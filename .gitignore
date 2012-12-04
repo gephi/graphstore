@@ -1,0 +1,5 @@
+.DS_Store
+target/**
+nbactions.xml
+/store/target/
+/store-benchmark/target/
