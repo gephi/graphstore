@@ -108,7 +108,7 @@ public class NodeStoreTest {
     @Test
     public void testGetMultiBlock() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = generateLargeNodeList();
+        NodeImpl[] nodes = GraphGenerator.generateLargeNodeList();
 
         nodeStore.addAll(Arrays.asList(nodes));
         NodeImpl firstNode = nodeStore.get(0);
@@ -200,7 +200,7 @@ public class NodeStoreTest {
     @Test
     public void testAddAll() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = generateLargeNodeList();
+        NodeImpl[] nodes = GraphGenerator.generateLargeNodeList();
 
         boolean a = nodeStore.addAll(Arrays.asList(nodes));
 
@@ -410,7 +410,7 @@ public class NodeStoreTest {
 
     @Test
     public void testRemoveAdd() {
-        NodeImpl[] nodes = generateSmallNodeList();
+        NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
         NodeStore nodeStore = new NodeStore();
         nodeStore.addAll(Arrays.asList(nodes));
 
@@ -423,7 +423,7 @@ public class NodeStoreTest {
     @Test
     public void testGarbageSize() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = generateLargeNodeList();
+        NodeImpl[] nodes = GraphGenerator.generateLargeNodeList();
         nodeStore.addAll(Arrays.asList(nodes));
 
         Assert.assertEquals(nodeStore.garbageSize, 0);
@@ -438,7 +438,7 @@ public class NodeStoreTest {
     @Test
     public void testBlockCounts() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = generateLargeNodeList();
+        NodeImpl[] nodes = GraphGenerator.generateLargeNodeList();
         nodeStore.addAll(Arrays.asList(nodes));
         int blockCount = nodeStore.blocksCount;
 
@@ -452,7 +452,7 @@ public class NodeStoreTest {
     @Test
     public void testBlockCountsEmpty() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = generateLargeNodeList();
+        NodeImpl[] nodes = GraphGenerator.generateLargeNodeList();
         nodeStore.addAll(Arrays.asList(nodes));
         nodeStore.removeAll(Arrays.asList(nodes));
 
@@ -543,22 +543,5 @@ public class NodeStoreTest {
             }
         }
         return set.toIntArray();
-    }
-
-    private NodeImpl[] generateSmallNodeList() {
-        return generateNodeList(100);
-    }
-
-    private NodeImpl[] generateLargeNodeList() {
-        return generateNodeList(NodeStore.BLOCK_SIZE * 3 + (int) (NodeStore.BLOCK_SIZE / 3.0));
-    }
-
-    private NodeImpl[] generateNodeList(int nodeCount) {
-        NodeImpl[] nodes = new NodeImpl[nodeCount];
-        for (int i = 0; i < nodeCount; i++) {
-            NodeImpl node = new NodeImpl(String.valueOf(i));
-            nodes[i] = node;
-        }
-        return nodes;
     }
 }

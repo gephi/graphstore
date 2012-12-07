@@ -1,16 +1,25 @@
 package org.gephi.graph.store;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.EdgeIterator;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Node;
@@ -21,7 +30,276 @@ import org.gephi.graph.api.NodeIterator;
  *
  * @author mbastian
  */
-public class BasicGraphStore {
+public class BasicGraphStore implements DirectedGraph {
+
+    protected final BasicNodeStore nodeStore;
+    protected final BasicEdgeStore edgeStore;
+
+    public BasicGraphStore() {
+        nodeStore = new BasicNodeStore();
+        edgeStore = new BasicEdgeStore();
+    }
+
+    @Override
+    public Edge getEdge(Node source, Node target, int type) {
+        return edgeStore.getEdge(source, target, type);
+    }
+
+    @Override
+    public NodeIterable getPredecessors(Node node) {
+        return new NodeIterableWrapper(edgeStore.predecessors((BasicNode) node));
+    }
+
+    @Override
+    public NodeIterable getPredecessors(Node node, int type) {
+        return new NodeIterableWrapper(edgeStore.predecessors((BasicNode) node, type));
+    }
+
+    @Override
+    public NodeIterable getSuccessors(Node node) {
+        return new NodeIterableWrapper(edgeStore.successors((BasicNode) node));
+    }
+
+    @Override
+    public NodeIterable getSuccessors(Node node, int type) {
+        return new NodeIterableWrapper(edgeStore.successors((BasicNode) node, type));
+    }
+
+    @Override
+    public EdgeIterable getInEdges(Node node) {
+        return new EdgeIterableWrapper(edgeStore.inIterator((BasicNode) node));
+    }
+
+    @Override
+    public EdgeIterable getInEdges(Node node, int type) {
+        return new EdgeIterableWrapper(edgeStore.inIterator((BasicNode) node, type));
+    }
+
+    @Override
+    public EdgeIterable getOutEdges(Node node) {
+        return new EdgeIterableWrapper(edgeStore.outIterator((BasicNode) node));
+    }
+
+    @Override
+    public EdgeIterable getOutEdges(Node node, int type) {
+        return new EdgeIterableWrapper(edgeStore.outIterator((BasicNode) node, type));
+    }
+
+    @Override
+    public boolean isAdjacent(Node source, Node target) {
+        return edgeStore.getEdge(source, target) != null;
+    }
+
+    @Override
+    public boolean isAdjacent(Node source, Node target, int type) {
+        return edgeStore.getEdge(source, target, type) != null;
+    }
+
+    @Override
+    public boolean addEdge(Edge edge) {
+        return edgeStore.add(edge);
+    }
+
+    @Override
+    public boolean addNode(Node node) {
+        return nodeStore.add(node);
+    }
+
+    @Override
+    public boolean addAllEdges(Collection<? extends Edge> edges) {
+        return edgeStore.addAll(edges);
+    }
+
+    @Override
+    public boolean addAllNodes(Collection<? extends Node> nodes) {
+        return nodeStore.addAll(nodes);
+    }
+
+    @Override
+    public boolean removeEdge(Edge edge) {
+        return edgeStore.remove(edge);
+    }
+
+    @Override
+    public boolean removeNode(Node node) {
+        BasicNode basicNode = (BasicNode) node;
+        EdgeIterator itr = edgeStore.inOutIterator(basicNode);
+        for (; itr.hasNext();) {
+            Edge edge = itr.next();
+            edgeStore.remove(edge);
+        }
+        nodeStore.remove(node);
+        return true;
+    }
+
+    @Override
+    public boolean removeEdgeAll(Collection<? extends Edge> edges) {
+        return edgeStore.removeAll(edges);
+    }
+
+    @Override
+    public boolean removeNodeAll(Collection<? extends Node> nodes) {
+        for (Node n : nodes) {
+            removeNode(n);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean contains(Node node) {
+        return nodeStore.contains(node);
+    }
+
+    @Override
+    public boolean contains(Edge edge) {
+        return edgeStore.contains(edge);
+    }
+
+    @Override
+    public Node getNode(Object id) {
+        return nodeStore.get(id);
+    }
+
+    @Override
+    public Edge getEdge(Object id) {
+        return edgeStore.get(id);
+    }
+
+    @Override
+    public NodeIterable getNodes() {
+        return new NodeIterableWrapper(nodeStore.iterator());
+    }
+
+    @Override
+    public EdgeIterable getEdges() {
+        return new EdgeIterableWrapper(edgeStore.iterator());
+    }
+
+    @Override
+    public NodeIterable getNeighbors(Node node) {
+        return new NodeIterableWrapper(new NeighborsIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node)));
+    }
+
+    @Override
+    public NodeIterable getNeighbors(Node node, int type) {
+        return new NodeIterableWrapper(new NeighborsIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node, type)));
+    }
+
+    @Override
+    public EdgeIterable getEdges(Node node) {
+        return new EdgeIterableWrapper(edgeStore.inOutIterator((BasicNode) node));
+    }
+
+    @Override
+    public EdgeIterable getEdges(Node node, int type) {
+        return new EdgeIterableWrapper(edgeStore.inOutIterator((BasicNode) node, type));
+    }
+
+    @Override
+    public int getNodeCount() {
+        return nodeStore.size();
+    }
+
+    @Override
+    public int getEdgeCount() {
+        return edgeStore.size();
+    }
+
+    @Override
+    public int getEdgeCount(int type) {
+        return edgeStore.size(type);
+    }
+
+    @Override
+    public Node getOpposite(Node node, Edge edge) {
+        if (edge.getSource() == node) {
+            return edge.getTarget();
+        } else if (edge.getTarget() == node) {
+            return edge.getSource();
+        }
+        return null;
+    }
+
+    @Override
+    public int getDegree(Node node) {
+        EdgeIterator itr = edgeStore.inOutIterator((BasicNode) node);
+        int i = 0;
+        for (; itr.hasNext();) {
+            i++;
+        }
+        return i;
+    }
+
+    @Override
+    public boolean isSelfLoop(Edge edge) {
+        return edge.isSelfLoop();
+    }
+
+    @Override
+    public boolean isDirected(Edge edge) {
+        return edge.isDirected();
+    }
+
+    @Override
+    public boolean isIncident(Edge edge1, Edge edge2) {
+        return edge1.getSource() == edge2.getSource() || edge1.getTarget() == edge2.getTarget() || edge1.getSource() == edge2.getTarget() || edge1.getTarget() == edge2.getSource();
+    }
+
+    @Override
+    public boolean isIncident(Node node, Edge edge) {
+        return edge.getSource() == node || edge.getTarget() == node;
+    }
+
+    @Override
+    public void clearEdges(Node node) {
+        BasicNode basicNode = (BasicNode) node;
+        EdgeIterator itr = edgeStore.inOutIterator(basicNode);
+        for (; itr.hasNext();) {
+            Edge edge = itr.next();
+            edgeStore.remove(edge);
+        }
+    }
+
+    @Override
+    public void clearEdges(Node node, int type) {
+        BasicNode basicNode = (BasicNode) node;
+        EdgeIterator itr = edgeStore.inOutIterator(basicNode, type);
+        for (; itr.hasNext();) {
+            Edge edge = itr.next();
+            edgeStore.remove(edge);
+        }
+    }
+
+    @Override
+    public void clear() {
+        edgeStore.clear();
+        nodeStore.clear();
+    }
+
+    @Override
+    public void clearEdges() {
+        edgeStore.clear();
+    }
+
+    @Override
+    public void readLock() {
+    }
+
+    @Override
+    public void readUnlock() {
+    }
+
+    @Override
+    public void readUnlockAll() {
+    }
+
+    @Override
+    public void writeLock() {
+    }
+
+    @Override
+    public void writeUnlock() {
+    }
 
     public static class BasicElement implements Element {
 
@@ -246,6 +524,10 @@ public class BasicGraphStore {
         public boolean containsAll(Collection<?> c) {
             return idToNodeMap.values().containsAll(c);
         }
+        
+        public boolean containsId(Object id) {
+            return idToNodeMap.containsKey(id);
+        }
 
         @Override
         public boolean addAll(Collection<? extends Node> c) {
@@ -314,9 +596,13 @@ public class BasicGraphStore {
     public static class BasicEdgeStore implements Collection<Edge> {
 
         protected final Object2ObjectMap<Object, BasicEdge> idToEdgeMap;
+        protected final Object2ObjectMap<String, BasicEdge> sourceTargetIdEdgeMap;
+        protected final Int2IntMap typeCountMap;
 
         public BasicEdgeStore() {
-            idToEdgeMap = new Object2ObjectOpenHashMap<Object, BasicGraphStore.BasicEdge>();
+            idToEdgeMap = new Object2ObjectLinkedOpenHashMap<Object, BasicGraphStore.BasicEdge>();
+            sourceTargetIdEdgeMap = new Object2ObjectLinkedOpenHashMap<String, BasicEdge>();
+            typeCountMap = new Int2IntOpenHashMap();
         }
 
         @Override
@@ -324,9 +610,17 @@ public class BasicGraphStore {
             return idToEdgeMap.size();
         }
 
+        public int size(int type) {
+            return typeCountMap.get(type);
+        }
+
         @Override
         public boolean isEmpty() {
             return idToEdgeMap.isEmpty();
+        }
+
+        public BasicEdge get(Object id) {
+            return idToEdgeMap.get(id);
         }
 
         @Override
@@ -342,9 +636,91 @@ public class BasicGraphStore {
             return idToEdgeMap.containsKey(id);
         }
 
+        public BasicEdge getEdge(Node source, Node target, int type) {
+            return sourceTargetIdEdgeMap.get(getStringId(source, target, type));
+        }
+
+        public BasicEdge getEdge(Node source, Node target) {
+            return sourceTargetIdEdgeMap.get(getStringId(source, target));
+        }
+
         @Override
-        public BasicEdgeIterator iterator() {
+        public EdgeIterator iterator() {
             return new BasicEdgeIterator(idToEdgeMap.values().iterator());
+        }
+
+        public EdgeIterator outIterator(BasicNode node) {
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            for (Object2ObjectMap<Object, BasicEdge> col : node.outEdges.values()) {
+                set.addAll(col.values());
+            }
+            return new BasicEdgeIterator(set);
+        }
+
+        public EdgeIterator outIterator(BasicNode node, int type) {
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            if (node.outEdges.containsKey(type)) {
+                set.addAll(node.outEdges.get(type).values());
+            }
+            return new BasicEdgeIterator(set);
+        }
+
+        public EdgeIterator inIterator(BasicNode node) {
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            for (Object2ObjectMap<Object, BasicEdge> col : node.inEdges.values()) {
+                set.addAll(col.values());
+            }
+            return new BasicEdgeIterator(set);
+        }
+
+        public EdgeIterator inIterator(BasicNode node, int type) {
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            if (node.inEdges.containsKey(type)) {
+                set.addAll(node.inEdges.get(type).values());
+            }
+            return new BasicEdgeIterator(set);
+        }
+
+        public EdgeIterator inOutIterator(BasicNode node) {
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            for (Object2ObjectMap<Object, BasicEdge> col : node.outEdges.values()) {
+                set.addAll(col.values());
+            }
+            for (Object2ObjectMap<Object, BasicEdge> col : node.inEdges.values()) {
+                set.addAll(col.values());
+            }
+            return new BasicEdgeIterator(set);
+        }
+
+        public EdgeIterator inOutIterator(BasicNode node, int type) {
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            if (node.outEdges.containsKey(type)) {
+                set.addAll(node.outEdges.get(type).values());
+            }
+            if (node.inEdges.containsKey(type)) {
+                set.addAll(node.inEdges.get(type).values());
+            }
+            return new BasicEdgeIterator(set);
+        }
+
+        public NodeIterator predecessors(BasicNode node) {
+            EdgeIterator itr = inIterator(node);
+            return new NeighborsIterator(node, itr);
+        }
+
+        public NodeIterator predecessors(BasicNode node, int type) {
+            EdgeIterator itr = inIterator(node, type);
+            return new NeighborsIterator(node, itr);
+        }
+
+        public NodeIterator successors(BasicNode node) {
+            EdgeIterator itr = outIterator(node);
+            return new NeighborsIterator(node, itr);
+        }
+
+        public NodeIterator successors(BasicNode node, int type) {
+            EdgeIterator itr = outIterator(node, type);
+            return new NeighborsIterator(node, itr);
         }
 
         @Override
@@ -369,6 +745,12 @@ public class BasicGraphStore {
             BasicNode target = basicEdge.getTarget();
             int type = edge.getType();
 
+            sourceTargetIdEdgeMap.put(getStringId(source, target, type), basicEdge);
+            sourceTargetIdEdgeMap.put(getStringId(source, target), basicEdge);
+
+            int typeCount = typeCountMap.get(type);
+            typeCountMap.put(type, typeCount + 1);
+
             Object2ObjectMap<Object, BasicEdge> outMap = source.outEdges.get(type);
             if (outMap == null) {
                 outMap = new Object2ObjectOpenHashMap<Object, BasicEdge>();
@@ -386,13 +768,37 @@ public class BasicGraphStore {
             return true;
         }
 
+        private String getStringId(Node source, Node target, int type) {
+            return source + "-" + target + "-" + type;
+        }
+
+        private String getStringId(Node source, Node target) {
+            return source + "-" + target + "-" + "X";
+        }
+
         @Override
         public boolean remove(Object o) {
             if (!(o instanceof BasicEdge)) {
                 throw new RuntimeException("Wrong type " + o.getClass().getName());
             }
             BasicEdge edge = (BasicEdge) o;
+            BasicNode source = edge.getSource();
+            BasicNode target = edge.getTarget();
+            int type = edge.getType();
+
             idToEdgeMap.remove(edge.getId());
+            sourceTargetIdEdgeMap.remove(getStringId(source, target, type));
+            sourceTargetIdEdgeMap.remove(getStringId(source, target));
+
+            int typeCount = typeCountMap.get(type);
+            typeCountMap.put(type, typeCount - 1);
+
+            Object2ObjectMap<Object, BasicEdge> outMap = source.outEdges.get(type);
+            outMap.remove(target.getId());
+
+            Object2ObjectMap<Object, BasicEdge> inMap = target.inEdges.get(type);
+            inMap.remove(source.getId());
+
             return true;
         }
 
@@ -439,6 +845,10 @@ public class BasicGraphStore {
                 this.itr = itr;
             }
 
+            public BasicEdgeIterator(Collection<BasicEdge> collection) {
+                this.itr = collection.iterator();
+            }
+
             @Override
             public boolean hasNext() {
                 return itr.hasNext();
@@ -453,6 +863,89 @@ public class BasicGraphStore {
             public void remove() {
                 itr.remove();
             }
+        }
+    }
+
+    private static class NeighborsIterator implements NodeIterator {
+
+        protected final BasicNode node;
+        protected final Iterator<Edge> itr;
+
+        public NeighborsIterator(BasicNode node, Iterator<Edge> itr) {
+            this.node = node;
+            this.itr = itr;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return itr.hasNext();
+        }
+
+        @Override
+        public Node next() {
+            Edge e = itr.next();
+            return e.getSource() == node ? e.getTarget() : e.getSource();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove not supported for this iterator");
+        }
+    }
+
+    protected class NodeIterableWrapper implements NodeIterable {
+
+        protected final NodeIterator iterator;
+
+        public NodeIterableWrapper(NodeIterator iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public NodeIterator iterator() {
+            return iterator;
+        }
+
+        @Override
+        public Node[] toArray() {
+            List<Node> list = new ArrayList<Node>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list.toArray(new Node[0]);
+        }
+
+        @Override
+        public void doBreak() {
+            //Not used because no locking
+        }
+    }
+
+    protected class EdgeIterableWrapper implements EdgeIterable {
+
+        protected final EdgeIterator iterator;
+
+        public EdgeIterableWrapper(EdgeIterator iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public EdgeIterator iterator() {
+            return iterator;
+        }
+
+        @Override
+        public Edge[] toArray() {
+            List<Edge> list = new ArrayList<Edge>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list.toArray(new Edge[0]);
+        }
+
+        @Override
+        public void doBreak() {
+            //Not used because no locking
         }
     }
 }

@@ -49,7 +49,7 @@ public class EdgeStoreTest {
     @Test
     public void testSize() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(2);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(2);
         EdgeImpl e1 = edges[0];
         EdgeImpl e2 = edges[1];
         edgeStore.add(e1);
@@ -66,7 +66,7 @@ public class EdgeStoreTest {
     @Test
     public void testAdd() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         boolean a = edgeStore.add(edge);
         boolean b = edgeStore.add(edge);
 
@@ -89,7 +89,7 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddOtherStore() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
 
         EdgeStore edgeStore2 = new EdgeStore();
@@ -99,7 +99,7 @@ public class EdgeStoreTest {
     @Test
     public void testGet() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
 
         Assert.assertEquals(edgeStore.get(0), edge);
@@ -108,7 +108,7 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetInvalid() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
         edgeStore.get(1);
     }
@@ -116,7 +116,7 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetNegative() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
         edgeStore.get(-1);
     }
@@ -124,7 +124,7 @@ public class EdgeStoreTest {
     @Test
     public void testGetMultiBlock() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateLargeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateLargeEdgeList();
 
         edgeStore.addAll(Arrays.asList(edges));
         EdgeImpl firstEdge = edgeStore.get(0);
@@ -141,7 +141,7 @@ public class EdgeStoreTest {
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.clear();
 
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
         edgeStore.clear();
 
@@ -155,7 +155,7 @@ public class EdgeStoreTest {
     @Test
     public void testRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
 
         edgeStore.add(edge);
         boolean a = edgeStore.remove(edge);
@@ -180,12 +180,12 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRemoveOtherStore() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
 
         edgeStore.add(edge);
 
         EdgeStore edgeStore2 = new EdgeStore();
-        EdgeImpl edge2 = generateSingleEdge();
+        EdgeImpl edge2 = GraphGenerator.generateSingleEdge();
 
         edgeStore2.add(edge2);
 
@@ -195,17 +195,17 @@ public class EdgeStoreTest {
     @Test
     public void testContains() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
         Assert.assertTrue(edgeStore.contains(edge));
 
-        Assert.assertFalse(edgeStore.contains(generateSingleEdge()));
+        Assert.assertFalse(edgeStore.contains(GraphGenerator.generateSingleEdge()));
     }
 
     @Test
     public void testContainsId() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
         Assert.assertTrue(edgeStore.containsId("0"));
 
@@ -215,7 +215,7 @@ public class EdgeStoreTest {
     @Test
     public void testContainsBySourceTarget() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
         Assert.assertTrue(edgeStore.contains(edge.getSource(), edge.getTarget(), edge.getType()));
         Assert.assertFalse(edgeStore.contains(edge.getTarget(), edge.getSource(), edge.getType()));
@@ -225,7 +225,7 @@ public class EdgeStoreTest {
     @Test
     public void testGetBySourceTarget() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
         Assert.assertEquals(edgeStore.get(edge.getSource(), edge.getTarget(), edge.getType()), edge);
     }
@@ -233,7 +233,7 @@ public class EdgeStoreTest {
     @Test
     public void testAddAll() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateLargeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateLargeEdgeList();
 
         boolean a = edgeStore.addAll(Arrays.asList(edges));
 
@@ -257,7 +257,7 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testAddAllNull() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edges[1] = null;
         edgeStore.addAll(Arrays.asList(edges));
     }
@@ -265,7 +265,7 @@ public class EdgeStoreTest {
     @Test
     public void testRemoveAll() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
 
         boolean a = edgeStore.removeAll(new ArrayList<Edge>());
@@ -281,7 +281,7 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testRemoveAllNull() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
         edges[0] = null;
         edgeStore.removeAll(Arrays.asList(edges));
@@ -296,7 +296,7 @@ public class EdgeStoreTest {
     @Test
     public void testRetainAll() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
 
         EdgeImpl[] r = new EdgeImpl[]{edges[0]};
@@ -316,7 +316,7 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testRetainAllNull() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
         edges[0] = null;
         edgeStore.retainAll(Arrays.asList(edges));
@@ -331,7 +331,7 @@ public class EdgeStoreTest {
     @Test
     public void testContainsAll() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
         Assert.assertTrue(edgeStore.containsAll(Arrays.asList(edges)));
     }
@@ -339,7 +339,7 @@ public class EdgeStoreTest {
     @Test
     public void testIterator() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
 
         EdgeStore.EdgeStoreIterator itr = edgeStore.iterator();
@@ -354,7 +354,7 @@ public class EdgeStoreTest {
     @Test
     public void testIteratorRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
 
         EdgeStore.EdgeStoreIterator itr = edgeStore.iterator();
@@ -378,7 +378,7 @@ public class EdgeStoreTest {
     @Test
     public void testIteratorAfterRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
         edgeStore.remove(edges[1]);
         EdgeStore.EdgeStoreIterator itr = edgeStore.iterator();
@@ -394,9 +394,9 @@ public class EdgeStoreTest {
 
     @Test
     public void testEqualsAndHashCode() {
-        EdgeImpl[] edges = generateEdgeList(3);
-        EdgeImpl[] edges2 = generateEdgeList(3);
-        EdgeImpl[] edges3 = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
+        EdgeImpl[] edges2 = GraphGenerator.generateEdgeList(3);
+        EdgeImpl[] edges3 = GraphGenerator.generateEdgeList(3);
         EdgeImpl t = edges3[0];
         edges3[0] = edges3[1];
         edges3[1] = t;
@@ -422,7 +422,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testToArray() {
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         EdgeStore edgeStore = new EdgeStore();
         Assert.assertEquals(new EdgeImpl[0], edgeStore.toArray());
         edgeStore.addAll(Arrays.asList(edges));
@@ -435,7 +435,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testToArrayAfterRemove() {
-        EdgeImpl[] edges = generateEdgeList(3);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         EdgeStore edgeStore = new EdgeStore();
 
         edgeStore.addAll(Arrays.asList(edges));
@@ -446,7 +446,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testRemoveAdd() {
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -459,7 +459,7 @@ public class EdgeStoreTest {
     @Test
     public void testGarbageSize() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateLargeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateLargeEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         Assert.assertEquals(edgeStore.garbageSize, 0);
@@ -474,7 +474,7 @@ public class EdgeStoreTest {
     @Test
     public void testBlockCounts() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateLargeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateLargeEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
         int blockCount = edgeStore.blocksCount;
 
@@ -488,7 +488,7 @@ public class EdgeStoreTest {
     @Test
     public void testBlockCountsEmpty() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateLargeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateLargeEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
         edgeStore.removeAll(Arrays.asList(edges));
 
@@ -502,13 +502,13 @@ public class EdgeStoreTest {
     @Test
     public void testDictionary() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.contains(edge));
         Assert.assertEquals(edgeStore.get("0"), edge);
         Assert.assertNull(edgeStore.get("1"));
-        Assert.assertFalse(edgeStore.contains(generateSingleEdge()));
+        Assert.assertFalse(edgeStore.contains(GraphGenerator.generateSingleEdge()));
 
         edgeStore.remove(edge);
         Assert.assertFalse(edgeStore.contains(edge));
@@ -517,9 +517,9 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testDictionaryDuplicate() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
-        EdgeImpl edge2 = generateSingleEdge();
+        EdgeImpl edge2 = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge2);
     }
 
@@ -596,7 +596,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testOutIterator() {
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -627,7 +627,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testOutIteratorAfterRemove() {
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>(Arrays.asList(edges));
         edgeStore.addAll(edgeList);
@@ -650,7 +650,7 @@ public class EdgeStoreTest {
     @Test
     public void testOutIteratorRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         int index = 0;
@@ -669,7 +669,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInIterator() {
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -700,7 +700,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInIteratorAfterRemove() {
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>(Arrays.asList(edges));
         edgeStore.addAll(edgeList);
@@ -723,7 +723,7 @@ public class EdgeStoreTest {
     @Test
     public void testInIteratorRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         int index = 0;
@@ -742,7 +742,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInOutIterator() {
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -785,7 +785,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInOutIteratorAfterRemove() {
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>(Arrays.asList(edges));
         edgeStore.addAll(edgeList);
@@ -820,7 +820,7 @@ public class EdgeStoreTest {
     @Test
     public void testInOutIteratorRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         int index = 0;
@@ -839,7 +839,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testOutTypeIterator() {
-        EdgeImpl[] edges = generateSmallMultiTypeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -873,7 +873,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testOutTypeIteratorUnknownType() {
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(edge);
         Assert.assertFalse(edgeStore.edgeOutIterator(edge.source, 99).hasNext());
@@ -882,7 +882,7 @@ public class EdgeStoreTest {
     @Test
     public void testOutTypeIteratorRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         int index = 0;
@@ -901,7 +901,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInTypeIterator() {
-        EdgeImpl[] edges = generateSmallMultiTypeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -935,7 +935,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInTypeIteratorUnknownType() {
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(edge);
         Assert.assertFalse(edgeStore.edgeInIterator(edge.target, 99).hasNext());
@@ -944,7 +944,7 @@ public class EdgeStoreTest {
     @Test
     public void testInTypeIteratorRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         int index = 0;
@@ -963,7 +963,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInOutTypeIterator() {
-        EdgeImpl[] edges = generateSmallMultiTypeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -1011,7 +1011,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInOutTypeIteratorUnknownType() {
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(edge);
         Assert.assertFalse(edgeStore.edgeInOutIterator(edge.source, 99).hasNext());
@@ -1020,7 +1020,7 @@ public class EdgeStoreTest {
     @Test
     public void testInOutTypeIteratorRemove() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         int index = 0;
@@ -1041,8 +1041,8 @@ public class EdgeStoreTest {
 
     @Test
     public void testBasicStoreEquals() {
-        EdgeImpl[] edges = generateSmallEdgeList();
-        BasicGraphStore.BasicEdgeStore basicEdgeStore = generateBasicEdgeStore(edges);
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        BasicGraphStore.BasicEdgeStore basicEdgeStore = GraphGenerator.generateBasicEdgeStore(edges);
 
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
@@ -1052,8 +1052,8 @@ public class EdgeStoreTest {
 
     @Test
     public void testMultiTypeBasicStoreEquals() {
-        EdgeImpl[] edges = generateSmallMultiTypeEdgeList();
-        BasicGraphStore.BasicEdgeStore basicEdgeStore = generateBasicEdgeStore(edges);
+        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
+        BasicGraphStore.BasicEdgeStore basicEdgeStore = GraphGenerator.generateBasicEdgeStore(edges);
 
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
@@ -1064,7 +1064,7 @@ public class EdgeStoreTest {
     @Test
     public void testAddUndirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleUndirectedEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleUndirectedEdge();
         boolean a = edgeStore.add(edge);
         boolean b = edgeStore.add(edge);
 
@@ -1081,7 +1081,7 @@ public class EdgeStoreTest {
     @Test
     public void testUndirectedLongId() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleUndirectedEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleUndirectedEdge();
         edgeStore.add(edge);
 
         Assert.assertEquals(EdgeStore.getLongId(edge.source, edge.target, false), EdgeStore.getLongId(edge.target, edge.source, false));
@@ -1089,7 +1089,7 @@ public class EdgeStoreTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddUndirectedExistingDirected() {
-        EdgeImpl directed = generateSingleEdge();
+        EdgeImpl directed = GraphGenerator.generateSingleEdge();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(directed);
 
@@ -1102,7 +1102,7 @@ public class EdgeStoreTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddDirectedExistingUndirected() {
-        EdgeImpl undirected = generateSingleUndirectedEdge();
+        EdgeImpl undirected = GraphGenerator.generateSingleUndirectedEdge();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(undirected);
 
@@ -1113,7 +1113,7 @@ public class EdgeStoreTest {
     @Test
     public void testContainsBySourceTargetUndirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleUndirectedEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleUndirectedEdge();
         edgeStore.add(edge);
         Assert.assertTrue(edgeStore.contains(edge.getSource(), edge.getTarget(), edge.getType()));
         Assert.assertTrue(edgeStore.contains(edge.getTarget(), edge.getSource(), edge.getType()));
@@ -1123,7 +1123,7 @@ public class EdgeStoreTest {
     @Test
     public void testGetBySourceTargetUndirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleUndirectedEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleUndirectedEdge();
         edgeStore.add(edge);
         Assert.assertEquals(edgeStore.get(edge.getSource(), edge.getTarget(), edge.getType()), edge);
         Assert.assertEquals(edgeStore.get(edge.getTarget(), edge.getSource(), edge.getType()), edge);
@@ -1131,7 +1131,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testGetBySourceTargetMixed() {
-        EdgeImpl[] edges = generateMixedEdgeList(20);
+        EdgeImpl[] edges = GraphGenerator.generateMixedEdgeList(20);
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -1147,7 +1147,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testContainsBySourceTargetMixed() {
-        EdgeImpl[] edges = generateMixedEdgeList(20);
+        EdgeImpl[] edges = GraphGenerator.generateMixedEdgeList(20);
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -1163,7 +1163,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testUndirectedCount() {
-        EdgeImpl[] edges = generateSmallMixedEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallMixedEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         Assert.assertEquals(0, edgeStore.undirectedSize);
 
@@ -1189,7 +1189,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testMutual() {
-        EdgeImpl[] edges = generateEdgeList(1000);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(1000);
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -1213,7 +1213,7 @@ public class EdgeStoreTest {
     @Test
     public void testAddSelfLoop() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSelfLoop(0, true);
+        EdgeImpl edge = GraphGenerator.generateSelfLoop(0, true);
         boolean a = edgeStore.add(edge);
         boolean b = edgeStore.add(edge);
 
@@ -1235,7 +1235,7 @@ public class EdgeStoreTest {
     @Test
     public void testContainsBySourceTargetSelfLoop() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSelfLoop(0, true);
+        EdgeImpl edge = GraphGenerator.generateSelfLoop(0, true);
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.contains(edge.source, edge.target, edge.type));
@@ -1245,7 +1245,7 @@ public class EdgeStoreTest {
     @Test
     public void testGetBySourceTargetSelfLoop() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSelfLoop(0, true);
+        EdgeImpl edge = GraphGenerator.generateSelfLoop(0, true);
         edgeStore.add(edge);
 
         Assert.assertEquals(edge, edgeStore.get(edge.source, edge.target, edge.type));
@@ -1255,7 +1255,7 @@ public class EdgeStoreTest {
     @Test
     public void testAddSelfLoopUndirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSelfLoop(0, false);
+        EdgeImpl edge = GraphGenerator.generateSelfLoop(0, false);
         boolean a = edgeStore.add(edge);
         boolean b = edgeStore.add(edge);
 
@@ -1276,7 +1276,7 @@ public class EdgeStoreTest {
     @Test
     public void testContainsBySourceTargetSelfLoopUndirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSelfLoop(0, false);
+        EdgeImpl edge = GraphGenerator.generateSelfLoop(0, false);
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.contains(edge.source, edge.target, edge.type));
@@ -1286,7 +1286,7 @@ public class EdgeStoreTest {
     @Test
     public void testGetBySourceTargetSelfLoopUndirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSelfLoop(0, false);
+        EdgeImpl edge = GraphGenerator.generateSelfLoop(0, false);
         edgeStore.add(edge);
 
         Assert.assertEquals(edge, edgeStore.get(edge.source, edge.target, edge.type));
@@ -1296,7 +1296,7 @@ public class EdgeStoreTest {
     @Test
     public void testDegreeDirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateEdgeList(300, 0, true, true);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(300, 0, true, true);
 
         LongSet idSet = new LongOpenHashSet();
         int mutualEdges = 0;
@@ -1353,7 +1353,7 @@ public class EdgeStoreTest {
     @Test
     public void testNeighborOutIterators() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         Set<EdgeImpl> edgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
@@ -1371,7 +1371,7 @@ public class EdgeStoreTest {
     @Test
     public void testNeighborInIterators() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         Set<EdgeImpl> edgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
@@ -1389,7 +1389,7 @@ public class EdgeStoreTest {
     @Test
     public void testNodeAdjacentDirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.isAdjacent(edge.source, edge.target, edge.type));
@@ -1401,7 +1401,7 @@ public class EdgeStoreTest {
     @Test
     public void testNodeAdjacentUndirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleUndirectedEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleUndirectedEdge();
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.isAdjacent(edge.source, edge.target, edge.type));
@@ -1413,7 +1413,7 @@ public class EdgeStoreTest {
     @Test
     public void testNodeAdjacentSelfLoopDirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSelfLoop(0, true);
+        EdgeImpl edge = GraphGenerator.generateSelfLoop(0, true);
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.isAdjacent(edge.source, edge.target, edge.type));
@@ -1423,7 +1423,7 @@ public class EdgeStoreTest {
     @Test
     public void testNodeAdjacentSelfLoopUnDirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSelfLoop(0, false);
+        EdgeImpl edge = GraphGenerator.generateSelfLoop(0, false);
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.isAdjacent(edge.source, edge.target, edge.type));
@@ -1442,7 +1442,7 @@ public class EdgeStoreTest {
     @Test
     public void testNodeAdjacentAllTypes() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateMultiTypeEdgeList(100, 3, true, true);
+        EdgeImpl[] edges = GraphGenerator.generateMultiTypeEdgeList(100, 3, true, true);
         edgeStore.addAll(Arrays.asList(edges));
 
         for (EdgeImpl edge : edges) {
@@ -1458,7 +1458,7 @@ public class EdgeStoreTest {
     @Test
     public void testEdgeNodeIncident() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.isIncident(edge.source, edge));
@@ -1472,7 +1472,7 @@ public class EdgeStoreTest {
     @Test
     public void testEdgeNodeIncidentUndirected() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl edge = generateSingleUndirectedEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleUndirectedEdge();
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.isIncident(edge.source, edge));
@@ -1486,7 +1486,7 @@ public class EdgeStoreTest {
     @Test
     public void testEdgeIncident() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
 
         for (EdgeImpl e : edges) {
             for (EdgeImpl f : edges) {
@@ -1501,7 +1501,7 @@ public class EdgeStoreTest {
     public void testTypeCounting() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
         EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null);
-        EdgeImpl[] edges = generateSmallMultiTypeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
 
         Int2IntMap counts = new Int2IntOpenHashMap();
         int maxType = 0;
@@ -1543,7 +1543,7 @@ public class EdgeStoreTest {
         Assert.assertFalse(edgeStore.isMixedGraph());
         Assert.assertFalse(edgeStore.isUndirectedGraph());
 
-        EdgeImpl edge = generateSingleEdge();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
 
         Assert.assertTrue(edgeStore.isDirectedGraph());
@@ -1555,7 +1555,7 @@ public class EdgeStoreTest {
     public void testGraphTypeMixed() {
         EdgeStore edgeStore = new EdgeStore();
 
-        EdgeImpl[] edges = generateMixedEdgeList(20);
+        EdgeImpl[] edges = GraphGenerator.generateMixedEdgeList(20);
         edgeStore.addAll(Arrays.asList(edges));
 
         Assert.assertFalse(edgeStore.isDirectedGraph());
@@ -1576,7 +1576,7 @@ public class EdgeStoreTest {
     @Test
     public void testUndirectedIterator() {
         EdgeStore edgeStore = new EdgeStore();
-        EdgeImpl[] edges = generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
         ObjectSet<EdgeImpl> edgeSet = new ObjectOpenHashSet<EdgeImpl>();
@@ -1597,7 +1597,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInOutUndirectedIterator() {
-        EdgeImpl[] edges = generateEdgeList(500, 0, true, true);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(500, 0, true, true);
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -1621,7 +1621,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testInOutTypeUndirectedIterator() {
-        EdgeImpl[] edges = generateSmallMultiTypeEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
@@ -1796,201 +1796,6 @@ public class EdgeStoreTest {
             }
         }
         return set.toIntArray();
-    }
-
-    private EdgeImpl[] generateSmallEdgeList() {
-        return generateEdgeList(100, 0, true, true);
-    }
-
-    private EdgeImpl[] generateSmallUndirectedEdgeList() {
-        return generateEdgeList(100, 0, false, true);
-    }
-
-    private EdgeImpl[] generateSmallMixedEdgeList() {
-        return generateMixedEdgeList(100, 0);
-    }
-
-    private EdgeImpl[] generateSmallMultiTypeEdgeList() {
-        return generateMultiTypeEdgeList(100, 3, true, true);
-    }
-
-    private EdgeImpl[] generateSmallUndirectedMultiTypeEdgeList() {
-        return generateMultiTypeEdgeList(100, 3, true, true);
-    }
-
-    private EdgeImpl[] generateLargeEdgeList() {
-        return generateEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 0, true, true);
-    }
-
-    private EdgeImpl[] generateLargeMultiTypeEdgeList() {
-        return generateMultiTypeEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 5, true, true);
-    }
-
-    private EdgeImpl generateSingleEdge() {
-        return generateEdgeList(1, 0, true, false)[0];
-    }
-
-    private EdgeImpl generateSingleEdge(int type) {
-        return generateEdgeList(1, type, true, false)[0];
-    }
-
-    private EdgeImpl generateSelfLoop(int type, boolean directed) {
-        NodeStore nodeStore = generateNodeStore(2);
-        EdgeImpl edge = new EdgeImpl('0', nodeStore.get(0), nodeStore.get(0), type, directed);
-        return edge;
-    }
-
-    private EdgeImpl generateSingleUndirectedEdge() {
-        return generateEdgeList(1, 0, false, false)[0];
-    }
-
-    private EdgeImpl[] generateEdgeList(int edgeCount) {
-        return generateEdgeList(edgeCount, 0, true, true);
-    }
-
-    private EdgeImpl[] generateMixedEdgeList(int edgeCount) {
-        return generateMixedEdgeList(edgeCount, 0);
-    }
-
-    private EdgeImpl[] generateEdgeList(int edgeCount, int type, boolean directed, boolean allowSelfLoops) {
-        int nodeCount = Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0));
-        return generateEdgeList(generateNodeStore(nodeCount), edgeCount, type, directed, allowSelfLoops);
-    }
-
-    private EdgeImpl[] generateMixedEdgeList(int edgeCount, int type) {
-        int nodeCount = Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0));
-        return generateMixedEdgeList(generateNodeStore(nodeCount), edgeCount, type);
-    }
-
-    private EdgeImpl[] generateEdgeList(NodeStore nodeStore, int edgeCount, int type, boolean directed, boolean allowSelfLoops) {
-        int nodeCount = nodeStore.size();
-        final List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>();
-        LongSet idSet = new LongOpenHashSet();
-        Random r = new Random(124);
-
-        IntSet leafs = new IntOpenHashSet();
-        if (nodeCount > 10) {
-            for (int i = 0; i < Math.min(10, (int) (nodeCount * .05)); i++) {
-                int id = r.nextInt(nodeCount);
-                if (leafs.contains(id)) {
-                    i--;
-                } else {
-                    leafs.add(id);
-                }
-            }
-        }
-
-        int c = 0;
-        while (idSet.size() < edgeCount) {
-            int sourceId = r.nextInt(nodeCount);
-            int targetId = r.nextInt(nodeCount);
-            NodeImpl source = nodeStore.get(sourceId);
-            NodeImpl target = nodeStore.get(targetId);
-            EdgeImpl edge = new EdgeImpl(String.valueOf(c), source, target, type, directed);
-            if (!leafs.contains(sourceId) && !leafs.contains(targetId) && (allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(edge.getLongId())) {
-                edgeList.add(edge);
-                c++;
-                idSet.add(edge.getLongId());
-            }
-        }
-        return edgeList.toArray(new EdgeImpl[0]);
-    }
-
-    private EdgeImpl[] generateMixedEdgeList(NodeStore nodeStore, int edgeCount, int type) {
-        int nodeCount = nodeStore.size();
-        final List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>();
-        LongSet idSet = new LongOpenHashSet();
-        Random r = new Random(124);
-        int c = 0;
-        while (idSet.size() < edgeCount / 2) {
-            int sourceId = r.nextInt(nodeCount);
-            int targetId = r.nextInt(nodeCount);
-            NodeImpl source = nodeStore.get(sourceId);
-            NodeImpl target = nodeStore.get(targetId);
-            EdgeImpl edge = new EdgeImpl(String.valueOf(c), source, target, type, true);
-            if (source != target && !idSet.contains(edge.getLongId())) {
-                edgeList.add(edge);
-                c++;
-                idSet.add(edge.getLongId());
-            }
-        }
-        while (idSet.size() < edgeCount) {
-            int sourceId = r.nextInt(nodeCount);
-            int targetId = r.nextInt(nodeCount);
-            NodeImpl source = nodeStore.get(sourceId);
-            NodeImpl target = nodeStore.get(targetId);
-            EdgeImpl edge = new EdgeImpl(String.valueOf(c), source, target, type, false);
-            if (source != target && !idSet.contains(EdgeStore.getLongId(edge.source, edge.target, true)) && !idSet.contains(EdgeStore.getLongId(edge.target, edge.source, true))) {
-                edgeList.add(edge);
-                c++;
-                idSet.add(edge.getLongId());
-            }
-        }
-        return edgeList.toArray(new EdgeImpl[0]);
-    }
-
-    private EdgeImpl[] generateMultiTypeEdgeList(int edgeCount, int typeCount, boolean directed, boolean allowSelfLoops) {
-        List<EdgeImpl> edges = new ArrayList<EdgeImpl>();
-        int nodeCount = Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0));
-        NodeStore nodeStore = generateNodeStore(nodeCount);
-        int[] typeAssignemnts = distributeTypeCounts(typeCount, edgeCount);
-        for (int i = 0; i < typeCount; i++) {
-            edges.addAll(Arrays.asList(generateEdgeList(typeAssignemnts[i], i, directed, allowSelfLoops)));
-        }
-        Collections.shuffle(edges, new Random(87));
-        return edges.toArray(new EdgeImpl[0]);
-    }
-
-    private int[] distributeTypeCounts(int typeCount, int edgeCount) {
-        double sum = 0;
-        double[] ratio = new double[typeCount];
-        Random r = new Random(453);
-        for (int i = 0; i < typeCount;) {
-            double n = r.nextDouble();
-            if (n != 0) {
-                ratio[i] = n;
-                sum += n;
-                i++;
-            }
-        }
-        int[] res = new int[typeCount];
-        int total = 0;
-        for (int i = 0; i < typeCount; i++) {
-            if (i == typeCount - 1) {
-                res[i] = edgeCount - total;
-                assert res[i] > 0;
-            } else {
-                res[i] = (int) (ratio[i] / sum);
-                total += res[i];
-            }
-        }
-        return res;
-    }
-
-    private BasicGraphStore.BasicEdgeStore generateBasicEdgeStore(EdgeImpl[] edgeList) {
-        BasicGraphStore.BasicNodeStore basicNodeStore = new BasicGraphStore.BasicNodeStore();
-        BasicGraphStore.BasicEdgeStore basicEdgeStore = new BasicGraphStore.BasicEdgeStore();
-        for (EdgeImpl e : edgeList) {
-            basicNodeStore.add(new BasicGraphStore.BasicNode(e.source.getId()));
-            basicNodeStore.add(new BasicGraphStore.BasicNode(e.target.getId()));
-        }
-        for (EdgeImpl e : edgeList) {
-            BasicGraphStore.BasicNode source = basicNodeStore.get(e.source.getId());
-            BasicGraphStore.BasicNode target = basicNodeStore.get(e.target.getId());
-
-            basicEdgeStore.add(new BasicGraphStore.BasicEdge(e.getId(), source, target, e.getType()));
-        }
-        return basicEdgeStore;
-    }
-
-    private NodeStore generateNodeStore(int nodeCount) {
-        final NodeStore nodeStore = new NodeStore();
-
-        for (int i = 0; i < nodeCount; i++) {
-            NodeImpl n = new NodeImpl(String.valueOf(i));
-            nodeStore.add(n);
-        }
-        return nodeStore;
     }
 
     private Object2ObjectMap<Object, EdgeImpl> getObjectMap(EdgeImpl[] edges) {
