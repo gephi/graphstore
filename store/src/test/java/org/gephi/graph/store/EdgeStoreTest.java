@@ -2,7 +2,6 @@ package org.gephi.graph.store;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -22,8 +21,6 @@ import java.util.Random;
 import java.util.Set;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterator;
-import org.gephi.graph.store.BasicGraphStore.BasicEdge;
-import org.gephi.graph.store.BasicGraphStore.BasicNode;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -1040,28 +1037,6 @@ public class EdgeStoreTest {
     }
 
     @Test
-    public void testBasicStoreEquals() {
-        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
-        BasicGraphStore.BasicEdgeStore basicEdgeStore = GraphGenerator.generateBasicEdgeStore(edges);
-
-        EdgeStore edgeStore = new EdgeStore();
-        edgeStore.addAll(Arrays.asList(edges));
-
-        testBasicStoreEquals(edgeStore, basicEdgeStore);
-    }
-
-    @Test
-    public void testMultiTypeBasicStoreEquals() {
-        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
-        BasicGraphStore.BasicEdgeStore basicEdgeStore = GraphGenerator.generateBasicEdgeStore(edges);
-
-        EdgeStore edgeStore = new EdgeStore();
-        edgeStore.addAll(Arrays.asList(edges));
-
-        testBasicStoreEquals(edgeStore, basicEdgeStore);
-    }
-
-    @Test
     public void testAddUndirected() {
         EdgeStore edgeStore = new EdgeStore();
         EdgeImpl edge = GraphGenerator.generateSingleUndirectedEdge();
@@ -1359,10 +1334,13 @@ public class EdgeStoreTest {
         Set<EdgeImpl> edgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
 
         for (NodeImpl node : getNodes(edges)) {
+            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
+
             for (EdgeStore.NeighborsIterator itr = edgeStore.neighborOutIterator(node); itr.hasNext();) {
                 NodeImpl neighbor = (NodeImpl) itr.next();
                 EdgeImpl edge = edgeStore.get(node, neighbor, 0);
                 Assert.assertTrue(edgeSet.remove(edge));
+                Assert.assertTrue(nodeSet.add(neighbor));
             }
         }
         Assert.assertEquals(0, edgeSet.size());
@@ -1377,13 +1355,53 @@ public class EdgeStoreTest {
         Set<EdgeImpl> edgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
 
         for (NodeImpl node : getNodes(edges)) {
+            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
+
             for (EdgeStore.NeighborsIterator itr = edgeStore.neighborInIterator(node); itr.hasNext();) {
                 NodeImpl neighbor = (NodeImpl) itr.next();
                 EdgeImpl edge = edgeStore.get(neighbor, node, 0);
                 Assert.assertTrue(edgeSet.remove(edge));
+                Assert.assertTrue(nodeSet.add(neighbor));
             }
         }
         Assert.assertEquals(0, edgeSet.size());
+    }
+
+    @Test
+    public void testNeighborInOutIterators() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        Set<EdgeImpl> inEdgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
+        Set<EdgeImpl> outEdgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
+        int mutualEdges = 0;
+
+        for (NodeImpl node : getNodes(edges)) {
+            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
+            for (EdgeStore.NeighborsIterator itr = edgeStore.neighborIterator(node); itr.hasNext();) {
+                NodeImpl neighbor = (NodeImpl) itr.next();
+                boolean out = ((EdgeStore.EdgeInOutIterator) itr.itr).out;
+
+                if (out) {
+                    EdgeImpl edge = edgeStore.get(node, neighbor, 0);
+                    if(edge.isSelfLoop()) {
+                        Assert.assertTrue(inEdgeSet.remove(edge));
+                    }
+                    Assert.assertTrue(outEdgeSet.remove(edge));
+                    if(edge.isMutual()) {
+                        mutualEdges++;
+                    }
+                } else {
+                    EdgeImpl edge = edgeStore.get(neighbor, node, 0);
+                    Assert.assertTrue(inEdgeSet.remove(edge));
+                }
+
+                Assert.assertTrue(nodeSet.add(neighbor));
+            }
+        }
+        Assert.assertEquals(0, outEdgeSet.size() - mutualEdges);
+        Assert.assertEquals(0, inEdgeSet.size() - mutualEdges);
     }
 
     @Test
@@ -1663,70 +1681,6 @@ public class EdgeStoreTest {
     private void testContainsNone(EdgeStore store, List<EdgeImpl> list) {
         for (EdgeImpl n : list) {
             Assert.assertFalse(store.contains(n));
-        }
-    }
-
-    private void testBasicStoreEquals(EdgeStore edgeStore, BasicGraphStore.BasicEdgeStore basicEdgeStore) {
-        Assert.assertEquals(edgeStore.size(), basicEdgeStore.size());
-        int size = basicEdgeStore.size();
-        for (Edge e : edgeStore) {
-            Assert.assertTrue(basicEdgeStore.containsId(e.getId()));
-            size--;
-        }
-        Assert.assertEquals(size, 0);
-
-        Object2ObjectMap<Object, BasicNode> basicNodeMap = new Object2ObjectOpenHashMap<Object, BasicNode>();
-        Object2ObjectMap<Object, NodeImpl> nodeMap = new Object2ObjectOpenHashMap<Object, NodeImpl>();
-        Int2IntMap typeCounts = new Int2IntOpenHashMap();
-        for (Edge basicEdge : basicEdgeStore) {
-            BasicGraphStore.BasicNode source = (BasicGraphStore.BasicNode) basicEdge.getSource();
-            BasicGraphStore.BasicNode target = (BasicGraphStore.BasicNode) basicEdge.getTarget();
-            basicNodeMap.put(source.getId(), source);
-            basicNodeMap.put(target.getId(), target);
-
-            EdgeImpl edge = edgeStore.get(basicEdge.getId());
-            nodeMap.put(edge.getSource().getId(), edge.getSource());
-            nodeMap.put(edge.getTarget().getId(), edge.getTarget());
-
-            Assert.assertNotNull(edge);
-            Assert.assertEquals(edge.getId(), basicEdge.getId());
-            Assert.assertEquals(edge.getType(), basicEdge.getType());
-
-            typeCounts.put(basicEdge.getType(), typeCounts.get(basicEdge.getType()) + 1);
-        }
-
-        Assert.assertEquals(nodeMap.size(), basicNodeMap.size());
-
-        for (BasicNode basicNode : basicNodeMap.values()) {
-            NodeImpl node = nodeMap.get(basicNode.getId());
-            for (Int2ObjectMap.Entry<Object2ObjectMap<Object, BasicGraphStore.BasicEdge>> entry : basicNode.outEdges.int2ObjectEntrySet()) {
-                int type = entry.getIntKey();
-                Object2ObjectMap<Object, BasicEdge> edges = entry.getValue();
-                EdgeStore.EdgeTypeOutIterator itr = edgeStore.edgeOutIterator(node, type);
-                int i = 0;
-                for (; itr.hasNext(); i++) {
-                    EdgeImpl edge = itr.next();
-                    Assert.assertNotNull(edge);
-                    Assert.assertEquals(edge.getId(), edges.get(edge.target.getId()).getId());
-                }
-                Assert.assertEquals(i, edges.size());
-            }
-            for (Int2ObjectMap.Entry<Object2ObjectMap<Object, BasicGraphStore.BasicEdge>> entry : basicNode.inEdges.int2ObjectEntrySet()) {
-                int type = entry.getIntKey();
-                Object2ObjectMap<Object, BasicEdge> edges = entry.getValue();
-                EdgeStore.EdgeTypeInIterator itr = edgeStore.edgeInIterator(node, type);
-                int i = 0;
-                for (; itr.hasNext(); i++) {
-                    EdgeImpl edge = itr.next();
-                    Assert.assertNotNull(edge);
-                    Assert.assertEquals(edge.getId(), edges.get(edge.source.getId()).getId());
-                }
-                Assert.assertEquals(i, edges.size());
-            }
-        }
-
-        for (Int2IntMap.Entry typeEntry : typeCounts.int2IntEntrySet()) {
-            Assert.assertEquals(edgeStore.size(typeEntry.getIntKey()), typeEntry.getIntValue());
         }
     }
 

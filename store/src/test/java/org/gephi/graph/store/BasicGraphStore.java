@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -177,12 +178,12 @@ public class BasicGraphStore implements DirectedGraph {
 
     @Override
     public NodeIterable getNeighbors(Node node) {
-        return new NodeIterableWrapper(new NeighborsIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node)));
+        return new NodeIterableWrapper(new NeighborsUndirectedIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node)));
     }
 
     @Override
     public NodeIterable getNeighbors(Node node, int type) {
-        return new NodeIterableWrapper(new NeighborsIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node, type)));
+        return new NodeIterableWrapper(new NeighborsUndirectedIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node, type)));
     }
 
     @Override
@@ -407,12 +408,14 @@ public class BasicGraphStore implements DirectedGraph {
         protected final BasicNode source;
         protected final BasicNode target;
         protected final int type;
+        protected final boolean directed;
 
-        public BasicEdge(Object id, BasicNode source, BasicNode target, int type) {
+        public BasicEdge(Object id, BasicNode source, BasicNode target, int type, boolean directed) {
             super(id);
             this.source = source;
             this.target = target;
             this.type = type;
+            this.directed = directed;
         }
 
         @Override
@@ -442,7 +445,11 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public boolean isDirected() {
-            return true;
+            return directed;
+        }
+
+        public String getStringId() {
+            return BasicEdgeStore.getStringId(source, target, directed);
         }
     }
 
@@ -524,7 +531,7 @@ public class BasicGraphStore implements DirectedGraph {
         public boolean containsAll(Collection<?> c) {
             return idToNodeMap.values().containsAll(c);
         }
-        
+
         public boolean containsId(Object id) {
             return idToNodeMap.containsKey(id);
         }
@@ -837,6 +844,18 @@ public class BasicGraphStore implements DirectedGraph {
             idToEdgeMap.clear();
         }
 
+        protected static String getStringId(BasicNode source, BasicNode target, boolean directed) {
+            if (directed) {
+                return source.getId() + "->" + target.getId();
+            } else {
+                if (source.getId().hashCode() > target.getId().hashCode()) {
+                    return source.getId() + "->" + target.getId();
+                } else {
+                    return target.getId() + "->" + source.getId();
+                }
+            }
+        }
+
         private static class BasicEdgeIterator implements EdgeIterator {
 
             private final Iterator<BasicEdge> itr;
@@ -885,6 +904,45 @@ public class BasicGraphStore implements DirectedGraph {
         public Node next() {
             Edge e = itr.next();
             return e.getSource() == node ? e.getTarget() : e.getSource();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove not supported for this iterator");
+        }
+    }
+
+    private static class NeighborsUndirectedIterator implements NodeIterator {
+
+        protected Set<BasicNode> output = new ObjectOpenHashSet<BasicNode>();
+        protected final BasicNode node;
+        protected final Iterator<Edge> itr;
+        protected BasicNode pointer;
+
+        public NeighborsUndirectedIterator(BasicNode node, Iterator<Edge> itr) {
+            this.node = node;
+            this.itr = itr;
+        }
+
+        @Override
+        public boolean hasNext() {
+            pointer = null;
+            while (pointer == null) {
+                if (!itr.hasNext()) {
+                    return false;
+                }
+                Edge e = itr.next();
+                pointer = (BasicNode) (e.getSource() == node ? e.getTarget() : e.getSource());
+                if (!output.add(pointer)) {
+                    pointer = null;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public Node next() {
+            return pointer;
         }
 
         @Override
