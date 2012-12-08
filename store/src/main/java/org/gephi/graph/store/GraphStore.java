@@ -415,12 +415,12 @@ public class GraphStore implements DirectedGraph {
 
     @Override
     public void readLock() {
-        autoReadLock();
+        lock.readLock();
     }
 
     @Override
     public void readUnlock() {
-        autoReadUnlock();
+        lock.readUnlock();
     }
 
     @Override
@@ -430,35 +430,35 @@ public class GraphStore implements DirectedGraph {
 
     @Override
     public void writeLock() {
-        autoWriteLock();
+        lock.writeLock();
     }
 
     @Override
     public void writeUnlock() {
-        autoWriteUnlock();
+        lock.writeUnlock();
     }
 
     private void autoReadLock() {
         if (AUTO_LOCKING) {
-            autoReadLock();
+            readLock();
         }
     }
 
     private void autoReadUnlock() {
         if (AUTO_LOCKING) {
-            autoReadUnlock();
+            readUnlock();
         }
     }
 
     private void autoWriteLock() {
         if (AUTO_LOCKING) {
-            autoWriteLock();
+            writeLock();
         }
     }
 
     private void autoWriteUnlock() {
         if (AUTO_LOCKING) {
-            autoWriteUnlock();
+            writeUnlock();
         }
     }
 

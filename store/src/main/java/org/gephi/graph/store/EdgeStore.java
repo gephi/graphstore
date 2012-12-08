@@ -338,20 +338,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     public NeighborsIterator neighborIterator(Node node) {
         checkValidNodeObject(node);
-        return new NeighborsIterator((NodeImpl) node, new EdgeInOutIterator((NodeImpl) node));
-    }
-
-    public NeighborsIterator neighborIterator(final Node node, int type) {
-        checkValidNodeObject(node);
-        return new NeighborsIterator((NodeImpl) node, new EdgeTypeInOutIterator((NodeImpl) node, type));
-    }
-
-    public NeighborsIterator neighborUndirectedIterator(final Node node) {
-        checkValidNodeObject(node);
         return new NeighborsUndirectedIterator((NodeImpl) node, new EdgeInOutIterator((NodeImpl) node));
     }
 
-    public NeighborsIterator neighborUndirectedIterator(final Node node, int type) {
+    public NeighborsIterator neighborIterator(final Node node, int type) {
         checkValidNodeObject(node);
         return new NeighborsUndirectedIterator((NodeImpl) node, new EdgeTypeInOutIterator((NodeImpl) node, type));
     }

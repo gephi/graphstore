@@ -4,8 +4,9 @@ package org.gephi.graph.api;
  *
  * @author mbastian
  */
-public interface NodeIterable {
+public interface NodeIterable extends Iterable<Node> {
     
+    @Override
     public NodeIterator iterator();
 
     public Node[] toArray();

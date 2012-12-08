@@ -104,12 +104,12 @@ public class UndirectedDecorator implements UndirectedGraph {
 
     @Override
     public NodeIterable getNeighbors(Node node) {
-        return store.getNodeIterableWrapper(store.edgeStore.neighborUndirectedIterator(node));
+        return store.getNodeIterableWrapper(store.edgeStore.neighborIterator(node));
     }
 
     @Override
     public NodeIterable getNeighbors(Node node, int type) {
-        return store.getNodeIterableWrapper(store.edgeStore.neighborUndirectedIterator(node, type));
+        return store.getNodeIterableWrapper(store.edgeStore.neighborIterator(node, type));
     }
 
     @Override

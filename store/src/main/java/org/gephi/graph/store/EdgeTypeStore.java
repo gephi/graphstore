@@ -150,7 +150,7 @@ public class EdgeTypeStore {
     public boolean contains(final int id) {
         checkValidId(id);
 
-        return countArray[id] != NULL_COUNT;
+        return idMap.containsKey(intToShort(id));
     }
 
     public void clear() {
