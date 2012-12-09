@@ -969,7 +969,7 @@ public class EdgeStoreTest {
 
         for (NodeImpl n : getNodes(edges)) {
             for (int i = 0; i < Math.max(n.headIn.length, n.headOut.length); i++) {
-                EdgeStore.EdgeTypeInOutIterator itr = edgeStore.edgeInOutIterator(n, i);
+                EdgeStore.EdgeTypeInOutIterator itr = edgeStore.edgeIterator(n, i);
                 for (; itr.hasNext();) {
                     EdgeImpl e = itr.next();
                     if (e.isSelfLoop()) {
@@ -997,13 +997,13 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testInOutTypeIteratorNull() {
         EdgeStore edgeStore = new EdgeStore();
-        edgeStore.edgeInOutIterator(null, 0);
+        edgeStore.edgeIterator(null, 0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInOutTypeIteratorInvalid() {
         EdgeStore edgeStore = new EdgeStore();
-        edgeStore.edgeInOutIterator(new NodeImpl("0"), 0);
+        edgeStore.edgeIterator(new NodeImpl("0"), 0);
     }
 
     @Test
@@ -1011,7 +1011,7 @@ public class EdgeStoreTest {
         EdgeImpl edge = GraphGenerator.generateSingleEdge();
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(edge);
-        Assert.assertFalse(edgeStore.edgeInOutIterator(edge.source, 99).hasNext());
+        Assert.assertFalse(edgeStore.edgeIterator(edge.source, 99).hasNext());
     }
 
     @Test
@@ -1022,7 +1022,7 @@ public class EdgeStoreTest {
 
         int index = 0;
         for (NodeImpl n : getNodes(edges)) {
-            EdgeStore.EdgeTypeInOutIterator itr = edgeStore.edgeInOutIterator(n, 0);
+            EdgeStore.EdgeTypeInOutIterator itr = edgeStore.edgeIterator(n, 0);
             for (; itr.hasNext();) {
                 EdgeImpl e = itr.next();
                 itr.remove();
@@ -1322,7 +1322,7 @@ public class EdgeStoreTest {
         Assert.assertEquals(totalInDegree, edges.length);
         Assert.assertEquals(totalOutDegree, edges.length);
         Assert.assertEquals(totalDegree, edges.length * 2);
-        Assert.assertEquals(totalUndirectedDegree, edges.length * 2 - mutualEdges * 2 - selfLoops);
+        Assert.assertEquals(totalUndirectedDegree, edges.length * 2 - mutualEdges * 2);
     }
 
     @Test
@@ -1537,7 +1537,7 @@ public class EdgeStoreTest {
         edgeStore.addAll(Arrays.asList(edges));
 
         for (Int2IntMap.Entry entry : counts.int2IntEntrySet()) {
-            int count = edgeTypeStore.getCount(entry.getIntKey());
+            int count = edgeStore.size(entry.getIntKey());
             Assert.assertEquals(count, entry.getIntValue());
         }
 
@@ -1548,7 +1548,7 @@ public class EdgeStoreTest {
         }
 
         for (Int2IntMap.Entry entry : counts.int2IntEntrySet()) {
-            int count = edgeTypeStore.getCount(entry.getIntKey());
+            int count = edgeStore.size(entry.getIntKey());
             Assert.assertEquals(count, entry.getIntValue());
         }
     }

@@ -232,6 +232,26 @@ public class BasicGraphStore implements DirectedGraph {
     }
 
     @Override
+    public int getInDegree(Node node) {
+        EdgeIterator itr = edgeStore.inIterator((BasicNode) node);
+        int i = 0;
+        for (; itr.hasNext();) {
+            i++;
+        }
+        return i;
+    }
+
+    @Override
+    public int getOutDegree(Node node) {
+        EdgeIterator itr = edgeStore.outIterator((BasicNode) node);
+        int i = 0;
+        for (; itr.hasNext();) {
+            i++;
+        }
+        return i;
+    }
+
+    @Override
     public boolean isSelfLoop(Edge edge) {
         return edge.isSelfLoop();
     }

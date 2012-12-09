@@ -24,6 +24,10 @@ public interface DirectedGraph extends Graph {
     public EdgeIterable getOutEdges(Node node);
 
     public EdgeIterable getOutEdges(Node node, int type);
+    
+    public int getInDegree(Node node);
+    
+    public int getOutDegree(Node node);
 
     @Override
     public boolean isAdjacent(Node source, Node target);

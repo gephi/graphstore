@@ -249,7 +249,7 @@ public class GraphStore implements DirectedGraph {
 
     @Override
     public EdgeIterable getEdges(final Node node, final int type) {
-        return new EdgeIterableWrapper(edgeStore.edgeInOutIterator(node, type));
+        return new EdgeIterableWrapper(edgeStore.edgeIterator(node, type));
     }
 
     @Override
@@ -283,11 +283,11 @@ public class GraphStore implements DirectedGraph {
     }
 
     @Override
-    public int getEdgeCount(int type) {
+    public int getEdgeCount(final int type) {
         autoReadLock();
         try {
             if (edgeTypeStore.contains(type)) {
-                return edgeTypeStore.getCount(type);
+                return edgeStore.size(type);
             }
             return 0;
         } finally {
@@ -296,7 +296,7 @@ public class GraphStore implements DirectedGraph {
     }
 
     @Override
-    public Node getOpposite(Node node, Edge edge) {
+    public Node getOpposite(final Node node, final Edge edge) {
         nodeStore.checkNonNullNodeObject(node);
         edgeStore.checkNonNullEdgeObject(edge);
         return edge.getSource() == node ? edge.getTarget() : edge.getSource();
@@ -306,6 +306,18 @@ public class GraphStore implements DirectedGraph {
     public int getDegree(final Node node) {
         nodeStore.checkNonNullNodeObject(node);
         return ((NodeImpl) node).getDegree();
+    }
+    
+    @Override
+    public int getInDegree(final Node node) {
+        nodeStore.checkNonNullNodeObject(node);
+        return ((NodeImpl) node).getInDegree();
+    }
+    
+    @Override
+    public int getOutDegree(final Node node) {
+        nodeStore.checkNonNullNodeObject(node);
+        return ((NodeImpl) node).getOutDegree();
     }
 
     @Override
@@ -352,7 +364,7 @@ public class GraphStore implements DirectedGraph {
     }
 
     @Override
-    public boolean isIncident(Node node, Edge edge) {
+    public boolean isIncident(final Node node, final Edge edge) {
         autoReadLock();
         try {
             nodeStore.checkNonNullNodeObject(node);
@@ -382,7 +394,7 @@ public class GraphStore implements DirectedGraph {
     public void clearEdges(final Node node, final int type) {
         autoWriteLock();
         try {
-            EdgeStore.EdgeTypeInOutIterator itr = edgeStore.edgeInOutIterator(node, type);
+            EdgeStore.EdgeTypeInOutIterator itr = edgeStore.edgeIterator(node, type);
             for (; itr.hasNext();) {
                 itr.next();
                 itr.remove();
@@ -438,25 +450,25 @@ public class GraphStore implements DirectedGraph {
         lock.writeUnlock();
     }
 
-    private void autoReadLock() {
+    protected void autoReadLock() {
         if (AUTO_LOCKING) {
             readLock();
         }
     }
 
-    private void autoReadUnlock() {
+    protected void autoReadUnlock() {
         if (AUTO_LOCKING) {
             readUnlock();
         }
     }
 
-    private void autoWriteLock() {
+    protected void autoWriteLock() {
         if (AUTO_LOCKING) {
             writeLock();
         }
     }
 
-    private void autoWriteUnlock() {
+    protected void autoWriteUnlock() {
         if (AUTO_LOCKING) {
             writeUnlock();
         }
