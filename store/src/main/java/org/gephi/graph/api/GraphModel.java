@@ -14,6 +14,10 @@ public interface GraphModel {
     
     public UndirectedGraph getUndirectedGraph();
     
+    public DirectedSubgraph getDirectedGraph(GraphView view);
+    
+    public UndirectedSubgraph getUndirectedGraph(GraphView view);
+    
     public boolean isDirected();
     
     public boolean isUndirected();
