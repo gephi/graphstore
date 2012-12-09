@@ -509,7 +509,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         }
     }
 
-    public class NodeStoreIterator implements Iterator<Node>, NodeIterator {
+    protected final class NodeStoreIterator implements Iterator<Node>, NodeIterator {
 
         protected int blockIndex;
         protected NodeImpl[] backingArray;

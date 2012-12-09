@@ -32,6 +32,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected Long2IntOpenHashMap[] longDictionary;
     //Stats
     protected int undirectedSize;
+    protected int mutualEdgesSize;
+    protected int[] mutualEdgesTypeSize;
     //Locking (optional)
     protected final GraphLock lock;
     //Types counting (optional)
@@ -62,6 +64,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.longDictionary = new Long2IntOpenHashMap[DEFAULT_TYPE_COUNT];
         this.longDictionary[0] = new Long2IntOpenHashMap(DEFAULT_DICTIONARY_SIZE, DEFAULT_DICTIONARY_LOAD_FACTOR);
         this.longDictionary[0].defaultReturnValue(NULL_ID);
+        this.mutualEdgesTypeSize = new int[DEFAULT_TYPE_COUNT];
     }
 
     private void ensureCapacity(final int capacity) {
@@ -152,6 +155,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 newMap.defaultReturnValue(NULL_ID);
                 longDictionary[i] = newMap;
             }
+            int[] newSizeArray = new int[type +1];
+            System.arraycopy(mutualEdgesTypeSize, 0, newSizeArray, 0, length);
+            mutualEdgesTypeSize = newSizeArray;
         }
     }
 
@@ -254,10 +260,21 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public int size() {
         return size;
     }
+    
+    public int undirectedSize() {
+        return size - mutualEdgesSize;
+    }
 
     public int size(int type) {
         if (type < longDictionary.length) {
             return longDictionary[type].size();
+        }
+        return 0;
+    }
+    
+    public int undirectedSize(int type) {
+        if (type < longDictionary.length) {
+            return longDictionary[type].size() - mutualEdgesTypeSize[type];
         }
         return 0;
     }
@@ -311,7 +328,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return new EdgeTypeInIterator((NodeImpl) node, type);
     }
 
-    public EdgeTypeInOutIterator edgeInOutIterator(final Node node, int type) {
+    public EdgeTypeInOutIterator edgeIterator(final Node node, int type) {
         checkValidNodeObject(node);
         return new EdgeTypeInOutIterator((NodeImpl) node, type);
     }
@@ -454,17 +471,13 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                     mutual.setMutual(true);
                     source.mutualDegree++;
                     target.mutualDegree++;
+                    mutualEdgesSize++;
+                    mutualEdgesTypeSize[type]++;
                 }
-            } else if (directed) {
-                source.mutualDegree++;
             }
 
             if (!directed) {
                 undirectedSize++;
-            }
-
-            if (edgeTypeStore != null) {
-                edgeTypeStore.increment(type);
             }
 
             size++;
@@ -528,9 +541,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                     mutual.setMutual(false);
                     source.mutualDegree--;
                     target.mutualDegree--;
+                    mutualEdgesSize--;
+                    mutualEdgesTypeSize[type]--;
                 }
-            } else if (directed) {
-                source.mutualDegree--;
             }
 
             if (!directed) {
@@ -538,7 +551,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             }
 
             if (edgeTypeStore != null) {
-                edgeTypeStore.decrement(type);
+                //TODO - if type count is zero, do smthing
             }
 
             return true;
@@ -991,7 +1004,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class EdgeStoreIterator implements Iterator<Edge>, EdgeIterator {
+    protected class EdgeStoreIterator implements Iterator<Edge>, EdgeIterator {
 
         protected int blockIndex;
         protected EdgeImpl[] backingArray;
@@ -1000,9 +1013,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected EdgeImpl pointer;
 
         public EdgeStoreIterator() {
+            readLock();
             this.backingArray = blocks[blockIndex].backingArray;
             this.blockLength = blocks[blockIndex].nodeLength;
-            readLock();
         }
 
         @Override
@@ -1038,7 +1051,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class UndirectedEdgeStoreIterator extends EdgeStoreIterator {
+    protected final class UndirectedEdgeStoreIterator extends EdgeStoreIterator {
 
         public UndirectedEdgeStoreIterator() {
             super();
@@ -1059,7 +1072,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class EdgeInOutIterator implements EdgeIterator {
+    protected final class EdgeInOutIterator implements EdgeIterator {
 
         protected final int outTypeLength;
         protected final int inTypeLength;
@@ -1071,11 +1084,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected boolean out = true;
 
         public EdgeInOutIterator(NodeImpl node) {
+            readLock();
             outArray = node.headOut;
             outTypeLength = outArray.length;
             inArray = node.headIn;
             inTypeLength = inArray.length;
-            readLock();
         }
 
         @Override
@@ -1115,18 +1128,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         @Override
         public EdgeImpl next() {
             lastEdge = pointer;
-//            int id;
-//            if (out) {
-//                id = lastEdge.nextOutEdge;
-//            } else {
-//                id = lastEdge.nextInEdge;
-//            }
-//            if (id != EdgeStore.NULL_ID) {
-//                pointer = get(id);
-//            } else {
-//                pointer = null;
-//            }
-            //Ignore self loops for in
             if (out) {
                 int id = lastEdge.nextOutEdge;
                 if (id != EdgeStore.NULL_ID) {
@@ -1159,7 +1160,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class EdgeOutIterator implements EdgeIterator {
+    protected final class EdgeOutIterator implements EdgeIterator {
 
         protected final int typeLength;
         protected EdgeImpl[] outArray;
@@ -1168,9 +1169,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected EdgeImpl lastEdge;
 
         public EdgeOutIterator(NodeImpl node) {
+            readLock();
             outArray = node.headOut;
             typeLength = outArray.length;
-            readLock();
         }
 
         @Override
@@ -1206,7 +1207,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class EdgeInIterator implements EdgeIterator {
+    protected final class EdgeInIterator implements EdgeIterator {
 
         protected final int typeLength;
         protected EdgeImpl[] inArray;
@@ -1215,9 +1216,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected EdgeImpl lastEdge;
 
         public EdgeInIterator(NodeImpl node) {
+            readLock();
             inArray = node.headIn;
             typeLength = inArray.length;
-            readLock();
         }
 
         @Override
@@ -1253,7 +1254,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class EdgeTypeInOutIterator implements EdgeIterator {
+    protected final class EdgeTypeInOutIterator implements EdgeIterator {
 
         protected final int type;
         protected EdgeImpl lastEdge;
@@ -1263,11 +1264,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         public EdgeTypeInOutIterator(NodeImpl node, int type) {
             this.type = type;
+            readLock();
             EdgeImpl[] outArray = node.headOut;
             EdgeImpl[] inArray = node.headIn;
             outPointer = type < outArray.length ? outArray[type] : null;
             inPointer = type < inArray.length ? inArray[type] : null;
-            readLock();
         }
 
         @Override
@@ -1294,24 +1295,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         @Override
         public EdgeImpl next() {
-//            if (out) {
-//                lastEdge = outPointer;
-//                int id = lastEdge.nextOutEdge;
-//                if (id != EdgeStore.NULL_ID) {
-//                    outPointer = get(id);
-//                } else {
-//                    outPointer = null;
-//                }
-//            } else {
-//                lastEdge = inPointer;
-//                int id = lastEdge.nextInEdge;
-//                if (id != EdgeStore.NULL_ID) {
-//                    inPointer = get(id);
-//                } else {
-//                    inPointer = null;
-//                }
-//            }
-
             if (out) {
                 lastEdge = outPointer;
                 int id = lastEdge.nextOutEdge;
@@ -1354,7 +1337,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class EdgeTypeOutIterator implements EdgeIterator {
+    protected final class EdgeTypeOutIterator implements EdgeIterator {
 
         protected final int type;
         protected EdgeImpl lastEdge;
@@ -1362,9 +1345,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         public EdgeTypeOutIterator(NodeImpl node, int type) {
             this.type = type;
+            readLock();
             EdgeImpl[] outArray = node.headOut;
             pointer = type < outArray.length ? outArray[type] : null;
-            readLock();
         }
 
         @Override
@@ -1400,7 +1383,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class EdgeTypeInIterator implements EdgeIterator {
+    protected final class EdgeTypeInIterator implements EdgeIterator {
 
         protected final int type;
         protected EdgeImpl lastEdge;
@@ -1408,9 +1391,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         public EdgeTypeInIterator(NodeImpl node, int type) {
             this.type = type;
+            readLock();
             EdgeImpl[] inArray = node.headIn;
             pointer = type < inArray.length ? inArray[type] : null;
-            readLock();
         }
 
         @Override
@@ -1446,7 +1429,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class NeighborsIterator implements NodeIterator {
+    protected class NeighborsIterator implements NodeIterator {
 
         protected final NodeImpl node;
         protected final Iterator<Edge> itr;
@@ -1473,7 +1456,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class NeighborsUndirectedIterator extends NeighborsIterator {
+    protected final class NeighborsUndirectedIterator extends NeighborsIterator {
 
         protected EdgeImpl pointer;
 
@@ -1499,7 +1482,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    public class UndirectedIterator implements EdgeIterator {
+    protected final class UndirectedIterator implements EdgeIterator {
 
         protected final Iterator<Edge> itr;
         protected EdgeImpl pointer;

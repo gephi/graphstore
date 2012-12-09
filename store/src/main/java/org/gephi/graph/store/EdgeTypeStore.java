@@ -21,7 +21,6 @@ public class EdgeTypeStore {
     protected final Object2ShortMap labelMap;
     protected final Short2ObjectMap idMap;
     protected final ShortPriorityQueue garbageQueue;
-    protected int[] countArray;
     protected int length;
 
     public EdgeTypeStore() {
@@ -29,12 +28,8 @@ public class EdgeTypeStore {
             throw new RuntimeException("Edge Type Store size can't exceed 65534");
         }
         this.garbageQueue = new ShortHeapPriorityQueue(MAX_SIZE);
-        this.countArray = new int[MAX_SIZE];
         this.labelMap = new Object2ShortOpenHashMap(MAX_SIZE);
         this.idMap = new Short2ObjectOpenHashMap(MAX_SIZE);
-        for (int i = 0; i < countArray.length; i++) {
-            countArray[i] = NULL_COUNT;
-        }
         labelMap.defaultReturnValue(NULL_SHORT);
     }
 
@@ -66,7 +61,6 @@ public class EdgeTypeStore {
                 if (length >= MAX_SIZE) {
                     throw new RuntimeException("Maximum number of edge types reached at " + MAX_SIZE);
                 }
-                countArray[length] = 0;
                 length++;
             }
             labelMap.put(label, id);
@@ -86,7 +80,6 @@ public class EdgeTypeStore {
         garbageQueue.enqueue(id);
 
         int intId = shortToInt(id);
-        countArray[intId] = 0;
         return intId;
     }
 
@@ -99,48 +92,8 @@ public class EdgeTypeStore {
             labelMap.remove(label);
             garbageQueue.enqueue(id);
 
-            countArray[type] = 0;
         }
         return label;
-    }
-
-    private int getCapacity() {
-        return countArray.length - garbageQueue.size();
-    }
-
-    public int increment(final int type) {
-        checkValidId(type);
-
-        int count;
-        if (type >= length || ((count = countArray[type]) == NULL_COUNT)) {
-            throw new RuntimeException("Edge type id=" + type + " doesn't exist");
-        }
-        countArray[type] = ++count;;
-        return count;
-    }
-
-    public int decrement(final int type) {
-        checkValidId(type);
-
-        int count;
-        if (type >= length || ((count = countArray[type]) == NULL_COUNT) || count == 0) {
-            throw new RuntimeException("Edge type id=" + type + " doesn't exist");
-        }
-        countArray[type] = --count;;
-        if (count == 0) {
-            //do smthing?
-        }
-        return count;
-    }
-
-    public int getCount(final int type) {
-        checkValidId(type);
-
-        int count;
-        if (type >= length || ((count = countArray[type]) == NULL_COUNT)) {
-            throw new RuntimeException("Edge type id=" + type + " doesn't exist");
-        }
-        return count;
     }
 
     public boolean contains(final Object label) {
@@ -154,10 +107,7 @@ public class EdgeTypeStore {
     }
 
     public void clear() {
-        countArray = new int[MAX_SIZE];
-        for (int i = 0; i < countArray.length; i++) {
-            countArray[i] = NULL_COUNT;
-        }
+        
     }
 
     public int size() {

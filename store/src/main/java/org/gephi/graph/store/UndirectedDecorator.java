@@ -129,12 +129,20 @@ public class UndirectedDecorator implements UndirectedGraph {
 
     @Override
     public int getEdgeCount() {
-        return store.getEdgeCount();
+        return store.edgeStore.undirectedSize();
     }
 
     @Override
     public int getEdgeCount(int type) {
-        return store.getEdgeCount(type);
+        store.autoReadLock();
+        try {
+            if (store.edgeTypeStore.contains(type)) {
+                return store.edgeStore.undirectedSize(type);
+            }
+            return 0;
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override
