@@ -49,6 +49,50 @@ public class GraphStoreTest {
         testBasicStoreEquals(graphStore, basicStore);
     }
 
+    @Test
+    public void testFullUndirected() {
+        GraphStore graphStore = new GraphStore();
+        BasicGraphStore basicStore = new BasicGraphStore();
+
+        graphStore.edgeTypeStore.addType("0");
+
+        NodeImpl[] nodes = GraphGenerator.generateLargeNodeList();
+        BasicGraphStore.BasicNode[] basicNodes = GraphGenerator.generateLargeBasicNodeList();
+
+        graphStore.addAllNodes(Arrays.asList(nodes));
+        basicStore.addAllNodes(Arrays.asList(basicNodes));
+
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 20000, 0, false, true);
+        BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator.generateBasicEdgeList(basicStore.nodeStore, 20000, 0, false, true);
+
+        graphStore.addAllEdges(Arrays.asList(edges));
+        basicStore.addAllEdges(Arrays.asList(basicEdges));
+
+        testBasicStoreEquals(graphStore, basicStore);
+    }
+
+    @Test
+    public void testFullMixed() {
+        GraphStore graphStore = new GraphStore();
+        BasicGraphStore basicStore = new BasicGraphStore();
+
+        graphStore.edgeTypeStore.addType("0");
+
+        NodeImpl[] nodes = GraphGenerator.generateLargeNodeList();
+        BasicGraphStore.BasicNode[] basicNodes = GraphGenerator.generateLargeBasicNodeList();
+
+        graphStore.addAllNodes(Arrays.asList(nodes));
+        basicStore.addAllNodes(Arrays.asList(basicNodes));
+
+        EdgeImpl[] edges = GraphGenerator.generateMixedEdgeList(graphStore.nodeStore, 20000, 0, true);
+        BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator.generateBasicMixedEdgeList(basicStore.nodeStore, 20000, 0, true);
+
+        graphStore.addAllEdges(Arrays.asList(edges));
+        basicStore.addAllEdges(Arrays.asList(basicEdges));
+
+        testBasicStoreEquals(graphStore, basicStore);
+    }
+
     private void testBasicStoreEquals(GraphStore graphStore, BasicGraphStore basicGraphStore) {
         BasicGraphStore.BasicEdgeStore basicEdgeStore = basicGraphStore.edgeStore;
         BasicGraphStore.BasicNodeStore basicNodeStore = basicGraphStore.nodeStore;

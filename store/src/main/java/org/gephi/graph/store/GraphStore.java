@@ -307,13 +307,13 @@ public class GraphStore implements DirectedGraph {
         nodeStore.checkNonNullNodeObject(node);
         return ((NodeImpl) node).getDegree();
     }
-    
+
     @Override
     public int getInDegree(final Node node) {
         nodeStore.checkNonNullNodeObject(node);
         return ((NodeImpl) node).getInDegree();
     }
-    
+
     @Override
     public int getOutDegree(final Node node) {
         nodeStore.checkNonNullNodeObject(node);
@@ -474,11 +474,6 @@ public class GraphStore implements DirectedGraph {
         }
     }
 
-//    createKeyIndex(String key, Class<T> elementClass);
-//        
-//        dropKeyIndex(String key, Class<T> elementClass) 
-//                
-//                Set<String> getIndexedKeys(Class<T> elementClass);
     public boolean isDirected() {
         return edgeStore.isDirectedGraph();
     }

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import org.gephi.graph.store.BasicGraphStore.BasicEdgeStore;
 
 /**
  *
@@ -27,7 +28,7 @@ public class GraphGenerator {
     }
     
     public static EdgeImpl[] generateSmallMixedEdgeList() {
-        return generateMixedEdgeList(100, 0);
+        return generateMixedEdgeList(100, 0, true);
     }
     
     public static EdgeImpl[] generateSmallMultiTypeEdgeList() {
@@ -40,6 +41,14 @@ public class GraphGenerator {
     
     public static EdgeImpl[] generateLargeEdgeList() {
         return generateEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 0, true, true);
+    }
+    
+    public static EdgeImpl[] generatelargeUndirectedEdgeList() {
+        return generateEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 0, false, true);
+    }
+    
+    public static EdgeImpl[] generateLargeMixedEdgeList() {
+        return generateMixedEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 0, true);
     }
     
     public static EdgeImpl[] generateLargeMultiTypeEdgeList() {
@@ -69,7 +78,7 @@ public class GraphGenerator {
     }
     
     public static EdgeImpl[] generateMixedEdgeList(int edgeCount) {
-        return generateMixedEdgeList(edgeCount, 0);
+        return generateMixedEdgeList(edgeCount, 0, true);
     }
     
     public static EdgeImpl[] generateEdgeList(int edgeCount, int type, boolean directed, boolean allowSelfLoops) {
@@ -77,9 +86,9 @@ public class GraphGenerator {
         return generateEdgeList(generateNodeStore(nodeCount), edgeCount, type, directed, allowSelfLoops);
     }
     
-    public static EdgeImpl[] generateMixedEdgeList(int edgeCount, int type) {
+    public static EdgeImpl[] generateMixedEdgeList(int edgeCount, int type, boolean allowSelfLoops) {
         int nodeCount = Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0));
-        return generateMixedEdgeList(generateNodeStore(nodeCount), edgeCount, type);
+        return generateMixedEdgeList(generateNodeStore(nodeCount), edgeCount, type, allowSelfLoops);
     }
     
     public static EdgeImpl[] generateEdgeList(NodeStore nodeStore, int edgeCount, int type, boolean directed, boolean allowSelfLoops) {
@@ -150,7 +159,7 @@ public class GraphGenerator {
         return edgeList.toArray(new BasicGraphStore.BasicEdge[0]);
     }
     
-    public static EdgeImpl[] generateMixedEdgeList(NodeStore nodeStore, int edgeCount, int type) {
+    public static EdgeImpl[] generateMixedEdgeList(NodeStore nodeStore, int edgeCount, int type, boolean allowSelfLoops) {
         int nodeCount = nodeStore.size();
         final List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>();
         LongSet idSet = new LongOpenHashSet();
@@ -162,7 +171,7 @@ public class GraphGenerator {
             NodeImpl source = nodeStore.get(sourceId);
             NodeImpl target = nodeStore.get(targetId);
             EdgeImpl edge = new EdgeImpl(String.valueOf(c), source, target, type, true);
-            if (source != target && !idSet.contains(edge.getLongId())) {
+            if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(edge.getLongId())) {
                 edgeList.add(edge);
                 c++;
                 idSet.add(edge.getLongId());
@@ -174,13 +183,46 @@ public class GraphGenerator {
             NodeImpl source = nodeStore.get(sourceId);
             NodeImpl target = nodeStore.get(targetId);
             EdgeImpl edge = new EdgeImpl(String.valueOf(c), source, target, type, false);
-            if (source != target && !idSet.contains(EdgeStore.getLongId(edge.source, edge.target, true)) && !idSet.contains(EdgeStore.getLongId(edge.target, edge.source, true))) {
+            if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(EdgeStore.getLongId(edge.source, edge.target, true)) && !idSet.contains(EdgeStore.getLongId(edge.target, edge.source, true))) {
                 edgeList.add(edge);
                 c++;
                 idSet.add(edge.getLongId());
             }
         }
         return edgeList.toArray(new EdgeImpl[0]);
+    }
+    
+    public static BasicGraphStore.BasicEdge[] generateBasicMixedEdgeList(BasicGraphStore.BasicNodeStore nodeStore, int edgeCount, int type, boolean allowSelfLoops) {
+        int nodeCount = nodeStore.size();
+        final List<BasicGraphStore.BasicEdge> edgeList = new ArrayList<BasicGraphStore.BasicEdge>();
+        ObjectSet<String> idSet = new ObjectOpenHashSet();
+        Random r = new Random(124);
+        int c = 0;
+        while (idSet.size() < edgeCount / 2) {
+            int sourceId = r.nextInt(nodeCount);
+            int targetId = r.nextInt(nodeCount);
+            BasicGraphStore.BasicNode source = nodeStore.get(String.valueOf(sourceId));
+            BasicGraphStore.BasicNode target = nodeStore.get(String.valueOf(targetId));
+            BasicGraphStore.BasicEdge edge = new BasicGraphStore.BasicEdge(String.valueOf(c), source, target, type, true);
+            if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(edge.getStringId())) {
+                edgeList.add(edge);
+                c++;
+                idSet.add(edge.getStringId());
+            }
+        }
+        while (idSet.size() < edgeCount) {
+            int sourceId = r.nextInt(nodeCount);
+            int targetId = r.nextInt(nodeCount);
+            BasicGraphStore.BasicNode source = nodeStore.get(String.valueOf(sourceId));
+            BasicGraphStore.BasicNode target = nodeStore.get(String.valueOf(targetId));
+            BasicGraphStore.BasicEdge edge = new BasicGraphStore.BasicEdge(String.valueOf(c), source, target, type, false);
+            if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(BasicEdgeStore.getStringId(edge.source, edge.target, true)) && !idSet.contains(BasicEdgeStore.getStringId(edge.target, edge.source, true))) {
+                edgeList.add(edge);
+                c++;
+                idSet.add(edge.getStringId());
+            }
+        }
+        return edgeList.toArray(new BasicGraphStore.BasicEdge[0]);
     }
     
     public static EdgeImpl[] generateMultiTypeEdgeList(int edgeCount, int typeCount, boolean directed, boolean allowSelfLoops) {
