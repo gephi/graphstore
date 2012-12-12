@@ -19,18 +19,18 @@ public final class GraphViewImpl implements GraphView {
     //Const
     public static final int DEFAULT_TYPE_COUNT = 1;
     //Data
-    private final GraphStore graphStore;
-    private final BitVector nodeBitVector;
-    private final BitVector edgeBitVector;
+    protected final GraphStore graphStore;
+    protected final BitVector nodeBitVector;
+    protected final BitVector edgeBitVector;
     protected int storeId;
     //Decorators
     private final GraphViewDecorator directedDecorator;
     private final GraphViewDecorator undirectedDecorator;
     //Stats
+    protected int nodeCount;
+    protected int edgeCount;
     private int[] typeCounts;
     private int[] mutualEdgeTypeCounts;
-    private int nodeCount;
-    private int edgeCount;
     private int mutualEdgesCount;
 
     public GraphViewImpl(final GraphStore store) {

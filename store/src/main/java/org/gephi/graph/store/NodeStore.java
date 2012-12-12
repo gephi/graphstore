@@ -551,7 +551,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("Remove is not supported for this iterator");
+            checkWriteLock();
+            NodeStore.this.remove(pointer);
         }
     }
 }
