@@ -332,4 +332,14 @@ public class GraphGenerator {
         }
         return nodes;
     }
+    
+    public static GraphStore generateSmallGraphStore() {
+        int edgeCount = 100;
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)));
+        graphStore.addAllNodes(Arrays.asList(nodes));
+        EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, true, true);
+        graphStore.addAllEdges(Arrays.asList(edges));
+        return graphStore;
+    }
 }

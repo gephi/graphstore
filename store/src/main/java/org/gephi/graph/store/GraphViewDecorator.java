@@ -256,6 +256,11 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
             return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.iterator()));
         }
     }
+    
+    @Override
+    public EdgeIterable getSelfLoops() {
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.iteratorSelfLoop()));
+    }
 
     @Override
     public NodeIterable getNeighbors(Node node) {
@@ -445,6 +450,21 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     @Override
     public void clearEdges() {
         view.clearEdges();
+    }
+
+    @Override
+    public int addEdgeType(Object label) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    public int getEdgeType(Object label) {
+        return graphStore.getEdgeType(label);
+    }
+
+    @Override
+    public Object getEdgeLabel(int id) {
+        return graphStore.getEdgeLabel(id);
     }
 
     @Override

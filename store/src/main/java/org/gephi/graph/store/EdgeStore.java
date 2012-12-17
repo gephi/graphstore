@@ -292,6 +292,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public EdgeStoreIterator iteratorUndirected() {
         return new UndirectedEdgeStoreIterator();
     }
+    
+    public SelfLoopIterator iteratorSelfLoop() {
+        return new SelfLoopIterator();
+    }
 
     public EdgeOutIterator edgeOutIterator(final Node node) {
         checkValidNodeObject(node);
@@ -1065,6 +1069,27 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                     return false;
                 }
                 if (isUndirectedToIgnore(pointer)) {
+                    pointer = null;
+                }
+            }
+            return true;
+        }
+    }
+    
+    protected final class SelfLoopIterator extends EdgeStoreIterator {
+
+        public SelfLoopIterator() {
+            super();
+        }
+
+        @Override
+        public boolean hasNext() {
+            pointer = null;
+            while (pointer == null) {
+                if (!super.hasNext()) {
+                    return false;
+                }
+                if (!pointer.isSelfLoop()) {
                     pointer = null;
                 }
             }

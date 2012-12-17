@@ -101,6 +101,11 @@ public class UndirectedDecorator implements UndirectedGraph {
     public EdgeIterable getEdges() {
         return store.getEdgeIterableWrapper(store.edgeStore.iteratorUndirected());
     }
+    
+    @Override
+    public EdgeIterable getSelfLoops() {
+        return store.getEdgeIterableWrapper(store.edgeStore.iteratorSelfLoop());
+    }
 
     @Override
     public NodeIterable getNeighbors(Node node) {
@@ -228,5 +233,20 @@ public class UndirectedDecorator implements UndirectedGraph {
     @Override
     public void writeUnlock() {
         store.writeUnlock();
+    }
+
+    @Override
+    public int addEdgeType(Object label) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int getEdgeType(Object label) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Object getEdgeLabel(int id) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

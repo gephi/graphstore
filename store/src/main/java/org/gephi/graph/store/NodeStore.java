@@ -19,6 +19,10 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     public final static int BLOCK_SIZE = 5000;
     public final static int DEFAULT_BLOCKS = 10;
     public final static float DEFAULT_LOAD_FACTOR = .7f;
+    //Store
+    protected final EdgeStore edgeStore;
+    //Locking (optional)
+    protected final GraphLock lock;
     //Data
     protected int size;
     protected int garbageSize;
@@ -27,17 +31,17 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected NodeBlock blocks[];
     protected NodeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
-    //Locking (optional)
-    protected final GraphLock lock;
-    
+
     public NodeStore() {
         initStore();
         this.lock = null;
+        this.edgeStore = null;
     }
-    
-    public NodeStore(GraphLock lock) {
+
+    public NodeStore(final EdgeStore edgeStore, final GraphLock lock) {
         initStore();
         this.lock = lock;
+        this.edgeStore = edgeStore;
     }
 
     private void initStore() {
@@ -130,7 +134,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     @Override
     public NodeImpl[] toArray() {
         readLock();
-        
+
         NodeImpl[] array = new NodeImpl[size];
         if (garbageSize == 0) {
             for (int i = 0; i < blocksCount; i++) {
@@ -145,9 +149,9 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 array[offset++] = n;
             }
         }
-        
+
         readUnlock();
-        
+
         return array;
     }
 
@@ -156,7 +160,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         checkNonNullObject(array);
 
         readLock();
-        
+
         if (array.length < size()) {
             array = (T[]) java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), size());
         }
@@ -173,7 +177,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 array[offset++] = (T) n;
             }
         }
-        
+
         readUnlock();
         return array;
     }
@@ -390,7 +394,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     public void doBreak() {
         readUnlock();
     }
-    
+
     void readLock() {
         if (lock != null) {
             lock.readLock();
@@ -408,7 +412,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             lock.checkHoldWriteLock();
         }
     }
-    
+
     private void checkIdDoesntExist(Object id) {
         if (dictionary.containsKey(id)) {
             throw new IllegalArgumentException("The node id already exist");
@@ -537,7 +541,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                     }
                 }
             }
-            if(pointer == null) {
+            if (pointer == null) {
                 readUnlock();
                 return false;
             }
@@ -552,6 +556,12 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         @Override
         public void remove() {
             checkWriteLock();
+            if (edgeStore != null) {
+                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(pointer); edgeIterator.hasNext();) {
+                    edgeIterator.next();
+                    edgeIterator.remove();
+                }
+            }
             NodeStore.this.remove(pointer);
         }
     }

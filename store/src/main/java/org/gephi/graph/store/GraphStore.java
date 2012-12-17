@@ -34,9 +34,9 @@ public class GraphStore implements DirectedGraph {
 
     public GraphStore() {
         lock = new GraphLock();
-        nodeStore = new NodeStore();
         edgeTypeStore = new EdgeTypeStore();
         edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null);
+        nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null);
         nodePropertyStore = new PropertyStore<Node>(Node.class);
         edgePropertyStore = new PropertyStore<Edge>(Edge.class);
 
@@ -90,6 +90,21 @@ public class GraphStore implements DirectedGraph {
             autoWriteUnlock();
         }
     }
+    
+    @Override
+    public int addEdgeType(Object label) {
+        return edgeTypeStore.addType(label);
+    }
+    
+    @Override
+    public int getEdgeType(Object label) {
+        return edgeTypeStore.getId(label);
+    }
+    
+    @Override
+    public Object getEdgeLabel(int id) {
+        return edgeTypeStore.getLabel(id);
+    }
 
     @Override
     public NodeImpl getNode(final Object id) {
@@ -119,6 +134,11 @@ public class GraphStore implements DirectedGraph {
     @Override
     public EdgeIterable getEdges() {
         return edgeStore;
+    }
+
+    @Override
+    public EdgeIterable getSelfLoops() {
+        return new EdgeIterableWrapper(edgeStore.iteratorSelfLoop());
     }
 
     @Override

@@ -1224,7 +1224,16 @@ public class EdgeStoreTest {
         edgeStore.add(edge);
 
         Assert.assertEquals(edge, edgeStore.get(edge.source, edge.target, edge.type));
-        Assert.assertEquals(edge, edgeStore.get(edge.target, edge.source, edge.type));
+
+        EdgeStore edgeStore2 = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        edgeStore2.addAll(Arrays.asList(edges));
+
+        EdgeIterator itr = edgeStore2.iteratorSelfLoop();
+        while (itr.hasNext()) {
+            Edge e = itr.next();
+            Assert.assertEquals(e, edgeStore2.get(e.getSource(), e.getTarget(), 0));
+        }
     }
 
     @Test
@@ -1385,11 +1394,11 @@ public class EdgeStoreTest {
 
                 if (out) {
                     EdgeImpl edge = edgeStore.get(node, neighbor, 0);
-                    if(edge.isSelfLoop()) {
+                    if (edge.isSelfLoop()) {
                         Assert.assertTrue(inEdgeSet.remove(edge));
                     }
                     Assert.assertTrue(outEdgeSet.remove(edge));
-                    if(edge.isMutual()) {
+                    if (edge.isMutual()) {
                         mutualEdges++;
                     }
                 } else {
@@ -1659,6 +1668,30 @@ public class EdgeStoreTest {
             neighbours.remove(n);
         }
         Assert.assertEquals(0, neighbours.size());
+    }
+
+    @Test
+    public void testSelfLoopIterator() {
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        int selfLoops = 0;
+        for (EdgeImpl e : edges) {
+            if (e.isSelfLoop()) {
+                selfLoops++;
+            }
+        }
+
+        int count = 0;
+        EdgeStore.SelfLoopIterator itr = edgeStore.iteratorSelfLoop();
+        while (itr.hasNext()) {
+            Edge e = itr.next();
+            Assert.assertTrue(e.isSelfLoop());
+            count++;
+        }
+
+        Assert.assertEquals(count, selfLoops);
     }
 
     /*

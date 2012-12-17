@@ -6,10 +6,12 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Arrays;
 import java.util.Set;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.NodeIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -91,6 +93,184 @@ public class GraphStoreTest {
         basicStore.addAllEdges(Arrays.asList(basicEdges));
 
         testBasicStoreEquals(graphStore, basicStore);
+    }
+
+    @Test
+    public void testAddNode() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(1);
+
+        boolean a = graphStore.addNode(nodes[0]);
+        boolean b = graphStore.addNode(nodes[0]);
+
+        Assert.assertTrue(a);
+        Assert.assertFalse(b);
+
+        boolean c = graphStore.contains(nodes[0]);
+
+        Assert.assertTrue(c);
+    }
+
+    @Test(expectedExceptions = ClassCastException.class)
+    public void testAddNodeClass() {
+        GraphStore graphStore = new GraphStore();
+
+        graphStore.addNode(new Node() {
+            @Override
+            public Object getId() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object getProperty(String key) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object getProperty(Column column) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object[] getProperties() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Set<String> getPropertyKeys() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object removeProperty(String key) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object removeProperty(Column column) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setProperty(String key, Object value) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setProperty(Column column, Object value) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void clearProperties() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        });
+    }
+
+    @Test
+    public void testAddEdge() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, true);
+        boolean a = graphStore.addEdge(edge);
+        boolean b = graphStore.addEdge(edge);
+
+        Assert.assertTrue(a);
+        Assert.assertFalse(b);
+
+        boolean c = graphStore.contains(edge);
+
+        Assert.assertTrue(c);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testAddEdgeNoTypeRegistration() {
+        GraphStore graphStore = new GraphStore();
+        GraphStore.AUTO_TYPE_REGISTRATION = false;
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, true);
+        graphStore.addEdge(edge);
+        
+        GraphStore.AUTO_TYPE_REGISTRATION = true;
+    }
+
+    @Test
+    public void testAddEdgeCustomType() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        int i = graphStore.addEdgeType("Test");
+
+        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], i, true);
+        boolean a = graphStore.addEdge(edge);
+
+        Assert.assertTrue(a);
+    }
+
+    @Test
+    public void testGetEdgeLabel() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        int i = graphStore.addEdgeType("Test");
+
+        Assert.assertEquals(graphStore.getEdgeType("Test"), i);
+        Assert.assertEquals(graphStore.getEdgeLabel(i), "Test");
+    }
+
+    @Test
+    public void testRemoveNodeWithEdges() {
+        GraphStore.AUTO_LOCKING = false;
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 100, 0, true, true);
+        graphStore.addAllEdges(Arrays.asList(edges));
+
+        int edgeCount = graphStore.getEdgeCount();
+
+        NodeIterator nodeIterator = graphStore.getNodes().iterator();
+        for (; nodeIterator.hasNext();) {
+            NodeImpl n = (NodeImpl) nodeIterator.next();
+            int degree = n.getDegree();
+            
+            boolean hasSelfLoop = graphStore.getEdge(n, n, 0) != null;
+            if(hasSelfLoop) {
+                degree--;
+            }
+            
+            nodeIterator.remove();
+
+            Assert.assertEquals(graphStore.getEdgeCount(), edgeCount - degree);
+            edgeCount -= degree;
+        }
+
+        Assert.assertEquals(edgeCount, 0);
+        Assert.assertEquals(graphStore.getNodeCount(), 0);
+        GraphStore.AUTO_LOCKING = true;
+    }
+    
+    @Test
+    public void testRemoveEdges() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        Edge[] edges = graphStore.getEdges().toArray();
+        
+        int edgeCount = edges.length;
+        for(Edge e : edges) {
+            boolean b = graphStore.removeEdge(e);
+            Assert.assertTrue(b);
+            
+            Assert.assertEquals(graphStore.getEdgeCount(), --edgeCount);
+        }
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
     }
 
     private void testBasicStoreEquals(GraphStore graphStore, BasicGraphStore basicGraphStore) {
