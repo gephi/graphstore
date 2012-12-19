@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.gephi.graph.api.Column;
+import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -322,6 +322,11 @@ public class BasicGraphStore implements DirectedGraph {
     public void writeUnlock() {
     }
 
+    @Override
+    public EdgeIterable getSelfLoops() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public static class BasicElement implements Element {
 
         protected final Map<String, Object> properties = new HashMap<String, Object>();
@@ -429,13 +434,15 @@ public class BasicGraphStore implements DirectedGraph {
         protected final BasicNode target;
         protected final int type;
         protected final boolean directed;
+        protected double weight;
 
-        public BasicEdge(Object id, BasicNode source, BasicNode target, int type, boolean directed) {
+        public BasicEdge(Object id, BasicNode source, BasicNode target, int type, double weight, boolean directed) {
             super(id);
             this.source = source;
             this.target = target;
             this.type = type;
             this.directed = directed;
+            this.weight = weight;
         }
 
         @Override
@@ -451,6 +458,16 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public Object getId() {
             return id;
+        }
+
+        @Override
+        public double getWeight() {
+            return weight;
+        }
+
+        @Override
+        public void setWeight(double weight) {
+            this.weight = weight;
         }
 
         @Override

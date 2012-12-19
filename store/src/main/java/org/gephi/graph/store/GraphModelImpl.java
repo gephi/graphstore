@@ -3,6 +3,7 @@ package org.gephi.graph.store;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.UndirectedGraph;
@@ -17,9 +18,15 @@ public class GraphModelImpl implements GraphModel {
     protected final GraphStore store;
     protected final GraphViewStore viewStore;
     
+    
     public GraphModelImpl() {
         store = new GraphStore();
         viewStore = new GraphViewStore(store);
+    }
+    
+    @Override
+    public GraphFactory factory() {
+        return store.factory;
     }
 
     @Override
@@ -46,6 +53,21 @@ public class GraphModelImpl implements GraphModel {
     public UndirectedSubgraph getUndirectedGraph(GraphView view) {
         return viewStore.getUndirectedGraph(view);
     }
+    
+    @Override
+    public int addEdgeType(Object label) {
+        return store.edgeTypeStore.addType(label);
+    }
+    
+    @Override
+    public int getEdgeType(Object label) {
+        return store.edgeTypeStore.getId(label);
+    }
+    
+    @Override
+    public Object getEdgeLabel(int id) {
+        return store.edgeTypeStore.getLabel(id);
+    }
 
     @Override
     public boolean isDirected() {
@@ -60,5 +82,15 @@ public class GraphModelImpl implements GraphModel {
     @Override
     public boolean isMixed() {
         return store.isMixed();
+    }
+
+    @Override
+    public GraphView createView() {
+        return viewStore.createView();
+    }
+
+    @Override
+    public void destroyView(GraphView view) {
+        viewStore.destroyView(view);
     }
 }

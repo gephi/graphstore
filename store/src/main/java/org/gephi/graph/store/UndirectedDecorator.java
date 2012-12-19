@@ -234,19 +234,4 @@ public class UndirectedDecorator implements UndirectedGraph {
     public void writeUnlock() {
         store.writeUnlock();
     }
-
-    @Override
-    public int addEdgeType(Object label) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public int getEdgeType(Object label) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Object getEdgeLabel(int id) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

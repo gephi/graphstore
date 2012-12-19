@@ -16,8 +16,12 @@ public class NodeImpl extends ElementImpl implements Node {
     protected int outDegree;
     protected int mutualDegree;
 
+    public NodeImpl(Object id, GraphStore graphStore) {
+        super(id, graphStore);
+    }
+
     public NodeImpl(Object id) {
-        super(id);
+        super(id, null);
     }
 
     public int getStoreId() {
@@ -46,7 +50,10 @@ public class NodeImpl extends ElementImpl implements Node {
 
     @Override
     PropertyStore getPropertyStore() {
-        return graphStore.nodePropertyStore;
+        if (graphStore != null) {
+            return graphStore.nodePropertyStore;
+        }
+        return null;
     }
 
     @Override

@@ -78,12 +78,6 @@ public interface Graph {
 
     public void clearEdges();
 
-    public int addEdgeType(Object label);
-
-    public int getEdgeType(Object label);
-
-    public Object getEdgeLabel(int id);
-
     public void readLock();
 
     public void readUnlock();

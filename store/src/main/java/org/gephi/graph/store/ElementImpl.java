@@ -1,7 +1,7 @@
 package org.gephi.graph.store;
 
 import java.util.Set;
-import org.gephi.graph.api.Column;
+import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.Element;
 
 /**
@@ -11,14 +11,16 @@ import org.gephi.graph.api.Element;
 public abstract class ElementImpl implements Element {
 
     //Reference to store
-    protected GraphStore graphStore;
+    protected final GraphStore graphStore;
     //Id
     protected final Object id;
     //Properties
     protected Object[] properties;
-
-    public ElementImpl(Object id) {
+    
+    public ElementImpl(Object id, GraphStore graphStore) {
         this.id = id;
+        this.graphStore = graphStore;
+        this.properties = new Object[0];
     }
 
     abstract PropertyStore getPropertyStore();
@@ -63,11 +65,14 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object removeProperty(Column column) {
+        PropertyStore propertyStore = getPropertyStore();
         int index = column.getIndex();
         if (index < properties.length) {
             Object oldValue = properties[index];
             properties[index] = null;
-            getPropertyStore().remove(column, oldValue, this);
+            if (propertyStore != null) {
+                propertyStore.remove(column, oldValue, this);
+            }
             return oldValue;
         }
         return null;
@@ -81,6 +86,7 @@ public abstract class ElementImpl implements Element {
     @Override
     public void setProperty(Column column, Object value) {
         int index = column.getIndex();
+        PropertyStore propertyStore = getPropertyStore();
         Object oldValue = null;
         if (index >= properties.length) {
             Object[] newArray = new Object[index + 1];
@@ -89,25 +95,40 @@ public abstract class ElementImpl implements Element {
         } else {
             oldValue = properties[index];
         }
+
+        if (propertyStore != null) {
+            value = propertyStore.set(column, oldValue, value, this);
+        }
         properties[index] = value;
-        getPropertyStore().set(column, oldValue, value, this);
     }
 
     @Override
     public void clearProperties() {
         PropertyStore propertyStore = getPropertyStore();
-        for (int i = 0; i < properties.length; i++) {
-            Object o = properties[i];
-            Column c = propertyStore.getColumnByIndex(i);
-            propertyStore.remove(c, o, this);
+
+        for (int index = 0; index < properties.length; index++) {
+            Object value = properties[index];
+            properties[index] = null;
+            if (propertyStore != null) {
+                Column column = propertyStore.getColumnByIndex(index);
+                propertyStore.remove(column, value, this);
+            }
         }
     }
 
-    public GraphStore getGraphStore() {
-        return graphStore;
+    protected void indexProperties() {
+        PropertyStore propertyStore = getPropertyStore();
+        if (propertyStore != null) {
+            for (int index = 0; index < properties.length; index++) {
+                Object value = properties[index];
+                Column column = propertyStore.getColumnByIndex(index);
+                value = getPropertyStore().put(column, value, this);
+                properties[index] = value;
+            }
+        }
     }
 
-    public void setGraphStore(GraphStore graphStore) {
-        this.graphStore = graphStore;
+    protected GraphStore getGraphStore() {
+        return graphStore;
     }
 }

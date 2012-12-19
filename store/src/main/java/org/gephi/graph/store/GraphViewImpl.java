@@ -258,6 +258,11 @@ public final class GraphViewImpl implements GraphView {
         }
         return typeCounts[type] - mutualEdgeTypeCounts[type];
     }
+    
+    @Override
+    public GraphModelImpl getGraphModel() {
+        return graphStore.graphModel;
+    }
 
     private void ensureTypeCountArrayCapacity(int type) {
         if (type >= typeCounts.length) {

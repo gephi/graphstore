@@ -5,6 +5,8 @@ import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.EdgeIterator;
+import org.gephi.graph.api.GraphFactory;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.NodeIterator;
@@ -453,21 +455,6 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     }
 
     @Override
-    public int addEdgeType(Object label) {
-        throw new RuntimeException();
-    }
-
-    @Override
-    public int getEdgeType(Object label) {
-        return graphStore.getEdgeType(label);
-    }
-
-    @Override
-    public Object getEdgeLabel(int id) {
-        return graphStore.getEdgeLabel(id);
-    }
-
-    @Override
     public void readLock() {
         graphStore.lock.readLock();
     }
@@ -490,6 +477,11 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     @Override
     public void writeUnlock() {
         graphStore.lock.writeUnlock();
+    }
+
+    @Override
+    public GraphView getView() {
+        return view;
     }
 
     void checkWriteLock() {

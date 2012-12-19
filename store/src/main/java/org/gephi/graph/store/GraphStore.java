@@ -8,6 +8,7 @@ import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.EdgeIterator;
+import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.NodeIterator;
@@ -21,24 +22,35 @@ public class GraphStore implements DirectedGraph {
     //Auto-lock
     public static boolean AUTO_LOCKING = true;
     public static boolean AUTO_TYPE_REGISTRATION = true;
+    //Model
+    protected final GraphModelImpl graphModel;
     //Stores
     protected final NodeStore nodeStore;
     protected final EdgeStore edgeStore;
     protected final EdgeTypeStore edgeTypeStore;
     protected final PropertyStore<Node> nodePropertyStore;
     protected final PropertyStore<Edge> edgePropertyStore;
+    //Factory
+    protected final GraphFactoryImpl factory;
     //Lock
     protected final GraphLock lock;
     //Undirected
     protected final UndirectedDecorator undirectedDecorator;
-
+    
     public GraphStore() {
+        this(null);
+    }
+
+    public GraphStore(GraphModelImpl model) {
+        graphModel = model;
         lock = new GraphLock();
         edgeTypeStore = new EdgeTypeStore();
+        edgeTypeStore.addType("Default Type");
         edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null);
         nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null);
         nodePropertyStore = new PropertyStore<Node>(Node.class);
         edgePropertyStore = new PropertyStore<Edge>(Edge.class);
+        factory = new GraphFactoryImpl(this);
 
         undirectedDecorator = new UndirectedDecorator(this);
     }
@@ -89,21 +101,6 @@ public class GraphStore implements DirectedGraph {
         } finally {
             autoWriteUnlock();
         }
-    }
-    
-    @Override
-    public int addEdgeType(Object label) {
-        return edgeTypeStore.addType(label);
-    }
-    
-    @Override
-    public int getEdgeType(Object label) {
-        return edgeTypeStore.getId(label);
-    }
-    
-    @Override
-    public Object getEdgeLabel(int id) {
-        return edgeTypeStore.getLabel(id);
     }
 
     @Override

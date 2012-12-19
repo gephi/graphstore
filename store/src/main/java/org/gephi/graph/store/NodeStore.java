@@ -205,6 +205,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 currentBlock.add(node);
                 dictionary.put(node.getId(), node.storeId);
             }
+            node.indexProperties();
+            
             size++;
             return true;
         } else if (isValidIndex(node.storeId) && get(node.storeId) == node) {
@@ -230,6 +232,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             garbageSize++;
             dictionary.remove(node.getId());
             trimDictionary();
+            node.clearProperties();
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {
                     blocks[i] = null;

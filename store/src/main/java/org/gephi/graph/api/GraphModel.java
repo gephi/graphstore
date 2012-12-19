@@ -8,6 +8,8 @@ import org.gephi.graph.store.GraphStore;
  */
 public interface GraphModel {
     
+    public GraphFactory factory();
+    
     public Graph getGraph();
     
     public DirectedGraph getDirectedGraph();
@@ -18,9 +20,21 @@ public interface GraphModel {
     
     public UndirectedSubgraph getUndirectedGraph(GraphView view);
     
+    public int addEdgeType(Object label);
+
+    public int getEdgeType(Object label);
+
+    public Object getEdgeLabel(int id);
+    
     public boolean isDirected();
     
     public boolean isUndirected();
     
     public boolean isMixed();
+    
+    public GraphView createView();
+    
+    public void destroyView(GraphView view);
+    
+    
 }

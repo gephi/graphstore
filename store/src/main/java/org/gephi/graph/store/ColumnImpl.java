@@ -1,6 +1,7 @@
 package org.gephi.graph.store;
 
-import org.gephi.graph.api.Column;
+import org.gephi.attribute.api.Column;
+import org.gephi.attribute.api.Origin;
 
 /**
  *
@@ -11,14 +12,18 @@ public class ColumnImpl implements Column {
     //Attributes
     protected final String id;
     protected final Class typeClass;
-    protected String title;
-    protected Object defaultValue;
+    protected final String title;
+    protected final Object defaultValue;
+    protected final Origin origin;
     //Store Id
     protected int storeId = PropertyStore.NULL_ID;
 
-    public ColumnImpl(String id, Class typeClass) {
+    public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin) {
         this.id = id;
         this.typeClass = typeClass;
+        this.title = title;
+        this.defaultValue = defaultValue;
+        this.origin = origin;
     }
 
     @Override
@@ -46,6 +51,11 @@ public class ColumnImpl implements Column {
         return defaultValue;
     }
 
+    @Override
+    public Origin getOrigin() {
+        return origin;
+    }
+
     public int getStoreId() {
         return storeId;
     }
@@ -53,4 +63,26 @@ public class ColumnImpl implements Column {
     public void setStoreId(int storeId) {
         this.storeId = storeId;
     }    
+    
+    @Override
+    public String toString() {
+        return title + " (" + typeClass.toString() + ")";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Column) {
+            ColumnImpl o = (ColumnImpl) obj;
+            return id.equals(o.id) && o.typeClass == typeClass;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        hash = 53 * hash + (this.typeClass != null ? this.typeClass.hashCode() : 0);
+        return hash;
+    }
 }

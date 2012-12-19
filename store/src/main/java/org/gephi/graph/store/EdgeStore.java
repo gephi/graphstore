@@ -467,6 +467,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             target.inDegree++;
 
             dico.put(longId, edge.storeId);
+            edge.indexProperties();
 
             if (directed && !edge.isSelfLoop()) {
                 EdgeImpl mutual = getMutual(edge);
@@ -520,6 +521,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             garbageSize++;
             dictionary.remove(edge.getId());
             trimDictionary();
+            edge.clearProperties();
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {
                     blocks[i] = null;

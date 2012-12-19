@@ -1,5 +1,6 @@
 package org.gephi.graph.api;
 
+import org.gephi.attribute.api.Column;
 import java.util.Set;
 
 /**

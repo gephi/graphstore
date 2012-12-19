@@ -24,13 +24,19 @@ public class EdgeImpl extends ElementImpl implements Edge {
     //Flags
     protected byte flags;
     //Other fields
+    protected double weight;
 
-    public EdgeImpl(Object id, NodeImpl source, NodeImpl target, int type, boolean directed) {
-        super(id);
+    public EdgeImpl(Object id, GraphStore graphStore, NodeImpl source, NodeImpl target, int type, double weight, boolean directed) {
+        super(id, graphStore);
         this.source = source;
         this.target = target;
         this.flags = (byte) (directed ? 1 : 0);
+        this.weight = weight;
         this.type = type;
+    }
+
+    public EdgeImpl(Object id, NodeImpl source, NodeImpl target, int type, double weight, boolean directed) {
+        this(id, null, source, target, type, weight, directed);
     }
 
     @Override
@@ -55,8 +61,18 @@ public class EdgeImpl extends ElementImpl implements Edge {
 //        return ((int) (id >> (NODE_BITS * 2)) & 1) == 1;
 //    }
     @Override
+    public double getWeight() {
+        return weight;
+    }
+
+    @Override
     public int getType() {
         return type;
+    }
+
+    @Override
+    public void setWeight(double weight) {
+        this.weight = weight;
     }
 
     public int getNextOutEdge() {
@@ -111,7 +127,10 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     PropertyStore getPropertyStore() {
-        return graphStore.edgePropertyStore;
+        if (graphStore != null) {
+            return graphStore.edgePropertyStore;
+        }
+        return null;
     }
 
     @Override

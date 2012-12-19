@@ -6,4 +6,6 @@ package org.gephi.graph.api;
  */
 public interface GraphView {
     
+    public GraphModel getGraphModel();
+    
 }

@@ -28,9 +28,25 @@ public class GraphViewStore {
     }
 
     public GraphViewImpl createView() {
-        GraphViewImpl graphView = new GraphViewImpl(graphStore);
-        addView(graphView);
-        return graphView;
+        graphStore.autoWriteLock();
+        try {
+            GraphViewImpl graphView = new GraphViewImpl(graphStore);
+            addView(graphView);
+            return graphView;
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+    
+    public void destroyView(GraphView view) {
+        graphStore.autoWriteLock();
+        try {
+            checkNonNullViewObject(view);
+            
+            removeView((GraphViewImpl)view);
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
     }
 
     public DirectedSubgraph getDirectedGraph(GraphView view) {

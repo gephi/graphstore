@@ -1,6 +1,8 @@
-package org.gephi.graph.api;
+package org.gephi.attribute.api;
 
+import org.gephi.attribute.api.Column;
 import java.util.Map.Entry;
+import org.gephi.graph.api.Element;
 
 /**
  *

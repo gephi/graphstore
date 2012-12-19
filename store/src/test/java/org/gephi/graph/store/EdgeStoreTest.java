@@ -523,7 +523,7 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testNullSource() {
         NodeImpl n1 = new NodeImpl("0");
-        EdgeImpl e1 = new EdgeImpl("0", null, n1, 0, true);
+        EdgeImpl e1 = new EdgeImpl("0", null, n1, 0, 1.0, true);
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(e1);
     }
@@ -532,7 +532,7 @@ public class EdgeStoreTest {
     public void testInvalidEdges() {
         NodeImpl n1 = new NodeImpl("0");
         NodeImpl n2 = new NodeImpl("1");
-        EdgeImpl e1 = new EdgeImpl("0", n1, n2, 0, true);
+        EdgeImpl e1 = new EdgeImpl("0", n1, n2, 0, 1.0, true);
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(e1);
     }
@@ -545,9 +545,9 @@ public class EdgeStoreTest {
         nodeStore.add(n1);
         nodeStore.add(n2);
 
-        EdgeImpl e1 = new EdgeImpl("0", n1, n2, 0, true);
-        EdgeImpl e2 = new EdgeImpl("1", n1, n2, 1, true);
-        EdgeImpl e3 = new EdgeImpl("2", n1, n2, 1, true);
+        EdgeImpl e1 = new EdgeImpl("0", n1, n2, 0, 1.0, true);
+        EdgeImpl e2 = new EdgeImpl("1", n1, n2, 1, 1.0, true);
+        EdgeImpl e3 = new EdgeImpl("2", n1, n2, 1, 1.0, true);
         EdgeStore edgeStore = new EdgeStore();
         boolean a = edgeStore.add(e1);
         boolean b = edgeStore.add(e2);
@@ -570,8 +570,8 @@ public class EdgeStoreTest {
         nodeStore.add(n1);
         nodeStore.add(n2);
 
-        EdgeImpl e1 = new EdgeImpl("0", n1, n2, 0, true);
-        EdgeImpl e2 = new EdgeImpl("1", n1, n2, 1, true);
+        EdgeImpl e1 = new EdgeImpl("0", n1, n2, 0, 1.0, true);
+        EdgeImpl e2 = new EdgeImpl("1", n1, n2, 1, 1.0, true);
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(e1);
         edgeStore.add(e2);
@@ -1068,10 +1068,10 @@ public class EdgeStoreTest {
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(directed);
 
-        EdgeImpl undirectedSameOrder = new EdgeImpl("4", directed.source, directed.target, directed.type, false);
+        EdgeImpl undirectedSameOrder = new EdgeImpl("4", directed.source, directed.target, directed.type, 1.0, false);
         Assert.assertFalse(edgeStore.add(undirectedSameOrder));
 
-        EdgeImpl undirectedOtherOrder = new EdgeImpl('5', directed.target, directed.source, directed.type, false);
+        EdgeImpl undirectedOtherOrder = new EdgeImpl('5', directed.target, directed.source, directed.type, 1.0, false);
         edgeStore.add(undirectedOtherOrder);
     }
 
@@ -1081,7 +1081,7 @@ public class EdgeStoreTest {
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.add(undirected);
 
-        EdgeImpl directed = new EdgeImpl('5', undirected.target, undirected.source, undirected.type, true);
+        EdgeImpl directed = new EdgeImpl('5', undirected.target, undirected.source, undirected.type, 1.0, true);
         edgeStore.add(directed);
     }
 
@@ -1192,7 +1192,7 @@ public class EdgeStoreTest {
         boolean a = edgeStore.add(edge);
         boolean b = edgeStore.add(edge);
 
-        EdgeImpl reverse = new EdgeImpl("1", edge.target, edge.source, edge.type, true);
+        EdgeImpl reverse = new EdgeImpl("1", edge.target, edge.source, edge.type, 1.0, true);
         boolean c = edgeStore.add(reverse);
 
         Assert.assertTrue(a);
@@ -1243,7 +1243,7 @@ public class EdgeStoreTest {
         boolean a = edgeStore.add(edge);
         boolean b = edgeStore.add(edge);
 
-        EdgeImpl reverse = new EdgeImpl("1", edge.target, edge.source, edge.type, false);
+        EdgeImpl reverse = new EdgeImpl("1", edge.target, edge.source, edge.type, 1.0, false);
         boolean c = edgeStore.add(reverse);
 
         Assert.assertTrue(a);
@@ -1491,7 +1491,7 @@ public class EdgeStoreTest {
         Assert.assertTrue(edgeStore.isIncident(edge.source, edge));
         Assert.assertTrue(edgeStore.isIncident(edge.target, edge));
 
-        EdgeImpl selfLoop = new EdgeImpl("2", edge.source, edge.source, 0, true);
+        EdgeImpl selfLoop = new EdgeImpl("2", edge.source, edge.source, 0, 1.0, true);
         edgeStore.add(selfLoop);
         Assert.assertTrue(edgeStore.isIncident(edge.source, selfLoop));
     }
@@ -1505,7 +1505,7 @@ public class EdgeStoreTest {
         Assert.assertTrue(edgeStore.isIncident(edge.source, edge));
         Assert.assertTrue(edgeStore.isIncident(edge.target, edge));
 
-        EdgeImpl selfLoop = new EdgeImpl("2", edge.source, edge.source, 0, true);
+        EdgeImpl selfLoop = new EdgeImpl("2", edge.source, edge.source, 0, 1.0, true);
         edgeStore.add(selfLoop);
         Assert.assertTrue(edgeStore.isIncident(edge.source, selfLoop));
     }

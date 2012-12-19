@@ -13,14 +13,15 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.shorts.ShortHeapPriorityQueue;
 import it.unimi.dsi.fastutil.shorts.ShortPriorityQueue;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
-import org.gephi.graph.api.Column;
+import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.Element;
-import org.gephi.graph.api.Index;
+import org.gephi.attribute.api.Index;
 
 /**
  *
@@ -179,18 +180,18 @@ public class PropertyStore<T extends Element> implements Index<T> {
         return index;
     }
 
-    public void put(String key, Object value, T element) {
+    public Object put(String key, Object value, T element) {
         checkNonNullObject(key);
 
         AbstractIndex index = getIndex(key);
-        index.putValue(element, value);
+        return index.putValue(element, value);
     }
 
-    public void put(Column column, Object value, T element) {
+    public Object put(Column column, Object value, T element) {
         checkNonNullColumnObject(column);
 
         AbstractIndex index = getIndex((ColumnImpl) column);
-        index.putValue(element, value);
+        return index.putValue(element, value);
     }
 
     public void remove(String key, Object value, T element) {
@@ -207,18 +208,18 @@ public class PropertyStore<T extends Element> implements Index<T> {
         index.removeValue(element, value);
     }
 
-    public void set(String key, Object oldValue, Object value, T element) {
+    public Object set(String key, Object oldValue, Object value, T element) {
         checkNonNullObject(key);
 
         AbstractIndex index = getIndex(key);
-        index.replaceValue(element, oldValue, value);
+        return index.replaceValue(element, oldValue, value);
     }
 
-    public void set(Column column, Object oldValue, Object value, T element) {
+    public Object set(Column column, Object oldValue, Object value, T element) {
         checkNonNullColumnObject(column);
 
         AbstractIndex index = getIndex((ColumnImpl) column);
-        index.replaceValue(element, oldValue, value);
+        return index.replaceValue(element, oldValue, value);
     }
 
     public int size() {
@@ -326,7 +327,7 @@ public class PropertyStore<T extends Element> implements Index<T> {
             this.nullSet = new ObjectOpenHashSet<T>();
         }
 
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             if (value == null) {
                 nullSet.add(element);
             } else {
@@ -334,9 +335,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
                 if (set == null) {
                     set = addValue((K) value);
                 }
+                value = ((ValueSet) set).value;
 
                 set.add(element);
             }
+            return value;
         }
 
         public void removeValue(T element, Object value) {
@@ -351,9 +354,9 @@ public class PropertyStore<T extends Element> implements Index<T> {
             }
         }
 
-        public void replaceValue(T element, K oldValue, K newValue) {
+        public Object replaceValue(T element, K oldValue, K newValue) {
             removeValue(element, oldValue);
-            putValue(element, newValue);
+            return putValue(element, newValue);
         }
 
         public int getCount(K value) {
@@ -392,6 +395,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
             }
         }
 
+        protected void destroy() {
+            map = null;
+        }
+
+        @Override
         public Iterator<Entry<K, Set<T>>> iterator() {
             return new EntryIterator();
         }
@@ -405,13 +413,9 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         protected Set<T> addValue(K value) {
-            Set<T> set = new ObjectOpenHashSet<T>();
-            map.put(value, set);
-            return set;
-        }
-
-        protected void destroy() {
-            map = null;
+            ValueSet valueSet = new ValueSet(value);
+            map.put(value, valueSet);
+            return valueSet;
         }
 
         private boolean isSortable() {
@@ -472,6 +476,92 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
     }
 
+    private static final class ValueSet<K, T> implements Set<T> {
+
+        private final K value;
+        private final Set<T> set;
+
+        public ValueSet(K value) {
+            this.value = value;
+            this.set = new ObjectOpenHashSet<T>();
+        }
+
+        @Override
+        public int size() {
+            return set.size();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return set.isEmpty();
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return set.contains(o);
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return set.iterator();
+        }
+
+        @Override
+        public Object[] toArray() {
+            return set.toArray();
+        }
+
+        @Override
+        public <T> T[] toArray(T[] ts) {
+            return set.toArray(ts);
+        }
+
+        @Override
+        public boolean add(T e) {
+            throw new UnsupportedOperationException("Not supported operation.");
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException("Not supported operation.");
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> clctn) {
+            return set.containsAll(clctn);
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends T> clctn) {
+            throw new UnsupportedOperationException("Not supported operation.");
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> clctn) {
+            throw new UnsupportedOperationException("Not supported operation.");
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> clctn) {
+            throw new UnsupportedOperationException("Not supported operation.");
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("Not supported operation.");
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return set.equals(o);
+        }
+
+        @Override
+        public int hashCode() {
+            return set.hashCode();
+        }
+    }
+
     protected class DefaultIndex extends AbstractIndex<Object> {
 
         public DefaultIndex(ColumnImpl column) {
@@ -483,13 +573,13 @@ public class PropertyStore<T extends Element> implements Index<T> {
 
     protected class BooleanIndex extends AbstractIndex<Boolean> {
 
-        private Set<T> trueSet;
-        private Set<T> falseSet;
+        private ValueSet trueSet;
+        private ValueSet falseSet;
 
         public BooleanIndex(ColumnImpl column) {
             super(column);
-            trueSet = new ObjectOpenHashSet<T>();
-            falseSet = new ObjectOpenHashSet<T>();
+            trueSet = new ValueSet(Boolean.TRUE);
+            falseSet = new ValueSet(Boolean.FALSE);
         }
 
         @Override
@@ -512,8 +602,8 @@ public class PropertyStore<T extends Element> implements Index<T> {
 
         @Override
         protected void destroy() {
-            trueSet = new ObjectOpenHashSet<T>();
-            falseSet = new ObjectOpenHashSet<T>();
+            trueSet = new ValueSet(Boolean.TRUE);
+            falseSet = new ValueSet(Boolean.FALSE);
         }
     }
 
@@ -587,10 +677,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (Object s : (Object[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override
@@ -608,10 +699,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (boolean s : (boolean[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override
@@ -629,10 +721,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (double s : (double[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override
@@ -650,10 +743,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (int s : (int[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override
@@ -671,10 +765,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (float s : (float[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override
@@ -692,10 +787,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (long s : (long[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override
@@ -713,10 +809,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (short s : (short[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override
@@ -734,10 +831,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (byte s : (byte[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override
@@ -755,10 +853,11 @@ public class PropertyStore<T extends Element> implements Index<T> {
         }
 
         @Override
-        public void putValue(T element, Object value) {
+        public Object putValue(T element, Object value) {
             for (char s : (char[]) value) {
                 super.putValue(element, s);
             }
+            return value;
         }
 
         @Override

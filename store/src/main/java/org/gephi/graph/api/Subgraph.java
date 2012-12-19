@@ -4,6 +4,8 @@ package org.gephi.graph.api;
  *
  * @author mbastian
  */
-public interface DirectedSubgraph extends DirectedGraph, Subgraph {
+public interface Subgraph {
+    
+    public GraphView getView();
     
 }

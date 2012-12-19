@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Arrays;
 import java.util.Set;
-import org.gephi.graph.api.Column;
+import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
@@ -174,7 +174,7 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, true);
+        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
         boolean a = graphStore.addEdge(edge);
         boolean b = graphStore.addEdge(edge);
 
@@ -193,36 +193,10 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, true);
+        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
         graphStore.addEdge(edge);
-        
+
         GraphStore.AUTO_TYPE_REGISTRATION = true;
-    }
-
-    @Test
-    public void testAddEdgeCustomType() {
-        GraphStore graphStore = new GraphStore();
-        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
-        graphStore.addAllNodes(Arrays.asList(nodes));
-
-        int i = graphStore.addEdgeType("Test");
-
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], i, true);
-        boolean a = graphStore.addEdge(edge);
-
-        Assert.assertTrue(a);
-    }
-
-    @Test
-    public void testGetEdgeLabel() {
-        GraphStore graphStore = new GraphStore();
-        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
-        graphStore.addAllNodes(Arrays.asList(nodes));
-
-        int i = graphStore.addEdgeType("Test");
-
-        Assert.assertEquals(graphStore.getEdgeType("Test"), i);
-        Assert.assertEquals(graphStore.getEdgeLabel(i), "Test");
     }
 
     @Test
@@ -241,12 +215,12 @@ public class GraphStoreTest {
         for (; nodeIterator.hasNext();) {
             NodeImpl n = (NodeImpl) nodeIterator.next();
             int degree = n.getDegree();
-            
+
             boolean hasSelfLoop = graphStore.getEdge(n, n, 0) != null;
-            if(hasSelfLoop) {
+            if (hasSelfLoop) {
                 degree--;
             }
-            
+
             nodeIterator.remove();
 
             Assert.assertEquals(graphStore.getEdgeCount(), edgeCount - degree);
@@ -257,17 +231,17 @@ public class GraphStoreTest {
         Assert.assertEquals(graphStore.getNodeCount(), 0);
         GraphStore.AUTO_LOCKING = true;
     }
-    
+
     @Test
     public void testRemoveEdges() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
         Edge[] edges = graphStore.getEdges().toArray();
-        
+
         int edgeCount = edges.length;
-        for(Edge e : edges) {
+        for (Edge e : edges) {
             boolean b = graphStore.removeEdge(e);
             Assert.assertTrue(b);
-            
+
             Assert.assertEquals(graphStore.getEdgeCount(), --edgeCount);
         }
         Assert.assertEquals(graphStore.getEdgeCount(), 0);
