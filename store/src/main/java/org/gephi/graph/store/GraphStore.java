@@ -33,6 +33,7 @@ public class GraphStore implements DirectedGraph {
     protected final EdgeTypeStore edgeTypeStore;
     protected final ColumnStore<Node> nodePropertyStore;
     protected final ColumnStore<Edge> edgePropertyStore;
+    protected final GraphViewStore viewStore;
     //Factory
     protected final GraphFactoryImpl factory;
     //Lock
@@ -40,7 +41,7 @@ public class GraphStore implements DirectedGraph {
     //Undirected
     protected final UndirectedDecorator undirectedDecorator;
     //Main Graph view
-    protected final MainGraphView mainGraphView;
+    protected final GraphView mainGraphView;
 
     public GraphStore() {
         this(null);
@@ -53,6 +54,7 @@ public class GraphStore implements DirectedGraph {
         edgeTypeStore.addType("Default Type");
         edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null);
         nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null);
+        viewStore = new GraphViewStore(this);
         nodePropertyStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
         edgePropertyStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);

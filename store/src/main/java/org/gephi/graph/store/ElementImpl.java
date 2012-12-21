@@ -16,7 +16,7 @@ public abstract class ElementImpl implements Element {
     protected final Object id;
     //Properties
     protected Object[] properties;
-    
+
     public ElementImpl(Object id, GraphStore graphStore) {
         this.id = id;
         this.graphStore = graphStore;
@@ -71,7 +71,7 @@ public abstract class ElementImpl implements Element {
             Object oldValue = properties[index];
             properties[index] = null;
             if (column.isIndexed() && propertyStore != null) {
-                propertyStore.indexStore.remove(column, oldValue, this);
+                propertyStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
             }
             return oldValue;
         }
@@ -105,30 +105,15 @@ public abstract class ElementImpl implements Element {
     @Override
     public void clearProperties() {
         ColumnStore propertyStore = getPropertyStore();
-
-        for (int index = 0; index < properties.length; index++) {
-            Object value = properties[index];
-            properties[index] = null;
-            if (propertyStore != null) {
-                Column column = propertyStore.getColumnByIndex(index);
-                if(column.isIndexed()) {
-                    propertyStore.indexStore.remove(column, value, this);
-                }
-            }
+        if (propertyStore != null) {
+            propertyStore.indexStore.clear(this);
         }
     }
-
+    
     protected void indexProperties() {
         ColumnStore propertyStore = getPropertyStore();
         if (propertyStore != null) {
-            for (int index = 0; index < properties.length; index++) {
-                Object value = properties[index];
-                Column column = propertyStore.getColumnByIndex(index);
-                if(column.isIndexed()) {
-                    value = getPropertyStore().indexStore.put(column, value, this);
-                }
-                properties[index] = value;
-            }
+            propertyStore.indexStore.index(this);
         }
     }
 

@@ -172,6 +172,18 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
     }
 
+    protected void addAllColumns(ColumnImpl[] cols) {
+        ensureColumnSize(cols.length);
+
+        for (int i = 0; i < cols.length; i++) {
+            ColumnImpl col = cols[i];
+            if (col.isIndexed()) {
+                AbstractIndex index = createIndex(col);
+                columns[col.storeId] = index;
+            }
+        }
+    }
+
     protected void removeColumn(ColumnImpl col) {
         if (col.isIndexed()) {
             AbstractIndex index = columns[col.storeId];
@@ -186,6 +198,13 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     protected AbstractIndex getIndex(String key) {
         return columns[propertyStore.getColumnIndex(key)];
+    }
+    
+    protected void destroy() {
+        for(AbstractIndex ai : columns) {
+            ai.destroy();
+        }
+        columns = null;
     }
 
     AbstractIndex createIndex(ColumnImpl column) {
