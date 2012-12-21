@@ -38,17 +38,21 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected final GraphLock lock;
     //Types counting (optional)
     protected final EdgeTypeStore edgeTypeStore;
+    //View store
+    protected final GraphViewStore viewStore;
 
     public EdgeStore() {
         initStore();
         this.lock = null;
         this.edgeTypeStore = null;
+        this.viewStore = null;
     }
 
-    public EdgeStore(EdgeTypeStore edgeTypeStore, GraphLock lock) {
+    public EdgeStore(final EdgeTypeStore edgeTypeStore, final GraphLock lock, final GraphViewStore viewStore) {
         initStore();
         this.lock = lock;
         this.edgeTypeStore = edgeTypeStore;
+        this.viewStore = viewStore;
     }
 
     private void initStore() {
@@ -155,7 +159,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 newMap.defaultReturnValue(NULL_ID);
                 longDictionary[i] = newMap;
             }
-            int[] newSizeArray = new int[type +1];
+            int[] newSizeArray = new int[type + 1];
             System.arraycopy(mutualEdgesTypeSize, 0, newSizeArray, 0, length);
             mutualEdgesTypeSize = newSizeArray;
         }
@@ -260,7 +264,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public int size() {
         return size;
     }
-    
+
     public int undirectedSize() {
         return size - mutualEdgesSize;
     }
@@ -271,7 +275,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
         return 0;
     }
-    
+
     public int undirectedSize(int type) {
         if (type < longDictionary.length) {
             return longDictionary[type].size() - mutualEdgesTypeSize[type];
@@ -292,7 +296,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public EdgeStoreIterator iteratorUndirected() {
         return new UndirectedEdgeStoreIterator();
     }
-    
+
     public SelfLoopIterator iteratorSelfLoop() {
         return new SelfLoopIterator();
     }
@@ -467,6 +471,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             target.inDegree++;
 
             dico.put(longId, edge.storeId);
+            if (viewStore != null) {
+                viewStore.addEdge(edge);
+            }
             edge.indexProperties();
 
             if (directed && !edge.isSelfLoop()) {
@@ -521,6 +528,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             garbageSize++;
             dictionary.remove(edge.getId());
             trimDictionary();
+            if (viewStore != null) {
+                viewStore.removeEdge(edge);
+            }
             edge.clearProperties();
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {
@@ -1077,7 +1087,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             return true;
         }
     }
-    
+
     protected final class SelfLoopIterator extends EdgeStoreIterator {
 
         public SelfLoopIterator() {

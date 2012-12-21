@@ -37,13 +37,13 @@ public class GraphViewStore {
             graphStore.autoWriteUnlock();
         }
     }
-    
+
     public void destroyView(GraphView view) {
         graphStore.autoWriteLock();
         try {
             checkNonNullViewObject(view);
-            
-            removeView((GraphViewImpl)view);
+
+            removeView((GraphViewImpl) view);
         } finally {
             graphStore.autoWriteUnlock();
         }
@@ -60,6 +60,22 @@ public class GraphViewStore {
 
         return ((GraphViewImpl) view).getUndirectedGraph();
     }
+    
+    protected void addNode(NodeImpl node) {
+        
+    }
+    
+    protected void removeNode(NodeImpl node) {
+        
+    }
+    
+    protected void addEdge(EdgeImpl edge) {
+        
+    }
+    
+    protected void removeEdge(EdgeImpl edge) {
+        
+    }
 
     protected int addView(final GraphViewImpl view) {
         checkNonNullViewObject(view);
@@ -69,6 +85,7 @@ public class GraphViewStore {
             id = garbageQueue.dequeueInt();
         } else {
             id = length++;
+            ensureArraySize(id);
         }
         views[id] = view;
         view.storeId = id;
@@ -82,6 +99,14 @@ public class GraphViewStore {
         views[id] = null;
         garbageQueue.enqueue(id);
         view.storeId = NULL_VIEW;
+    }
+
+    private void ensureArraySize(int index) {
+        if (index >= views.length) {
+            GraphViewImpl[] newArray = new GraphViewImpl[index + 1];
+            System.arraycopy(views, 0, newArray, 0, views.length);
+            views = newArray;
+        }
     }
 
     private void checkNonNullViewObject(final Object o) {

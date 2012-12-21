@@ -31,17 +31,21 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected NodeBlock blocks[];
     protected NodeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
+    //View store
+    protected final GraphViewStore viewStore;
 
     public NodeStore() {
         initStore();
         this.lock = null;
         this.edgeStore = null;
+        this.viewStore = null;
     }
 
-    public NodeStore(final EdgeStore edgeStore, final GraphLock lock) {
+    public NodeStore(final EdgeStore edgeStore, final GraphLock lock, final GraphViewStore viewStore) {
         initStore();
         this.lock = lock;
         this.edgeStore = edgeStore;
+        this.viewStore = viewStore;
     }
 
     private void initStore() {
@@ -205,8 +209,11 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 currentBlock.add(node);
                 dictionary.put(node.getId(), node.storeId);
             }
+            if (viewStore != null) {
+                viewStore.addNode(node);
+            }
             node.indexProperties();
-            
+
             size++;
             return true;
         } else if (isValidIndex(node.storeId) && get(node.storeId) == node) {
@@ -232,6 +239,9 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             garbageSize++;
             dictionary.remove(node.getId());
             trimDictionary();
+            if (viewStore != null) {
+                viewStore.removeNode(node);
+            }
             node.clearProperties();
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {

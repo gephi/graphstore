@@ -20,7 +20,7 @@ import org.gephi.graph.api.NodeIterator;
  */
 public class GraphStore implements DirectedGraph {
 
-    //Auto-lock
+    //Const
     public static boolean AUTO_LOCKING = true;
     public static boolean AUTO_TYPE_REGISTRATION = true;
     public static boolean INDEX_NODES = true;
@@ -52,9 +52,9 @@ public class GraphStore implements DirectedGraph {
         lock = new GraphLock();
         edgeTypeStore = new EdgeTypeStore();
         edgeTypeStore.addType("Default Type");
-        edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null);
-        nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null);
         viewStore = new GraphViewStore(this);
+        edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null, viewStore);
+        nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null, viewStore);
         nodePropertyStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
         edgePropertyStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);

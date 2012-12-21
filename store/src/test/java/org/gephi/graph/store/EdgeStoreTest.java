@@ -1527,7 +1527,7 @@ public class EdgeStoreTest {
     @Test
     public void testTypeCounting() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null);
+        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null);
         EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
 
         Int2IntMap counts = new Int2IntOpenHashMap();
