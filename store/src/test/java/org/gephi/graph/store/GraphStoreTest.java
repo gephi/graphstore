@@ -201,7 +201,6 @@ public class GraphStoreTest {
 
     @Test
     public void testRemoveNodeWithEdges() {
-        GraphStore.AUTO_LOCKING = false;
         GraphStore graphStore = new GraphStore();
         NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
         graphStore.addAllNodes(Arrays.asList(nodes));
@@ -229,7 +228,6 @@ public class GraphStoreTest {
 
         Assert.assertEquals(edgeCount, 0);
         Assert.assertEquals(graphStore.getNodeCount(), 0);
-        GraphStore.AUTO_LOCKING = true;
     }
 
     @Test
