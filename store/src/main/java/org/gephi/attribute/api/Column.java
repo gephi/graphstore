@@ -16,5 +16,7 @@ public interface Column {
     
     public Origin getOrigin();
     
+    public boolean isIndexed();
+    
     public Object getDefaultValue();
 }

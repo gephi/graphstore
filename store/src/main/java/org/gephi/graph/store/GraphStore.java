@@ -8,7 +8,8 @@ import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.EdgeIterator;
-import org.gephi.graph.api.GraphFactory;
+import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.NodeIterator;
@@ -22,21 +23,25 @@ public class GraphStore implements DirectedGraph {
     //Auto-lock
     public static boolean AUTO_LOCKING = true;
     public static boolean AUTO_TYPE_REGISTRATION = true;
+    public static boolean INDEX_NODES = true;
+    public static boolean INDEX_EDGES = true;
     //Model
     protected final GraphModelImpl graphModel;
     //Stores
     protected final NodeStore nodeStore;
     protected final EdgeStore edgeStore;
     protected final EdgeTypeStore edgeTypeStore;
-    protected final PropertyStore<Node> nodePropertyStore;
-    protected final PropertyStore<Edge> edgePropertyStore;
+    protected final ColumnStore<Node> nodePropertyStore;
+    protected final ColumnStore<Edge> edgePropertyStore;
     //Factory
     protected final GraphFactoryImpl factory;
     //Lock
     protected final GraphLock lock;
     //Undirected
     protected final UndirectedDecorator undirectedDecorator;
-    
+    //Main Graph view
+    protected final MainGraphView mainGraphView;
+
     public GraphStore() {
         this(null);
     }
@@ -48,9 +53,10 @@ public class GraphStore implements DirectedGraph {
         edgeTypeStore.addType("Default Type");
         edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null);
         nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null);
-        nodePropertyStore = new PropertyStore<Node>(Node.class);
-        edgePropertyStore = new PropertyStore<Edge>(Edge.class);
+        nodePropertyStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
+        edgePropertyStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);
+        mainGraphView = new MainGraphView();
 
         undirectedDecorator = new UndirectedDecorator(this);
     }
@@ -443,6 +449,11 @@ public class GraphStore implements DirectedGraph {
     }
 
     @Override
+    public GraphView getView() {
+        return mainGraphView;
+    }
+
+    @Override
     public void readLock() {
         lock.readLock();
     }
@@ -590,6 +601,19 @@ public class GraphStore implements DirectedGraph {
         @Override
         public void doBreak() {
             autoReadUnlock();
+        }
+    }
+
+    private final class MainGraphView implements GraphView {
+
+        @Override
+        public GraphModel getGraphModel() {
+            return graphModel;
+        }
+
+        @Override
+        public boolean isMainView() {
+            return true;
         }
     }
 }

@@ -1,7 +1,8 @@
 package org.gephi.attribute.api;
 
-import org.gephi.attribute.api.Column;
+import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.gephi.graph.api.Element;
 
 /**
@@ -14,8 +15,14 @@ public interface Index<T extends Element> {
 
     public Iterable<T> get(Column column, Object value);
 
-    public Iterable<Entry<Object, T>> get(Column column);
+    public Iterable<Entry<Object, Set<T>>> get(Column column);
 
+    public Collection values(Column column);
+    
+    public int countValues(Column column);
+    
+    public int countElements(Column column);
+    
     public Number getMinValue(Column column);
 
     public Number getMaxValue(Column column);

@@ -56,16 +56,19 @@ public class GraphModelImpl implements GraphModel {
     
     @Override
     public int addEdgeType(Object label) {
+        //TODO Locking
         return store.edgeTypeStore.addType(label);
     }
     
     @Override
     public int getEdgeType(Object label) {
+        //TODO Locking
         return store.edgeTypeStore.getId(label);
     }
     
     @Override
     public Object getEdgeLabel(int id) {
+        //TODO Locking
         return store.edgeTypeStore.getLabel(id);
     }
 

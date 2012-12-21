@@ -15,15 +15,17 @@ public class ColumnImpl implements Column {
     protected final String title;
     protected final Object defaultValue;
     protected final Origin origin;
+    protected final boolean indexed;
     //Store Id
-    protected int storeId = PropertyStore.NULL_ID;
+    protected int storeId = ColumnStore.NULL_ID;
 
-    public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin) {
+    public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed) {
         this.id = id;
         this.typeClass = typeClass;
         this.title = title;
         this.defaultValue = defaultValue;
         this.origin = origin;
+        this.indexed = indexed;
     }
 
     @Override
@@ -54,6 +56,11 @@ public class ColumnImpl implements Column {
     @Override
     public Origin getOrigin() {
         return origin;
+    }
+
+    @Override
+    public boolean isIndexed() {
+        return indexed;
     }
 
     public int getStoreId() {

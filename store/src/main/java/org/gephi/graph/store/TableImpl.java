@@ -11,24 +11,24 @@ import org.gephi.graph.api.Element;
  */
 public class TableImpl<T extends Element> implements Table {
 
-    protected final PropertyStore<T> store;
+    protected final ColumnStore<T> store;
 
-    public TableImpl(Class<T> elementType) {
-        store = new PropertyStore<T>(elementType);
+    public TableImpl(ColumnStore<T> store) {
+        this.store = store;
     }
 
     @Override
     public Column addColumn(String id, Class type) {
-        return addColumn(id, null, type, Origin.DATA, null);
+        return addColumn(id, null, type, Origin.DATA, null, true);
     }
 
     @Override
     public Column addColumn(String id, Class type, Origin origin) {
-        return addColumn(id, null, type, origin, null);
+        return addColumn(id, null, type, origin, null, true);
     }
 
     @Override
-    public Column addColumn(String id, String title, Class type, Origin origin, Object defaultValue) {
+    public Column addColumn(String id, String title, Class type, Origin origin, Object defaultValue, boolean indexed) {
         checkValidId(id);
         checkSupportedTypes(type);
         checkDefaultValue(defaultValue, type);
@@ -39,7 +39,7 @@ public class TableImpl<T extends Element> implements Table {
 
         id = id.toLowerCase();
 
-        ColumnImpl column = new ColumnImpl(id, type, title, defaultValue, origin);
+        ColumnImpl column = new ColumnImpl(id, type, title, defaultValue, origin, indexed);
         store.addColumn(column);
 
         return column;

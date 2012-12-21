@@ -23,6 +23,7 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.EdgeIterator;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.NodeIterator;
@@ -300,6 +301,11 @@ public class BasicGraphStore implements DirectedGraph {
     @Override
     public void clearEdges() {
         edgeStore.clear();
+    }
+
+    @Override
+    public GraphView getView() {
+        return null;
     }
 
     @Override

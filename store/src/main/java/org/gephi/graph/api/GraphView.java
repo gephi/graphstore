@@ -8,4 +8,6 @@ public interface GraphView {
     
     public GraphModel getGraphModel();
     
+    public boolean isMainView();
+    
 }

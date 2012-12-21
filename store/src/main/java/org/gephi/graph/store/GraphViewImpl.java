@@ -264,6 +264,11 @@ public final class GraphViewImpl implements GraphView {
         return graphStore.graphModel;
     }
 
+    @Override
+    public boolean isMainView() {
+        return false;
+    }
+
     private void ensureTypeCountArrayCapacity(int type) {
         if (type >= typeCounts.length) {
             int[] newArray = new int[type];

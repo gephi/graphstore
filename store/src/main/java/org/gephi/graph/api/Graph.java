@@ -77,6 +77,8 @@ public interface Graph {
     public void clear();
 
     public void clearEdges();
+    
+    public GraphView getView();
 
     public void readLock();
 

@@ -23,7 +23,7 @@ public abstract class ElementImpl implements Element {
         this.properties = new Object[0];
     }
 
-    abstract PropertyStore getPropertyStore();
+    abstract ColumnStore getPropertyStore();
 
     @Override
     public Object getId() {
@@ -65,13 +65,13 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object removeProperty(Column column) {
-        PropertyStore propertyStore = getPropertyStore();
+        ColumnStore propertyStore = getPropertyStore();
         int index = column.getIndex();
         if (index < properties.length) {
             Object oldValue = properties[index];
             properties[index] = null;
-            if (propertyStore != null) {
-                propertyStore.remove(column, oldValue, this);
+            if (column.isIndexed() && propertyStore != null) {
+                propertyStore.indexStore.remove(column, oldValue, this);
             }
             return oldValue;
         }
@@ -86,7 +86,7 @@ public abstract class ElementImpl implements Element {
     @Override
     public void setProperty(Column column, Object value) {
         int index = column.getIndex();
-        PropertyStore propertyStore = getPropertyStore();
+        ColumnStore propertyStore = getPropertyStore();
         Object oldValue = null;
         if (index >= properties.length) {
             Object[] newArray = new Object[index + 1];
@@ -96,33 +96,37 @@ public abstract class ElementImpl implements Element {
             oldValue = properties[index];
         }
 
-        if (propertyStore != null) {
-            value = propertyStore.set(column, oldValue, value, this);
+        if (column.isIndexed() && propertyStore != null) {
+            value = propertyStore.indexStore.set(column, oldValue, value, this);
         }
         properties[index] = value;
     }
 
     @Override
     public void clearProperties() {
-        PropertyStore propertyStore = getPropertyStore();
+        ColumnStore propertyStore = getPropertyStore();
 
         for (int index = 0; index < properties.length; index++) {
             Object value = properties[index];
             properties[index] = null;
             if (propertyStore != null) {
                 Column column = propertyStore.getColumnByIndex(index);
-                propertyStore.remove(column, value, this);
+                if(column.isIndexed()) {
+                    propertyStore.indexStore.remove(column, value, this);
+                }
             }
         }
     }
 
     protected void indexProperties() {
-        PropertyStore propertyStore = getPropertyStore();
+        ColumnStore propertyStore = getPropertyStore();
         if (propertyStore != null) {
             for (int index = 0; index < properties.length; index++) {
                 Object value = properties[index];
                 Column column = propertyStore.getColumnByIndex(index);
-                value = getPropertyStore().put(column, value, this);
+                if(column.isIndexed()) {
+                    value = getPropertyStore().indexStore.put(column, value, this);
+                }
                 properties[index] = value;
             }
         }

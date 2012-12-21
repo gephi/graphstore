@@ -3,6 +3,7 @@ package org.gephi.graph.store;
 import java.util.Collection;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.UndirectedGraph;
@@ -208,6 +209,11 @@ public class UndirectedDecorator implements UndirectedGraph {
     @Override
     public void clearEdges() {
         store.clearEdges();
+    }
+
+    @Override
+    public GraphView getView() {
+        return store.mainGraphView;
     }
 
     @Override
