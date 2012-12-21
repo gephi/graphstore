@@ -13,6 +13,8 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.NodeIterator;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -20,6 +22,16 @@ import org.testng.annotations.Test;
  * @author mbastian
  */
 public class GraphStoreTest {
+
+    @BeforeClass
+    public void oneTimeSetUp() {
+        GraphStore.AUTO_LOCKING = false;
+    }
+
+    @AfterClass
+    public void oneTimeTearDown() {
+        GraphStore.AUTO_LOCKING = true;
+    }
 
     @Test
     public void testEmpty() {

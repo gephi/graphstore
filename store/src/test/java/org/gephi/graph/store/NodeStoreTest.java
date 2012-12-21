@@ -11,6 +11,8 @@ import java.util.Random;
 import java.util.Set;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -20,6 +22,16 @@ import org.testng.annotations.Test;
 public class NodeStoreTest {
 
     public NodeStoreTest() {
+    }
+
+    @BeforeClass
+    public void oneTimeSetUp() {
+        GraphStore.AUTO_LOCKING = false;
+    }
+
+    @AfterClass
+    public void oneTimeTearDown() {
+        GraphStore.AUTO_LOCKING = true;
     }
 
     @Test

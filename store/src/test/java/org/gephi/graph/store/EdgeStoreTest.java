@@ -22,6 +22,8 @@ import java.util.Set;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterator;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -33,6 +35,16 @@ public class EdgeStoreTest {
     public EdgeStoreTest() {
     }
 
+    @BeforeClass
+    public void oneTimeSetUp() {
+        GraphStore.AUTO_LOCKING = false;
+    }
+
+    @AfterClass
+    public void oneTimeTearDown() {
+        GraphStore.AUTO_LOCKING = true;
+    }
+    
     @Test
     public void testDefaultSize() {
         EdgeStore edgeStore = new EdgeStore();
