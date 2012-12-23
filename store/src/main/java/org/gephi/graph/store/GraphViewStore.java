@@ -22,6 +22,9 @@ public class GraphViewStore {
     protected int length;
 
     public GraphViewStore(GraphStore graphStore) {
+        if (graphStore == null) {
+            throw new NullPointerException();
+        }
         this.graphStore = graphStore;
         this.views = new GraphViewImpl[DEFAULT_VIEWS];
         this.garbageQueue = new IntHeapPriorityQueue(DEFAULT_VIEWS);
@@ -49,6 +52,25 @@ public class GraphViewStore {
         }
     }
 
+    public boolean contains(GraphView view) {
+        graphStore.autoReadLock();
+        try {
+            checkNonNullViewObject(view);
+            GraphViewImpl viewImpl = (GraphViewImpl) view;
+            int id = viewImpl.storeId;
+            if (id != NULL_VIEW && id < length && views[id] == view) {
+                return true;
+            }
+            return false;
+        } finally {
+            graphStore.autoReadUnlock();
+        }
+    }
+
+    public int size() {
+        return length - garbageQueue.size();
+    }
+
     public DirectedSubgraph getDirectedGraph(GraphView view) {
         checkNonNullViewObject(view);
 
@@ -60,21 +82,17 @@ public class GraphViewStore {
 
         return ((GraphViewImpl) view).getUndirectedGraph();
     }
-    
+
     protected void addNode(NodeImpl node) {
-        
     }
-    
+
     protected void removeNode(NodeImpl node) {
-        
     }
-    
+
     protected void addEdge(EdgeImpl edge) {
-        
     }
-    
+
     protected void removeEdge(EdgeImpl edge) {
-        
     }
 
     protected int addView(final GraphViewImpl view) {

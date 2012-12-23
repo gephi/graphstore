@@ -1,6 +1,7 @@
 package org.gephi.graph.store;
 
 import java.util.Collection;
+import java.util.Iterator;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -44,25 +45,25 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     @Override
     public NodeIterable getPredecessors(Node node) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NodeViewIterator(graphStore.edgeStore.neighborInIterator(node)));
+        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node, new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node))));
     }
 
     @Override
     public NodeIterable getPredecessors(Node node, int type) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NodeViewIterator(graphStore.edgeStore.neighborInIterator(node, type)));
+        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node, new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node, type))));
     }
 
     @Override
     public NodeIterable getSuccessors(Node node) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NodeViewIterator(graphStore.edgeStore.neighborOutIterator(node)));
+        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node, new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node))));
     }
 
     @Override
     public NodeIterable getSuccessors(Node node, int type) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NodeViewIterator(graphStore.edgeStore.neighborOutIterator(node, type)));
+        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node, new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node, type))));
     }
 
     @Override
@@ -257,7 +258,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
             return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.iterator()));
         }
     }
-    
+
     @Override
     public EdgeIterable getSelfLoops() {
         return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.iteratorSelfLoop()));
@@ -266,13 +267,13 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     @Override
     public NodeIterable getNeighbors(Node node) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NodeViewIterator(graphStore.edgeStore.neighborIterator(node)));
+        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node, new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node))));
     }
 
     @Override
     public NodeIterable getNeighbors(Node node, int type) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NodeViewIterator(graphStore.edgeStore.neighborIterator(node, type)));
+        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node, new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node, type))));
     }
 
     @Override
@@ -639,6 +640,33 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         @Override
         public void remove() {
             itr.remove();
+        }
+    }
+
+    protected class NeighborsIterator implements NodeIterator {
+
+        protected final NodeImpl node;
+        protected final Iterator<Edge> itr;
+
+        public NeighborsIterator(NodeImpl node, Iterator<Edge> itr) {
+            this.node = node;
+            this.itr = itr;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return itr.hasNext();
+        }
+
+        @Override
+        public Node next() {
+            Edge e = itr.next();
+            return e.getSource() == node ? e.getTarget() : e.getSource();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove not supported for this iterator");
         }
     }
 }

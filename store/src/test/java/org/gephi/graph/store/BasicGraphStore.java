@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -546,6 +547,11 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
+        public Collection<Node> toCollection() {
+            return Arrays.asList(idToNodeMap.values().toArray(new Node[0]));
+        }
+
+        @Override
         public boolean add(Node node) {
             if (((BasicNode) node).getId() == null) {
                 throw new NullPointerException("Node id is null");
@@ -1017,6 +1023,15 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
+        public Collection<Node> toCollection() {
+            List<Node> list = new ArrayList<Node>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list;
+        }
+
+        @Override
         public void doBreak() {
             //Not used because no locking
         }
@@ -1042,6 +1057,15 @@ public class BasicGraphStore implements DirectedGraph {
                 list.add(iterator.next());
             }
             return list.toArray(new Edge[0]);
+        }
+
+        @Override
+        public Collection<Edge> toCollection() {
+            List<Edge> list = new ArrayList<Edge>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list;
         }
 
         @Override

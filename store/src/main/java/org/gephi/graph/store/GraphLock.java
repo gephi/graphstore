@@ -37,7 +37,7 @@ public class GraphLock {
     }
 
     public void writeLock() {
-        if (readWriteLock.getReadHoldCount() > 0) {
+        if (readWriteLock.getReadHoldCount() > 0 && !readWriteLock.isWriteLockedByCurrentThread()) {
             throw new IllegalMonitorStateException("Impossible to acquire a write lock when currently holding a read lock. Use toArray() methods on NodeIterable and EdgeIterable to avoid holding a readLock or wrap your loop with a write lock.");
         }
         writeLock.lock();

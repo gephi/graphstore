@@ -3,8 +3,10 @@ package org.gephi.graph.store;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.NodeIterator;
@@ -184,6 +186,23 @@ public class NodeStore implements Collection<Node>, NodeIterable {
 
         readUnlock();
         return array;
+    }
+
+    @Override
+    public Collection<Node> toCollection() {
+        readLock();
+
+        List<Node> list = new ArrayList<Node>(size);
+
+        NodeStoreIterator itr = iterator();
+        while (itr.hasNext()) {
+            NodeImpl n = itr.next();
+            list.add(n);
+        }
+
+        readUnlock();
+
+        return list;
     }
 
     @Override

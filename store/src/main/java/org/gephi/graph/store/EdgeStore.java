@@ -4,8 +4,10 @@ import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.EdgeIterator;
@@ -667,6 +669,21 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         readUnlock();
 
         return array;
+    }
+
+    @Override
+    public Collection<Edge> toCollection() {
+        readLock();
+
+        List<Edge> list = new ArrayList<Edge>(size);
+        EdgeStoreIterator itr = iterator();
+        while (itr.hasNext()) {
+            EdgeImpl n = itr.next();
+            list.add(n);
+        }
+
+        readUnlock();
+        return list;
     }
 
     @Override

@@ -573,6 +573,15 @@ public class GraphStore implements DirectedGraph {
         }
 
         @Override
+        public Collection<Node> toCollection() {
+            List<Node> list = new ArrayList<Node>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list;
+        }
+
+        @Override
         public void doBreak() {
             autoReadUnlock();
         }
@@ -598,6 +607,15 @@ public class GraphStore implements DirectedGraph {
                 list.add(iterator.next());
             }
             return list.toArray(new Edge[0]);
+        }
+
+        @Override
+        public Collection<Edge> toCollection() {
+             List<Edge> list = new ArrayList<Edge>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list;
         }
 
         @Override

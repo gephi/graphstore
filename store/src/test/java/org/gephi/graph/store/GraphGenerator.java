@@ -226,9 +226,13 @@ public class GraphGenerator {
     }
 
     public static EdgeImpl[] generateMultiTypeEdgeList(int edgeCount, int typeCount, boolean directed, boolean allowSelfLoops) {
-        List<EdgeImpl> edges = new ArrayList<EdgeImpl>();
         int nodeCount = Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0));
         NodeStore nodeStore = generateNodeStore(nodeCount);
+        return generateMultiTypeEdgeList(nodeStore, edgeCount, typeCount, directed, allowSelfLoops);
+    }
+
+    public static EdgeImpl[] generateMultiTypeEdgeList(NodeStore nodeStore, int edgeCount, int typeCount, boolean directed, boolean allowSelfLoops) {
+        List<EdgeImpl> edges = new ArrayList<EdgeImpl>();
         int[] typeAssignemnts = distributeTypeCounts(typeCount, edgeCount);
         for (int i = 0; i < typeCount; i++) {
             edges.addAll(Arrays.asList(generateEdgeList(nodeStore, typeAssignemnts[i], i, directed, allowSelfLoops)));
@@ -339,6 +343,16 @@ public class GraphGenerator {
         NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)));
         graphStore.addAllNodes(Arrays.asList(nodes));
         EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, true, true);
+        graphStore.addAllEdges(Arrays.asList(edges));
+        return graphStore;
+    }
+
+    public static GraphStore generateSmallMultiTypeGraphStore() {
+        int edgeCount = 100;
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)));
+        graphStore.addAllNodes(Arrays.asList(nodes));
+        EdgeImpl[] edges = generateMultiTypeEdgeList(graphStore.nodeStore, edgeCount, 3, true, true);
         graphStore.addAllEdges(Arrays.asList(edges));
         return graphStore;
     }

@@ -35,11 +35,12 @@ public final class GraphViewImpl implements GraphView {
 
     public GraphViewImpl(final GraphStore store) {
         this.graphStore = store;
-        this.nodeCount = store.getNodeCount();
-        this.edgeCount = store.getEdgeCount();
-        this.nodeBitVector = new BitVector(nodeCount);
-        this.edgeBitVector = new BitVector(edgeCount);
+        this.nodeCount = 0;
+        this.edgeCount = 0;
+        this.nodeBitVector = new BitVector(store.getNodeCount());
+        this.edgeBitVector = new BitVector(store.getEdgeCount());
         this.typeCounts = new int[DEFAULT_TYPE_COUNT];
+        this.mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
     }
@@ -92,6 +93,8 @@ public final class GraphViewImpl implements GraphView {
         int id = edgeImpl.storeId;
         boolean isSet = edgeBitVector.get(id);
         if (!isSet) {
+            checkIncidentNodesExists(edgeImpl);
+
             edgeBitVector.set(id);
             edgeCount++;
 
@@ -100,7 +103,7 @@ public final class GraphViewImpl implements GraphView {
 
             typeCounts[type]++;
 
-            if (edgeImpl.isMutual() && edgeImpl.source.storeId > edgeImpl.target.storeId) {
+            if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
                 mutualEdgeTypeCounts[type]++;
                 mutualEdgesCount++;
             }
@@ -148,7 +151,7 @@ public final class GraphViewImpl implements GraphView {
                     edgeCount--;
                     typeCounts[edgeImpl.type]--;
 
-                    if (edgeImpl.isMutual() && edgeImpl.source.storeId > edgeImpl.target.storeId) {
+                    if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
                         mutualEdgeTypeCounts[edgeImpl.type]--;
                         mutualEdgesCount--;
                     }
@@ -187,7 +190,7 @@ public final class GraphViewImpl implements GraphView {
             edgeCount--;
             typeCounts[edgeImpl.type]--;
 
-            if (edgeImpl.isMutual() && edgeImpl.source.storeId > edgeImpl.target.storeId) {
+            if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
                 mutualEdgeTypeCounts[edgeImpl.type]--;
                 mutualEdgesCount--;
             }
@@ -217,12 +220,16 @@ public final class GraphViewImpl implements GraphView {
         nodeCount = 0;
         edgeCount = 0;
         typeCounts = new int[DEFAULT_TYPE_COUNT];
+        mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
+        mutualEdgesCount = 0;
     }
 
     public void clearEdges() {
         edgeBitVector.clear();
         edgeCount = 0;
         typeCounts = new int[DEFAULT_TYPE_COUNT];
+        mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
+        mutualEdgesCount = 0;
     }
 
     public boolean containsNode(final NodeImpl node) {
@@ -258,7 +265,7 @@ public final class GraphViewImpl implements GraphView {
         }
         return typeCounts[type] - mutualEdgeTypeCounts[type];
     }
-    
+
     @Override
     public GraphModelImpl getGraphModel() {
         return graphStore.graphModel;
@@ -271,11 +278,11 @@ public final class GraphViewImpl implements GraphView {
 
     private void ensureTypeCountArrayCapacity(int type) {
         if (type >= typeCounts.length) {
-            int[] newArray = new int[type];
+            int[] newArray = new int[type + 1];
             System.arraycopy(typeCounts, 0, newArray, 0, typeCounts.length);
             typeCounts = newArray;
 
-            int[] newMutualArray = new int[type];
+            int[] newMutualArray = new int[type + 1];
             System.arraycopy(mutualEdgeTypeCounts, 0, newMutualArray, 0, mutualEdgeTypeCounts.length);
             mutualEdgeTypeCounts = newMutualArray;
         }
@@ -296,6 +303,12 @@ public final class GraphViewImpl implements GraphView {
         }
         if (!(o instanceof EdgeImpl)) {
             throw new ClassCastException("Object must be a EdgeImpl object");
+        }
+    }
+
+    private void checkIncidentNodesExists(final EdgeImpl e) {
+        if (!nodeBitVector.get(e.source.storeId) || !nodeBitVector.get(e.target.storeId)) {
+            throw new RuntimeException("Both source and target nodes need to be in the view");
         }
     }
 }
