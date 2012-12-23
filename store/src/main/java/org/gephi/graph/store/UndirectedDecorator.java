@@ -158,7 +158,7 @@ public class UndirectedDecorator implements UndirectedGraph {
 
     @Override
     public int getDegree(Node node) {
-        return store.getDegree(node);
+        return store.getUndirectedDegree(node);
     }
 
     @Override

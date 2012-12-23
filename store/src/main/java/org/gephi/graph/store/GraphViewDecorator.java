@@ -336,7 +336,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
             EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
-                if (!isUndirectedToIgnore(edge) && view.containsEdge(edge)) {
+                if (view.containsEdge(edge) && !isUndirectedToIgnore(edge)) {
                     count++;
                     if (edge.isSelfLoop()) {
                         count++;

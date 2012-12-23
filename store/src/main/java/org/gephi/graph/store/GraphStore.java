@@ -332,6 +332,11 @@ public class GraphStore implements DirectedGraph {
         nodeStore.checkNonNullNodeObject(node);
         return ((NodeImpl) node).getDegree();
     }
+    
+    public int getUndirectedDegree(final Node node) {
+        nodeStore.checkNonNullNodeObject(node);
+        return ((NodeImpl) node).getUndirectedDegree();
+    }
 
     @Override
     public int getInDegree(final Node node) {

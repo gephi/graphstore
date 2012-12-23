@@ -716,6 +716,39 @@ public class GraphViewStoreTest {
             }
         }
     }
+    
+    @Test
+    public void testDirectedDegree() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+        int typeCount = graphStore.edgeTypeStore.length;
+        
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        GraphStore copyGraphStore = convertToStore(view);
+        for (Node n : graph.getNodes()) {
+            Node m = copyGraphStore.getNode(n.getId());
+            Assert.assertEquals(graph.getDegree(n), copyGraphStore.getDegree(m));
+            Assert.assertEquals(graph.getInDegree(n), copyGraphStore.getInDegree(m));
+            Assert.assertEquals(graph.getOutDegree(n), copyGraphStore.getOutDegree(m));
+        }
+    }
+    
+    @Test
+    public void testUndirectedDegree() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+        
+        UndirectedSubgraph graph = store.getUndirectedGraph(view);
+        GraphStore copyGraphStore = convertToStore(view);
+        for (Node n : graph.getNodes()) {
+            Node m = copyGraphStore.getNode(n.getId());
+            Assert.assertEquals(graph.getDegree(n), copyGraphStore.undirectedDecorator.getDegree(m));
+        }
+    }
 
     @Test
     public void testAddNodeMainView() {
