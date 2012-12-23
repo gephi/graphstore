@@ -84,15 +84,35 @@ public class GraphViewStore {
     }
 
     protected void addNode(NodeImpl node) {
+        if (views.length > 0) {
+            for (GraphViewImpl view : views) {
+                view.ensureNodeVectorSize(node);
+            }
+        }
     }
 
     protected void removeNode(NodeImpl node) {
+        if (views.length > 0) {
+            for (GraphViewImpl view : views) {
+                view.removeNode(node);
+            }
+        }
     }
 
     protected void addEdge(EdgeImpl edge) {
+        if (views.length > 0) {
+            for (GraphViewImpl view : views) {
+                view.ensureEdgeVectorSize(edge);
+            }
+        }
     }
 
     protected void removeEdge(EdgeImpl edge) {
+        if (views.length > 0) {
+            for (GraphViewImpl view : views) {
+                view.removeEdge(edge);
+            }
+        }
     }
 
     protected int addView(final GraphViewImpl view) {

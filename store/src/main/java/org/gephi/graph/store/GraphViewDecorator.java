@@ -116,6 +116,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
 
     @Override
     public boolean addEdge(Edge edge) {
+        checkValidEdgeObject(edge);
         graphStore.autoWriteLock();
         try {
             return view.addEdge(edge);
@@ -127,6 +128,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
 
     @Override
     public boolean addNode(Node node) {
+        checkValidNodeObject(node);
         graphStore.autoWriteLock();
         try {
             return view.addNode(node);
@@ -157,6 +159,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
 
     @Override
     public boolean removeEdge(Edge edge) {
+        checkValidEdgeObject(edge);
         graphStore.autoWriteLock();
         try {
             return view.removeEdge(edge);
@@ -167,6 +170,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
 
     @Override
     public boolean removeNode(Node node) {
+        checkValidNodeObject(node);
         graphStore.autoWriteLock();
         try {
             return view.removeNode(node);

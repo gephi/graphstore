@@ -1,6 +1,7 @@
 package org.gephi.graph.store;
 
 import cern.colt.bitvector.BitVector;
+import cern.colt.bitvector.QuickBitVector;
 import java.util.Collection;
 import java.util.Iterator;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -18,10 +19,11 @@ public final class GraphViewImpl implements GraphView {
 
     //Const
     public static final int DEFAULT_TYPE_COUNT = 1;
+    public static final double GROWING_FACTOR = 1.1;
     //Data
     protected final GraphStore graphStore;
-    protected final BitVector nodeBitVector;
-    protected final BitVector edgeBitVector;
+    protected BitVector nodeBitVector;
+    protected BitVector edgeBitVector;
     protected int storeId;
     //Decorators
     private final GraphViewDecorator directedDecorator;
@@ -37,8 +39,8 @@ public final class GraphViewImpl implements GraphView {
         this.graphStore = store;
         this.nodeCount = 0;
         this.edgeCount = 0;
-        this.nodeBitVector = new BitVector(store.getNodeCount());
-        this.edgeBitVector = new BitVector(store.getEdgeCount());
+        this.nodeBitVector = new BitVector(store.nodeStore.maxStoreId());
+        this.edgeBitVector = new BitVector(store.edgeStore.maxStoreId());
         this.typeCounts = new int[DEFAULT_TYPE_COUNT];
         this.mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
@@ -54,8 +56,6 @@ public final class GraphViewImpl implements GraphView {
     }
 
     public boolean addNode(final Node node) {
-        checkNonNullNodeObject(node);
-
         NodeImpl nodeImpl = (NodeImpl) node;
         graphStore.nodeStore.checkNodeExists(nodeImpl);
 
@@ -75,6 +75,7 @@ public final class GraphViewImpl implements GraphView {
             boolean changed = false;
             while (nodeItr.hasNext()) {
                 Node node = nodeItr.next();
+                checkValidNodeObject(node);
                 if (addNode(node)) {
                     changed = true;
                 }
@@ -85,8 +86,6 @@ public final class GraphViewImpl implements GraphView {
     }
 
     public boolean addEdge(final Edge edge) {
-        checkNonNullEdgeObject(edge);
-
         EdgeImpl edgeImpl = (EdgeImpl) edge;
         graphStore.edgeStore.checkEdgeExists(edgeImpl);
 
@@ -118,6 +117,7 @@ public final class GraphViewImpl implements GraphView {
             boolean changed = false;
             while (edgeItr.hasNext()) {
                 Edge edge = edgeItr.next();
+                checkValidEdgeObject(edge);
                 if (addEdge(edge)) {
                     changed = true;
                 }
@@ -128,8 +128,6 @@ public final class GraphViewImpl implements GraphView {
     }
 
     public boolean removeNode(final Node node) {
-        checkNonNullNodeObject(node);
-
         NodeImpl nodeImpl = (NodeImpl) node;
         graphStore.nodeStore.checkNodeExists(nodeImpl);
 
@@ -168,6 +166,7 @@ public final class GraphViewImpl implements GraphView {
             boolean changed = false;
             while (nodeItr.hasNext()) {
                 Node node = nodeItr.next();
+                checkValidNodeObject(node);
                 if (removeNode(node)) {
                     changed = true;
                 }
@@ -178,8 +177,6 @@ public final class GraphViewImpl implements GraphView {
     }
 
     public boolean removeEdge(final Edge edge) {
-        checkNonNullEdgeObject(edge);
-
         EdgeImpl edgeImpl = (EdgeImpl) edge;
         graphStore.edgeStore.checkEdgeExists(edgeImpl);
 
@@ -205,6 +202,7 @@ public final class GraphViewImpl implements GraphView {
             boolean changed = false;
             while (edgeItr.hasNext()) {
                 Edge edge = edgeItr.next();
+                checkValidEdgeObject(edge);
                 if (removeEdge(edge)) {
                     changed = true;
                 }
@@ -266,6 +264,22 @@ public final class GraphViewImpl implements GraphView {
         return typeCounts[type] - mutualEdgeTypeCounts[type];
     }
 
+    public void ensureNodeVectorSize(NodeImpl node) {
+        int sid = node.storeId;
+        if (sid >= nodeBitVector.size()) {
+            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GROWING_FACTOR)), Integer.MAX_VALUE);
+            nodeBitVector = growBitVector(nodeBitVector, newSize);
+        }
+    }
+
+    public void ensureEdgeVectorSize(EdgeImpl edge) {
+        int sid = edge.storeId;
+        if (sid >= edgeBitVector.size()) {
+            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GROWING_FACTOR)), Integer.MAX_VALUE);
+            edgeBitVector = growBitVector(edgeBitVector, newSize);
+        }
+    }
+
     @Override
     public GraphModelImpl getGraphModel() {
         return graphStore.graphModel;
@@ -274,6 +288,13 @@ public final class GraphViewImpl implements GraphView {
     @Override
     public boolean isMainView() {
         return false;
+    }
+
+    private BitVector growBitVector(BitVector bitVector, int size) {
+        long[] elements = bitVector.elements();
+        long[] newElements = QuickBitVector.makeBitVector(size, 1);
+        System.arraycopy(elements, 0, newElements, 0, elements.length);
+        return new BitVector(newElements, size);
     }
 
     private void ensureTypeCountArrayCapacity(int type) {
@@ -288,27 +309,33 @@ public final class GraphViewImpl implements GraphView {
         }
     }
 
-    private void checkNonNullNodeObject(final Object o) {
-        if (o == null) {
-            throw new NullPointerException();
-        }
-        if (!(o instanceof NodeImpl)) {
-            throw new ClassCastException("Object must be a NodeImpl object");
-        }
-    }
-
-    private void checkNonNullEdgeObject(final Object o) {
-        if (o == null) {
-            throw new NullPointerException();
-        }
-        if (!(o instanceof EdgeImpl)) {
-            throw new ClassCastException("Object must be a EdgeImpl object");
-        }
-    }
-
     private void checkIncidentNodesExists(final EdgeImpl e) {
         if (!nodeBitVector.get(e.source.storeId) || !nodeBitVector.get(e.target.storeId)) {
             throw new RuntimeException("Both source and target nodes need to be in the view");
+        }
+    }
+
+    private void checkValidEdgeObject(final Edge n) {
+        if (n == null) {
+            throw new NullPointerException();
+        }
+        if (!(n instanceof EdgeImpl)) {
+            throw new ClassCastException("Object must be a EdgeImpl object");
+        }
+        if (((EdgeImpl) n).storeId == EdgeStore.NULL_ID) {
+            throw new IllegalArgumentException("Edge should belong to a store");
+        }
+    }
+
+    private void checkValidNodeObject(final Node n) {
+        if (n == null) {
+            throw new NullPointerException();
+        }
+        if (!(n instanceof NodeImpl)) {
+            throw new ClassCastException("Object must be a NodeImpl object");
+        }
+        if (((NodeImpl) n).storeId == NodeStore.NULL_ID) {
+            throw new IllegalArgumentException("Node should belong to a store");
         }
     }
 }

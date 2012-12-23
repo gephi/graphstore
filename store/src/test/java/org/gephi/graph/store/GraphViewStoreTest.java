@@ -35,7 +35,7 @@ public class GraphViewStoreTest {
     @Test
     public void testEmptyStore() {
         GraphStore graphStore = new GraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
 
         Assert.assertEquals(store.size(), 0);
     }
@@ -48,7 +48,7 @@ public class GraphViewStoreTest {
     @Test
     public void testCreate() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
 
         GraphViewImpl view = store.createView();
         Assert.assertNotNull(view);
@@ -63,7 +63,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDestroy() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
 
         GraphViewImpl view = store.createView();
         store.destroyView(view);
@@ -76,7 +76,7 @@ public class GraphViewStoreTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testDestroyTwice() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
 
         GraphViewImpl view = store.createView();
         store.destroyView(view);
@@ -86,7 +86,7 @@ public class GraphViewStoreTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testDestroyOtherStore() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         GraphStore graphStore2 = GraphGenerator.generateSmallGraphStore();
@@ -101,7 +101,7 @@ public class GraphViewStoreTest {
     @Test
     public void testGarbage() {
         GraphStore graphStore = new GraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
 
         Assert.assertEquals(store.garbageQueue.size(), 0);
 
@@ -124,7 +124,7 @@ public class GraphViewStoreTest {
     @Test
     public void testGetGraph() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph directedSubgraph = store.getDirectedGraph(view);
@@ -139,7 +139,7 @@ public class GraphViewStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testGetDirectedGraphNull() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
 
         store.getDirectedGraph(null);
     }
@@ -147,7 +147,7 @@ public class GraphViewStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testGetUndirectedGraphNull() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
 
         store.getUndirectedGraph(null);
     }
@@ -155,7 +155,7 @@ public class GraphViewStoreTest {
     @Test(expectedExceptions = ClassCastException.class)
     public void testGetViewAnonymousClass() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
 
         store.getDirectedGraph(new GraphView() {
             @Override
@@ -173,7 +173,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedEmptyView() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -192,7 +192,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedEmptyView() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -211,7 +211,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedContainsElementsEmptyView() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -228,7 +228,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedContainsElementsEmptyView() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -245,7 +245,7 @@ public class GraphViewStoreTest {
     @Test(expectedExceptions = RuntimeException.class)
     public void testNodeExistCheckEmptyView() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -256,7 +256,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedAdd() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -292,7 +292,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedAdd() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -331,7 +331,7 @@ public class GraphViewStoreTest {
     @Test(expectedExceptions = RuntimeException.class)
     public void testAddEdgeWithoutNodes() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         Edge edge = graphStore.getEdges().toArray()[0];
@@ -341,7 +341,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedAddAll() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -366,7 +366,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedAddAll() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -391,7 +391,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedRemove() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -429,7 +429,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedRemove() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -470,7 +470,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedRemoveAll() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -495,7 +495,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedRemoveAll() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -520,7 +520,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedRemoveNodesFirst() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -541,7 +541,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedRemoveNodesFirst() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -562,7 +562,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedClearEdges() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -582,7 +582,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedClearEdges() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -602,7 +602,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedClear() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
@@ -626,7 +626,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedClear() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
 
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
@@ -658,7 +658,7 @@ public class GraphViewStoreTest {
     @Test
     public void testDirectedIterators() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
         addSomeElements(graphStore, view);
         int typeCount = graphStore.edgeTypeStore.length;
@@ -693,7 +693,7 @@ public class GraphViewStoreTest {
     @Test
     public void testUndirectedIterators() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
-        GraphViewStore store = new GraphViewStore(graphStore);
+        GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
         addSomeElements(graphStore, view);
         int typeCount = graphStore.edgeTypeStore.length;
@@ -717,6 +717,42 @@ public class GraphViewStoreTest {
         }
     }
 
+    @Test
+    public void testAddNodeMainView() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        NodeImpl node = new NodeImpl("A");
+        graphStore.addNode(node);
+
+        Assert.assertTrue(view.nodeBitVector.size() >= node.storeId);
+        boolean a = view.addNode(node);
+        Assert.assertTrue(a);
+    }
+
+    @Test
+    public void testAddEdgeMainView() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        NodeImpl source = new NodeImpl("A");
+        NodeImpl target = new NodeImpl("B");
+        graphStore.addNode(source);
+        graphStore.addNode(target);
+        view.addNode(source);
+        view.addNode(target);
+
+        EdgeImpl edge = new EdgeImpl("S", source, target, 0, 1.0, true);
+        graphStore.addEdge(edge);
+
+        Assert.assertTrue(view.edgeBitVector.size() >= edge.storeId);
+        boolean a = view.addEdge(edge);
+        Assert.assertTrue(a);
+    }
+
+    //UTILITY
     private boolean isIterablesEqual(ElementIterable n1, ElementIterable n2) {
         ObjectSet s1 = new ObjectOpenHashSet();
         for (Object n : n1) {

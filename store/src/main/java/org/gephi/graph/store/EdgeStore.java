@@ -971,6 +971,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return false;
     }
 
+    int maxStoreId() {
+        return currentBlock.offset + currentBlock.nodeLength;
+    }
+    
     protected static long getLongId(NodeImpl source, NodeImpl target, boolean directed) {
         if (directed) {
             long edgeId = ((long) source.storeId) << NODE_BITS;

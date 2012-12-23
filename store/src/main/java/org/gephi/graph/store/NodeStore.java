@@ -444,6 +444,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             lock.checkHoldWriteLock();
         }
     }
+    
+    
 
     private void checkIdDoesntExist(Object id) {
         if (dictionary.containsKey(id)) {
@@ -458,7 +460,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         return true;
     }
 
-    void checkNonNullObject(final Object o) {
+    private void checkNonNullObject(final Object o) {
         if (o == null) {
             throw new NullPointerException();
         }
@@ -479,16 +481,20 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         }
     }
 
-    void checkValidId(final int id) {
+    private void checkValidId(final int id) {
         if (id < 0 || !isValidIndex(id)) {
             throw new IllegalArgumentException("Node id=" + id + " is invalid");
         }
     }
 
-    void checkCollection(final Collection<?> collection) {
+    private void checkCollection(final Collection<?> collection) {
         if (collection == this) {
             throw new IllegalArgumentException("Can't pass itself");
         }
+    }
+    
+    int maxStoreId() {
+        return currentBlock.offset + currentBlock.nodeLength;
     }
 
     protected static class NodeBlock {
