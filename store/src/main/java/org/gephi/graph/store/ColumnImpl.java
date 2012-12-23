@@ -20,6 +20,9 @@ public class ColumnImpl implements Column {
     protected int storeId = ColumnStore.NULL_ID;
 
     public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed) {
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("The column ID can't be null or empty");
+        }
         this.id = id;
         this.typeClass = typeClass;
         this.title = title;
@@ -47,7 +50,7 @@ public class ColumnImpl implements Column {
     public String getTitle() {
         return title;
     }
-    
+
     @Override
     public Object getDefaultValue() {
         return defaultValue;
@@ -69,8 +72,8 @@ public class ColumnImpl implements Column {
 
     public void setStoreId(int storeId) {
         this.storeId = storeId;
-    }    
-    
+    }
+
     @Override
     public String toString() {
         return title + " (" + typeClass.toString() + ")";

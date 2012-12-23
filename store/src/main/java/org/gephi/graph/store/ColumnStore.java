@@ -71,7 +71,9 @@ public class ColumnStore<T extends Element> {
                 int intIndex = shortToInt(id);
                 columnImpl.setStoreId(intIndex);
                 columns[intIndex] = columnImpl;
-                indexStore.addColumn(columnImpl);
+                if (indexStore != null) {
+                    indexStore.addColumn(columnImpl);
+                }
             } else {
                 throw new IllegalArgumentException("The column already exist");
             }
@@ -85,15 +87,19 @@ public class ColumnStore<T extends Element> {
 
         writeLock();
         try {
+            final ColumnImpl columnImpl = (ColumnImpl) column;
             short id = idMap.removeShort(column.getId());
             if (id == NULL_SHORT) {
                 throw new IllegalArgumentException("The column doesnt exist");
             }
             garbageQueue.enqueue(id);
+            columnImpl.setStoreId(NULL_ID);
 
             int intId = shortToInt(id);
             columns[intId] = null;
-            indexStore.removeColumn((ColumnImpl)column);
+            if (indexStore != null) {
+                indexStore.removeColumn((ColumnImpl) column);
+            }
         } finally {
             writeUnlock();
         }
@@ -160,12 +166,7 @@ public class ColumnStore<T extends Element> {
     }
 
     public int size() {
-        readLock();
-        try {
-            return length - garbageQueue.size();
-        } finally {
-            readUnlock();
-        }
+        return length - garbageQueue.size();
     }
 
     short intToShort(final int id) {
