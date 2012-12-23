@@ -1,15 +1,19 @@
 package org.gephi.graph.api;
 
+import java.util.Collection;
+
 /**
  *
  * @author mbastian
  */
-public interface EdgeIterable extends Iterable<Edge> {
+public interface EdgeIterable extends ElementIterable<Edge> {
 
     @Override
     public EdgeIterator iterator();
 
+    @Override
     public Edge[] toArray();
-
-    public void doBreak();
+    
+    @Override
+    public Collection<Edge> toCollection();
 }
