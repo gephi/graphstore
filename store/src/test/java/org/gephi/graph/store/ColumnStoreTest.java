@@ -107,7 +107,7 @@ public class ColumnStoreTest {
     public void testRemoveColumnNull() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
 
-        store.removeColumn(null);
+        store.removeColumn((Column)null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

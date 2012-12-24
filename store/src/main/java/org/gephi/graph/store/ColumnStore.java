@@ -105,7 +105,18 @@ public class ColumnStore<T extends Element> {
         }
     }
 
+    public void removeColumn(final String key) {
+        checkNonNullObject(key);
+        readLock();
+        try {
+            removeColumn(getColumn(key));
+        } finally {
+            readUnlock();
+        }
+    }
+
     public int getColumnIndex(final String key) {
+        checkNonNullObject(key);
         readLock();
         try {
             short id = idMap.getShort(key);
@@ -135,6 +146,7 @@ public class ColumnStore<T extends Element> {
     }
 
     public Column getColumn(final String key) {
+        checkNonNullObject(key);
         readLock();
         try {
             short id = idMap.getShort(key);
@@ -148,6 +160,7 @@ public class ColumnStore<T extends Element> {
     }
 
     public boolean hasColumn(String key) {
+        checkNonNullObject(key);
         readLock();
         try {
             return idMap.containsKey(key);
@@ -198,6 +211,12 @@ public class ColumnStore<T extends Element> {
     void writeUnlock() {
         if (lock != null) {
             lock.writeUnlock();
+        }
+    }
+
+    void checkNonNullObject(final Object o) {
+        if (o == null) {
+            throw new NullPointerException();
         }
     }
 

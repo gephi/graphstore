@@ -44,7 +44,37 @@ public class TableImpl<T extends Element> implements Table {
 
         return column;
     }
+    
+    @Override
+    public int countColumns() {
+        return store.size();
+    }
 
+    @Override
+    public Column getColumn(int index) {
+        return store.getColumnByIndex(index);
+    }
+
+    @Override
+    public Column getColumn(String id) {
+        return store.getColumn(id);
+    }
+
+    @Override
+    public boolean hasColumn(String id) {
+        return store.hasColumn(id);
+    }
+
+    @Override
+    public void removeColumn(Column column) {
+        store.removeColumn(column);
+    }
+
+    @Override
+    public void removeColumn(String id) {
+        store.removeColumn(id);
+    }
+    
     private void checkValidId(String id) {
         if (id == null) {
             throw new NullPointerException();
@@ -66,10 +96,5 @@ public class TableImpl<T extends Element> implements Table {
                 throw new IllegalArgumentException("The default value type cannot be cast to the type");
             }
         }
-    }
-
-    @Override
-    public int countColumns() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
