@@ -407,7 +407,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
 
         private boolean isSortable() {
-            return column.getTypeClass().isAssignableFrom(Number.class);
+            return Number.class.isAssignableFrom(column.getTypeClass());
         }
 
         protected final class WithNullDecorator implements Collection<K> {

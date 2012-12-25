@@ -90,7 +90,7 @@ public abstract class ElementImpl implements Element {
         Object oldValue = null;
         if (index >= properties.length) {
             Object[] newArray = new Object[index + 1];
-            System.arraycopy(properties, 0, newArray, 0, index);
+            System.arraycopy(properties, 0, newArray, 0, properties.length);
             properties = newArray;
         } else {
             oldValue = properties[index];

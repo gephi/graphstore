@@ -181,6 +181,26 @@ public class IndexStoreTest {
         Assert.assertEquals(mainIndex.values(col1).size(), nodes.length);
         Assert.assertEquals(mainIndex.values(col2).size(), nodes.length);
     }
+    
+    @Test
+    public void testMinMaxValue() {
+        ColumnStore<Node> columnStore = generateBasicNodeColumnStore();
+        IndexStore<Node> indexStore = columnStore.indexStore;
+        IndexImpl<Node> mainIndex = indexStore.mainIndex;
+
+        Column col = columnStore.getColumn("age");
+        
+        NodeImpl n1 = new NodeImpl("0");
+        n1.setProperty(col, 1);
+        NodeImpl n2 = new NodeImpl("1");
+        n2.setProperty(col, 5);
+        
+        indexStore.index(n1);
+        indexStore.index(n2);
+        
+        Assert.assertEquals(mainIndex.getMinValue(col), 1);
+        Assert.assertEquals(mainIndex.getMaxValue(col), 5);
+    }
 
     private NodeImpl[] generateNodesWithUniqueAttributes(ColumnStore<Node> columnStore) {
         int count = 100;
