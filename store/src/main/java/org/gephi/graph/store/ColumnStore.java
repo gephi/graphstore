@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortHeapPriorityQueue;
 import it.unimi.dsi.fastutil.shorts.ShortPriorityQueue;
+import java.util.Iterator;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.Element;
@@ -13,7 +14,7 @@ import org.gephi.graph.api.Element;
  *
  * @author mbastian
  */
-public class ColumnStore<T extends Element> {
+public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
 
     //Const
     public final static int NULL_ID = -1;
@@ -93,13 +94,13 @@ public class ColumnStore<T extends Element> {
                 throw new IllegalArgumentException("The column doesnt exist");
             }
             garbageQueue.enqueue(id);
-            columnImpl.setStoreId(NULL_ID);
 
             int intId = shortToInt(id);
             columns[intId] = null;
             if (indexStore != null) {
                 indexStore.removeColumn((ColumnImpl) column);
             }
+            columnImpl.setStoreId(NULL_ID);
         } finally {
             writeUnlock();
         }
@@ -169,6 +170,11 @@ public class ColumnStore<T extends Element> {
         }
     }
 
+    @Override
+    public Iterator<ColumnImpl> iterator() {
+        return new ColumnStoreIterator();
+    }
+
     public Set<String> getPropertyKeys() {
         readLock();
         try {
@@ -232,6 +238,34 @@ public class ColumnStore<T extends Element> {
     void checkIndexStatus(final Column column) {
         if (indexStore == null && column.isIndexed()) {
             throw new IllegalArgumentException("Can't add an indexed column to a non indexed store");
+        }
+    }
+
+    private final class ColumnStoreIterator implements Iterator<ColumnImpl> {
+
+        private int index;
+        private ColumnImpl pointer;
+
+        @Override
+        public boolean hasNext() {
+            while (index < length && (pointer = columns[index++]) == null) {
+            }
+            if (pointer == null) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public ColumnImpl next() {
+            ColumnImpl c = pointer;
+            pointer = null;
+            return c;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported");
         }
     }
 }

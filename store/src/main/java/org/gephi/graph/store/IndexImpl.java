@@ -192,6 +192,16 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
     }
 
+    protected boolean hasColumn(ColumnImpl col) {
+        if (col.isIndexed()) {
+            int id = col.storeId;
+            if (id != ColumnStore.NULL_ID && columns[id].column == col) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected AbstractIndex getIndex(ColumnImpl column) {
         return columns[column.getStoreId()];
     }
@@ -199,9 +209,9 @@ public class IndexImpl<T extends Element> implements Index<T> {
     protected AbstractIndex getIndex(String key) {
         return columns[propertyStore.getColumnIndex(key)];
     }
-    
+
     protected void destroy() {
-        for(AbstractIndex ai : columns) {
+        for (AbstractIndex ai : columns) {
             ai.destroy();
         }
         columns = null;
@@ -286,7 +296,9 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         public Object putValue(T element, Object value) {
             if (value == null) {
-                nullSet.add(element);
+                if (nullSet.add(element)) {
+                    elements++;
+                }
             } else {
                 Set<T> set = getValueSet((K) value);
                 if (set == null) {
@@ -303,7 +315,9 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         public void removeValue(T element, Object value) {
             if (value == null) {
-                nullSet.remove(element);
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
             } else {
                 Set<T> set = getValueSet((K) value);
                 if (set.remove(element)) {
@@ -333,11 +347,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
 
         public Collection values() {
-            return map.keySet();
+            return new WithNullDecorator();
         }
 
         public int countValues() {
-            return values().size();
+            return (nullSet.isEmpty() ? 0 : 1) + map.size();
         }
 
         public Number getMinValue() {
@@ -366,6 +380,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         protected void destroy() {
             map = null;
+            nullSet.clear();
             elements = 0;
         }
 
@@ -375,6 +390,9 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
 
         protected Set<T> getValueSet(K value) {
+            if(value == null) {
+                return nullSet;
+            }
             return map.get(value);
         }
 
@@ -392,7 +410,141 @@ public class IndexImpl<T extends Element> implements Index<T> {
             return column.getTypeClass().isAssignableFrom(Number.class);
         }
 
-        protected final class EntryIterator implements Iterator<Map.Entry<K, Set<T>>> {
+        protected final class WithNullDecorator implements Collection<K> {
+
+            private boolean hasNull() {
+                return !nullSet.isEmpty();
+            }
+
+            @Override
+            public int size() {
+                return (hasNull() ? 1 : 0) + map.size();
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return !hasNull() && map.isEmpty();
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                if (o == null && hasNull()) {
+                    return true;
+                } else if (o != null) {
+                    return map.containsKey((K) o);
+                }
+                return false;
+            }
+
+            @Override
+            public Iterator iterator() {
+                return new WithNullIterator();
+            }
+
+            @Override
+            public Object[] toArray() {
+                if (hasNull()) {
+                    Object[] res = new Object[map.size() + 1];
+                    res[0] = null;
+                    System.arraycopy(map.keySet().toArray(), 0, res, 1, map.size());
+                    return res;
+                } else {
+                    return map.keySet().toArray();
+                }
+            }
+
+            @Override
+            public Object[] toArray(Object[] array) {
+
+                if (hasNull()) {
+                    if (array.length < size()) {
+                        array = (K[]) java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), map.size() + 1);
+                    }
+                    array[0] = null;
+                    System.arraycopy(map.keySet().toArray(), 0, array, 1, map.size());
+                    return array;
+                } else {
+                    return map.keySet().toArray(array);
+                }
+            }
+
+            @Override
+            public boolean add(Object e) {
+                throw new UnsupportedOperationException("Not supported");
+            }
+
+            @Override
+            public boolean remove(Object o) {
+                throw new UnsupportedOperationException("Not supported");
+            }
+
+            @Override
+            public boolean containsAll(Collection clctn) {
+                for (Object o : clctn) {
+                    if (o == null && nullSet.isEmpty()) {
+                        return false;
+                    } else if (o != null && !map.containsKey((K) o)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public boolean addAll(Collection clctn) {
+                throw new UnsupportedOperationException("Not supported");
+            }
+
+            @Override
+            public boolean removeAll(Collection clctn) {
+                throw new UnsupportedOperationException("Not supported");
+            }
+
+            @Override
+            public boolean retainAll(Collection clctn) {
+                throw new UnsupportedOperationException("Not supported");
+            }
+
+            @Override
+            public void clear() {
+                throw new UnsupportedOperationException("Not supported");
+            }
+
+            private final class WithNullIterator implements Iterator<K> {
+
+                private final Iterator<K> mapIterator;
+                private boolean hasNull;
+
+                public WithNullIterator() {
+                    hasNull = hasNull();
+                    mapIterator = map.keySet().iterator();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    if (hasNull) {
+                        return true;
+                    }
+                    return mapIterator.hasNext();
+                }
+
+                @Override
+                public K next() {
+                    if (hasNull) {
+                        hasNull = false;
+                        return null;
+                    }
+                    return mapIterator.next();
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException("Not supported operation.");
+                }
+            }
+        }
+
+        private final class EntryIterator implements Iterator<Map.Entry<K, Set<T>>> {
 
             private final Iterator<Map.Entry<K, Set<T>>> mapIterator;
             private NullEntry nullEntry;
@@ -488,12 +640,12 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public boolean add(T e) {
-            throw new UnsupportedOperationException("Not supported operation.");
+            return set.add(e);
         }
 
         @Override
         public boolean remove(Object o) {
-            throw new UnsupportedOperationException("Not supported operation.");
+            return set.remove(o);
         }
 
         @Override
