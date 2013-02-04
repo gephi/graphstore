@@ -1,6 +1,6 @@
 package org.gephi.graph.api;
 
-import org.gephi.graph.store.GraphStore;
+import org.gephi.attribute.api.Table;
 
 /**
  *
@@ -36,5 +36,7 @@ public interface GraphModel {
     
     public void destroyView(GraphView view);
     
+    public Table getNodeTable();
     
+    public Table getEdgeTable();
 }

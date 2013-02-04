@@ -18,5 +18,7 @@ public interface Column {
     
     public boolean isIndexed();
     
+    public boolean isArray();
+    
     public Object getDefaultValue();
 }

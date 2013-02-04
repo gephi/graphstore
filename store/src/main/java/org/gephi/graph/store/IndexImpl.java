@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectAVLTreeMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -25,12 +26,14 @@ import org.gephi.graph.api.Element;
  */
 public class IndexImpl<T extends Element> implements Index<T> {
 
+    protected final GraphLock lock;
     protected final ColumnStore<T> propertyStore;
     protected AbstractIndex[] columns;
 
     public IndexImpl(ColumnStore<T> propertyStore) {
         this.propertyStore = propertyStore;
         this.columns = new AbstractIndex[0];
+        this.lock = propertyStore.lock;
     }
 
     @Override
@@ -47,8 +50,13 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public int count(Column column, Object value) {
         checkNonNullColumnObject(column);
 
-        AbstractIndex index = getIndex((ColumnImpl) column);
-        return index.getCount(value);
+        readLock();
+        try {
+            AbstractIndex index = getIndex((ColumnImpl) column);
+            return index.getCount(value);
+        } finally {
+            readUnlock();
+        }
     }
 
     public int count(String key, Object value) {
@@ -69,6 +77,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Iterable<T> get(Column column, Object value) {
         checkNonNullColumnObject(column);
 
+        if (lock != null) {
+            readLock();
+            AbstractIndex index = getIndex((ColumnImpl) column);
+            return new LockableIterable<T>(index.getValueSet(value));
+        }
         AbstractIndex index = getIndex((ColumnImpl) column);
         return index.getValueSet(value);
     }
@@ -77,16 +90,25 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Number getMinValue(Column column) {
         checkNonNullColumnObject(column);
 
-        AbstractIndex index = getIndex((ColumnImpl) column);
-        return index.getMinValue();
+        readLock();
+        try {
+            AbstractIndex index = getIndex((ColumnImpl) column);
+            return index.getMinValue();
+        } finally {
+            readUnlock();
+        }
     }
 
     @Override
     public Number getMaxValue(Column column) {
         checkNonNullColumnObject(column);
-
-        AbstractIndex index = getIndex((ColumnImpl) column);
-        return index.getMaxValue();
+        readLock();
+        try {
+            AbstractIndex index = getIndex((ColumnImpl) column);
+            return index.getMaxValue();
+        } finally {
+            readUnlock();
+        }
     }
 
     @Override
@@ -101,24 +123,37 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Collection values(Column column) {
         checkNonNullColumnObject(column);
 
-        AbstractIndex index = getIndex((ColumnImpl) column);
-        return index.values();
+        readLock();
+        try {
+            AbstractIndex index = getIndex((ColumnImpl) column);
+            return new ArrayList(index.values());
+        } finally {
+            readUnlock();
+        }
     }
 
     @Override
     public int countValues(Column column) {
         checkNonNullColumnObject(column);
-
-        AbstractIndex index = getIndex((ColumnImpl) column);
-        return index.countValues();
+        readLock();
+        try {
+            AbstractIndex index = getIndex((ColumnImpl) column);
+            return index.countValues();
+        } finally {
+            readUnlock();
+        }
     }
 
     @Override
     public int countElements(Column column) {
         checkNonNullColumnObject(column);
-
-        AbstractIndex index = getIndex((ColumnImpl) column);
-        return index.elements;
+        readLock();
+        try {
+            AbstractIndex index = getIndex((ColumnImpl) column);
+            return index.elements;
+        } finally {
+            readUnlock();
+        }
     }
 
     public Object put(String key, Object value, T element) {
@@ -161,6 +196,12 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         AbstractIndex index = getIndex((ColumnImpl) column);
         return index.replaceValue(element, oldValue, value);
+    }
+
+    public void clear() {
+        for (AbstractIndex ai : columns) {
+            ai.clear();
+        }
     }
 
     protected void addColumn(ColumnImpl col) {
@@ -219,37 +260,62 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     AbstractIndex createIndex(ColumnImpl column) {
         if (column.getTypeClass().equals(Byte.class)) {
+            //Byte
             return new ByteIndex(column);
         } else if (column.getTypeClass().equals(Short.class)) {
+            //Short
             return new ShortIndex(column);
         } else if (column.getTypeClass().equals(Integer.class)) {
+            //Integer
             return new IntegerIndex(column);
         } else if (column.getTypeClass().equals(Long.class)) {
+            //Long
             return new LongIndex(column);
         } else if (column.getTypeClass().equals(Float.class)) {
+            //Float
             return new FloatIndex(column);
         } else if (column.getTypeClass().equals(Double.class)) {
+            //Double
             return new DoubleIndex(column);
         } else if (column.getTypeClass().equals(Boolean.class)) {
+            //Boolean
             return new BooleanIndex(column);
         } else if (column.getTypeClass().equals(Character.class)) {
+            //Char
             return new CharIndex(column);
+        } else if (column.getTypeClass().equals(String.class)) {
+            //String
+            return new DefaultIndex(column);
         } else if (column.getTypeClass().equals(byte[].class)) {
+            //Byte Array
             return new ByteArrayIndex(column);
         } else if (column.getTypeClass().equals(short[].class)) {
+            //Short Array
             return new ShortArrayIndex(column);
         } else if (column.getTypeClass().equals(int[].class)) {
+            //Integer Array
             return new IntegerArrayIndex(column);
         } else if (column.getTypeClass().equals(long[].class)) {
+            //Long Array
             return new LongArrayIndex(column);
         } else if (column.getTypeClass().equals(float[].class)) {
+            //Float array
             return new FloatArrayIndex(column);
         } else if (column.getTypeClass().equals(double[].class)) {
+            //Double array
             return new DoubleArrayIndex(column);
         } else if (column.getTypeClass().equals(boolean[].class)) {
+            //Boolean array
             return new BooleanArrayIndex(column);
         } else if (column.getTypeClass().equals(char[].class)) {
+            //Char array
             return new CharArrayIndex(column);
+        } else if (column.getTypeClass().equals(String[].class)) {
+            //String array
+            return new DefaultArrayIndex(column);
+        } else if (column.getTypeClass().isArray()) {
+            //Default Array
+            return new DefaultArrayIndex(column);
         }
         return new DefaultIndex(column);
     }
@@ -259,6 +325,30 @@ public class IndexImpl<T extends Element> implements Index<T> {
             AbstractIndex[] newArray = new AbstractIndex[index + 1];
             System.arraycopy(columns, 0, newArray, 0, columns.length);
             columns = newArray;
+        }
+    }
+
+    void readLock() {
+        if (lock != null) {
+            lock.readLock();
+        }
+    }
+
+    void readUnlock() {
+        if (lock != null) {
+            lock.readUnlock();
+        }
+    }
+
+    void writeLock() {
+        if (lock != null) {
+            lock.writeLock();
+        }
+    }
+
+    void writeUnlock() {
+        if (lock != null) {
+            lock.writeUnlock();
         }
     }
 
@@ -384,13 +474,19 @@ public class IndexImpl<T extends Element> implements Index<T> {
             elements = 0;
         }
 
+        protected void clear() {
+            map.clear();
+            nullSet.clear();
+            elements = 0;
+        }
+
         @Override
         public Iterator<Map.Entry<K, Set<T>>> iterator() {
             return new EntryIterator();
         }
 
         protected Set<T> getValueSet(K value) {
-            if(value == null) {
+            if (value == null) {
                 return nullSet;
             }
             return map.get(value);
@@ -735,6 +831,14 @@ public class IndexImpl<T extends Element> implements Index<T> {
             trueSet = new ValueSet(Boolean.TRUE);
             falseSet = new ValueSet(Boolean.FALSE);
         }
+
+        @Override
+        protected void clear() {
+            trueSet = new ValueSet(Boolean.TRUE);
+            falseSet = new ValueSet(Boolean.FALSE);
+            elements = 0;
+            nullSet.clear();
+        }
     }
 
     protected class DoubleIndex extends AbstractIndex<Double> {
@@ -995,6 +1099,48 @@ public class IndexImpl<T extends Element> implements Index<T> {
             for (char s : (char[]) value) {
                 super.removeValue(element, s);
             }
+        }
+    }
+
+    private class LockableIterable<T> implements Iterable<T> {
+
+        private final Iterable<T> ite;
+
+        public LockableIterable(Iterable<T> ite) {
+            this.ite = ite;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new LockableIterator<T>(ite.iterator());
+        }
+    }
+
+    private class LockableIterator<T> implements Iterator<T> {
+
+        private final Iterator<T> itr;
+
+        public LockableIterator(Iterator<T> itr) {
+            this.itr = itr;
+        }
+
+        @Override
+        public boolean hasNext() {
+            boolean n = itr.hasNext();
+            if (!n) {
+                readUnlock();
+            }
+            return n;
+        }
+
+        @Override
+        public T next() {
+            return itr.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
         }
     }
 }

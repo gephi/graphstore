@@ -27,14 +27,14 @@ public class IndexStore<T extends Element> {
         this.viewIndexes = new Object2ObjectOpenHashMap<Graph, IndexImpl<T>>();
     }
 
-    protected synchronized void addColumn(ColumnImpl col) {
+    protected void addColumn(ColumnImpl col) {
         mainIndex.addColumn(col);
         for (IndexImpl<T> index : viewIndexes.values()) {
             index.addColumn(col);
         }
     }
 
-    protected synchronized void removeColumn(ColumnImpl col) {
+    protected void removeColumn(ColumnImpl col) {
         mainIndex.removeColumn(col);
         for (IndexImpl<T> index : viewIndexes.values()) {
             index.destroy();
@@ -42,11 +42,11 @@ public class IndexStore<T extends Element> {
         }
     }
 
-    protected synchronized boolean hasColumn(ColumnImpl col) {
+    protected boolean hasColumn(ColumnImpl col) {
         return mainIndex.hasColumn(col);
     }
 
-    protected synchronized IndexImpl getIndex(Graph graph) {
+    protected IndexImpl getIndex(Graph graph) {
         GraphView view = graph.getView();
         if (view.isMainView()) {
             return mainIndex;
@@ -58,7 +58,7 @@ public class IndexStore<T extends Element> {
         return viewIndex;
     }
 
-    protected synchronized IndexImpl createViewIndex(Graph graph) {
+    protected IndexImpl createViewIndex(Graph graph) {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't create a view index for the main view");
         }
@@ -91,7 +91,7 @@ public class IndexStore<T extends Element> {
         return viewIndex;
     }
 
-    protected synchronized void deleteViewIndex(Graph graph) {
+    protected void deleteViewIndex(Graph graph) {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't delete a view index for the main view");
         }
@@ -101,7 +101,7 @@ public class IndexStore<T extends Element> {
         }
     }
 
-    public synchronized Object set(Column column, Object oldValue, Object value, T element) {
+    public Object set(Column column, Object oldValue, Object value, T element) {
         value = mainIndex.set(column, oldValue, value, element);
 
         if (!viewIndexes.isEmpty()) {
@@ -122,7 +122,7 @@ public class IndexStore<T extends Element> {
         return value;
     }
 
-    public synchronized void clear(T element) {
+    public void clear(T element) {
         ElementImpl elementImpl = (ElementImpl) element;
 
         final int length = propertyStore.length;
@@ -143,7 +143,7 @@ public class IndexStore<T extends Element> {
         }
     }
 
-    public synchronized void index(T element) {
+    public void index(T element) {
         ElementImpl elementImpl = (ElementImpl) element;
         ensurePropertyArrayLength(elementImpl, propertyStore.length);
 
@@ -156,6 +156,13 @@ public class IndexStore<T extends Element> {
                 value = mainIndex.put(c, value, element);
                 elementImpl.properties[c.getIndex()] = value;
             }
+        }
+    }
+
+    public void clear() {
+        mainIndex.clear();
+        for (IndexImpl index : viewIndexes.values()) {
+            index.clear();
         }
     }
 

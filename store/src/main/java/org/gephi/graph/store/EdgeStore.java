@@ -511,6 +511,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         int id = edge.storeId;
         if (id != EdgeStore.NULL_ID) {
             checkEdgeExists(edge);
+            
+            edge.clearProperties();
 
             int storeIndex = id / BLOCK_SIZE;
             EdgeBlock block = blocks[storeIndex];
@@ -533,7 +535,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             if (viewStore != null) {
                 viewStore.removeEdge(edge);
             }
-            edge.clearProperties();
+            
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {
                     blocks[i] = null;

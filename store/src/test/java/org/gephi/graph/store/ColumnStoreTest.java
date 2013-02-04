@@ -74,6 +74,11 @@ public class ColumnStoreTest {
             public boolean isIndexed() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+            
+            @Override
+            public boolean isArray() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
 
             @Override
             public Object getDefaultValue() {

@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Arrays;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
+import org.gephi.attribute.time.Estimator;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
@@ -175,6 +176,31 @@ public class GraphStoreTest {
 
             @Override
             public void clearProperties() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setProperty(String key, Object value, double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setProperty(Column column, Object value, double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean addTimestamp(double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean removeTimestamp(double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public double[] getTimestamps() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });

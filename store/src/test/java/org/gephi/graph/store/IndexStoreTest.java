@@ -133,7 +133,7 @@ public class IndexStoreTest {
         Assert.assertFalse(mainIndex.values(col1).contains("A"));
         Assert.assertFalse(mainIndex.values(col2).contains(20));
     }
-    
+
     @Test
     public void testClearNodeNullValue() {
         ColumnStore<Node> columnStore = generateBasicNodeColumnStore();
@@ -181,7 +181,7 @@ public class IndexStoreTest {
         Assert.assertEquals(mainIndex.values(col1).size(), nodes.length);
         Assert.assertEquals(mainIndex.values(col2).size(), nodes.length);
     }
-    
+
     @Test
     public void testMinMaxValue() {
         ColumnStore<Node> columnStore = generateBasicNodeColumnStore();
@@ -189,19 +189,42 @@ public class IndexStoreTest {
         IndexImpl<Node> mainIndex = indexStore.mainIndex;
 
         Column col = columnStore.getColumn("age");
-        
+
         NodeImpl n1 = new NodeImpl("0");
         n1.setProperty(col, 1);
         NodeImpl n2 = new NodeImpl("1");
         n2.setProperty(col, 5);
-        
+
         indexStore.index(n1);
         indexStore.index(n2);
-        
+
         Assert.assertEquals(mainIndex.getMinValue(col), 1);
         Assert.assertEquals(mainIndex.getMaxValue(col), 5);
     }
 
+    @Test
+    public void testClear() {
+        ColumnStore<Node> columnStore = generateBasicNodeColumnStore();
+        IndexStore<Node> indexStore = columnStore.indexStore;
+        IndexImpl<Node> mainIndex = indexStore.mainIndex;
+
+        Column col = columnStore.getColumn("age");
+
+        NodeImpl n1 = new NodeImpl("0");
+        n1.setProperty(col, 1);
+        NodeImpl n2 = new NodeImpl("1");
+        n2.setProperty(col, 5);
+
+        indexStore.index(n1);
+        indexStore.index(n2);
+
+        indexStore.clear();
+
+        Assert.assertEquals(mainIndex.count(col, 1), 0);
+        Assert.assertTrue(mainIndex.values(col).isEmpty());
+    }
+
+    //UTILITY
     private NodeImpl[] generateNodesWithUniqueAttributes(ColumnStore<Node> columnStore) {
         int count = 100;
         NodeImpl[] nodes = new NodeImpl[count];

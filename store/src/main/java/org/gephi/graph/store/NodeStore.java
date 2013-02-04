@@ -250,6 +250,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         int id = node.storeId;
         if (id != NodeStore.NULL_ID) {
             checkNodeExists(node);
+            
+            node.clearProperties();
 
             int storeIndex = id / BLOCK_SIZE;
             NodeBlock block = blocks[storeIndex];
@@ -261,7 +263,6 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             if (viewStore != null) {
                 viewStore.removeNode(node);
             }
-            node.clearProperties();
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {
                     blocks[i] = null;

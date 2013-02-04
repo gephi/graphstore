@@ -134,6 +134,11 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     @Override
+    boolean isValid() {
+        return storeId != EdgeStore.NULL_ID;
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 71 * hash + (this.id != null ? this.id.hashCode() : 0);

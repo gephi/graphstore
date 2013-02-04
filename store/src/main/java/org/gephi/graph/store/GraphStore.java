@@ -34,6 +34,7 @@ public class GraphStore implements DirectedGraph {
     protected final ColumnStore<Node> nodePropertyStore;
     protected final ColumnStore<Edge> edgePropertyStore;
     protected final GraphViewStore viewStore;
+    protected final TimestampStore timestampStore;
     //Factory
     protected final GraphFactoryImpl factory;
     //Lock
@@ -57,6 +58,7 @@ public class GraphStore implements DirectedGraph {
         nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null, viewStore);
         nodePropertyStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
         edgePropertyStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
+        timestampStore = new TimestampStore(this);
         factory = new GraphFactoryImpl(this);
         mainGraphView = new MainGraphView();
 
@@ -440,6 +442,9 @@ public class GraphStore implements DirectedGraph {
         try {
             edgeStore.clear();
             nodeStore.clear();
+            edgePropertyStore.indexStore.clear();
+            nodePropertyStore.indexStore.clear();
+            timestampStore.clear();
         } finally {
             autoWriteUnlock();
         }
@@ -450,6 +455,8 @@ public class GraphStore implements DirectedGraph {
         autoWriteLock();
         try {
             edgeStore.clear();
+            edgePropertyStore.indexStore.clear();
+            timestampStore.clearEdges();
         } finally {
             autoWriteUnlock();
         }

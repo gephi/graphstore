@@ -66,6 +66,11 @@ public class ColumnImpl implements Column {
         return indexed;
     }
 
+    @Override
+    public boolean isArray() {
+        return typeClass.isArray();
+    }
+
     public int getStoreId() {
         return storeId;
     }

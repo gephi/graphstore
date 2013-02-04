@@ -1,11 +1,14 @@
 package org.gephi.graph.store;
 
+import org.gephi.attribute.api.Table;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
@@ -16,9 +19,13 @@ import org.gephi.graph.api.UndirectedSubgraph;
 public class GraphModelImpl implements GraphModel {
 
     protected final GraphStore store;
+    protected final TableImpl<Node> nodeTable;
+    protected final TableImpl<Edge> edgeTable;
 
     public GraphModelImpl() {
         store = new GraphStore();
+        nodeTable = new TableImpl<Node>(store.nodePropertyStore);
+        edgeTable = new TableImpl<Edge>(store.edgePropertyStore);
     }
 
     @Override
@@ -92,5 +99,15 @@ public class GraphModelImpl implements GraphModel {
     @Override
     public void destroyView(GraphView view) {
         store.viewStore.destroyView(view);
+    }
+
+    @Override
+    public Table getNodeTable() {
+        return nodeTable;
+    }
+
+    @Override
+    public Table getEdgeTable() {
+        return edgeTable;
     }
 }

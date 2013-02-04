@@ -57,6 +57,11 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
+    boolean isValid() {
+        return storeId != NodeStore.NULL_ID;
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 29 * hash + (this.id != null ? this.id.hashCode() : 0);

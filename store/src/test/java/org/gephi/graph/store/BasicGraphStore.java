@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
+import org.gephi.attribute.time.Estimator;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -391,6 +392,31 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public void clearProperties() {
             properties.clear();
+        }
+
+        @Override
+        public void setProperty(String key, Object value, double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setProperty(Column column, Object value, double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean addTimestamp(double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean removeTimestamp(double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public double[] getTimestamps() {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 
