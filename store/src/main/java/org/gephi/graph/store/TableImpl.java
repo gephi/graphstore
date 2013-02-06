@@ -11,6 +11,7 @@ import org.gephi.graph.api.Element;
  */
 public class TableImpl<T extends Element> implements Table {
 
+    //Store
     protected final ColumnStore<T> store;
 
     public TableImpl(ColumnStore<T> store) {
@@ -44,7 +45,7 @@ public class TableImpl<T extends Element> implements Table {
 
         return column;
     }
-    
+
     @Override
     public int countColumns() {
         return store.size();
@@ -74,7 +75,7 @@ public class TableImpl<T extends Element> implements Table {
     public void removeColumn(String id) {
         store.removeColumn(id);
     }
-    
+
     private void checkValidId(String id) {
         if (id == null) {
             throw new NullPointerException();
@@ -88,6 +89,26 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     private void checkSupportedTypes(Class type) {
+        if (!(type.equals(Byte.class)
+                || type.equals(Short.class)
+                || type.equals(Integer.class)
+                || type.equals(Long.class)
+                || type.equals(Float.class)
+                || type.equals(Double.class)
+                || type.equals(Boolean.class)
+                || type.equals(Character.class)
+                || type.equals(String.class)
+                || type.equals(byte[].class)
+                || type.equals(short[].class)
+                || type.equals(int[].class)
+                || type.equals(long[].class)
+                || type.equals(float[].class)
+                || type.equals(double[].class)
+                || type.equals(boolean[].class)
+                || type.equals(char[].class)
+                || type.equals(String[].class))) {
+            throw new IllegalArgumentException("Unknown type " + type.getName());
+        }
     }
 
     private void checkDefaultValue(Object defaultValue, Class type) {

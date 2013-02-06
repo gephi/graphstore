@@ -111,7 +111,6 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
     }
 
-    @Override
     public Iterable<Map.Entry<Object, Set<T>>> get(Column column) {
         checkNonNullColumnObject(column);
 

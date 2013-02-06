@@ -379,6 +379,21 @@ public class TimestampStoreTest {
         Assert.assertTrue(r2.contains(nodeImpl));
         Assert.assertEquals(r2.size(), 1);
     }
+    
+    @Test
+    public void testRemoveTimestampNodes() {
+        GraphStore graphStore = new GraphStore();
+        TimestampStore store = graphStore.timestampStore;
+
+        NodeImpl nodeImpl = (NodeImpl)graphStore.factory.newNode(0);
+        nodeImpl.addTimestamp(1.0);
+        nodeImpl.addTimestamp(2.0);
+
+        graphStore.addNode(nodeImpl);
+        graphStore.removeNode(nodeImpl);
+        
+        Assert.assertEquals(store.size(), 0);
+    }
 
     //UTILITY
     private <T> Object[] getArrayFromIterable(Iterable<T> iterable) {

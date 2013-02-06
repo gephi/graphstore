@@ -33,6 +33,9 @@ public abstract class ElementImpl implements Element {
     protected TimestampSet timestampSet;
 
     public ElementImpl(Object id, GraphStore graphStore) {
+        if(id == null) {
+            throw new NullPointerException();
+        }
         this.id = id;
         this.graphStore = graphStore;
         this.properties = new Object[0];
@@ -54,6 +57,8 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object getProperty(Column column) {
+        checkColumn(column);
+        
         int index = column.getIndex();
         Object res = null;
         if (index < properties.length) {
@@ -82,6 +87,8 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object removeProperty(Column column) {
+        checkColumn(column);
+        
         ColumnStore propertyStore = getPropertyStore();
         int index = column.getIndex();
         if (index < properties.length) {
@@ -103,6 +110,7 @@ public abstract class ElementImpl implements Element {
     @Override
     public void setProperty(Column column, Object value) {
         checkType(column, value);
+        checkColumn(column);
 
         int index = column.getIndex();
         ColumnStore propertyStore = getPropertyStore();
@@ -130,6 +138,7 @@ public abstract class ElementImpl implements Element {
     public void setProperty(Column column, Object value, double timestamp) {
         checkType(column, value);
         checkDouble(timestamp);
+        checkColumn(column);
 
         final TimestampStore timestampStore = getTimestampStore();
         if (timestampStore != null) {
@@ -252,6 +261,16 @@ public abstract class ElementImpl implements Element {
     private void checkDouble(double timestamp) {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             throw new IllegalArgumentException("Timestamp can' be NaN or infinity");
+        }
+    }
+    
+    private void checkColumn(Column column) {
+        if(column.getIndex() == ColumnStore.NULL_ID) {
+            throw new IllegalArgumentException("The column does not exist");
+        }
+        ColumnStore columnStore = getPropertyStore();
+        if(columnStore.getColumnByIndex(column.getIndex()) != column) {
+            throw new IllegalArgumentException("The column does not belong to the right column store");
         }
     }
 

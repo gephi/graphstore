@@ -15,8 +15,6 @@ public interface Index<T extends Element> {
 
     public Iterable<T> get(Column column, Object value);
 
-    public Iterable<Entry<Object, Set<T>>> get(Column column);
-
     public Collection values(Column column);
     
     public int countValues(Column column);

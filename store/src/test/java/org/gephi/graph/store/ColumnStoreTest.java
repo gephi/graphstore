@@ -94,6 +94,16 @@ public class ColumnStoreTest {
         store.addColumn(col);
         store.addColumn(col);
     }
+    
+    @Test
+    public void testDefaultValue() {
+        Integer defaultValue = 25;
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, defaultValue, Origin.DATA, false);
+        
+        store.addColumn(col);
+        Assert.assertEquals(col.getDefaultValue(), defaultValue);
+    }
 
     @Test
     public void testRemoveColumn() {

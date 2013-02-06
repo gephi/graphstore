@@ -62,7 +62,7 @@ public class TimestampStore {
 
     public Iterable<NodeImpl> getNodes(double timestamp) {
         checkDouble(timestamp);
-        
+
         int index = timestampMap.get(timestamp);
         if (index != NULL_INDEX) {
             TimestampIndexEntry ts = timestamps[index];
@@ -89,7 +89,7 @@ public class TimestampStore {
         }
         return nodes;
     }
-    
+
     public Iterable<EdgeImpl> getEdges(double timestamp) {
         int index = timestampMap.get(timestamp);
         if (index != NULL_INDEX) {
@@ -138,11 +138,11 @@ public class TimestampStore {
 
         return timestampMap.containsKey(timestamp);
     }
-    
+
     public boolean hasNodes() {
         return nodeCount > 0;
     }
-    
+
     public boolean hasEdges() {
         return edgeCount > 0;
     }
@@ -156,13 +156,13 @@ public class TimestampStore {
         nodeCount = 0;
         edgeCount = 0;
     }
-    
+
     public void clearEdges() {
-        if(nodeCount == 0) {
+        if (nodeCount == 0) {
             clear();
         } else {
-            for(TimestampIndexEntry entry : timestamps) {
-                if(entry != null) {
+            for (TimestampIndexEntry entry : timestamps) {
+                if (entry != null) {
                     entry.edgeSet.clear();
                 }
             }
@@ -272,6 +272,9 @@ public class TimestampStore {
         TimestampIndexEntry entry = timestamps[timestampIndex];
         if (entry.removeNode(node)) {
             nodeCount--;
+            if (entry.isEmpty()) {
+                cleanEntry(entry);
+            }
         }
     }
 
@@ -279,6 +282,9 @@ public class TimestampStore {
         TimestampIndexEntry entry = timestamps[timestampIndex];
         if (entry.removeEdge(edge)) {
             edgeCount--;
+            if (entry.isEmpty()) {
+                cleanEntry(entry);
+            }
         }
     }
 
@@ -315,6 +321,10 @@ public class TimestampStore {
             System.arraycopy(timestamps, 0, newArray, 0, timestamps.length);
             timestamps = newArray;
         }
+    }
+
+    private void cleanEntry(TimestampIndexEntry entry) {
+        removeTimestamp(entry.timestamp);
     }
 
     private void checkIndex(int index) {
@@ -355,6 +365,10 @@ public class TimestampStore {
 
         public boolean removeEdge(EdgeImpl edge) {
             return edgeSet.remove(edge);
+        }
+
+        public boolean isEmpty() {
+            return nodeSet.isEmpty() && edgeSet.isEmpty();
         }
     }
 }
