@@ -267,7 +267,7 @@ public abstract class ElementImpl implements Element {
             throw new IllegalArgumentException("The column does not exist");
         }
         ColumnStore columnStore = getPropertyStore();
-        if(columnStore.getColumnByIndex(column.getIndex()) != column) {
+        if(columnStore != null && columnStore.getColumnByIndex(column.getIndex()) != column) {
             throw new IllegalArgumentException("The column does not belong to the right column store");
         }
     }
