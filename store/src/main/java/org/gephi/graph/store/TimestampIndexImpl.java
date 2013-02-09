@@ -7,10 +7,19 @@ package org.gephi.graph.store;
 import it.unimi.dsi.fastutil.doubles.Double2IntMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntSortedMap;
 import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.gephi.attribute.api.TimestampIndex;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.EdgeIterator;
+import org.gephi.graph.api.Node;
+import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.NodeIterator;
 
 /**
  *
@@ -18,8 +27,10 @@ import org.gephi.attribute.api.TimestampIndex;
  */
 public class TimestampIndexImpl implements TimestampIndex {
     //Const
+
     public static final int NULL_INDEX = -1;
     //Data
+    protected final GraphLock lock;
     protected final TimestampStore timestampStore;
     protected final boolean mainIndex;
     protected TimestampIndexEntry[] timestamps;
@@ -29,6 +40,7 @@ public class TimestampIndexImpl implements TimestampIndex {
     public TimestampIndexImpl(TimestampStore store, boolean main) {
         timestampStore = store;
         mainIndex = main;
+        lock = store.lock;
 
         timestamps = new TimestampIndexEntry[0];
     }
@@ -87,20 +99,28 @@ public class TimestampIndexImpl implements TimestampIndex {
         return Double.POSITIVE_INFINITY;
     }
 
-    public Iterable<NodeImpl> getNodes(double timestamp) {
+    @Override
+    public NodeIterable getNodes(double timestamp) {
         checkDouble(timestamp);
 
+        readLock();
         int index = timestampStore.timestampMap.get(timestamp);
         if (index != NULL_INDEX) {
             TimestampIndexEntry ts = timestamps[index];
             if (ts != null) {
-                return ts.nodeSet;
+                return new NodeIterableImpl(new NodeIteratorImpl(ts.nodeSet.iterator()));
             }
         }
-        return new ArrayList<NodeImpl>();
+        readUnlock();
+        return null;
     }
 
-    public Iterable<NodeImpl> getNodes(double from, double to) {
+    @Override
+    public NodeIterable getNodes(double from, double to) {
+        checkDouble(from);
+        checkDouble(to);
+        
+        readLock();
         ObjectSet<NodeImpl> nodes = new ObjectOpenHashSet<NodeImpl>();
         Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
         if (!sortedMap.isEmpty()) {
@@ -117,21 +137,31 @@ public class TimestampIndexImpl implements TimestampIndex {
                 }
             }
         }
-        return nodes;
+        return new NodeIterableImpl(new NodeIteratorImpl(nodes.iterator()));
     }
 
-    public Iterable<EdgeImpl> getEdges(double timestamp) {
+    @Override
+    public EdgeIterable getEdges(double timestamp) {
+        checkDouble(timestamp);
+        
+        readLock();
         int index = timestampStore.timestampMap.get(timestamp);
         if (index != NULL_INDEX) {
             TimestampIndexEntry ts = timestamps[index];
             if (ts != null) {
-                return ts.edgeSet;
+                return new EdgeIterableImpl(new EdgeIteratorImpl(ts.edgeSet.iterator()));
             }
         }
-        return new ArrayList<EdgeImpl>();
+        readUnlock();
+        return null;
     }
 
-    public Iterable<EdgeImpl> getEdges(double from, double to) {
+    @Override
+    public EdgeIterable getEdges(double from, double to) {
+        checkDouble(from);
+        checkDouble(to);
+        
+        readLock();
         ObjectSet<EdgeImpl> edges = new ObjectOpenHashSet<EdgeImpl>();
         Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
         if (!sortedMap.isEmpty()) {
@@ -148,7 +178,7 @@ public class TimestampIndexImpl implements TimestampIndex {
                 }
             }
         }
-        return edges;
+        return new EdgeIterableImpl(new EdgeIteratorImpl(edges.iterator()));
     }
 
     public boolean hasNodes() {
@@ -253,6 +283,30 @@ public class TimestampIndexImpl implements TimestampIndex {
         }
     }
 
+    private void readLock() {
+        if (lock != null) {
+            lock.readLock();
+        }
+    }
+
+    private void readUnlock() {
+        if (lock != null) {
+            lock.readUnlock();
+        }
+    }
+
+    private void writeLock() {
+        if (lock != null) {
+            lock.writeLock();
+        }
+    }
+
+    private void writeUnlock() {
+        if (lock != null) {
+            lock.writeUnlock();
+        }
+    }
+
     protected static class TimestampIndexEntry {
 
         protected final ObjectSet<NodeImpl> nodeSet;
@@ -281,6 +335,128 @@ public class TimestampIndexImpl implements TimestampIndex {
 
         public boolean isEmpty() {
             return nodeSet.isEmpty() && edgeSet.isEmpty();
+        }
+    }
+
+    protected class NodeIteratorImpl implements NodeIterator {
+
+        private final ObjectIterator<NodeImpl> itr;
+
+        public NodeIteratorImpl(ObjectIterator<NodeImpl> itr) {
+            this.itr = itr;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return itr.hasNext();
+        }
+
+        @Override
+        public Node next() {
+            return itr.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
+        }
+    }
+
+    protected class EdgeIteratorImpl implements EdgeIterator {
+
+        private final ObjectIterator<EdgeImpl> itr;
+
+        public EdgeIteratorImpl(ObjectIterator<EdgeImpl> itr) {
+            this.itr = itr;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return itr.hasNext();
+        }
+
+        @Override
+        public Edge next() {
+            return itr.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
+        }
+    }
+
+    protected class NodeIterableImpl implements NodeIterable {
+
+        protected final NodeIterator iterator;
+
+        public NodeIterableImpl(NodeIterator iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public NodeIterator iterator() {
+            return iterator;
+        }
+
+        @Override
+        public Node[] toArray() {
+            List<Node> list = new ArrayList<Node>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list.toArray(new Node[0]);
+        }
+
+        @Override
+        public Collection<Node> toCollection() {
+            List<Node> list = new ArrayList<Node>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list;
+        }
+
+        @Override
+        public void doBreak() {
+            readUnlock();
+        }
+    }
+
+    protected class EdgeIterableImpl implements EdgeIterable {
+
+        protected final EdgeIterator iterator;
+
+        public EdgeIterableImpl(EdgeIterator iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public EdgeIterator iterator() {
+            return iterator;
+        }
+
+        @Override
+        public Edge[] toArray() {
+            List<Edge> list = new ArrayList<Edge>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list.toArray(new Edge[0]);
+        }
+
+        @Override
+        public Collection<Edge> toCollection() {
+            List<Edge> list = new ArrayList<Edge>();
+            for (; iterator.hasNext();) {
+                list.add(iterator.next());
+            }
+            return list;
+        }
+
+        @Override
+        public void doBreak() {
+            readUnlock();
         }
     }
 }

@@ -24,8 +24,8 @@ public class TimestampStore {
 
     //Const
     public static final int NULL_INDEX = -1;
-    //Graphstroe
-    protected final GraphStore graphStore;
+    //Lock (optional
+    protected final GraphLock lock;
     //Timestamp index managament
     protected final Double2IntMap timestampMap;
     protected final Double2IntSortedMap timestampSortedMap;
@@ -36,8 +36,8 @@ public class TimestampStore {
     protected final TimestampIndexImpl mainIndex;
     protected final Map<GraphView, TimestampIndexImpl> viewIndexes;
 
-    public TimestampStore(GraphStore store) {
-        graphStore = store;
+    public TimestampStore(GraphLock graphLock) {
+        lock = graphLock;
         timestampMap = new Double2IntOpenHashMap();
         timestampMap.defaultReturnValue(NULL_INDEX);
         mainIndex = new TimestampIndexImpl(this, true);

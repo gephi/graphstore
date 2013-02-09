@@ -101,11 +101,13 @@ public class GraphModelImpl implements GraphModel {
     
     @Override
     public GraphView createView() {
+        //TODO Locking
         return store.viewStore.createView();
     }
     
     @Override
     public void destroyView(GraphView view) {
+        //TODO Locking
         store.timestampStore.deleteViewIndex(store);
         store.edgePropertyStore.indexStore.deleteViewIndex(((GraphViewImpl) view).graphStore);
         store.nodePropertyStore.indexStore.deleteViewIndex(((GraphViewImpl) view).graphStore);
@@ -129,6 +131,7 @@ public class GraphModelImpl implements GraphModel {
     
     @Override
     public Index getNodeIndex(GraphView view) {
+        //TODO Locking
         return store.nodePropertyStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
     }
     
@@ -139,6 +142,7 @@ public class GraphModelImpl implements GraphModel {
     
     @Override
     public Index getEdgeIndex(GraphView view) {
+        //TODO Locking
         return store.edgePropertyStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
     }
     
@@ -149,6 +153,7 @@ public class GraphModelImpl implements GraphModel {
     
     @Override
     public TimestampIndex getTimestampIndex(GraphView view) {
+        //TODO Locking
         return store.timestampStore.getIndex(((GraphViewImpl) view).graphStore);
     }
 }

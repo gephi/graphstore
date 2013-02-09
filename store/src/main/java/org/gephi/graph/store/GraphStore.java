@@ -58,7 +58,7 @@ public class GraphStore implements DirectedGraph {
         nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null, viewStore);
         nodePropertyStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
         edgePropertyStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
-        timestampStore = new TimestampStore(this);
+        timestampStore = new TimestampStore(AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);
         mainGraphView = new MainGraphView();
 

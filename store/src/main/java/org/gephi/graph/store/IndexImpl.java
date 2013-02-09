@@ -78,7 +78,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         checkNonNullColumnObject(column);
 
         if (lock != null) {
-            readLock();
+            lock.readLock();
             AbstractIndex index = getIndex((ColumnImpl) column);
             return new LockableIterable<T>(index.getValueSet(value));
         }

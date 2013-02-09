@@ -33,7 +33,7 @@ public abstract class ElementImpl implements Element {
     protected TimestampSet timestampSet;
 
     public ElementImpl(Object id, GraphStore graphStore) {
-        if(id == null) {
+        if (id == null) {
             throw new NullPointerException();
         }
         this.id = id;
@@ -58,7 +58,7 @@ public abstract class ElementImpl implements Element {
     @Override
     public Object getProperty(Column column) {
         checkColumn(column);
-        
+
         int index = column.getIndex();
         Object res = null;
         if (index < properties.length) {
@@ -88,14 +88,19 @@ public abstract class ElementImpl implements Element {
     @Override
     public Object removeProperty(Column column) {
         checkColumn(column);
-        
+
         ColumnStore propertyStore = getPropertyStore();
         int index = column.getIndex();
         if (index < properties.length) {
             Object oldValue = properties[index];
             properties[index] = null;
             if (column.isIndexed() && propertyStore != null && isValid()) {
-                propertyStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
+                writeLock();
+                try {
+                    propertyStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
+                } finally {
+                    writeUnlock();
+                }
             }
             return oldValue;
         }
@@ -124,7 +129,12 @@ public abstract class ElementImpl implements Element {
         }
 
         if (column.isIndexed() && propertyStore != null && isValid()) {
-            value = propertyStore.indexStore.set(column, oldValue, value, this);
+            writeLock();
+            try {
+                value = propertyStore.indexStore.set(column, oldValue, value, this);
+            } finally {
+                writeUnlock();
+            }
         }
         properties[index] = value;
     }
@@ -142,32 +152,37 @@ public abstract class ElementImpl implements Element {
 
         final TimestampStore timestampStore = getTimestampStore();
         if (timestampStore != null) {
-            int index = column.getIndex();
-            Object oldValue = null;
-            if (index >= properties.length) {
-                Object[] newArray = new Object[index + 1];
-                System.arraycopy(properties, 0, newArray, 0, properties.length);
-                properties = newArray;
-            } else {
-                oldValue = properties[index];
-            }
-
-            TimestampValueSet dynamicValue = null;
-            if (oldValue == null) {
-                try {
-                    dynamicValue = (TimestampValueSet) column.getTypeClass().newInstance();
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(ElementImpl.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(ElementImpl.class.getName()).log(Level.SEVERE, null, ex);
+            writeLock();
+            try {
+                int index = column.getIndex();
+                Object oldValue = null;
+                if (index >= properties.length) {
+                    Object[] newArray = new Object[index + 1];
+                    System.arraycopy(properties, 0, newArray, 0, properties.length);
+                    properties = newArray;
+                } else {
+                    oldValue = properties[index];
                 }
-            } else {
-                dynamicValue = (TimestampValueSet) oldValue;
+
+                TimestampValueSet dynamicValue = null;
+                if (oldValue == null) {
+                    try {
+                        dynamicValue = (TimestampValueSet) column.getTypeClass().newInstance();
+                    } catch (InstantiationException ex) {
+                        Logger.getLogger(ElementImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IllegalAccessException ex) {
+                        Logger.getLogger(ElementImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    dynamicValue = (TimestampValueSet) oldValue;
+                }
+
+
+                int timestampIndex = timestampStore.getTimestampIndex(timestamp);
+                dynamicValue.put(timestampIndex, value);
+            } finally {
+                writeUnlock();
             }
-
-
-            int timestampIndex = timestampStore.getTimestampIndex(timestamp);
-            dynamicValue.put(timestampIndex, value);
         } else {
             throw new RuntimeException("The timestamp store is not available");
         }
@@ -179,11 +194,16 @@ public abstract class ElementImpl implements Element {
 
         final TimestampStore timestampStore = getTimestampStore();
         if (timestampStore != null) {
-            if (timestampSet == null) {
-                timestampSet = new TimestampSet();
+            writeLock();
+            try {
+                if (timestampSet == null) {
+                    timestampSet = new TimestampSet();
+                }
+                final int timestampIndex = timestampStore.addElement(timestamp, this);
+                return timestampSet.add(timestampIndex);
+            } finally {
+                writeUnlock();
             }
-            final int timestampIndex = timestampStore.addElement(timestamp, this);
-            return timestampSet.add(timestampIndex);
         }
         return false;
     }
@@ -193,10 +213,15 @@ public abstract class ElementImpl implements Element {
         checkDouble(timestamp);
 
         if (timestampSet != null) {
-            final TimestampStore timestampStore = getTimestampStore();
-            if (timestampStore != null) {
-                final int timestampIndex = timestampStore.removeElement(timestamp, this);
-                return timestampSet.remove(timestampIndex);
+            writeLock();
+            try {
+                final TimestampStore timestampStore = getTimestampStore();
+                if (timestampStore != null) {
+                    final int timestampIndex = timestampStore.removeElement(timestamp, this);
+                    return timestampSet.remove(timestampIndex);
+                }
+            } finally {
+                writeUnlock();
             }
         }
         return false;
@@ -207,8 +232,13 @@ public abstract class ElementImpl implements Element {
         if (timestampSet != null) {
             final TimestampStore timestampStore = getTimestampStore();
             if (timestampStore != null) {
-                final int[] indices = timestampSet.getTimestamps();
-                return timestampStore.getTimestamps(indices);
+                readLock();
+                try {
+                    final int[] indices = timestampSet.getTimestamps();
+                    return timestampStore.getTimestamps(indices);
+                } finally {
+                    readUnlock();
+                }
             }
         }
         return new double[0];
@@ -227,21 +257,26 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public void clearProperties() {
-        if (isValid()) {
-            ColumnStore propertyStore = getPropertyStore();
-            if (propertyStore != null) {
-                propertyStore.indexStore.clear(this);
+        writeLock();
+        try {
+            if (isValid()) {
+                ColumnStore propertyStore = getPropertyStore();
+                if (propertyStore != null) {
+                    propertyStore.indexStore.clear(this);
+                }
+                TimestampStore timestampStore = getTimestampStore();
+                if (timestampStore != null) {
+                    timestampStore.clear(this);
+                }
             }
-            TimestampStore timestampStore = getTimestampStore();
-            if (timestampStore != null) {
-                timestampStore.clear(this);
+
+            properties = new Object[0];
+
+            if (timestampSet != null) {
+                timestampSet.clear();
             }
-        }
-
-        properties = new Object[0];
-
-        if (timestampSet != null) {
-            timestampSet.clear();
+        } finally {
+            writeUnlock();
         }
     }
 
@@ -261,14 +296,38 @@ public abstract class ElementImpl implements Element {
             throw new IllegalArgumentException("Timestamp can' be NaN or infinity");
         }
     }
-    
+
     private void checkColumn(Column column) {
-        if(column.getIndex() == ColumnStore.NULL_ID) {
+        if (column.getIndex() == ColumnStore.NULL_ID) {
             throw new IllegalArgumentException("The column does not exist");
         }
         ColumnStore columnStore = getPropertyStore();
-        if(columnStore != null && columnStore.getColumnByIndex(column.getIndex()) != column) {
+        if (columnStore != null && columnStore.getColumnByIndex(column.getIndex()) != column) {
             throw new IllegalArgumentException("The column does not belong to the right column store");
+        }
+    }
+
+    private void readLock() {
+        if (graphStore != null) {
+            graphStore.autoReadLock();
+        }
+    }
+
+    private void readUnlock() {
+        if (graphStore != null) {
+            graphStore.autoReadUnlock();
+        }
+    }
+
+    private void writeLock() {
+        if (graphStore != null) {
+            graphStore.writeLock();
+        }
+    }
+
+    private void writeUnlock() {
+        if (graphStore != null) {
+            graphStore.writeUnlock();
         }
     }
 
