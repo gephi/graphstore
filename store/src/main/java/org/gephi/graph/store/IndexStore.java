@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.gephi.attribute.api.Column;
+import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
@@ -19,12 +20,12 @@ public class IndexStore<T extends Element> {
 
     protected final ColumnStore<T> propertyStore;
     protected final IndexImpl<T> mainIndex;
-    protected final Map<Graph, IndexImpl<T>> viewIndexes;
+    protected final Map<GraphView, IndexImpl<T>> viewIndexes;
 
     public IndexStore(ColumnStore<T> propertyStore) {
         this.propertyStore = propertyStore;
         this.mainIndex = new IndexImpl<T>(propertyStore);
-        this.viewIndexes = new Object2ObjectOpenHashMap<Graph, IndexImpl<T>>();
+        this.viewIndexes = new Object2ObjectOpenHashMap<GraphView, IndexImpl<T>>();
     }
 
     protected void addColumn(ColumnImpl col) {
@@ -51,7 +52,7 @@ public class IndexStore<T extends Element> {
         if (view.isMainView()) {
             return mainIndex;
         }
-        IndexImpl<T> viewIndex = viewIndexes.get(graph);
+        IndexImpl<T> viewIndex = viewIndexes.get(graph.getView());
         if (viewIndex == null) {
             viewIndex = createViewIndex(graph);
         }
@@ -64,7 +65,7 @@ public class IndexStore<T extends Element> {
         }
         IndexImpl viewIndex = new IndexImpl<T>(propertyStore);
         viewIndex.addAllColumns(propertyStore.columns);
-        viewIndexes.put(graph, viewIndex);
+        viewIndexes.put(graph.getView(), viewIndex);
 
         Iterator<T> iterator = null;
         if (propertyStore.elementType.equals(Node.class)) {
@@ -95,7 +96,7 @@ public class IndexStore<T extends Element> {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't delete a view index for the main view");
         }
-        IndexImpl<T> index = viewIndexes.remove(graph);
+        IndexImpl<T> index = viewIndexes.remove(graph.getView());
         if (index != null) {
             index.destroy();
         }
@@ -105,8 +106,9 @@ public class IndexStore<T extends Element> {
         value = mainIndex.set(column, oldValue, value, element);
 
         if (!viewIndexes.isEmpty()) {
-            for (Entry<Graph, IndexImpl<T>> entry : viewIndexes.entrySet()) {
-                Graph graph = entry.getKey();
+            for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
+                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                DirectedSubgraph graph = graphView.getDirectedGraph();
                 if (element instanceof Node) {
                     if (graph.contains((Node) element)) {
                         entry.getValue().set(column, oldValue, value, element);
@@ -132,8 +134,9 @@ public class IndexStore<T extends Element> {
             if (c != null && c.isIndexed()) {
                 Object value = elementImpl.properties[c.getIndex()];
                 mainIndex.remove(c, value, element);
-                for (Entry<Graph, IndexImpl<T>> entry : viewIndexes.entrySet()) {
-                    Graph graph = entry.getKey();
+                for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
+                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                    DirectedSubgraph graph = graphView.getDirectedGraph();
                     boolean inView = element instanceof Node ? graph.contains((Node) element) : graph.contains((Edge) element);
                     if (inView) {
                         entry.getValue().remove(c, value, element);

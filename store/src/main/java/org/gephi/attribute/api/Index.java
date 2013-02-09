@@ -1,8 +1,6 @@
 package org.gephi.attribute.api;
 
 import java.util.Collection;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.gephi.graph.api.Element;
 
 /**

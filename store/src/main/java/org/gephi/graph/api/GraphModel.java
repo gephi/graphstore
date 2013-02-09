@@ -1,6 +1,8 @@
 package org.gephi.graph.api;
 
+import org.gephi.attribute.api.Index;
 import org.gephi.attribute.api.Table;
+import org.gephi.attribute.api.TimestampIndex;
 
 /**
  *
@@ -11,6 +13,8 @@ public interface GraphModel {
     public GraphFactory factory();
     
     public Graph getGraph();
+    
+    public Subgraph getGraph(GraphView view);
     
     public DirectedGraph getDirectedGraph();
     
@@ -39,4 +43,16 @@ public interface GraphModel {
     public Table getNodeTable();
     
     public Table getEdgeTable();
+    
+    public Index getNodeIndex();
+    
+    public Index getNodeIndex(GraphView view);
+    
+    public Index getEdgeIndex();
+    
+    public Index getEdgeIndex(GraphView view);
+    
+    public TimestampIndex getTimestampIndex();
+    
+    public TimestampIndex getTimestampIndex(GraphView view);
 }

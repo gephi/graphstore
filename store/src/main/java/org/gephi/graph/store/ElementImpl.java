@@ -182,8 +182,7 @@ public abstract class ElementImpl implements Element {
             if (timestampSet == null) {
                 timestampSet = new TimestampSet();
             }
-            final int timestampIndex = timestampStore.getTimestampIndex(timestamp);
-            timestampStore.addElement(timestampIndex, this);
+            final int timestampIndex = timestampStore.addElement(timestamp, this);
             return timestampSet.add(timestampIndex);
         }
         return false;
@@ -196,8 +195,7 @@ public abstract class ElementImpl implements Element {
         if (timestampSet != null) {
             final TimestampStore timestampStore = getTimestampStore();
             if (timestampStore != null) {
-                final int timestampIndex = timestampStore.getTimestampIndex(timestamp);
-                timestampStore.removeElement(timestampIndex, this);
+                final int timestampIndex = timestampStore.removeElement(timestamp, this);
                 return timestampSet.remove(timestampIndex);
             }
         }

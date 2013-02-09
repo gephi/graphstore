@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntHeapPriorityQueue;
 import it.unimi.dsi.fastutil.ints.IntPriorityQueue;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
 /**
@@ -71,8 +72,19 @@ public class GraphViewStore {
         return length - garbageQueue.size();
     }
 
+    public Subgraph getGraph(GraphView view) {
+        checkNonNullViewObject(view);
+
+        if (graphStore.isUndirected()) {
+            return ((GraphViewImpl) view).getUndirectedGraph();
+        } else {
+            return ((GraphViewImpl) view).getDirectedGraph();
+        }
+    }
+
     public DirectedSubgraph getDirectedGraph(GraphView view) {
         checkNonNullViewObject(view);
+        checkDirectedAllowed();
 
         return ((GraphViewImpl) view).getDirectedGraph();
     }
@@ -160,6 +172,12 @@ public class GraphViewStore {
         int id = view.storeId;
         if (id == NULL_VIEW || id >= length || views[id] != view) {
             throw new IllegalArgumentException("The view doesn't exist");
+        }
+    }
+
+    private void checkDirectedAllowed() {
+        if (graphStore.isUndirected()) {
+            throw new RuntimeException("Can't get a directed subgraph from an undirected graph");
         }
     }
 }

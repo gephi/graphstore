@@ -6,10 +6,15 @@ import it.unimi.dsi.fastutil.doubles.Double2IntRBTreeMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntSortedMap;
 import it.unimi.dsi.fastutil.ints.IntHeapPriorityQueue;
 import it.unimi.dsi.fastutil.ints.IntPriorityQueue;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
-import java.util.ArrayList;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.gephi.attribute.time.TimestampSet;
+import org.gephi.graph.api.DirectedSubgraph;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Node;
 
 /**
  *
@@ -19,25 +24,69 @@ public class TimestampStore {
 
     //Const
     public static final int NULL_INDEX = -1;
-    //Data
+    //Graphstroe
     protected final GraphStore graphStore;
+    //Timestamp index managament
     protected final Double2IntMap timestampMap;
     protected final Double2IntSortedMap timestampSortedMap;
     protected final IntPriorityQueue garbageQueue;
-    protected TimestampIndexEntry[] timestamps;
+    protected double[] indexMap;
     protected int length;
-    protected int nodeCount;
-    protected int edgeCount;
+    //Index
+    protected final TimestampIndexImpl mainIndex;
+    protected final Map<GraphView, TimestampIndexImpl> viewIndexes;
 
     public TimestampStore(GraphStore store) {
         graphStore = store;
         timestampMap = new Double2IntOpenHashMap();
-        timestampSortedMap = new Double2IntRBTreeMap();
         timestampMap.defaultReturnValue(NULL_INDEX);
+        mainIndex = new TimestampIndexImpl(this, true);
         garbageQueue = new IntHeapPriorityQueue(0);
-        timestamps = new TimestampIndexEntry[0];
+        viewIndexes = new Object2ObjectOpenHashMap<GraphView, TimestampIndexImpl>();
+        timestampSortedMap = new Double2IntRBTreeMap();
+        indexMap = new double[0];
     }
 
+    public TimestampIndexImpl getIndex(Graph graph) {
+        GraphView view = graph.getView();
+        if (view.isMainView()) {
+            return mainIndex;
+        }
+        TimestampIndexImpl viewIndex = viewIndexes.get(graph.getView());
+        if (viewIndex == null) {
+            viewIndex = createViewIndex(graph);
+        }
+        return viewIndex;
+    }
+
+    protected TimestampIndexImpl createViewIndex(Graph graph) {
+        if (graph.getView().isMainView()) {
+            throw new IllegalArgumentException("Can't create a view index for the main view");
+        }
+        TimestampIndexImpl viewIndex = new TimestampIndexImpl(this, false);
+        viewIndexes.put(graph.getView(), viewIndex);
+
+        for (Node node : graph.getNodes()) {
+            indexNode((NodeImpl) node);
+        }
+        for (Edge edge : graph.getEdges()) {
+            indexEdge((EdgeImpl) edge);
+        }
+
+        return viewIndex;
+    }
+
+    protected void deleteViewIndex(Graph graph) {
+        if (graph.getView().isMainView()) {
+            throw new IllegalArgumentException("Can't delete a view index for the main view");
+        }
+        TimestampIndexImpl index = viewIndexes.remove(graph.getView());
+        if (index != null) {
+            index.clear();
+        }
+    }
+
+    //Protected
     public int getTimestampIndex(double timestamp) {
         int index = timestampMap.get(timestamp);
         if (index == NULL_INDEX) {
@@ -46,76 +95,10 @@ public class TimestampStore {
         return index;
     }
 
-    public double getMin() {
-        if (size() > 0) {
-            return timestampSortedMap.firstDoubleKey();
-        }
-        return Double.NEGATIVE_INFINITY;
-    }
-
-    public double getMax() {
-        if (size() > 0) {
-            return timestampSortedMap.lastDoubleKey();
-        }
-        return Double.POSITIVE_INFINITY;
-    }
-
-    public Iterable<NodeImpl> getNodes(double timestamp) {
+    public boolean contains(double timestamp) {
         checkDouble(timestamp);
 
-        int index = timestampMap.get(timestamp);
-        if (index != NULL_INDEX) {
-            TimestampIndexEntry ts = timestamps[index];
-            if (ts != null) {
-                return ts.nodeSet;
-            }
-        }
-        return new ArrayList<NodeImpl>();
-    }
-
-    public Iterable<NodeImpl> getNodes(double from, double to) {
-        ObjectSet<NodeImpl> nodes = new ObjectOpenHashSet<NodeImpl>();
-        for (Double2IntMap.Entry entry : timestampSortedMap.tailMap(from).double2IntEntrySet()) {
-            double timestamp = entry.getDoubleKey();
-            int index = entry.getIntValue();
-            if (timestamp <= to) {
-                TimestampIndexEntry ts = timestamps[index];
-                if (ts != null) {
-                    nodes.addAll(ts.nodeSet);
-                }
-            } else {
-                break;
-            }
-        }
-        return nodes;
-    }
-
-    public Iterable<EdgeImpl> getEdges(double timestamp) {
-        int index = timestampMap.get(timestamp);
-        if (index != NULL_INDEX) {
-            TimestampIndexEntry ts = timestamps[index];
-            if (ts != null) {
-                return ts.edgeSet;
-            }
-        }
-        return new ArrayList<EdgeImpl>();
-    }
-
-    public Iterable<EdgeImpl> getEdges(double from, double to) {
-        ObjectSet<EdgeImpl> edges = new ObjectOpenHashSet<EdgeImpl>();
-        for (Double2IntMap.Entry entry : timestampSortedMap.tailMap(from).double2IntEntrySet()) {
-            double timestamp = entry.getDoubleKey();
-            int index = entry.getIntValue();
-            if (timestamp <= to) {
-                TimestampIndexEntry ts = timestamps[index];
-                if (ts != null) {
-                    edges.addAll(ts.edgeSet);
-                }
-            } else {
-                break;
-            }
-        }
-        return edges;
+        return timestampMap.containsKey(timestamp);
     }
 
     public double[] getTimestamps(int[] indices) {
@@ -124,69 +107,57 @@ public class TimestampStore {
         for (int i = 0; i < indicesLength; i++) {
             int index = indices[i];
             checkIndex(index);
-            TimestampIndexEntry entry = timestamps[index];
-            if (entry == null) {
-                throw new IllegalArgumentException("The timestamp index can't be found");
-            }
-            res[i] = entry.timestamp;
+            res[i] = indexMap[i];
         }
         return res;
     }
 
-    public boolean contains(double timestamp) {
-        checkDouble(timestamp);
-
-        return timestampMap.containsKey(timestamp);
-    }
-
-    public boolean hasNodes() {
-        return nodeCount > 0;
-    }
-
-    public boolean hasEdges() {
-        return edgeCount > 0;
+    public int size() {
+        return timestampMap.size();
     }
 
     public void clear() {
         timestampMap.clear();
         timestampSortedMap.clear();
-        timestamps = new TimestampIndexEntry[0];
         garbageQueue.clear();
-        length = 0;
-        nodeCount = 0;
-        edgeCount = 0;
+        indexMap = new double[0];
+
+        mainIndex.clear();
+
+        if (!viewIndexes.isEmpty()) {
+            for (TimestampIndexImpl index : viewIndexes.values()) {
+                index.clear();
+            }
+        }
     }
 
     public void clearEdges() {
-        if (nodeCount == 0) {
+        if (!mainIndex.hasNodes()) {
             clear();
         } else {
-            for (TimestampIndexEntry entry : timestamps) {
-                if (entry != null) {
-                    entry.edgeSet.clear();
+            mainIndex.clearEdges();
+
+            if (!viewIndexes.isEmpty()) {
+                for (TimestampIndexImpl index : viewIndexes.values()) {
+                    index.clearEdges();
                 }
             }
-            edgeCount = 0;
         }
     }
 
-    public int size() {
-        return length - garbageQueue.size();
-    }
-
-    public void addElement(int timestampIndex, ElementImpl element) {
+    public int addElement(double timestamp, ElementImpl element) {
         if (element instanceof NodeImpl) {
-            addNode(timestampIndex, (NodeImpl) element);
+            return addNode(timestamp, (NodeImpl) element);
         } else {
-            addEdge(timestampIndex, (EdgeImpl) element);
+            return addEdge(timestamp, (EdgeImpl) element);
         }
     }
 
-    public void removeElement(int timestampIndex, ElementImpl element) {
+    public int removeElement(double timestamp, ElementImpl element) {
         if (element instanceof NodeImpl) {
-            removeNode(timestampIndex, (NodeImpl) element);
+            return removeNode(timestamp, (NodeImpl) element);
         } else {
-            removeEdge(timestampIndex, (EdgeImpl) element);
+            return removeEdge(timestamp, (EdgeImpl) element);
         }
     }
 
@@ -206,6 +177,7 @@ public class TimestampStore {
         }
     }
 
+    //private
     protected void indexNode(NodeImpl node) {
         TimestampSet set = node.timestampSet;
         if (set != null) {
@@ -213,7 +185,20 @@ public class TimestampStore {
             int tsLength = ts.length;
             for (int i = 0; i < tsLength; i++) {
                 int timestamp = ts[i];
-                addNode(timestamp, node);
+                mainIndex.addNode(timestamp, node);
+            }
+
+            if (!viewIndexes.isEmpty()) {
+                for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                    DirectedSubgraph graph = graphView.getDirectedGraph();
+                    if (graph.contains(node)) {
+                        for (int i = 0; i < tsLength; i++) {
+                            int timestamp = ts[i];
+                            entry.getValue().addNode(timestamp, node);
+                        }
+                    }
+                }
             }
         }
     }
@@ -225,7 +210,20 @@ public class TimestampStore {
             int tsLength = ts.length;
             for (int i = 0; i < tsLength; i++) {
                 int timestamp = ts[i];
-                addEdge(timestamp, edge);
+                mainIndex.addEdge(timestamp, edge);
+            }
+
+            if (!viewIndexes.isEmpty()) {
+                for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                    DirectedSubgraph graph = graphView.getDirectedGraph();
+                    if (graph.contains(edge)) {
+                        for (int i = 0; i < tsLength; i++) {
+                            int timestamp = ts[i];
+                            entry.getValue().addEdge(timestamp, edge);
+                        }
+                    }
+                }
             }
         }
     }
@@ -237,7 +235,24 @@ public class TimestampStore {
             int tsLength = ts.length;
             for (int i = 0; i < tsLength; i++) {
                 int timestamp = ts[i];
-                removeNode(timestamp, node);
+                mainIndex.removeNode(timestamp, node);
+
+                if (mainIndex.timestamps[i] == null) {
+                    removeTimestamp(indexMap[i]);
+                }
+            }
+
+            if (!viewIndexes.isEmpty()) {
+                for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                    DirectedSubgraph graph = graphView.getDirectedGraph();
+                    if (graph.contains(node)) {
+                        for (int i = 0; i < tsLength; i++) {
+                            int timestamp = ts[i];
+                            entry.getValue().removeNode(timestamp, node);
+                        }
+                    }
+                }
             }
         }
     }
@@ -249,43 +264,102 @@ public class TimestampStore {
             int tsLength = ts.length;
             for (int i = 0; i < tsLength; i++) {
                 int timestamp = ts[i];
-                removeEdge(timestamp, edge);
+                mainIndex.removeEdge(timestamp, edge);
+
+                if (mainIndex.timestamps[i] == null) {
+                    removeTimestamp(indexMap[i]);
+                }
+            }
+
+            if (!viewIndexes.isEmpty()) {
+                for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                    DirectedSubgraph graph = graphView.getDirectedGraph();
+                    if (graph.contains(edge)) {
+                        for (int i = 0; i < tsLength; i++) {
+                            int timestamp = ts[i];
+                            entry.getValue().removeEdge(timestamp, edge);
+                        }
+                    }
+                }
             }
         }
     }
 
-    protected void addNode(int timestampIndex, NodeImpl node) {
-        TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry.addNode(node)) {
-            nodeCount++;
-        }
-    }
+    protected int addNode(double timestamp, NodeImpl node) {
+        int timestampIndex = getTimestampIndex(timestamp);
+        mainIndex.addNode(timestampIndex, node);
 
-    protected void addEdge(int timestampIndex, EdgeImpl edge) {
-        TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry.addEdge(edge)) {
-            edgeCount++;
-        }
-    }
-
-    protected void removeNode(int timestampIndex, NodeImpl node) {
-        TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry.removeNode(node)) {
-            nodeCount--;
-            if (entry.isEmpty()) {
-                cleanEntry(entry);
+        if (!viewIndexes.isEmpty()) {
+            for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                DirectedSubgraph graph = graphView.getDirectedGraph();
+                if (graph.contains(node)) {
+                    entry.getValue().addNode(timestampIndex, node);
+                }
             }
         }
+
+        return timestampIndex;
     }
 
-    protected void removeEdge(int timestampIndex, EdgeImpl edge) {
-        TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry.removeEdge(edge)) {
-            edgeCount--;
-            if (entry.isEmpty()) {
-                cleanEntry(entry);
+    protected int addEdge(double timestamp, EdgeImpl edge) {
+        int timestampIndex = getTimestampIndex(timestamp);
+        mainIndex.addEdge(timestampIndex, edge);
+
+        if (!viewIndexes.isEmpty()) {
+            for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                DirectedSubgraph graph = graphView.getDirectedGraph();
+                if (graph.contains(edge)) {
+                    entry.getValue().addEdge(timestampIndex, edge);
+                }
             }
         }
+
+        return timestampIndex;
+    }
+
+    protected int removeNode(double timestamp, NodeImpl node) {
+        int timestampIndex = getTimestampIndex(timestamp);
+        mainIndex.removeNode(timestampIndex, node);
+
+        if (!viewIndexes.isEmpty()) {
+            for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                DirectedSubgraph graph = graphView.getDirectedGraph();
+                if (graph.contains(node)) {
+                    entry.getValue().removeNode(timestampIndex, node);
+                }
+            }
+        }
+
+        if (mainIndex.timestamps[timestampIndex] == null) {
+            removeTimestamp(timestamp);
+        }
+
+        return timestampIndex;
+    }
+
+    protected int removeEdge(double timestamp, EdgeImpl edge) {
+        int timestampIndex = getTimestampIndex(timestamp);
+        mainIndex.removeEdge(timestampIndex, edge);
+
+        if (!viewIndexes.isEmpty()) {
+            for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                DirectedSubgraph graph = graphView.getDirectedGraph();
+                if (graph.contains(edge)) {
+                    entry.getValue().removeEdge(timestampIndex, edge);
+                }
+            }
+        }
+
+        if (mainIndex.timestamps[timestampIndex] == null) {
+            removeTimestamp(timestamp);
+        }
+
+        return timestampIndex;
     }
 
     protected int addTimestamp(final double timestamp) {
@@ -296,11 +370,12 @@ public class TimestampStore {
             id = garbageQueue.dequeueInt();
         } else {
             id = length++;
-            ensureArraySize(id);
         }
         timestampMap.put(timestamp, id);
         timestampSortedMap.put(timestamp, id);
-        timestamps[id] = new TimestampIndexEntry(timestamp);
+        ensureArraySize(id);
+        indexMap[id] = timestamp;
+
         return id;
     }
 
@@ -309,66 +384,28 @@ public class TimestampStore {
 
         int id = timestampMap.get(timestamp);
         garbageQueue.enqueue(id);
-
         timestampMap.remove(timestamp);
         timestampSortedMap.remove(timestamp);
-        timestamps[id] = null;
+        indexMap[id] = Double.NaN;
     }
 
     private void ensureArraySize(int index) {
-        if (index >= timestamps.length) {
-            TimestampIndexEntry[] newArray = new TimestampIndexEntry[index + 1];
-            System.arraycopy(timestamps, 0, newArray, 0, timestamps.length);
-            timestamps = newArray;
+        if (index >= indexMap.length) {
+            double[] newArray = new double[index + 1];
+            System.arraycopy(indexMap, 0, newArray, 0, indexMap.length);
+            indexMap = newArray;
         }
     }
 
-    private void cleanEntry(TimestampIndexEntry entry) {
-        removeTimestamp(entry.timestamp);
-    }
-
-    private void checkIndex(int index) {
-        if (index < 0 || index >= length) {
-            throw new IllegalArgumentException("The type must be included between 0 and 65535");
-        }
-    }
-
-    private void checkDouble(double timestamp) {
+    void checkDouble(double timestamp) {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             throw new IllegalArgumentException("Timestamp can' be NaN or infinity");
         }
     }
 
-    protected static class TimestampIndexEntry {
-
-        protected final double timestamp;
-        protected final ObjectSet<NodeImpl> nodeSet;
-        protected final ObjectSet<EdgeImpl> edgeSet;
-
-        public TimestampIndexEntry(double timestamp) {
-            this.timestamp = timestamp;
-            nodeSet = new ObjectOpenHashSet<NodeImpl>();
-            edgeSet = new ObjectOpenHashSet<EdgeImpl>();
-        }
-
-        public boolean addNode(NodeImpl node) {
-            return nodeSet.add(node);
-        }
-
-        public boolean addEdge(EdgeImpl edge) {
-            return edgeSet.add(edge);
-        }
-
-        public boolean removeNode(NodeImpl node) {
-            return nodeSet.remove(node);
-        }
-
-        public boolean removeEdge(EdgeImpl edge) {
-            return edgeSet.remove(edge);
-        }
-
-        public boolean isEmpty() {
-            return nodeSet.isEmpty() && edgeSet.isEmpty();
+    void checkIndex(int index) {
+        if (index < 0 || index >= length) {
+            throw new IllegalArgumentException("The timestamp store index is out of bounds");
         }
     }
 }
