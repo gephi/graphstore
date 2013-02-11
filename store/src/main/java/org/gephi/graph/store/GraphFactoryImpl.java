@@ -42,6 +42,6 @@ public class GraphFactoryImpl implements GraphFactory {
 
     @Override
     public Node newNode(Object id) {
-        return new NodeImpl(NODE_IDS.getAndIncrement(), store);
+        return new NodeImpl(id, store);
     }
 }

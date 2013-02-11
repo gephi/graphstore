@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -74,7 +75,7 @@ public class ColumnStoreTest {
             public boolean isIndexed() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
-            
+
             @Override
             public boolean isArray() {
                 throw new UnsupportedOperationException("Not supported yet.");
@@ -94,13 +95,13 @@ public class ColumnStoreTest {
         store.addColumn(col);
         store.addColumn(col);
     }
-    
+
     @Test
     public void testDefaultValue() {
         Integer defaultValue = 25;
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
         ColumnImpl col = new ColumnImpl("0", Integer.class, null, defaultValue, Origin.DATA, false);
-        
+
         store.addColumn(col);
         Assert.assertEquals(col.getDefaultValue(), defaultValue);
     }
@@ -122,7 +123,7 @@ public class ColumnStoreTest {
     public void testRemoveColumnNull() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
 
-        store.removeColumn((Column)null);
+        store.removeColumn((Column) null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -178,5 +179,101 @@ public class ColumnStoreTest {
         Assert.assertEquals(col.getIndex(), 0);
         Assert.assertEquals(store.garbageQueue.size(), 0);
         Assert.assertEquals(store.getColumnByIndex(0), col);
+    }
+
+    @Test
+    public void testEqualsEmpty() {
+        ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
+        Assert.assertEquals(store1, store1);
+        ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
+        Assert.assertEquals(store1, store2);
+        ColumnStore<Edge> store3 = new ColumnStore<Edge>(Edge.class, false);
+        Assert.assertNotEquals(store1, store3);
+    }
+
+    @Test
+    public void testHashCodeEmpty() {
+        ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
+        Assert.assertEquals(store1.hashCode(), store1.hashCode());
+        ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
+        Assert.assertEquals(store1.hashCode(), store2.hashCode());
+        ColumnStore<Edge> store3 = new ColumnStore<Edge>(Edge.class, false);
+        Assert.assertNotEquals(store1.hashCode(), store3.hashCode());
+    }
+
+    @Test
+    public void testEquals() {
+        ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        store1.addColumn(col1);
+
+        ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col2 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        store2.addColumn(col2);
+
+        Assert.assertEquals(store1, store2);
+
+        ColumnStore<Node> store3 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col3 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false);
+        store3.addColumn(col3);
+
+        Assert.assertNotEquals(store1, store3);
+    }
+
+    @Test
+    public void testHashCode() {
+        ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        store1.addColumn(col1);
+
+        ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col2 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        store2.addColumn(col2);
+
+        Assert.assertEquals(store1.hashCode(), store2.hashCode());
+
+        ColumnStore<Node> store3 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col3 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false);
+        store3.addColumn(col3);
+
+        Assert.assertNotEquals(store1.hashCode(), store3.hashCode());
+    }
+
+    @Test
+    public void testEqualsWithGarbage() {
+        ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        store1.addColumn(col11);
+        store1.addColumn(col12);
+        store1.removeColumn(col11);
+
+        ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col21 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col22 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        store2.addColumn(col21);
+        store2.addColumn(col22);
+        store2.removeColumn(col21);
+
+        Assert.assertEquals(store1, store2);
+    }
+
+    @Test
+    public void testHashCodeWithGarbage() {
+        ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        store1.addColumn(col11);
+        store1.addColumn(col12);
+        store1.removeColumn(col11);
+
+        ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
+        ColumnImpl col21 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col22 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        store2.addColumn(col21);
+        store2.addColumn(col22);
+        store2.removeColumn(col21);
+
+        Assert.assertEquals(store1.hashCode(), store2.hashCode());
     }
 }

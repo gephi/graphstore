@@ -199,14 +199,15 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     public void clear() {
         for (AbstractIndex ai : columns) {
-            ai.clear();
+            if(ai != null) {
+                ai.clear();
+            }
         }
     }
 
     protected void addColumn(ColumnImpl col) {
-        ensureColumnSize(col.storeId);
-
         if (col.isIndexed()) {
+            ensureColumnSize(col.storeId);
             AbstractIndex index = createIndex(col);
             columns[col.storeId] = index;
         }

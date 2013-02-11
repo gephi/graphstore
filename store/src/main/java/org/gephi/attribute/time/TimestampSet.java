@@ -19,6 +19,12 @@ public class TimestampSet {
         array = new int[capacity];
         Arrays.fill(array, -1);
     }
+    
+    public TimestampSet(int[] arr) {
+        array = new int[arr.length];
+        System.arraycopy(arr, 0, array, 0, arr.length);
+        size = arr.length;
+    }
 
     public boolean add(int timestampIndex) {
         return addInner(timestampIndex, false) >= 0 ? true : false;

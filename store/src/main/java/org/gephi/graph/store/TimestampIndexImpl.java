@@ -12,7 +12,9 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.gephi.attribute.api.TimestampIndex;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -28,7 +30,9 @@ import org.gephi.graph.api.NodeIterator;
 public class TimestampIndexImpl implements TimestampIndex {
     //Const
 
-    public static final int NULL_INDEX = -1;
+    protected static final NodeIterable EMPTY_NODE_ITERABLE = new NodeIterableEmpty();
+    protected static final EdgeIterable EMPTY_EDGE_ITERABLE = new EdgeIterableEmpty();
+    protected static final int NULL_INDEX = -1;
     //Data
     protected final GraphLock lock;
     protected final TimestampStore timestampStore;
@@ -112,14 +116,14 @@ public class TimestampIndexImpl implements TimestampIndex {
             }
         }
         readUnlock();
-        return null;
+        return EMPTY_NODE_ITERABLE;
     }
 
     @Override
     public NodeIterable getNodes(double from, double to) {
         checkDouble(from);
         checkDouble(to);
-        
+
         readLock();
         ObjectSet<NodeImpl> nodes = new ObjectOpenHashSet<NodeImpl>();
         Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
@@ -137,13 +141,16 @@ public class TimestampIndexImpl implements TimestampIndex {
                 }
             }
         }
-        return new NodeIterableImpl(new NodeIteratorImpl(nodes.iterator()));
+        if (!nodes.isEmpty()) {
+            return new NodeIterableImpl(new NodeIteratorImpl(nodes.iterator()));
+        }
+        return EMPTY_NODE_ITERABLE;
     }
 
     @Override
     public EdgeIterable getEdges(double timestamp) {
         checkDouble(timestamp);
-        
+
         readLock();
         int index = timestampStore.timestampMap.get(timestamp);
         if (index != NULL_INDEX) {
@@ -153,14 +160,14 @@ public class TimestampIndexImpl implements TimestampIndex {
             }
         }
         readUnlock();
-        return null;
+        return EMPTY_EDGE_ITERABLE;
     }
 
     @Override
     public EdgeIterable getEdges(double from, double to) {
         checkDouble(from);
         checkDouble(to);
-        
+
         readLock();
         ObjectSet<EdgeImpl> edges = new ObjectOpenHashSet<EdgeImpl>();
         Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
@@ -178,7 +185,11 @@ public class TimestampIndexImpl implements TimestampIndex {
                 }
             }
         }
-        return new EdgeIterableImpl(new EdgeIteratorImpl(edges.iterator()));
+        if (!edges.isEmpty()) {
+            return new EdgeIterableImpl(new EdgeIteratorImpl(edges.iterator()));
+        } else {
+            return EMPTY_EDGE_ITERABLE;
+        }
     }
 
     public boolean hasNodes() {
@@ -457,6 +468,80 @@ public class TimestampIndexImpl implements TimestampIndex {
         @Override
         public void doBreak() {
             readUnlock();
+        }
+    }
+
+    protected static class NodeIterableEmpty implements NodeIterator, NodeIterable {
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Node next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
+        }
+
+        @Override
+        public NodeIterator iterator() {
+            return this;
+        }
+
+        @Override
+        public Node[] toArray() {
+            return new Node[0];
+        }
+
+        @Override
+        public Collection<Node> toCollection() {
+            return Collections.EMPTY_LIST;
+        }
+
+        @Override
+        public void doBreak() {
+        }
+    }
+
+    protected static class EdgeIterableEmpty implements EdgeIterator, EdgeIterable {
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Edge next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
+        }
+
+        @Override
+        public EdgeIterator iterator() {
+            return this;
+        }
+
+        @Override
+        public Edge[] toArray() {
+            return new Edge[0];
+        }
+
+        @Override
+        public Collection<Edge> toCollection() {
+            return Collections.EMPTY_LIST;
+        }
+
+        @Override
+        public void doBreak() {
         }
     }
 }

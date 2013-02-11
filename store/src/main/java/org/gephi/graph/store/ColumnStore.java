@@ -3,8 +3,9 @@ package org.gephi.graph.store;
 import it.unimi.dsi.fastutil.objects.Object2ShortMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.shorts.ShortHeapPriorityQueue;
-import it.unimi.dsi.fastutil.shorts.ShortPriorityQueue;
+import it.unimi.dsi.fastutil.shorts.ShortRBTreeSet;
+import it.unimi.dsi.fastutil.shorts.ShortSortedSet;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
@@ -25,7 +26,7 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
     //Columns
     protected final Object2ShortMap<String> idMap;
     protected final ColumnImpl[] columns;
-    protected final ShortPriorityQueue garbageQueue;
+    protected final ShortSortedSet garbageQueue;
     //Index
     protected final IndexStore<T> indexStore;
     //Locking (optional)
@@ -42,7 +43,7 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
             throw new RuntimeException("Column Store size can't exceed 65534");
         }
         this.lock = lock;
-        this.garbageQueue = new ShortHeapPriorityQueue(MAX_SIZE);
+        this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<String>(MAX_SIZE);
         this.columns = new ColumnImpl[MAX_SIZE];
         this.elementType = elementType;
@@ -60,11 +61,12 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
             short id = idMap.getShort(columnImpl.getId());
             if (id == NULL_SHORT) {
                 if (!garbageQueue.isEmpty()) {
-                    id = garbageQueue.dequeueShort();
+                    id = garbageQueue.firstShort();
+                    garbageQueue.remove(id);
                 } else {
                     id = intToShort(length);
                     if (length >= MAX_SIZE) {
-                        throw new RuntimeException("Maximum number of edge types reached at " + MAX_SIZE);
+                        throw new RuntimeException("Maximum number of columns reached at " + MAX_SIZE);
                     }
                     length++;
                 }
@@ -93,7 +95,7 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
             if (id == NULL_SHORT) {
                 throw new IllegalArgumentException("The column doesnt exist");
             }
-            garbageQueue.enqueue(id);
+            garbageQueue.add(id);
 
             int intId = shortToInt(id);
             columns[intId] = null;
@@ -183,6 +185,15 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
             readUnlock();
         }
     }
+    
+    public void clear() {
+        garbageQueue.clear();
+        idMap.clear();
+        Arrays.fill(columns, null);
+        if(indexStore != null) {
+            indexStore.clear();
+        }
+    }
 
     public int size() {
         return length - garbageQueue.size();
@@ -267,5 +278,41 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
         public void remove() {
             throw new UnsupportedOperationException("Not supported");
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 11 * hash + (this.elementType != null ? this.elementType.hashCode() : 0);
+        Iterator<ColumnImpl> itr = this.iterator();
+        while (itr.hasNext()) {
+            hash = 11 * hash + itr.next().hashCode();
+        }
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ColumnStore<T> other = (ColumnStore<T>) obj;
+        if (this.elementType != other.elementType && (this.elementType == null || !this.elementType.equals(other.elementType))) {
+            return false;
+        }
+        Iterator<ColumnImpl> itr1 = this.iterator();
+        Iterator<ColumnImpl> itr2 = other.iterator();
+        while (itr1.hasNext()) {
+            if (!itr2.hasNext()) {
+                return false;
+            }
+            if (!itr1.next().equals(itr2.next())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

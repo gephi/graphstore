@@ -251,7 +251,7 @@ public class TimestampStoreTest {
     @Test
     public void testHasNodesClear() {
         TimestampStore store = new TimestampStore(null);
-        
+
         NodeImpl nodeImpl = new NodeImpl(0);
 
         store.addElement(1.0, nodeImpl);
@@ -264,43 +264,43 @@ public class TimestampStoreTest {
         GraphStore graphStore = new GraphStore();
         TimestampStore store = graphStore.timestampStore;
 
-        NodeImpl nodeImpl = (NodeImpl)graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
         Assert.assertEquals(store.size(), 2);
 
         store.index(nodeImpl);
-        
+
         ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.getNodes(1.0, 2.0)));
         Assert.assertTrue(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 1);
     }
-    
+
     @Test
     public void testIndexNodeAdd() {
         GraphStore graphStore = new GraphStore();
         TimestampStore store = graphStore.timestampStore;
 
-        NodeImpl nodeImpl = (NodeImpl)graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
         Assert.assertEquals(store.size(), 2);
 
         graphStore.addNode(nodeImpl);
-        
+
         ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.getNodes(1.0, 2.0)));
         Assert.assertTrue(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 1);
     }
-    
+
     @Test
     public void testClearNode() {
         GraphStore graphStore = new GraphStore();
         TimestampStore store = graphStore.timestampStore;
 
-        NodeImpl nodeImpl = (NodeImpl)graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
@@ -308,18 +308,18 @@ public class TimestampStoreTest {
 
         store.index(nodeImpl);
         store.clear(nodeImpl);
-        
+
         ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.getNodes(1.0, 2.0)));
         Assert.assertFalse(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 0);
     }
-    
+
     @Test
     public void testClearRemove() {
         GraphStore graphStore = new GraphStore();
         TimestampStore store = graphStore.timestampStore;
 
-        NodeImpl nodeImpl = (NodeImpl)graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
@@ -327,63 +327,123 @@ public class TimestampStoreTest {
 
         graphStore.addNode(nodeImpl);
         graphStore.removeNode(nodeImpl);
-        
+
         ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.getNodes(1.0, 2.0)));
         Assert.assertFalse(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 0);
     }
-    
+
     @Test
     public void testAddAfterAdd() {
         GraphStore graphStore = new GraphStore();
         TimestampStore store = graphStore.timestampStore;
 
-        NodeImpl nodeImpl = (NodeImpl)graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
         graphStore.addNode(nodeImpl);
         nodeImpl.addTimestamp(3.0);
-        
+
         ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.getNodes(3.0, 3.0)));
         Assert.assertTrue(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 1);
     }
-    
+
     @Test
     public void testRemoveAfterAdd() {
         GraphStore graphStore = new GraphStore();
         TimestampStore store = graphStore.timestampStore;
 
-        NodeImpl nodeImpl = (NodeImpl)graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
         graphStore.addNode(nodeImpl);
         nodeImpl.removeTimestamp(1.0);
-        
+
         ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.getNodes(1.0, 1.0)));
         Assert.assertFalse(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 0);
-        
+
         ObjectSet r2 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.getNodes(2.0, 2.0)));
         Assert.assertTrue(r2.contains(nodeImpl));
         Assert.assertEquals(r2.size(), 1);
     }
-    
+
     @Test
     public void testRemoveTimestampNodes() {
         GraphStore graphStore = new GraphStore();
         TimestampStore store = graphStore.timestampStore;
 
-        NodeImpl nodeImpl = (NodeImpl)graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
         graphStore.addNode(nodeImpl);
         graphStore.removeNode(nodeImpl);
-        
+
         Assert.assertEquals(store.size(), 0);
+    }
+
+    @Test
+    public void testEqualsEmpty() {
+        TimestampStore store1 = new TimestampStore(null);
+        Assert.assertEquals(store1, store1);
+
+        TimestampStore store2 = new TimestampStore(null);
+        Assert.assertEquals(store1, store2);
+    }
+
+    @Test
+    public void testHashCodeEmpty() {
+        TimestampStore store1 = new TimestampStore(null);
+        Assert.assertEquals(store1, store1);
+
+        TimestampStore store2 = new TimestampStore(null);
+        Assert.assertEquals(store1.hashCode(), store2.hashCode());
+    }
+
+    @Test
+    public void testEquals() {
+        TimestampStore store1 = new TimestampStore(null);
+        store1.addTimestamp(1.0);
+        store1.addTimestamp(2.0);
+        store1.addTimestamp(3.0);
+        store1.removeTimestamp(1.0);
+
+        TimestampStore store2 = new TimestampStore(null);
+        store2.addTimestamp(1.0);
+        store2.addTimestamp(2.0);
+        store2.addTimestamp(3.0);
+        store2.removeTimestamp(1.0);
+
+        TimestampStore store3 = new TimestampStore(null);
+        store3.addTimestamp(1.0);
+
+        Assert.assertEquals(store1, store2);
+        Assert.assertNotEquals(store1, store3);
+    }
+
+    @Test
+    public void testHashCode() {
+        TimestampStore store1 = new TimestampStore(null);
+        store1.addTimestamp(1.0);
+        store1.addTimestamp(2.0);
+        store1.addTimestamp(3.0);
+        store1.removeTimestamp(1.0);
+
+        TimestampStore store2 = new TimestampStore(null);
+        store2.addTimestamp(1.0);
+        store2.addTimestamp(2.0);
+        store2.addTimestamp(3.0);
+        store2.removeTimestamp(1.0);
+
+        TimestampStore store3 = new TimestampStore(null);
+        store3.addTimestamp(1.0);
+
+        Assert.assertEquals(store1.hashCode(), store2.hashCode());
+        Assert.assertNotEquals(store1.hashCode(), store3.hashCode());
     }
 
     //UTILITY

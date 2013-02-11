@@ -5,7 +5,8 @@ import it.unimi.dsi.fastutil.doubles.Double2IntOpenHashMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntRBTreeMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntSortedMap;
 import it.unimi.dsi.fastutil.ints.IntHeapPriorityQueue;
-import it.unimi.dsi.fastutil.ints.IntPriorityQueue;
+import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
+import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,6 +16,7 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.utils.MapDeepEquals;
 
 /**
  *
@@ -29,7 +31,7 @@ public class TimestampStore {
     //Timestamp index managament
     protected final Double2IntMap timestampMap;
     protected final Double2IntSortedMap timestampSortedMap;
-    protected final IntPriorityQueue garbageQueue;
+    protected final IntSortedSet garbageQueue;
     protected double[] indexMap;
     protected int length;
     //Index
@@ -41,7 +43,7 @@ public class TimestampStore {
         timestampMap = new Double2IntOpenHashMap();
         timestampMap.defaultReturnValue(NULL_INDEX);
         mainIndex = new TimestampIndexImpl(this, true);
-        garbageQueue = new IntHeapPriorityQueue(0);
+        garbageQueue = new IntRBTreeSet();
         viewIndexes = new Object2ObjectOpenHashMap<GraphView, TimestampIndexImpl>();
         timestampSortedMap = new Double2IntRBTreeMap();
         indexMap = new double[0];
@@ -367,7 +369,8 @@ public class TimestampStore {
 
         int id;
         if (!garbageQueue.isEmpty()) {
-            id = garbageQueue.dequeueInt();
+            id = garbageQueue.firstInt();
+            garbageQueue.remove(id);
         } else {
             id = length++;
         }
@@ -383,13 +386,13 @@ public class TimestampStore {
         checkDouble(timestamp);
 
         int id = timestampMap.get(timestamp);
-        garbageQueue.enqueue(id);
+        garbageQueue.add(id);
         timestampMap.remove(timestamp);
         timestampSortedMap.remove(timestamp);
         indexMap[id] = Double.NaN;
     }
 
-    private void ensureArraySize(int index) {
+    protected void ensureArraySize(int index) {
         if (index >= indexMap.length) {
             double[] newArray = new double[index + 1];
             System.arraycopy(indexMap, 0, newArray, 0, indexMap.length);
@@ -407,5 +410,30 @@ public class TimestampStore {
         if (index < 0 || index >= length) {
             throw new IllegalArgumentException("The timestamp store index is out of bounds");
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        for (Double2IntMap.Entry entry : timestampSortedMap.double2IntEntrySet()) {
+            hash = 29 * hash + entry.getKey().hashCode();
+            hash = 29 * hash + entry.getValue().hashCode();
+        }
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TimestampStore other = (TimestampStore) obj;
+        if (!MapDeepEquals.mapDeepEquals(timestampSortedMap, other.timestampSortedMap)) {
+            return false;
+        }
+        return true;
     }
 }
