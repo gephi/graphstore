@@ -137,7 +137,24 @@ public class SerializationTest {
         graphStore = new GraphStore();
         ser = new Serialization(graphStore);
         TimestampStore l = (TimestampStore) ser.deserialize(buf);
-        Assert.assertEquals(timestampStore, l);
+        Assert.assertTrue(timestampStore.equals(l));
+    }
+    
+    @Test
+    public void testGraphFactory() throws IOException, ClassNotFoundException {
+        GraphStore graphStore = new GraphStore();
+        GraphFactoryImpl factory = graphStore.factory;
+        
+        factory.setNodeCounter(100);
+        factory.setEdgeCounter(50);
+        
+        Serialization ser = new Serialization(graphStore);
+        byte[] buf = ser.serialize(factory);
+
+        graphStore = new GraphStore();
+        ser = new Serialization(graphStore);
+        GraphFactoryImpl l = (GraphFactoryImpl) ser.deserialize(buf);
+        Assert.assertTrue(factory.equals(l));
     }
 
     @Test

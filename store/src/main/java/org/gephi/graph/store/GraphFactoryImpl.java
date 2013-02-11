@@ -11,8 +11,8 @@ import org.gephi.graph.api.Node;
  */
 public class GraphFactoryImpl implements GraphFactory {
 
-    private static AtomicInteger NODE_IDS = new AtomicInteger();
-    private static AtomicInteger EDGE_IDS = new AtomicInteger();
+    private final AtomicInteger NODE_IDS = new AtomicInteger();
+    private final AtomicInteger EDGE_IDS = new AtomicInteger();
     //Store
     protected final GraphStore store;
 
@@ -43,5 +43,53 @@ public class GraphFactoryImpl implements GraphFactory {
     @Override
     public Node newNode(Object id) {
         return new NodeImpl(id, store);
+    }
+
+    protected int getNodeCounter() {
+        return NODE_IDS.get();
+    }
+
+    protected int getEdgeCounter() {
+        return EDGE_IDS.get();
+    }
+
+    protected void setNodeCounter(int count) {
+        NODE_IDS.set(count);
+    }
+
+    protected void setEdgeCounter(int count) {
+        EDGE_IDS.set(count);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        Integer node = this.NODE_IDS.get();
+        Integer edge = this.EDGE_IDS.get();
+        hash = 59 * hash + node.hashCode();
+        hash = 59 * hash + edge.hashCode();
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final GraphFactoryImpl other = (GraphFactoryImpl) obj;
+        Integer node = this.NODE_IDS.get();
+        Integer edge = this.EDGE_IDS.get();
+        Integer otherNode = other.NODE_IDS.get();
+        Integer otherEdge = other.EDGE_IDS.get();
+        if (this.NODE_IDS != other.NODE_IDS && (!node.equals(otherNode))) {
+            return false;
+        }
+        if (this.EDGE_IDS != other.EDGE_IDS && (!edge.equals(otherEdge))) {
+            return false;
+        }
+        return true;
     }
 }

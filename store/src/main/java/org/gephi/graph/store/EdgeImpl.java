@@ -109,10 +109,12 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     protected void setMutual(boolean mutual) {
-        if (mutual) {
-            flags |= MUTUAL_BYTE;
-        } else {
-            flags &= ~MUTUAL_BYTE;
+        if (isDirected()) {
+            if (mutual) {
+                flags |= MUTUAL_BYTE;
+            } else {
+                flags &= ~MUTUAL_BYTE;
+            }
         }
     }
 

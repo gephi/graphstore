@@ -117,6 +117,7 @@ public class Serialization {
     final static int COLUMN_STORE = 206;
     final static int TIMESTAMP_STORE = 207;
     final static int GRAPH_STORE = 208;
+    final static int GRAPH_FACTORY = 209;
     //Store
     protected final GraphStore store;
     protected final Int2IntMap idMap;
@@ -138,6 +139,9 @@ public class Serialization {
 
         //Timestamp
         serialize(out, store.timestampStore);
+
+        //Factory
+        serialize(out, store.factory);
 
         //Nodes + Edges
         int nodesAndEdges = store.nodeStore.size() + store.edgeStore.size();
@@ -166,12 +170,15 @@ public class Serialization {
         //Timestamp
         deserialize(is);
 
+        //Factory
+        deserialize(is);
+
         //Nodes and edges
         int nodesAndEdges = (Integer) deserialize(is);
         for (int i = 0; i < nodesAndEdges; i++) {
             deserialize(is);
         }
-        
+
         return store;
     }
 
@@ -379,6 +386,25 @@ public class Serialization {
         return timestampStore;
     }
 
+    private void serializeGraphFatory(final DataOutput out) throws IOException {
+        GraphFactoryImpl factory = store.factory;
+
+        serialize(out, factory.getNodeCounter());
+        serialize(out, factory.getEdgeCounter());
+    }
+
+    private GraphFactoryImpl deserializeGraphFactory(final DataInput is) throws IOException, ClassNotFoundException {
+        GraphFactoryImpl graphFactory = store.factory;
+
+        int nodeCounter = (Integer) deserialize(is);
+        int edgeCounter = (Integer) deserialize(is);
+
+        graphFactory.setNodeCounter(nodeCounter);
+        graphFactory.setEdgeCounter(edgeCounter);
+
+        return graphFactory;
+    }
+
     //SERIALIZE PRIMITIVES
     protected byte[] serialize(Object obj) throws IOException {
         DataInputOutput ba = new DataInputOutput();
@@ -583,10 +609,14 @@ public class Serialization {
             TimestampStore b = (TimestampStore) obj;
             out.write(TIMESTAMP_STORE);
             serializeTimestampStore(out);
-        } else if(obj instanceof GraphStore) {
-            GraphStore b = (GraphStore)obj;
+        } else if (obj instanceof GraphStore) {
+            GraphStore b = (GraphStore) obj;
             out.write(GRAPH_STORE);
             serializeGraphStore(out);
+        } else if (obj instanceof GraphFactoryImpl) {
+            GraphFactoryImpl b = (GraphFactoryImpl) obj;
+            out.write(GRAPH_FACTORY);
+            serializeGraphFatory(out);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1056,6 +1086,9 @@ public class Serialization {
                 break;
             case GRAPH_STORE:
                 ret = deserializeGraphStore(is);
+                break;
+            case GRAPH_FACTORY:
+                ret = deserializeGraphFactory(is);
                 break;
             case -1:
                 throw new EOFException();
