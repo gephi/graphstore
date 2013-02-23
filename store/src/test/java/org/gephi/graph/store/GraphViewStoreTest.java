@@ -716,7 +716,7 @@ public class GraphViewStoreTest {
             }
         }
     }
-    
+
     @Test
     public void testDirectedDegree() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
@@ -724,7 +724,7 @@ public class GraphViewStoreTest {
         GraphViewImpl view = store.createView();
         addSomeElements(graphStore, view);
         int typeCount = graphStore.edgeTypeStore.length;
-        
+
         DirectedSubgraph graph = store.getDirectedGraph(view);
         GraphStore copyGraphStore = convertToStore(view);
         for (Node n : graph.getNodes()) {
@@ -734,14 +734,14 @@ public class GraphViewStoreTest {
             Assert.assertEquals(graph.getOutDegree(n), copyGraphStore.getOutDegree(m));
         }
     }
-    
+
     @Test
     public void testUndirectedDegree() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
         GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
         addSomeElements(graphStore, view);
-        
+
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
         GraphStore copyGraphStore = convertToStore(view);
         for (Node n : graph.getNodes()) {
@@ -783,6 +783,129 @@ public class GraphViewStoreTest {
         Assert.assertTrue(view.edgeBitVector.size() >= edge.storeId);
         boolean a = view.addEdge(edge);
         Assert.assertTrue(a);
+    }
+
+    @Test
+    public void testViewEquals() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        NodeImpl n1 = graphStore.getNode("0");
+        view.addNode(n1);
+
+        Assert.assertTrue(view.equals(view));
+
+        GraphViewImpl view2 = store.createView();
+
+        NodeImpl n2 = graphStore.getNode("0");
+        view2.addNode(n2);
+
+        Assert.assertTrue(view.equals(view2));
+    }
+
+    @Test
+    public void testViewHashCode() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        NodeImpl n1 = graphStore.getNode("0");
+        view.addNode(n1);
+
+        Assert.assertEquals(view.hashCode(), view.hashCode());
+
+        GraphViewImpl view2 = store.createView();
+
+        NodeImpl n2 = graphStore.getNode("0");
+        view2.addNode(n2);
+
+        Assert.assertEquals(view.hashCode(), view2.hashCode());
+    }
+
+    @Test
+    public void testViewCopy() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        NodeImpl n1 = graphStore.getNode("0");
+        view.addNode(n1);
+
+        Assert.assertTrue(view.containsNode(n1));
+
+        GraphViewImpl copyView = store.createView(view);
+        Assert.assertTrue(copyView.equals(view));
+        Assert.assertEquals(copyView.hashCode(), view.hashCode());
+    }
+
+    @Test
+    public void testViewIntersection() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        GraphViewImpl view2 = store.createView();
+
+        EdgeImpl e1 = graphStore.getEdge("0");
+        EdgeImpl e2 = graphStore.getEdge("5");
+        NodeImpl n1 = e1.getSource();
+        NodeImpl n2 = e1.getTarget();
+        NodeImpl n3 = e2.getSource();
+        NodeImpl n4 = e2.getTarget();
+        view.addNode(n1);
+        view2.addNode(n1);
+        view.addNode(n2);
+        view2.addNode(n2);
+
+        view.addNode(n3);
+        view.addNode(n4);
+
+        view.addEdge(e1);
+        view2.addEdge(e1);
+        view.addEdge(e2);
+
+        view.intersection(view2);
+
+        Assert.assertTrue(view.containsNode(n1));
+        Assert.assertTrue(view.containsNode(n2));
+        Assert.assertTrue(view.containsEdge(e1));
+        Assert.assertFalse(view.containsNode(n3));
+        Assert.assertFalse(view.containsNode(n4));
+        Assert.assertFalse(view.containsEdge(e2));
+
+        Assert.assertTrue(view2.equals(view));
+    }
+    
+    @Test
+    public void testViewUnion() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        GraphViewImpl view2 = store.createView();
+
+        EdgeImpl e1 = graphStore.getEdge("0");
+        EdgeImpl e2 = graphStore.getEdge("5");
+        NodeImpl n1 = e1.getSource();
+        NodeImpl n2 = e1.getTarget();
+        NodeImpl n3 = e2.getSource();
+        NodeImpl n4 = e2.getTarget();
+        view.addNode(n1);
+        view.addNode(n2);
+
+        view2.addNode(n3);
+        view2.addNode(n4);
+
+        view.addEdge(e1);
+        view2.addEdge(e2);
+
+        view.union(view2);
+
+        Assert.assertTrue(view.containsNode(n1));
+        Assert.assertTrue(view.containsNode(n2));
+        Assert.assertTrue(view.containsEdge(e1));
+        Assert.assertTrue(view.containsNode(n3));
+        Assert.assertTrue(view.containsNode(n4));
+        Assert.assertTrue(view.containsEdge(e2));
     }
 
     //UTILITY

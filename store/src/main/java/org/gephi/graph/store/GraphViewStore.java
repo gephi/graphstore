@@ -42,6 +42,20 @@ public class GraphViewStore {
         }
     }
 
+    public GraphViewImpl createView(GraphView view) {
+        checkNonNullViewObject(view);
+        checkViewExist((GraphViewImpl) view);
+
+        graphStore.autoWriteLock();
+        try {
+            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view);
+            addView(graphView);
+            return graphView;
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
     public void destroyView(GraphView view) {
         graphStore.autoWriteLock();
         try {

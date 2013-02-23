@@ -2,6 +2,7 @@ package org.gephi.graph.store;
 
 import cern.colt.bitvector.BitVector;
 import cern.colt.bitvector.QuickBitVector;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -43,6 +44,20 @@ public final class GraphViewImpl implements GraphView {
         this.edgeBitVector = new BitVector(store.edgeStore.maxStoreId());
         this.typeCounts = new int[DEFAULT_TYPE_COUNT];
         this.mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
+        this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
+        this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
+    }
+
+    public GraphViewImpl(final GraphViewImpl view) {
+        this.graphStore = view.graphStore;
+        this.nodeCount = view.nodeCount;
+        this.edgeCount = view.edgeCount;
+        this.nodeBitVector = view.nodeBitVector.copy();
+        this.edgeBitVector = view.edgeBitVector.copy();
+        this.typeCounts = new int[view.typeCounts.length];
+        System.arraycopy(view.typeCounts, 0, typeCounts, 0, view.typeCounts.length);
+        this.mutualEdgeTypeCounts = new int[view.mutualEdgeTypeCounts.length];
+        System.arraycopy(view.mutualEdgeTypeCounts, 0, mutualEdgeTypeCounts, 0, view.mutualEdgeTypeCounts.length);
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
     }
@@ -238,6 +253,52 @@ public final class GraphViewImpl implements GraphView {
         return edgeBitVector.get(edge.storeId);
     }
 
+    public void intersection(final GraphViewImpl otherView) {
+        BitVector nodeOtherBitVector = otherView.nodeBitVector;
+        BitVector edgeOtherBitVector = otherView.edgeBitVector;
+
+        int nodeSize = nodeBitVector.size();
+        for (int i = 0; i < nodeSize; i++) {
+            boolean t = nodeBitVector.get(i);
+            boolean o = nodeOtherBitVector.get(i);
+            if (t && !o) {
+                removeNode(getNode(i));
+            }
+        }
+
+        int edgeSize = nodeBitVector.size();
+        for (int i = 0; i < edgeSize; i++) {
+            boolean t = edgeBitVector.get(i);
+            boolean o = edgeOtherBitVector.get(i);
+            if (t && !o) {
+                removeEdge(getEdge(i));
+            }
+        }
+    }
+
+    public void union(final GraphViewImpl otherView) {
+        BitVector nodeOtherBitVector = otherView.nodeBitVector;
+        BitVector edgeOtherBitVector = otherView.edgeBitVector;
+
+        int nodeSize = nodeBitVector.size();
+        for (int i = 0; i < nodeSize; i++) {
+            boolean t = nodeBitVector.get(i);
+            boolean o = nodeOtherBitVector.get(i);
+            if (!t && o) {
+                addNode(getNode(i));
+            }
+        }
+        
+        int edgeSize = nodeBitVector.size();
+        for (int i = 0; i < edgeSize; i++) {
+            boolean t = edgeBitVector.get(i);
+            boolean o = edgeOtherBitVector.get(i);
+            if (!t && o) {
+                addEdge(getEdge(i));
+            }
+        }
+    }
+
     public int getNodeCount() {
         return nodeCount;
     }
@@ -297,6 +358,14 @@ public final class GraphViewImpl implements GraphView {
         return new BitVector(newElements, size);
     }
 
+    private NodeImpl getNode(int id) {
+        return graphStore.nodeStore.get(id);
+    }
+
+    private EdgeImpl getEdge(int id) {
+        return graphStore.edgeStore.get(id);
+    }
+
     private void ensureTypeCountArrayCapacity(int type) {
         if (type >= typeCounts.length) {
             int[] newArray = new int[type + 1];
@@ -308,6 +377,54 @@ public final class GraphViewImpl implements GraphView {
             mutualEdgeTypeCounts = newMutualArray;
         }
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 11 * hash + (this.nodeBitVector != null ? this.nodeBitVector.hashCode() : 0);
+        hash = 11 * hash + (this.edgeBitVector != null ? this.edgeBitVector.hashCode() : 0);
+        hash = 11 * hash + this.nodeCount;
+        hash = 11 * hash + this.edgeCount;
+        hash = 11 * hash + Arrays.hashCode(this.typeCounts);
+        hash = 11 * hash + Arrays.hashCode(this.mutualEdgeTypeCounts);
+        hash = 11 * hash + this.mutualEdgesCount;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final GraphViewImpl other = (GraphViewImpl) obj;
+        if (this.nodeBitVector != other.nodeBitVector && (this.nodeBitVector == null || !this.nodeBitVector.equals(other.nodeBitVector))) {
+            return false;
+        }
+        if (this.edgeBitVector != other.edgeBitVector && (this.edgeBitVector == null || !this.edgeBitVector.equals(other.edgeBitVector))) {
+            return false;
+        }
+        if (this.nodeCount != other.nodeCount) {
+            return false;
+        }
+        if (this.edgeCount != other.edgeCount) {
+            return false;
+        }
+        if (!Arrays.equals(this.typeCounts, other.typeCounts)) {
+            return false;
+        }
+        if (!Arrays.equals(this.mutualEdgeTypeCounts, other.mutualEdgeTypeCounts)) {
+            return false;
+        }
+        if (this.mutualEdgesCount != other.mutualEdgesCount) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 
     private void checkIncidentNodesExists(final EdgeImpl e) {
         if (!nodeBitVector.get(e.source.storeId) || !nodeBitVector.get(e.target.storeId)) {
