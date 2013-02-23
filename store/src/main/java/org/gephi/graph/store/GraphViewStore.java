@@ -1,7 +1,8 @@
 package org.gephi.graph.store;
 
-import it.unimi.dsi.fastutil.ints.IntHeapPriorityQueue;
-import it.unimi.dsi.fastutil.ints.IntPriorityQueue;
+import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
+import it.unimi.dsi.fastutil.ints.IntSortedSet;
+import java.util.Arrays;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Subgraph;
@@ -17,7 +18,7 @@ public class GraphViewStore {
     public static final int NULL_VIEW = -1;
     public static final int DEFAULT_VIEWS = 0;
     //Data
-    protected final IntPriorityQueue garbageQueue;
+    protected final IntSortedSet garbageQueue;
     protected final GraphStore graphStore;
     protected GraphViewImpl[] views;
     protected int length;
@@ -28,7 +29,7 @@ public class GraphViewStore {
         }
         this.graphStore = graphStore;
         this.views = new GraphViewImpl[DEFAULT_VIEWS];
-        this.garbageQueue = new IntHeapPriorityQueue(DEFAULT_VIEWS);
+        this.garbageQueue = new IntRBTreeSet();
     }
 
     public GraphViewImpl createView() {
@@ -146,7 +147,8 @@ public class GraphViewStore {
 
         int id;
         if (!garbageQueue.isEmpty()) {
-            id = garbageQueue.dequeueInt();
+            id = garbageQueue.firstInt();
+            garbageQueue.remove(id);
         } else {
             id = length++;
             ensureArraySize(id);
@@ -161,7 +163,7 @@ public class GraphViewStore {
 
         int id = view.storeId;
         views[id] = null;
-        garbageQueue.enqueue(id);
+        garbageQueue.add(id);
         view.storeId = NULL_VIEW;
     }
 
@@ -171,6 +173,32 @@ public class GraphViewStore {
             System.arraycopy(views, 0, newArray, 0, views.length);
             views = newArray;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 67 * hash + Arrays.deepHashCode(this.views);
+        hash = 67 * hash + this.length;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final GraphViewStore other = (GraphViewStore) obj;
+        if (!Arrays.deepEquals(this.views, other.views)) {
+            return false;
+        }
+        if (this.length != other.length) {
+            return false;
+        }
+        return true;
     }
 
     private void checkNonNullViewObject(final Object o) {

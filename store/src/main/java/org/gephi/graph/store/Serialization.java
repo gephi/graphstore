@@ -1,5 +1,6 @@
 package org.gephi.graph.store;
 
+import cern.colt.bitvector.BitVector;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import java.io.DataInput;
@@ -118,6 +119,9 @@ public class Serialization {
     final static int TIMESTAMP_STORE = 207;
     final static int GRAPH_STORE = 208;
     final static int GRAPH_FACTORY = 209;
+    final static int GRAPH_VIEW_STORE = 210;
+    final static int GRAPH_VIEW = 211;
+    final static int BIT_VECTOR = 212;
     //Store
     protected final GraphStore store;
     protected final Int2IntMap idMap;
@@ -386,7 +390,7 @@ public class Serialization {
         return timestampStore;
     }
 
-    private void serializeGraphFatory(final DataOutput out) throws IOException {
+    private void serializeGraphFactory(final DataOutput out) throws IOException {
         GraphFactoryImpl factory = store.factory;
 
         serialize(out, factory.getNodeCounter());
@@ -403,6 +407,79 @@ public class Serialization {
         graphFactory.setEdgeCounter(edgeCounter);
 
         return graphFactory;
+    }
+
+    private void serializeViewStore(final DataOutput out) throws IOException {
+        GraphViewStore viewStore = store.viewStore;
+
+        serialize(out, viewStore.length);
+        serialize(out, viewStore.views);
+        serialize(out, viewStore.garbageQueue.toIntArray());
+    }
+
+    private GraphViewStore deserializeViewStore(final DataInput is) throws IOException, ClassNotFoundException {
+        GraphViewStore viewStore = store.viewStore;
+
+        int length = (Integer) deserialize(is);
+        Object[] views = (Object[]) deserialize(is);
+        int[] garbages = (int[]) deserialize(is);
+
+        viewStore.length = length;
+        viewStore.views = new GraphViewImpl[views.length];
+        System.arraycopy(views, 0, viewStore.views, 0, views.length);
+        for (int i = 0; i < garbages.length; i++) {
+            viewStore.garbageQueue.add(garbages[i]);
+        }
+        return viewStore;
+    }
+
+    private void serializeGraphView(final DataOutput out, final GraphViewImpl view) throws IOException {
+        serialize(out, view.storeId);
+        serialize(out, view.nodeCount);
+        serialize(out, view.edgeCount);
+
+        serialize(out, view.nodeBitVector);
+        serialize(out, view.edgeBitVector);
+
+        serialize(out, view.typeCounts);
+        serialize(out, view.mutualEdgeTypeCounts);
+        serialize(out, view.mutualEdgesCount);
+    }
+
+    private GraphViewImpl deserializeGraphView(final DataInput is) throws IOException, ClassNotFoundException {
+        GraphViewImpl view = new GraphViewImpl(store);
+
+        int storeId = (Integer) deserialize(is);
+        int nodeCount = (Integer) deserialize(is);
+        int edgeCount = (Integer) deserialize(is);
+        BitVector nodeCountVector = (BitVector) deserialize(is);
+        BitVector edgeCountVector = (BitVector) deserialize(is);
+        int[] typeCounts = (int[]) deserialize(is);
+        int[] mutualEdgeTypeCounts = (int[]) deserialize(is);
+        int mutualEdgesCount = (Integer) deserialize(is);
+
+        view.nodeCount = nodeCount;
+        view.edgeCount = edgeCount;
+        view.nodeBitVector = nodeCountVector;
+        view.edgeBitVector = edgeCountVector;
+        view.storeId = storeId;
+
+        view.typeCounts = typeCounts;
+        view.mutualEdgesCount = mutualEdgesCount;
+        view.mutualEdgeTypeCounts = mutualEdgeTypeCounts;
+
+        return view;
+    }
+
+    private void serializeBitVector(final DataOutput out, final BitVector bitVector) throws IOException {
+        serialize(out, bitVector.size());
+        serialize(out, bitVector.elements());
+    }
+
+    private BitVector deserializeBitVector(final DataInput is) throws IOException, ClassNotFoundException {
+        int size = (Integer) deserialize(is);
+        long[] elements = (long[]) deserialize(is);
+        return new BitVector(elements, size);
     }
 
     //SERIALIZE PRIMITIVES
@@ -616,7 +693,19 @@ public class Serialization {
         } else if (obj instanceof GraphFactoryImpl) {
             GraphFactoryImpl b = (GraphFactoryImpl) obj;
             out.write(GRAPH_FACTORY);
-            serializeGraphFatory(out);
+            serializeGraphFactory(out);
+        } else if (obj instanceof GraphViewStore) {
+            GraphViewStore b = (GraphViewStore) obj;
+            out.write(GRAPH_VIEW_STORE);
+            serializeViewStore(out);
+        } else if (obj instanceof GraphViewImpl) {
+            GraphViewImpl b = (GraphViewImpl) obj;
+            out.write(GRAPH_VIEW);
+            serializeGraphView(out, b);
+        } else if (obj instanceof BitVector) {
+            BitVector bv = (BitVector) obj;
+            out.write(BIT_VECTOR);
+            serializeBitVector(out, bv);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1089,6 +1178,15 @@ public class Serialization {
                 break;
             case GRAPH_FACTORY:
                 ret = deserializeGraphFactory(is);
+                break;
+            case GRAPH_VIEW_STORE:
+                ret = deserializeViewStore(is);
+                break;
+            case GRAPH_VIEW:
+                ret = deserializeGraphView(is);
+                break;
+            case BIT_VECTOR:
+                ret = deserializeBitVector(is);
                 break;
             case -1:
                 throw new EOFException();

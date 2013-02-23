@@ -1,5 +1,6 @@
 package org.gephi.graph.store;
 
+import cern.colt.bitvector.BitVector;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -7,6 +8,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import org.gephi.attribute.api.Origin;
+import org.gephi.graph.api.Edge;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -112,7 +114,7 @@ public class SerializationTest {
 
         Serialization ser = new Serialization(graphStore);
         byte[] buf = ser.serialize(node);
-        
+
         graphStore = new GraphStore();
         ser = new Serialization(graphStore);
         NodeImpl l = (NodeImpl) ser.deserialize(buf);
@@ -139,15 +141,15 @@ public class SerializationTest {
         TimestampStore l = (TimestampStore) ser.deserialize(buf);
         Assert.assertTrue(timestampStore.equals(l));
     }
-    
+
     @Test
     public void testGraphFactory() throws IOException, ClassNotFoundException {
         GraphStore graphStore = new GraphStore();
         GraphFactoryImpl factory = graphStore.factory;
-        
+
         factory.setNodeCounter(100);
         factory.setEdgeCounter(50);
-        
+
         Serialization ser = new Serialization(graphStore);
         byte[] buf = ser.serialize(factory);
 
@@ -212,6 +214,60 @@ public class SerializationTest {
         Assert.assertEquals(l.origin, col.getOrigin());
         Assert.assertEquals(l.title, col.getTitle());
         Assert.assertEquals(l.storeId, col.getStoreId());
+    }
+
+    @Test
+    public void testViewStore() throws IOException, ClassNotFoundException {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore viewStore = graphStore.viewStore;
+        GraphViewImpl view = viewStore.createView();
+        GraphViewImpl view2 = viewStore.createView();
+
+        Edge edge = graphStore.getEdge("0");
+        view2.addNode(edge.getSource());
+        view2.addNode(edge.getTarget());
+        view2.addEdge(edge);
+
+        viewStore.removeView(view);
+
+        Serialization ser = new Serialization(graphStore);
+        byte[] buf = ser.serialize(viewStore);
+
+        graphStore = new GraphStore();
+        ser = new Serialization(graphStore);
+        GraphViewStore l = (GraphViewStore) ser.deserialize(buf);
+        Assert.assertEquals(viewStore, l);
+    }
+
+    @Test
+    public void testGraphView() throws IOException, ClassNotFoundException {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+
+        Edge edge = graphStore.getEdge("0");
+        view.addNode(edge.getSource());
+        view.addNode(edge.getTarget());
+        view.addEdge(edge);
+
+        Serialization ser = new Serialization(graphStore);
+        byte[] buf = ser.serialize(view);
+
+        graphStore = new GraphStore();
+        ser = new Serialization(graphStore);
+        GraphViewImpl l = (GraphViewImpl) ser.deserialize(buf);
+        Assert.assertEquals(view, l);
+    }
+
+    @Test
+    public void testBitVector() throws IOException, ClassNotFoundException {
+        BitVector bitVector = new BitVector(10);
+        bitVector.set(1);
+        bitVector.set(4);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(bitVector);
+        BitVector l = (BitVector) ser.deserialize(buf);
+        Assert.assertEquals(bitVector, l);
     }
 
     @Test

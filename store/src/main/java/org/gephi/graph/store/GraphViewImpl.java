@@ -32,9 +32,9 @@ public final class GraphViewImpl implements GraphView {
     //Stats
     protected int nodeCount;
     protected int edgeCount;
-    private int[] typeCounts;
-    private int[] mutualEdgeTypeCounts;
-    private int mutualEdgesCount;
+    protected int[] typeCounts;
+    protected int[] mutualEdgeTypeCounts;
+    protected int mutualEdgesCount;
 
     public GraphViewImpl(final GraphStore store) {
         this.graphStore = store;
@@ -288,7 +288,7 @@ public final class GraphViewImpl implements GraphView {
                 addNode(getNode(i));
             }
         }
-        
+
         int edgeSize = nodeBitVector.size();
         for (int i = 0; i < edgeSize; i++) {
             boolean t = edgeBitVector.get(i);
@@ -423,8 +423,6 @@ public final class GraphViewImpl implements GraphView {
         }
         return true;
     }
-    
-    
 
     private void checkIncidentNodesExists(final EdgeImpl e) {
         if (!nodeBitVector.get(e.source.storeId) || !nodeBitVector.get(e.target.storeId)) {
