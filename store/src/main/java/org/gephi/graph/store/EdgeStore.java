@@ -1,3 +1,18 @@
+/*
+ * Copyright 2012-2013 Gephi Consortium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.gephi.graph.store;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -511,7 +526,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         int id = edge.storeId;
         if (id != EdgeStore.NULL_ID) {
             checkEdgeExists(edge);
-            
+
             edge.clearProperties();
 
             int storeIndex = id / BLOCK_SIZE;
@@ -535,7 +550,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             if (viewStore != null) {
                 viewStore.removeEdge(edge);
             }
-            
+
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {
                     blocks[i] = null;
@@ -976,7 +991,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     int maxStoreId() {
         return currentBlock.offset + currentBlock.nodeLength;
     }
-    
+
     protected static long getLongId(NodeImpl source, NodeImpl target, boolean directed) {
         if (directed) {
             long edgeId = ((long) source.storeId) << NODE_BITS;
