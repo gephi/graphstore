@@ -334,7 +334,7 @@ public class GraphStore implements DirectedGraph {
         nodeStore.checkNonNullNodeObject(node);
         return ((NodeImpl) node).getDegree();
     }
-    
+
     public int getUndirectedDegree(final Node node) {
         nodeStore.checkNonNullNodeObject(node);
         return ((NodeImpl) node).getUndirectedDegree();
@@ -623,7 +623,7 @@ public class GraphStore implements DirectedGraph {
 
         @Override
         public Collection<Edge> toCollection() {
-             List<Edge> list = new ArrayList<Edge>();
+            List<Edge> list = new ArrayList<Edge>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -646,6 +646,11 @@ public class GraphStore implements DirectedGraph {
         @Override
         public boolean isMainView() {
             return true;
+        }
+
+        @Override
+        public boolean isNodeView() {
+            return false;
         }
     }
 }

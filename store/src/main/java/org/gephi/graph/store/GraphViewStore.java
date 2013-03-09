@@ -35,7 +35,18 @@ public class GraphViewStore {
     public GraphViewImpl createView() {
         graphStore.autoWriteLock();
         try {
-            GraphViewImpl graphView = new GraphViewImpl(graphStore);
+            GraphViewImpl graphView = new GraphViewImpl(graphStore, false);
+            addView(graphView);
+            return graphView;
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
+    public GraphViewImpl createNodeView() {
+        graphStore.autoWriteLock();
+        try {
+            GraphViewImpl graphView = new GraphViewImpl(graphStore, true);
             addView(graphView);
             return graphView;
         } finally {

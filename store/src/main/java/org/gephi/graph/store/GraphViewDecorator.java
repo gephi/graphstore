@@ -10,6 +10,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.NodeIterator;
+import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
 /**
@@ -488,6 +489,40 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         return view;
     }
 
+    @Override
+    public void fill() {
+        graphStore.autoWriteLock();
+        try {
+            view.fill();
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
+    @Override
+    public void union(Subgraph subGraph) {
+        checkValidViewObject(subGraph.getView());
+
+        graphStore.autoWriteLock();
+        try {
+            view.union((GraphViewImpl) subGraph.getView());
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
+    @Override
+    public void intersection(Subgraph subGraph) {
+        checkValidViewObject(subGraph.getView());
+
+        graphStore.autoWriteLock();
+        try {
+            view.intersection((GraphViewImpl) subGraph.getView());
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
     void checkWriteLock() {
         if (graphStore.lock != null) {
             graphStore.lock.checkHoldWriteLock();
@@ -531,6 +566,18 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
 
         if (!view.containsEdge((EdgeImpl) e)) {
             throw new RuntimeException("Edge doesn't belong to this view");
+        }
+    }
+
+    void checkValidViewObject(final GraphView view) {
+        if (view == null) {
+            throw new NullPointerException();
+        }
+        if (!(view instanceof GraphViewImpl)) {
+            throw new ClassCastException("Object must be a GraphViewImpl object");
+        }
+        if (((GraphViewImpl) view).graphStore != graphStore) {
+            throw new RuntimeException("The view doesn't belong to this store");
         }
     }
 

@@ -123,6 +123,7 @@ public class EdgeTypeStore {
     }
 
     public void clear() {
+        //TODO
     }
 
     public int size() {

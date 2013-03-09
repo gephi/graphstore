@@ -23,6 +23,7 @@ public final class GraphViewImpl implements GraphView {
     public static final double GROWING_FACTOR = 1.1;
     //Data
     protected final GraphStore graphStore;
+    protected final boolean nodeViewOnly;
     protected BitVector nodeBitVector;
     protected BitVector edgeBitVector;
     protected int storeId;
@@ -36,10 +37,11 @@ public final class GraphViewImpl implements GraphView {
     protected int[] mutualEdgeTypeCounts;
     protected int mutualEdgesCount;
 
-    public GraphViewImpl(final GraphStore store) {
+    public GraphViewImpl(final GraphStore store, boolean nodesOnly) {
         this.graphStore = store;
         this.nodeCount = 0;
         this.edgeCount = 0;
+        this.nodeViewOnly = nodesOnly;
         this.nodeBitVector = new BitVector(store.nodeStore.maxStoreId());
         this.edgeBitVector = new BitVector(store.edgeStore.maxStoreId());
         this.typeCounts = new int[DEFAULT_TYPE_COUNT];
@@ -52,6 +54,7 @@ public final class GraphViewImpl implements GraphView {
         this.graphStore = view.graphStore;
         this.nodeCount = view.nodeCount;
         this.edgeCount = view.edgeCount;
+        this.nodeViewOnly = view.nodeViewOnly;
         this.nodeBitVector = view.nodeBitVector.copy();
         this.edgeBitVector = view.edgeBitVector.copy();
         this.typeCounts = new int[view.typeCounts.length];
@@ -79,6 +82,18 @@ public final class GraphViewImpl implements GraphView {
         if (!isSet) {
             nodeBitVector.set(id);
             nodeCount++;
+
+            if (nodeViewOnly) {
+                //Add edges
+                EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+                while (itr.hasNext()) {
+                    EdgeImpl edge = itr.next();
+                    NodeImpl opposite = edge.source == nodeImpl ? edge.target : edge.source;
+                    if (nodeBitVector.get(opposite.getStoreId())) {
+                        addEdge(edge);
+                    }
+                }
+            }
             return true;
         }
         return false;
@@ -245,6 +260,24 @@ public final class GraphViewImpl implements GraphView {
         mutualEdgesCount = 0;
     }
 
+    public void fill() {
+        nodeBitVector = new BitVector(graphStore.nodeStore.maxStoreId());
+        edgeBitVector = new BitVector(graphStore.edgeStore.maxStoreId());
+        nodeBitVector.not();
+        edgeBitVector.not();
+        this.nodeCount = graphStore.nodeStore.size();
+        this.edgeCount = graphStore.edgeStore.size();
+        int typeLength = graphStore.edgeStore.longDictionary.length;
+        this.typeCounts = new int[typeLength];
+        for (int i = 0; i < typeLength; i++) {
+            int count = graphStore.edgeStore.longDictionary[i].size();
+            this.typeCounts[i] = count;
+        }
+        this.mutualEdgeTypeCounts = new int[graphStore.edgeStore.mutualEdgesTypeSize.length];
+        System.arraycopy(graphStore.edgeStore.mutualEdgesTypeSize, 0, this.mutualEdgeTypeCounts, 0, this.mutualEdgeTypeCounts.length);
+        this.mutualEdgesCount = graphStore.edgeStore.mutualEdgesSize;
+    }
+
     public boolean containsNode(final NodeImpl node) {
         return nodeBitVector.get(node.storeId);
     }
@@ -325,22 +358,6 @@ public final class GraphViewImpl implements GraphView {
         return typeCounts[type] - mutualEdgeTypeCounts[type];
     }
 
-    public void ensureNodeVectorSize(NodeImpl node) {
-        int sid = node.storeId;
-        if (sid >= nodeBitVector.size()) {
-            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GROWING_FACTOR)), Integer.MAX_VALUE);
-            nodeBitVector = growBitVector(nodeBitVector, newSize);
-        }
-    }
-
-    public void ensureEdgeVectorSize(EdgeImpl edge) {
-        int sid = edge.storeId;
-        if (sid >= edgeBitVector.size()) {
-            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GROWING_FACTOR)), Integer.MAX_VALUE);
-            edgeBitVector = growBitVector(edgeBitVector, newSize);
-        }
-    }
-
     @Override
     public GraphModelImpl getGraphModel() {
         return graphStore.graphModel;
@@ -349,6 +366,39 @@ public final class GraphViewImpl implements GraphView {
     @Override
     public boolean isMainView() {
         return false;
+    }
+
+    @Override
+    public boolean isNodeView() {
+        return nodeViewOnly;
+    }
+
+    protected void ensureNodeVectorSize(NodeImpl node) {
+        int sid = node.storeId;
+        if (sid >= nodeBitVector.size()) {
+            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GROWING_FACTOR)), Integer.MAX_VALUE);
+            nodeBitVector = growBitVector(nodeBitVector, newSize);
+        }
+    }
+
+    private void ensureNodeVectorSize(int size) {
+        if (size > nodeBitVector.size()) {
+            nodeBitVector = growBitVector(nodeBitVector, size);
+        }
+    }
+
+    private void ensureEdgeVectorSize(int size) {
+        if (size > edgeBitVector.size()) {
+            edgeBitVector = growBitVector(edgeBitVector, size);
+        }
+    }
+
+    protected void ensureEdgeVectorSize(EdgeImpl edge) {
+        int sid = edge.storeId;
+        if (sid >= edgeBitVector.size()) {
+            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GROWING_FACTOR)), Integer.MAX_VALUE);
+            edgeBitVector = growBitVector(edgeBitVector, newSize);
+        }
     }
 
     private BitVector growBitVector(BitVector bitVector, int size) {
@@ -381,6 +431,7 @@ public final class GraphViewImpl implements GraphView {
     @Override
     public int hashCode() {
         int hash = 5;
+        hash = 17 * hash + (this.nodeViewOnly ? 1 : 0);
         hash = 11 * hash + (this.nodeBitVector != null ? this.nodeBitVector.hashCode() : 0);
         hash = 11 * hash + (this.edgeBitVector != null ? this.edgeBitVector.hashCode() : 0);
         hash = 11 * hash + this.nodeCount;
@@ -410,6 +461,9 @@ public final class GraphViewImpl implements GraphView {
             return false;
         }
         if (this.edgeCount != other.edgeCount) {
+            return false;
+        }
+        if (this.nodeViewOnly != other.nodeViewOnly) {
             return false;
         }
         if (!Arrays.equals(this.typeCounts, other.typeCounts)) {
