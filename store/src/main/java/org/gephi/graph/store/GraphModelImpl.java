@@ -83,55 +83,76 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public int addEdgeType(Object label) {
-        //TODO Locking
-        return store.edgeTypeStore.addType(label);
+        store.autoWriteLock();
+        try {
+            return store.edgeTypeStore.addType(label);
+        } finally {
+            store.autoWriteUnlock();
+        }
     }
 
     @Override
     public int getEdgeType(Object label) {
-        //TODO Locking
-        return store.edgeTypeStore.getId(label);
+        store.autoReadLock();
+        try {
+            return store.edgeTypeStore.getId(label);
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override
     public Object getEdgeLabel(int id) {
-        //TODO Locking
-        return store.edgeTypeStore.getLabel(id);
+        store.autoReadLock();
+        try {
+            return store.edgeTypeStore.getLabel(id);
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override
     public boolean isDirected() {
-        return store.isDirected();
+        store.autoReadLock();
+        try {
+            return store.isDirected();
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override
     public boolean isUndirected() {
-        return store.isUndirected();
+        store.autoReadLock();
+        try {
+            return store.isUndirected();
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override
     public boolean isMixed() {
-        return store.isMixed();
+        store.autoReadLock();
+        try {
+            return store.isMixed();
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override
     public GraphView createView() {
-        //TODO Locking
         return store.viewStore.createView();
     }
 
     @Override
     public GraphView createNodeView() {
-        //TODO Locking
         return store.viewStore.createNodeView();
     }
 
     @Override
     public void destroyView(GraphView view) {
-        //TODO Locking
-        store.timestampStore.deleteViewIndex(store);
-        store.edgePropertyStore.indexStore.deleteViewIndex(((GraphViewImpl) view).graphStore);
-        store.nodePropertyStore.indexStore.deleteViewIndex(((GraphViewImpl) view).graphStore);
         store.viewStore.destroyView(view);
     }
 
@@ -152,7 +173,6 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Index getNodeIndex(GraphView view) {
-        //TODO Locking
         return store.nodePropertyStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
     }
 
@@ -163,7 +183,6 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Index getEdgeIndex(GraphView view) {
-        //TODO Locking
         return store.edgePropertyStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
     }
 
@@ -174,7 +193,6 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public TimestampIndex getTimestampIndex(GraphView view) {
-        //TODO Locking
         return store.timestampStore.getIndex(((GraphViewImpl) view).graphStore);
     }
 }
