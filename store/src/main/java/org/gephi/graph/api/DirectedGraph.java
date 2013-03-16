@@ -24,6 +24,12 @@ public interface DirectedGraph extends Graph {
     @Override
     public Edge getEdge(Node source, Node target, int type);
 
+    @Override
+    public boolean isAdjacent(Node source, Node target);
+
+    @Override
+    public boolean isAdjacent(Node source, Node target, int type);
+
     public NodeIterable getPredecessors(Node node);
 
     public NodeIterable getPredecessors(Node node, int type);
@@ -43,10 +49,4 @@ public interface DirectedGraph extends Graph {
     public int getInDegree(Node node);
 
     public int getOutDegree(Node node);
-
-    @Override
-    public boolean isAdjacent(Node source, Node target);
-
-    @Override
-    public boolean isAdjacent(Node source, Node target, int type);
 }

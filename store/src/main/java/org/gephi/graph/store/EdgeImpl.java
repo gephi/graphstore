@@ -86,6 +86,11 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     @Override
+    public Object getTypeLabel() {
+        return graphStore.edgeTypeStore.getLabel(type);
+    }
+
+    @Override
     public void setWeight(double weight) {
         this.weight = weight;
     }

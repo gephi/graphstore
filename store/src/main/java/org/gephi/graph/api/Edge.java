@@ -21,8 +21,6 @@ package org.gephi.graph.api;
  */
 public interface Edge extends Element {
 
-    public static int DEFAULT_TYPE = 0;
-
     public Node getSource();
 
     public Node getTarget();
@@ -32,6 +30,8 @@ public interface Edge extends Element {
     public void setWeight(double weight);
 
     public int getType();
+
+    public Object getTypeLabel();
 
     public boolean isSelfLoop();
 
