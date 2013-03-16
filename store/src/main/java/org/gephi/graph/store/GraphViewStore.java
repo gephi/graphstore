@@ -88,6 +88,10 @@ public class GraphViewStore {
         try {
             checkNonNullViewObject(view);
 
+            graphStore.timestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            graphStore.edgePropertyStore.indexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            graphStore.nodePropertyStore.indexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+
             removeView((GraphViewImpl) view);
         } finally {
             graphStore.autoWriteUnlock();

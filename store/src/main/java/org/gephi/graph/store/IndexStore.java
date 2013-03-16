@@ -34,6 +34,7 @@ import org.gephi.graph.api.Node;
 public class IndexStore<T extends Element> {
 
     protected final ColumnStore<T> propertyStore;
+    protected final GraphLock lock;
     protected final IndexImpl<T> mainIndex;
     protected final Map<GraphView, IndexImpl<T>> viewIndexes;
 
@@ -41,6 +42,7 @@ public class IndexStore<T extends Element> {
         this.propertyStore = propertyStore;
         this.mainIndex = new IndexImpl<T>(propertyStore);
         this.viewIndexes = new Object2ObjectOpenHashMap<GraphView, IndexImpl<T>>();
+        this.lock = propertyStore.lock;
     }
 
     protected void addColumn(ColumnImpl col) {
@@ -67,11 +69,16 @@ public class IndexStore<T extends Element> {
         if (view.isMainView()) {
             return mainIndex;
         }
-        IndexImpl<T> viewIndex = viewIndexes.get(graph.getView());
-        if (viewIndex == null) {
-            viewIndex = createViewIndex(graph);
+        writeLock();
+        try {
+            IndexImpl<T> viewIndex = viewIndexes.get(graph.getView());
+            if (viewIndex == null) {
+                viewIndex = createViewIndex(graph);
+            }
+            return viewIndex;
+        } finally {
+            writeUnlock();
         }
-        return viewIndex;
     }
 
     protected IndexImpl createViewIndex(Graph graph) {
@@ -190,6 +197,18 @@ public class IndexStore<T extends Element> {
             Object[] newArray = new Object[size];
             System.arraycopy(properties, 0, newArray, 0, properties.length);
             element.properties = newArray;
+        }
+    }
+
+    private void writeLock() {
+        if (lock != null) {
+            lock.writeLock();
+        }
+    }
+
+    private void writeUnlock() {
+        if (lock != null) {
+            lock.writeUnlock();
         }
     }
 }

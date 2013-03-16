@@ -68,11 +68,16 @@ public class TimestampStore {
         if (view.isMainView()) {
             return mainIndex;
         }
-        TimestampIndexImpl viewIndex = viewIndexes.get(graph.getView());
-        if (viewIndex == null) {
-            viewIndex = createViewIndex(graph);
+        writeLock();
+        try {
+            TimestampIndexImpl viewIndex = viewIndexes.get(graph.getView());
+            if (viewIndex == null) {
+                viewIndex = createViewIndex(graph);
+            }
+            return viewIndex;
+        } finally {
+            writeUnlock();
         }
-        return viewIndex;
     }
 
     protected TimestampIndexImpl createViewIndex(Graph graph) {
@@ -449,5 +454,29 @@ public class TimestampStore {
             return false;
         }
         return true;
+    }
+
+    private void readLock() {
+        if (lock != null) {
+            lock.readLock();
+        }
+    }
+
+    private void readUnlock() {
+        if (lock != null) {
+            lock.readUnlock();
+        }
+    }
+
+    private void writeLock() {
+        if (lock != null) {
+            lock.writeLock();
+        }
+    }
+
+    private void writeUnlock() {
+        if (lock != null) {
+            lock.writeUnlock();
+        }
     }
 }
