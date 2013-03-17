@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.NodeIterator;
 
 /**
  *
@@ -40,6 +39,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected final EdgeStore edgeStore;
     //Locking (optional)
     protected final GraphLock lock;
+    //Version
+    protected final GraphVersion version;
     //Data
     protected int size;
     protected int garbageSize;
@@ -56,13 +57,15 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         this.lock = null;
         this.edgeStore = null;
         this.viewStore = null;
+        this.version = null;
     }
 
-    public NodeStore(final EdgeStore edgeStore, final GraphLock lock, final GraphViewStore viewStore) {
+    public NodeStore(final EdgeStore edgeStore, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeStore = edgeStore;
         this.viewStore = viewStore;
+        this.version = graphVersion;
     }
 
     private void initStore() {
@@ -130,6 +133,10 @@ public class NodeStore implements Collection<Node>, NodeIterable {
 
     @Override
     public void clear() {
+        if (!isEmpty()) {
+            incrementVersion();
+        }
+
         for (NodeStoreIterator itr = new NodeStoreIterator(); itr.hasNext();) {
             NodeImpl node = itr.next();
             node.setStoreId(NodeStore.NULL_ID);
@@ -228,6 +235,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         if (node.storeId == NodeStore.NULL_ID) {
             checkIdDoesntExist(n.getId());
 
+            incrementVersion();
+
             if (garbageSize > 0) {
                 for (int i = 0; i < blocksCount; i++) {
                     NodeBlock nodeBlock = blocks[i];
@@ -249,6 +258,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             node.indexProperties();
 
             size++;
+
             return true;
         } else if (isValidIndex(node.storeId) && get(node.storeId) == node) {
             return false;
@@ -267,6 +277,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             checkNodeExists(node);
 
             node.clearProperties();
+
+            incrementVersion();
 
             int storeIndex = id / BLOCK_SIZE;
             NodeBlock block = blocks[storeIndex];
@@ -467,6 +479,13 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         }
     }
 
+    private int incrementVersion() {
+        if (version != null) {
+            return version.incrementAndGetNodeVersion();
+        }
+        return 0;
+    }
+
     private boolean isValidIndex(int id) {
         if (id < 0 || id >= currentBlock.offset + currentBlock.nodeLength) {
             return false;
@@ -565,7 +584,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         }
     }
 
-    protected final class NodeStoreIterator implements Iterator<Node>, NodeIterator {
+    protected final class NodeStoreIterator implements Iterator<Node> {
 
         protected int blockIndex;
         protected NodeImpl[] backingArray;

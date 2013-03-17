@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
  */
 public class TableImplTest {
 
+    @Test
     public void testTable() {
         TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
         Assert.assertEquals(table.countColumns(), 0);

@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import org.gephi.graph.api.Edge;
-import org.gephi.graph.api.EdgeIterator;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -1256,7 +1255,7 @@ public class EdgeStoreTest {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore2.addAll(Arrays.asList(edges));
 
-        EdgeIterator itr = edgeStore2.iteratorSelfLoop();
+        Iterator<Edge> itr = edgeStore2.iteratorSelfLoop();
         while (itr.hasNext()) {
             Edge e = itr.next();
             Assert.assertEquals(e, edgeStore2.get(e.getSource(), e.getTarget(), 0));
@@ -1554,7 +1553,7 @@ public class EdgeStoreTest {
     @Test
     public void testTypeCounting() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null);
+        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null);
         EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
 
         Int2IntMap counts = new Int2IntOpenHashMap();
@@ -1658,7 +1657,7 @@ public class EdgeStoreTest {
         Object2ObjectMap<NodeImpl, Set<EdgeImpl>> neighbours = getNeighboursMap(edges, 0, true);
 
         for (NodeImpl n : getNodes(edges)) {
-            EdgeIterator itr = edgeStore.edgeUndirectedIterator(n);
+            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n);
 
             Set<EdgeImpl> incidentEdges = neighbours.get(n);
 
@@ -1682,7 +1681,7 @@ public class EdgeStoreTest {
         Object2ObjectMap<NodeImpl, Set<EdgeImpl>> neighbours = getNeighboursMap(edges, 2, true);
 
         for (NodeImpl n : getNodes(edges)) {
-            EdgeIterator itr = edgeStore.edgeUndirectedIterator(n, 2);
+            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n, 2);
 
             Set<EdgeImpl> incidentEdges = neighbours.get(n);
 

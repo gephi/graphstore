@@ -23,16 +23,13 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.gephi.attribute.api.TimestampIndex;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.EdgeIterator;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.NodeIterator;
 
 /**
  *
@@ -41,8 +38,6 @@ import org.gephi.graph.api.NodeIterator;
 public class TimestampIndexImpl implements TimestampIndex {
     //Const
 
-    protected static final NodeIterable EMPTY_NODE_ITERABLE = new NodeIterableEmpty();
-    protected static final EdgeIterable EMPTY_EDGE_ITERABLE = new EdgeIterableEmpty();
     protected static final int NULL_INDEX = -1;
     //Data
     protected final GraphLock lock;
@@ -127,7 +122,7 @@ public class TimestampIndexImpl implements TimestampIndex {
             }
         }
         readUnlock();
-        return EMPTY_NODE_ITERABLE;
+        return NodeIterable.EMPTY;
     }
 
     @Override
@@ -155,7 +150,7 @@ public class TimestampIndexImpl implements TimestampIndex {
         if (!nodes.isEmpty()) {
             return new NodeIterableImpl(new NodeIteratorImpl(nodes.iterator()));
         }
-        return EMPTY_NODE_ITERABLE;
+        return NodeIterable.EMPTY;
     }
 
     @Override
@@ -171,7 +166,7 @@ public class TimestampIndexImpl implements TimestampIndex {
             }
         }
         readUnlock();
-        return EMPTY_EDGE_ITERABLE;
+        return EdgeIterable.EMPTY;
     }
 
     @Override
@@ -199,7 +194,7 @@ public class TimestampIndexImpl implements TimestampIndex {
         if (!edges.isEmpty()) {
             return new EdgeIterableImpl(new EdgeIteratorImpl(edges.iterator()));
         } else {
-            return EMPTY_EDGE_ITERABLE;
+            return EdgeIterable.EMPTY;
         }
     }
 
@@ -360,7 +355,7 @@ public class TimestampIndexImpl implements TimestampIndex {
         }
     }
 
-    protected class NodeIteratorImpl implements NodeIterator {
+    protected class NodeIteratorImpl implements Iterator<Node> {
 
         private final ObjectIterator<NodeImpl> itr;
 
@@ -384,7 +379,7 @@ public class TimestampIndexImpl implements TimestampIndex {
         }
     }
 
-    protected class EdgeIteratorImpl implements EdgeIterator {
+    protected class EdgeIteratorImpl implements Iterator<Edge> {
 
         private final ObjectIterator<EdgeImpl> itr;
 
@@ -410,14 +405,14 @@ public class TimestampIndexImpl implements TimestampIndex {
 
     protected class NodeIterableImpl implements NodeIterable {
 
-        protected final NodeIterator iterator;
+        protected final Iterator<Node> iterator;
 
-        public NodeIterableImpl(NodeIterator iterator) {
+        public NodeIterableImpl(Iterator<Node> iterator) {
             this.iterator = iterator;
         }
 
         @Override
-        public NodeIterator iterator() {
+        public Iterator<Node> iterator() {
             return iterator;
         }
 
@@ -447,14 +442,14 @@ public class TimestampIndexImpl implements TimestampIndex {
 
     protected class EdgeIterableImpl implements EdgeIterable {
 
-        protected final EdgeIterator iterator;
+        protected final Iterator<Edge> iterator;
 
-        public EdgeIterableImpl(EdgeIterator iterator) {
+        public EdgeIterableImpl(Iterator<Edge> iterator) {
             this.iterator = iterator;
         }
 
         @Override
-        public EdgeIterator iterator() {
+        public Iterator<Edge> iterator() {
             return iterator;
         }
 
@@ -479,80 +474,6 @@ public class TimestampIndexImpl implements TimestampIndex {
         @Override
         public void doBreak() {
             readUnlock();
-        }
-    }
-
-    protected static class NodeIterableEmpty implements NodeIterator, NodeIterable {
-
-        @Override
-        public boolean hasNext() {
-            return false;
-        }
-
-        @Override
-        public Node next() {
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
-
-        @Override
-        public NodeIterator iterator() {
-            return this;
-        }
-
-        @Override
-        public Node[] toArray() {
-            return new Node[0];
-        }
-
-        @Override
-        public Collection<Node> toCollection() {
-            return Collections.EMPTY_LIST;
-        }
-
-        @Override
-        public void doBreak() {
-        }
-    }
-
-    protected static class EdgeIterableEmpty implements EdgeIterator, EdgeIterable {
-
-        @Override
-        public boolean hasNext() {
-            return false;
-        }
-
-        @Override
-        public Edge next() {
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
-
-        @Override
-        public EdgeIterator iterator() {
-            return this;
-        }
-
-        @Override
-        public Edge[] toArray() {
-            return new Edge[0];
-        }
-
-        @Override
-        public Collection<Edge> toCollection() {
-            return Collections.EMPTY_LIST;
-        }
-
-        @Override
-        public void doBreak() {
         }
     }
 }

@@ -16,6 +16,9 @@
 package org.gephi.graph.api;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  *
@@ -23,12 +26,51 @@ import java.util.Collection;
  */
 public interface NodeIterable extends ElementIterable<Node> {
 
+    public static final NodeIterable EMPTY = new NodeIterableEmpty();
+
     @Override
-    public NodeIterator iterator();
+    public Iterator<Node> iterator();
 
     @Override
     public Node[] toArray();
 
     @Override
     public Collection<Node> toCollection();
+
+    static final class NodeIterableEmpty implements Iterator<Node>, NodeIterable {
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Node next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
+        }
+
+        @Override
+        public Iterator<Node> iterator() {
+            return this;
+        }
+
+        @Override
+        public Node[] toArray() {
+            return new Node[0];
+        }
+
+        @Override
+        public Collection<Node> toCollection() {
+            return Collections.EMPTY_LIST;
+        }
+
+        @Override
+        public void doBreak() {
+        }
+    }
 }

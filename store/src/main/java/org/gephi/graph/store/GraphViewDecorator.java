@@ -20,11 +20,9 @@ import java.util.Iterator;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.EdgeIterator;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.NodeIterator;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
@@ -605,12 +603,12 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         return false;
     }
 
-    protected final class NodeViewIterator implements NodeIterator {
+    protected final class NodeViewIterator implements Iterator<Node> {
 
-        private final NodeIterator nodeIterator;
+        private final Iterator<Node> nodeIterator;
         private NodeImpl pointer;
 
-        public NodeViewIterator(NodeIterator nodeIterator) {
+        public NodeViewIterator(Iterator<Node> nodeIterator) {
             this.nodeIterator = nodeIterator;
         }
 
@@ -641,12 +639,12 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         }
     }
 
-    protected final class EdgeViewIterator implements EdgeIterator {
+    protected final class EdgeViewIterator implements Iterator<Edge> {
 
-        private final EdgeIterator edgeIterator;
+        private final Iterator<Edge> edgeIterator;
         private EdgeImpl pointer;
 
-        public EdgeViewIterator(EdgeIterator edgeIterator) {
+        public EdgeViewIterator(Iterator<Edge> edgeIterator) {
             this.edgeIterator = edgeIterator;
         }
 
@@ -677,12 +675,12 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         }
     }
 
-    protected final class UndirectedEdgeViewIterator implements EdgeIterator {
+    protected final class UndirectedEdgeViewIterator implements Iterator<Edge> {
 
-        protected final EdgeIterator itr;
+        protected final Iterator<Edge> itr;
         protected EdgeImpl pointer;
 
-        public UndirectedEdgeViewIterator(EdgeIterator itr) {
+        public UndirectedEdgeViewIterator(Iterator<Edge> itr) {
             this.itr = itr;
         }
 
@@ -709,7 +707,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         }
     }
 
-    protected class NeighborsIterator implements NodeIterator {
+    protected class NeighborsIterator implements Iterator<Node> {
 
         protected final NodeImpl node;
         protected final Iterator<Edge> itr;

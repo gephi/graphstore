@@ -17,11 +17,14 @@ package org.gephi.graph.store;
 
 import cern.colt.bitvector.BitVector;
 import cern.colt.bitvector.QuickBitVector;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedSubgraph;
@@ -42,6 +45,9 @@ public final class GraphViewImpl implements GraphView {
     protected BitVector nodeBitVector;
     protected BitVector edgeBitVector;
     protected int storeId;
+    //Version
+    protected final GraphVersion version;
+    protected final List<GraphObserverImpl> observers;
     //Decorators
     private final GraphViewDecorator directedDecorator;
     private final GraphViewDecorator undirectedDecorator;
@@ -63,6 +69,8 @@ public final class GraphViewImpl implements GraphView {
         this.mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
+        this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
+        this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
     }
 
     public GraphViewImpl(final GraphViewImpl view) {
@@ -78,6 +86,8 @@ public final class GraphViewImpl implements GraphView {
         System.arraycopy(view.mutualEdgeTypeCounts, 0, mutualEdgeTypeCounts, 0, view.mutualEdgeTypeCounts.length);
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
+        this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
+        this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
     }
 
     protected DirectedSubgraph getDirectedGraph() {
@@ -97,6 +107,7 @@ public final class GraphViewImpl implements GraphView {
         if (!isSet) {
             nodeBitVector.set(id);
             nodeCount++;
+            incrementNodeVersion();
 
             if (nodeViewOnly) {
                 //Add edges
@@ -138,6 +149,8 @@ public final class GraphViewImpl implements GraphView {
         boolean isSet = edgeBitVector.get(id);
         if (!isSet) {
             checkIncidentNodesExists(edgeImpl);
+
+            incrementEdgeVersion();
 
             edgeBitVector.set(id);
             edgeCount++;
@@ -181,6 +194,7 @@ public final class GraphViewImpl implements GraphView {
         if (isSet) {
             nodeBitVector.clear(id);
             nodeCount--;
+            incrementNodeVersion();
 
             //Remove edges
             EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
@@ -190,6 +204,8 @@ public final class GraphViewImpl implements GraphView {
                 int edgeId = edgeImpl.storeId;
                 boolean edgeSet = edgeBitVector.get(edgeId);
                 if (edgeSet) {
+                    incrementEdgeVersion();
+
                     edgeBitVector.clear(edgeId);
                     edgeCount--;
                     typeCounts[edgeImpl.type]--;
@@ -228,6 +244,8 @@ public final class GraphViewImpl implements GraphView {
         int id = edgeImpl.storeId;
         boolean isSet = edgeBitVector.get(id);
         if (isSet) {
+            incrementEdgeVersion();
+
             edgeBitVector.clear(id);
             edgeCount--;
             typeCounts[edgeImpl.type]--;
@@ -258,6 +276,12 @@ public final class GraphViewImpl implements GraphView {
     }
 
     public void clear() {
+        if (nodeCount > 0) {
+            incrementNodeVersion();
+        }
+        if (edgeCount > 0) {
+            incrementEdgeVersion();
+        }
         nodeBitVector.clear();
         edgeBitVector.clear();
         nodeCount = 0;
@@ -268,6 +292,9 @@ public final class GraphViewImpl implements GraphView {
     }
 
     public void clearEdges() {
+        if (edgeCount > 0) {
+            incrementEdgeVersion();
+        }
         edgeBitVector.clear();
         edgeCount = 0;
         typeCounts = new int[DEFAULT_TYPE_COUNT];
@@ -291,6 +318,13 @@ public final class GraphViewImpl implements GraphView {
         this.mutualEdgeTypeCounts = new int[graphStore.edgeStore.mutualEdgesTypeSize.length];
         System.arraycopy(graphStore.edgeStore.mutualEdgesTypeSize, 0, this.mutualEdgeTypeCounts, 0, this.mutualEdgeTypeCounts.length);
         this.mutualEdgesCount = graphStore.edgeStore.mutualEdgesSize;
+
+        if (edgeCount > 0) {
+            incrementEdgeVersion();
+        }
+        if (nodeCount > 0) {
+            incrementNodeVersion();
+        }
     }
 
     public boolean containsNode(final NodeImpl node) {
@@ -386,6 +420,32 @@ public final class GraphViewImpl implements GraphView {
     @Override
     public boolean isNodeView() {
         return nodeViewOnly;
+    }
+
+    protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
+        if (observers != null) {
+            GraphObserverImpl observer = new GraphObserverImpl(graphStore, version, graph, withDiff);
+            observers.add(observer);
+
+            return observer;
+        }
+        return null;
+    }
+
+    protected void destroyGraphObserver(GraphObserverImpl observer) {
+        if (observers != null) {
+            observers.remove(observer);
+            observer.destroyObserver();
+        }
+    }
+
+    protected void destroyAllObservers() {
+        if (observers != null) {
+            for (GraphObserverImpl graphObserverImpl : observers) {
+                graphObserverImpl.destroyObserver();
+            }
+            observers.clear();
+        }
     }
 
     protected void ensureNodeVectorSize(NodeImpl node) {
@@ -491,6 +551,20 @@ public final class GraphViewImpl implements GraphView {
             return false;
         }
         return true;
+    }
+
+    private int incrementNodeVersion() {
+        if (version != null) {
+            return version.incrementAndGetNodeVersion();
+        }
+        return 0;
+    }
+
+    private int incrementEdgeVersion() {
+        if (version != null) {
+            return version.incrementAndGetEdgeVersion();
+        }
+        return 0;
     }
 
     private void checkIncidentNodesExists(final EdgeImpl e) {

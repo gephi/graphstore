@@ -72,4 +72,6 @@ public interface GraphModel {
     public TimestampIndex getTimestampIndex();
 
     public TimestampIndex getTimestampIndex(GraphView view);
+
+    public GraphObserver getGraphObserver(Graph graph, boolean withGraphDiff);
 }

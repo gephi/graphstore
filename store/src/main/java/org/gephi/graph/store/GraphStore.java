@@ -22,12 +22,11 @@ import java.util.List;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.EdgeIterator;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.NodeIterator;
 
 /**
  *
@@ -40,6 +39,7 @@ public class GraphStore implements DirectedGraph {
     public static boolean AUTO_TYPE_REGISTRATION = true;
     public static boolean INDEX_NODES = true;
     public static boolean INDEX_EDGES = true;
+    public static boolean ENABLE_OBSERVERS = true;
     //Model
     protected final GraphModelImpl graphModel;
     //Stores
@@ -54,6 +54,9 @@ public class GraphStore implements DirectedGraph {
     protected final GraphFactoryImpl factory;
     //Lock
     protected final GraphLock lock;
+    //Version
+    protected final GraphVersion version;
+    protected final List<GraphObserverImpl> observers;
     //Undirected
     protected final UndirectedDecorator undirectedDecorator;
     //Main Graph view
@@ -67,14 +70,16 @@ public class GraphStore implements DirectedGraph {
         graphModel = model;
         lock = new GraphLock();
         edgeTypeStore = new EdgeTypeStore();
-        edgeTypeStore.addType("Default Type");
         viewStore = new GraphViewStore(this);
-        edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null, viewStore);
-        nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null, viewStore);
+        version = ENABLE_OBSERVERS ? new GraphVersion(this) : null;
+        observers = ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
+        edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null, viewStore, ENABLE_OBSERVERS ? version : null);
+        nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null, viewStore, ENABLE_OBSERVERS ? version : null);
         nodePropertyStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
         edgePropertyStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
         timestampStore = new TimestampStore(AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);
+
         mainGraphView = new MainGraphView();
 
         undirectedDecorator = new UndirectedDecorator(this);
@@ -543,12 +548,41 @@ public class GraphStore implements DirectedGraph {
         return edgeStore.isMixedGraph();
     }
 
-    protected EdgeIterableWrapper getEdgeIterableWrapper(EdgeIterator edgeIterator) {
+    protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
+        if (graph.getView() != mainGraphView) {
+            throw new RuntimeException("This graph doesn't belong to this store");
+        }
+
+        if (observers != null) {
+            GraphObserverImpl observer = new GraphObserverImpl(this, version, graph, withDiff);
+            observers.add(observer);
+
+            return observer;
+        }
+        return null;
+    }
+
+    protected void destroyGraphObserver(GraphObserverImpl observer) {
+        if (observers != null) {
+            observers.remove(observer);
+            observer.destroyObserver();
+        }
+    }
+
+    protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator) {
         return new EdgeIterableWrapper(edgeIterator);
     }
 
-    protected NodeIterableWrapper getNodeIterableWrapper(NodeIterator nodeIterator) {
+    protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator) {
         return new NodeIterableWrapper(nodeIterator);
+    }
+
+    protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator, boolean blocking) {
+        return new EdgeIterableWrapper(edgeIterator, blocking);
+    }
+
+    protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator, boolean blocking) {
+        return new NodeIterableWrapper(nodeIterator, blocking);
     }
 
     @Override
@@ -579,14 +613,20 @@ public class GraphStore implements DirectedGraph {
 
     protected class NodeIterableWrapper implements NodeIterable {
 
-        protected final NodeIterator iterator;
+        protected final Iterator<Node> iterator;
+        protected final boolean blocking;
 
-        public NodeIterableWrapper(NodeIterator iterator) {
+        public NodeIterableWrapper(Iterator<Node> iterator) {
+            this(iterator, true);
+        }
+
+        public NodeIterableWrapper(Iterator<Node> iterator, boolean blocking) {
             this.iterator = iterator;
+            this.blocking = blocking;
         }
 
         @Override
-        public NodeIterator iterator() {
+        public Iterator<Node> iterator() {
             return iterator;
         }
 
@@ -610,20 +650,28 @@ public class GraphStore implements DirectedGraph {
 
         @Override
         public void doBreak() {
-            autoReadUnlock();
+            if (blocking) {
+                autoReadUnlock();
+            }
         }
     }
 
     protected class EdgeIterableWrapper implements EdgeIterable {
 
-        protected final EdgeIterator iterator;
+        protected final Iterator<Edge> iterator;
+        protected final boolean blocking;
 
-        public EdgeIterableWrapper(EdgeIterator iterator) {
+        public EdgeIterableWrapper(Iterator<Edge> iterator) {
+            this(iterator, true);
+        }
+
+        public EdgeIterableWrapper(Iterator<Edge> iterator, boolean blocking) {
             this.iterator = iterator;
+            this.blocking = blocking;
         }
 
         @Override
-        public EdgeIterator iterator() {
+        public Iterator<Edge> iterator() {
             return iterator;
         }
 
@@ -647,7 +695,9 @@ public class GraphStore implements DirectedGraph {
 
         @Override
         public void doBreak() {
-            autoReadUnlock();
+            if (blocking) {
+                autoReadUnlock();
+            }
         }
     }
 

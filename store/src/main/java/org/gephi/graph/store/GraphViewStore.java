@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.Arrays;
 import org.gephi.graph.api.DirectedSubgraph;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
@@ -140,6 +141,20 @@ public class GraphViewStore {
         return ((GraphViewImpl) view).getUndirectedGraph();
     }
 
+    public GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
+        GraphViewImpl graphViewImpl = (GraphViewImpl) graph.getView();
+        checkViewExist(graphViewImpl);
+
+        return graphViewImpl.createGraphObserver(graph, withDiff);
+    }
+
+    public void destroyGraphObserver(GraphObserverImpl graphObserver) {
+        GraphViewImpl graphViewImpl = (GraphViewImpl) graphObserver.graph.getView();
+        checkViewExist(graphViewImpl);
+
+        graphViewImpl.destroyGraphObserver(graphObserver);
+    }
+
     protected void addNode(NodeImpl node) {
         if (views.length > 0) {
             for (GraphViewImpl view : views) {
@@ -195,6 +210,8 @@ public class GraphViewStore {
         views[id] = null;
         garbageQueue.add(id);
         view.storeId = NULL_VIEW;
+
+        view.destroyAllObservers();
     }
 
     private void ensureArraySize(int index) {

@@ -20,13 +20,13 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.NodeIterator;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -241,6 +241,7 @@ public class GraphStoreTest {
     @Test(expectedExceptions = RuntimeException.class)
     public void testAddEdgeNoTypeRegistration() {
         GraphStore graphStore = new GraphStore();
+        boolean autoTypeRegistration = GraphStore.AUTO_TYPE_REGISTRATION;
         GraphStore.AUTO_TYPE_REGISTRATION = false;
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
@@ -248,7 +249,7 @@ public class GraphStoreTest {
         EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
         graphStore.addEdge(edge);
 
-        GraphStore.AUTO_TYPE_REGISTRATION = true;
+        GraphStore.AUTO_TYPE_REGISTRATION = autoTypeRegistration;
     }
 
     @Test
@@ -262,7 +263,7 @@ public class GraphStoreTest {
 
         int edgeCount = graphStore.getEdgeCount();
 
-        NodeIterator nodeIterator = graphStore.getNodes().iterator();
+        Iterator<Node> nodeIterator = graphStore.getNodes().iterator();
         for (; nodeIterator.hasNext();) {
             NodeImpl n = (NodeImpl) nodeIterator.next();
             int degree = n.getDegree();

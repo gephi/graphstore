@@ -37,12 +37,10 @@ import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.EdgeIterator;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.NodeIterator;
 
 /**
  *
@@ -141,7 +139,7 @@ public class BasicGraphStore implements DirectedGraph {
     @Override
     public boolean removeNode(Node node) {
         BasicNode basicNode = (BasicNode) node;
-        EdgeIterator itr = edgeStore.inOutIterator(basicNode);
+        Iterator<Edge> itr = edgeStore.inOutIterator(basicNode);
         for (; itr.hasNext();) {
             Edge edge = itr.next();
             edgeStore.remove(edge);
@@ -240,7 +238,7 @@ public class BasicGraphStore implements DirectedGraph {
 
     @Override
     public int getDegree(Node node) {
-        EdgeIterator itr = edgeStore.inOutIterator((BasicNode) node);
+        Iterator<Edge> itr = edgeStore.inOutIterator((BasicNode) node);
         int i = 0;
         for (; itr.hasNext();) {
             i++;
@@ -250,7 +248,7 @@ public class BasicGraphStore implements DirectedGraph {
 
     @Override
     public int getInDegree(Node node) {
-        EdgeIterator itr = edgeStore.inIterator((BasicNode) node);
+        Iterator<Edge> itr = edgeStore.inIterator((BasicNode) node);
         int i = 0;
         for (; itr.hasNext();) {
             i++;
@@ -260,7 +258,7 @@ public class BasicGraphStore implements DirectedGraph {
 
     @Override
     public int getOutDegree(Node node) {
-        EdgeIterator itr = edgeStore.outIterator((BasicNode) node);
+        Iterator<Edge> itr = edgeStore.outIterator((BasicNode) node);
         int i = 0;
         for (; itr.hasNext();) {
             i++;
@@ -291,7 +289,7 @@ public class BasicGraphStore implements DirectedGraph {
     @Override
     public void clearEdges(Node node) {
         BasicNode basicNode = (BasicNode) node;
-        EdgeIterator itr = edgeStore.inOutIterator(basicNode);
+        Iterator<Edge> itr = edgeStore.inOutIterator(basicNode);
         for (; itr.hasNext();) {
             Edge edge = itr.next();
             edgeStore.remove(edge);
@@ -301,7 +299,7 @@ public class BasicGraphStore implements DirectedGraph {
     @Override
     public void clearEdges(Node node, int type) {
         BasicNode basicNode = (BasicNode) node;
-        EdgeIterator itr = edgeStore.inOutIterator(basicNode, type);
+        Iterator<Edge> itr = edgeStore.inOutIterator(basicNode, type);
         for (; itr.hasNext();) {
             Edge edge = itr.next();
             edgeStore.remove(edge);
@@ -523,6 +521,11 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
+        public Object getTypeLabel() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
         public boolean isSelfLoop() {
             return source == target;
         }
@@ -572,7 +575,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
-        public NodeIterator iterator() {
+        public Iterator<Node> iterator() {
             return new BasicNodeIterator(idToNodeMap.values().iterator());
         }
 
@@ -664,7 +667,7 @@ public class BasicGraphStore implements DirectedGraph {
         public void doBreak() {
         }
 
-        private static class BasicNodeIterator implements NodeIterator {
+        private static class BasicNodeIterator implements Iterator<Node> {
 
             private final Iterator<BasicNode> itr;
 
@@ -741,11 +744,11 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
-        public EdgeIterator iterator() {
+        public Iterator<Edge> iterator() {
             return new BasicEdgeIterator(idToEdgeMap.values().iterator());
         }
 
-        public EdgeIterator outIterator(BasicNode node) {
+        public Iterator<Edge> outIterator(BasicNode node) {
             ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
             for (Object2ObjectMap<Object, BasicEdge> col : node.outEdges.values()) {
                 set.addAll(col.values());
@@ -753,7 +756,7 @@ public class BasicGraphStore implements DirectedGraph {
             return new BasicEdgeIterator(set);
         }
 
-        public EdgeIterator outIterator(BasicNode node, int type) {
+        public Iterator<Edge> outIterator(BasicNode node, int type) {
             ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
             if (node.outEdges.containsKey(type)) {
                 set.addAll(node.outEdges.get(type).values());
@@ -761,7 +764,7 @@ public class BasicGraphStore implements DirectedGraph {
             return new BasicEdgeIterator(set);
         }
 
-        public EdgeIterator inIterator(BasicNode node) {
+        public Iterator<Edge> inIterator(BasicNode node) {
             ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
             for (Object2ObjectMap<Object, BasicEdge> col : node.inEdges.values()) {
                 set.addAll(col.values());
@@ -769,7 +772,7 @@ public class BasicGraphStore implements DirectedGraph {
             return new BasicEdgeIterator(set);
         }
 
-        public EdgeIterator inIterator(BasicNode node, int type) {
+        public Iterator<Edge> inIterator(BasicNode node, int type) {
             ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
             if (node.inEdges.containsKey(type)) {
                 set.addAll(node.inEdges.get(type).values());
@@ -777,7 +780,7 @@ public class BasicGraphStore implements DirectedGraph {
             return new BasicEdgeIterator(set);
         }
 
-        public EdgeIterator inOutIterator(BasicNode node) {
+        public Iterator<Edge> inOutIterator(BasicNode node) {
             ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
             for (Object2ObjectMap<Object, BasicEdge> col : node.outEdges.values()) {
                 set.addAll(col.values());
@@ -788,7 +791,7 @@ public class BasicGraphStore implements DirectedGraph {
             return new BasicEdgeIterator(set);
         }
 
-        public EdgeIterator inOutIterator(BasicNode node, int type) {
+        public Iterator<Edge> inOutIterator(BasicNode node, int type) {
             ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
             if (node.outEdges.containsKey(type)) {
                 set.addAll(node.outEdges.get(type).values());
@@ -799,23 +802,23 @@ public class BasicGraphStore implements DirectedGraph {
             return new BasicEdgeIterator(set);
         }
 
-        public NodeIterator predecessors(BasicNode node) {
-            EdgeIterator itr = inIterator(node);
+        public Iterator<Node> predecessors(BasicNode node) {
+            Iterator<Edge> itr = inIterator(node);
             return new NeighborsIterator(node, itr);
         }
 
-        public NodeIterator predecessors(BasicNode node, int type) {
-            EdgeIterator itr = inIterator(node, type);
+        public Iterator<Node> predecessors(BasicNode node, int type) {
+            Iterator<Edge> itr = inIterator(node, type);
             return new NeighborsIterator(node, itr);
         }
 
-        public NodeIterator successors(BasicNode node) {
-            EdgeIterator itr = outIterator(node);
+        public Iterator<Node> successors(BasicNode node) {
+            Iterator<Edge> itr = outIterator(node);
             return new NeighborsIterator(node, itr);
         }
 
-        public NodeIterator successors(BasicNode node, int type) {
-            EdgeIterator itr = outIterator(node, type);
+        public Iterator<Node> successors(BasicNode node, int type) {
+            Iterator<Edge> itr = outIterator(node, type);
             return new NeighborsIterator(node, itr);
         }
 
@@ -945,7 +948,7 @@ public class BasicGraphStore implements DirectedGraph {
             }
         }
 
-        private static class BasicEdgeIterator implements EdgeIterator {
+        private static class BasicEdgeIterator implements Iterator<Edge> {
 
             private final Iterator<BasicEdge> itr;
 
@@ -974,7 +977,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
     }
 
-    private static class NeighborsIterator implements NodeIterator {
+    private static class NeighborsIterator implements Iterator<Node> {
 
         protected final BasicNode node;
         protected final Iterator<Edge> itr;
@@ -1001,7 +1004,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
     }
 
-    private static class NeighborsUndirectedIterator implements NodeIterator {
+    private static class NeighborsUndirectedIterator implements Iterator<Node> {
 
         protected Set<BasicNode> output = new ObjectOpenHashSet<BasicNode>();
         protected final BasicNode node;
@@ -1042,14 +1045,14 @@ public class BasicGraphStore implements DirectedGraph {
 
     protected class NodeIterableWrapper implements NodeIterable {
 
-        protected final NodeIterator iterator;
+        protected final Iterator<Node> iterator;
 
-        public NodeIterableWrapper(NodeIterator iterator) {
+        public NodeIterableWrapper(Iterator<Node> iterator) {
             this.iterator = iterator;
         }
 
         @Override
-        public NodeIterator iterator() {
+        public Iterator<Node> iterator() {
             return iterator;
         }
 
@@ -1079,14 +1082,14 @@ public class BasicGraphStore implements DirectedGraph {
 
     protected class EdgeIterableWrapper implements EdgeIterable {
 
-        protected final EdgeIterator iterator;
+        protected final Iterator<Edge> iterator;
 
-        public EdgeIterableWrapper(EdgeIterator iterator) {
+        public EdgeIterableWrapper(Iterator<Edge> iterator) {
             this.iterator = iterator;
         }
 
         @Override
-        public EdgeIterator iterator() {
+        public Iterator<Edge> iterator() {
             return iterator;
         }
 

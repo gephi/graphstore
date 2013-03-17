@@ -24,6 +24,7 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
@@ -194,5 +195,46 @@ public class GraphModelImpl implements GraphModel {
     @Override
     public TimestampIndex getTimestampIndex(GraphView view) {
         return store.timestampStore.getIndex(((GraphViewImpl) view).graphStore);
+    }
+
+    @Override
+    public GraphObserver getGraphObserver(Graph graph, boolean withGraphDiff) {
+        store.autoWriteLock();
+        try {
+            if (graph.getView().isMainView()) {
+                return store.createGraphObserver(graph, withGraphDiff);
+            } else {
+                return store.viewStore.createGraphObserver(graph, withGraphDiff);
+            }
+        } finally {
+            store.autoWriteUnlock();
+        }
+    }
+
+    public void destroyGraphObserver(GraphObserver observer) {
+        checkGraphObserver(observer);
+
+        store.autoWriteLock();
+        try {
+            if (observer.getGraph().getView().isMainView()) {
+                store.destroyGraphObserver((GraphObserverImpl) observer);
+            } else {
+                store.viewStore.destroyGraphObserver((GraphObserverImpl) observer);
+            }
+        } finally {
+            store.autoWriteUnlock();
+        }
+    }
+
+    private void checkGraphObserver(GraphObserver observer) {
+        if (observer == null) {
+            throw new NullPointerException();
+        }
+        if (!(observer instanceof GraphObserverImpl)) {
+            throw new ClassCastException("The observer should be a GraphObserverImpl instance");
+        }
+        if (((GraphObserverImpl) observer).graphStore != store) {
+            throw new RuntimeException("The observer doesn't belong to this store");
+        }
     }
 }

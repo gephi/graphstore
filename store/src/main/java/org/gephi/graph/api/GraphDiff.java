@@ -15,11 +15,17 @@
  */
 package org.gephi.graph.api;
 
-import java.util.Iterator;
-
 /**
  *
  * @author mbastian
  */
-public interface EdgeIterator extends Iterator<Edge> {
+public interface GraphDiff {
+
+    public NodeIterable getAddedNodes();
+
+    public NodeIterable getRemovedNodes();
+
+    public EdgeIterable getAddedEdges();
+
+    public EdgeIterable getRemovedEdges();
 }

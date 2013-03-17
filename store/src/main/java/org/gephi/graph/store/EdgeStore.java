@@ -25,9 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.EdgeIterator;
 import org.gephi.graph.api.Node;
-import org.gephi.graph.api.NodeIterator;
 
 public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
@@ -53,6 +51,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected int[] mutualEdgesTypeSize;
     //Locking (optional)
     protected final GraphLock lock;
+    //Version
+    protected final GraphVersion version;
     //Types counting (optional)
     protected final EdgeTypeStore edgeTypeStore;
     //View store
@@ -63,13 +63,15 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.lock = null;
         this.edgeTypeStore = null;
         this.viewStore = null;
+        this.version = null;
     }
 
-    public EdgeStore(final EdgeTypeStore edgeTypeStore, final GraphLock lock, final GraphViewStore viewStore) {
+    public EdgeStore(final EdgeTypeStore edgeTypeStore, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeTypeStore = edgeTypeStore;
         this.viewStore = viewStore;
+        this.version = graphVersion;
     }
 
     private void initStore() {
@@ -270,6 +272,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     @Override
     public void clear() {
+        if (!isEmpty()) {
+            incrementVersion();
+        }
+
         for (EdgeStoreIterator itr = new EdgeStoreIterator(); itr.hasNext();) {
             EdgeImpl edge = itr.next();
             edge.setStoreId(EdgeStore.NULL_ID);
@@ -333,7 +339,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return new EdgeInOutIterator((NodeImpl) node);
     }
 
-    public EdgeIterator edgeUndirectedIterator(final Node node) {
+    public Iterator<Edge> edgeUndirectedIterator(final Node node) {
         checkValidNodeObject(node);
         return undirectedIterator(new EdgeInOutIterator((NodeImpl) node));
     }
@@ -343,7 +349,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return new EdgeTypeOutIterator((NodeImpl) node, type);
     }
 
-    public EdgeIterator edgeUndirectedIterator(final Node node, int type) {
+    public Iterator<Edge> edgeUndirectedIterator(final Node node, int type) {
         checkValidNodeObject(node);
         return undirectedIterator(new EdgeTypeInOutIterator((NodeImpl) node, type));
     }
@@ -465,6 +471,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 return false;
             }
 
+            incrementVersion();
+
             if (garbageSize > 0) {
                 for (int i = 0; i < blocksCount; i++) {
                     EdgeBlock edgeBlock = blocks[i];
@@ -526,6 +534,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         int id = edge.storeId;
         if (id != EdgeStore.NULL_ID) {
             checkEdgeExists(edge);
+
+            incrementVersion();
 
             edge.clearProperties();
 
@@ -852,7 +862,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return edge.source == node || edge.target == node;
     }
 
-    protected EdgeIterator undirectedIterator(EdgeIterator edgeIterator) {
+    protected Iterator<Edge> undirectedIterator(Iterator<Edge> edgeIterator) {
         return new UndirectedIterator(edgeIterator);
     }
 
@@ -981,6 +991,12 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
+    private void incrementVersion() {
+        if (version != null) {
+            version.incrementAndGetEdgeVersion();
+        }
+    }
+
     boolean isUndirectedToIgnore(EdgeImpl edge) {
         if (edge.isMutual() && edge.source.storeId < edge.target.storeId) {
             return true;
@@ -1058,7 +1074,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected class EdgeStoreIterator implements Iterator<Edge>, EdgeIterator {
+    protected class EdgeStoreIterator implements Iterator<Edge> {
 
         protected int blockIndex;
         protected EdgeImpl[] backingArray;
@@ -1147,7 +1163,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected final class EdgeInOutIterator implements EdgeIterator {
+    protected final class EdgeInOutIterator implements Iterator<Edge> {
 
         protected final int outTypeLength;
         protected final int inTypeLength;
@@ -1235,7 +1251,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected final class EdgeOutIterator implements EdgeIterator {
+    protected final class EdgeOutIterator implements Iterator<Edge> {
 
         protected final int typeLength;
         protected EdgeImpl[] outArray;
@@ -1282,7 +1298,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected final class EdgeInIterator implements EdgeIterator {
+    protected final class EdgeInIterator implements Iterator<Edge> {
 
         protected final int typeLength;
         protected EdgeImpl[] inArray;
@@ -1329,7 +1345,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected final class EdgeTypeInOutIterator implements EdgeIterator {
+    protected final class EdgeTypeInOutIterator implements Iterator<Edge> {
 
         protected final int type;
         protected EdgeImpl lastEdge;
@@ -1412,7 +1428,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected final class EdgeTypeOutIterator implements EdgeIterator {
+    protected final class EdgeTypeOutIterator implements Iterator<Edge> {
 
         protected final int type;
         protected EdgeImpl lastEdge;
@@ -1458,7 +1474,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected final class EdgeTypeInIterator implements EdgeIterator {
+    protected final class EdgeTypeInIterator implements Iterator<Edge> {
 
         protected final int type;
         protected EdgeImpl lastEdge;
@@ -1504,7 +1520,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected class NeighborsIterator implements NodeIterator {
+    protected class NeighborsIterator implements Iterator<Node> {
 
         protected final NodeImpl node;
         protected final Iterator<Edge> itr;
@@ -1557,7 +1573,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected final class UndirectedIterator implements EdgeIterator {
+    protected final class UndirectedIterator implements Iterator<Edge> {
 
         protected final Iterator<Edge> itr;
         protected EdgeImpl pointer;
