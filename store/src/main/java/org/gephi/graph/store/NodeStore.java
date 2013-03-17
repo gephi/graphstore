@@ -279,6 +279,9 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             node.clearProperties();
 
             incrementVersion();
+            if (viewStore != null) {
+                viewStore.removeNode(node);
+            }
 
             int storeIndex = id / BLOCK_SIZE;
             NodeBlock block = blocks[storeIndex];
@@ -287,9 +290,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             garbageSize++;
             dictionary.remove(node.getId());
             trimDictionary();
-            if (viewStore != null) {
-                viewStore.removeNode(node);
-            }
+
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {
                     blocks[i] = null;

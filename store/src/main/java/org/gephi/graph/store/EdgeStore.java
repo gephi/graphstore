@@ -537,6 +537,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             incrementVersion();
 
+            if (viewStore != null) {
+                viewStore.removeEdge(edge);
+            }
+
             edge.clearProperties();
 
             int storeIndex = id / BLOCK_SIZE;
@@ -557,9 +561,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             garbageSize++;
             dictionary.remove(edge.getId());
             trimDictionary();
-            if (viewStore != null) {
-                viewStore.removeEdge(edge);
-            }
 
             for (int i = storeIndex; i == (blocksCount - 1) && block.garbageLength == block.nodeLength && i >= 0;) {
                 if (i != 0) {
