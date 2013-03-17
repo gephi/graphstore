@@ -50,14 +50,18 @@ public class GraphVersion {
     }
 
     private void handleNodeReset() {
-        if (graph.getView().isMainView()) {
-        } else {
+        if (graph != null) {
+            if (graph.getView().isMainView()) {
+            } else {
+            }
         }
     }
 
     private void handleEdgeReset() {
-        if (graph.getView().isMainView()) {
-        } else {
+        if (graph != null) {
+            if (graph.getView().isMainView()) {
+            } else {
+            }
         }
     }
 }

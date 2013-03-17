@@ -71,11 +71,13 @@ public class GraphObserverImpl implements GraphObserver {
 
     @Override
     public synchronized GraphDiff getDiff() {
-        checkNotDestroyed();
-
+        if (!withDiff) {
+            throw new RuntimeException("This observer doesn't compute diffs, set diff setting to true");
+        }
         if (graphDiff == null) {
             throw new IllegalStateException("The hasGraphChanged() method should be called first and getDiff() only once then");
         }
+        checkNotDestroyed();
         GraphDiff diff = graphDiff;
         graphDiff = null;
         return diff;
@@ -107,9 +109,9 @@ public class GraphObserverImpl implements GraphObserver {
                             graphDiff.removedNodes.add(nImpl);
                         }
                     }
-                    if (maxStoreId >= nodeCache.length || maxStoreId < nodeCache.length) {
+                    if (maxStoreId > nodeCache.length || maxStoreId < nodeCache.length) {
                         NodeImpl[] newCache = new NodeImpl[maxStoreId];
-                        System.arraycopy(nodeCache, 0, newCache, 0, nodeCache.length);
+                        System.arraycopy(nodeCache, 0, newCache, 0, maxStoreId > nodeCache.length ? nodeCache.length : maxStoreId);
                         nodeCache = newCache;
                     }
                     for (Node n : graph.getNodes()) {
@@ -140,9 +142,9 @@ public class GraphObserverImpl implements GraphObserver {
                             graphDiff.removedEdges.add(eImpl);
                         }
                     }
-                    if (maxStoreId >= edgeCache.length || maxStoreId < edgeCache.length) {
+                    if (maxStoreId > edgeCache.length || maxStoreId < edgeCache.length) {
                         EdgeImpl[] newCache = new EdgeImpl[maxStoreId];
-                        System.arraycopy(edgeCache, 0, newCache, 0, edgeCache.length);
+                        System.arraycopy(edgeCache, 0, newCache, 0, maxStoreId > edgeCache.length ? edgeCache.length : maxStoreId);
                         edgeCache = newCache;
                     }
                     for (Edge e : graph.getEdges()) {

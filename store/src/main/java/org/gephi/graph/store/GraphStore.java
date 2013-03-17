@@ -564,6 +564,9 @@ public class GraphStore implements DirectedGraph {
 
     protected void destroyGraphObserver(GraphObserverImpl observer) {
         if (observers != null) {
+            if (observer.graph.getView() != mainGraphView) {
+                throw new RuntimeException("This graph doesn't belong to this store");
+            }
             observers.remove(observer);
             observer.destroyObserver();
         }
