@@ -163,6 +163,14 @@ public class GraphObserverImpl implements GraphObserver {
         }
     }
 
+    protected void resetNodeVersion() {
+        nodeVersion = Integer.MIN_VALUE;
+    }
+
+    protected void resetEdgeVersion() {
+        edgeVersion = Integer.MIN_VALUE;
+    }
+
     protected final class GraphDiffImpl implements GraphDiff {
 
         protected final ObjectList<Node> addedNodes;

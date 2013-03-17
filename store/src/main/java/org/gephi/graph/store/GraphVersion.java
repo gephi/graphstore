@@ -52,7 +52,19 @@ public class GraphVersion {
     private void handleNodeReset() {
         if (graph != null) {
             if (graph.getView().isMainView()) {
+                GraphStore graphStore = (GraphStore) graph;
+                if (graphStore.observers != null) {
+                    for (GraphObserverImpl observer : graphStore.observers) {
+                        observer.resetNodeVersion();
+                    }
+                }
             } else {
+                GraphViewImpl view = (GraphViewImpl) graph.getView();
+                if (view.observers != null) {
+                    for (GraphObserverImpl observer : view.observers) {
+                        observer.resetNodeVersion();
+                    }
+                }
             }
         }
     }
@@ -60,7 +72,19 @@ public class GraphVersion {
     private void handleEdgeReset() {
         if (graph != null) {
             if (graph.getView().isMainView()) {
+                GraphStore graphStore = (GraphStore) graph;
+                if (graphStore.observers != null) {
+                    for (GraphObserverImpl observer : graphStore.observers) {
+                        observer.resetEdgeVersion();
+                    }
+                }
             } else {
+                GraphViewImpl view = (GraphViewImpl) graph.getView();
+                if (view.observers != null) {
+                    for (GraphObserverImpl observer : view.observers) {
+                        observer.resetEdgeVersion();
+                    }
+                }
             }
         }
     }
