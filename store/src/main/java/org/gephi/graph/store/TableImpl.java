@@ -55,6 +55,10 @@ public class TableImpl<T extends Element> implements Table {
 
         id = id.toLowerCase();
 
+        if (indexed && store.indexStore == null) {
+            indexed = false;
+        }
+
         ColumnImpl column = new ColumnImpl(id, type, title, defaultValue, origin, indexed);
         store.addColumn(column);
 

@@ -238,20 +238,6 @@ public class GraphStoreTest {
         Assert.assertTrue(c);
     }
 
-    @Test(expectedExceptions = RuntimeException.class)
-    public void testAddEdgeNoTypeRegistration() {
-        GraphStore graphStore = new GraphStore();
-        boolean autoTypeRegistration = GraphStore.AUTO_TYPE_REGISTRATION;
-        GraphStore.AUTO_TYPE_REGISTRATION = false;
-        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
-        graphStore.addAllNodes(Arrays.asList(nodes));
-
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
-        graphStore.addEdge(edge);
-
-        GraphStore.AUTO_TYPE_REGISTRATION = autoTypeRegistration;
-    }
-
     @Test
     public void testRemoveNodeWithEdges() {
         GraphStore graphStore = new GraphStore();
