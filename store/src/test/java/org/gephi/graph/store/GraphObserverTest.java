@@ -378,4 +378,18 @@ public class GraphObserverTest {
         Assert.assertTrue(Arrays.deepEquals(addedNodes, new Node[]{newNode}));
         Assert.assertTrue(Arrays.deepEquals(removedNodes, new Node[]{node}));
     }
+
+    @Test
+    public void testResetVersion() {
+        GraphStore store = GraphGenerator.generateSmallGraphStore();
+        store.version.nodeVersion = Integer.MAX_VALUE - 1;
+        GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
+        graphObserver.hasGraphChanged();
+        store.addNode(store.factory.newNode());
+
+        int nodeVersion = store.version.nodeVersion;
+
+        Assert.assertEquals(nodeVersion, Integer.MIN_VALUE + 1);
+        Assert.assertEquals(graphObserver.nodeVersion, Integer.MIN_VALUE);
+    }
 }
