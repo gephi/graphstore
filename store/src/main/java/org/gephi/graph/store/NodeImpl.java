@@ -26,8 +26,8 @@ import org.gephi.graph.api.NodeProperties;
 public class NodeImpl extends ElementImpl implements Node {
 
     protected int storeId = NodeStore.NULL_ID;
-    protected EdgeImpl[] headOut = new EdgeImpl[EdgeStore.DEFAULT_TYPE_COUNT];
-    protected EdgeImpl[] headIn = new EdgeImpl[EdgeStore.DEFAULT_TYPE_COUNT];
+    protected EdgeImpl[] headOut = new EdgeImpl[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+    protected EdgeImpl[] headIn = new EdgeImpl[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
     //Degree
     protected int inDegree;
     protected int outDegree;

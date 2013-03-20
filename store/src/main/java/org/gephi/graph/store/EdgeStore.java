@@ -29,13 +29,9 @@ import org.gephi.graph.api.Node;
 
 public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
-    public final static int NULL_ID = -1;
-    public final static int BLOCK_SIZE = 8192;
-    public final static int DEFAULT_BLOCKS = 10;
-    public final static int DEFAULT_TYPE_COUNT = 1;
-    public final static int DEFAULT_DICTIONARY_SIZE = 1000;
-    public final static float DEFAULT_DICTIONARY_LOAD_FACTOR = .7f;
-    public final static int NODE_BITS = 31;
+    //Const
+    protected final static int NULL_ID = -1;
+    protected final static int NODE_BITS = 31;
     //Data
     protected int size;
     protected int garbageSize;
@@ -79,15 +75,15 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.garbageSize = 0;
         this.blocksCount = 1;
         this.currentBlockIndex = 0;
-        this.blocks = new EdgeBlock[DEFAULT_BLOCKS];
+        this.blocks = new EdgeBlock[GraphStoreConfiguration.EDGESTORE_DEFAULT_BLOCKS];
         this.blocks[0] = new EdgeBlock(0);
         this.currentBlock = blocks[currentBlockIndex];
-        this.dictionary = new Object2IntOpenHashMap(BLOCK_SIZE);
+        this.dictionary = new Object2IntOpenHashMap(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE);
         this.dictionary.defaultReturnValue(NULL_ID);
-        this.longDictionary = new Long2IntOpenHashMap[DEFAULT_TYPE_COUNT];
-        this.longDictionary[0] = new Long2IntOpenHashMap(DEFAULT_DICTIONARY_SIZE, DEFAULT_DICTIONARY_LOAD_FACTOR);
+        this.longDictionary = new Long2IntOpenHashMap[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        this.longDictionary[0] = new Long2IntOpenHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR);
         this.longDictionary[0].defaultReturnValue(NULL_ID);
-        this.mutualEdgesTypeSize = new int[DEFAULT_TYPE_COUNT];
+        this.mutualEdgesTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
     }
 
     private void ensureCapacity(final int capacity) {
@@ -96,7 +92,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         int blockCapacity = currentBlock.getCapacity();
         while (capacity > blockCapacity) {
             if (currentBlockIndex == blocksCount - 1) {
-                int blocksNeeded = (int) Math.ceil((capacity - blockCapacity) / (double) BLOCK_SIZE);
+                int blocksNeeded = (int) Math.ceil((capacity - blockCapacity) / (double) GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE);
                 for (int i = 0; i < blocksNeeded; i++) {
                     if (blocksCount == blocks.length) {
                         EdgeBlock[] newBlocks = new EdgeBlock[blocksCount + 1];
@@ -124,7 +120,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     private void trimDictionary() {
-        dictionary.trim(Math.max(BLOCK_SIZE, size * 2));
+        dictionary.trim(Math.max(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE, size * 2));
     }
 
     private void ensureHeadOutCapacity(final NodeImpl node, final int type) {
@@ -174,7 +170,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             System.arraycopy(longDictionary, 0, newArray, 0, length);
             longDictionary = newArray;
             for (int i = length; i <= type; i++) {
-                Long2IntOpenHashMap newMap = new Long2IntOpenHashMap(DEFAULT_DICTIONARY_SIZE, DEFAULT_DICTIONARY_LOAD_FACTOR);
+                Long2IntOpenHashMap newMap = new Long2IntOpenHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR);
                 newMap.defaultReturnValue(NULL_ID);
                 longDictionary[i] = newMap;
             }
@@ -231,7 +227,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             NodeImpl source = edge.source;
             EdgeImpl[] headOutArray = source.headOut;
             headOutArray[type] = nextOutEdge;
-            if (nextOutEdge == null && type > DEFAULT_TYPE_COUNT - 1 && type == headOutArray.length - 1) {
+            if (nextOutEdge == null && type > GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT - 1 && type == headOutArray.length - 1) {
                 trimHeadOutCapacity(source, type - 1);
             }
         } else {
@@ -258,7 +254,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             NodeImpl target = edge.target;
             EdgeImpl[] headInArray = target.headIn;
             headInArray[type] = nextInEdge;
-            if (nextInEdge == null && type > DEFAULT_TYPE_COUNT - 1 && type == headInArray.length - 1) {
+            if (nextInEdge == null && type > GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT - 1 && type == headInArray.length - 1) {
                 trimHeadInCapacity(target, type - 1);
             }
         } else {
@@ -397,7 +393,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public EdgeImpl get(int id) {
         checkValidId(id);
 
-        return blocks[id / BLOCK_SIZE].get(id);
+        return blocks[id / GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE].get(id);
     }
 
     public EdgeImpl get(final Object id) {
@@ -543,7 +539,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             edge.clearAttributes();
 
-            int storeIndex = id / BLOCK_SIZE;
+            int storeIndex = id / GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE;
             EdgeBlock block = blocks[storeIndex];
             block.remove(edge);
 
@@ -1030,12 +1026,12 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected int garbageLength;
 
         public EdgeBlock(int index) {
-            this.offset = index * BLOCK_SIZE;
-            if (BLOCK_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE) {
+            this.offset = index * GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE;
+            if (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE) {
                 throw new RuntimeException("BLOCK SIZE can't exceed 65535");
             }
-            this.garbageArray = new short[BLOCK_SIZE];
-            this.backingArray = new EdgeImpl[BLOCK_SIZE];
+            this.garbageArray = new short[GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE];
+            this.backingArray = new EdgeImpl[GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE];
         }
 
         public boolean hasGarbage() {
@@ -1043,7 +1039,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
 
         public int getCapacity() {
-            return BLOCK_SIZE - nodeLength - garbageLength;
+            return GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE - nodeLength - garbageLength;
         }
 
         public void add(EdgeImpl k) {

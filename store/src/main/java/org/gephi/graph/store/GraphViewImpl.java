@@ -36,9 +36,6 @@ import org.gephi.graph.store.EdgeStore.EdgeInOutIterator;
  */
 public final class GraphViewImpl implements GraphView {
 
-    //Const
-    public static final int DEFAULT_TYPE_COUNT = 1;
-    public static final double GROWING_FACTOR = 1.1;
     //Data
     protected final GraphStore graphStore;
     protected final boolean nodeViewOnly;
@@ -49,8 +46,8 @@ public final class GraphViewImpl implements GraphView {
     protected final GraphVersion version;
     protected final List<GraphObserverImpl> observers;
     //Decorators
-    private final GraphViewDecorator directedDecorator;
-    private final GraphViewDecorator undirectedDecorator;
+    protected final GraphViewDecorator directedDecorator;
+    protected final GraphViewDecorator undirectedDecorator;
     //Stats
     protected int nodeCount;
     protected int edgeCount;
@@ -65,8 +62,8 @@ public final class GraphViewImpl implements GraphView {
         this.nodeViewOnly = nodesOnly;
         this.nodeBitVector = new BitVector(store.nodeStore.maxStoreId());
         this.edgeBitVector = new BitVector(store.edgeStore.maxStoreId());
-        this.typeCounts = new int[DEFAULT_TYPE_COUNT];
-        this.mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
+        this.typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
+        this.mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
@@ -286,8 +283,8 @@ public final class GraphViewImpl implements GraphView {
         edgeBitVector.clear();
         nodeCount = 0;
         edgeCount = 0;
-        typeCounts = new int[DEFAULT_TYPE_COUNT];
-        mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
+        typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
+        mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         mutualEdgesCount = 0;
     }
 
@@ -297,8 +294,8 @@ public final class GraphViewImpl implements GraphView {
         }
         edgeBitVector.clear();
         edgeCount = 0;
-        typeCounts = new int[DEFAULT_TYPE_COUNT];
-        mutualEdgeTypeCounts = new int[DEFAULT_TYPE_COUNT];
+        typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
+        mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         mutualEdgesCount = 0;
     }
 
@@ -451,7 +448,7 @@ public final class GraphViewImpl implements GraphView {
     protected void ensureNodeVectorSize(NodeImpl node) {
         int sid = node.storeId;
         if (sid >= nodeBitVector.size()) {
-            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GROWING_FACTOR)), Integer.MAX_VALUE);
+            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
             nodeBitVector = growBitVector(nodeBitVector, newSize);
         }
     }
@@ -471,7 +468,7 @@ public final class GraphViewImpl implements GraphView {
     protected void ensureEdgeVectorSize(EdgeImpl edge) {
         int sid = edge.storeId;
         if (sid >= edgeBitVector.size()) {
-            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GROWING_FACTOR)), Integer.MAX_VALUE);
+            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
             edgeBitVector = growBitVector(edgeBitVector, newSize);
         }
     }

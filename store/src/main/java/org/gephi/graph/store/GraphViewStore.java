@@ -31,8 +31,9 @@ import org.gephi.graph.api.UndirectedSubgraph;
 public class GraphViewStore {
 
     //Const
-    public static final int NULL_VIEW = -1;
-    public static final int DEFAULT_VIEWS = 0;
+    protected static final int NULL_VIEW = -1;
+    //Config
+    protected static final int DEFAULT_VIEWS = 0;
     //Data
     protected final IntSortedSet garbageQueue;
     protected final GraphStore graphStore;

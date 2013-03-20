@@ -29,8 +29,6 @@ import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -38,16 +36,6 @@ import org.testng.annotations.Test;
  * @author mbastian
  */
 public class GraphStoreTest {
-
-    @BeforeClass
-    public void oneTimeSetUp() {
-        GraphStore.AUTO_LOCKING = false;
-    }
-
-    @AfterClass
-    public void oneTimeTearDown() {
-        GraphStore.AUTO_LOCKING = true;
-    }
 
     @Test
     public void testEmpty() {
@@ -360,6 +348,7 @@ public class GraphStoreTest {
 
         int edgeCount = graphStore.getEdgeCount();
 
+        graphStore.writeLock();
         Iterator<Node> nodeIterator = graphStore.getNodes().iterator();
         for (; nodeIterator.hasNext();) {
             NodeImpl n = (NodeImpl) nodeIterator.next();
@@ -375,6 +364,7 @@ public class GraphStoreTest {
             Assert.assertEquals(graphStore.getEdgeCount(), edgeCount - degree);
             edgeCount -= degree;
         }
+        graphStore.writeUnlock();
 
         Assert.assertEquals(edgeCount, 0);
         Assert.assertEquals(graphStore.getNodeCount(), 0);

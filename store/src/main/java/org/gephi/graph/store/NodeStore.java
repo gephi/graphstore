@@ -31,10 +31,8 @@ import org.gephi.graph.api.NodeIterable;
  */
 public class NodeStore implements Collection<Node>, NodeIterable {
 
-    public final static int NULL_ID = -1;
-    public final static int BLOCK_SIZE = 5000;
-    public final static int DEFAULT_BLOCKS = 10;
-    public final static float DEFAULT_LOAD_FACTOR = .7f;
+    //Const
+    protected final static int NULL_ID = -1;
     //Store
     protected final EdgeStore edgeStore;
     //Locking (optional)
@@ -73,10 +71,10 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         this.garbageSize = 0;
         this.blocksCount = 1;
         this.currentBlockIndex = 0;
-        this.blocks = new NodeBlock[DEFAULT_BLOCKS];
+        this.blocks = new NodeBlock[GraphStoreConfiguration.NODESTORE_DEFAULT_BLOCKS];
         this.blocks[0] = new NodeBlock(0);
         this.currentBlock = blocks[currentBlockIndex];
-        this.dictionary = new Object2IntOpenHashMap(BLOCK_SIZE, DEFAULT_LOAD_FACTOR);
+        this.dictionary = new Object2IntOpenHashMap(GraphStoreConfiguration.NODESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.NODESTORE_DICTIONARY_LOAD_FACTOR);
         this.dictionary.defaultReturnValue(NULL_ID);
     }
 
@@ -86,7 +84,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         int blockCapacity = currentBlock.getCapacity();
         while (capacity > blockCapacity) {
             if (currentBlockIndex == blocksCount - 1) {
-                int blocksNeeded = (int) Math.ceil((capacity - blockCapacity) / (double) BLOCK_SIZE);
+                int blocksNeeded = (int) Math.ceil((capacity - blockCapacity) / (double) GraphStoreConfiguration.NODESTORE_BLOCK_SIZE);
                 for (int i = 0; i < blocksNeeded; i++) {
                     if (blocksCount == blocks.length) {
                         NodeBlock[] newBlocks = new NodeBlock[blocksCount + 1];
@@ -114,13 +112,13 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     }
 
     private void trimDictionary() {
-        dictionary.trim(Math.max(BLOCK_SIZE, size * 2));
+        dictionary.trim(Math.max(GraphStoreConfiguration.NODESTORE_BLOCK_SIZE, size * 2));
     }
 
     public NodeImpl get(final int id) {
         checkValidId(id);
 
-        return blocks[id / BLOCK_SIZE].get(id);
+        return blocks[id / GraphStoreConfiguration.NODESTORE_BLOCK_SIZE].get(id);
     }
 
     public NodeImpl get(final Object id) {
@@ -283,7 +281,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 viewStore.removeNode(node);
             }
 
-            int storeIndex = id / BLOCK_SIZE;
+            int storeIndex = id / GraphStoreConfiguration.NODESTORE_BLOCK_SIZE;
             NodeBlock block = blocks[storeIndex];
             block.remove(node);
             size--;
@@ -540,12 +538,12 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         protected int garbageLength;
 
         public NodeBlock(int index) {
-            this.offset = index * BLOCK_SIZE;
-            if (BLOCK_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE) {
+            this.offset = index * GraphStoreConfiguration.NODESTORE_BLOCK_SIZE;
+            if (GraphStoreConfiguration.NODESTORE_BLOCK_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE) {
                 throw new RuntimeException("BLOCK SIZE can't exceed 65535");
             }
-            this.garbageArray = new short[BLOCK_SIZE];
-            this.backingArray = new NodeImpl[BLOCK_SIZE];
+            this.garbageArray = new short[GraphStoreConfiguration.NODESTORE_BLOCK_SIZE];
+            this.backingArray = new NodeImpl[GraphStoreConfiguration.NODESTORE_BLOCK_SIZE];
         }
 
         public boolean hasGarbage() {
@@ -553,7 +551,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         }
 
         public int getCapacity() {
-            return BLOCK_SIZE - nodeLength - garbageLength;
+            return GraphStoreConfiguration.NODESTORE_BLOCK_SIZE - nodeLength - garbageLength;
         }
 
         public void add(NodeImpl k) {

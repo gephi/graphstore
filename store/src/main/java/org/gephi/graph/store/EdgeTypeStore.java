@@ -30,10 +30,12 @@ import org.gephi.graph.utils.MapDeepEquals;
  */
 public class EdgeTypeStore {
 
+    //Const
+    protected final static int NULL_COUNT = -1;
+    protected final static int NULL_TYPE = -1;
+    protected final static short NULL_SHORT = Short.MIN_VALUE;
+    //Config
     public final static int MAX_SIZE = 65534;
-    public final static int NULL_COUNT = -1;
-    public final static int NULL_TYPE = -1;
-    public final static short NULL_SHORT = Short.MIN_VALUE;
     //Data
     protected final Object2ShortMap labelMap;
     protected final Short2ObjectMap idMap;

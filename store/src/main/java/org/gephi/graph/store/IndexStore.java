@@ -38,11 +38,11 @@ public class IndexStore<T extends Element> {
     protected final IndexImpl<T> mainIndex;
     protected final Map<GraphView, IndexImpl<T>> viewIndexes;
 
-    public IndexStore(ColumnStore<T> propertyStore) {
-        this.columnStore = propertyStore;
-        this.mainIndex = new IndexImpl<T>(propertyStore);
+    public IndexStore(ColumnStore<T> columnStore) {
+        this.columnStore = columnStore;
+        this.mainIndex = new IndexImpl<T>(columnStore);
         this.viewIndexes = new Object2ObjectOpenHashMap<GraphView, IndexImpl<T>>();
-        this.lock = propertyStore.lock;
+        this.lock = columnStore.lock;
     }
 
     protected void addColumn(ColumnImpl col) {
@@ -170,7 +170,7 @@ public class IndexStore<T extends Element> {
 
     public void index(T element) {
         ElementImpl elementImpl = (ElementImpl) element;
-        ensurePropertyArrayLength(elementImpl, columnStore.length);
+        ensureAttributeArrayLength(elementImpl, columnStore.length);
 
         final int length = columnStore.length;
         final ColumnImpl[] cols = columnStore.columns;
@@ -191,11 +191,11 @@ public class IndexStore<T extends Element> {
         }
     }
 
-    private void ensurePropertyArrayLength(ElementImpl element, int size) {
-        final Object[] properties = element.attributes;
-        if (size > properties.length) {
+    private void ensureAttributeArrayLength(ElementImpl element, int size) {
+        final Object[] attributes = element.attributes;
+        if (size > attributes.length) {
             Object[] newArray = new Object[size];
-            System.arraycopy(properties, 0, newArray, 0, properties.length);
+            System.arraycopy(attributes, 0, newArray, 0, attributes.length);
             element.attributes = newArray;
         }
     }

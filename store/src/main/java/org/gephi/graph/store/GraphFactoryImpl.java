@@ -26,8 +26,8 @@ import org.gephi.graph.api.Node;
  */
 public class GraphFactoryImpl implements GraphFactory {
 
-    private final AtomicInteger NODE_IDS = new AtomicInteger();
-    private final AtomicInteger EDGE_IDS = new AtomicInteger();
+    protected final AtomicInteger NODE_IDS = new AtomicInteger();
+    protected final AtomicInteger EDGE_IDS = new AtomicInteger();
     //Store
     protected final GraphStore store;
 

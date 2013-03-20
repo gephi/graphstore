@@ -34,13 +34,6 @@ import org.gephi.graph.api.NodeIterable;
  */
 public class GraphStore implements DirectedGraph {
 
-    //Const
-    public static boolean AUTO_LOCKING = true;
-    public static boolean AUTO_TYPE_REGISTRATION = true;
-    public static boolean INDEX_NODES = true;
-    public static boolean INDEX_EDGES = true;
-    public static boolean ENABLE_OBSERVERS = true;
-    //Model
     protected final GraphModelImpl graphModel;
     //Stores
     protected final NodeStore nodeStore;
@@ -71,13 +64,13 @@ public class GraphStore implements DirectedGraph {
         lock = new GraphLock();
         edgeTypeStore = new EdgeTypeStore();
         viewStore = new GraphViewStore(this);
-        version = ENABLE_OBSERVERS ? new GraphVersion(this) : null;
-        observers = ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
-        edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null, viewStore, ENABLE_OBSERVERS ? version : null);
-        nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null, viewStore, ENABLE_OBSERVERS ? version : null);
-        nodeColumnStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
-        edgeColumnStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
-        timestampStore = new TimestampStore(AUTO_LOCKING ? lock : null);
+        version = GraphStoreConfiguration.ENABLE_OBSERVERS ? new GraphVersion(this) : null;
+        observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
+        edgeStore = new EdgeStore(edgeTypeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
+        nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
+        nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
+        edgeColumnStore = new ColumnStore<Edge>(Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
+        timestampStore = new TimestampStore(GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);
 
         mainGraphView = new MainGraphView();
@@ -111,7 +104,7 @@ public class GraphStore implements DirectedGraph {
         try {
             int type = edge.getType();
             if (edgeTypeStore != null && !edgeTypeStore.contains(type)) {
-                if (AUTO_TYPE_REGISTRATION) {
+                if (GraphStoreConfiguration.ENABLE_AUTO_TYPE_REGISTRATION) {
                     edgeTypeStore.addType(type);
                 } else {
                     throw new RuntimeException("The type doesn't exist");
@@ -513,25 +506,25 @@ public class GraphStore implements DirectedGraph {
     }
 
     protected void autoReadLock() {
-        if (AUTO_LOCKING) {
+        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
             readLock();
         }
     }
 
     protected void autoReadUnlock() {
-        if (AUTO_LOCKING) {
+        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
             readUnlock();
         }
     }
 
     protected void autoWriteLock() {
-        if (AUTO_LOCKING) {
+        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
             writeLock();
         }
     }
 
     protected void autoWriteUnlock() {
-        if (AUTO_LOCKING) {
+        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
             writeUnlock();
         }
     }

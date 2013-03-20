@@ -27,8 +27,6 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -36,16 +34,6 @@ import org.testng.annotations.Test;
  * @author mbastian
  */
 public class GraphViewStoreTest {
-
-    @BeforeClass
-    public void oneTimeSetUp() {
-        GraphStore.AUTO_LOCKING = false;
-    }
-
-    @AfterClass
-    public void oneTimeTearDown() {
-        GraphStore.AUTO_LOCKING = true;
-    }
 
     @Test
     public void testEmptyStore() {
@@ -282,6 +270,7 @@ public class GraphViewStoreTest {
         DirectedSubgraph graph = store.getDirectedGraph(view);
 
         int count = 0;
+        graph.writeLock();
         for (Node n : graphStore.getNodes()) {
             boolean a = graph.addNode(n);
             boolean b = graph.addNode(n);
@@ -291,9 +280,11 @@ public class GraphViewStoreTest {
             Assert.assertTrue(graph.contains(n));
             Assert.assertEquals(graph.getNodeCount(), ++count);
         }
+        graph.writeUnlock();
         Assert.assertEquals(graph.getNodeCount(), graphStore.getNodeCount());
 
         count = 0;
+        graph.writeLock();
         for (Edge e : graphStore.getEdges()) {
             boolean a = graph.addEdge(e);
             boolean b = graph.addEdge(e);
@@ -303,6 +294,7 @@ public class GraphViewStoreTest {
             Assert.assertTrue(graph.contains(e));
             Assert.assertEquals(graph.getEdgeCount(), ++count);
         }
+        graph.writeUnlock();
         Assert.assertEquals(graph.getEdgeCount(), graphStore.getEdgeCount());
         for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
             Assert.assertEquals(graph.getEdgeCount(i), graphStore.getEdgeCount(i));
@@ -318,6 +310,7 @@ public class GraphViewStoreTest {
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
 
         int count = 0;
+        graph.writeLock();
         for (Node n : graphStore.getNodes()) {
             boolean a = graph.addNode(n);
             boolean b = graph.addNode(n);
@@ -327,9 +320,11 @@ public class GraphViewStoreTest {
             Assert.assertTrue(graph.contains(n));
             Assert.assertEquals(graph.getNodeCount(), ++count);
         }
+        graph.writeUnlock();
         Assert.assertEquals(graph.getNodeCount(), graphStore.undirectedDecorator.getNodeCount());
 
         count = 0;
+        graph.writeLock();
         for (Edge e : graphStore.getEdges()) {
             boolean a = graph.addEdge(e);
             boolean b = graph.addEdge(e);
@@ -342,6 +337,7 @@ public class GraphViewStoreTest {
                 Assert.assertEquals(graph.getEdgeCount(), ++count);
             }
         }
+        graph.writeUnlock();
         Assert.assertEquals(graph.getEdgeCount(), graphStore.undirectedDecorator.getEdgeCount());
         for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
             Assert.assertEquals(graph.getEdgeCount(i), graphStore.undirectedDecorator.getEdgeCount(i));
@@ -418,6 +414,7 @@ public class GraphViewStoreTest {
         graph.addAllNodes(graphStore.getNodes().toCollection());
         graph.addAllEdges(graphStore.getEdges().toCollection());
 
+        graph.writeLock();
         int count = graph.getEdgeCount();
         for (Edge e : graphStore.getEdges()) {
             boolean a = graph.removeEdge(e);
@@ -428,12 +425,14 @@ public class GraphViewStoreTest {
             Assert.assertFalse(graph.contains(e));
             Assert.assertEquals(graph.getEdgeCount(), --count);
         }
+        graph.writeUnlock();
         Assert.assertEquals(graph.getEdgeCount(), 0);
         for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
             Assert.assertEquals(graph.getEdgeCount(i), 0);
         }
 
         count = graph.getNodeCount();
+        graph.writeLock();
         for (Node n : graphStore.getNodes()) {
             boolean a = graph.removeNode(n);
             boolean b = graph.removeNode(n);
@@ -443,6 +442,7 @@ public class GraphViewStoreTest {
             Assert.assertFalse(graph.contains(n));
             Assert.assertEquals(graph.getNodeCount(), --count);
         }
+        graph.writeUnlock();
         Assert.assertEquals(graph.getNodeCount(), 0);
     }
 
@@ -457,6 +457,7 @@ public class GraphViewStoreTest {
         graph.addAllEdges(graphStore.getEdges().toCollection());
 
         int count = graph.getEdgeCount();
+        graph.writeLock();
         for (Edge e : graphStore.getEdges()) {
             boolean a = graph.removeEdge(e);
             boolean b = graph.removeEdge(e);
@@ -469,12 +470,14 @@ public class GraphViewStoreTest {
                 Assert.assertEquals(graph.getEdgeCount(), --count);
             }
         }
+        graph.writeUnlock();
         Assert.assertEquals(graph.getEdgeCount(), 0);
         for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
             Assert.assertEquals(graph.getEdgeCount(i), 0);
         }
 
         count = graph.getNodeCount();
+        graph.writeLock();
         for (Node n : graphStore.getNodes()) {
             boolean a = graph.removeNode(n);
             boolean b = graph.removeNode(n);
@@ -484,6 +487,7 @@ public class GraphViewStoreTest {
             Assert.assertFalse(graph.contains(n));
             Assert.assertEquals(graph.getNodeCount(), --count);
         }
+        graph.writeUnlock();
         Assert.assertEquals(graph.getNodeCount(), 0);
     }
 
@@ -547,6 +551,7 @@ public class GraphViewStoreTest {
         graph.addAllNodes(graphStore.getNodes().toCollection());
         graph.addAllEdges(graphStore.getEdges().toCollection());
 
+        graph.writeLock();
         for (Node n : graphStore.getNodes()) {
             graph.removeNode(n);
 
@@ -554,6 +559,7 @@ public class GraphViewStoreTest {
                 Assert.assertFalse(graph.contains(e));
             }
         }
+        graph.writeUnlock();
 
         Assert.assertEquals(graph.getEdgeCount(), 0);
     }
@@ -568,6 +574,7 @@ public class GraphViewStoreTest {
         graph.addAllNodes(graphStore.getNodes().toCollection());
         graph.addAllEdges(graphStore.getEdges().toCollection());
 
+        graph.writeLock();
         for (Node n : graphStore.getNodes()) {
             graph.removeNode(n);
 
@@ -575,6 +582,7 @@ public class GraphViewStoreTest {
                 Assert.assertFalse(graph.contains(e));
             }
         }
+        graph.writeUnlock();
 
         Assert.assertEquals(graph.getEdgeCount(), 0);
     }

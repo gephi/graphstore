@@ -26,8 +26,6 @@ import java.util.Random;
 import java.util.Set;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -37,16 +35,6 @@ import org.testng.annotations.Test;
 public class NodeStoreTest {
 
     public NodeStoreTest() {
-    }
-
-    @BeforeClass
-    public void oneTimeSetUp() {
-        GraphStore.AUTO_LOCKING = false;
-    }
-
-    @AfterClass
-    public void oneTimeTearDown() {
-        GraphStore.AUTO_LOCKING = true;
     }
 
     @Test
@@ -469,7 +457,7 @@ public class NodeStoreTest {
         nodeStore.addAll(Arrays.asList(nodes));
         int blockCount = nodeStore.blocksCount;
 
-        for (int i = 0; i < NodeStore.BLOCK_SIZE; i++) {
+        for (int i = 0; i < GraphStoreConfiguration.NODESTORE_BLOCK_SIZE; i++) {
             nodeStore.remove(nodes[nodes.length - 1 - i]);
         }
 

@@ -23,9 +23,9 @@ import org.gephi.graph.api.Edge;
  */
 public class EdgeImpl extends ElementImpl implements Edge {
 
-    //Bytes
-    public static final byte DIRECTED_BYTE = 1;
-    public static final byte MUTUAL_BYTE = 1 << 1;
+    //Const
+    protected static final byte DIRECTED_BYTE = 1;
+    protected static final byte MUTUAL_BYTE = 1 << 1;
     //Final Data
     protected final NodeImpl source;
     protected final NodeImpl target;

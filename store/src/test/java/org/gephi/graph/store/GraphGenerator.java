@@ -55,19 +55,19 @@ public class GraphGenerator {
     }
 
     public static EdgeImpl[] generateLargeEdgeList() {
-        return generateEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 0, true, true);
+        return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, true, true);
     }
 
     public static EdgeImpl[] generatelargeUndirectedEdgeList() {
-        return generateEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 0, false, true);
+        return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, false, true);
     }
 
     public static EdgeImpl[] generateLargeMixedEdgeList() {
-        return generateMixedEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 0, true);
+        return generateMixedEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, true);
     }
 
     public static EdgeImpl[] generateLargeMultiTypeEdgeList() {
-        return generateMultiTypeEdgeList(EdgeStore.BLOCK_SIZE * 3 + (int) (EdgeStore.BLOCK_SIZE / 3.0), 5, true, true);
+        return generateMultiTypeEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 5, true, true);
     }
 
     public static EdgeImpl generateSingleEdge() {
@@ -327,11 +327,11 @@ public class GraphGenerator {
     }
 
     public static NodeImpl[] generateLargeNodeList() {
-        return generateNodeList(NodeStore.BLOCK_SIZE * 3 + (int) (NodeStore.BLOCK_SIZE / 3.0));
+        return generateNodeList(GraphStoreConfiguration.NODESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.NODESTORE_BLOCK_SIZE / 3.0));
     }
 
     public static BasicGraphStore.BasicNode[] generateLargeBasicNodeList() {
-        return generateBasicNodeList(NodeStore.BLOCK_SIZE * 3 + (int) (NodeStore.BLOCK_SIZE / 3.0));
+        return generateBasicNodeList(GraphStoreConfiguration.NODESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.NODESTORE_BLOCK_SIZE / 3.0));
     }
 
     public static NodeImpl[] generateNodeList(int nodeCount) {

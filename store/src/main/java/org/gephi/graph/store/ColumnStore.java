@@ -32,10 +32,11 @@ import org.gephi.graph.api.Element;
  */
 public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
 
+    //Config
+    protected final static int MAX_SIZE = 65534;
     //Const
-    public final static int NULL_ID = -1;
-    public final static int MAX_SIZE = 65534;
-    public final static short NULL_SHORT = Short.MIN_VALUE;
+    protected final static int NULL_ID = -1;
+    protected final static short NULL_SHORT = Short.MIN_VALUE;
     //Element
     protected final Class<T> elementType;
     //Columns

@@ -36,8 +36,6 @@ import java.util.Random;
 import java.util.Set;
 import org.gephi.graph.api.Edge;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -47,16 +45,6 @@ import org.testng.annotations.Test;
 public class EdgeStoreTest {
 
     public EdgeStoreTest() {
-    }
-
-    @BeforeClass
-    public void oneTimeSetUp() {
-        GraphStore.AUTO_LOCKING = false;
-    }
-
-    @AfterClass
-    public void oneTimeTearDown() {
-        GraphStore.AUTO_LOCKING = true;
     }
 
     @Test
@@ -501,7 +489,7 @@ public class EdgeStoreTest {
         edgeStore.addAll(Arrays.asList(edges));
         int blockCount = edgeStore.blocksCount;
 
-        for (int i = 0; i < EdgeStore.BLOCK_SIZE; i++) {
+        for (int i = 0; i < GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE; i++) {
             edgeStore.remove(edges[edges.length - 1 - i]);
         }
 
