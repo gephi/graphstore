@@ -15,7 +15,9 @@
  */
 package org.gephi.graph.store;
 
+import java.awt.Color;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.EdgeProperties;
 
 /**
  *
@@ -40,6 +42,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
     protected byte flags;
     //Other fields
     protected double weight;
+    //Props
+    protected final EdgePropertiesImpl properties;
 
     public EdgeImpl(Object id, GraphStore graphStore, NodeImpl source, NodeImpl target, int type, double weight, boolean directed) {
         super(id, graphStore);
@@ -48,6 +52,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
         this.flags = (byte) (directed ? 1 : 0);
         this.weight = weight;
         this.type = type;
+        this.properties = GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES ? new EdgePropertiesImpl() : null;
     }
 
     public EdgeImpl(Object id, NodeImpl source, NodeImpl target, int type, double weight, boolean directed) {
@@ -161,6 +166,61 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     @Override
+    public float r() {
+        return properties.r();
+    }
+
+    @Override
+    public float g() {
+        return properties.g();
+    }
+
+    @Override
+    public float b() {
+        return properties.b();
+    }
+
+    @Override
+    public float alpha() {
+        return properties.alpha();
+    }
+
+    @Override
+    public int getRGBA() {
+        return properties.rgba;
+    }
+
+    @Override
+    public Color getColor() {
+        return properties.getColor();
+    }
+
+    @Override
+    public void setR(float r) {
+        properties.setR(r);
+    }
+
+    @Override
+    public void setG(float g) {
+        properties.setG(g);
+    }
+
+    @Override
+    public void setB(float b) {
+        properties.setB(b);
+    }
+
+    @Override
+    public void setAlpha(float a) {
+        properties.setAlpha(a);
+    }
+
+    @Override
+    public void setColor(Color color) {
+        properties.setColor(color);
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 71 * hash + (this.id != null ? this.id.hashCode() : 0);
@@ -180,5 +240,92 @@ public class EdgeImpl extends ElementImpl implements Edge {
             return false;
         }
         return true;
+    }
+
+    protected static class EdgePropertiesImpl implements EdgeProperties {
+
+        protected int rgba;
+        protected float size;
+
+        @Override
+        public float r() {
+            return ((rgba >> 16) & 0xFF) / 255f;
+        }
+
+        @Override
+        public float g() {
+            return ((rgba >> 8) & 0xFF) / 255f;
+        }
+
+        @Override
+        public float b() {
+            return (rgba & 0xFF) / 255f;
+        }
+
+        @Override
+        public float alpha() {
+            return ((rgba >> 24) & 0xFF) / 255f;
+        }
+
+        @Override
+        public int getRGBA() {
+            return rgba;
+        }
+
+        @Override
+        public Color getColor() {
+            return new Color(rgba, true);
+        }
+
+        @Override
+        public void setR(float r) {
+            rgba |= ((int) (r * 255f)) << 16;
+        }
+
+        @Override
+        public void setG(float g) {
+            this.rgba |= ((int) (g * 255f)) << 8;
+        }
+
+        @Override
+        public void setB(float b) {
+            this.rgba |= ((int) (b * 255f));
+        }
+
+        @Override
+        public void setAlpha(float a) {
+            this.rgba |= ((int) (a * 255f)) << 24;
+        }
+
+        @Override
+        public void setColor(Color color) {
+            this.rgba = (color.getAlpha() << 24) | color.getRGB();
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 83 * hash + this.rgba;
+            hash = 83 * hash + Float.floatToIntBits(this.size);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final EdgePropertiesImpl other = (EdgePropertiesImpl) obj;
+            if (this.rgba != other.rgba) {
+                return false;
+            }
+            if (Float.floatToIntBits(this.size) != Float.floatToIntBits(other.size)) {
+                return false;
+            }
+            return true;
+        }
     }
 }

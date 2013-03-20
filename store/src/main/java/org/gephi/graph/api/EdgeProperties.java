@@ -15,25 +15,33 @@
  */
 package org.gephi.graph.api;
 
+import java.awt.Color;
+
 /**
  *
  * @author mbastian
  */
-public interface Edge extends Element, EdgeProperties {
+public interface EdgeProperties {
 
-    public Node getSource();
+    public float r();
 
-    public Node getTarget();
+    public float g();
 
-    public double getWeight();
+    public float b();
 
-    public void setWeight(double weight);
+    public int getRGBA();
 
-    public int getType();
+    public Color getColor();
 
-    public Object getTypeLabel();
+    public float alpha();
 
-    public boolean isSelfLoop();
+    public void setR(float r);
 
-    public boolean isDirected();
+    public void setG(float g);
+
+    public void setB(float b);
+
+    public void setAlpha(float a);
+
+    public void setColor(Color color);
 }

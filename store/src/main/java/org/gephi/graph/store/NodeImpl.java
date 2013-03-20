@@ -32,7 +32,7 @@ public class NodeImpl extends ElementImpl implements Node {
     protected int inDegree;
     protected int outDegree;
     protected int mutualDegree;
-    //Spatial
+    //Props
     protected final NodePropertiesImpl properties;
 
     public NodeImpl(Object id, GraphStore graphStore) {

@@ -649,6 +649,61 @@ public class BasicGraphStore implements DirectedGraph {
         public String getStringId() {
             return BasicEdgeStore.getStringId(source, target, directed);
         }
+
+        @Override
+        public float r() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float g() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float b() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public int getRGBA() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Color getColor() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float alpha() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setR(float r) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setG(float g) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setB(float b) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setAlpha(float a) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setColor(Color color) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     public static class BasicNodeStore implements Collection<Node>, NodeIterable {
