@@ -27,6 +27,8 @@ public final class GraphStoreConfiguration {
     public static final boolean ENABLE_INDEX_NODES = true;
     public static final boolean ENABLE_INDEX_EDGES = true;
     public static final boolean ENABLE_OBSERVERS = true;
+    public static final boolean ENABLE_NODE_PROPERTIES = true;
+    public static final boolean ENABLE_EDGE_PROPERTIES = true;
     //NodeStore
     public final static int NODESTORE_BLOCK_SIZE = 5000;
     public final static int NODESTORE_DEFAULT_BLOCKS = 10;

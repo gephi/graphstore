@@ -33,16 +33,15 @@ public class NodeImpl extends ElementImpl implements Node {
     protected int outDegree;
     protected int mutualDegree;
     //Spatial
-    protected final NodeSpatialImpl spatial;
+    protected final NodePropertiesImpl properties;
 
     public NodeImpl(Object id, GraphStore graphStore) {
         super(id, graphStore);
-        spatial = new NodeSpatialImpl();
+        properties = GraphStoreConfiguration.ENABLE_NODE_PROPERTIES ? new NodePropertiesImpl() : null;
     }
 
     public NodeImpl(Object id) {
-        super(id, null);
-        spatial = new NodeSpatialImpl();
+        this(id, null);
     }
 
     public int getStoreId() {
@@ -84,112 +83,112 @@ public class NodeImpl extends ElementImpl implements Node {
 
     @Override
     public float x() {
-        return spatial.x;
+        return properties.x;
     }
 
     @Override
     public float y() {
-        return spatial.y;
+        return properties.y;
     }
 
     @Override
     public float z() {
-        return spatial.z;
+        return properties.z;
     }
 
     @Override
     public float r() {
-        return spatial.r();
+        return properties.r();
     }
 
     @Override
     public float g() {
-        return spatial.g();
+        return properties.g();
     }
 
     @Override
     public float b() {
-        return spatial.b();
+        return properties.b();
     }
 
     @Override
     public float alpha() {
-        return spatial.alpha();
+        return properties.alpha();
     }
 
     @Override
     public int getRGBA() {
-        return spatial.rgba;
+        return properties.rgba;
     }
 
     @Override
     public Color getColor() {
-        return spatial.getColor();
+        return properties.getColor();
     }
 
     @Override
     public float size() {
-        return spatial.size;
+        return properties.size;
     }
 
     @Override
     public float radius() {
-        return spatial.radius();
+        return properties.radius();
     }
 
     @Override
     public void setX(float x) {
-        spatial.setX(x);
+        properties.setX(x);
     }
 
     @Override
     public void setY(float y) {
-        spatial.setY(y);
+        properties.setY(y);
     }
 
     @Override
     public void setZ(float z) {
-        spatial.setZ(z);
+        properties.setZ(z);
     }
 
     @Override
     public void setPosition(float x, float y) {
-        spatial.setPosition(x, y);
+        properties.setPosition(x, y);
     }
 
     @Override
     public void setPosition(float x, float y, float z) {
-        spatial.setPosition(x, y, z);
+        properties.setPosition(x, y, z);
     }
 
     @Override
     public void setR(float r) {
-        spatial.setR(r);
+        properties.setR(r);
     }
 
     @Override
     public void setG(float g) {
-        spatial.setG(g);
+        properties.setG(g);
     }
 
     @Override
     public void setB(float b) {
-        spatial.setB(b);
+        properties.setB(b);
     }
 
     @Override
     public void setAlpha(float a) {
-        spatial.setAlpha(a);
+        properties.setAlpha(a);
     }
 
     @Override
     public void setColor(Color color) {
-        spatial.setColor(color);
+        properties.setColor(color);
     }
 
     @Override
     public void setSize(float size) {
-        spatial.setSize(size);
+        properties.setSize(size);
     }
 
     @Override
@@ -214,7 +213,7 @@ public class NodeImpl extends ElementImpl implements Node {
         return true;
     }
 
-    protected static class NodeSpatialImpl implements NodeProperties {
+    protected static class NodePropertiesImpl implements NodeProperties {
 
         protected float x;
         protected float y;
@@ -354,7 +353,7 @@ public class NodeImpl extends ElementImpl implements Node {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final NodeSpatialImpl other = (NodeSpatialImpl) obj;
+            final NodePropertiesImpl other = (NodePropertiesImpl) obj;
             if (Float.floatToIntBits(this.x) != Float.floatToIntBits(other.x)) {
                 return false;
             }
