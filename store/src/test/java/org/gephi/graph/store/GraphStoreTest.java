@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
@@ -215,6 +216,116 @@ public class GraphStoreTest {
 
             @Override
             public double[] getTimestamps() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float x() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float y() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float z() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float r() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float g() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float b() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public int getRGBA() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Color getColor() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float alpha() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float size() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public float radius() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setX(float x) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setY(float y) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setZ(float z) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setPosition(float x, float y) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setPosition(float x, float y, float z) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setR(float r) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setG(float g) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setB(float b) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setAlpha(float a) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setColor(Color color) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setSize(float size) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });
