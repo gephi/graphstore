@@ -39,114 +39,114 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testSetPropertyColumn() {
+    public void testSetAttributeColumn() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
         NodeImpl node = new NodeImpl(0, store);
-        node.setProperty(column, 1);
+        node.setAttribute(column, 1);
 
-        Assert.assertEquals(node.properties.length, 1);
-        Assert.assertEquals(node.properties[0], 1);
-        Assert.assertEquals(node.getProperty(column), 1);
+        Assert.assertEquals(node.attributes.length, 1);
+        Assert.assertEquals(node.attributes[0], 1);
+        Assert.assertEquals(node.getAttribute(column), 1);
     }
 
     @Test
-    public void testSetPropertyString() {
+    public void testSetAttributeString() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
         NodeImpl node = new NodeImpl(0, store);
-        node.setProperty("age", 1);
+        node.setAttribute("age", 1);
 
-        Assert.assertEquals(node.properties.length, 1);
-        Assert.assertEquals(node.properties[0], 1);
-        Assert.assertEquals(node.getProperty(column), 1);
+        Assert.assertEquals(node.attributes.length, 1);
+        Assert.assertEquals(node.attributes[0], 1);
+        Assert.assertEquals(node.getAttribute(column), 1);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testSetPropertyUnknownColumn() {
+    public void testSetAttributeUnknownColumn() {
         GraphStore store = new GraphStore();
         ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false);
         NodeImpl node = new NodeImpl(0, store);
-        node.setProperty(columnImpl, "0");
+        node.setAttribute(columnImpl, "0");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testSetPropertyOtherStoreColumn() {
+    public void testSetAttributeOtherStoreColumn() {
         GraphStore otherStore = new GraphStore();
         Column column = generateBasicColumn(otherStore);
         GraphStore store = new GraphStore();
 
         NodeImpl node = new NodeImpl(0, store);
-        node.setProperty(column, "0");
+        node.setAttribute(column, "0");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testSetPropertyWrongType() {
+    public void testSetAttributeWrongType() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
         NodeImpl node = new NodeImpl(0, store);
-        node.setProperty(column, "a");
+        node.setAttribute(column, "a");
     }
 
     @Test
-    public void testSetPropertyNull() {
+    public void testSetAttributeNull() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
         NodeImpl node = new NodeImpl(0, store);
-        node.setProperty(column, null);
+        node.setAttribute(column, null);
 
-        Assert.assertEquals(node.properties.length, 1);
-        Assert.assertNull(node.properties[0]);
-        Assert.assertNull(node.getProperty(column));
+        Assert.assertEquals(node.attributes.length, 1);
+        Assert.assertNull(node.attributes[0]);
+        Assert.assertNull(node.getAttribute(column));
     }
 
     @Test
-    public void testGetPropertyColumn() {
+    public void testGetAttributeColumn() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
         NodeImpl node = new NodeImpl(0, store);
-        node.setProperty(column, 1);
-        Object res = node.getProperty(column);
+        node.setAttribute(column, 1);
+        Object res = node.getAttribute(column);
 
         Assert.assertEquals(res, 1);
-        node.setProperty(column, 2);
+        node.setAttribute(column, 2);
 
-        res = node.getProperty(column);
+        res = node.getAttribute(column);
         Assert.assertEquals(res, 2);
     }
 
     @Test
-    public void testGetPropertyKey() {
+    public void testGetAttributeKey() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
         NodeImpl node = new NodeImpl(0, store);
-        node.setProperty(column, 1);
-        Object res = node.getProperty(column.getId());
+        node.setAttribute(column, 1);
+        Object res = node.getAttribute(column.getId());
         Assert.assertEquals(res, 1);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testGetPropertyUnknownColumn() {
+    public void testGetAttributeUnknownColumn() {
         GraphStore store = new GraphStore();
         ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false);
         NodeImpl node = new NodeImpl(0, store);
-        node.getProperty(columnImpl);
+        node.getAttribute(columnImpl);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testGetPropertyOtherStoreColumn() {
+    public void testGetAttributeOtherStoreColumn() {
         GraphStore otherStore = new GraphStore();
         Column column = generateBasicColumn(otherStore);
         GraphStore store = new GraphStore();
 
         NodeImpl node = new NodeImpl(0, store);
-        node.getProperty(column);
+        node.getAttribute(column);
     }
 
     @Test
@@ -154,43 +154,43 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Integer defaultValue = 25;
         Column column = new ColumnImpl("age", Integer.class, "Age", defaultValue, Origin.DATA, true);
-        store.nodePropertyStore.addColumn(column);
+        store.nodeColumnStore.addColumn(column);
 
         NodeImpl node = new NodeImpl(0, store);
-        Object res = node.getProperty(column.getId());
+        Object res = node.getAttribute(column.getId());
         Assert.assertEquals(res, defaultValue);
 
-        node.setProperty(column, null);
-        res = node.getProperty(column.getId());
+        node.setAttribute(column, null);
+        res = node.getAttribute(column.getId());
         Assert.assertEquals(res, defaultValue);
 
-        node.setProperty(column, 1);
-        res = node.getProperty(column.getId());
+        node.setAttribute(column, 1);
+        res = node.getAttribute(column.getId());
         Assert.assertEquals(res, 1);
     }
 
     @Test
-    public void testGetPropertyKeysEmpty() {
+    public void testGetAttributeKeysEmpty() {
         GraphStore store = new GraphStore();
         NodeImpl node = new NodeImpl(0, store);
-        Set<String> pk = node.getPropertyKeys();
+        Set<String> pk = node.getAttributeKeys();
         Assert.assertTrue(pk.isEmpty());
     }
 
     @Test
-    public void testGetPropertyKeys() {
+    public void testGetAttributeKeys() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
         NodeImpl node = new NodeImpl(0, store);
-        Set<String> pk = node.getPropertyKeys();
+        Set<String> pk = node.getAttributeKeys();
         Assert.assertTrue(pk.contains(column.getId()));
         Assert.assertEquals(pk.size(), 1);
     }
 
     //Utility
     private Column generateBasicColumn(GraphStore graphStore) {
-        graphStore.nodePropertyStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true));
-        return graphStore.nodePropertyStore.getColumn("age");
+        graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true));
+        return graphStore.nodeColumnStore.getColumn("age");
     }
 }

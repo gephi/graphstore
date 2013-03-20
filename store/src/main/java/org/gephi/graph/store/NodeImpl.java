@@ -70,9 +70,9 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
-    ColumnStore getPropertyStore() {
+    ColumnStore getColumnStore() {
         if (graphStore != null) {
-            return graphStore.nodePropertyStore;
+            return graphStore.nodeColumnStore;
         }
         return null;
     }

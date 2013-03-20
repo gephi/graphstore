@@ -46,8 +46,8 @@ public class GraphStore implements DirectedGraph {
     protected final NodeStore nodeStore;
     protected final EdgeStore edgeStore;
     protected final EdgeTypeStore edgeTypeStore;
-    protected final ColumnStore<Node> nodePropertyStore;
-    protected final ColumnStore<Edge> edgePropertyStore;
+    protected final ColumnStore<Node> nodeColumnStore;
+    protected final ColumnStore<Edge> edgeColumnStore;
     protected final GraphViewStore viewStore;
     protected final TimestampStore timestampStore;
     //Factory
@@ -75,8 +75,8 @@ public class GraphStore implements DirectedGraph {
         observers = ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
         edgeStore = new EdgeStore(edgeTypeStore, AUTO_LOCKING ? lock : null, viewStore, ENABLE_OBSERVERS ? version : null);
         nodeStore = new NodeStore(edgeStore, AUTO_LOCKING ? lock : null, viewStore, ENABLE_OBSERVERS ? version : null);
-        nodePropertyStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
-        edgePropertyStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
+        nodeColumnStore = new ColumnStore<Node>(Node.class, INDEX_NODES, AUTO_LOCKING ? lock : null);
+        edgeColumnStore = new ColumnStore<Edge>(Edge.class, INDEX_EDGES, AUTO_LOCKING ? lock : null);
         timestampStore = new TimestampStore(AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);
 
@@ -462,8 +462,8 @@ public class GraphStore implements DirectedGraph {
         try {
             edgeStore.clear();
             nodeStore.clear();
-            edgePropertyStore.indexStore.clear();
-            nodePropertyStore.indexStore.clear();
+            edgeColumnStore.indexStore.clear();
+            nodeColumnStore.indexStore.clear();
             timestampStore.clear();
         } finally {
             autoWriteUnlock();
@@ -475,7 +475,7 @@ public class GraphStore implements DirectedGraph {
         autoWriteLock();
         try {
             edgeStore.clear();
-            edgePropertyStore.indexStore.clear();
+            edgeColumnStore.indexStore.clear();
             timestampStore.clearEdges();
         } finally {
             autoWriteUnlock();

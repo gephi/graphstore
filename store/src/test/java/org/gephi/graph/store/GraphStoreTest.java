@@ -150,57 +150,57 @@ public class GraphStoreTest {
             }
 
             @Override
-            public Object getProperty(String key) {
+            public Object getAttribute(String key) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public Object getProperty(Column column) {
+            public Object getAttribute(Column column) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public Object[] getProperties() {
+            public Object[] getAttributes() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public Set<String> getPropertyKeys() {
+            public Set<String> getAttributeKeys() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public Object removeProperty(String key) {
+            public Object removeAttribute(String key) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public Object removeProperty(Column column) {
+            public Object removeAttribute(Column column) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public void setProperty(String key, Object value) {
+            public void setAttribute(String key, Object value) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public void setProperty(Column column, Object value) {
+            public void setAttribute(Column column, Object value) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public void clearProperties() {
+            public void clearAttributes() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public void setProperty(String key, Object value, double timestamp) {
+            public void setAttribute(String key, Object value, double timestamp) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
-            public void setProperty(Column column, Object value, double timestamp) {
+            public void setAttribute(Column column, Object value, double timestamp) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 

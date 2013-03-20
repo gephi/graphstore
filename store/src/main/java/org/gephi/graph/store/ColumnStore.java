@@ -192,7 +192,7 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
         return new ColumnStoreIterator();
     }
 
-    public Set<String> getPropertyKeys() {
+    public Set<String> getColumnKeys() {
         readLock();
         try {
             return new ObjectOpenHashSet<String>(idMap.keySet());

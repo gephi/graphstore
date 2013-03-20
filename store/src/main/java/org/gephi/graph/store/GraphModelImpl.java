@@ -43,8 +43,8 @@ public class GraphModelImpl implements GraphModel {
 
     public GraphModelImpl() {
         store = new GraphStore();
-        nodeTable = new TableImpl<Node>(store.nodePropertyStore);
-        edgeTable = new TableImpl<Edge>(store.edgePropertyStore);
+        nodeTable = new TableImpl<Node>(store.nodeColumnStore);
+        edgeTable = new TableImpl<Edge>(store.edgeColumnStore);
     }
 
     @Override
@@ -169,22 +169,22 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Index getNodeIndex() {
-        return store.nodePropertyStore.indexStore.getIndex(store);
+        return store.nodeColumnStore.indexStore.getIndex(store);
     }
 
     @Override
     public Index getNodeIndex(GraphView view) {
-        return store.nodePropertyStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
+        return store.nodeColumnStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
     }
 
     @Override
     public Index getEdgeIndex() {
-        return store.edgePropertyStore.indexStore.getIndex(store);
+        return store.edgeColumnStore.indexStore.getIndex(store);
     }
 
     @Override
     public Index getEdgeIndex(GraphView view) {
-        return store.edgePropertyStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
+        return store.edgeColumnStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
     }
 
     @Override

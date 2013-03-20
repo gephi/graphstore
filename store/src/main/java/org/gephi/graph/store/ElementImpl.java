@@ -42,8 +42,8 @@ public abstract class ElementImpl implements Element {
     protected final GraphStore graphStore;
     //Id
     protected final Object id;
-    //Properties
-    protected Object[] properties;
+    //Attributes
+    protected Object[] attributes;
     //Timestamp
     protected TimestampSet timestampSet;
 
@@ -53,10 +53,10 @@ public abstract class ElementImpl implements Element {
         }
         this.id = id;
         this.graphStore = graphStore;
-        this.properties = new Object[0];
+        this.attributes = new Object[0];
     }
 
-    abstract ColumnStore getPropertyStore();
+    abstract ColumnStore getColumnStore();
 
     abstract boolean isValid();
 
@@ -66,18 +66,18 @@ public abstract class ElementImpl implements Element {
     }
 
     @Override
-    public Object getProperty(String key) {
-        return getProperty(getPropertyStore().getColumn(key));
+    public Object getAttribute(String key) {
+        return getAttribute(getColumnStore().getColumn(key));
     }
 
     @Override
-    public Object getProperty(Column column) {
+    public Object getAttribute(Column column) {
         checkColumn(column);
 
         int index = column.getIndex();
         Object res = null;
-        if (index < properties.length) {
-            res = properties[index];
+        if (index < attributes.length) {
+            res = attributes[index];
         }
         if (res == null) {
             return column.getDefaultValue();
@@ -86,33 +86,33 @@ public abstract class ElementImpl implements Element {
     }
 
     @Override
-    public Object[] getProperties() {
-        return properties;
+    public Object[] getAttributes() {
+        return attributes;
     }
 
     @Override
-    public Set<String> getPropertyKeys() {
-        return getPropertyStore().getPropertyKeys();
+    public Set<String> getAttributeKeys() {
+        return getColumnStore().getColumnKeys();
     }
 
     @Override
-    public Object removeProperty(String key) {
-        return removeProperty(getPropertyStore().getColumn(key));
+    public Object removeAttribute(String key) {
+        return removeAttribute(getColumnStore().getColumn(key));
     }
 
     @Override
-    public Object removeProperty(Column column) {
+    public Object removeAttribute(Column column) {
         checkColumn(column);
 
-        ColumnStore propertyStore = getPropertyStore();
+        ColumnStore columnStore = getColumnStore();
         int index = column.getIndex();
-        if (index < properties.length) {
-            Object oldValue = properties[index];
-            properties[index] = null;
-            if (column.isIndexed() && propertyStore != null && isValid()) {
+        if (index < attributes.length) {
+            Object oldValue = attributes[index];
+            attributes[index] = null;
+            if (column.isIndexed() && columnStore != null && isValid()) {
                 writeLock();
                 try {
-                    propertyStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
+                    columnStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
                 } finally {
                     writeUnlock();
                 }
@@ -123,44 +123,44 @@ public abstract class ElementImpl implements Element {
     }
 
     @Override
-    public void setProperty(String key, Object value) {
-        setProperty(getPropertyStore().getColumn(key), value);
+    public void setAttribute(String key, Object value) {
+        setAttribute(getColumnStore().getColumn(key), value);
     }
 
     @Override
-    public void setProperty(Column column, Object value) {
+    public void setAttribute(Column column, Object value) {
         checkType(column, value);
         checkColumn(column);
 
         int index = column.getIndex();
-        ColumnStore propertyStore = getPropertyStore();
+        ColumnStore columnStore = getColumnStore();
         Object oldValue = null;
-        if (index >= properties.length) {
+        if (index >= attributes.length) {
             Object[] newArray = new Object[index + 1];
-            System.arraycopy(properties, 0, newArray, 0, properties.length);
-            properties = newArray;
+            System.arraycopy(attributes, 0, newArray, 0, attributes.length);
+            attributes = newArray;
         } else {
-            oldValue = properties[index];
+            oldValue = attributes[index];
         }
 
-        if (column.isIndexed() && propertyStore != null && isValid()) {
+        if (column.isIndexed() && columnStore != null && isValid()) {
             writeLock();
             try {
-                value = propertyStore.indexStore.set(column, oldValue, value, this);
+                value = columnStore.indexStore.set(column, oldValue, value, this);
             } finally {
                 writeUnlock();
             }
         }
-        properties[index] = value;
+        attributes[index] = value;
     }
 
     @Override
-    public void setProperty(String key, Object value, double timestamp) {
-        setProperty(getPropertyStore().getColumn(key), value, timestamp);
+    public void setAttribute(String key, Object value, double timestamp) {
+        setAttribute(getColumnStore().getColumn(key), value, timestamp);
     }
 
     @Override
-    public void setProperty(Column column, Object value, double timestamp) {
+    public void setAttribute(Column column, Object value, double timestamp) {
         checkType(column, value);
         checkDouble(timestamp);
         checkColumn(column);
@@ -171,12 +171,12 @@ public abstract class ElementImpl implements Element {
             try {
                 int index = column.getIndex();
                 Object oldValue = null;
-                if (index >= properties.length) {
+                if (index >= attributes.length) {
                     Object[] newArray = new Object[index + 1];
-                    System.arraycopy(properties, 0, newArray, 0, properties.length);
-                    properties = newArray;
+                    System.arraycopy(attributes, 0, newArray, 0, attributes.length);
+                    attributes = newArray;
                 } else {
-                    oldValue = properties[index];
+                    oldValue = attributes[index];
                 }
 
                 TimestampValueSet dynamicValue = null;
@@ -259,10 +259,10 @@ public abstract class ElementImpl implements Element {
         return new double[0];
     }
 
-    protected void indexProperties() {
-        ColumnStore propertyStore = getPropertyStore();
-        if (propertyStore != null) {
-            propertyStore.indexStore.index(this);
+    protected void indexAttributes() {
+        ColumnStore columnStore = getColumnStore();
+        if (columnStore != null) {
+            columnStore.indexStore.index(this);
         }
         TimestampStore timestampStore = getTimestampStore();
         if (timestampStore != null) {
@@ -271,13 +271,13 @@ public abstract class ElementImpl implements Element {
     }
 
     @Override
-    public void clearProperties() {
+    public void clearAttributes() {
         writeLock();
         try {
             if (isValid()) {
-                ColumnStore propertyStore = getPropertyStore();
-                if (propertyStore != null) {
-                    propertyStore.indexStore.clear(this);
+                ColumnStore columnStore = getColumnStore();
+                if (columnStore != null) {
+                    columnStore.indexStore.clear(this);
                 }
                 TimestampStore timestampStore = getTimestampStore();
                 if (timestampStore != null) {
@@ -285,7 +285,7 @@ public abstract class ElementImpl implements Element {
                 }
             }
 
-            properties = new Object[0];
+            attributes = new Object[0];
 
             if (timestampSet != null) {
                 timestampSet.clear();
@@ -316,7 +316,7 @@ public abstract class ElementImpl implements Element {
         if (column.getIndex() == ColumnStore.NULL_ID) {
             throw new IllegalArgumentException("The column does not exist");
         }
-        ColumnStore columnStore = getPropertyStore();
+        ColumnStore columnStore = getColumnStore();
         if (columnStore != null && columnStore.getColumnByIndex(column.getIndex()) != column) {
             throw new IllegalArgumentException("The column does not belong to the right column store");
         }

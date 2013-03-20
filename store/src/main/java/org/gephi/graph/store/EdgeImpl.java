@@ -148,9 +148,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     @Override
-    ColumnStore getPropertyStore() {
+    ColumnStore getColumnStore() {
         if (graphStore != null) {
-            return graphStore.edgePropertyStore;
+            return graphStore.edgeColumnStore;
         }
         return null;
     }

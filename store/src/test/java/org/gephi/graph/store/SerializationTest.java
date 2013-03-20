@@ -115,7 +115,7 @@ public class SerializationTest {
     @Test
     public void testNode() throws IOException, ClassNotFoundException {
         GraphStore graphStore = new GraphStore();
-        ColumnStore columnStore = graphStore.nodePropertyStore;
+        ColumnStore columnStore = graphStore.nodeColumnStore;
         ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false);
         ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false);
         ColumnImpl col3 = new ColumnImpl("2", int[].class, null, null, Origin.PROPERTY, false);
@@ -124,8 +124,8 @@ public class SerializationTest {
         columnStore.addColumn(col3);
 
         NodeImpl node = new NodeImpl("Foo", graphStore);
-        node.setProperty(col1, 1);
-        node.setProperty(col3, new int[]{1, 7, 3, 4});
+        node.setAttribute(col1, 1);
+        node.setAttribute(col3, new int[]{1, 7, 3, 4});
 
         Serialization ser = new Serialization(graphStore);
         byte[] buf = ser.serialize(node);
@@ -134,7 +134,7 @@ public class SerializationTest {
         ser = new Serialization(graphStore);
         NodeImpl l = (NodeImpl) ser.deserialize(buf);
         Assert.assertTrue(node.equals(l));
-        Assert.assertTrue(Arrays.deepEquals(l.properties, node.properties));
+        Assert.assertTrue(Arrays.deepEquals(l.attributes, node.attributes));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class SerializationTest {
     public void testColumnStore() throws IOException, ClassNotFoundException {
         GraphStore graphStore = new GraphStore();
 
-        ColumnStore columnStore = graphStore.nodePropertyStore;
+        ColumnStore columnStore = graphStore.nodeColumnStore;
         ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false);
         ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false);
         ColumnImpl col3 = new ColumnImpl("2", int[].class, null, null, Origin.PROPERTY, false);

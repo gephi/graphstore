@@ -167,14 +167,14 @@ public class ColumnStoreTest {
     }
 
     @Test
-    public void testGetPropertyKeys() {
+    public void testGetColumnKeys() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
         ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
         store.addColumn(col);
 
         ObjectSet<String> set = new ObjectOpenHashSet<String>();
         set.add("0");
-        Assert.assertEquals(store.getPropertyKeys(), set);
+        Assert.assertEquals(store.getColumnKeys(), set);
     }
 
     @Test

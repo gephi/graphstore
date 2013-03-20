@@ -33,13 +33,13 @@ import org.gephi.graph.api.Node;
  */
 public class IndexStore<T extends Element> {
 
-    protected final ColumnStore<T> propertyStore;
+    protected final ColumnStore<T> columnStore;
     protected final GraphLock lock;
     protected final IndexImpl<T> mainIndex;
     protected final Map<GraphView, IndexImpl<T>> viewIndexes;
 
     public IndexStore(ColumnStore<T> propertyStore) {
-        this.propertyStore = propertyStore;
+        this.columnStore = propertyStore;
         this.mainIndex = new IndexImpl<T>(propertyStore);
         this.viewIndexes = new Object2ObjectOpenHashMap<GraphView, IndexImpl<T>>();
         this.lock = propertyStore.lock;
@@ -85,14 +85,14 @@ public class IndexStore<T extends Element> {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't create a view index for the main view");
         }
-        IndexImpl viewIndex = new IndexImpl<T>(propertyStore);
-        viewIndex.addAllColumns(propertyStore.columns);
+        IndexImpl viewIndex = new IndexImpl<T>(columnStore);
+        viewIndex.addAllColumns(columnStore.columns);
         viewIndexes.put(graph.getView(), viewIndex);
 
         Iterator<T> iterator = null;
-        if (propertyStore.elementType.equals(Node.class)) {
+        if (columnStore.elementType.equals(Node.class)) {
             iterator = (Iterator<T>) graph.getNodes().iterator();
-        } else if (propertyStore.elementType.equals(Edge.class)) {
+        } else if (columnStore.elementType.equals(Edge.class)) {
             iterator = (Iterator<T>) graph.getEdges().iterator();
         }
 
@@ -100,12 +100,12 @@ public class IndexStore<T extends Element> {
             while (iterator.hasNext()) {
                 ElementImpl element = (ElementImpl) iterator.next();
 
-                final int length = propertyStore.length;
-                final ColumnImpl[] cols = propertyStore.columns;
+                final int length = columnStore.length;
+                final ColumnImpl[] cols = columnStore.columns;
                 for (int i = 0; i < length; i++) {
                     Column c = cols[i];
                     if (c != null && c.isIndexed()) {
-                        Object value = element.properties[c.getIndex()];
+                        Object value = element.attributes[c.getIndex()];
                         viewIndex.put(c, value, element);
                     }
                 }
@@ -149,12 +149,12 @@ public class IndexStore<T extends Element> {
     public void clear(T element) {
         ElementImpl elementImpl = (ElementImpl) element;
 
-        final int length = propertyStore.length;
-        final ColumnImpl[] cols = propertyStore.columns;
+        final int length = columnStore.length;
+        final ColumnImpl[] cols = columnStore.columns;
         for (int i = 0; i < length; i++) {
             Column c = cols[i];
             if (c != null && c.isIndexed()) {
-                Object value = elementImpl.properties[c.getIndex()];
+                Object value = elementImpl.attributes[c.getIndex()];
                 mainIndex.remove(c, value, element);
                 for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                     GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
@@ -170,16 +170,16 @@ public class IndexStore<T extends Element> {
 
     public void index(T element) {
         ElementImpl elementImpl = (ElementImpl) element;
-        ensurePropertyArrayLength(elementImpl, propertyStore.length);
+        ensurePropertyArrayLength(elementImpl, columnStore.length);
 
-        final int length = propertyStore.length;
-        final ColumnImpl[] cols = propertyStore.columns;
+        final int length = columnStore.length;
+        final ColumnImpl[] cols = columnStore.columns;
         for (int i = 0; i < length; i++) {
             Column c = cols[i];
             if (c != null && c.isIndexed()) {
-                Object value = elementImpl.properties[c.getIndex()];
+                Object value = elementImpl.attributes[c.getIndex()];
                 value = mainIndex.put(c, value, element);
-                elementImpl.properties[c.getIndex()] = value;
+                elementImpl.attributes[c.getIndex()] = value;
             }
         }
     }
@@ -192,11 +192,11 @@ public class IndexStore<T extends Element> {
     }
 
     private void ensurePropertyArrayLength(ElementImpl element, int size) {
-        final Object[] properties = element.properties;
+        final Object[] properties = element.attributes;
         if (size > properties.length) {
             Object[] newArray = new Object[size];
             System.arraycopy(properties, 0, newArray, 0, properties.length);
-            element.properties = newArray;
+            element.attributes = newArray;
         }
     }
 

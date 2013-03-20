@@ -255,7 +255,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             if (viewStore != null) {
                 viewStore.addNode(node);
             }
-            node.indexProperties();
+            node.indexAttributes();
 
             size++;
 
@@ -276,7 +276,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         if (id != NodeStore.NULL_ID) {
             checkNodeExists(node);
 
-            node.clearProperties();
+            node.clearAttributes();
 
             incrementVersion();
             if (viewStore != null) {

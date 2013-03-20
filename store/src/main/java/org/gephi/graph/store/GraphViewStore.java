@@ -90,8 +90,8 @@ public class GraphViewStore {
             checkNonNullViewObject(view);
 
             graphStore.timestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
-            graphStore.edgePropertyStore.indexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
-            graphStore.nodePropertyStore.indexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            graphStore.edgeColumnStore.indexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            graphStore.nodeColumnStore.indexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
 
             removeView((GraphViewImpl) view);
         } finally {

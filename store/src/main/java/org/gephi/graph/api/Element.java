@@ -26,25 +26,25 @@ public interface Element {
 
     public Object getId();
 
-    public Object getProperty(String key);
+    public Object getAttribute(String key);
 
-    public Object getProperty(Column column);
+    public Object getAttribute(Column column);
 
-    public Object[] getProperties();
+    public Object[] getAttributes();
 
-    public Set<String> getPropertyKeys();
+    public Set<String> getAttributeKeys();
 
-    public Object removeProperty(String key);
+    public Object removeAttribute(String key);
 
-    public Object removeProperty(Column column);
+    public Object removeAttribute(Column column);
 
-    public void setProperty(String key, Object value);
+    public void setAttribute(String key, Object value);
 
-    public void setProperty(Column column, Object value);
+    public void setAttribute(Column column, Object value);
 
-    public void setProperty(String key, Object value, double timestamp);
+    public void setAttribute(String key, Object value, double timestamp);
 
-    public void setProperty(Column column, Object value, double timestamp);
+    public void setAttribute(Column column, Object value, double timestamp);
 
     public boolean addTimestamp(double timestamp);
 
@@ -52,5 +52,5 @@ public interface Element {
 
     public double[] getTimestamps();
 
-    public void clearProperties();
+    public void clearAttributes();
 }

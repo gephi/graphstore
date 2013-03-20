@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -362,57 +363,57 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
-        public Object getProperty(String key) {
+        public Object getAttribute(String key) {
             return properties.get(key);
         }
 
         @Override
-        public Object getProperty(Column column) {
+        public Object getAttribute(Column column) {
             return properties.get(column.getId());
         }
 
         @Override
-        public Object[] getProperties() {
+        public Object[] getAttributes() {
             return properties.values().toArray();
         }
 
         @Override
-        public Set<String> getPropertyKeys() {
+        public Set<String> getAttributeKeys() {
             return properties.keySet();
         }
 
         @Override
-        public Object removeProperty(String key) {
+        public Object removeAttribute(String key) {
             return properties.remove(key);
         }
 
         @Override
-        public Object removeProperty(Column column) {
+        public Object removeAttribute(Column column) {
             return properties.remove(column.getId());
         }
 
         @Override
-        public void setProperty(String key, Object value) {
+        public void setAttribute(String key, Object value) {
             properties.put(key, value);
         }
 
         @Override
-        public void setProperty(Column column, Object value) {
+        public void setAttribute(Column column, Object value) {
             properties.put(column.getId(), value);
         }
 
         @Override
-        public void clearProperties() {
+        public void clearAttributes() {
             properties.clear();
         }
 
         @Override
-        public void setProperty(String key, Object value, double timestamp) {
+        public void setAttribute(String key, Object value, double timestamp) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
-        public void setProperty(Column column, Object value, double timestamp) {
+        public void setAttribute(Column column, Object value, double timestamp) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -470,6 +471,116 @@ public class BasicGraphStore implements DirectedGraph {
                 return false;
             }
             return true;
+        }
+
+        @Override
+        public float x() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float y() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float z() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float r() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float g() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float b() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public int getRGBA() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Color getColor() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float alpha() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float size() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public float radius() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setX(float x) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setY(float y) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setZ(float z) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setPosition(float x, float y) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setPosition(float x, float y, float z) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setR(float r) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setG(float g) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setB(float b) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setAlpha(float a) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setColor(Color color) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setSize(float size) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 

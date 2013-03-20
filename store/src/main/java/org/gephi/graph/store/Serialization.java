@@ -154,8 +154,8 @@ public class Serialization {
         serialize(out, edgeTypeStore);
 
         //Column
-        serialize(out, store.nodePropertyStore);
-        serialize(out, store.edgePropertyStore);
+        serialize(out, store.nodeColumnStore);
+        serialize(out, store.edgeColumnStore);
 
         //Timestamp
         serialize(out, store.timestampStore);
@@ -205,7 +205,7 @@ public class Serialization {
     private void serializeNode(DataOutput out, NodeImpl node) throws IOException {
         serialize(out, node.id);
         serialize(out, node.storeId);
-        serialize(out, node.properties);
+        serialize(out, node.attributes);
         serialize(out, node.timestampSet);
     }
 
@@ -216,7 +216,7 @@ public class Serialization {
         serialize(out, edge.type);
         serialize(out, edge.weight);
         serialize(out, edge.isDirected());
-        serialize(out, edge.properties);
+        serialize(out, edge.attributes);
         serialize(out, edge.timestampSet);
     }
 
@@ -227,7 +227,7 @@ public class Serialization {
         TimestampSet timestampSet = (TimestampSet) deserialize(is);
 
         NodeImpl node = (NodeImpl) store.factory.newNode(id);
-        node.properties = properties;
+        node.attributes = properties;
         node.timestampSet = timestampSet;
         store.nodeStore.add(node);
 
@@ -257,7 +257,7 @@ public class Serialization {
         NodeImpl target = store.nodeStore.get(targetNewId);
 
         EdgeImpl edge = (EdgeImpl) store.factory.newEdge(id, source, target, type, weight, directed);
-        edge.properties = properties;
+        edge.attributes = properties;
         edge.timestampSet = timestampSet;
 
         store.edgeStore.add(edge);
@@ -315,9 +315,9 @@ public class Serialization {
         Class elementType = (Class) deserialize(is);
         ColumnStore columnStore = null;
         if (elementType.equals(Node.class)) {
-            columnStore = store.nodePropertyStore;
+            columnStore = store.nodeColumnStore;
         } else if (elementType.equals(Edge.class)) {
-            columnStore = store.edgePropertyStore;
+            columnStore = store.edgeColumnStore;
         } else {
             throw new RuntimeException("Not recognized column store");
         }

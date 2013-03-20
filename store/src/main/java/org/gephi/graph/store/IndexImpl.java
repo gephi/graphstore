@@ -42,23 +42,23 @@ import org.gephi.graph.api.Element;
 public class IndexImpl<T extends Element> implements Index<T> {
 
     protected final GraphLock lock;
-    protected final ColumnStore<T> propertyStore;
+    protected final ColumnStore<T> columnStore;
     protected AbstractIndex[] columns;
 
-    public IndexImpl(ColumnStore<T> propertyStore) {
-        this.propertyStore = propertyStore;
+    public IndexImpl(ColumnStore<T> columnStore) {
+        this.columnStore = columnStore;
         this.columns = new AbstractIndex[0];
-        this.lock = propertyStore.lock;
+        this.lock = columnStore.lock;
     }
 
     @Override
     public Class<T> getIndexClass() {
-        return propertyStore.elementType;
+        return columnStore.elementType;
     }
 
     @Override
     public String getIndexName() {
-        return "index_" + propertyStore.elementType.getCanonicalName();
+        return "index_" + columnStore.elementType.getCanonicalName();
     }
 
     @Override
@@ -263,7 +263,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
     }
 
     protected AbstractIndex getIndex(String key) {
-        return columns[propertyStore.getColumnIndex(key)];
+        return columns[columnStore.getColumnIndex(key)];
     }
 
     protected void destroy() {

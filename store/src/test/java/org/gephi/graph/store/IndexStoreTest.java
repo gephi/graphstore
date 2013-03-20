@@ -55,7 +55,7 @@ public class IndexStoreTest {
     @Test
     public void testGetMainIndex() {
         GraphStore graphStore = new GraphStore();
-        IndexStore<Node> indexStore = graphStore.nodePropertyStore.indexStore;
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
 
         Assert.assertNotNull(indexStore.getIndex(graphStore));
     }
@@ -66,7 +66,7 @@ public class IndexStoreTest {
         NodeImpl n = new NodeImpl("0");
         indexStore.index(n);
 
-        Assert.assertEquals(n.properties.length, indexStore.propertyStore.length);
+        Assert.assertEquals(n.attributes.length, indexStore.columnStore.length);
     }
 
     @Test
@@ -79,8 +79,8 @@ public class IndexStoreTest {
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl n = new NodeImpl("0");
-        n.setProperty(col1, "A");
-        n.setProperty(col2, 20);
+        n.setAttribute(col1, "A");
+        n.setAttribute(col2, 20);
         indexStore.index(n);
 
         Assert.assertEquals(mainIndex.count(col1, "A"), 1);
@@ -106,8 +106,8 @@ public class IndexStoreTest {
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl n = new NodeImpl("0");
-        n.setProperty(col1, null);
-        n.setProperty(col2, null);
+        n.setAttribute(col1, null);
+        n.setAttribute(col2, null);
         indexStore.index(n);
 
         Assert.assertEquals(mainIndex.count(col1, null), 1);
@@ -133,8 +133,8 @@ public class IndexStoreTest {
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl n = new NodeImpl("0");
-        n.setProperty(col1, "A");
-        n.setProperty(col2, 20);
+        n.setAttribute(col1, "A");
+        n.setAttribute(col2, 20);
         indexStore.index(n);
         indexStore.clear(n);
 
@@ -159,8 +159,8 @@ public class IndexStoreTest {
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl n = new NodeImpl("0");
-        n.setProperty(col1, null);
-        n.setProperty(col2, null);
+        n.setAttribute(col1, null);
+        n.setAttribute(col2, null);
         indexStore.index(n);
         indexStore.clear(n);
 
@@ -206,9 +206,9 @@ public class IndexStoreTest {
         Column col = columnStore.getColumn("age");
 
         NodeImpl n1 = new NodeImpl("0");
-        n1.setProperty(col, 1);
+        n1.setAttribute(col, 1);
         NodeImpl n2 = new NodeImpl("1");
-        n2.setProperty(col, 5);
+        n2.setAttribute(col, 5);
 
         indexStore.index(n1);
         indexStore.index(n2);
@@ -226,9 +226,9 @@ public class IndexStoreTest {
         Column col = columnStore.getColumn("age");
 
         NodeImpl n1 = new NodeImpl("0");
-        n1.setProperty(col, 1);
+        n1.setAttribute(col, 1);
         NodeImpl n2 = new NodeImpl("1");
-        n2.setProperty(col, 5);
+        n2.setAttribute(col, 5);
 
         indexStore.index(n1);
         indexStore.index(n2);
@@ -249,9 +249,9 @@ public class IndexStoreTest {
 
             for (ColumnImpl col : columnStore) {
                 if (col.typeClass.equals(String.class)) {
-                    n.setProperty(col, "" + i);
+                    n.setAttribute(col, "" + i);
                 } else if (col.typeClass.equals(Integer.class)) {
-                    n.setProperty(col, i);
+                    n.setAttribute(col, i);
                 }
             }
         }
@@ -260,7 +260,7 @@ public class IndexStoreTest {
 
     private ColumnStore<Node> generateBasicNodeColumnStore() {
         GraphStore graphStore = new GraphStore();
-        ColumnStore<Node> columnStore = graphStore.nodePropertyStore;
+        ColumnStore<Node> columnStore = graphStore.nodeColumnStore;
         columnStore.addColumn(new ColumnImpl("id", String.class, "ID", null, Origin.DATA, true));
         columnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true));
         return columnStore;
@@ -268,7 +268,7 @@ public class IndexStoreTest {
 
     private ColumnStore<Node> generateEmptyNodeStore() {
         GraphStore graphStore = new GraphStore();
-        ColumnStore<Node> columnStore = graphStore.nodePropertyStore;
+        ColumnStore<Node> columnStore = graphStore.nodeColumnStore;
         return columnStore;
     }
 

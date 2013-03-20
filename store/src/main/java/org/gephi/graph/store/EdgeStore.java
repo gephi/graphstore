@@ -499,7 +499,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             if (viewStore != null) {
                 viewStore.addEdge(edge);
             }
-            edge.indexProperties();
+            edge.indexAttributes();
 
             if (directed && !edge.isSelfLoop()) {
                 EdgeImpl mutual = getMutual(edge);
@@ -541,7 +541,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 viewStore.removeEdge(edge);
             }
 
-            edge.clearProperties();
+            edge.clearAttributes();
 
             int storeIndex = id / BLOCK_SIZE;
             EdgeBlock block = blocks[storeIndex];
