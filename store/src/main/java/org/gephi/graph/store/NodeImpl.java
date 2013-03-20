@@ -19,6 +19,7 @@ import java.awt.Color;
 import org.gephi.graph.api.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeProperties;
+import org.gephi.graph.api.TextProperties;
 
 /**
  *
@@ -148,6 +149,11 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
+    public TextProperties getTextProperties() {
+        return properties.getTextProperties();
+    }
+
+    @Override
     public void setX(float x) {
         properties.setX(x);
     }
@@ -243,6 +249,10 @@ public class NodeImpl extends ElementImpl implements Node {
         protected float size;
         protected boolean fixed;
         protected LayoutData layoutData;
+        protected TextPropertiesImpl textProperties;
+
+        public NodePropertiesImpl() {
+        }
 
         @Override
         public float x() {
@@ -307,6 +317,11 @@ public class NodeImpl extends ElementImpl implements Node {
         @Override
         public <T extends LayoutData> T getLayoutData() {
             return (T) layoutData;
+        }
+
+        @Override
+        public TextProperties getTextProperties() {
+            return textProperties;
         }
 
         @Override
@@ -379,14 +394,15 @@ public class NodeImpl extends ElementImpl implements Node {
 
         @Override
         public int hashCode() {
-            int hash = 7;
-            hash = 97 * hash + Float.floatToIntBits(this.x);
-            hash = 97 * hash + Float.floatToIntBits(this.y);
-            hash = 97 * hash + Float.floatToIntBits(this.z);
-            hash = 97 * hash + this.rgba;
-            hash = 97 * hash + Float.floatToIntBits(this.size);
-            hash = 97 * hash + (this.fixed ? 1 : 0);
-            hash = 97 * hash + (this.layoutData != null ? this.layoutData.hashCode() : 0);
+            int hash = 3;
+            hash = 53 * hash + Float.floatToIntBits(this.x);
+            hash = 53 * hash + Float.floatToIntBits(this.y);
+            hash = 53 * hash + Float.floatToIntBits(this.z);
+            hash = 53 * hash + this.rgba;
+            hash = 53 * hash + Float.floatToIntBits(this.size);
+            hash = 53 * hash + (this.fixed ? 1 : 0);
+            hash = 53 * hash + (this.layoutData != null ? this.layoutData.hashCode() : 0);
+            hash = 53 * hash + (this.textProperties != null ? this.textProperties.hashCode() : 0);
             return hash;
         }
 
@@ -418,6 +434,9 @@ public class NodeImpl extends ElementImpl implements Node {
                 return false;
             }
             if (this.layoutData != other.layoutData && (this.layoutData == null || !this.layoutData.equals(other.layoutData))) {
+                return false;
+            }
+            if (this.textProperties != other.textProperties && (this.textProperties == null || !this.textProperties.equals(other.textProperties))) {
                 return false;
             }
             return true;

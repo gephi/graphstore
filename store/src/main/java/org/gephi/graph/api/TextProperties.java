@@ -21,21 +21,25 @@ import java.awt.Color;
  *
  * @author mbastian
  */
-public interface EdgeProperties {
+public interface TextProperties {
 
-    public float r();
+    public float getR();
 
-    public float g();
+    public float getG();
 
-    public float b();
+    public float getB();
 
     public int getRGBA();
 
     public Color getColor();
 
-    public float alpha();
+    public float getAlpha();
 
-    public TextProperties getTextProperties();
+    public float getSize();
+
+    public boolean isVisible();
+
+    public String getText();
 
     public void setR(float r);
 
@@ -46,4 +50,10 @@ public interface EdgeProperties {
     public void setAlpha(float a);
 
     public void setColor(Color color);
+
+    public void setSize(float size);
+
+    public void setVisible(boolean visible);
+
+    public void setText(String text);
 }

@@ -18,6 +18,7 @@ package org.gephi.graph.store;
 import java.awt.Color;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
+import org.gephi.graph.api.TextProperties;
 
 /**
  *
@@ -186,6 +187,11 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     @Override
+    public TextProperties getTextProperties() {
+        return properties.getTextProperties();
+    }
+
+    @Override
     public int getRGBA() {
         return properties.rgba;
     }
@@ -246,6 +252,10 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
         protected int rgba;
         protected float size;
+        protected TextPropertiesImpl textProperties;
+
+        public EdgePropertiesImpl() {
+        }
 
         @Override
         public float r() {
@@ -270,6 +280,11 @@ public class EdgeImpl extends ElementImpl implements Edge {
         @Override
         public int getRGBA() {
             return rgba;
+        }
+
+        @Override
+        public TextProperties getTextProperties() {
+            return textProperties;
         }
 
         @Override
@@ -305,8 +320,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
         @Override
         public int hashCode() {
             int hash = 3;
-            hash = 83 * hash + this.rgba;
-            hash = 83 * hash + Float.floatToIntBits(this.size);
+            hash = 29 * hash + this.rgba;
+            hash = 29 * hash + Float.floatToIntBits(this.size);
+            hash = 29 * hash + (this.textProperties != null ? this.textProperties.hashCode() : 0);
             return hash;
         }
 
@@ -323,6 +339,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 return false;
             }
             if (Float.floatToIntBits(this.size) != Float.floatToIntBits(other.size)) {
+                return false;
+            }
+            if (this.textProperties != other.textProperties && (this.textProperties == null || !this.textProperties.equals(other.textProperties))) {
                 return false;
             }
             return true;

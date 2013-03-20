@@ -43,6 +43,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.TextProperties;
 
 /**
  *
@@ -603,6 +604,11 @@ public class BasicGraphStore implements DirectedGraph {
         public void setLayoutData(LayoutData layoutData) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public TextProperties getTextProperties() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     public static class BasicEdge extends BasicElement implements Edge {
@@ -723,6 +729,11 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public void setColor(Color color) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public TextProperties getTextProperties() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }

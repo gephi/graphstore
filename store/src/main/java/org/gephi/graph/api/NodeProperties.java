@@ -49,6 +49,8 @@ public interface NodeProperties {
 
     public <T extends LayoutData> T getLayoutData();
 
+    public TextProperties getTextProperties();
+
     public void setX(float x);
 
     public void setY(float y);

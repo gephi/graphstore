@@ -29,6 +29,7 @@ import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.TextProperties;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -335,6 +336,11 @@ public class GraphStoreTest {
 
             @Override
             public void setLayoutData(LayoutData layoutData) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public TextProperties getTextProperties() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });
