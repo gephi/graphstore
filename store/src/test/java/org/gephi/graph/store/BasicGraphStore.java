@@ -40,6 +40,7 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 
@@ -580,6 +581,26 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public void setSize(float size) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean isFixed() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public <T extends LayoutData> T getLayoutData() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setFixed(boolean fixed) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setLayoutData(LayoutData layoutData) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }

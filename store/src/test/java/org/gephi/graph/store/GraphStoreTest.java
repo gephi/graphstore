@@ -26,6 +26,7 @@ import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.testng.Assert;
@@ -314,6 +315,26 @@ public class GraphStoreTest {
 
             @Override
             public void setSize(float size) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean isFixed() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public <T extends LayoutData> T getLayoutData() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setFixed(boolean fixed) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setLayoutData(LayoutData layoutData) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });

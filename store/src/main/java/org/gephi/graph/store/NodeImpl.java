@@ -16,6 +16,7 @@
 package org.gephi.graph.store;
 
 import java.awt.Color;
+import org.gephi.graph.api.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeProperties;
 
@@ -137,6 +138,16 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
+    public boolean isFixed() {
+        return properties.isFixed();
+    }
+
+    @Override
+    public <T extends LayoutData> T getLayoutData() {
+        return properties.getLayoutData();
+    }
+
+    @Override
     public void setX(float x) {
         properties.setX(x);
     }
@@ -192,6 +203,16 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
+    public void setFixed(boolean fixed) {
+        properties.setFixed(fixed);
+    }
+
+    @Override
+    public void setLayoutData(LayoutData layoutData) {
+        properties.setLayoutData(layoutData);
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 29 * hash + (this.id != null ? this.id.hashCode() : 0);
@@ -220,6 +241,8 @@ public class NodeImpl extends ElementImpl implements Node {
         protected float z;
         protected int rgba;
         protected float size;
+        protected boolean fixed;
+        protected LayoutData layoutData;
 
         @Override
         public float x() {
@@ -274,6 +297,16 @@ public class NodeImpl extends ElementImpl implements Node {
         @Override
         public float radius() {
             return size / 2;
+        }
+
+        @Override
+        public boolean isFixed() {
+            return fixed;
+        }
+
+        @Override
+        public <T extends LayoutData> T getLayoutData() {
+            return (T) layoutData;
         }
 
         @Override
@@ -335,13 +368,25 @@ public class NodeImpl extends ElementImpl implements Node {
         }
 
         @Override
+        public void setFixed(boolean fixed) {
+            this.fixed = fixed;
+        }
+
+        @Override
+        public void setLayoutData(LayoutData layoutData) {
+            this.layoutData = layoutData;
+        }
+
+        @Override
         public int hashCode() {
-            int hash = 3;
-            hash = 67 * hash + Float.floatToIntBits(this.x);
-            hash = 67 * hash + Float.floatToIntBits(this.y);
-            hash = 67 * hash + Float.floatToIntBits(this.z);
-            hash = 67 * hash + this.rgba;
-            hash = 67 * hash + Float.floatToIntBits(this.size);
+            int hash = 7;
+            hash = 97 * hash + Float.floatToIntBits(this.x);
+            hash = 97 * hash + Float.floatToIntBits(this.y);
+            hash = 97 * hash + Float.floatToIntBits(this.z);
+            hash = 97 * hash + this.rgba;
+            hash = 97 * hash + Float.floatToIntBits(this.size);
+            hash = 97 * hash + (this.fixed ? 1 : 0);
+            hash = 97 * hash + (this.layoutData != null ? this.layoutData.hashCode() : 0);
             return hash;
         }
 
@@ -367,6 +412,12 @@ public class NodeImpl extends ElementImpl implements Node {
                 return false;
             }
             if (Float.floatToIntBits(this.size) != Float.floatToIntBits(other.size)) {
+                return false;
+            }
+            if (this.fixed != other.fixed) {
+                return false;
+            }
+            if (this.layoutData != other.layoutData && (this.layoutData == null || !this.layoutData.equals(other.layoutData))) {
                 return false;
             }
             return true;

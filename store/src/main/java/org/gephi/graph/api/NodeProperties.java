@@ -45,6 +45,10 @@ public interface NodeProperties {
 
     public float radius();
 
+    public boolean isFixed();
+
+    public <T extends LayoutData> T getLayoutData();
+
     public void setX(float x);
 
     public void setY(float y);
@@ -66,4 +70,8 @@ public interface NodeProperties {
     public void setColor(Color color);
 
     public void setSize(float size);
+
+    public void setFixed(boolean fixed);
+
+    public void setLayoutData(LayoutData layoutData);
 }
