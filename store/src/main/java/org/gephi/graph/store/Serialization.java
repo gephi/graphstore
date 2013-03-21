@@ -206,7 +206,6 @@ public class Serialization {
         serialize(out, node.id);
         serialize(out, node.storeId);
         serialize(out, node.attributes);
-        serialize(out, node.timestampSet);
     }
 
     private void serializeEdge(DataOutput out, EdgeImpl edge) throws IOException {
@@ -217,18 +216,15 @@ public class Serialization {
         serialize(out, edge.weight);
         serialize(out, edge.isDirected());
         serialize(out, edge.attributes);
-        serialize(out, edge.timestampSet);
     }
 
     private NodeImpl deserializeNode(DataInput is) throws IOException, ClassNotFoundException {
         Object id = deserialize(is);
         int storeId = (Integer) deserialize(is);
         Object[] properties = (Object[]) deserialize(is);
-        TimestampSet timestampSet = (TimestampSet) deserialize(is);
 
         NodeImpl node = (NodeImpl) store.factory.newNode(id);
         node.attributes = properties;
-        node.timestampSet = timestampSet;
         store.nodeStore.add(node);
 
         idMap.put(storeId, node.storeId);
@@ -244,7 +240,6 @@ public class Serialization {
         double weight = (Double) deserialize(is);
         boolean directed = (Boolean) deserialize(is);
         Object[] properties = (Object[]) deserialize(is);
-        TimestampSet timestampSet = (TimestampSet) deserialize(is);
 
         int sourceNewId = idMap.get(sourceId);
         int targetNewId = idMap.get(targetId);
@@ -258,7 +253,6 @@ public class Serialization {
 
         EdgeImpl edge = (EdgeImpl) store.factory.newEdge(id, source, target, type, weight, directed);
         edge.attributes = properties;
-        edge.timestampSet = timestampSet;
 
         store.edgeStore.add(edge);
 

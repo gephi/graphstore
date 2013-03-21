@@ -44,8 +44,6 @@ public abstract class ElementImpl implements Element {
     protected final Object id;
     //Attributes
     protected Object[] attributes;
-    //Timestamp
-    protected TimestampSet timestampSet;
 
     public ElementImpl(Object id, GraphStore graphStore) {
         if (id == null) {
@@ -63,6 +61,14 @@ public abstract class ElementImpl implements Element {
     @Override
     public Object getId() {
         return id;
+    }
+
+    @Override
+    public String getLabel() {
+        if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL && attributes.length > GraphStoreConfiguration.ELEMENT_LABEL_INDEX) {
+            return (String) attributes[GraphStoreConfiguration.ELEMENT_LABEL_INDEX];
+        }
+        return null;
     }
 
     @Override
@@ -123,6 +129,19 @@ public abstract class ElementImpl implements Element {
     }
 
     @Override
+    public void setLabel(String label) {
+        if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
+            int index = GraphStoreConfiguration.ELEMENT_LABEL_INDEX;
+            if (index >= attributes.length) {
+                Object[] newArray = new Object[index + 1];
+                System.arraycopy(attributes, 0, newArray, 0, attributes.length);
+                attributes = newArray;
+            }
+            attributes[index] = label;
+        }
+    }
+
+    @Override
     public void setAttribute(String key, Object value) {
         setAttribute(getColumnStore().getColumn(key), value);
     }
@@ -161,6 +180,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public void setAttribute(Column column, Object value, double timestamp) {
+        checkEnabledTimestampSet();
         checkType(column, value);
         checkDouble(timestamp);
         checkColumn(column);
@@ -205,14 +225,23 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public boolean addTimestamp(double timestamp) {
+        checkEnabledTimestampSet();
         checkDouble(timestamp);
 
         final TimestampStore timestampStore = getTimestampStore();
         if (timestampStore != null) {
             writeLock();
             try {
+                TimestampSet timestampSet = getTimestampSet();
                 if (timestampSet == null) {
                     timestampSet = new TimestampSet();
+                    int index = GraphStoreConfiguration.ELEMENT_TIMESTAMP_INDEX;
+                    if (index >= attributes.length) {
+                        Object[] newArray = new Object[index + 1];
+                        System.arraycopy(attributes, 0, newArray, 0, attributes.length);
+                        attributes = newArray;
+                    }
+                    attributes[index] = timestampSet;
                 }
                 final int timestampIndex = timestampStore.addElement(timestamp, this);
                 return timestampSet.add(timestampIndex);
@@ -225,8 +254,10 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public boolean removeTimestamp(double timestamp) {
+        checkEnabledTimestampSet();
         checkDouble(timestamp);
 
+        TimestampSet timestampSet = getTimestampSet();
         if (timestampSet != null) {
             writeLock();
             try {
@@ -244,6 +275,9 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public double[] getTimestamps() {
+        checkEnabledTimestampSet();
+
+        TimestampSet timestampSet = getTimestampSet();
         if (timestampSet != null) {
             final TimestampStore timestampStore = getTimestampStore();
             if (timestampStore != null) {
@@ -257,6 +291,13 @@ public abstract class ElementImpl implements Element {
             }
         }
         return new double[0];
+    }
+
+    protected TimestampSet getTimestampSet() {
+        if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET && GraphStoreConfiguration.ELEMENT_TIMESTAMP_INDEX < attributes.length) {
+            return (TimestampSet) attributes[GraphStoreConfiguration.ELEMENT_TIMESTAMP_INDEX];
+        }
+        return null;
     }
 
     protected void indexAttributes() {
@@ -285,11 +326,13 @@ public abstract class ElementImpl implements Element {
                 }
             }
 
-            attributes = new Object[0];
 
+            TimestampSet timestampSet = getTimestampSet();
             if (timestampSet != null) {
                 timestampSet.clear();
             }
+
+            attributes = new Object[0];
         } finally {
             writeUnlock();
         }
@@ -304,6 +347,12 @@ public abstract class ElementImpl implements Element {
             return graphStore.timestampStore;
         }
         return null;
+    }
+
+    private void checkEnabledTimestampSet() {
+        if (!GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET) {
+            throw new RuntimeException("Can't call timestamp methods if they are disabled");
+        }
     }
 
     private void checkDouble(double timestamp) {

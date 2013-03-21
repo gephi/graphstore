@@ -26,6 +26,7 @@ public final class GraphStoreConfiguration {
     public static final boolean ENABLE_AUTO_TYPE_REGISTRATION = true;
     public static final boolean ENABLE_INDEX_NODES = true;
     public static final boolean ENABLE_INDEX_EDGES = true;
+    public static final boolean ENABLE_INDEX_TIMESTAMP = true;
     public static final boolean ENABLE_OBSERVERS = true;
     public static final boolean ENABLE_NODE_PROPERTIES = true;
     public static final boolean ENABLE_EDGE_PROPERTIES = true;
@@ -43,4 +44,10 @@ public final class GraphStoreConfiguration {
     //GraphView
     public static final int VIEW_DEFAULT_TYPE_COUNT = 1;
     public static final double VIEW_GROWING_FACTOR = 1.1;
+    //Properties
+    public static final boolean ENABLE_ELEMENT_LABEL = true;
+    public static final boolean ENABLE_ELEMENT_TIMESTAMP_SET = true;
+    //Properties index
+    public static final int ELEMENT_TIMESTAMP_INDEX = 0;
+    public static final int ELEMENT_LABEL_INDEX = ENABLE_ELEMENT_TIMESTAMP_SET ? 1 : 0;
 }

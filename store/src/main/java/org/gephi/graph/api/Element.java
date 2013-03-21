@@ -26,6 +26,8 @@ public interface Element {
 
     public Object getId();
 
+    public String getLabel();
+
     public Object getAttribute(String key);
 
     public Object getAttribute(Column column);
@@ -37,6 +39,8 @@ public interface Element {
     public Object removeAttribute(String key);
 
     public Object removeAttribute(Column column);
+
+    public void setLabel(String label);
 
     public void setAttribute(String key, Object value);
 

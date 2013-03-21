@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.TimestampSet;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -76,6 +78,16 @@ public class GraphStore implements DirectedGraph {
         mainGraphView = new MainGraphView();
 
         undirectedDecorator = new UndirectedDecorator(this);
+
+        //Default cols
+        if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET) {
+            nodeColumnStore.addColumn(new ColumnImpl("timestamp", TimestampSet.class, null, null, Origin.PROPERTY, false));
+            edgeColumnStore.addColumn(new ColumnImpl("timestamp", TimestampSet.class, null, null, Origin.PROPERTY, false));
+        }
+        if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
+            nodeColumnStore.addColumn(new ColumnImpl("label", String.class, null, null, Origin.PROPERTY, false));
+            edgeColumnStore.addColumn(new ColumnImpl("label", String.class, null, null, Origin.PROPERTY, false));
+        }
     }
 
     @Override
@@ -457,7 +469,9 @@ public class GraphStore implements DirectedGraph {
             nodeStore.clear();
             edgeColumnStore.indexStore.clear();
             nodeColumnStore.indexStore.clear();
-            timestampStore.clear();
+            if (timestampStore != null) {
+                timestampStore.clear();
+            }
         } finally {
             autoWriteUnlock();
         }
@@ -469,7 +483,9 @@ public class GraphStore implements DirectedGraph {
         try {
             edgeStore.clear();
             edgeColumnStore.indexStore.clear();
-            timestampStore.clearEdges();
+            if (timestampStore != null) {
+                timestampStore.clearEdges();
+            }
         } finally {
             autoWriteUnlock();
         }

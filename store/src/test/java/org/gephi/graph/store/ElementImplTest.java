@@ -18,6 +18,8 @@ package org.gephi.graph.store;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
+import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -46,8 +48,8 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 1);
 
-        Assert.assertEquals(node.attributes.length, 1);
-        Assert.assertEquals(node.attributes[0], 1);
+        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], 1);
         Assert.assertEquals(node.getAttribute(column), 1);
     }
 
@@ -59,8 +61,8 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute("age", 1);
 
-        Assert.assertEquals(node.attributes.length, 1);
-        Assert.assertEquals(node.attributes[0], 1);
+        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], 1);
         Assert.assertEquals(node.getAttribute(column), 1);
     }
 
@@ -99,8 +101,8 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, null);
 
-        Assert.assertEquals(node.attributes.length, 1);
-        Assert.assertNull(node.attributes[0]);
+        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
+        Assert.assertNull(node.attributes[getFirstNonPropertyIndex()]);
         Assert.assertNull(node.getAttribute(column));
     }
 
@@ -174,7 +176,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         NodeImpl node = new NodeImpl(0, store);
         Set<String> pk = node.getAttributeKeys();
-        Assert.assertTrue(pk.isEmpty());
+        Assert.assertTrue(pk.size() == getElementPropertiesLength());
     }
 
     @Test
@@ -185,12 +187,21 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl(0, store);
         Set<String> pk = node.getAttributeKeys();
         Assert.assertTrue(pk.contains(column.getId()));
-        Assert.assertEquals(pk.size(), 1);
+        Assert.assertEquals(pk.size(), 1 + getElementPropertiesLength());
     }
 
     //Utility
     private Column generateBasicColumn(GraphStore graphStore) {
         graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true));
         return graphStore.nodeColumnStore.getColumn("age");
+    }
+
+    //Properties size
+    public int getElementPropertiesLength() {
+        return (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIMESTAMP_SET ? 1 : 0);
+    }
+
+    public int getFirstNonPropertyIndex() {
+        return getElementPropertiesLength();
     }
 }

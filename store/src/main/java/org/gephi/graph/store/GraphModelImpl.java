@@ -169,32 +169,56 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Index getNodeIndex() {
-        return store.nodeColumnStore.indexStore.getIndex(store);
+        IndexStore<Node> indexStore = store.nodeColumnStore.indexStore;
+        if (indexStore != null) {
+            return indexStore.getIndex(store);
+        }
+        return null;
     }
 
     @Override
     public Index getNodeIndex(GraphView view) {
-        return store.nodeColumnStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
+        IndexStore<Node> indexStore = store.nodeColumnStore.indexStore;
+        if (indexStore != null) {
+            return indexStore.getIndex(((GraphViewImpl) view).directedDecorator);
+        }
+        return null;
     }
 
     @Override
     public Index getEdgeIndex() {
-        return store.edgeColumnStore.indexStore.getIndex(store);
+        IndexStore<Edge> indexStore = store.edgeColumnStore.indexStore;
+        if (indexStore != null) {
+            return indexStore.getIndex(store);
+        }
+        return null;
     }
 
     @Override
     public Index getEdgeIndex(GraphView view) {
-        return store.edgeColumnStore.indexStore.getIndex(((GraphViewImpl) view).graphStore);
+        IndexStore<Edge> indexStore = store.edgeColumnStore.indexStore;
+        if (indexStore != null) {
+            return indexStore.getIndex(((GraphViewImpl) view).directedDecorator);
+        }
+        return null;
     }
 
     @Override
     public TimestampIndex getTimestampIndex() {
-        return store.timestampStore.getIndex(store);
+        TimestampStore timestampStore = store.timestampStore;
+        if (timestampStore != null) {
+            return timestampStore.getIndex(store);
+        }
+        return null;
     }
 
     @Override
     public TimestampIndex getTimestampIndex(GraphView view) {
-        return store.timestampStore.getIndex(((GraphViewImpl) view).graphStore);
+        TimestampStore timestampStore = store.timestampStore;
+        if (timestampStore != null) {
+            return timestampStore.getIndex(((GraphViewImpl) view).directedDecorator);
+        }
+        return null;
     }
 
     @Override

@@ -343,6 +343,16 @@ public class GraphStoreTest {
             public TextProperties getTextProperties() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            @Override
+            public String getLabel() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setLabel(String label) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         });
     }
 

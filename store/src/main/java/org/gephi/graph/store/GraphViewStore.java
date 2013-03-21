@@ -19,8 +19,10 @@ import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.Arrays;
 import org.gephi.graph.api.DirectedSubgraph;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
@@ -90,9 +92,20 @@ public class GraphViewStore {
         try {
             checkNonNullViewObject(view);
 
-            graphStore.timestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
-            graphStore.edgeColumnStore.indexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
-            graphStore.nodeColumnStore.indexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            TimestampStore timestampStore = graphStore.timestampStore;
+            if (timestampStore != null) {
+                timestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            }
+
+            IndexStore<Node> nodeIndexStore = graphStore.nodeColumnStore.indexStore;
+            if (nodeIndexStore != null) {
+                nodeIndexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            }
+
+            IndexStore<Edge> edgeIndexStore = graphStore.edgeColumnStore.indexStore;
+            if (edgeIndexStore != null) {
+                edgeIndexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            }
 
             removeView((GraphViewImpl) view);
         } finally {
