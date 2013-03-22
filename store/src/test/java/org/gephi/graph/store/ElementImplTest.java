@@ -190,6 +190,23 @@ public class ElementImplTest {
         Assert.assertEquals(pk.size(), 1 + getElementPropertiesLength());
     }
 
+    @Test
+    public void testLabel() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl(0, store);
+
+        Assert.assertNull(node.getLabel());
+
+        String lbl = "test";
+        node.setLabel(lbl);
+
+        Assert.assertSame(node.getLabel(), lbl);
+        node.setLabel(null);
+
+        Assert.assertNull(node.getLabel());
+    }
+
     //Utility
     private Column generateBasicColumn(GraphStore graphStore) {
         graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true));

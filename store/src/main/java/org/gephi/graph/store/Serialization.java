@@ -138,9 +138,13 @@ public class Serialization {
     final static int GRAPH_VIEW_STORE = 210;
     final static int GRAPH_VIEW = 211;
     final static int BIT_VECTOR = 212;
+    final static int GRAPH_STORE_CONFIGURATION = 213;
+    final static int GRAPH_VERSION = 214;
     //Store
     protected final GraphStore store;
     protected final Int2IntMap idMap;
+    //Deserialized configuration
+    protected GraphStoreConfigurationVersion graphStoreConfigurationVersion;
 
     public Serialization(GraphStore graphStore) {
         store = graphStore;
@@ -149,6 +153,12 @@ public class Serialization {
     }
 
     public void serializeGraphStore(DataOutput out) throws IOException {
+        //Configuration
+        serializeGraphStoreConfiguration(out);
+
+        //GraphVersion
+        serialize(out, store.version);
+
         //Edge types
         EdgeTypeStore edgeTypeStore = store.edgeTypeStore;
         serialize(out, edgeTypeStore);
@@ -173,12 +183,21 @@ public class Serialization {
         for (Edge edge : store.edgeStore) {
             serialize(out, edge);
         }
+
+        //Views
+        serialize(out, store.viewStore);
     }
 
     public GraphStore deserializeGraphStore(DataInput is) throws IOException, ClassNotFoundException {
         if (!store.nodeStore.isEmpty()) {   //TODO test other stores
             throw new IOException("The store is not empty");
         }
+
+        //Store Configuration
+        deserialize(is);
+
+        //Graph Version
+        deserialize(is);
 
         //Edge types
         deserialize(is);
@@ -198,6 +217,9 @@ public class Serialization {
         for (int i = 0; i < nodesAndEdges; i++) {
             deserialize(is);
         }
+
+        //ViewStore
+        deserialize(is);
 
         return store;
     }
@@ -221,10 +243,10 @@ public class Serialization {
     private NodeImpl deserializeNode(DataInput is) throws IOException, ClassNotFoundException {
         Object id = deserialize(is);
         int storeId = (Integer) deserialize(is);
-        Object[] properties = (Object[]) deserialize(is);
+        Object[] attributes = (Object[]) deserialize(is);
 
         NodeImpl node = (NodeImpl) store.factory.newNode(id);
-        node.attributes = properties;
+        node.attributes = attributes;
         store.nodeStore.add(node);
 
         idMap.put(storeId, node.storeId);
@@ -494,6 +516,41 @@ public class Serialization {
         return new BitVector(elements, size);
     }
 
+    private void serializeGraphStoreConfiguration(final DataOutput out) throws IOException {
+        out.write(GRAPH_STORE_CONFIGURATION);
+        serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_LABEL);
+        serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET);
+        serialize(out, GraphStoreConfiguration.ENABLE_NODE_PROPERTIES);
+        serialize(out, GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES);
+    }
+
+    private GraphStoreConfigurationVersion deserializeGraphStoreConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
+        boolean enableElementLabel = (Boolean) deserialize(is);
+        boolean enableElementTimestamp = (Boolean) deserialize(is);
+        boolean enableNodeProperties = (Boolean) deserialize(is);
+        boolean enableEdgeProperties = (Boolean) deserialize(is);
+
+        graphStoreConfigurationVersion = new GraphStoreConfigurationVersion(enableElementLabel, enableElementTimestamp, enableNodeProperties, enableEdgeProperties);
+        return graphStoreConfigurationVersion;
+    }
+
+    private void serializeGraphVersion(final DataOutput out, final GraphVersion graphVersion) throws IOException {
+        serialize(out, graphVersion.nodeVersion);
+        serialize(out, graphVersion.edgeVersion);
+    }
+
+    private GraphVersion deserializeGraphVersion(final DataInput is) throws IOException, ClassNotFoundException {
+        GraphVersion graphVersion = store.version;
+
+        int nodeVersion = (Integer) deserialize(is);
+        int edgeVersion = (Integer) deserialize(is);
+
+        graphVersion.nodeVersion = nodeVersion;
+        graphVersion.edgeVersion = edgeVersion;
+
+        return graphVersion;
+    }
+
     //SERIALIZE PRIMITIVES
     protected byte[] serialize(Object obj) throws IOException {
         DataInputOutput ba = new DataInputOutput();
@@ -718,6 +775,10 @@ public class Serialization {
             BitVector bv = (BitVector) obj;
             out.write(BIT_VECTOR);
             serializeBitVector(out, bv);
+        } else if (obj instanceof GraphVersion) {
+            GraphVersion b = (GraphVersion) obj;
+            out.write(GRAPH_VERSION);
+            serializeGraphVersion(out, b);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1200,6 +1261,12 @@ public class Serialization {
             case BIT_VECTOR:
                 ret = deserializeBitVector(is);
                 break;
+            case GRAPH_STORE_CONFIGURATION:
+                ret = deserializeGraphStoreConfiguration(is);
+                break;
+            case GRAPH_VERSION:
+                ret = deserializeGraphVersion(is);
+                break;
             case -1:
                 throw new EOFException();
 
@@ -1355,5 +1422,20 @@ public class Serialization {
         int[] r = (int[]) deserialize(is);
 
         return new TimestampSet(r);
+    }
+
+    protected static class GraphStoreConfigurationVersion {
+
+        protected final boolean enableElementLabel;
+        protected final boolean enableElementTimestamp;
+        protected final boolean enableNodeProperties;
+        protected final boolean enableEdgeProperties;
+
+        public GraphStoreConfigurationVersion(boolean enableElementLabel, boolean enableElementTimestamp, boolean enableNodeProperties, boolean enableEdgeProperties) {
+            this.enableElementLabel = enableElementLabel;
+            this.enableElementTimestamp = enableElementTimestamp;
+            this.enableNodeProperties = enableNodeProperties;
+            this.enableEdgeProperties = enableEdgeProperties;
+        }
     }
 }

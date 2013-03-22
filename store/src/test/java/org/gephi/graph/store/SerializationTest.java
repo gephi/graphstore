@@ -286,6 +286,19 @@ public class SerializationTest {
     }
 
     @Test
+    public void testGraphVersion() throws IOException, ClassNotFoundException {
+        GraphStore store = new GraphStore();
+        GraphVersion version = store.version;
+        version.nodeVersion = 1;
+        version.edgeVersion = 2;
+
+        Serialization ser = new Serialization(store);
+        byte[] buf = ser.serialize(version);
+        GraphVersion l = (GraphVersion) ser.deserialize(buf);
+        Assert.assertEquals(version, l);
+    }
+
+    @Test
     public void testInt() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);
         int[] vals = {

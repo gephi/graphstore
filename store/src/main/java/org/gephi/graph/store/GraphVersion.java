@@ -88,4 +88,30 @@ public class GraphVersion {
             }
         }
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 17 * hash + this.nodeVersion;
+        hash = 17 * hash + this.edgeVersion;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final GraphVersion other = (GraphVersion) obj;
+        if (this.nodeVersion != other.nodeVersion) {
+            return false;
+        }
+        if (this.edgeVersion != other.edgeVersion) {
+            return false;
+        }
+        return true;
+    }
 }
