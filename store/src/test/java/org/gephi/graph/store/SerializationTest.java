@@ -299,6 +299,55 @@ public class SerializationTest {
     }
 
     @Test
+    public void testTextProperties() throws IOException, ClassNotFoundException {
+        TextPropertiesImpl textProperties = new TextPropertiesImpl();
+        textProperties.rgba = 100;
+        textProperties.size = 3f;
+        textProperties.text = "foo";
+        textProperties.visible = true;
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(textProperties);
+        TextPropertiesImpl l = (TextPropertiesImpl) ser.deserialize(buf);
+        Assert.assertEquals(textProperties, l);
+    }
+
+    @Test
+    public void testNodeProperties() throws IOException, ClassNotFoundException {
+        NodeImpl.NodePropertiesImpl nodeProperties = new NodeImpl.NodePropertiesImpl();
+        nodeProperties.x = 1f;
+        nodeProperties.y = 2f;
+        nodeProperties.z = 3f;
+        nodeProperties.rgba = 100;
+        nodeProperties.size = 4f;
+        nodeProperties.fixed = true;
+        nodeProperties.textProperties.rgba = 200;
+        nodeProperties.textProperties.size = 5f;
+        nodeProperties.textProperties.text = "foo";
+        nodeProperties.textProperties.visible = true;
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(nodeProperties);
+        NodeImpl.NodePropertiesImpl l = (NodeImpl.NodePropertiesImpl) ser.deserialize(buf);
+        Assert.assertEquals(nodeProperties, l);
+    }
+
+    @Test
+    public void testEdgeProperties() throws IOException, ClassNotFoundException {
+        EdgeImpl.EdgePropertiesImpl edgeProperties = new EdgeImpl.EdgePropertiesImpl();
+        edgeProperties.rgba = 100;
+        edgeProperties.textProperties.rgba = 200;
+        edgeProperties.textProperties.size = 5f;
+        edgeProperties.textProperties.text = "foo";
+        edgeProperties.textProperties.visible = true;
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(edgeProperties);
+        EdgeImpl.EdgePropertiesImpl l = (EdgeImpl.EdgePropertiesImpl) ser.deserialize(buf);
+        Assert.assertEquals(edgeProperties, l);
+    }
+
+    @Test
     public void testInt() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);
         int[] vals = {

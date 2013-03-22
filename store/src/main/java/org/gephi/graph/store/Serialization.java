@@ -31,6 +31,8 @@ import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.TimestampSet;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.store.EdgeImpl.EdgePropertiesImpl;
+import org.gephi.graph.store.NodeImpl.NodePropertiesImpl;
 import org.gephi.graph.utils.DataInputOutput;
 import org.gephi.graph.utils.LongPacker;
 
@@ -140,6 +142,9 @@ public class Serialization {
     final static int BIT_VECTOR = 212;
     final static int GRAPH_STORE_CONFIGURATION = 213;
     final static int GRAPH_VERSION = 214;
+    final static int NODE_PROPERTIES = 215;
+    final static int EDGE_PROPERTIES = 216;
+    final static int TEXT_PROPERTIES = 217;
     //Store
     protected final GraphStore store;
     protected final Int2IntMap idMap;
@@ -228,6 +233,7 @@ public class Serialization {
         serialize(out, node.id);
         serialize(out, node.storeId);
         serialize(out, node.attributes);
+        serialize(out, node.properties);
     }
 
     private void serializeEdge(DataOutput out, EdgeImpl edge) throws IOException {
@@ -238,15 +244,20 @@ public class Serialization {
         serialize(out, edge.weight);
         serialize(out, edge.isDirected());
         serialize(out, edge.attributes);
+        serialize(out, edge.properties);
     }
 
     private NodeImpl deserializeNode(DataInput is) throws IOException, ClassNotFoundException {
         Object id = deserialize(is);
         int storeId = (Integer) deserialize(is);
         Object[] attributes = (Object[]) deserialize(is);
+        NodePropertiesImpl properties = (NodePropertiesImpl) deserialize(is);
 
         NodeImpl node = (NodeImpl) store.factory.newNode(id);
         node.attributes = attributes;
+        if (node.properties != null) {
+            node.setNodeProperties(properties);
+        }
         store.nodeStore.add(node);
 
         idMap.put(storeId, node.storeId);
@@ -261,7 +272,8 @@ public class Serialization {
         int type = (Integer) deserialize(is);
         double weight = (Double) deserialize(is);
         boolean directed = (Boolean) deserialize(is);
-        Object[] properties = (Object[]) deserialize(is);
+        Object[] attributes = (Object[]) deserialize(is);
+        EdgePropertiesImpl properties = (EdgePropertiesImpl) deserialize(is);
 
         int sourceNewId = idMap.get(sourceId);
         int targetNewId = idMap.get(targetId);
@@ -274,7 +286,10 @@ public class Serialization {
         NodeImpl target = store.nodeStore.get(targetNewId);
 
         EdgeImpl edge = (EdgeImpl) store.factory.newEdge(id, source, target, type, weight, directed);
-        edge.attributes = properties;
+        edge.attributes = attributes;
+        if (edge.properties != null) {
+            edge.setEdgeProperties(properties);
+        }
 
         store.edgeStore.add(edge);
 
@@ -551,6 +566,75 @@ public class Serialization {
         return graphVersion;
     }
 
+    private void serializeNodeProperties(final DataOutput out, final NodePropertiesImpl nodeProperties) throws IOException {
+        serialize(out, nodeProperties.x);
+        serialize(out, nodeProperties.y);
+        serialize(out, nodeProperties.z);
+        serialize(out, nodeProperties.rgba);
+        serialize(out, nodeProperties.size);
+        serialize(out, nodeProperties.fixed);
+        serialize(out, nodeProperties.textProperties);
+    }
+
+    private NodePropertiesImpl deserializeNodeProperties(final DataInput is) throws IOException, ClassNotFoundException {
+        float x = (Float) deserialize(is);
+        float y = (Float) deserialize(is);
+        float z = (Float) deserialize(is);
+        int rgba = (Integer) deserialize(is);
+        float size = (Float) deserialize(is);
+        boolean fixed = (Boolean) deserialize(is);
+        TextPropertiesImpl textProperties = (TextPropertiesImpl) deserialize(is);
+
+        NodePropertiesImpl props = new NodePropertiesImpl();
+        props.x = x;
+        props.y = y;
+        props.z = z;
+        props.rgba = rgba;
+        props.size = size;
+        props.fixed = fixed;
+        props.setTextProperties(textProperties);
+
+        return props;
+    }
+
+    private void serializeEdgeProperties(final DataOutput out, final EdgePropertiesImpl edgeProperties) throws IOException {
+        serialize(out, edgeProperties.rgba);
+        serialize(out, edgeProperties.textProperties);
+    }
+
+    private EdgePropertiesImpl deserializeEdgeProperties(final DataInput is) throws IOException, ClassNotFoundException {
+        int rgba = (Integer) deserialize(is);
+        TextPropertiesImpl textProperties = (TextPropertiesImpl) deserialize(is);
+
+        EdgePropertiesImpl props = new EdgePropertiesImpl();
+        props.rgba = rgba;
+        props.setTextProperties(textProperties);
+
+        return props;
+    }
+
+    private void serializeTextProperties(final DataOutput out, final TextPropertiesImpl textProperties) throws IOException {
+        serialize(out, textProperties.size);
+        serialize(out, textProperties.rgba);
+        serialize(out, textProperties.visible);
+        serialize(out, textProperties.text);
+    }
+
+    private TextPropertiesImpl deserializeTextProperties(final DataInput is) throws IOException, ClassNotFoundException {
+        float size = (Float) deserialize(is);
+        int rgba = (Integer) deserialize(is);
+        boolean visible = (Boolean) deserialize(is);
+        String text = (String) deserialize(is);
+
+        TextPropertiesImpl props = new TextPropertiesImpl();
+        props.size = size;
+        props.rgba = rgba;
+        props.visible = visible;
+        props.text = text;
+
+        return props;
+    }
+
     //SERIALIZE PRIMITIVES
     protected byte[] serialize(Object obj) throws IOException {
         DataInputOutput ba = new DataInputOutput();
@@ -779,6 +863,18 @@ public class Serialization {
             GraphVersion b = (GraphVersion) obj;
             out.write(GRAPH_VERSION);
             serializeGraphVersion(out, b);
+        } else if (obj instanceof NodePropertiesImpl) {
+            NodePropertiesImpl b = (NodePropertiesImpl) obj;
+            out.write(NODE_PROPERTIES);
+            serializeNodeProperties(out, b);
+        } else if (obj instanceof EdgePropertiesImpl) {
+            EdgePropertiesImpl b = (EdgePropertiesImpl) obj;
+            out.write(EDGE_PROPERTIES);
+            serializeEdgeProperties(out, b);
+        } else if (obj instanceof TextPropertiesImpl) {
+            TextPropertiesImpl b = (TextPropertiesImpl) obj;
+            out.write(TEXT_PROPERTIES);
+            serializeTextProperties(out, b);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1266,6 +1362,15 @@ public class Serialization {
                 break;
             case GRAPH_VERSION:
                 ret = deserializeGraphVersion(is);
+                break;
+            case NODE_PROPERTIES:
+                ret = deserializeNodeProperties(is);
+                break;
+            case EDGE_PROPERTIES:
+                ret = deserializeEdgeProperties(is);
+                break;
+            case TEXT_PROPERTIES:
+                ret = deserializeTextProperties(is);
                 break;
             case -1:
                 throw new EOFException();

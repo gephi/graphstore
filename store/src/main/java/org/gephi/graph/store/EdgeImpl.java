@@ -191,6 +191,13 @@ public class EdgeImpl extends ElementImpl implements Edge {
         return properties.getTextProperties();
     }
 
+    protected void setEdgeProperties(EdgePropertiesImpl edgeProperties) {
+        properties.rgba = edgeProperties.rgba;
+        if (properties.textProperties != null) {
+            properties.setTextProperties(edgeProperties.textProperties);
+        }
+    }
+
     @Override
     public int getRGBA() {
         return properties.rgba;
@@ -250,11 +257,11 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     protected static class EdgePropertiesImpl implements EdgeProperties {
 
+        protected final TextPropertiesImpl textProperties;
         protected int rgba;
-        protected float size;
-        protected TextPropertiesImpl textProperties;
 
         public EdgePropertiesImpl() {
+            textProperties = new TextPropertiesImpl();
         }
 
         @Override
@@ -285,6 +292,13 @@ public class EdgeImpl extends ElementImpl implements Edge {
         @Override
         public TextProperties getTextProperties() {
             return textProperties;
+        }
+
+        protected void setTextProperties(TextPropertiesImpl textProperties) {
+            this.textProperties.rgba = textProperties.rgba;
+            this.textProperties.size = textProperties.size;
+            this.textProperties.text = textProperties.text;
+            this.textProperties.visible = textProperties.visible;
         }
 
         @Override
@@ -321,7 +335,6 @@ public class EdgeImpl extends ElementImpl implements Edge {
         public int hashCode() {
             int hash = 3;
             hash = 29 * hash + this.rgba;
-            hash = 29 * hash + Float.floatToIntBits(this.size);
             hash = 29 * hash + (this.textProperties != null ? this.textProperties.hashCode() : 0);
             return hash;
         }
@@ -336,9 +349,6 @@ public class EdgeImpl extends ElementImpl implements Edge {
             }
             final EdgePropertiesImpl other = (EdgePropertiesImpl) obj;
             if (this.rgba != other.rgba) {
-                return false;
-            }
-            if (Float.floatToIntBits(this.size) != Float.floatToIntBits(other.size)) {
                 return false;
             }
             if (this.textProperties != other.textProperties && (this.textProperties == null || !this.textProperties.equals(other.textProperties))) {

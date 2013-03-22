@@ -116,4 +116,38 @@ public class TextPropertiesImpl implements TextProperties {
     public void setText(String text) {
         this.text = text;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + (this.visible ? 1 : 0);
+        hash = 97 * hash + this.rgba;
+        hash = 97 * hash + Float.floatToIntBits(this.size);
+        hash = 97 * hash + (this.text != null ? this.text.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TextPropertiesImpl other = (TextPropertiesImpl) obj;
+        if (this.visible != other.visible) {
+            return false;
+        }
+        if (this.rgba != other.rgba) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.size) != Float.floatToIntBits(other.size)) {
+            return false;
+        }
+        if ((this.text == null) ? (other.text != null) : !this.text.equals(other.text)) {
+            return false;
+        }
+        return true;
+    }
 }

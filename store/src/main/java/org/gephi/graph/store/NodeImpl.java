@@ -153,6 +153,18 @@ public class NodeImpl extends ElementImpl implements Node {
         return properties.getTextProperties();
     }
 
+    protected void setNodeProperties(NodePropertiesImpl nodeProperties) {
+        properties.x = nodeProperties.x;
+        properties.y = nodeProperties.y;
+        properties.z = nodeProperties.z;
+        properties.rgba = nodeProperties.rgba;
+        properties.size = nodeProperties.size;
+        properties.fixed = nodeProperties.fixed;
+        if (properties.textProperties != null) {
+            properties.setTextProperties(nodeProperties.textProperties);
+        }
+    }
+
     @Override
     public void setX(float x) {
         properties.setX(x);
@@ -242,6 +254,7 @@ public class NodeImpl extends ElementImpl implements Node {
 
     protected static class NodePropertiesImpl implements NodeProperties {
 
+        protected final TextPropertiesImpl textProperties;
         protected float x;
         protected float y;
         protected float z;
@@ -249,9 +262,9 @@ public class NodeImpl extends ElementImpl implements Node {
         protected float size;
         protected boolean fixed;
         protected LayoutData layoutData;
-        protected TextPropertiesImpl textProperties;
 
         public NodePropertiesImpl() {
+            this.textProperties = new TextPropertiesImpl();
         }
 
         @Override
@@ -322,6 +335,13 @@ public class NodeImpl extends ElementImpl implements Node {
         @Override
         public TextProperties getTextProperties() {
             return textProperties;
+        }
+
+        protected void setTextProperties(TextPropertiesImpl textProperties) {
+            this.textProperties.rgba = textProperties.rgba;
+            this.textProperties.size = textProperties.size;
+            this.textProperties.text = textProperties.text;
+            this.textProperties.visible = textProperties.visible;
         }
 
         @Override
