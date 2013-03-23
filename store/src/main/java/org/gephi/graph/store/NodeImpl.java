@@ -265,6 +265,7 @@ public class NodeImpl extends ElementImpl implements Node {
 
         public NodePropertiesImpl() {
             this.textProperties = new TextPropertiesImpl();
+            this.rgba = 255 << 24;  //Alpha set to 1
         }
 
         @Override

@@ -30,6 +30,7 @@ public class TextPropertiesImpl implements TextProperties {
     protected String text;
 
     public TextPropertiesImpl() {
+        this.rgba = 255 << 24;  //Alpha set to 1
     }
 
     @Override

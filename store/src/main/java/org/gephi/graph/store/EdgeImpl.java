@@ -262,6 +262,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
         public EdgePropertiesImpl() {
             textProperties = new TextPropertiesImpl();
+            this.rgba = 255 << 24;  //Alpha set to 1
         }
 
         @Override
