@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.api;
 
+import org.gephi.graph.spi.LayoutData;
 import java.awt.Color;
 
 /**

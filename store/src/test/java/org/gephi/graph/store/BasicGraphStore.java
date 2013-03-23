@@ -40,7 +40,7 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphView;
-import org.gephi.graph.api.LayoutData;
+import org.gephi.graph.spi.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.TextProperties;

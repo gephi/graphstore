@@ -16,7 +16,7 @@
 package org.gephi.graph.store;
 
 import java.awt.Color;
-import org.gephi.graph.api.LayoutData;
+import org.gephi.graph.spi.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeProperties;
 import org.gephi.graph.api.TextProperties;
