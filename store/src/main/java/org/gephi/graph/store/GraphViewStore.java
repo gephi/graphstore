@@ -41,6 +41,8 @@ public class GraphViewStore {
     protected final GraphStore graphStore;
     protected GraphViewImpl[] views;
     protected int length;
+    //Visible view
+    protected GraphView visibleView;
 
     public GraphViewStore(GraphStore graphStore) {
         if (graphStore == null) {
@@ -49,6 +51,7 @@ public class GraphViewStore {
         this.graphStore = graphStore;
         this.views = new GraphViewImpl[DEFAULT_VIEWS];
         this.garbageQueue = new IntRBTreeSet();
+        this.visibleView = graphStore.mainGraphView;
     }
 
     public GraphViewImpl createView() {
@@ -155,6 +158,20 @@ public class GraphViewStore {
         return ((GraphViewImpl) view).getUndirectedGraph();
     }
 
+    public GraphView getVisibleView() {
+        return visibleView;
+    }
+
+    public void setVisibleView(GraphView view) {
+        if (view != null && view == graphStore.mainGraphView) {
+            visibleView = view;
+        } else {
+            checkNonNullViewObject(view);
+            checkViewExist((GraphViewImpl) view);
+            visibleView = view;
+        }
+    }
+
     public GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
         GraphViewImpl graphViewImpl = (GraphViewImpl) graph.getView();
         checkViewExist(graphViewImpl);
@@ -226,6 +243,11 @@ public class GraphViewStore {
         view.storeId = NULL_VIEW;
 
         view.destroyAllObservers();
+
+        //Check if not visible view
+        if (visibleView == view) {
+            visibleView = graphStore.mainGraphView;
+        }
     }
 
     private void ensureArraySize(int index) {

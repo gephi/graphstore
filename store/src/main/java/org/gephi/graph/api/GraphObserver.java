@@ -28,4 +28,6 @@ public interface GraphObserver {
     public Graph getGraph();
 
     public void destroy();
+
+    public boolean isDestroyed();
 }

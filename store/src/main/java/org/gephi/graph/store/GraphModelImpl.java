@@ -83,6 +83,21 @@ public class GraphModelImpl implements GraphModel {
     }
 
     @Override
+    public GraphView getVisibleView() {
+        return store.viewStore.getVisibleView();
+    }
+
+    @Override
+    public void setVisibleView(GraphView view) {
+        store.autoWriteLock();
+        try {
+            store.viewStore.setVisibleView(view);
+        } finally {
+            store.autoWriteUnlock();
+        }
+    }
+
+    @Override
     public int addEdgeType(Object label) {
         store.autoWriteLock();
         try {

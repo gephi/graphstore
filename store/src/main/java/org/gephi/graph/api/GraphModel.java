@@ -39,6 +39,10 @@ public interface GraphModel {
 
     public UndirectedSubgraph getUndirectedGraph(GraphView view);
 
+    public GraphView getVisibleView();
+
+    public void setVisibleView(GraphView view);
+
     public int addEdgeType(Object label);
 
     public int getEdgeType(Object label);

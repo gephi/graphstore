@@ -225,6 +225,11 @@ public class GraphObserverImpl implements GraphObserver {
         graphStore.graphModel.destroyGraphObserver(this);
     }
 
+    @Override
+    public boolean isDestroyed() {
+        return destroyed;
+    }
+
     public synchronized void destroyObserver() {
         checkNotDestroyed();
 
