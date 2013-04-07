@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.store;
 
+import java.util.Iterator;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.api.Table;
@@ -68,6 +69,11 @@ public class TableImpl<T extends Element> implements Table {
     @Override
     public int countColumns() {
         return store.size();
+    }
+
+    @Override
+    public Iterator<Column> iterator() {
+        return store.iterator();
     }
 
     @Override

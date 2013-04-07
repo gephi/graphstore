@@ -30,7 +30,7 @@ import org.gephi.graph.api.Element;
  *
  * @author mbastian
  */
-public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
+public class ColumnStore<T extends Element> implements Iterable<Column> {
 
     //Config
     protected final static int MAX_SIZE = 65534;
@@ -189,7 +189,7 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
     }
 
     @Override
-    public Iterator<ColumnImpl> iterator() {
+    public Iterator<Column> iterator() {
         return new ColumnStoreIterator();
     }
 
@@ -268,7 +268,7 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
         }
     }
 
-    private final class ColumnStoreIterator implements Iterator<ColumnImpl> {
+    private final class ColumnStoreIterator implements Iterator<Column> {
 
         private int index;
         private ColumnImpl pointer;
@@ -284,7 +284,7 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
         }
 
         @Override
-        public ColumnImpl next() {
+        public Column next() {
             ColumnImpl c = pointer;
             pointer = null;
             return c;
@@ -300,7 +300,7 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
     public int hashCode() {
         int hash = 3;
         hash = 11 * hash + (this.elementType != null ? this.elementType.hashCode() : 0);
-        Iterator<ColumnImpl> itr = this.iterator();
+        Iterator<Column> itr = this.iterator();
         while (itr.hasNext()) {
             hash = 11 * hash + itr.next().hashCode();
         }
@@ -319,8 +319,8 @@ public class ColumnStore<T extends Element> implements Iterable<ColumnImpl> {
         if (this.elementType != other.elementType && (this.elementType == null || !this.elementType.equals(other.elementType))) {
             return false;
         }
-        Iterator<ColumnImpl> itr1 = this.iterator();
-        Iterator<ColumnImpl> itr2 = other.iterator();
+        Iterator<Column> itr1 = this.iterator();
+        Iterator<Column> itr2 = other.iterator();
         while (itr1.hasNext()) {
             if (!itr2.hasNext()) {
                 return false;

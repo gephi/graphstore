@@ -19,7 +19,7 @@ package org.gephi.attribute.api;
  *
  * @author mbastian
  */
-public interface Table {
+public interface Table extends Iterable<Column> {
 
     public Column addColumn(String id, Class type);
 
