@@ -19,8 +19,9 @@ package org.gephi.graph.api;
  *
  * @author mbastian
  */
-public interface Subgraph {
+public interface Subgraph extends Graph {
 
+    @Override
     public GraphView getView();
 
     public void fill();
