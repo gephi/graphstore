@@ -15,9 +15,35 @@
  */
 package org.gephi.graph.api;
 
+import java.awt.Color;
+
 /**
  *
  * @author mbastian
  */
-public interface EdgeProperties extends ElementProperties {
+public interface ElementProperties {
+
+    public float r();
+
+    public float g();
+
+    public float b();
+
+    public int getRGBA();
+
+    public Color getColor();
+
+    public float alpha();
+
+    public TextProperties getTextProperties();
+
+    public void setR(float r);
+
+    public void setG(float g);
+
+    public void setB(float b);
+
+    public void setAlpha(float a);
+
+    public void setColor(Color color);
 }

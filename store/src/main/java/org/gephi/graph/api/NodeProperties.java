@@ -16,13 +16,12 @@
 package org.gephi.graph.api;
 
 import org.gephi.graph.spi.LayoutData;
-import java.awt.Color;
 
 /**
  *
  * @author mbastian
  */
-public interface NodeProperties {
+public interface NodeProperties extends ElementProperties {
 
     public float x();
 
@@ -30,27 +29,11 @@ public interface NodeProperties {
 
     public float z();
 
-    public float r();
-
-    public float g();
-
-    public float b();
-
-    public int getRGBA();
-
-    public Color getColor();
-
-    public float alpha();
-
     public float size();
-
-    public float radius();
 
     public boolean isFixed();
 
     public <T extends LayoutData> T getLayoutData();
-
-    public TextProperties getTextProperties();
 
     public void setX(float x);
 
@@ -58,21 +41,11 @@ public interface NodeProperties {
 
     public void setZ(float z);
 
+    public void setSize(float size);
+
     public void setPosition(float x, float y);
 
     public void setPosition(float x, float y, float z);
-
-    public void setR(float r);
-
-    public void setG(float g);
-
-    public void setB(float b);
-
-    public void setAlpha(float a);
-
-    public void setColor(Color color);
-
-    public void setSize(float size);
 
     public void setFixed(boolean fixed);
 
