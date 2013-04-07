@@ -16,10 +16,10 @@
 package org.gephi.graph.store;
 
 import java.awt.Color;
-import org.gephi.graph.spi.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeProperties;
 import org.gephi.graph.api.TextProperties;
+import org.gephi.graph.spi.LayoutData;
 
 /**
  *
@@ -131,11 +131,6 @@ public class NodeImpl extends ElementImpl implements Node {
     @Override
     public float size() {
         return properties.size;
-    }
-
-    @Override
-    public float radius() {
-        return properties.radius();
     }
 
     @Override
@@ -316,11 +311,6 @@ public class NodeImpl extends ElementImpl implements Node {
         @Override
         public float size() {
             return size;
-        }
-
-        @Override
-        public float radius() {
-            return size / 2;
         }
 
         @Override

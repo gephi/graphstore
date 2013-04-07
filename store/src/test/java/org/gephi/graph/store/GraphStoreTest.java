@@ -26,10 +26,10 @@ import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.spi.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.TextProperties;
+import org.gephi.graph.spi.LayoutData;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -256,11 +256,6 @@ public class GraphStoreTest {
 
             @Override
             public float size() {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            @Override
-            public float radius() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 

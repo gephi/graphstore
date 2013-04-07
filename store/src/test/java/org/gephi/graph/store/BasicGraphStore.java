@@ -40,10 +40,10 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphView;
-import org.gephi.graph.spi.LayoutData;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.TextProperties;
+import org.gephi.graph.spi.LayoutData;
 
 /**
  *
@@ -532,11 +532,6 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public float size() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public float radius() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
