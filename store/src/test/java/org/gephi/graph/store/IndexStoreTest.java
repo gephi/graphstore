@@ -247,10 +247,10 @@ public class IndexStoreTest {
             NodeImpl n = new NodeImpl(i);
             nodes[i] = n;
 
-            for (ColumnImpl col : columnStore) {
-                if (col.typeClass.equals(String.class)) {
+            for (Column col : columnStore) {
+                if (col.getTypeClass().equals(String.class)) {
                     n.setAttribute(col, "" + i);
-                } else if (col.typeClass.equals(Integer.class)) {
+                } else if (col.getTypeClass().equals(Integer.class)) {
                     n.setAttribute(col, i);
                 }
             }
