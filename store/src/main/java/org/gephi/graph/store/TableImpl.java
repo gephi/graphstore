@@ -50,6 +50,8 @@ public class TableImpl<T extends Element> implements Table {
         checkSupportedTypes(type);
         checkDefaultValue(defaultValue, type);
 
+        type = standardizeType(type);
+
         if (title == null || title.isEmpty()) {
             title = id;
         }
@@ -101,6 +103,43 @@ public class TableImpl<T extends Element> implements Table {
         store.removeColumn(id);
     }
 
+    protected Class standardizeType(Class type) {
+        if (type.equals(int.class)) {
+            return Integer.class;
+        } else if (type.equals(float.class)) {
+            return Float.class;
+        } else if (type.equals(double.class)) {
+            return Double.class;
+        } else if (type.equals(boolean.class)) {
+            return Boolean.class;
+        } else if (type.equals(byte.class)) {
+            return Byte.class;
+        } else if (type.equals(short.class)) {
+            return Short.class;
+        } else if (type.equals(char.class)) {
+            return Character.class;
+        } else if (type.equals(long.class)) {
+            return Long.class;
+        } else if (type.equals(Integer[].class)) {
+            return int[].class;
+        } else if (type.equals(Float[].class)) {
+            return float[].class;
+        } else if (type.equals(Double[].class)) {
+            return double[].class;
+        } else if (type.equals(Boolean[].class)) {
+            return boolean[].class;
+        } else if (type.equals(Byte[].class)) {
+            return byte[].class;
+        } else if (type.equals(Short[].class)) {
+            return short[].class;
+        } else if (type.equals(Character[].class)) {
+            return char[].class;
+        } else if (type.equals(Long[].class)) {
+            return long[].class;
+        }
+        return type;
+    }
+
     private void checkValidId(String id) {
         if (id == null) {
             throw new NullPointerException();
@@ -115,21 +154,37 @@ public class TableImpl<T extends Element> implements Table {
 
     private void checkSupportedTypes(Class type) {
         if (!(type.equals(Byte.class)
+                || type.equals(byte.class)
                 || type.equals(Short.class)
+                || type.equals(short.class)
                 || type.equals(Integer.class)
+                || type.equals(int.class)
                 || type.equals(Long.class)
+                || type.equals(long.class)
                 || type.equals(Float.class)
+                || type.equals(float.class)
                 || type.equals(Double.class)
+                || type.equals(double.class)
                 || type.equals(Boolean.class)
+                || type.equals(boolean.class)
                 || type.equals(Character.class)
+                || type.equals(char.class)
                 || type.equals(String.class)
+                || type.equals(Byte[].class)
                 || type.equals(byte[].class)
+                || type.equals(Short[].class)
                 || type.equals(short[].class)
+                || type.equals(Integer[].class)
                 || type.equals(int[].class)
+                || type.equals(Long[].class)
                 || type.equals(long[].class)
+                || type.equals(Float[].class)
                 || type.equals(float[].class)
+                || type.equals(Double[].class)
                 || type.equals(double[].class)
+                || type.equals(Boolean[].class)
                 || type.equals(boolean[].class)
+                || type.equals(Character[].class)
                 || type.equals(char[].class)
                 || type.equals(String[].class))) {
             throw new IllegalArgumentException("Unknown type " + type.getName());
