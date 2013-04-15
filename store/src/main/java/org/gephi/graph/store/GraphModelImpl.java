@@ -59,6 +59,11 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
+    public Graph getGraphVisivle() {
+        return getGraph(store.viewStore.visibleView);
+    }
+
+    @Override
     public Subgraph getGraph(GraphView view) {
         return store.viewStore.getDirectedGraph(view);
     }
@@ -69,8 +74,18 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
+    public DirectedGraph getDirectedGraphVisible() {
+        return getDirectedGraph(store.viewStore.visibleView);
+    }
+
+    @Override
     public UndirectedGraph getUndirectedGraph() {
         return store.undirectedDecorator;
+    }
+
+    @Override
+    public UndirectedGraph getUndirectedGraphVisible() {
+        return getUndirectedGraph(store.viewStore.visibleView);
     }
 
     @Override

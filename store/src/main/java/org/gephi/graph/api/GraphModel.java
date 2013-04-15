@@ -29,11 +29,17 @@ public interface GraphModel {
 
     public Graph getGraph();
 
+    public Graph getGraphVisivle();
+
     public Subgraph getGraph(GraphView view);
 
     public DirectedGraph getDirectedGraph();
 
+    public DirectedGraph getDirectedGraphVisible();
+
     public UndirectedGraph getUndirectedGraph();
+
+    public UndirectedGraph getUndirectedGraphVisible();
 
     public DirectedSubgraph getDirectedGraph(GraphView view);
 

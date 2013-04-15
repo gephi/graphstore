@@ -21,13 +21,15 @@ import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedGraph;
+import org.gephi.graph.api.UndirectedSubgraph;
 
 /**
  *
  * @author mbastian
  */
-public class UndirectedDecorator implements UndirectedGraph {
+public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph {
 
     protected final GraphStore store;
 
@@ -254,5 +256,20 @@ public class UndirectedDecorator implements UndirectedGraph {
     @Override
     public void writeUnlock() {
         store.writeUnlock();
+    }
+
+    @Override
+    public void union(Subgraph subGraph) {
+        throw new UnsupportedOperationException("Not supported yet for the main view.");
+    }
+
+    @Override
+    public void intersection(Subgraph subGraph) {
+        throw new UnsupportedOperationException("Not supported yet for the main view.");
+    }
+
+    @Override
+    public void fill() {
+        throw new UnsupportedOperationException("Not supported yet for the main view.");
     }
 }

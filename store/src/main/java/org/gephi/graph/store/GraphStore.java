@@ -22,6 +22,7 @@ import java.util.List;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.TimestampSet;
 import org.gephi.graph.api.DirectedGraph;
+import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
@@ -29,12 +30,13 @@ import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.Subgraph;
 
 /**
  *
  * @author mbastian
  */
-public class GraphStore implements DirectedGraph {
+public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     protected final GraphModelImpl graphModel;
     //Stores
@@ -554,6 +556,21 @@ public class GraphStore implements DirectedGraph {
 
     public boolean isMixed() {
         return edgeStore.isMixedGraph();
+    }
+
+    @Override
+    public void union(Subgraph subGraph) {
+        throw new UnsupportedOperationException("Not supported for the main view.");
+    }
+
+    @Override
+    public void intersection(Subgraph subGraph) {
+        throw new UnsupportedOperationException("Not supported for the main view.");
+    }
+
+    @Override
+    public void fill() {
+        throw new UnsupportedOperationException("Not supported for the main view.");
     }
 
     protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {

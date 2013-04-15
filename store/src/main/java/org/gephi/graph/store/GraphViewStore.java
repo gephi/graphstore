@@ -139,8 +139,14 @@ public class GraphViewStore {
         checkNonNullViewObject(view);
 
         if (graphStore.isUndirected()) {
+            if (view.isMainView()) {
+                return graphStore.undirectedDecorator;
+            }
             return ((GraphViewImpl) view).getUndirectedGraph();
         } else {
+            if (view.isMainView()) {
+                return graphStore;
+            }
             return ((GraphViewImpl) view).getDirectedGraph();
         }
     }
@@ -149,12 +155,18 @@ public class GraphViewStore {
         checkNonNullViewObject(view);
         checkDirectedAllowed();
 
+        if (view.isMainView()) {
+            return graphStore;
+        }
         return ((GraphViewImpl) view).getDirectedGraph();
     }
 
     public UndirectedSubgraph getUndirectedGraph(GraphView view) {
         checkNonNullViewObject(view);
 
+        if (view.isMainView()) {
+            return graphStore.undirectedDecorator;
+        }
         return ((GraphViewImpl) view).getUndirectedGraph();
     }
 
@@ -288,8 +300,10 @@ public class GraphViewStore {
         if (o == null) {
             throw new NullPointerException();
         }
-        if (!(o instanceof GraphViewImpl)) {
-            throw new ClassCastException("View must be a GraphViewImpl object");
+        if (o != graphStore.mainGraphView) {
+            if (!(o instanceof GraphViewImpl)) {
+                throw new ClassCastException("View must be a GraphViewImpl object");
+            }
         }
     }
 
