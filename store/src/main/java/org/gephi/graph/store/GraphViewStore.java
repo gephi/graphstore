@@ -163,8 +163,8 @@ public class GraphViewStore {
     }
 
     public void setVisibleView(GraphView view) {
-        if (view != null && view == graphStore.mainGraphView) {
-            visibleView = view;
+        if (view == null || view == graphStore.mainGraphView) {
+            visibleView = graphStore.mainGraphView;
         } else {
             checkNonNullViewObject(view);
             checkViewExist((GraphViewImpl) view);

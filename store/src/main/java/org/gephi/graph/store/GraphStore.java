@@ -65,6 +65,7 @@ public class GraphStore implements DirectedGraph {
         graphModel = model;
         lock = new GraphLock();
         edgeTypeStore = new EdgeTypeStore();
+        mainGraphView = new MainGraphView();
         viewStore = new GraphViewStore(this);
         version = GraphStoreConfiguration.ENABLE_OBSERVERS ? new GraphVersion(this) : null;
         observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
@@ -74,8 +75,6 @@ public class GraphStore implements DirectedGraph {
         edgeColumnStore = new ColumnStore<Edge>(Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
         timestampStore = new TimestampStore(GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);
-
-        mainGraphView = new MainGraphView();
 
         undirectedDecorator = new UndirectedDecorator(this);
 

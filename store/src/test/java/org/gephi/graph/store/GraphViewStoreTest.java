@@ -999,6 +999,43 @@ public class GraphViewStoreTest {
         Assert.assertTrue(v2.isNodeView());
     }
 
+    @Test
+    public void testDefaultVisibleView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphView view = graphStore.viewStore.getVisibleView();
+
+        Assert.assertNotNull(view);
+        Assert.assertEquals(view, graphStore.mainGraphView);
+
+    }
+
+    @Test
+    public void testSetVisibleView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        GraphView view = store.createView();
+        store.setVisibleView(view);
+
+        GraphView visibleView = store.getVisibleView();
+        Assert.assertNotNull(view);
+        Assert.assertEquals(visibleView, view);
+    }
+
+    @Test
+    public void testSetMainVisibleView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        GraphView view = store.createView();
+        store.setVisibleView(view);
+        store.setVisibleView(null);
+
+        GraphView visibleView = store.getVisibleView();
+        Assert.assertNotNull(view);
+        Assert.assertEquals(visibleView, graphStore.mainGraphView);
+    }
+
     //UTILITY
     private boolean isIterablesEqual(ElementIterable n1, ElementIterable n2) {
         ObjectSet s1 = new ObjectOpenHashSet();
