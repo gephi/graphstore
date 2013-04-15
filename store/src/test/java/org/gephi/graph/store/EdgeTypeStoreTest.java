@@ -45,6 +45,19 @@ public class EdgeTypeStoreTest {
     }
 
     @Test
+    public void testAddNullType() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        int type = edgeTypeStore.addType(null);
+
+        Assert.assertEquals(type, 0);
+        Assert.assertTrue(edgeTypeStore.contains(null));
+
+        type = edgeTypeStore.addType(null);
+        Assert.assertEquals(type, 0);
+        Assert.assertTrue(edgeTypeStore.contains(null));
+    }
+
+    @Test
     public void testRemoveType() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
         int type = edgeTypeStore.addType("0");
@@ -57,6 +70,22 @@ public class EdgeTypeStoreTest {
         Assert.assertEquals(edgeTypeStore.size(), 0);
 
         type = edgeTypeStore.removeType("0");
+        Assert.assertEquals(type, EdgeTypeStore.NULL_TYPE);
+    }
+
+    @Test
+    public void testRemoveNullType() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        int type = edgeTypeStore.addType(null);
+
+        type = edgeTypeStore.removeType(null);
+
+        Assert.assertEquals(type, 0);
+        Assert.assertFalse(edgeTypeStore.contains(null));
+
+        Assert.assertEquals(edgeTypeStore.size(), 0);
+
+        type = edgeTypeStore.removeType(null);
         Assert.assertEquals(type, EdgeTypeStore.NULL_TYPE);
     }
 

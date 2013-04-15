@@ -53,8 +53,6 @@ public class EdgeTypeStore {
     }
 
     public int getId(final Object label) {
-        checkNonNullObject(label);
-
         short id = labelMap.getShort(label);
         if (id == NULL_SHORT) {
             return NULL_TYPE;
@@ -69,7 +67,6 @@ public class EdgeTypeStore {
     }
 
     public int addType(final Object label) {
-        checkNonNullObject(label);
         checkType(label);
 
         short id = labelMap.getShort(label);
@@ -91,8 +88,6 @@ public class EdgeTypeStore {
     }
 
     public int removeType(final Object label) {
-        checkNonNullObject(label);
-
         short id = labelMap.removeShort(label);
         if (id == NULL_SHORT) {
             return NULL_TYPE;
@@ -161,24 +156,20 @@ public class EdgeTypeStore {
         }
     }
 
-    void checkNonNullObject(final Object o) {
-        if (o == null) {
-            throw new NullPointerException();
-        }
-    }
-
     void checkType(final Object o) {
-        Class cl = o.getClass();
-        if (!(cl.equals(Integer.class)
-                || cl.equals(String.class)
-                || cl.equals(Float.class)
-                || cl.equals(Double.class)
-                || cl.equals(Short.class)
-                || cl.equals(Byte.class)
-                || cl.equals(Long.class)
-                || cl.equals(Character.class)
-                || cl.equals(Boolean.class))) {
-            throw new IllegalArgumentException("The type id must be a primitive type (int, string, long...)");
+        if (o != null) {
+            Class cl = o.getClass();
+            if (!(cl.equals(Integer.class)
+                    || cl.equals(String.class)
+                    || cl.equals(Float.class)
+                    || cl.equals(Double.class)
+                    || cl.equals(Short.class)
+                    || cl.equals(Byte.class)
+                    || cl.equals(Long.class)
+                    || cl.equals(Character.class)
+                    || cl.equals(Boolean.class))) {
+                throw new IllegalArgumentException("The type id must be a primitive type (int, string, long...)");
+            }
         }
     }
 
