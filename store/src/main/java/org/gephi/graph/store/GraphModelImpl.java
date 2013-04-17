@@ -59,7 +59,7 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
-    public Graph getGraphVisivle() {
+    public Graph getGraphVisible() {
         return getGraph(store.viewStore.visibleView);
     }
 

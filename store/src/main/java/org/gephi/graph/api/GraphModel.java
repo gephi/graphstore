@@ -29,7 +29,7 @@ public interface GraphModel {
 
     public Graph getGraph();
 
-    public Graph getGraphVisivle();
+    public Graph getGraphVisible();
 
     public Subgraph getGraph(GraphView view);
 
