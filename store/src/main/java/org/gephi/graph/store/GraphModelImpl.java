@@ -65,6 +65,9 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
 
     @Override
     public Subgraph getGraph(GraphView view) {
+        if (store.isUndirected()) {
+            return store.viewStore.getUndirectedGraph(view);
+        }
         return store.viewStore.getDirectedGraph(view);
     }
 
