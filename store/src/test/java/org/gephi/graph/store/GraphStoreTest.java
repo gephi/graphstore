@@ -348,6 +348,11 @@ public class GraphStoreTest {
             public void setLabel(String label) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            @Override
+            public int getStoreId() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         });
     }
 

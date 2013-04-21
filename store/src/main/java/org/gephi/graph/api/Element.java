@@ -36,6 +36,8 @@ public interface Element {
 
     public Set<String> getAttributeKeys();
 
+    public int getStoreId();
+
     public Object removeAttribute(String key);
 
     public Object removeAttribute(Column column);

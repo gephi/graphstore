@@ -443,6 +443,11 @@ public class BasicGraphStore implements DirectedGraph {
         public void setLabel(String label) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public int getStoreId() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     public static class BasicNode extends BasicElement implements Node {
