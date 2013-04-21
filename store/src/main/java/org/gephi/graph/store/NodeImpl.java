@@ -46,6 +46,7 @@ public class NodeImpl extends ElementImpl implements Node {
         this(id, null);
     }
 
+    @Override
     public int getStoreId() {
         return storeId;
     }
@@ -365,22 +366,22 @@ public class NodeImpl extends ElementImpl implements Node {
 
         @Override
         public void setR(float r) {
-            rgba |= ((int) (r * 255f)) << 16;
+            rgba = (rgba & 0xFF00FFFF) | (((int) (r * 255f)) << 16);
         }
 
         @Override
         public void setG(float g) {
-            this.rgba |= ((int) (g * 255f)) << 8;
+            rgba = (rgba & 0xFFFF00FF) | ((int) (g * 255f)) << 8;
         }
 
         @Override
         public void setB(float b) {
-            this.rgba |= ((int) (b * 255f));
+            rgba = (rgba & 0xFFFFFF00) | ((int) (b * 255f));
         }
 
         @Override
         public void setAlpha(float a) {
-            this.rgba |= ((int) (a * 255f)) << 24;
+            rgba = (rgba & 0xFFFFFF) | ((int) (a * 255f)) << 24;
         }
 
         @Override

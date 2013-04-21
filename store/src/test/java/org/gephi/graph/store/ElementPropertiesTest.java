@@ -46,8 +46,15 @@ public class ElementPropertiesTest {
         properties.setR(color.getRed() / 255f);
         properties.setG(color.getGreen() / 255f);
         properties.setB(color.getBlue() / 255f);
-        
-        Assert.assertEquals(color, properties.getColor());
+
+        Assert.assertEquals(properties.getColor(), color);
+
+        color = new Color(0, 2, 3);
+        properties.setR(color.getRed() / 255f);
+        properties.setG(color.getGreen() / 255f);
+        properties.setB(color.getBlue() / 255f);
+
+        Assert.assertEquals(properties.getColor(), color);
 
         Color newColor = new Color(properties.getRGBA(), true);
         Assert.assertEquals(newColor, color);

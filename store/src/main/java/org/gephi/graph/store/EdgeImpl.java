@@ -117,6 +117,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
         return previousInEdge;
     }
 
+    @Override
     public int getStoreId() {
         return storeId;
     }
@@ -309,27 +310,27 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
         @Override
         public void setR(float r) {
-            rgba |= ((int) (r * 255f)) << 16;
+            rgba = (rgba & 0xFF00FFFF) | (((int) (r * 255f)) << 16);
         }
 
         @Override
         public void setG(float g) {
-            this.rgba |= ((int) (g * 255f)) << 8;
+            rgba = (rgba & 0xFFFF00FF) | ((int) (g * 255f)) << 8;
         }
 
         @Override
         public void setB(float b) {
-            this.rgba |= ((int) (b * 255f));
+            rgba = (rgba & 0xFFFFFF00) | ((int) (b * 255f));
         }
 
         @Override
         public void setAlpha(float a) {
-            this.rgba |= ((int) (a * 255f)) << 24;
+            rgba = (rgba & 0xFFFFFF) | ((int) (a * 255f)) << 24;
         }
 
         @Override
         public void setColor(Color color) {
-            this.rgba = (color.getAlpha() << 24) | color.getRGB();
+            rgba = (color.getAlpha() << 24) | color.getRGB();
         }
 
         @Override
