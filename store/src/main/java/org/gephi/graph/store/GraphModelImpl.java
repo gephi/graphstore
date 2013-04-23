@@ -43,7 +43,7 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     protected final TableImpl<Edge> edgeTable;
 
     public GraphModelImpl() {
-        store = new GraphStore();
+        store = new GraphStore(this);
         nodeTable = new TableImpl<Node>(store.nodeColumnStore);
         edgeTable = new TableImpl<Edge>(store.edgeColumnStore);
     }

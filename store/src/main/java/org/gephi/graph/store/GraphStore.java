@@ -86,8 +86,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             edgeColumnStore.addColumn(new ColumnImpl("timestamp", TimestampSet.class, null, null, Origin.PROPERTY, false));
         }
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
-            nodeColumnStore.addColumn(new ColumnImpl("label", String.class, null, null, Origin.PROPERTY, false));
-            edgeColumnStore.addColumn(new ColumnImpl("label", String.class, null, null, Origin.PROPERTY, false));
+            nodeColumnStore.addColumn(new ColumnImpl("label", String.class, "Label", null, Origin.PROPERTY, false));
+            edgeColumnStore.addColumn(new ColumnImpl("label", String.class, "Label", null, Origin.PROPERTY, false));
         }
     }
 
