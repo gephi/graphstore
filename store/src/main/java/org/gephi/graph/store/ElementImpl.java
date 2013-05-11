@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.gephi.attribute.api.Column;
+import org.gephi.attribute.time.Estimator;
 import org.gephi.attribute.time.Interval;
 import org.gephi.attribute.time.TimestampBooleanSet;
 import org.gephi.attribute.time.TimestampByteSet;
@@ -146,9 +147,8 @@ public abstract class ElementImpl implements Element {
             }
             checkEnabledTimestampSet();
             checkViewExist((GraphViewImpl) view);
-            final TimestampMap timestampMap = getTimestampMap();
+            final TimestampMap timestampMap = getColumnStore().getTimestampMap(column);
             if (timestampMap != null) {
-
                 int index = column.getIndex();
                 TimestampValueSet dynamicValue = null;
                 if (index < attributes.length) {
@@ -156,8 +156,7 @@ public abstract class ElementImpl implements Element {
                 }
                 if (dynamicValue != null && dynamicValue.isEmpty()) {
                     int[] timestampIndices = timestampMap.getTimestampIndices(interval);
-
-
+                    return dynamicValue.get(null, timestampIndices, Estimator.AVERAGE);
                 }
             } else {
                 throw new RuntimeException("The timestamp store is not available");
@@ -260,7 +259,7 @@ public abstract class ElementImpl implements Element {
         checkDouble(timestamp);
         checkColumn(column);
 
-        final TimestampMap timestampMap = getTimestampMap();
+        final TimestampMap timestampMap = getColumnStore().getTimestampMap(column);
         if (timestampMap != null) {
             writeLock();
             try {

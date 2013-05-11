@@ -218,7 +218,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         return length - garbageQueue.size();
     }
 
-    public TimestampMap getTimestampStore(Column column) {
+    public TimestampMap getTimestampMap(Column column) {
         int index = column.getIndex();
         TimestampMap timestampStore = timestampMaps[index];
         if (timestampStore == null) {
