@@ -15,6 +15,14 @@
  */
 package org.gephi.attribute.time;
 
+import java.math.BigDecimal;
+import static org.gephi.attribute.time.Estimator.AVERAGE;
+import static org.gephi.attribute.time.Estimator.FIRST;
+import static org.gephi.attribute.time.Estimator.LAST;
+import static org.gephi.attribute.time.Estimator.MAX;
+import static org.gephi.attribute.time.Estimator.MIN;
+import static org.gephi.attribute.time.Estimator.SUM;
+
 /**
  *
  * @author mbastian
@@ -65,12 +73,12 @@ public final class TimestampLongSet extends TimestampValueSet<Long> {
     }
 
     @Override
-    public Long get(int timestampIndex) {
+    public Long get(int timestampIndex, Long defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
     }
 
     public long getLong(int timestampIndex) {
@@ -82,12 +90,53 @@ public final class TimestampLongSet extends TimestampValueSet<Long> {
     }
 
     @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case AVERAGE:
+                BigDecimal ra = getAverageBigDecimal(timestampIndices);
+                if (ra != null) {
+                    return ra.doubleValue();
+                }
+                return null;
+            case SUM:
+                BigDecimal rs = getSumBigDecimal(timestampIndices);
+                if (rs != null) {
+                    return rs.longValue();
+                }
+                return null;
+            case MIN:
+                Double min = (Double) getMin(timestampIndices);
+                if (min != null) {
+                    return min.longValue();
+                }
+                return null;
+            case MAX:
+                Double max = (Double) getMax(timestampIndices);
+                if (max != null) {
+                    return max.longValue();
+                }
+                return null;
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new IllegalArgumentException("Unknown estimator.");
+        }
+    }
+
+    @Override
     public Long[] toArray() {
         final Long[] res = new Long[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
         return res;
+    }
+
+    @Override
+    public Class<Long> getTypeClass() {
+        return Long.class;
     }
 
     public long[] toLongArray() {
@@ -104,5 +153,10 @@ public final class TimestampLongSet extends TimestampValueSet<Long> {
     public void clear() {
         super.clear();
         values = new long[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }

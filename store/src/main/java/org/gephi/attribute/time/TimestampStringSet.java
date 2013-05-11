@@ -61,12 +61,24 @@ public final class TimestampStringSet extends TimestampValueSet<String> {
     }
 
     @Override
-    public String get(int timestampIndex) {
+    public String get(int timestampIndex, String defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
+    }
+
+    @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new IllegalArgumentException("Unknown estimator.");
+        }
     }
 
     @Override
@@ -81,8 +93,18 @@ public final class TimestampStringSet extends TimestampValueSet<String> {
     }
 
     @Override
+    public Class<String> getTypeClass() {
+        return String.class;
+    }
+
+    @Override
     public void clear() {
         super.clear();
         values = new String[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }

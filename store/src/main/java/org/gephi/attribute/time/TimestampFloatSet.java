@@ -15,6 +15,14 @@
  */
 package org.gephi.attribute.time;
 
+import java.math.BigDecimal;
+import static org.gephi.attribute.time.Estimator.AVERAGE;
+import static org.gephi.attribute.time.Estimator.FIRST;
+import static org.gephi.attribute.time.Estimator.LAST;
+import static org.gephi.attribute.time.Estimator.MAX;
+import static org.gephi.attribute.time.Estimator.MIN;
+import static org.gephi.attribute.time.Estimator.SUM;
+
 /**
  *
  * @author mbastian
@@ -65,12 +73,12 @@ public final class TimestampFloatSet extends TimestampValueSet<Float> {
     }
 
     @Override
-    public Float get(int timestampIndex) {
+    public Float get(int timestampIndex, Float defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
     }
 
     public float getFloat(int timestampIndex) {
@@ -82,12 +90,53 @@ public final class TimestampFloatSet extends TimestampValueSet<Float> {
     }
 
     @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case AVERAGE:
+                BigDecimal ra = getAverageBigDecimal(timestampIndices);
+                if (ra != null) {
+                    return ra.floatValue();
+                }
+                return null;
+            case SUM:
+                BigDecimal rs = getSumBigDecimal(timestampIndices);
+                if (rs != null) {
+                    return rs.floatValue();
+                }
+                return null;
+            case MIN:
+                Double min = (Double) getMin(timestampIndices);
+                if (min != null) {
+                    return min.floatValue();
+                }
+                return null;
+            case MAX:
+                Double max = (Double) getMax(timestampIndices);
+                if (max != null) {
+                    return max.floatValue();
+                }
+                return null;
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new UnsupportedOperationException("Unknown estimator.");
+        }
+    }
+
+    @Override
     public Float[] toArray() {
         final Float[] res = new Float[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
         return res;
+    }
+
+    @Override
+    public Class<Float> getTypeClass() {
+        return Float.class;
     }
 
     public float[] toFloatArray() {
@@ -104,5 +153,10 @@ public final class TimestampFloatSet extends TimestampValueSet<Float> {
     public void clear() {
         super.clear();
         values = new float[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }

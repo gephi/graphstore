@@ -65,12 +65,12 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
     }
 
     @Override
-    public Character get(int timestampIndex) {
+    public Character get(int timestampIndex, Character defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
     }
 
     public char getCharacter(int timestampIndex) {
@@ -82,12 +82,71 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
     }
 
     @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case MIN:
+                return getMin(timestampIndices);
+            case MAX:
+                return getMax(timestampIndices);
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new UnsupportedOperationException("Unknown estimator.");
+        }
+    }
+
+    @Override
+    protected Object getMin(int[] timestampIndices) {
+        char min = Character.MAX_VALUE;
+        boolean found = false;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                char val = values[index];
+                min = (char) Math.min(min, val);
+                found = true;
+            }
+        }
+        if (!found) {
+            return null;
+        }
+        return min;
+    }
+
+    @Override
+    protected Object getMax(int[] timestampIndices) {
+        char max = Character.MIN_VALUE;
+        boolean found = false;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                char val = values[index];
+                max = (char) Math.max(max, val);
+                found = true;
+            }
+        }
+        if (!found) {
+            return null;
+        }
+        return max;
+    }
+
+    @Override
     public Character[] toArray() {
         final Character[] res = new Character[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
         return res;
+    }
+
+    @Override
+    public Class<Character> getTypeClass() {
+        return Character.class;
     }
 
     public char[] toCharacterArray() {
@@ -104,5 +163,10 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
     public void clear() {
         super.clear();
         values = new char[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }

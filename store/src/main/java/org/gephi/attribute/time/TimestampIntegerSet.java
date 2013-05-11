@@ -15,6 +15,8 @@
  */
 package org.gephi.attribute.time;
 
+import java.math.BigDecimal;
+
 /**
  *
  * @author mbastian
@@ -65,12 +67,12 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
     }
 
     @Override
-    public Integer get(int timestampIndex) {
+    public Integer get(int timestampIndex, Integer defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
     }
 
     public int getInteger(int timestampIndex) {
@@ -82,12 +84,53 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
     }
 
     @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case AVERAGE:
+                BigDecimal ra = getAverageBigDecimal(timestampIndices);
+                if (ra != null) {
+                    return ra.doubleValue();
+                }
+                return null;
+            case SUM:
+                BigDecimal rs = getSumBigDecimal(timestampIndices);
+                if (rs != null) {
+                    return rs.longValue();
+                }
+                return null;
+            case MIN:
+                Double min = (Double) getMin(timestampIndices);
+                if (min != null) {
+                    return min.intValue();
+                }
+                return null;
+            case MAX:
+                Double max = (Double) getMax(timestampIndices);
+                if (max != null) {
+                    return max.intValue();
+                }
+                return null;
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new IllegalArgumentException("Unknown estimator.");
+        }
+    }
+
+    @Override
     public Integer[] toArray() {
         final Integer[] res = new Integer[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
         return res;
+    }
+
+    @Override
+    public Class<Integer> getTypeClass() {
+        return Integer.class;
     }
 
     public int[] toIntegerArray() {
@@ -104,5 +147,10 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
     public void clear() {
         super.clear();
         values = new int[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }

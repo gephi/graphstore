@@ -15,6 +15,8 @@
  */
 package org.gephi.attribute.time;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 
 /**
@@ -39,9 +41,15 @@ public abstract class TimestampValueSet<T> {
 
     public abstract void remove(int timestampIndex);
 
-    public abstract T get(int timestampIndex);
+    public abstract T get(int timestampIndex, T defaultValue);
+
+    public abstract Object get(double[] timestamps, int[] timestampIndices, Estimator estimator);
 
     public abstract T[] toArray();
+
+    public abstract Class<T> getTypeClass();
+
+    protected abstract Object getValue(int index);
 
     protected int putInner(int timestampIndex) {
         int index = Arrays.binarySearch(array, 0, size, timestampIndex);
@@ -114,5 +122,103 @@ public abstract class TimestampValueSet<T> {
     public void clear() {
         size = 0;
         array = new int[0];
+    }
+
+    //Estimators
+    protected Object getFirst(final int[] timestampIndices) {
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                Object val = getValue(index);
+                return val;
+            }
+        }
+        return null;
+    }
+
+    protected Object getLast(final int[] timestampIndices) {
+        for (int i = timestampIndices.length - 1; i > 0; i--) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                Object val = getValue(index);
+                return val;
+            }
+        }
+        return null;
+    }
+
+    protected Object getMin(final int[] timestampIndices) {
+        double min = Double.POSITIVE_INFINITY;
+        boolean found = false;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                double val = ((Number) getValue(index)).doubleValue();
+                min = (double) Math.min(min, val);
+                found = true;
+            }
+        }
+        if (!found) {
+            return null;
+        }
+        return min;
+    }
+
+    protected Object getMax(final int[] timestampIndices) {
+        double max = Double.NEGATIVE_INFINITY;
+        boolean found = false;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                double val = ((Number) getValue(index)).doubleValue();
+                max = (double) Math.max(max, val);
+                found = true;
+            }
+        }
+        if (!found) {
+            return null;
+        }
+        return max;
+    }
+
+    protected BigDecimal getAverageBigDecimal(final int[] timestampIndices) {
+        BigDecimal total = new BigDecimal(0);
+        int count = 0;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                double val = ((Number) getValue(index)).doubleValue();
+                total = total.add(BigDecimal.valueOf(val));
+                count++;
+            }
+
+        }
+        if (count == 0) {
+            return null;
+        }
+        return total.divide(BigDecimal.valueOf(count), 10, RoundingMode.HALF_EVEN);
+    }
+
+    protected BigDecimal getSumBigDecimal(final int[] timestampIndices) {
+        BigDecimal total = new BigDecimal(0);
+        int count = 0;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                double val = ((Number) getValue(index)).doubleValue();
+                total = total.add(BigDecimal.valueOf(val));
+                count++;
+            }
+        }
+        if (count == 0) {
+            return null;
+        }
+        return total;
     }
 }

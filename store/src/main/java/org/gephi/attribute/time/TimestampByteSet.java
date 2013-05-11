@@ -65,12 +65,12 @@ public final class TimestampByteSet extends TimestampValueSet<Byte> {
     }
 
     @Override
-    public Byte get(int timestampIndex) {
+    public Byte get(int timestampIndex, Byte defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
     }
 
     public byte getByte(int timestampIndex) {
@@ -82,12 +82,82 @@ public final class TimestampByteSet extends TimestampValueSet<Byte> {
     }
 
     @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case AVERAGE:
+                return getAverage(timestampIndices);
+            case SUM:
+                return getSum(timestampIndices);
+            case MIN:
+                Object rmin = getMin(timestampIndices);
+                if (rmin != null) {
+                    return ((Double) rmin).byteValue();
+                }
+                return null;
+            case MAX:
+                Object rmax = getMax(timestampIndices);
+                if (rmax != null) {
+                    return ((Double) rmax).byteValue();
+                }
+                return null;
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new UnsupportedOperationException("Unknown estimator.");
+        }
+    }
+
+    private Object getAverage(final int[] timestampIndices) {
+        double sum = 0;
+        int count = 0;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                byte val = values[index];
+                sum += val;
+                count++;
+            }
+        }
+        if (count == 0) {
+            return null;
+        }
+        sum /= count;
+        return sum;
+    }
+
+    private Object getSum(final int[] timestampIndices) {
+        int sum = 0;
+        int count = 0;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                byte val = values[index];
+                sum += val;
+                count++;
+            }
+        }
+        if (count == 0) {
+            return null;
+        }
+        return sum;
+    }
+
+    @Override
     public Byte[] toArray() {
         final Byte[] res = new Byte[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
         return res;
+    }
+
+    @Override
+    public Class<Byte> getTypeClass() {
+        return Byte.class;
     }
 
     public byte[] toByteArray() {
@@ -104,5 +174,10 @@ public final class TimestampByteSet extends TimestampValueSet<Byte> {
     public void clear() {
         super.clear();
         values = new byte[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }

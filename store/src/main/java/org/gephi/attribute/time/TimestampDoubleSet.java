@@ -15,6 +15,14 @@
  */
 package org.gephi.attribute.time;
 
+import java.math.BigDecimal;
+import static org.gephi.attribute.time.Estimator.AVERAGE;
+import static org.gephi.attribute.time.Estimator.FIRST;
+import static org.gephi.attribute.time.Estimator.LAST;
+import static org.gephi.attribute.time.Estimator.MAX;
+import static org.gephi.attribute.time.Estimator.MIN;
+import static org.gephi.attribute.time.Estimator.SUM;
+
 /**
  *
  * @author mbastian
@@ -65,12 +73,12 @@ public final class TimestampDoubleSet extends TimestampValueSet<Double> {
     }
 
     @Override
-    public Double get(int timestampIndex) {
+    public Double get(int timestampIndex, Double defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
     }
 
     public double getDouble(int timestampIndex) {
@@ -82,12 +90,43 @@ public final class TimestampDoubleSet extends TimestampValueSet<Double> {
     }
 
     @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case AVERAGE:
+                BigDecimal ra = getAverageBigDecimal(timestampIndices);
+                if (ra != null) {
+                    return ra.doubleValue();
+                }
+            case SUM:
+                BigDecimal rs = getSumBigDecimal(timestampIndices);
+                if (rs != null) {
+                    return rs.doubleValue();
+                }
+            case MIN:
+                return getMin(timestampIndices);
+            case MAX:
+                return getMax(timestampIndices);
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new UnsupportedOperationException("Unknown estimator.");
+        }
+    }
+
+    @Override
     public Double[] toArray() {
         final Double[] res = new Double[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
         return res;
+    }
+
+    @Override
+    public Class<Double> getTypeClass() {
+        return Double.class;
     }
 
     public double[] toDoubleArray() {
@@ -104,5 +143,10 @@ public final class TimestampDoubleSet extends TimestampValueSet<Double> {
     public void clear() {
         super.clear();
         values = new double[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }

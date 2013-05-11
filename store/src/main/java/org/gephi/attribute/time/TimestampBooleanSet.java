@@ -65,12 +65,70 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
     }
 
     @Override
-    public Boolean get(int timestampIndex) {
+    public Boolean get(int timestampIndex, Boolean defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
+    }
+
+    @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case MIN:
+                return getMin(timestampIndices);
+            case MAX:
+                return getMax(timestampIndices);
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new UnsupportedOperationException("Not supported estimator.");
+        }
+    }
+
+    @Override
+    protected Object getMin(final int[] timestampIndices) {
+        boolean t = false;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                boolean val = values[index];
+                if (!val) {
+                    return Boolean.FALSE;
+                } else {
+                    t = true;
+                }
+            }
+        }
+        if (t) {
+            return Boolean.TRUE;
+        }
+        return null;
+    }
+
+    @Override
+    protected Object getMax(final int[] timestampIndices) {
+        boolean f = false;
+        for (int i = 0; i < timestampIndices.length; i++) {
+            int timestampIndex = timestampIndices[i];
+            int index = getIndex(timestampIndex);
+            if (index >= 0) {
+                boolean val = values[index];
+                if (val) {
+                    return Boolean.TRUE;
+                } else {
+                    f = true;
+                }
+            }
+        }
+        if (f) {
+            return Boolean.FALSE;
+        }
+        return null;
     }
 
     public boolean getBoolean(int timestampIndex) {
@@ -90,6 +148,11 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
         return res;
     }
 
+    @Override
+    public Class<Boolean> getTypeClass() {
+        return Boolean.class;
+    }
+
     public boolean[] toBooleanArray() {
         if (size < values.length - 1) {
             final boolean[] res = new boolean[size];
@@ -104,5 +167,10 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
     public void clear() {
         super.clear();
         values = new boolean[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }

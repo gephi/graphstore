@@ -15,6 +15,8 @@
  */
 package org.gephi.attribute.time;
 
+import java.math.BigDecimal;
+
 /**
  *
  * @author mbastian
@@ -65,12 +67,12 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
     }
 
     @Override
-    public Short get(int timestampIndex) {
+    public Short get(int timestampIndex, Short defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
         }
-        throw new IllegalArgumentException("The element doesn't exist");
+        return defaultValue;
     }
 
     public short getShort(int timestampIndex) {
@@ -82,12 +84,53 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
     }
 
     @Override
+    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+        switch (estimator) {
+            case AVERAGE:
+                BigDecimal ra = getAverageBigDecimal(timestampIndices);
+                if (ra != null) {
+                    return ra.doubleValue();
+                }
+                return null;
+            case SUM:
+                BigDecimal rs = getSumBigDecimal(timestampIndices);
+                if (rs != null) {
+                    return rs.intValue();
+                }
+                return null;
+            case MIN:
+                Double min = (Double) getMin(timestampIndices);
+                if (min != null) {
+                    return min.shortValue();
+                }
+                return null;
+            case MAX:
+                Double max = (Double) getMax(timestampIndices);
+                if (max != null) {
+                    return max.shortValue();
+                }
+                return null;
+            case FIRST:
+                return getFirst(timestampIndices);
+            case LAST:
+                return getLast(timestampIndices);
+            default:
+                throw new IllegalArgumentException("Unknown estimator.");
+        }
+    }
+
+    @Override
     public Short[] toArray() {
         final Short[] res = new Short[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
         return res;
+    }
+
+    @Override
+    public Class<Short> getTypeClass() {
+        return Short.class;
     }
 
     public short[] toShortArray() {
@@ -104,5 +147,10 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
     public void clear() {
         super.clear();
         values = new short[0];
+    }
+
+    @Override
+    protected Object getValue(int index) {
+        return values[index];
     }
 }
