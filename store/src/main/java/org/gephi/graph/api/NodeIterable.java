@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
  */
 public interface NodeIterable extends ElementIterable<Node> {
 
-    public static final NodeIterable EMPTY = new NodeIterableEmpty();
+    static final NodeIterable EMPTY = new NodeIterableEmpty();
 
     @Override
     public Iterator<Node> iterator();
