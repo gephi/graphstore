@@ -147,7 +147,8 @@ public abstract class ElementImpl implements Element {
             }
             checkEnabledTimestampSet();
             checkViewExist((GraphViewImpl) view);
-            final TimestampMap timestampMap = getColumnStore().getTimestampMap(column);
+            final ColumnStore columnStore = getColumnStore();
+            final TimestampMap timestampMap = columnStore.getTimestampMap(column);
             if (timestampMap != null) {
                 int index = column.getIndex();
                 TimestampValueSet dynamicValue = null;
@@ -156,7 +157,11 @@ public abstract class ElementImpl implements Element {
                 }
                 if (dynamicValue != null && dynamicValue.isEmpty()) {
                     int[] timestampIndices = timestampMap.getTimestampIndices(interval);
-                    return dynamicValue.get(null, timestampIndices, Estimator.AVERAGE);
+                    Estimator estimator = columnStore.getEstimator(column);
+                    if (estimator == null) {
+                        estimator = Estimator.FIRST;
+                    }
+                    return dynamicValue.get(null, timestampIndices, estimator);
                 }
             } else {
                 throw new RuntimeException("The timestamp store is not available");

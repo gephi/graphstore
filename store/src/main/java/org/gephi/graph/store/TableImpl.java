@@ -19,6 +19,7 @@ import java.util.Iterator;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.api.Table;
+import org.gephi.attribute.time.Estimator;
 import org.gephi.graph.api.Element;
 
 /**
@@ -101,6 +102,16 @@ public class TableImpl<T extends Element> implements Table {
     @Override
     public void removeColumn(String id) {
         store.removeColumn(id);
+    }
+
+    @Override
+    public Estimator getEstimator(Column column) {
+        return store.getEstimator(column);
+    }
+
+    @Override
+    public void setEstimator(Column column, Estimator estimator) {
+        store.setEstimator(column, estimator);
     }
 
     protected Class standardizeType(Class type) {

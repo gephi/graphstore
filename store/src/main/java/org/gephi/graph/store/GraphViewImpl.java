@@ -422,7 +422,6 @@ public class GraphViewImpl implements GraphView {
         return nodeViewOnly;
     }
 
-    @Override
     public void setTimeInterval(Interval interval) {
         this.interval = interval;
     }

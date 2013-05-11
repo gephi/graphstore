@@ -178,11 +178,6 @@ public class GraphViewStoreTest {
             }
 
             @Override
-            public void setTimeInterval(Interval interval) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            @Override
             public Interval getTimeInterval() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }

@@ -15,6 +15,8 @@
  */
 package org.gephi.attribute.api;
 
+import org.gephi.attribute.time.Estimator;
+
 /**
  *
  * @author mbastian
@@ -30,6 +32,10 @@ public interface Table extends Iterable<Column> {
     public Column getColumn(int index);
 
     public Column getColumn(String id);
+
+    public Estimator getEstimator(Column column);
+
+    public void setEstimator(Column column, Estimator estimator);
 
     public boolean hasColumn(String id);
 

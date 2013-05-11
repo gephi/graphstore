@@ -17,6 +17,7 @@ package org.gephi.graph.store;
 
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.Estimator;
 import org.gephi.attribute.time.TimestampValueSet;
 
 /**
@@ -33,6 +34,7 @@ public class ColumnImpl implements Column {
     protected final Origin origin;
     protected final boolean indexed;
     protected final boolean dynamic;
+    protected Estimator estimator;
     //Store Id
     protected int storeId = ColumnStore.NULL_ID;
 
@@ -108,6 +110,14 @@ public class ColumnImpl implements Column {
     @Override
     public String toString() {
         return title + " (" + typeClass.toString() + ")";
+    }
+
+    public Estimator getEstimator() {
+        return estimator;
+    }
+
+    public void setEstimator(Estimator estimator) {
+        this.estimator = estimator;
     }
 
     @Override

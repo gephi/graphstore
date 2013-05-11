@@ -31,7 +31,6 @@ public final class Interval {
         this.high = interval.high;
         this.lopen = interval.lopen;
         this.ropen = interval.ropen;
-
     }
 
     public Interval(double low, double high, boolean lopen, boolean ropen) {

@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
+import org.gephi.attribute.time.Estimator;
+import org.gephi.attribute.time.TimestampValueSet;
 import org.gephi.graph.api.Element;
 
 /**
@@ -134,6 +136,19 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         } finally {
             readUnlock();
         }
+    }
+
+    public void setEstimator(Column column, Estimator estimator) {
+        checkNonNullColumnObject(column);
+        checkDynamicColumn(column);
+        checkEstimator(column, estimator);
+
+        ((ColumnImpl) column).setEstimator(estimator);
+    }
+
+    public Estimator getEstimator(Column column) {
+        checkNonNullColumnObject(column);
+        return ((ColumnImpl) column).getEstimator();
     }
 
     public int getColumnIndex(final String key) {
@@ -278,6 +293,24 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     void checkIndexStatus(final Column column) {
         if (indexStore == null && column.isIndexed()) {
             throw new IllegalArgumentException("Can't add an indexed column to a non indexed store");
+        }
+    }
+
+    void checkDynamicColumn(final Column column) {
+        if (!column.isDynamic()) {
+            throw new IllegalArgumentException("The column must have a dynamic type");
+        }
+    }
+
+    void checkEstimator(final Column column, final Estimator estimator) {
+        Class<? extends TimestampValueSet> typeClass = column.getTypeClass();
+        try {
+            TimestampValueSet vs = typeClass.newInstance();
+            if (!vs.isSupported(estimator)) {
+                throw new IllegalArgumentException("The column doesnt't support this estimator");
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 

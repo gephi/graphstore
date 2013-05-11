@@ -744,10 +744,6 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         }
 
         @Override
-        public void setTimeInterval(Interval interval) {
-        }
-
-        @Override
         public Interval getTimeInterval() {
             return null;
         }

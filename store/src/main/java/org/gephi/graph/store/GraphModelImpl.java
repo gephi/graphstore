@@ -19,6 +19,7 @@ import org.gephi.attribute.api.AttributeModel;
 import org.gephi.attribute.api.Index;
 import org.gephi.attribute.api.Table;
 import org.gephi.attribute.api.TimestampIndex;
+import org.gephi.attribute.time.Interval;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
@@ -199,6 +200,11 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     @Override
     public void destroyView(GraphView view) {
         store.viewStore.destroyView(view);
+    }
+
+    @Override
+    public void setTimeInterval(GraphView view, Interval interval) {
+        store.viewStore.setTimeInterval(view, interval);
     }
 
     @Override

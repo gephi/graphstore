@@ -18,6 +18,7 @@ package org.gephi.graph.store;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.Arrays;
+import org.gephi.attribute.time.Interval;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -130,6 +131,19 @@ public class GraphViewStore {
             }
 
             removeView((GraphViewImpl) view);
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
+    public void setTimeInterval(GraphView view, Interval interval) {
+        checkNonNullViewObject(view);
+        checkViewExist((GraphViewImpl) view);
+
+        graphStore.autoWriteLock();
+        try {
+            GraphViewImpl graphView = (GraphViewImpl) view;
+            graphView.setTimeInterval(interval);
         } finally {
             graphStore.autoWriteUnlock();
         }

@@ -29,7 +29,5 @@ public interface GraphView {
 
     public boolean isNodeView();
 
-    public void setTimeInterval(Interval interval);
-
     public Interval getTimeInterval();
 }

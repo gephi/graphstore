@@ -18,6 +18,7 @@ package org.gephi.graph.api;
 import org.gephi.attribute.api.Index;
 import org.gephi.attribute.api.Table;
 import org.gephi.attribute.api.TimestampIndex;
+import org.gephi.attribute.time.Interval;
 
 /**
  *
@@ -70,6 +71,8 @@ public interface GraphModel {
     public GraphView copyNodeView(GraphView view);
 
     public void destroyView(GraphView view);
+
+    public void setTimeInterval(GraphView view, Interval interval);
 
     public Table getNodeTable();
 
