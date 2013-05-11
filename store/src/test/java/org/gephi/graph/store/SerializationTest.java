@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.Estimator;
 import org.gephi.graph.api.Edge;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -328,6 +329,16 @@ public class SerializationTest {
     }
 
     @Test
+    public void testEstimator() throws IOException, ClassNotFoundException {
+        Estimator estimator = Estimator.AVERAGE;
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(estimator);
+        Estimator l = (Estimator) ser.deserialize(buf);
+        Assert.assertEquals(estimator, l);
+    }
+
+    @Test
     public void testInt() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);
         int[] vals = {
@@ -585,6 +596,5 @@ public class SerializationTest {
         Assert.assertEquals(Locale.FRANCE, ser.deserialize(ser.serialize(Locale.FRANCE)));
         Assert.assertEquals(Locale.CANADA_FRENCH, ser.deserialize(ser.serialize(Locale.CANADA_FRENCH)));
         Assert.assertEquals(Locale.SIMPLIFIED_CHINESE, ser.deserialize(ser.serialize(Locale.SIMPLIFIED_CHINESE)));
-
     }
 }

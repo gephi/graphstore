@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Locale;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.Estimator;
 import org.gephi.attribute.time.TimestampSet;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
@@ -144,6 +145,7 @@ public class Serialization {
     final static int NODE_PROPERTIES = 214;
     final static int EDGE_PROPERTIES = 215;
     final static int TEXT_PROPERTIES = 216;
+    final static int ESTIMATOR = 217;
     //Store
     protected final GraphStore store;
     protected final Int2IntMap idMap;
@@ -375,6 +377,7 @@ public class Serialization {
         serialize(out, column.typeClass);
         serialize(out, column.defaultValue);
         serialize(out, column.indexed);
+        serialize(out, column.estimator);
     }
 
     private ColumnImpl deserializeColumn(final DataInput is) throws IOException, ClassNotFoundException {
@@ -385,9 +388,11 @@ public class Serialization {
         Class typeClass = (Class) deserialize(is);
         Object defaultValue = deserialize(is);
         boolean indexed = (Boolean) deserialize(is);
+        Estimator estimator = (Estimator) deserialize(is);
 
         ColumnImpl column = new ColumnImpl(id, typeClass, title, defaultValue, origin, indexed);
         column.storeId = storeId;
+        column.setEstimator(estimator);
         return column;
     }
 
@@ -825,6 +830,10 @@ public class Serialization {
             TextPropertiesImpl b = (TextPropertiesImpl) obj;
             out.write(TEXT_PROPERTIES);
             serializeTextProperties(out, b);
+        } else if (obj instanceof Estimator) {
+            Estimator b = (Estimator) obj;
+            out.write(ESTIMATOR);
+            serializeString(out, b.name());
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1318,6 +1327,9 @@ public class Serialization {
                 break;
             case TEXT_PROPERTIES:
                 ret = deserializeTextProperties(is);
+                break;
+            case ESTIMATOR:
+                ret = Estimator.valueOf(deserializeString(is));
                 break;
             case -1:
                 throw new EOFException();
