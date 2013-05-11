@@ -18,6 +18,7 @@ package org.gephi.graph.store;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Random;
+import org.gephi.attribute.time.Interval;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
@@ -174,6 +175,16 @@ public class GraphViewStoreTest {
             @Override
             public boolean isNodeView() {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void setTimeInterval(Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Interval getTimeInterval() {
+                throw new UnsupportedOperationException("Not supported yet.");
             }
         });
     }

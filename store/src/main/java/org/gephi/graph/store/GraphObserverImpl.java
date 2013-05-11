@@ -56,15 +56,15 @@ public class GraphObserverImpl implements GraphObserver {
 
     @Override
     public synchronized boolean hasGraphChanged() {
-        checkNotDestroyed();
-
-        if (nodeVersion < graphVersion.nodeVersion || edgeVersion < graphVersion.edgeVersion) {
-            if (withDiff) {
-                refreshDiff();
+        if (!destroyed) {
+            if (nodeVersion < graphVersion.nodeVersion || edgeVersion < graphVersion.edgeVersion) {
+                if (withDiff) {
+                    refreshDiff();
+                }
+                nodeVersion = graphVersion.nodeVersion;
+                edgeVersion = graphVersion.edgeVersion;
+                return true;
             }
-            nodeVersion = graphVersion.nodeVersion;
-            edgeVersion = graphVersion.edgeVersion;
-            return true;
         }
         return false;
     }
@@ -77,7 +77,6 @@ public class GraphObserverImpl implements GraphObserver {
         if (graphDiff == null) {
             throw new IllegalStateException("The hasGraphChanged() method should be called first and getDiff() only once then");
         }
-        checkNotDestroyed();
         GraphDiff diff = graphDiff;
         graphDiff = null;
         return diff;

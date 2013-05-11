@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.api;
 
+import org.gephi.attribute.time.Interval;
+
 /**
  *
  * @author mbastian
@@ -26,4 +28,8 @@ public interface GraphView {
     public boolean isMainView();
 
     public boolean isNodeView();
+
+    public void setTimeInterval(Interval interval);
+
+    public Interval getTimeInterval();
 }

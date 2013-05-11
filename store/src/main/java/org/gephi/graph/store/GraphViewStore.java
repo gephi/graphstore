@@ -82,7 +82,21 @@ public class GraphViewStore {
 
         graphStore.autoWriteLock();
         try {
-            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view);
+            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, false);
+            addView(graphView);
+            return graphView;
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
+    public GraphViewImpl createNodeView(GraphView view) {
+        checkNonNullViewObject(view);
+        checkViewExist((GraphViewImpl) view);
+
+        graphStore.autoWriteLock();
+        try {
+            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, true);
             addView(graphView);
             return graphView;
         } finally {
@@ -95,9 +109,14 @@ public class GraphViewStore {
         try {
             checkNonNullViewObject(view);
 
-            TimestampStore timestampStore = graphStore.timestampStore;
-            if (timestampStore != null) {
-                timestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            TimestampIndexStore nodeTimestampStore = graphStore.timestampStore.nodeIndexStore;
+            if (nodeTimestampStore != null) {
+                nodeTimestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            }
+
+            TimestampIndexStore edgeTimestampStore = graphStore.timestampStore.edgeIndexStore;
+            if (edgeTimestampStore != null) {
+                edgeTimestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
             }
 
             IndexStore<Node> nodeIndexStore = graphStore.nodeColumnStore.indexStore;
@@ -296,7 +315,7 @@ public class GraphViewStore {
         return true;
     }
 
-    private void checkNonNullViewObject(final Object o) {
+    protected void checkNonNullViewObject(final Object o) {
         if (o == null) {
             throw new NullPointerException();
         }
@@ -307,7 +326,7 @@ public class GraphViewStore {
         }
     }
 
-    private void checkViewExist(final GraphViewImpl view) {
+    protected void checkViewExist(final GraphViewImpl view) {
         int id = view.storeId;
         if (id == NULL_VIEW || id >= length || views[id] != view) {
             throw new IllegalArgumentException("The view doesn't exist");

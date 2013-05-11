@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import org.gephi.attribute.time.Interval;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -34,7 +35,7 @@ import org.gephi.graph.store.EdgeStore.EdgeInOutIterator;
  *
  * @author mbastian
  */
-public final class GraphViewImpl implements GraphView {
+public class GraphViewImpl implements GraphView {
 
     //Data
     protected final GraphStore graphStore;
@@ -54,6 +55,8 @@ public final class GraphViewImpl implements GraphView {
     protected int[] typeCounts;
     protected int[] mutualEdgeTypeCounts;
     protected int mutualEdgesCount;
+    //Dynamic
+    protected Interval interval;
 
     public GraphViewImpl(final GraphStore store, boolean nodesOnly) {
         this.graphStore = store;
@@ -70,11 +73,11 @@ public final class GraphViewImpl implements GraphView {
         this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
     }
 
-    public GraphViewImpl(final GraphViewImpl view) {
+    public GraphViewImpl(final GraphViewImpl view, boolean nodesOnly) {
         this.graphStore = view.graphStore;
         this.nodeCount = view.nodeCount;
         this.edgeCount = view.edgeCount;
-        this.nodeViewOnly = view.nodeViewOnly;
+        this.nodeViewOnly = nodesOnly;
         this.nodeBitVector = view.nodeBitVector.copy();
         this.edgeBitVector = view.edgeBitVector.copy();
         this.typeCounts = new int[view.typeCounts.length];
@@ -417,6 +420,16 @@ public final class GraphViewImpl implements GraphView {
     @Override
     public boolean isNodeView() {
         return nodeViewOnly;
+    }
+
+    @Override
+    public void setTimeInterval(Interval interval) {
+        this.interval = interval;
+    }
+
+    @Override
+    public Interval getTimeInterval() {
+        return interval;
     }
 
     protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {

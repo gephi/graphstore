@@ -26,6 +26,7 @@ import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.TextProperties;
@@ -146,6 +147,16 @@ public class GraphStoreTest {
 
             @Override
             public Object getAttribute(Column column) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object getAttribute(Column column, double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object getAttribute(String key, double timestamp) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
@@ -351,6 +362,16 @@ public class GraphStoreTest {
 
             @Override
             public int getStoreId() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object getAttribute(String key, GraphView view) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object getAttribute(Column column, GraphView view) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });
