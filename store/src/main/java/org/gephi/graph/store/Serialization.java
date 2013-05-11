@@ -134,17 +134,16 @@ public class Serialization {
     final static int COLUMN_ORIGIN = 204;
     final static int COLUMN = 205;
     final static int COLUMN_STORE = 206;
-    final static int TIMESTAMP_STORE = 207;
-    final static int GRAPH_STORE = 208;
-    final static int GRAPH_FACTORY = 209;
-    final static int GRAPH_VIEW_STORE = 210;
-    final static int GRAPH_VIEW = 211;
-    final static int BIT_VECTOR = 212;
-    final static int GRAPH_STORE_CONFIGURATION = 213;
-    final static int GRAPH_VERSION = 214;
-    final static int NODE_PROPERTIES = 215;
-    final static int EDGE_PROPERTIES = 216;
-    final static int TEXT_PROPERTIES = 217;
+    final static int GRAPH_STORE = 207;
+    final static int GRAPH_FACTORY = 208;
+    final static int GRAPH_VIEW_STORE = 209;
+    final static int GRAPH_VIEW = 210;
+    final static int BIT_VECTOR = 211;
+    final static int GRAPH_STORE_CONFIGURATION = 212;
+    final static int GRAPH_VERSION = 213;
+    final static int NODE_PROPERTIES = 214;
+    final static int EDGE_PROPERTIES = 215;
+    final static int TEXT_PROPERTIES = 216;
     //Store
     protected final GraphStore store;
     protected final Int2IntMap idMap;
@@ -171,9 +170,6 @@ public class Serialization {
         //Column
         serialize(out, store.nodeColumnStore);
         serialize(out, store.edgeColumnStore);
-
-        //Timestamp
-        serialize(out, store.timestampStore);
 
         //Factory
         serialize(out, store.factory);
@@ -209,9 +205,6 @@ public class Serialization {
 
         //Columns
         deserialize(is);
-        deserialize(is);
-
-        //Timestamp
         deserialize(is);
 
         //Factory
@@ -396,45 +389,6 @@ public class Serialization {
         ColumnImpl column = new ColumnImpl(id, typeClass, title, defaultValue, origin, indexed);
         column.storeId = storeId;
         return column;
-    }
-
-    private void serializeTimestampStore(final DataOutput out) throws IOException {
-        TimestampStore timestampStore = store.timestampStore;
-
-        serialize(out, timestampStore.length);
-
-        int[] indices = timestampStore.timestampMap.values().toIntArray();
-        double[] timestamps = timestampStore.timestampMap.keySet().toDoubleArray();
-
-        serialize(out, indices);
-        serialize(out, timestamps);
-
-        serialize(out, timestampStore.garbageQueue.toIntArray());
-    }
-
-    private TimestampStore deserializeTimestampStore(final DataInput is) throws IOException, ClassNotFoundException {
-        TimestampStore timestampStore = store.timestampStore;
-
-        int length = (Integer) deserialize(is);
-        int[] indices = (int[]) deserialize(is);
-        double[] timestamps = (double[]) deserialize(is);
-        int[] garbage = (int[]) deserialize(is);
-
-        timestampStore.length = length;
-        timestampStore.ensureArraySize(length);
-        for (int i = 0; i < indices.length; i++) {
-            int index = indices[i];
-            double timestamp = timestamps[i];
-
-            timestampStore.timestampMap.put(timestamp, index);
-            timestampStore.timestampSortedMap.put(timestamp, index);
-            timestampStore.indexMap[index] = timestamp;
-        }
-
-        for (int i = 0; i < garbage.length; i++) {
-            timestampStore.garbageQueue.add(garbage[i]);
-        }
-        return timestampStore;
     }
 
     private void serializeGraphFactory(final DataOutput out) throws IOException {
@@ -835,10 +789,6 @@ public class Serialization {
             ColumnStore b = (ColumnStore) obj;
             out.write(COLUMN_STORE);
             serializeColumnStore(out, b);
-        } else if (obj instanceof TimestampStore) {
-            TimestampStore b = (TimestampStore) obj;
-            out.write(TIMESTAMP_STORE);
-            serializeTimestampStore(out);
         } else if (obj instanceof GraphStore) {
             GraphStore b = (GraphStore) obj;
             out.write(GRAPH_STORE);
@@ -1338,9 +1288,6 @@ public class Serialization {
                 break;
             case COLUMN_STORE:
                 ret = deserializeColumnStore(is);
-                break;
-            case TIMESTAMP_STORE:
-                ret = deserializeTimestampStore(is);
                 break;
             case GRAPH_STORE:
                 ret = deserializeGraphStore(is);

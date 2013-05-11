@@ -138,26 +138,6 @@ public class SerializationTest {
     }
 
     @Test
-    public void testTimestampStore() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
-
-        TimestampStore timestampStore = graphStore.timestampStore;
-        timestampStore.addTimestamp(1.0);
-        timestampStore.addTimestamp(2.0);
-        timestampStore.addTimestamp(3.0);
-
-        timestampStore.removeTimestamp(1.0);
-
-        Serialization ser = new Serialization(graphStore);
-        byte[] buf = ser.serialize(timestampStore);
-
-        graphStore = new GraphStore();
-        ser = new Serialization(graphStore);
-        TimestampStore l = (TimestampStore) ser.deserialize(buf);
-        Assert.assertTrue(timestampStore.equals(l));
-    }
-
-    @Test
     public void testGraphFactory() throws IOException, ClassNotFoundException {
         GraphStore graphStore = new GraphStore();
         GraphFactoryImpl factory = graphStore.factory;
