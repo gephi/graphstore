@@ -42,6 +42,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     //Columns
     protected final Object2ShortMap<String> idMap;
     protected final ColumnImpl[] columns;
+    protected final TimestampMap[] timestampMaps;
     protected final ShortSortedSet garbageQueue;
     //Index
     protected final IndexStore<T> indexStore;
@@ -62,6 +63,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<String>(MAX_SIZE);
         this.columns = new ColumnImpl[MAX_SIZE];
+        this.timestampMaps = new TimestampMap[MAX_SIZE];
         this.elementType = elementType;
         this.indexStore = indexed ? new IndexStore<T>(this) : null;
         idMap.defaultReturnValue(NULL_SHORT);
@@ -206,6 +208,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         garbageQueue.clear();
         idMap.clear();
         Arrays.fill(columns, null);
+        Arrays.fill(timestampMaps, null);
         if (indexStore != null) {
             indexStore.clear();
         }
@@ -213,6 +216,16 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
 
     public int size() {
         return length - garbageQueue.size();
+    }
+
+    public TimestampMap getTimestampStore(Column column) {
+        int index = column.getIndex();
+        TimestampMap timestampStore = timestampMaps[index];
+        if (timestampStore == null) {
+            timestampStore = new TimestampMap();
+            timestampMaps[index] = timestampStore;
+        }
+        return timestampStore;
     }
 
     short intToShort(final int id) {
@@ -325,7 +338,17 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
             if (!itr2.hasNext()) {
                 return false;
             }
-            if (!itr1.next().equals(itr2.next())) {
+            Column c1 = itr1.next();
+            Column c2 = itr2.next();
+            if (!c1.equals(c2)) {
+                return false;
+            }
+            TimestampMap s1 = timestampMaps[c1.getIndex()];
+            TimestampMap s2 = timestampMaps[c2.getIndex()];
+            if ((s1 == null && s2 != null) || (s1 != null && s2 == null)) {
+                return false;
+            }
+            if (s1 != null && !s1.equals(s2)) {
                 return false;
             }
         }

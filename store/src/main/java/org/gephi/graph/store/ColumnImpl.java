@@ -17,6 +17,7 @@ package org.gephi.graph.store;
 
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.TimestampValueSet;
 
 /**
  *
@@ -31,6 +32,7 @@ public class ColumnImpl implements Column {
     protected final Object defaultValue;
     protected final Origin origin;
     protected final boolean indexed;
+    protected final boolean dynamic;
     //Store Id
     protected int storeId = ColumnStore.NULL_ID;
 
@@ -38,12 +40,16 @@ public class ColumnImpl implements Column {
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("The column ID can't be null or empty");
         }
+        if (typeClass == null) {
+            throw new NullPointerException();
+        }
         this.id = id;
         this.typeClass = typeClass;
         this.title = title;
         this.defaultValue = defaultValue;
         this.origin = origin;
         this.indexed = indexed;
+        this.dynamic = TimestampValueSet.class.isAssignableFrom(typeClass);
     }
 
     @Override
@@ -84,6 +90,11 @@ public class ColumnImpl implements Column {
     @Override
     public boolean isArray() {
         return typeClass.isArray();
+    }
+
+    @Override
+    public boolean isDynamic() {
+        return dynamic;
     }
 
     public int getStoreId() {

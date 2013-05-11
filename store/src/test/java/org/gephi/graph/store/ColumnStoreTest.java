@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.TimestampDoubleSet;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
@@ -98,6 +99,11 @@ public class ColumnStoreTest {
 
             @Override
             public Object getDefaultValue() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean isDynamic() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });
@@ -290,5 +296,33 @@ public class ColumnStoreTest {
         store2.removeColumn(col21);
 
         Assert.assertEquals(store1.hashCode(), store2.hashCode());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testColumnNullId() {
+        new ColumnImpl(null, null, null, this, Origin.DATA, true);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testColumnEmptyId() {
+        new ColumnImpl("", null, null, this, Origin.DATA, true);
+    }
+
+    @Test
+    public void testColumnIsDynamic() {
+        ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false);
+        Assert.assertFalse(col1.isDynamic());
+
+        ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleSet.class, null, null, Origin.DATA, false);
+        Assert.assertTrue(col2.isDynamic());
+    }
+
+    @Test
+    public void testColumnIsArray() {
+        ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false);
+        Assert.assertFalse(col1.isArray());
+
+        ColumnImpl col2 = new ColumnImpl("0", int[].class, null, null, Origin.DATA, false);
+        Assert.assertTrue(col2.isArray());
     }
 }
