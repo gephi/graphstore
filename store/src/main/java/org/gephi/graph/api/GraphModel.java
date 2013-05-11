@@ -65,23 +65,31 @@ public interface GraphModel {
 
     public GraphView createNodeView();
 
+    public GraphView copyView(GraphView view);
+
+    public GraphView copyNodeView(GraphView view);
+
     public void destroyView(GraphView view);
 
     public Table getNodeTable();
 
     public Table getEdgeTable();
 
-    public Index getNodeIndex();
+    public Index<Node> getNodeIndex();
 
-    public Index getNodeIndex(GraphView view);
+    public Index<Node> getNodeIndex(GraphView view);
 
-    public Index getEdgeIndex();
+    public Index<Edge> getEdgeIndex();
 
-    public Index getEdgeIndex(GraphView view);
+    public Index<Edge> getEdgeIndex(GraphView view);
 
-    public TimestampIndex getTimestampIndex();
+    public TimestampIndex<Node> getNodeTimestampIndex();
 
-    public TimestampIndex getTimestampIndex(GraphView view);
+    public TimestampIndex<Node> getNodeTimestampIndex(GraphView view);
+
+    public TimestampIndex<Edge> getEdgeTimestampIndex();
+
+    public TimestampIndex<Edge> getEdgeTimestampIndex(GraphView view);
 
     public GraphObserver getGraphObserver(Graph graph, boolean withGraphDiff);
 }

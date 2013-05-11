@@ -32,6 +32,14 @@ public interface Element {
 
     public Object getAttribute(Column column);
 
+    public Object getAttribute(String key, double timestamp);
+
+    public Object getAttribute(Column column, double timestamp);
+
+    public Object getAttribute(String key, GraphView view);
+
+    public Object getAttribute(Column column, GraphView view);
+
     public Object[] getAttributes();
 
     public Set<String> getAttributeKeys();

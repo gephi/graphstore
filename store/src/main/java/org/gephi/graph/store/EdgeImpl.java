@@ -163,6 +163,22 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     @Override
+    TimestampMap getTimestampMap() {
+        if (graphStore != null) {
+            return graphStore.timestampStore.edgeMap;
+        }
+        return null;
+    }
+
+    @Override
+    TimestampIndexStore<Edge> getTimestampIndexStore() {
+        if (graphStore != null) {
+            return graphStore.timestampStore.edgeIndexStore;
+        }
+        return null;
+    }
+
+    @Override
     boolean isValid() {
         return storeId != EdgeStore.NULL_ID;
     }

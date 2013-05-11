@@ -26,44 +26,42 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.gephi.attribute.api.TimestampIndex;
-import org.gephi.graph.api.Edge;
-import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.Node;
-import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 
 /**
  *
  * @author mbastian
  */
-public class TimestampIndexImpl implements TimestampIndex {
+public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> {
     //Const
 
     protected static final int NULL_INDEX = -1;
     //Data
     protected final GraphLock lock;
-    protected final TimestampStore timestampStore;
+    protected final TimestampIndexStore timestampIndexStore;
+    protected final TimestampMap timestampMap;
     protected final boolean mainIndex;
     protected TimestampIndexEntry[] timestamps;
-    protected int nodeCount;
-    protected int edgeCount;
+    protected int elementCount;
 
-    public TimestampIndexImpl(TimestampStore store, boolean main) {
-        timestampStore = store;
+    public TimestampIndexImpl(TimestampIndexStore store, boolean main) {
+        timestampIndexStore = store;
+        timestampMap = store.timestampMap;
         mainIndex = main;
-        lock = store.lock;
-
         timestamps = new TimestampIndexEntry[0];
+        lock = store.timestampStore.lock;
     }
 
     @Override
     public double getMinTimestamp() {
         if (mainIndex) {
-            Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
+            Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
             if (!sortedMap.isEmpty()) {
                 return sortedMap.firstDoubleKey();
             }
         } else {
-            Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
+            Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
             if (!sortedMap.isEmpty()) {
                 ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator();
                 while (bi.hasNext()) {
@@ -85,12 +83,12 @@ public class TimestampIndexImpl implements TimestampIndex {
     @Override
     public double getMaxTimestamp() {
         if (mainIndex) {
-            Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
+            Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
             if (!sortedMap.isEmpty()) {
                 return sortedMap.lastDoubleKey();
             }
         } else {
-            Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
+            Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
             if (!sortedMap.isEmpty()) {
                 ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator(sortedMap.double2IntEntrySet().last());
                 while (bi.hasPrevious()) {
@@ -110,29 +108,29 @@ public class TimestampIndexImpl implements TimestampIndex {
     }
 
     @Override
-    public NodeIterable getNodes(double timestamp) {
+    public ElementIterable get(double timestamp) {
         checkDouble(timestamp);
 
         readLock();
-        int index = timestampStore.timestampMap.get(timestamp);
+        int index = timestampMap.timestampMap.get(timestamp);
         if (index != NULL_INDEX) {
             TimestampIndexEntry ts = timestamps[index];
             if (ts != null) {
-                return new NodeIterableImpl(new NodeIteratorImpl(ts.nodeSet.iterator()));
+                return new ElementIterableImpl(new ElementIteratorImpl(ts.elementSet.iterator()));
             }
         }
         readUnlock();
-        return NodeIterable.EMPTY;
+        return ElementIterable.EMPTY;
     }
 
     @Override
-    public NodeIterable getNodes(double from, double to) {
+    public ElementIterable get(double from, double to) {
         checkDouble(from);
         checkDouble(to);
 
         readLock();
-        ObjectSet<NodeImpl> nodes = new ObjectOpenHashSet<NodeImpl>();
-        Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
+        ObjectSet<ElementImpl> elements = new ObjectOpenHashSet<ElementImpl>();
+        Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
         if (!sortedMap.isEmpty()) {
             for (Double2IntMap.Entry entry : sortedMap.tailMap(from).double2IntEntrySet()) {
                 double timestamp = entry.getDoubleKey();
@@ -140,131 +138,43 @@ public class TimestampIndexImpl implements TimestampIndex {
                 if (timestamp <= to) {
                     TimestampIndexEntry ts = timestamps[index];
                     if (ts != null) {
-                        nodes.addAll(ts.nodeSet);
+                        elements.addAll(ts.elementSet);
                     }
                 } else {
                     break;
                 }
             }
         }
-        if (!nodes.isEmpty()) {
-            return new NodeIterableImpl(new NodeIteratorImpl(nodes.iterator()));
+        if (!elements.isEmpty()) {
+            return new ElementIterableImpl(new ElementIteratorImpl(elements.iterator()));
         }
-        return NodeIterable.EMPTY;
+        return ElementIterable.EMPTY;
     }
 
-    @Override
-    public EdgeIterable getEdges(double timestamp) {
-        checkDouble(timestamp);
-
-        readLock();
-        int index = timestampStore.timestampMap.get(timestamp);
-        if (index != NULL_INDEX) {
-            TimestampIndexEntry ts = timestamps[index];
-            if (ts != null) {
-                return new EdgeIterableImpl(new EdgeIteratorImpl(ts.edgeSet.iterator()));
-            }
-        }
-        readUnlock();
-        return EdgeIterable.EMPTY;
-    }
-
-    @Override
-    public EdgeIterable getEdges(double from, double to) {
-        checkDouble(from);
-        checkDouble(to);
-
-        readLock();
-        ObjectSet<EdgeImpl> edges = new ObjectOpenHashSet<EdgeImpl>();
-        Double2IntSortedMap sortedMap = timestampStore.timestampSortedMap;
-        if (!sortedMap.isEmpty()) {
-            for (Double2IntMap.Entry entry : sortedMap.tailMap(from).double2IntEntrySet()) {
-                double timestamp = entry.getDoubleKey();
-                int index = entry.getIntValue();
-                if (timestamp <= to) {
-                    TimestampIndexEntry ts = timestamps[index];
-                    if (ts != null) {
-                        edges.addAll(ts.edgeSet);
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-        if (!edges.isEmpty()) {
-            return new EdgeIterableImpl(new EdgeIteratorImpl(edges.iterator()));
-        } else {
-            return EdgeIterable.EMPTY;
-        }
-    }
-
-    public boolean hasNodes() {
-        return nodeCount > 0;
-    }
-
-    public boolean hasEdges() {
-        return edgeCount > 0;
+    public boolean hasElements() {
+        return elementCount > 0;
     }
 
     public void clear() {
         timestamps = new TimestampIndexEntry[0];
-        nodeCount = 0;
-        edgeCount = 0;
+        elementCount = 0;
     }
 
-    public void clearEdges() {
-        if (nodeCount == 0) {
-            clear();
-        } else {
-            for (int i = 0; i < timestamps.length; i++) {
-                TimestampIndexEntry entry = timestamps[i];
-                if (entry != null) {
-                    entry.edgeSet.clear();
-                    if (entry.isEmpty()) {
-                        clearEntry(i);
-                    }
-                }
-            }
-            edgeCount = 0;
-        }
-    }
-
-    protected void addNode(int timestampIndex, NodeImpl node) {
+    protected void add(int timestampIndex, ElementImpl element) {
         ensureArraySize(timestampIndex);
         TimestampIndexEntry entry = timestamps[timestampIndex];
         if (entry == null) {
             entry = addTimestamp(timestampIndex);
         }
-        if (entry.addNode(node)) {
-            nodeCount++;
+        if (entry.add(element)) {
+            elementCount++;
         }
     }
 
-    protected void addEdge(int timestampIndex, EdgeImpl edge) {
-        ensureArraySize(timestampIndex);
+    protected void remove(int timestampIndex, ElementImpl element) {
         TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry == null) {
-            entry = addTimestamp(timestampIndex);
-        }
-        if (entry.addEdge(edge)) {
-            edgeCount++;
-        }
-    }
-
-    protected void removeNode(int timestampIndex, NodeImpl node) {
-        TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry.removeNode(node)) {
-            nodeCount--;
-            if (entry.isEmpty()) {
-                clearEntry(timestampIndex);
-            }
-        }
-    }
-
-    protected void removeEdge(int timestampIndex, EdgeImpl edge) {
-        TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry.removeEdge(edge)) {
-            edgeCount--;
+        if (entry.remove(element)) {
+            elementCount--;
             if (entry.isEmpty()) {
                 clearEntry(timestampIndex);
             }
@@ -326,40 +236,30 @@ public class TimestampIndexImpl implements TimestampIndex {
 
     protected static class TimestampIndexEntry {
 
-        protected final ObjectSet<NodeImpl> nodeSet;
-        protected final ObjectSet<EdgeImpl> edgeSet;
+        protected final ObjectSet<ElementImpl> elementSet;
 
         public TimestampIndexEntry() {
-            nodeSet = new ObjectOpenHashSet<NodeImpl>();
-            edgeSet = new ObjectOpenHashSet<EdgeImpl>();
+            elementSet = new ObjectOpenHashSet<ElementImpl>();
         }
 
-        public boolean addNode(NodeImpl node) {
-            return nodeSet.add(node);
+        public boolean add(ElementImpl element) {
+            return elementSet.add(element);
         }
 
-        public boolean addEdge(EdgeImpl edge) {
-            return edgeSet.add(edge);
-        }
-
-        public boolean removeNode(NodeImpl node) {
-            return nodeSet.remove(node);
-        }
-
-        public boolean removeEdge(EdgeImpl edge) {
-            return edgeSet.remove(edge);
+        public boolean remove(ElementImpl element) {
+            return elementSet.remove(element);
         }
 
         public boolean isEmpty() {
-            return nodeSet.isEmpty() && edgeSet.isEmpty();
+            return elementSet.isEmpty();
         }
     }
 
-    protected class NodeIteratorImpl implements Iterator<Node> {
+    protected class ElementIteratorImpl implements Iterator<Element> {
 
-        private final ObjectIterator<NodeImpl> itr;
+        private final ObjectIterator<ElementImpl> itr;
 
-        public NodeIteratorImpl(ObjectIterator<NodeImpl> itr) {
+        public ElementIteratorImpl(ObjectIterator<ElementImpl> itr) {
             this.itr = itr;
         }
 
@@ -369,7 +269,7 @@ public class TimestampIndexImpl implements TimestampIndex {
         }
 
         @Override
-        public Node next() {
+        public Element next() {
             return itr.next();
         }
 
@@ -379,92 +279,31 @@ public class TimestampIndexImpl implements TimestampIndex {
         }
     }
 
-    protected class EdgeIteratorImpl implements Iterator<Edge> {
+    protected class ElementIterableImpl implements ElementIterable {
 
-        private final ObjectIterator<EdgeImpl> itr;
+        protected final Iterator<Element> iterator;
 
-        public EdgeIteratorImpl(ObjectIterator<EdgeImpl> itr) {
-            this.itr = itr;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return itr.hasNext();
-        }
-
-        @Override
-        public Edge next() {
-            return itr.next();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
-    }
-
-    protected class NodeIterableImpl implements NodeIterable {
-
-        protected final Iterator<Node> iterator;
-
-        public NodeIterableImpl(Iterator<Node> iterator) {
+        public ElementIterableImpl(Iterator<Element> iterator) {
             this.iterator = iterator;
         }
 
         @Override
-        public Iterator<Node> iterator() {
+        public Iterator<Element> iterator() {
             return iterator;
         }
 
         @Override
-        public Node[] toArray() {
-            List<Node> list = new ArrayList<Node>();
+        public Element[] toArray() {
+            List<Element> list = new ArrayList<Element>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
-            return list.toArray(new Node[0]);
+            return list.toArray(new Element[0]);
         }
 
         @Override
-        public Collection<Node> toCollection() {
-            List<Node> list = new ArrayList<Node>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list;
-        }
-
-        @Override
-        public void doBreak() {
-            readUnlock();
-        }
-    }
-
-    protected class EdgeIterableImpl implements EdgeIterable {
-
-        protected final Iterator<Edge> iterator;
-
-        public EdgeIterableImpl(Iterator<Edge> iterator) {
-            this.iterator = iterator;
-        }
-
-        @Override
-        public Iterator<Edge> iterator() {
-            return iterator;
-        }
-
-        @Override
-        public Edge[] toArray() {
-            List<Edge> list = new ArrayList<Edge>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list.toArray(new Edge[0]);
-        }
-
-        @Override
-        public Collection<Edge> toCollection() {
-            List<Edge> list = new ArrayList<Edge>();
+        public Collection<Element> toCollection() {
+            List<Element> list = new ArrayList<Element>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }

@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.Interval;
 import org.gephi.attribute.time.TimestampSet;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -75,7 +76,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
         edgeColumnStore = new ColumnStore<Edge>(Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
-        timestampStore = new TimestampStore(GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
+        timestampStore = new TimestampStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
         factory = new GraphFactoryImpl(this);
 
         undirectedDecorator = new UndirectedDecorator(this);
@@ -470,9 +471,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             nodeStore.clear();
             edgeColumnStore.indexStore.clear();
             nodeColumnStore.indexStore.clear();
-            if (timestampStore != null) {
-                timestampStore.clear();
-            }
+            timestampStore.clear();
         } finally {
             autoWriteUnlock();
         }
@@ -484,9 +483,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         try {
             edgeStore.clear();
             edgeColumnStore.indexStore.clear();
-            if (timestampStore != null) {
-                timestampStore.clearEdges();
-            }
+            timestampStore.clearEdges();
         } finally {
             autoWriteUnlock();
         }
@@ -744,6 +741,15 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         @Override
         public boolean isNodeView() {
             return false;
+        }
+
+        @Override
+        public void setTimeInterval(Interval interval) {
+        }
+
+        @Override
+        public Interval getTimeInterval() {
+            return null;
         }
     }
 }

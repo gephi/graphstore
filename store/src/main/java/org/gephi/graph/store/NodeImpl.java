@@ -80,6 +80,22 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
+    TimestampMap getTimestampMap() {
+        if (graphStore != null) {
+            return graphStore.timestampStore.nodeMap;
+        }
+        return null;
+    }
+
+    @Override
+    TimestampIndexStore<Node> getTimestampIndexStore() {
+        if (graphStore != null) {
+            return graphStore.timestampStore.nodeIndexStore;
+        }
+        return null;
+    }
+
+    @Override
     boolean isValid() {
         return storeId != NodeStore.NULL_ID;
     }

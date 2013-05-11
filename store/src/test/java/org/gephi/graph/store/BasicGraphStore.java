@@ -448,6 +448,26 @@ public class BasicGraphStore implements DirectedGraph {
         public int getStoreId() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public Object getAttribute(String key, double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Object getAttribute(Column column, double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Object getAttribute(String key, GraphView view) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Object getAttribute(Column column, GraphView view) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     public static class BasicNode extends BasicElement implements Node {

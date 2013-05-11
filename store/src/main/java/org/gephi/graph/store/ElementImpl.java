@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.gephi.attribute.api.Column;
+import org.gephi.attribute.time.Interval;
 import org.gephi.attribute.time.TimestampBooleanSet;
 import org.gephi.attribute.time.TimestampByteSet;
 import org.gephi.attribute.time.TimestampCharSet;
@@ -31,6 +32,7 @@ import org.gephi.attribute.time.TimestampShortSet;
 import org.gephi.attribute.time.TimestampStringSet;
 import org.gephi.attribute.time.TimestampValueSet;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.GraphView;
 
 /**
  *
@@ -55,6 +57,10 @@ public abstract class ElementImpl implements Element {
     }
 
     abstract ColumnStore getColumnStore();
+
+    abstract TimestampMap getTimestampMap();
+
+    abstract TimestampIndexStore getTimestampIndexStore();
 
     abstract boolean isValid();
 
@@ -89,6 +95,75 @@ public abstract class ElementImpl implements Element {
             return column.getDefaultValue();
         }
         return res;
+    }
+
+    @Override
+    public Object getAttribute(String key, double timestamp) {
+        return getAttribute(getColumnStore().getColumn(key), timestamp);
+    }
+
+    @Override
+    public Object getAttribute(Column column, double timestamp) {
+        checkEnabledTimestampSet();
+        checkDouble(timestamp);
+        checkColumn(column);
+        checkColumnDynamic(column);
+
+        Object res = null;
+        final TimestampMap timestampMap = getTimestampMap();
+        if (timestampMap != null) {
+
+            int index = column.getIndex();
+            TimestampValueSet dynamicValue = null;
+            if (index < attributes.length) {
+                dynamicValue = (TimestampValueSet) attributes[index];
+            }
+            if (dynamicValue != null) {
+                int timestampIndex = timestampMap.getTimestampIndex(timestamp);
+                res = dynamicValue.get(timestampIndex, column.getDefaultValue());
+            }
+        } else {
+            throw new RuntimeException("The timestamp store is not available");
+        }
+        return res;
+    }
+
+    @Override
+    public Object getAttribute(String key, GraphView view) {
+        return getAttribute(getColumnStore().getColumn(key), view);
+    }
+
+    @Override
+    public Object getAttribute(Column column, GraphView view) {
+        checkColumn(column);
+
+        if (!column.isDynamic()) {
+            return getAttribute(column);
+        } else {
+            Interval interval = view.getTimeInterval();
+            if (interval == null) {
+                return getAttribute(column);
+            }
+            checkEnabledTimestampSet();
+            checkViewExist((GraphViewImpl) view);
+            final TimestampMap timestampMap = getTimestampMap();
+            if (timestampMap != null) {
+
+                int index = column.getIndex();
+                TimestampValueSet dynamicValue = null;
+                if (index < attributes.length) {
+                    dynamicValue = (TimestampValueSet) attributes[index];
+                }
+                if (dynamicValue != null && dynamicValue.isEmpty()) {
+                    int[] timestampIndices = timestampMap.getTimestampIndices(interval);
+
+
+                }
+            } else {
+                throw new RuntimeException("The timestamp store is not available");
+            }
+        }
+        return null;
     }
 
     @Override
@@ -185,8 +260,8 @@ public abstract class ElementImpl implements Element {
         checkDouble(timestamp);
         checkColumn(column);
 
-        final TimestampStore timestampStore = getTimestampStore();
-        if (timestampStore != null) {
+        final TimestampMap timestampMap = getTimestampMap();
+        if (timestampMap != null) {
             writeLock();
             try {
                 int index = column.getIndex();
@@ -213,7 +288,7 @@ public abstract class ElementImpl implements Element {
                 }
 
 
-                int timestampIndex = timestampStore.getTimestampIndex(timestamp);
+                int timestampIndex = timestampMap.getTimestampIndex(timestamp);
                 dynamicValue.put(timestampIndex, value);
             } finally {
                 writeUnlock();
@@ -228,7 +303,7 @@ public abstract class ElementImpl implements Element {
         checkEnabledTimestampSet();
         checkDouble(timestamp);
 
-        final TimestampStore timestampStore = getTimestampStore();
+        final TimestampIndexStore timestampStore = getTimestampIndexStore();
         if (timestampStore != null) {
             writeLock();
             try {
@@ -243,7 +318,7 @@ public abstract class ElementImpl implements Element {
                     }
                     attributes[index] = timestampSet;
                 }
-                final int timestampIndex = timestampStore.addElement(timestamp, this);
+                final int timestampIndex = timestampStore.add(timestamp, this);
                 return timestampSet.add(timestampIndex);
             } finally {
                 writeUnlock();
@@ -261,9 +336,9 @@ public abstract class ElementImpl implements Element {
         if (timestampSet != null) {
             writeLock();
             try {
-                final TimestampStore timestampStore = getTimestampStore();
+                final TimestampIndexStore timestampStore = getTimestampIndexStore();
                 if (timestampStore != null) {
-                    final int timestampIndex = timestampStore.removeElement(timestamp, this);
+                    final int timestampIndex = timestampStore.remove(timestamp, this);
                     return timestampSet.remove(timestampIndex);
                 }
             } finally {
@@ -279,12 +354,12 @@ public abstract class ElementImpl implements Element {
 
         TimestampSet timestampSet = getTimestampSet();
         if (timestampSet != null) {
-            final TimestampStore timestampStore = getTimestampStore();
-            if (timestampStore != null) {
+            final TimestampMap timestampMap = getTimestampMap();
+            if (timestampMap != null) {
                 readLock();
                 try {
                     final int[] indices = timestampSet.getTimestamps();
-                    return timestampStore.getTimestamps(indices);
+                    return timestampMap.getTimestamps(indices);
                 } finally {
                     readUnlock();
                 }
@@ -305,7 +380,7 @@ public abstract class ElementImpl implements Element {
         if (columnStore != null) {
             columnStore.indexStore.index(this);
         }
-        TimestampStore timestampStore = getTimestampStore();
+        final TimestampIndexStore timestampStore = getTimestampIndexStore();
         if (timestampStore != null) {
             timestampStore.index(this);
         }
@@ -320,12 +395,11 @@ public abstract class ElementImpl implements Element {
                 if (columnStore != null) {
                     columnStore.indexStore.clear(this);
                 }
-                TimestampStore timestampStore = getTimestampStore();
+                final TimestampIndexStore timestampStore = getTimestampIndexStore();
                 if (timestampStore != null) {
                     timestampStore.clear(this);
                 }
             }
-
 
             TimestampSet timestampSet = getTimestampSet();
             if (timestampSet != null) {
@@ -340,13 +414,6 @@ public abstract class ElementImpl implements Element {
 
     protected GraphStore getGraphStore() {
         return graphStore;
-    }
-
-    protected TimestampStore getTimestampStore() {
-        if (graphStore != null) {
-            return graphStore.timestampStore;
-        }
-        return null;
     }
 
     private void checkEnabledTimestampSet() {
@@ -368,6 +435,12 @@ public abstract class ElementImpl implements Element {
         ColumnStore columnStore = getColumnStore();
         if (columnStore != null && columnStore.getColumnByIndex(column.getIndex()) != column) {
             throw new IllegalArgumentException("The column does not belong to the right column store");
+        }
+    }
+
+    private void checkColumnDynamic(Column column) {
+        if (!((ColumnImpl) column).isDynamic()) {
+            throw new IllegalArgumentException("The column is not dynamic");
         }
     }
 
@@ -416,5 +489,10 @@ public abstract class ElementImpl implements Element {
                 throw new IllegalArgumentException("The object class does not match with the column type (" + typeClass.getName() + ")");
             }
         }
+    }
+
+    private void checkViewExist(final GraphViewImpl view) {
+        graphStore.viewStore.checkNonNullViewObject(view);
+        graphStore.viewStore.checkViewExist(view);
     }
 }

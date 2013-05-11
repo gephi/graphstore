@@ -15,24 +15,20 @@
  */
 package org.gephi.attribute.api;
 
-import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 
 /**
  *
  * @author mbastian
  */
-public interface TimestampIndex {
+public interface TimestampIndex<T extends Element> {
 
     public double getMinTimestamp();
 
     public double getMaxTimestamp();
 
-    public NodeIterable getNodes(double timestamp);
+    public ElementIterable<T> get(double timestamp);
 
-    public NodeIterable getNodes(double from, double to);
-
-    public EdgeIterable getEdges(double timestamp);
-
-    public EdgeIterable getEdges(double from, double to);
+    public ElementIterable<T> get(double from, double to);
 }

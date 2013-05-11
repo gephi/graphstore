@@ -187,6 +187,16 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
+    public GraphView copyView(GraphView view) {
+        return store.viewStore.createView(view);
+    }
+
+    @Override
+    public GraphView copyNodeView(GraphView view) {
+        return store.viewStore.createNodeView(view);
+    }
+
+    @Override
     public void destroyView(GraphView view) {
         store.viewStore.destroyView(view);
     }
@@ -238,8 +248,8 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
-    public TimestampIndex getTimestampIndex() {
-        TimestampStore timestampStore = store.timestampStore;
+    public TimestampIndex<Node> getNodeTimestampIndex() {
+        TimestampIndexStore timestampStore = store.timestampStore.nodeIndexStore;
         if (timestampStore != null) {
             return timestampStore.getIndex(store);
         }
@@ -247,8 +257,26 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
-    public TimestampIndex getTimestampIndex(GraphView view) {
-        TimestampStore timestampStore = store.timestampStore;
+    public TimestampIndex<Node> getNodeTimestampIndex(GraphView view) {
+        TimestampIndexStore timestampStore = store.timestampStore.nodeIndexStore;
+        if (timestampStore != null) {
+            return timestampStore.getIndex(((GraphViewImpl) view).directedDecorator);
+        }
+        return null;
+    }
+
+    @Override
+    public TimestampIndex<Edge> getEdgeTimestampIndex() {
+        TimestampIndexStore timestampStore = store.timestampStore.edgeIndexStore;
+        if (timestampStore != null) {
+            return timestampStore.getIndex(store);
+        }
+        return null;
+    }
+
+    @Override
+    public TimestampIndex<Edge> getEdgeTimestampIndex(GraphView view) {
+        TimestampIndexStore timestampStore = store.timestampStore.edgeIndexStore;
         if (timestampStore != null) {
             return timestampStore.getIndex(((GraphViewImpl) view).directedDecorator);
         }
