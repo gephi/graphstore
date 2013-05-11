@@ -73,16 +73,16 @@
     <distributionManagement>
         <!-- Publish versioned releases here -->
         <repository>
-            <id>${gephi.release.repository.id}</id>
+            <id>${release.repository.id}</id>
             <name>Gephi Release Repository</name>
-            <url>${gephi.release.repository.url}</url>
+            <url>${release.repository.url}</url>
         </repository>
  
         <!-- Publish snapshots here -->
         <snapshotRepository>
-            <id>${gephi.snapshot.repository.id}</id>
+            <id>${snapshot.repository.id}</id>
             <name>Gephi Snapshot Repository</name>
-            <url>${gephi.snapshot.repository.url}</url>
+            <url>${snapshot.repository.url}</url>
         </snapshotRepository>
     </distributionManagement>
 
