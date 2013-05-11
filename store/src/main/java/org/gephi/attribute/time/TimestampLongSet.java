@@ -156,6 +156,11 @@ public final class TimestampLongSet extends TimestampValueSet<Long> {
     }
 
     @Override
+    public boolean isSupported(Estimator estimator) {
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE, Estimator.SUM);
+    }
+
+    @Override
     protected Object getValue(int index) {
         return values[index];
     }

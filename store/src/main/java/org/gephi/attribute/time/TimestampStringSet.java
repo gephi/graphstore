@@ -104,6 +104,11 @@ public final class TimestampStringSet extends TimestampValueSet<String> {
     }
 
     @Override
+    public boolean isSupported(Estimator estimator) {
+        return estimator.is(Estimator.FIRST, Estimator.LAST);
+    }
+
+    @Override
     protected Object getValue(int index) {
         return values[index];
     }

@@ -170,6 +170,11 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
     }
 
     @Override
+    public boolean isSupported(Estimator estimator) {
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST);
+    }
+
+    @Override
     protected Object getValue(int index) {
         return values[index];
     }

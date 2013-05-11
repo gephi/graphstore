@@ -49,6 +49,8 @@ public abstract class TimestampValueSet<T> {
 
     public abstract Class<T> getTypeClass();
 
+    public abstract boolean isSupported(Estimator estimator);
+
     protected abstract Object getValue(int index);
 
     protected int putInner(int timestampIndex) {

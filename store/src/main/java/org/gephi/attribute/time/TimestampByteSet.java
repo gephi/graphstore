@@ -177,6 +177,11 @@ public final class TimestampByteSet extends TimestampValueSet<Byte> {
     }
 
     @Override
+    public boolean isSupported(Estimator estimator) {
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE, Estimator.SUM);
+    }
+
+    @Override
     protected Object getValue(int index) {
         return values[index];
     }
