@@ -8,7 +8,18 @@
     <packaging>jar</packaging>
 
     <name>GraphStore</name>
-    <url>http://maven.apache.org</url>
+    <url>https://github.com/gephi/graphstore</url>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        
+        <!-- Repository URLs -->
+        <release.repository.id>gephi-nexus</release.repository.id>
+        <snapshot.repository.id>gephi-nexus</snapshot.repository.id>
+        <release.repository.url>http://nexus.gephi.org/nexus/content/repositories/releases</release.repository.url>
+        <snapshot.repository.url>http://nexus.gephi.org/nexus/content/repositories/snapshots</snapshot.repository.url>
+    </properties>
+    
     <build>
         <plugins>
             <plugin>
@@ -46,9 +57,7 @@
             </build>
         </profile>
     </profiles>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    
 
     <reporting>
         <plugins>
@@ -59,6 +68,23 @@
             </plugin>
         </plugins>
     </reporting>
+    
+    <!-- Locations of the artifacts published -->
+    <distributionManagement>
+        <!-- Publish versioned releases here -->
+        <repository>
+            <id>${gephi.release.repository.id}</id>
+            <name>Gephi Release Repository</name>
+            <url>${gephi.release.repository.url}</url>
+        </repository>
+ 
+        <!-- Publish snapshots here -->
+        <snapshotRepository>
+            <id>${gephi.snapshot.repository.id}</id>
+            <name>Gephi Snapshot Repository</name>
+            <url>${gephi.snapshot.repository.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
