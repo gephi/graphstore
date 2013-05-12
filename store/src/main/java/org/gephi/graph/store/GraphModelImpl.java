@@ -318,6 +318,10 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
         }
     }
 
+    public GraphStore getStore() {
+        return store;
+    }
+
     private void checkGraphObserver(GraphObserver observer) {
         if (observer == null) {
             throw new NullPointerException();

@@ -1011,7 +1011,7 @@ public class Serialization {
     }
 
     //DESERIALIZE PRIMITIVES
-    public Object deserialize(byte[] buf) throws ClassNotFoundException, IOException {
+    protected Object deserialize(byte[] buf) throws ClassNotFoundException, IOException {
         DataInputOutput bs = new DataInputOutput(buf);
         Object ret = deserialize(bs);
         if (bs.available() != 0) {
