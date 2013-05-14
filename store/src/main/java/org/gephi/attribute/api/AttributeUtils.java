@@ -15,15 +15,102 @@
  */
 package org.gephi.attribute.api;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
+import org.gephi.attribute.time.*;
 
 /**
  *
  * @author mbastian
  */
 public class AttributeUtils {
+
+    private static final Set<Class> supportedTypes;
+    private static final Map<Class, Class> typesStandardization;
+
+    static {
+        supportedTypes = new HashSet<Class>();
+
+        //Primitives
+        supportedTypes.add(Boolean.class);
+        supportedTypes.add(boolean.class);
+        supportedTypes.add(Integer.class);
+        supportedTypes.add(int.class);
+        supportedTypes.add(Short.class);
+        supportedTypes.add(short.class);
+        supportedTypes.add(Long.class);
+        supportedTypes.add(long.class);
+        supportedTypes.add(Byte.class);
+        supportedTypes.add(byte.class);
+        supportedTypes.add(Float.class);
+        supportedTypes.add(float.class);
+        supportedTypes.add(Double.class);
+        supportedTypes.add(double.class);
+        supportedTypes.add(Character.class);
+        supportedTypes.add(char.class);
+
+        //Objects
+        supportedTypes.add(String.class);
+
+        //Prinitives Array
+        supportedTypes.add(Boolean[].class);
+        supportedTypes.add(boolean[].class);
+        supportedTypes.add(Integer[].class);
+        supportedTypes.add(int[].class);
+        supportedTypes.add(Short[].class);
+        supportedTypes.add(short[].class);
+        supportedTypes.add(Long[].class);
+        supportedTypes.add(long[].class);
+        supportedTypes.add(Byte[].class);
+        supportedTypes.add(byte[].class);
+        supportedTypes.add(Float[].class);
+        supportedTypes.add(float[].class);
+        supportedTypes.add(Double[].class);
+        supportedTypes.add(double[].class);
+        supportedTypes.add(Character[].class);
+        supportedTypes.add(char[].class);
+
+        //Objects array
+        supportedTypes.add(String[].class);
+
+        //Dynamic
+        supportedTypes.add(TimestampBooleanSet.class);
+        supportedTypes.add(TimestampIntegerSet.class);
+        supportedTypes.add(TimestampShortSet.class);
+        supportedTypes.add(TimestampLongSet.class);
+        supportedTypes.add(TimestampByteSet.class);
+        supportedTypes.add(TimestampFloatSet.class);
+        supportedTypes.add(TimestampDoubleSet.class);
+        supportedTypes.add(TimestampCharSet.class);
+        supportedTypes.add(TimestampStringSet.class);
+
+        //Primitive types standardization
+        typesStandardization = new HashMap<Class, Class>();
+        typesStandardization.put(boolean.class, Boolean.class);
+        typesStandardization.put(int.class, Integer.class);
+        typesStandardization.put(short.class, Short.class);
+        typesStandardization.put(long.class, Long.class);
+        typesStandardization.put(byte.class, Byte.class);
+        typesStandardization.put(float.class, Float.class);
+        typesStandardization.put(double.class, Double.class);
+        typesStandardization.put(char.class, Character.class);
+
+        //Array standardization
+        typesStandardization.put(Boolean[].class, boolean[].class);
+        typesStandardization.put(Integer[].class, int[].class);
+        typesStandardization.put(Short[].class, short[].class);
+        typesStandardization.put(Long[].class, long[].class);
+        typesStandardization.put(Byte[].class, byte[].class);
+        typesStandardization.put(Float[].class, float[].class);
+        typesStandardization.put(Double[].class, double[].class);
+        typesStandardization.put(Character[].class, char[].class);
+    }
 
     public static Object parse(String str, Class typeClass) {
         if (typeClass.equals(String.class)) {
@@ -50,6 +137,96 @@ public class AttributeUtils {
             return new BigDecimal(str);
         }
         return null;
+    }
+
+    public static Class getPrimitiveType(Class type) {
+        if (!type.isPrimitive()) {
+            if (type.equals(Boolean.class)) {
+                return boolean.class;
+            } else if (type.equals(Integer.class)) {
+                return int.class;
+            } else if (type.equals(Short.class)) {
+                return short.class;
+            } else if (type.equals(Long.class)) {
+                return long.class;
+            } else if (type.equals(Byte.class)) {
+                return byte.class;
+            } else if (type.equals(Float.class)) {
+                return float.class;
+            } else if (type.equals(Double.class)) {
+                return double.class;
+            } else if (type.equals(Character.class)) {
+                return char.class;
+            }
+        }
+        throw new IllegalArgumentException("The type should be a wrapped primitive");
+    }
+
+    public static Object getPrimitiveArray(Object[] array) {
+        Class arrayClass = array.getClass().getComponentType();
+        if (!arrayClass.isPrimitive()) {
+            Class primitiveClass = getPrimitiveType(arrayClass);
+
+            int arrayLength = array.length;
+            Object primitiveArray = Array.newInstance(primitiveClass, arrayLength);
+
+            for (int i = 0; i < arrayLength; i++) {
+                Object obj = array[i];
+                if (obj != null) {
+                    Array.set(array, i, obj);
+                }
+            }
+            return primitiveArray;
+        }
+        return array;
+    }
+
+    public static Set<Class> getSupportedTypes() {
+        return supportedTypes;
+    }
+
+    public static boolean isSupported(Class type) {
+        return supportedTypes.contains(type);
+    }
+
+    public static Class getStandardizedType(Class type) {
+        return typesStandardization.get(type);
+    }
+
+    public boolean isStandardizedType(Class type) {
+        return typesStandardization.get(type).equals(type);
+    }
+
+    public static Class<? extends TimestampValueSet> getDynamicType(Class type) {
+        type = getStandardizedType(type);
+        if (type.equals(Boolean.class)) {
+            return TimestampBooleanSet.class;
+        } else if (type.equals(Integer.class)) {
+            return TimestampIntegerSet.class;
+        } else if (type.equals(Short.class)) {
+            return TimestampShortSet.class;
+        } else if (type.equals(Long.class)) {
+            return TimestampLongSet.class;
+        } else if (type.equals(Byte.class)) {
+            return TimestampByteSet.class;
+        } else if (type.equals(Float.class)) {
+            return TimestampFloatSet.class;
+        } else if (type.equals(Double.class)) {
+            return TimestampDoubleSet.class;
+        } else if (type.equals(Character.class)) {
+            return TimestampCharSet.class;
+        } else if (type.equals(String.class)) {
+            return TimestampStringSet.class;
+        }
+        throw new IllegalArgumentException("Unsupported type");
+    }
+
+    public static Object standardizeValue(Object value) {
+        Class type = value.getClass();
+        if (type.isArray()) {
+            return getPrimitiveArray((Object[]) value);
+        }
+        return value;
     }
 
     /**
