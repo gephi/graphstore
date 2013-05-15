@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.gephi.attribute.time.*;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 /**
  *
@@ -31,85 +33,89 @@ import org.gephi.attribute.time.*;
  */
 public class AttributeUtils {
 
-    private static final Set<Class> supportedTypes;
-    private static final Map<Class, Class> typesStandardization;
+    private static final Set<Class> SUPPORTED_TYPES;
+    private static final Map<Class, Class> TYPES_STANDARDIZATION;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER;
 
     static {
-        supportedTypes = new HashSet<Class>();
+        SUPPORTED_TYPES = new HashSet<Class>();
 
         //Primitives
-        supportedTypes.add(Boolean.class);
-        supportedTypes.add(boolean.class);
-        supportedTypes.add(Integer.class);
-        supportedTypes.add(int.class);
-        supportedTypes.add(Short.class);
-        supportedTypes.add(short.class);
-        supportedTypes.add(Long.class);
-        supportedTypes.add(long.class);
-        supportedTypes.add(Byte.class);
-        supportedTypes.add(byte.class);
-        supportedTypes.add(Float.class);
-        supportedTypes.add(float.class);
-        supportedTypes.add(Double.class);
-        supportedTypes.add(double.class);
-        supportedTypes.add(Character.class);
-        supportedTypes.add(char.class);
+        SUPPORTED_TYPES.add(Boolean.class);
+        SUPPORTED_TYPES.add(boolean.class);
+        SUPPORTED_TYPES.add(Integer.class);
+        SUPPORTED_TYPES.add(int.class);
+        SUPPORTED_TYPES.add(Short.class);
+        SUPPORTED_TYPES.add(short.class);
+        SUPPORTED_TYPES.add(Long.class);
+        SUPPORTED_TYPES.add(long.class);
+        SUPPORTED_TYPES.add(Byte.class);
+        SUPPORTED_TYPES.add(byte.class);
+        SUPPORTED_TYPES.add(Float.class);
+        SUPPORTED_TYPES.add(float.class);
+        SUPPORTED_TYPES.add(Double.class);
+        SUPPORTED_TYPES.add(double.class);
+        SUPPORTED_TYPES.add(Character.class);
+        SUPPORTED_TYPES.add(char.class);
 
         //Objects
-        supportedTypes.add(String.class);
+        SUPPORTED_TYPES.add(String.class);
 
         //Prinitives Array
-        supportedTypes.add(Boolean[].class);
-        supportedTypes.add(boolean[].class);
-        supportedTypes.add(Integer[].class);
-        supportedTypes.add(int[].class);
-        supportedTypes.add(Short[].class);
-        supportedTypes.add(short[].class);
-        supportedTypes.add(Long[].class);
-        supportedTypes.add(long[].class);
-        supportedTypes.add(Byte[].class);
-        supportedTypes.add(byte[].class);
-        supportedTypes.add(Float[].class);
-        supportedTypes.add(float[].class);
-        supportedTypes.add(Double[].class);
-        supportedTypes.add(double[].class);
-        supportedTypes.add(Character[].class);
-        supportedTypes.add(char[].class);
+        SUPPORTED_TYPES.add(Boolean[].class);
+        SUPPORTED_TYPES.add(boolean[].class);
+        SUPPORTED_TYPES.add(Integer[].class);
+        SUPPORTED_TYPES.add(int[].class);
+        SUPPORTED_TYPES.add(Short[].class);
+        SUPPORTED_TYPES.add(short[].class);
+        SUPPORTED_TYPES.add(Long[].class);
+        SUPPORTED_TYPES.add(long[].class);
+        SUPPORTED_TYPES.add(Byte[].class);
+        SUPPORTED_TYPES.add(byte[].class);
+        SUPPORTED_TYPES.add(Float[].class);
+        SUPPORTED_TYPES.add(float[].class);
+        SUPPORTED_TYPES.add(Double[].class);
+        SUPPORTED_TYPES.add(double[].class);
+        SUPPORTED_TYPES.add(Character[].class);
+        SUPPORTED_TYPES.add(char[].class);
 
         //Objects array
-        supportedTypes.add(String[].class);
+        SUPPORTED_TYPES.add(String[].class);
 
         //Dynamic
-        supportedTypes.add(TimestampBooleanSet.class);
-        supportedTypes.add(TimestampIntegerSet.class);
-        supportedTypes.add(TimestampShortSet.class);
-        supportedTypes.add(TimestampLongSet.class);
-        supportedTypes.add(TimestampByteSet.class);
-        supportedTypes.add(TimestampFloatSet.class);
-        supportedTypes.add(TimestampDoubleSet.class);
-        supportedTypes.add(TimestampCharSet.class);
-        supportedTypes.add(TimestampStringSet.class);
+        SUPPORTED_TYPES.add(TimestampBooleanSet.class);
+        SUPPORTED_TYPES.add(TimestampIntegerSet.class);
+        SUPPORTED_TYPES.add(TimestampShortSet.class);
+        SUPPORTED_TYPES.add(TimestampLongSet.class);
+        SUPPORTED_TYPES.add(TimestampByteSet.class);
+        SUPPORTED_TYPES.add(TimestampFloatSet.class);
+        SUPPORTED_TYPES.add(TimestampDoubleSet.class);
+        SUPPORTED_TYPES.add(TimestampCharSet.class);
+        SUPPORTED_TYPES.add(TimestampStringSet.class);
 
         //Primitive types standardization
-        typesStandardization = new HashMap<Class, Class>();
-        typesStandardization.put(boolean.class, Boolean.class);
-        typesStandardization.put(int.class, Integer.class);
-        typesStandardization.put(short.class, Short.class);
-        typesStandardization.put(long.class, Long.class);
-        typesStandardization.put(byte.class, Byte.class);
-        typesStandardization.put(float.class, Float.class);
-        typesStandardization.put(double.class, Double.class);
-        typesStandardization.put(char.class, Character.class);
+        TYPES_STANDARDIZATION = new HashMap<Class, Class>();
+        TYPES_STANDARDIZATION.put(boolean.class, Boolean.class);
+        TYPES_STANDARDIZATION.put(int.class, Integer.class);
+        TYPES_STANDARDIZATION.put(short.class, Short.class);
+        TYPES_STANDARDIZATION.put(long.class, Long.class);
+        TYPES_STANDARDIZATION.put(byte.class, Byte.class);
+        TYPES_STANDARDIZATION.put(float.class, Float.class);
+        TYPES_STANDARDIZATION.put(double.class, Double.class);
+        TYPES_STANDARDIZATION.put(char.class, Character.class);
 
         //Array standardization
-        typesStandardization.put(Boolean[].class, boolean[].class);
-        typesStandardization.put(Integer[].class, int[].class);
-        typesStandardization.put(Short[].class, short[].class);
-        typesStandardization.put(Long[].class, long[].class);
-        typesStandardization.put(Byte[].class, byte[].class);
-        typesStandardization.put(Float[].class, float[].class);
-        typesStandardization.put(Double[].class, double[].class);
-        typesStandardization.put(Character[].class, char[].class);
+        TYPES_STANDARDIZATION.put(Boolean[].class, boolean[].class);
+        TYPES_STANDARDIZATION.put(Integer[].class, int[].class);
+        TYPES_STANDARDIZATION.put(Short[].class, short[].class);
+        TYPES_STANDARDIZATION.put(Long[].class, long[].class);
+        TYPES_STANDARDIZATION.put(Byte[].class, byte[].class);
+        TYPES_STANDARDIZATION.put(Float[].class, float[].class);
+        TYPES_STANDARDIZATION.put(Double[].class, double[].class);
+        TYPES_STANDARDIZATION.put(Character[].class, char[].class);
+
+        //Datetime
+        DATE_TIME_FORMATTER = ISODateTimeFormat.dateOptionalTimeParser();
     }
 
     public static Object parse(String str, Class typeClass) {
@@ -182,19 +188,23 @@ public class AttributeUtils {
     }
 
     public static Set<Class> getSupportedTypes() {
-        return supportedTypes;
+        return SUPPORTED_TYPES;
     }
 
     public static boolean isSupported(Class type) {
-        return supportedTypes.contains(type);
+        return SUPPORTED_TYPES.contains(type);
     }
 
     public static Class getStandardizedType(Class type) {
-        return typesStandardization.get(type);
+        Class t = TYPES_STANDARDIZATION.get(type);
+        if (t != null) {
+            return t;
+        }
+        return type;
     }
 
     public boolean isStandardizedType(Class type) {
-        return typesStandardization.get(type).equals(type);
+        return TYPES_STANDARDIZATION.get(type).equals(type);
     }
 
     public static Class<? extends TimestampValueSet> getDynamicType(Class type) {
@@ -227,6 +237,10 @@ public class AttributeUtils {
             return getPrimitiveArray((Object[]) value);
         }
         return value;
+    }
+
+    public static double parseDateTime(String dateTime) {
+        return DATE_TIME_FORMATTER.parseDateTime(dateTime).getMillis();
     }
 
     /**
