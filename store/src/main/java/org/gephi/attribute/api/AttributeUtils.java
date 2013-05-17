@@ -16,8 +16,6 @@
 package org.gephi.attribute.api;
 
 import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -119,30 +117,41 @@ public class AttributeUtils {
     }
 
     public static Object parse(String str, Class typeClass) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        typeClass = getStandardizedType(typeClass);
+
         if (typeClass.equals(String.class)) {
             return str;
         } else if (typeClass.equals(Byte.class)) {
-            return new Byte(removeDecimalDigitsFromString(str));
+            return new Byte(str);
         } else if (typeClass.equals(Short.class)) {
-            return new Short(removeDecimalDigitsFromString(str));
+            return new Short(str);
         } else if (typeClass.equals(Integer.class)) {
-            return new Integer(removeDecimalDigitsFromString(str));
+            return new Integer(str);
         } else if (typeClass.equals(Long.class)) {
-            return new Long(removeDecimalDigitsFromString(str));
+            return new Long(str);
         } else if (typeClass.equals(Float.class)) {
             return new Float(str);
         } else if (typeClass.equals(Double.class)) {
             return new Double(str);
         } else if (typeClass.equals(Boolean.class)) {
+            if (str.length() == 1) {
+                if (str.charAt(0) == '1') {
+                    return Boolean.TRUE;
+                } else if (str.charAt(0) == '0') {
+                    return Boolean.FALSE;
+                }
+            }
             return Boolean.valueOf(str);
         } else if (typeClass.equals(Character.class)) {
+            if (str.length() > 1) {
+                throw new IllegalArgumentException("The string has a lenght > 1");
+            }
             return new Character(str.charAt(0));
-        } else if (typeClass.equals(BigInteger.class)) {
-            return new BigInteger(removeDecimalDigitsFromString(str));
-        } else if (typeClass.equals(BigDecimal.class)) {
-            return new BigDecimal(str);
         }
-        return null;
+        throw new IllegalArgumentException("Unsupported type");
     }
 
     public static Class getPrimitiveType(Class type) {
@@ -169,6 +178,9 @@ public class AttributeUtils {
     }
 
     public static Object getPrimitiveArray(Object[] array) {
+        if (!isSupported(array.getClass())) {
+            throw new IllegalArgumentException("Unsupported type");
+        }
         Class arrayClass = array.getClass().getComponentType();
         if (!arrayClass.isPrimitive()) {
             Class primitiveClass = getPrimitiveType(arrayClass);
@@ -179,7 +191,7 @@ public class AttributeUtils {
             for (int i = 0; i < arrayLength; i++) {
                 Object obj = array[i];
                 if (obj != null) {
-                    Array.set(array, i, obj);
+                    Array.set(primitiveArray, i, obj);
                 }
             }
             return primitiveArray;
@@ -192,10 +204,16 @@ public class AttributeUtils {
     }
 
     public static boolean isSupported(Class type) {
+        if (type == null) {
+            throw new NullPointerException();
+        }
         return SUPPORTED_TYPES.contains(type);
     }
 
     public static Class getStandardizedType(Class type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type");
+        }
         Class t = TYPES_STANDARDIZATION.get(type);
         if (t != null) {
             return t;
@@ -203,11 +221,23 @@ public class AttributeUtils {
         return type;
     }
 
-    public boolean isStandardizedType(Class type) {
-        return TYPES_STANDARDIZATION.get(type).equals(type);
+    public static boolean isStandardizedType(Class type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type");
+        }
+        Class t = TYPES_STANDARDIZATION.get(type);
+        if (t != null && t.equals(type)) {
+            return true;
+        } else if (t == null) {
+            return true;
+        }
+        return false;
     }
 
     public static Class<? extends TimestampValueSet> getDynamicType(Class type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type");
+        }
         type = getStandardizedType(type);
         if (type.equals(Boolean.class)) {
             return TimestampBooleanSet.class;
@@ -232,7 +262,13 @@ public class AttributeUtils {
     }
 
     public static Object standardizeValue(Object value) {
+        if (value == null) {
+            return null;
+        }
         Class type = value.getClass();
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type");
+        }
         if (type.isArray()) {
             return getPrimitiveArray((Object[]) value);
         }
