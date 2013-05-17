@@ -15,8 +15,11 @@
  */
 package org.gephi.graph.store;
 
+import java.awt.Color;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.Estimator;
+import org.gephi.attribute.time.TimestampByteSet;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -54,5 +57,108 @@ public class TableImplTest {
         Float defaultValue = 25f;
 
         table.addColumn("0", null, Integer.class, Origin.DATA, defaultValue, false);
+    }
+
+    @Test
+    public void testIsIndexed() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, true));
+        Column col1 = table.addColumn("0", null, Integer.class, Origin.DATA, null, false);
+        Column col2 = table.addColumn("1", null, Integer.class, Origin.DATA, null, true);
+
+        Assert.assertFalse(col1.isIndexed());
+        Assert.assertTrue(col2.isIndexed());
+    }
+
+    @Test
+    public void testGetColumnId() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("0", Integer.class);
+
+        Column c = table.getColumn("0");
+        Assert.assertSame(col, c);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetColumnBadId() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table.getColumn("0");
+    }
+
+    @Test
+    public void testGetColumnIndex() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("0", Integer.class);
+
+        Column c = table.getColumn(0);
+        Assert.assertSame(col, c);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetColumnBadIndex() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table.getColumn(0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetEstimatorStaticType() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("0", Integer.class);
+        Estimator est = Estimator.AVERAGE;
+        table.setEstimator(col, est);
+    }
+
+    @Test
+    public void testSetEstimator() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("0", TimestampByteSet.class);
+        Estimator est = Estimator.AVERAGE;
+        table.setEstimator(col, est);
+
+        Assert.assertEquals(table.getEstimator(col), est);
+    }
+
+    @Test
+    public void testTitleBackFill() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("0", Integer.class);
+        Assert.assertEquals(col.getTitle(), "0");
+    }
+
+    @Test
+    public void testIdLowercase() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("A", Integer.class);
+        Assert.assertEquals(col.getId(), "a");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testNonStandardType() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table.addColumn("0", Color.class);
+    }
+
+    @Test
+    public void testStandardizePrimitiveType() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("0", int.class);
+        Assert.assertEquals(col.getTypeClass(), Integer.class);
+    }
+
+    @Test
+    public void testStandardizeArrayType() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("0", Integer[].class);
+        Assert.assertEquals(col.getTypeClass(), int[].class);
+    }
+
+    @Test
+    public void testStandardizeArrayDefaultValue() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Integer[] t = new Integer[]{1, 2};
+
+        Column col = table.addColumn("0", null, Integer[].class, Origin.DATA, t, false);
+        Object d = col.getDefaultValue();
+        Assert.assertEquals(d.getClass(), int[].class);
+        Assert.assertEquals(d, new int[]{1, 2});
     }
 }

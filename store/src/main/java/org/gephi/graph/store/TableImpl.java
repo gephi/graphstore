@@ -53,6 +53,9 @@ public class TableImpl<T extends Element> implements Table {
         checkDefaultValue(defaultValue, type);
 
         type = AttributeUtils.getStandardizedType(type);
+        if (defaultValue != null) {
+            defaultValue = AttributeUtils.standardizeValue(defaultValue);
+        }
 
         if (title == null || title.isEmpty()) {
             title = id;
