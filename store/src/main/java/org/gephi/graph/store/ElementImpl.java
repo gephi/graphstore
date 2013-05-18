@@ -486,8 +486,6 @@ public abstract class ElementImpl implements Element {
                         || (value instanceof String && !typeClass.equals(TimestampStringSet.class))
                         || (value instanceof Character && !typeClass.equals(TimestampCharSet.class))) {
                     throw new IllegalArgumentException("The object class does not match with the dynamic type (" + typeClass.getName() + ")");
-                } else {
-                    throw new IllegalArgumentException("Unknown TimestampValueSet class");
                 }
             } else if (!value.getClass().equals(typeClass)) {
                 throw new IllegalArgumentException("The object class does not match with the column type (" + typeClass.getName() + ")");
