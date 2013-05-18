@@ -34,6 +34,8 @@ public class AttributeUtils {
     private static final Set<Class> SUPPORTED_TYPES;
     private static final Map<Class, Class> TYPES_STANDARDIZATION;
     private static final DateTimeFormatter DATE_TIME_FORMATTER;
+    private static final DateTimeFormatter DATE_PRINTER;
+    private static final DateTimeFormatter DATE_TIME_PRINTER;
 
     static {
         SUPPORTED_TYPES = new HashSet<Class>();
@@ -114,6 +116,8 @@ public class AttributeUtils {
 
         //Datetime
         DATE_TIME_FORMATTER = ISODateTimeFormat.dateOptionalTimeParser();
+        DATE_PRINTER = ISODateTimeFormat.date();
+        DATE_TIME_PRINTER = ISODateTimeFormat.dateTime();
     }
 
     public static Object parse(String str, Class typeClass) {
@@ -277,6 +281,14 @@ public class AttributeUtils {
 
     public static double parseDateTime(String dateTime) {
         return DATE_TIME_FORMATTER.parseDateTime(dateTime).getMillis();
+    }
+
+    public static String printDate(double timestamp) {
+        return DATE_PRINTER.print((long) timestamp);
+    }
+
+    public static String printDateTime(double timestamp) {
+        return DATE_TIME_PRINTER.print((long) timestamp);
     }
 
     /**

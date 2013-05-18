@@ -168,4 +168,30 @@ public class AttributeUtilsTest {
     public void testStandardizeValueUnsupportedType() {
         AttributeUtils.standardizeValue(new Color(0, 0, 0));
     }
+
+    @Test
+    public void parseDate() {
+        double d = AttributeUtils.parseDateTime("1970-01-01T00:00:00+00:00");
+        Assert.assertEquals(d, 0.0);
+
+        AttributeUtils.parseDateTime("2003-01-01");
+        AttributeUtils.parseDateTime("2012-09-12T15:04:01");
+        AttributeUtils.parseDateTime("20040401");
+    }
+
+    @Test
+    public void printDate() {
+        String date = "2003-01-01";
+        double d = AttributeUtils.parseDateTime(date);
+
+        Assert.assertEquals(AttributeUtils.printDate(d), date);
+    }
+
+    @Test
+    public void printDateTime() {
+        String date = "2003-01-01T00:00:00.000-08:00";
+        double d = AttributeUtils.parseDateTime(date);
+
+        Assert.assertEquals(AttributeUtils.printDateTime(d), date);
+    }
 }
