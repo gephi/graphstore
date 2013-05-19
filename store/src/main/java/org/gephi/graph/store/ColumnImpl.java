@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.store;
 
+import org.gephi.attribute.api.AttributeUtils;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.Estimator;
@@ -97,6 +98,11 @@ public class ColumnImpl implements Column {
     @Override
     public boolean isDynamic() {
         return dynamic;
+    }
+
+    @Override
+    public boolean isNumber() {
+        return AttributeUtils.isNumberType(typeClass);
     }
 
     public int getStoreId() {

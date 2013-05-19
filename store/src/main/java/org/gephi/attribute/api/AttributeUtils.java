@@ -265,6 +265,32 @@ public class AttributeUtils {
         throw new IllegalArgumentException("Unsupported type");
     }
 
+    public static Class getStaticType(Class<? extends TimestampValueSet> type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type");
+        }
+        if (type.equals(TimestampBooleanSet.class)) {
+            return Boolean.class;
+        } else if (type.equals(TimestampIntegerSet.class)) {
+            return Integer.class;
+        } else if (type.equals(TimestampShortSet.class)) {
+            return Short.class;
+        } else if (type.equals(TimestampLongSet.class)) {
+            return Long.class;
+        } else if (type.equals(TimestampByteSet.class)) {
+            return Byte.class;
+        } else if (type.equals(TimestampFloatSet.class)) {
+            return Float.class;
+        } else if (type.equals(TimestampDoubleSet.class)) {
+            return Double.class;
+        } else if (type.equals(TimestampCharSet.class)) {
+            return Character.class;
+        } else if (type.equals(TimestampStringSet.class)) {
+            return String.class;
+        }
+        throw new IllegalArgumentException("Unsupported type");
+    }
+
     public static Object standardizeValue(Object value) {
         if (value == null) {
             return null;
@@ -277,6 +303,28 @@ public class AttributeUtils {
             return getPrimitiveArray((Object[]) value);
         }
         return value;
+    }
+
+    public static boolean isNumberType(Class type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type");
+        }
+        type = getStandardizedType(type);
+        if (type.equals(Integer.class)
+                || type.equals(Float.class)
+                || type.equals(Double.class)
+                || type.equals(Long.class)
+                || type.equals(Short.class)
+                || type.equals(Byte.class)
+                || type.equals(TimestampIntegerSet.class)
+                || type.equals(TimestampFloatSet.class)
+                || type.equals(TimestampDoubleSet.class)
+                || type.equals(TimestampLongSet.class)
+                || type.equals(TimestampShortSet.class)
+                || type.equals(TimestampByteSet.class)) {
+            return true;
+        }
+        return false;
     }
 
     public static double parseDateTime(String dateTime) {

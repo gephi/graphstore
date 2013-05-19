@@ -37,5 +37,7 @@ public interface Column {
 
     public boolean isDynamic();
 
+    public boolean isNumber();
+
     public Object getDefaultValue();
 }

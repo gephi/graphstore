@@ -106,6 +106,11 @@ public class ColumnStoreTest {
             public boolean isDynamic() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            @Override
+            public boolean isNumber() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         });
     }
 
