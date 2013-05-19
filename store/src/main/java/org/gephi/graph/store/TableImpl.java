@@ -118,6 +118,28 @@ public class TableImpl<T extends Element> implements Table {
         store.setEstimator(column, estimator);
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + (this.store != null ? this.store.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TableImpl<T> other = (TableImpl<T>) obj;
+        if (this.store != other.store && (this.store == null || !this.store.equals(other.store))) {
+            return false;
+        }
+        return true;
+    }
+
     private void checkValidId(String id) {
         if (id == null) {
             throw new NullPointerException();
