@@ -111,6 +111,11 @@ public class ColumnStoreTest {
             public boolean isNumber() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            @Override
+            public boolean isProperty() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         });
     }
 

@@ -39,5 +39,7 @@ public interface Column {
 
     public boolean isNumber();
 
+    public boolean isProperty();
+
     public Object getDefaultValue();
 }
