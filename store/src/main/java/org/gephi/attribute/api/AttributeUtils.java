@@ -155,7 +155,7 @@ public class AttributeUtils {
             }
             return new Character(str.charAt(0));
         }
-        throw new IllegalArgumentException("Unsupported type");
+        throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
     }
 
     public static Class getPrimitiveType(Class type) {
@@ -183,7 +183,7 @@ public class AttributeUtils {
 
     public static Object getPrimitiveArray(Object[] array) {
         if (!isSupported(array.getClass())) {
-            throw new IllegalArgumentException("Unsupported type");
+            throw new IllegalArgumentException("Unsupported type " + array.getClass().getCanonicalName());
         }
         Class arrayClass = array.getClass().getComponentType();
         if (!arrayClass.isPrimitive()) {
@@ -216,7 +216,7 @@ public class AttributeUtils {
 
     public static Class getStandardizedType(Class type) {
         if (!isSupported(type)) {
-            throw new IllegalArgumentException("Unsupported type");
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         Class t = TYPES_STANDARDIZATION.get(type);
         if (t != null) {
@@ -227,7 +227,7 @@ public class AttributeUtils {
 
     public static boolean isStandardizedType(Class type) {
         if (!isSupported(type)) {
-            throw new IllegalArgumentException("Unsupported type");
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         Class t = TYPES_STANDARDIZATION.get(type);
         if (t != null && t.equals(type)) {
@@ -240,7 +240,7 @@ public class AttributeUtils {
 
     public static Class<? extends TimestampValueSet> getDynamicType(Class type) {
         if (!isSupported(type)) {
-            throw new IllegalArgumentException("Unsupported type");
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         type = getStandardizedType(type);
         if (type.equals(Boolean.class)) {
@@ -262,12 +262,12 @@ public class AttributeUtils {
         } else if (type.equals(String.class)) {
             return TimestampStringSet.class;
         }
-        throw new IllegalArgumentException("Unsupported type");
+        throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
     }
 
     public static Class getStaticType(Class<? extends TimestampValueSet> type) {
         if (!isSupported(type)) {
-            throw new IllegalArgumentException("Unsupported type");
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         if (type.equals(TimestampBooleanSet.class)) {
             return Boolean.class;
@@ -288,7 +288,7 @@ public class AttributeUtils {
         } else if (type.equals(TimestampStringSet.class)) {
             return String.class;
         }
-        throw new IllegalArgumentException("Unsupported type");
+        throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
     }
 
     public static Object standardizeValue(Object value) {
@@ -297,7 +297,7 @@ public class AttributeUtils {
         }
         Class type = value.getClass();
         if (!isSupported(type)) {
-            throw new IllegalArgumentException("Unsupported type");
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         if (type.isArray()) {
             return getPrimitiveArray((Object[]) value);
@@ -307,7 +307,7 @@ public class AttributeUtils {
 
     public static boolean isNumberType(Class type) {
         if (!isSupported(type)) {
-            throw new IllegalArgumentException("Unsupported type");
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         type = getStandardizedType(type);
         if (type.equals(Integer.class)
