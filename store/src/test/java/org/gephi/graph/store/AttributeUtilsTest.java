@@ -192,6 +192,7 @@ public class AttributeUtilsTest {
         String date = "2003-01-01T00:00:00.000-08:00";
         double d = AttributeUtils.parseDateTime(date);
 
-        Assert.assertEquals(AttributeUtils.printDateTime(d), date);
+        String pr = AttributeUtils.printDateTime(d);
+        Assert.assertEquals(AttributeUtils.parseDateTime(pr), d);
     }
 }
