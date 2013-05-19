@@ -22,7 +22,7 @@ import org.gephi.attribute.api.Column;
  *
  * @author mbastian
  */
-public interface Element {
+public interface Element extends ElementProperties {
 
     public Object getId();
 
