@@ -327,6 +327,18 @@ public class AttributeUtils {
         return false;
     }
 
+    public static boolean isDynamicType(Class type) {
+        return TimestampValueSet.class.isAssignableFrom(type);
+    }
+
+    public static String getTypeName(Class type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
+        }
+        type = getStandardizedType(type);
+        return type.getSimpleName().toLowerCase();
+    }
+
     public static double parseDateTime(String dateTime) {
         return DATE_TIME_FORMATTER.parseDateTime(dateTime).getMillis();
     }
