@@ -27,7 +27,15 @@ public interface Edge extends Element, EdgeProperties {
 
     public double getWeight();
 
+    public double getWeight(double timestamp);
+
+    public double getWeight(GraphView view);
+
     public void setWeight(double weight);
+
+    public void setWeight(double weight, double timestamp);
+
+    public boolean hasDynamicWeight();
 
     public int getType();
 

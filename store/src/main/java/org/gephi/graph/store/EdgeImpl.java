@@ -18,6 +18,7 @@ package org.gephi.graph.store;
 import java.awt.Color;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.TextProperties;
 
 /**
@@ -70,19 +71,27 @@ public class EdgeImpl extends ElementImpl implements Edge {
         return target;
     }
 
-//    public int getSourceID() {
-//        return (int) ((id >> NODE_BITS) & (1l << NODE_BITS) - 1);
-//    }
-//
-//    public int getTargetID() {
-//        return (int) (id & (1l << NODE_BITS) - 1);
-//    }
-//
-//    public boolean isDirected() {
-//        return ((int) (id >> (NODE_BITS * 2)) & 1) == 1;
-//    }
     @Override
     public double getWeight() {
+        return weight;
+    }
+
+    @Override
+    public boolean hasDynamicWeight() {
+        return false;
+    }
+
+    @Override
+    public void setWeight(double weight, double timestamp) {
+    }
+
+    @Override
+    public double getWeight(double timestamp) {
+        return weight;
+    }
+
+    @Override
+    public double getWeight(GraphView view) {
         return weight;
     }
 
