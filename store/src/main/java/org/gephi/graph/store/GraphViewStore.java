@@ -58,7 +58,7 @@ public class GraphViewStore {
     public GraphViewImpl createView() {
         graphStore.autoWriteLock();
         try {
-            GraphViewImpl graphView = new GraphViewImpl(graphStore, false);
+            GraphViewImpl graphView = new GraphViewImpl(graphStore, true, true);
             addView(graphView);
             return graphView;
         } finally {
@@ -66,10 +66,10 @@ public class GraphViewStore {
         }
     }
 
-    public GraphViewImpl createNodeView() {
+    public GraphViewImpl createView(boolean nodes, boolean edges) {
         graphStore.autoWriteLock();
         try {
-            GraphViewImpl graphView = new GraphViewImpl(graphStore, true);
+            GraphViewImpl graphView = new GraphViewImpl(graphStore, nodes, edges);
             addView(graphView);
             return graphView;
         } finally {
@@ -83,7 +83,7 @@ public class GraphViewStore {
 
         graphStore.autoWriteLock();
         try {
-            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, false);
+            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, true, true);
             addView(graphView);
             return graphView;
         } finally {
@@ -91,13 +91,13 @@ public class GraphViewStore {
         }
     }
 
-    public GraphViewImpl createNodeView(GraphView view) {
+    public GraphViewImpl createView(GraphView view, boolean nodes, boolean edges) {
         checkNonNullViewObject(view);
         checkViewExist((GraphViewImpl) view);
 
         graphStore.autoWriteLock();
         try {
-            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, true);
+            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, nodes, edges);
             addView(graphView);
             return graphView;
         } finally {

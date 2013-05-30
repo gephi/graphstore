@@ -181,6 +181,11 @@ public class GraphViewStoreTest {
             public Interval getTimeInterval() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            @Override
+            public boolean isEdgeView() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         });
     }
 
@@ -978,7 +983,7 @@ public class GraphViewStoreTest {
     public void testNodeView() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
         GraphViewStore store = graphStore.viewStore;
-        GraphViewImpl view = store.createNodeView();
+        GraphViewImpl view = store.createView(true, false);
 
         for (Node n : graphStore.getNodes()) {
             view.addNode(n);
@@ -999,10 +1004,10 @@ public class GraphViewStoreTest {
         GraphViewStore store = graphStore.viewStore;
 
         GraphView v1 = store.createView();
-        GraphView v2 = store.createNodeView();
+        GraphView v2 = store.createView(true, false);
 
-        Assert.assertFalse(v1.isNodeView());
-        Assert.assertTrue(v2.isNodeView());
+        Assert.assertTrue(v1.isNodeView() && v1.isEdgeView());
+        Assert.assertTrue(v2.isNodeView() && !v2.isEdgeView());
     }
 
     @Test
@@ -1012,7 +1017,6 @@ public class GraphViewStoreTest {
 
         Assert.assertNotNull(view);
         Assert.assertEquals(view, graphStore.mainGraphView);
-
     }
 
     @Test

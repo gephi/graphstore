@@ -29,5 +29,7 @@ public interface GraphView {
 
     public boolean isNodeView();
 
+    public boolean isEdgeView();
+
     public Interval getTimeInterval();
 }

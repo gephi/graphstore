@@ -778,7 +778,12 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
         @Override
         public boolean isNodeView() {
-            return false;
+            return true;
+        }
+
+        @Override
+        public boolean isEdgeView() {
+            return true;
         }
 
         @Override

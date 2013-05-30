@@ -39,7 +39,8 @@ public class GraphViewImpl implements GraphView {
 
     //Data
     protected final GraphStore graphStore;
-    protected final boolean nodeViewOnly;
+    protected final boolean nodeView;
+    protected final boolean edgeView;
     protected BitVector nodeBitVector;
     protected BitVector edgeBitVector;
     protected int storeId;
@@ -58,27 +59,36 @@ public class GraphViewImpl implements GraphView {
     //Dynamic
     protected Interval interval;
 
-    public GraphViewImpl(final GraphStore store, boolean nodesOnly) {
+    public GraphViewImpl(final GraphStore store, boolean nodes, boolean edges) {
         this.graphStore = store;
-        this.nodeCount = 0;
-        this.edgeCount = 0;
-        this.nodeViewOnly = nodesOnly;
-        this.nodeBitVector = new BitVector(store.nodeStore.maxStoreId());
+        this.nodeView = nodes;
+        this.edgeView = edges;
+        if (nodes) {
+            this.nodeBitVector = new BitVector(store.nodeStore.maxStoreId());
+        } else {
+            this.nodeBitVector = null;
+        }
         this.edgeBitVector = new BitVector(store.edgeStore.maxStoreId());
         this.typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         this.mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
+
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
         this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
     }
 
-    public GraphViewImpl(final GraphViewImpl view, boolean nodesOnly) {
+    public GraphViewImpl(final GraphViewImpl view, boolean nodes, boolean edges) {
         this.graphStore = view.graphStore;
-        this.nodeCount = view.nodeCount;
+        this.nodeView = nodes;
+        this.edgeView = edges;
+        if (nodes) {
+            this.nodeBitVector = view.nodeBitVector.copy();
+            this.nodeCount = view.nodeCount;
+        } else {
+            this.nodeBitVector = null;
+        }
         this.edgeCount = view.edgeCount;
-        this.nodeViewOnly = nodesOnly;
-        this.nodeBitVector = view.nodeBitVector.copy();
         this.edgeBitVector = view.edgeBitVector.copy();
         this.typeCounts = new int[view.typeCounts.length];
         System.arraycopy(view.typeCounts, 0, typeCounts, 0, view.typeCounts.length);
@@ -99,6 +109,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     public boolean addNode(final Node node) {
+        checkNodeView();
+
         NodeImpl nodeImpl = (NodeImpl) node;
         graphStore.nodeStore.checkNodeExists(nodeImpl);
 
@@ -109,14 +121,34 @@ public class GraphViewImpl implements GraphView {
             nodeCount++;
             incrementNodeVersion();
 
-            if (nodeViewOnly) {
+            if (nodeView && !edgeView) {
                 //Add edges
                 EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
                 while (itr.hasNext()) {
                     EdgeImpl edge = itr.next();
                     NodeImpl opposite = edge.source == nodeImpl ? edge.target : edge.source;
                     if (nodeBitVector.get(opposite.getStoreId())) {
-                        addEdge(edge);
+                        //Add edge
+                        int edgeid = edge.storeId;
+                        boolean edgeisSet = edgeBitVector.get(edgeid);
+                        if (!edgeisSet) {
+
+                            incrementEdgeVersion();
+
+                            edgeBitVector.set(edgeid);
+                            edgeCount++;
+
+                            int type = edge.type;
+                            ensureTypeCountArrayCapacity(type);
+
+                            typeCounts[type]++;
+
+                            if (edge.isMutual() && edge.source.storeId < edge.target.storeId) {
+                                mutualEdgeTypeCounts[type]++;
+                                mutualEdgesCount++;
+                            }
+                        }
+                        //End
                     }
                 }
             }
@@ -126,6 +158,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     public boolean addAllNodes(final Collection<? extends Node> nodes) {
+        checkNodeView();
+
         if (!nodes.isEmpty()) {
             Iterator<? extends Node> nodeItr = nodes.iterator();
             boolean changed = false;
@@ -142,6 +176,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     public boolean addEdge(final Edge edge) {
+        checkEdgeView();
+
         EdgeImpl edgeImpl = (EdgeImpl) edge;
         graphStore.edgeStore.checkEdgeExists(edgeImpl);
 
@@ -170,6 +206,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     public boolean addAllEdges(final Collection<? extends Edge> edges) {
+        checkEdgeView();
+
         if (!edges.isEmpty()) {
             Iterator<? extends Edge> edgeItr = edges.iterator();
             boolean changed = false;
@@ -186,6 +224,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     public boolean removeNode(final Node node) {
+        checkNodeView();
+
         NodeImpl nodeImpl = (NodeImpl) node;
         graphStore.nodeStore.checkNodeExists(nodeImpl);
 
@@ -238,6 +278,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     public boolean removeEdge(final Edge edge) {
+        checkEdgeView();
+
         EdgeImpl edgeImpl = (EdgeImpl) edge;
         graphStore.edgeStore.checkEdgeExists(edgeImpl);
 
@@ -260,6 +302,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     public boolean removeEdgeAll(final Collection<? extends Edge> edges) {
+        checkEdgeView();
+
         if (!edges.isEmpty()) {
             Iterator<? extends Edge> edgeItr = edges.iterator();
             boolean changed = false;
@@ -282,7 +326,9 @@ public class GraphViewImpl implements GraphView {
         if (edgeCount > 0) {
             incrementEdgeVersion();
         }
-        nodeBitVector.clear();
+        if (nodeView) {
+            nodeBitVector.clear();
+        }
         edgeBitVector.clear();
         nodeCount = 0;
         edgeCount = 0;
@@ -303,11 +349,14 @@ public class GraphViewImpl implements GraphView {
     }
 
     public void fill() {
-        nodeBitVector = new BitVector(graphStore.nodeStore.maxStoreId());
+        if (nodeView) {
+            nodeBitVector = new BitVector(graphStore.nodeStore.maxStoreId());
+            nodeBitVector.not();
+            this.nodeCount = graphStore.nodeStore.size();
+        }
         edgeBitVector = new BitVector(graphStore.edgeStore.maxStoreId());
-        nodeBitVector.not();
         edgeBitVector.not();
-        this.nodeCount = graphStore.nodeStore.size();
+
         this.edgeCount = graphStore.edgeStore.size();
         int typeLength = graphStore.edgeStore.longDictionary.length;
         this.typeCounts = new int[typeLength];
@@ -328,6 +377,9 @@ public class GraphViewImpl implements GraphView {
     }
 
     public boolean containsNode(final NodeImpl node) {
+        if (!nodeView) {
+            return true;
+        }
         return nodeBitVector.get(node.storeId);
     }
 
@@ -348,7 +400,7 @@ public class GraphViewImpl implements GraphView {
             }
         }
 
-        int edgeSize = nodeBitVector.size();
+        int edgeSize = edgeBitVector.size();
         for (int i = 0; i < edgeSize; i++) {
             boolean t = edgeBitVector.get(i);
             boolean o = edgeOtherBitVector.get(i);
@@ -371,7 +423,7 @@ public class GraphViewImpl implements GraphView {
             }
         }
 
-        int edgeSize = nodeBitVector.size();
+        int edgeSize = edgeBitVector.size();
         for (int i = 0; i < edgeSize; i++) {
             boolean t = edgeBitVector.get(i);
             boolean o = edgeOtherBitVector.get(i);
@@ -382,7 +434,10 @@ public class GraphViewImpl implements GraphView {
     }
 
     public int getNodeCount() {
-        return nodeCount;
+        if (nodeView) {
+            return nodeCount;
+        }
+        return graphStore.nodeStore.size();
     }
 
     public int getEdgeCount() {
@@ -419,7 +474,12 @@ public class GraphViewImpl implements GraphView {
 
     @Override
     public boolean isNodeView() {
-        return nodeViewOnly;
+        return nodeView;
+    }
+
+    @Override
+    public boolean isEdgeView() {
+        return edgeView;
     }
 
     public void setTimeInterval(Interval interval) {
@@ -515,7 +575,8 @@ public class GraphViewImpl implements GraphView {
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 17 * hash + (this.nodeViewOnly ? 1 : 0);
+        hash = 17 * hash + (this.nodeView ? 1 : 0);
+        hash = 17 * hash + (this.edgeView ? 1 : 0);
         hash = 11 * hash + (this.nodeBitVector != null ? this.nodeBitVector.hashCode() : 0);
         hash = 11 * hash + (this.edgeBitVector != null ? this.edgeBitVector.hashCode() : 0);
         hash = 11 * hash + this.nodeCount;
@@ -547,7 +608,10 @@ public class GraphViewImpl implements GraphView {
         if (this.edgeCount != other.edgeCount) {
             return false;
         }
-        if (this.nodeViewOnly != other.nodeViewOnly) {
+        if (this.nodeView != other.nodeView) {
+            return false;
+        }
+        if (this.edgeView != other.edgeView) {
             return false;
         }
         if (!Arrays.equals(this.typeCounts, other.typeCounts)) {
@@ -576,9 +640,23 @@ public class GraphViewImpl implements GraphView {
         return 0;
     }
 
+    private void checkNodeView() {
+        if (!nodeView) {
+            throw new RuntimeException("This method should only be used on a view with nodes enabled");
+        }
+    }
+
+    private void checkEdgeView() {
+        if (!edgeView) {
+            throw new RuntimeException("This method should only be used on a view with edges enabled");
+        }
+    }
+
     private void checkIncidentNodesExists(final EdgeImpl e) {
-        if (!nodeBitVector.get(e.source.storeId) || !nodeBitVector.get(e.target.storeId)) {
-            throw new RuntimeException("Both source and target nodes need to be in the view");
+        if (nodeView) {
+            if (!nodeBitVector.get(e.source.storeId) || !nodeBitVector.get(e.target.storeId)) {
+                throw new RuntimeException("Both source and target nodes need to be in the view");
+            }
         }
     }
 

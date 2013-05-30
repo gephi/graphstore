@@ -68,11 +68,11 @@ public interface GraphModel {
 
     public GraphView createView();
 
-    public GraphView createNodeView();
+    public GraphView createView(boolean node, boolean edge);
 
     public GraphView copyView(GraphView view);
 
-    public GraphView copyNodeView(GraphView view);
+    public GraphView copyView(GraphView view, boolean node, boolean edge);
 
     public void destroyView(GraphView view);
 

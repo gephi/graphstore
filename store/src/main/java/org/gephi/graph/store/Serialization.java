@@ -440,7 +440,8 @@ public class Serialization {
     }
 
     private void serializeGraphView(final DataOutput out, final GraphViewImpl view) throws IOException {
-        serialize(out, view.nodeViewOnly);
+        serialize(out, view.nodeView);
+        serialize(out, view.edgeView);
         serialize(out, view.storeId);
         serialize(out, view.nodeCount);
         serialize(out, view.edgeCount);
@@ -454,8 +455,9 @@ public class Serialization {
     }
 
     private GraphViewImpl deserializeGraphView(final DataInput is) throws IOException, ClassNotFoundException {
-        boolean nodesOnly = (Boolean) deserialize(is);
-        GraphViewImpl view = new GraphViewImpl(store, nodesOnly);
+        boolean nodeView = (Boolean) deserialize(is);
+        boolean edgeView = (Boolean) deserialize(is);
+        GraphViewImpl view = new GraphViewImpl(store, nodeView, edgeView);
 
         int storeId = (Integer) deserialize(is);
         int nodeCount = (Integer) deserialize(is);

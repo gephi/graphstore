@@ -188,8 +188,8 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
-    public GraphView createNodeView() {
-        return store.viewStore.createNodeView();
+    public GraphView createView(boolean node, boolean edge) {
+        return store.viewStore.createView(node, edge);
     }
 
     @Override
@@ -198,8 +198,8 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
-    public GraphView copyNodeView(GraphView view) {
-        return store.viewStore.createNodeView(view);
+    public GraphView copyView(GraphView view, boolean node, boolean edge) {
+        return store.viewStore.createView(view, node, edge);
     }
 
     @Override
