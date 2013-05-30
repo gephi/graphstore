@@ -28,7 +28,7 @@ public class EdgeTypeStoreTest {
     public void testDefaultSize() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
 
-        Assert.assertEquals(edgeTypeStore.size(), 0);
+        Assert.assertEquals(edgeTypeStore.size(), 1);
     }
 
     @Test
@@ -36,11 +36,11 @@ public class EdgeTypeStoreTest {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
         int type = edgeTypeStore.addType("0");
 
-        Assert.assertEquals(type, 0);
+        Assert.assertEquals(type, 1);
         Assert.assertTrue(edgeTypeStore.contains("0"));
 
         type = edgeTypeStore.addType("0");
-        Assert.assertEquals(type, 0);
+        Assert.assertEquals(type, 1);
         Assert.assertTrue(edgeTypeStore.contains("0"));
     }
 
@@ -64,10 +64,10 @@ public class EdgeTypeStoreTest {
 
         type = edgeTypeStore.removeType("0");
 
-        Assert.assertEquals(type, 0);
+        Assert.assertEquals(type, 1);
         Assert.assertFalse(edgeTypeStore.contains("0"));
 
-        Assert.assertEquals(edgeTypeStore.size(), 0);
+        Assert.assertEquals(edgeTypeStore.size(), 1);
 
         type = edgeTypeStore.removeType("0");
         Assert.assertEquals(type, EdgeTypeStore.NULL_TYPE);
@@ -99,7 +99,7 @@ public class EdgeTypeStoreTest {
         Assert.assertEquals(label, "0");
         Assert.assertFalse(edgeTypeStore.contains("0"));
 
-        Assert.assertEquals(edgeTypeStore.size(), 0);
+        Assert.assertEquals(edgeTypeStore.size(), 1);
 
         label = edgeTypeStore.removeType(type);
         Assert.assertNull(label);
@@ -122,7 +122,7 @@ public class EdgeTypeStoreTest {
 
         Assert.assertEquals(edgeTypeStore.getLabel(type), "0");
 
-        Assert.assertNull(edgeTypeStore.getLabel(1));
+        Assert.assertNull(edgeTypeStore.getLabel(type + 1));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -144,7 +144,7 @@ public class EdgeTypeStoreTest {
     @Test
     public void testMaximumLength() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        for (int i = 0; i < 65534; i++) {
+        for (int i = 1; i < 65534; i++) {
             int type = edgeTypeStore.addType(String.valueOf(i));
             Assert.assertEquals(edgeTypeStore.getId(String.valueOf(i)), type);
         }
@@ -155,7 +155,7 @@ public class EdgeTypeStoreTest {
     @Test(expectedExceptions = RuntimeException.class)
     public void testMaximumLengthException() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        for (int i = 0; i < 65535; i++) {
+        for (int i = 0; i < 65534; i++) {
             edgeTypeStore.addType(String.valueOf(i));
         }
     }
@@ -171,7 +171,7 @@ public class EdgeTypeStoreTest {
         Assert.assertFalse(edgeTypeStore.contains("0"));
 
         Assert.assertEquals(edgeTypeStore.garbageQueue.size(), 1);
-        Assert.assertEquals(edgeTypeStore.size(), 1);
+        Assert.assertEquals(edgeTypeStore.size(), 2);
 
         type = edgeTypeStore.addType("3");
 
@@ -179,8 +179,8 @@ public class EdgeTypeStoreTest {
         Assert.assertTrue(edgeTypeStore.contains("1"));
 
         Assert.assertEquals(edgeTypeStore.garbageQueue.size(), 0);
-        Assert.assertEquals(edgeTypeStore.size(), 2);
-        Assert.assertEquals(edgeTypeStore.length, 2);
+        Assert.assertEquals(edgeTypeStore.size(), 3);
+        Assert.assertEquals(edgeTypeStore.length, 3);
     }
 
     @Test

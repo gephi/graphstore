@@ -31,9 +31,9 @@ import org.gephi.graph.utils.MapDeepEquals;
 public class EdgeTypeStore {
 
     //Const
-    protected final static int NULL_COUNT = -1;
     protected final static int NULL_TYPE = -1;
-    protected final static short NULL_SHORT = Short.MIN_VALUE;
+    protected final static int NULL_LABEL = 0;
+    private final static short NULL_SHORT = Short.MIN_VALUE;
     //Config
     public final static int MAX_SIZE = 65534;
     //Data
@@ -50,6 +50,12 @@ public class EdgeTypeStore {
         this.labelMap = new Object2ShortOpenHashMap(MAX_SIZE);
         this.idMap = new Short2ObjectOpenHashMap(MAX_SIZE);
         labelMap.defaultReturnValue(NULL_SHORT);
+
+        //Add null type
+        short id = intToShort(NULL_LABEL);
+        length++;
+        labelMap.put(null, id);
+        idMap.put(id, null);
     }
 
     public int getId(final Object label) {
@@ -142,21 +148,21 @@ public class EdgeTypeStore {
         return length - garbageQueue.size();
     }
 
-    short intToShort(final int id) {
+    private short intToShort(final int id) {
         return (short) (id + Short.MIN_VALUE + 1);
     }
 
-    int shortToInt(final short id) {
+    private int shortToInt(final short id) {
         return id - Short.MIN_VALUE - 1;
     }
 
-    void checkValidId(final int id) {
+    private void checkValidId(final int id) {
         if (id < 0 || id >= MAX_SIZE) {
             throw new IllegalArgumentException("The type must be included between 0 and 65535");
         }
     }
 
-    void checkType(final Object o) {
+    private void checkType(final Object o) {
         if (o != null) {
             Class cl = o.getClass();
             if (!(cl.equals(Integer.class)
@@ -181,7 +187,7 @@ public class EdgeTypeStore {
         for (int i = 0; i < keys.length; i++) {
             Short s = keys[i];
             Object o = idMap.get(s);
-            hash = 67 * hash + o.hashCode();
+            hash = 67 * hash + (o != null ? o.hashCode() : 0);
             hash = 67 * hash + s.hashCode();
         }
         return hash;
