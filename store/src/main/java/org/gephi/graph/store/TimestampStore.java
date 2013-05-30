@@ -42,6 +42,10 @@ public class TimestampStore {
         edgeIndexStore = new TimestampIndexStore<Edge>(this, edgeMap);
     }
 
+    public boolean isEmpty() {
+        return nodeMap.size() == 0 && edgeMap.size() == 0;
+    }
+
     public void clear() {
     }
 
