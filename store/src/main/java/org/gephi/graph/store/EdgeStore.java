@@ -406,6 +406,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return null;
     }
 
+    public EdgeImpl get(final Node source, final Node target) {
+        return get(source, target, EdgeTypeStore.NULL_LABEL);
+    }
+
     public EdgeImpl get(final Node source, final Node target, final int type) {
         checkNonNullObject(source);
         checkNonNullObject(target);
@@ -439,6 +443,15 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             }
         }
         return null;
+    }
+
+    public EdgeImpl getMutualEdge(final Edge e) {
+        checkNonNullEdgeObject(e);
+
+        EdgeImpl edge = (EdgeImpl) e;
+        checkEdgeExists(edge);
+
+        return getMutual(edge);
     }
 
     private EdgeImpl getMutual(final EdgeImpl edge) {

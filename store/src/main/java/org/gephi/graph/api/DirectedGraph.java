@@ -46,6 +46,8 @@ public interface DirectedGraph extends Graph {
 
     public EdgeIterable getOutEdges(Node node, int type);
 
+    public Edge getMutualEdge(Edge edge);
+
     public int getInDegree(Node node);
 
     public int getOutDegree(Node node);

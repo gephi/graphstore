@@ -47,6 +47,8 @@ public interface Graph {
 
     public Edge getEdge(Object id);
 
+    public Edge getEdge(Node node1, Node node2);
+
     public Edge getEdge(Node node1, Node node2, int type);
 
     public NodeIterable getNodes();
@@ -94,6 +96,12 @@ public interface Graph {
     public void clearEdges();
 
     public GraphView getView();
+
+    public boolean isDirected();
+
+    public boolean isUndirected();
+
+    public boolean isMixed();
 
     public void readLock();
 

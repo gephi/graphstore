@@ -43,10 +43,38 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     }
 
     @Override
+    public Edge getEdge(Node node1, Node node2) {
+        graphStore.autoReadLock();
+        try {
+            EdgeImpl edge = graphStore.edgeStore.get(node1, node1);
+            if (view.containsEdge(edge)) {
+                return edge;
+            }
+            return null;
+        } finally {
+            graphStore.autoReadUnlock();
+        }
+    }
+
+    @Override
     public Edge getEdge(Node node1, Node node2, int type) {
         graphStore.autoReadLock();
         try {
             EdgeImpl edge = graphStore.edgeStore.get(node1, node1, type);
+            if (view.containsEdge(edge)) {
+                return edge;
+            }
+            return null;
+        } finally {
+            graphStore.autoReadUnlock();
+        }
+    }
+
+    @Override
+    public Edge getMutualEdge(Edge e) {
+        graphStore.autoReadLock();
+        try {
+            EdgeImpl edge = graphStore.edgeStore.getMutualEdge(e);
             if (view.containsEdge(edge)) {
                 return edge;
             }
@@ -470,6 +498,21 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     @Override
     public void clearEdges() {
         view.clearEdges();
+    }
+
+    @Override
+    public boolean isDirected() {
+        return graphStore.isDirected();
+    }
+
+    @Override
+    public boolean isUndirected() {
+        return graphStore.isUndirected();
+    }
+
+    @Override
+    public boolean isMixed() {
+        return graphStore.isMixed();
     }
 
     @Override

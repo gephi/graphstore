@@ -350,6 +350,31 @@ public class BasicGraphStore implements DirectedGraph {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public Edge getMutualEdge(Edge edge) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isDirected() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isUndirected() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isMixed() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Edge getEdge(Node node1, Node node2) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public static class BasicElement implements Element {
 
         protected final Map<String, Object> properties = new HashMap<String, Object>();
@@ -824,6 +849,26 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public TextProperties getTextProperties() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public double getWeight(double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public double getWeight(GraphView view) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setWeight(double weight, double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean hasDynamicWeight() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }

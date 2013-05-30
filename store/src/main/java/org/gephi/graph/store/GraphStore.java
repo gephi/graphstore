@@ -161,6 +161,16 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public Edge getMutualEdge(Edge edge) {
+        autoReadLock();
+        try {
+            return edgeStore.getMutualEdge(edge);
+        } finally {
+            autoReadUnlock();
+        }
+    }
+
+    @Override
     public NodeIterable getNodes() {
         return nodeStore;
     }
@@ -261,6 +271,16 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         autoReadLock();
         try {
             return edgeStore.get(node1, node2, type);
+        } finally {
+            autoReadUnlock();
+        }
+    }
+
+    @Override
+    public Edge getEdge(final Node node1, final Node node2) {
+        autoReadLock();
+        try {
+            return edgeStore.get(node1, node2);
         } finally {
             autoReadUnlock();
         }
@@ -543,16 +563,34 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         }
     }
 
+    @Override
     public boolean isDirected() {
-        return edgeStore.isDirectedGraph();
+        autoReadLock();
+        try {
+            return edgeStore.isDirectedGraph();
+        } finally {
+            autoReadUnlock();
+        }
     }
 
+    @Override
     public boolean isUndirected() {
-        return edgeStore.isUndirectedGraph();
+        autoReadLock();
+        try {
+            return edgeStore.isUndirectedGraph();
+        } finally {
+            autoReadUnlock();
+        }
     }
 
+    @Override
     public boolean isMixed() {
-        return edgeStore.isMixedGraph();
+        autoReadLock();
+        try {
+            return edgeStore.isMixedGraph();
+        } finally {
+            autoReadUnlock();
+        }
     }
 
     @Override

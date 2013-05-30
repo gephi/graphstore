@@ -106,6 +106,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public Edge getEdge(Node node1, Node node2) {
+        return store.getEdge(node1, node2);
+    }
+
+    @Override
     public Edge getEdge(Node node1, Node node2, int type) {
         return store.getEdge(node1, node2, type);
     }
@@ -256,6 +261,21 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     @Override
     public void writeUnlock() {
         store.writeUnlock();
+    }
+
+    @Override
+    public boolean isDirected() {
+        return false;
+    }
+
+    @Override
+    public boolean isMixed() {
+        return false;
+    }
+
+    @Override
+    public boolean isUndirected() {
+        return true;
     }
 
     @Override
