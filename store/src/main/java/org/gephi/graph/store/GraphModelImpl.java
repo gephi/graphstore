@@ -148,33 +148,38 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
-    public boolean isDirected() {
+    public boolean isMultiGraph() {
         store.autoReadLock();
         try {
-            return store.isDirected();
+            return store.edgeTypeStore.size() > 1;
         } finally {
             store.autoReadUnlock();
         }
+    }
+
+    @Override
+    public boolean isDynamic() {
+        store.autoReadLock();
+        try {
+            return !store.timestampStore.isEmpty();
+        } finally {
+            store.autoReadUnlock();
+        }
+    }
+
+    @Override
+    public boolean isDirected() {
+        return store.isDirected();
     }
 
     @Override
     public boolean isUndirected() {
-        store.autoReadLock();
-        try {
-            return store.isUndirected();
-        } finally {
-            store.autoReadUnlock();
-        }
+        return store.isUndirected();
     }
 
     @Override
     public boolean isMixed() {
-        store.autoReadLock();
-        try {
-            return store.isMixed();
-        } finally {
-            store.autoReadUnlock();
-        }
+        return store.isMixed();
     }
 
     @Override

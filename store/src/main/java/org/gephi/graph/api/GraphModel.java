@@ -62,6 +62,10 @@ public interface GraphModel {
 
     public boolean isMixed();
 
+    public boolean isDynamic();
+
+    public boolean isMultiGraph();
+
     public GraphView createView();
 
     public GraphView createNodeView();
