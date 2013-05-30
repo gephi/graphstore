@@ -29,7 +29,7 @@ public class MapDeepEquals {
      * @return - weather the maps are deep equal
      */
     public static boolean mapDeepEquals(Map<?, ?> m1, Map<?, ?> m2) {
-        if (m1.size() != m1.size()) {
+        if (m1.size() != m2.size()) {
             return false;
         }
 
@@ -38,7 +38,10 @@ public class MapDeepEquals {
             if (e.getValue() == null && o != null) {
                 return false;
             }
-            if (!e.getValue().equals(o)) {
+            if (o == null && e.getValue() != null) {
+                return false;
+            }
+            if (o != null && !e.getValue().equals(o)) {
                 return false;
             }
         }
