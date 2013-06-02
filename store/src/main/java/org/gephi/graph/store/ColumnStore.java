@@ -222,6 +222,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     public void clear() {
         garbageQueue.clear();
         idMap.clear();
+        length = 0;
         Arrays.fill(columns, null);
         Arrays.fill(timestampMaps, null);
         if (indexStore != null) {

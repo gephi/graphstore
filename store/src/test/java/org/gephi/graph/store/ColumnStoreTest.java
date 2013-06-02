@@ -150,6 +150,19 @@ public class ColumnStoreTest {
         Assert.assertEquals(col.getIndex(), ColumnStore.NULL_ID);
     }
 
+    @Test
+    public void testRemoveColumnString() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+
+        store.addColumn(col);
+        store.removeColumn("0");
+
+        Assert.assertFalse(store.hasColumn("0"));
+        Assert.assertEquals(store.size(), 0);
+        Assert.assertEquals(col.getIndex(), ColumnStore.NULL_ID);
+    }
+
     @Test(expectedExceptions = NullPointerException.class)
     public void testRemoveColumnNull() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
@@ -169,6 +182,27 @@ public class ColumnStoreTest {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
         ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
         store.getColumn("");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetColumnByIndexUnknown() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        store.getColumnByIndex(10);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetColumnIndexUnknown() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        store.getColumnIndex("");
+    }
+
+    @Test
+    public void testGetColumnIndex() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        store.addColumn(col);
+
+        Assert.assertEquals(store.getColumnIndex("0"), 0);
     }
 
     @Test
@@ -191,6 +225,18 @@ public class ColumnStoreTest {
         ObjectSet<String> set = new ObjectOpenHashSet<String>();
         set.add("0");
         Assert.assertEquals(store.getColumnKeys(), set);
+    }
+
+    @Test
+    public void testClear() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+
+        store.addColumn(col);
+        store.clear();
+
+        Assert.assertFalse(store.hasColumn("0"));
+        Assert.assertEquals(store.size(), 0);
     }
 
     @Test
