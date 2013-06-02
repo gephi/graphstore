@@ -517,7 +517,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
             return valueSet;
         }
 
-        private boolean isSortable() {
+        protected boolean isSortable() {
             return Number.class.isAssignableFrom(column.getTypeClass());
         }
 
@@ -678,8 +678,9 @@ public class IndexImpl<T extends Element> implements Index<T> {
             @Override
             public Map.Entry<K, Set<T>> next() {
                 if (nullEntry != null) {
+                    NullEntry ne = nullEntry;
                     nullEntry = null;
-                    return nullEntry;
+                    return ne;
                 }
                 return mapIterator.next();
             }
@@ -927,16 +928,28 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (Object s : (Object[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (Object s : (Object[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (Object s : (Object[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (Object s : (Object[]) value) {
+                    super.removeValue(element, s);
+                }
             }
         }
     }
@@ -949,16 +962,28 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (boolean s : (boolean[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (boolean s : (boolean[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (boolean s : (boolean[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (boolean s : (boolean[]) value) {
+                    super.removeValue(element, s);
+                }
             }
         }
     }
@@ -971,17 +996,34 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (double s : (double[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (double s : (double[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (double s : (double[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (double s : (double[]) value) {
+                    super.removeValue(element, s);
+                }
             }
+        }
+
+        @Override
+        protected boolean isSortable() {
+            return true;
         }
     }
 
@@ -993,17 +1035,34 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (int s : (int[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (int s : (int[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (int s : (int[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (int s : (int[]) value) {
+                    super.removeValue(element, s);
+                }
             }
+        }
+
+        @Override
+        protected boolean isSortable() {
+            return true;
         }
     }
 
@@ -1015,17 +1074,34 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (float s : (float[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (float s : (float[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (float s : (float[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (float s : (float[]) value) {
+                    super.removeValue(element, s);
+                }
             }
+        }
+
+        @Override
+        protected boolean isSortable() {
+            return true;
         }
     }
 
@@ -1037,17 +1113,34 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (long s : (long[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (long s : (long[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (long s : (long[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (long s : (long[]) value) {
+                    super.removeValue(element, s);
+                }
             }
+        }
+
+        @Override
+        protected boolean isSortable() {
+            return true;
         }
     }
 
@@ -1059,17 +1152,34 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (short s : (short[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (short s : (short[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (short s : (short[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (short s : (short[]) value) {
+                    super.removeValue(element, s);
+                }
             }
+        }
+
+        @Override
+        protected boolean isSortable() {
+            return true;
         }
     }
 
@@ -1081,17 +1191,34 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (byte s : (byte[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (byte s : (byte[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (byte s : (byte[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (byte s : (byte[]) value) {
+                    super.removeValue(element, s);
+                }
             }
+        }
+
+        @Override
+        protected boolean isSortable() {
+            return true;
         }
     }
 
@@ -1103,16 +1230,28 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Object putValue(T element, Object value) {
-            for (char s : (char[]) value) {
-                super.putValue(element, s);
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                for (char s : (char[]) value) {
+                    super.putValue(element, s);
+                }
             }
             return value;
         }
 
         @Override
         public void removeValue(T element, Object value) {
-            for (char s : (char[]) value) {
-                super.removeValue(element, s);
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                for (char s : (char[]) value) {
+                    super.removeValue(element, s);
+                }
             }
         }
     }
