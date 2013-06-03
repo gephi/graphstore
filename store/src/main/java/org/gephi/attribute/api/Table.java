@@ -44,4 +44,6 @@ public interface Table extends Iterable<Column> {
     public void removeColumn(String id);
 
     public int countColumns();
+
+    public TableObserver getTableObserver();
 }

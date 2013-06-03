@@ -20,6 +20,7 @@ import org.gephi.attribute.api.AttributeUtils;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.api.Table;
+import org.gephi.attribute.api.TableObserver;
 import org.gephi.attribute.time.Estimator;
 import org.gephi.graph.api.Element;
 
@@ -119,6 +120,17 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
+    public TableObserver getTableObserver() {
+        return store.createTableObserver(this);
+    }
+
+    public void destroyTableObserver(TableObserver observer) {
+        checkableTableObserver(observer);
+
+        store.destroyGraphObserver((TableObserverImpl) observer);
+    }
+
+    @Override
     public int hashCode() {
         int hash = 3;
         hash = 71 * hash + (this.store != null ? this.store.hashCode() : 0);
@@ -163,6 +175,18 @@ public class TableImpl<T extends Element> implements Table {
             if (defaultValue.getClass() != type) {
                 throw new IllegalArgumentException("The default value type cannot be cast to the type");
             }
+        }
+    }
+
+    private void checkableTableObserver(TableObserver observer) {
+        if (observer == null) {
+            throw new NullPointerException();
+        }
+        if (!(observer instanceof TableObserverImpl)) {
+            throw new ClassCastException("The observer should be a TableObserverImpl instance");
+        }
+        if (((TableObserverImpl) observer).table != this) {
+            throw new RuntimeException("The observer doesn't belong to this table");
         }
     }
 }

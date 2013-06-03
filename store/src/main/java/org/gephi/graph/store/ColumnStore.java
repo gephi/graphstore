@@ -20,8 +20,10 @@ import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortRBTreeSet;
 import it.unimi.dsi.fastutil.shorts.ShortSortedSet;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.time.Estimator;
@@ -48,6 +50,8 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     protected final ShortSortedSet garbageQueue;
     //Index
     protected final IndexStore<T> indexStore;
+    //Version
+    protected final List<TableObserverImpl> observers;
     //Locking (optional)
     protected final GraphLock lock;
     //Variables
@@ -69,6 +73,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         this.elementType = elementType;
         this.indexStore = indexed ? new IndexStore<T>(this) : null;
         idMap.defaultReturnValue(NULL_SHORT);
+        this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<TableObserverImpl>() : null;
     }
 
     public void addColumn(final Column column) {
@@ -242,6 +247,23 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
             timestampMaps[index] = timestampStore;
         }
         return timestampStore;
+    }
+
+    protected TableObserverImpl createTableObserver(TableImpl table) {
+        if (observers != null) {
+            TableObserverImpl observer = new TableObserverImpl(table);
+            observers.add(observer);
+
+            return observer;
+        }
+        return null;
+    }
+
+    protected void destroyGraphObserver(TableObserverImpl observer) {
+        if (observers != null) {
+            observers.remove(observer);
+            observer.destroyObserver();
+        }
     }
 
     short intToShort(final int id) {
