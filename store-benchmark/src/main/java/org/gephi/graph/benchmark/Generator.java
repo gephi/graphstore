@@ -41,6 +41,8 @@ Portions Copyrighted 2011 Gephi Consortium.
 */
 package org.gephi.graph.benchmark;
 
+import org.gephi.graph.store.GraphStore;
+
 
 
 /**
@@ -58,7 +60,7 @@ public interface Generator extends LongTask {
      * the graph to <code>GraphAPI</code>.
      * @param container the container the graph is to be pushed
      */
-    public void generate(ContainerLoader container);
+    public void generate(GraphStore graphStore );
 
     /**
      * Returns the generator display name.

@@ -49,6 +49,7 @@ import org.gephi.graph.store.NodeImpl;
 import org.gephi.graph.store.NodeStore;
 import org.gephi.graph.store.EdgeStore;
 import org.gephi.graph.store.EdgeImpl;
+import org.gephi.graph.store.GraphStore;
 
 
 /**
@@ -65,7 +66,7 @@ public class RandomGraph implements Generator {
     protected boolean cancel = false;
 
     @Override
-    public void generate(ContainerLoader container) {
+    public void generate(GraphStore container) {
 
         int max = numberOfNodes;
         if (wiringProbability > 0) {

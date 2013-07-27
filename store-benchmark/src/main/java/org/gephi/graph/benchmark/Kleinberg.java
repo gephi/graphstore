@@ -21,15 +21,11 @@
 package org.gephi.graph.benchmark;
 
 import java.util.Random;
-/*import org.gephi.io.generator.spi.Generator;
-import org.gephi.io.generator.spi.GeneratorUI;
-import org.gephi.io.importer.api.ContainerLoader;
-import org.gephi.io.importer.api.EdgeDraft;
-import org.gephi.io.importer.api.NodeDraft;
-import org.gephi.utils.progress.Progress;
-import org.gephi.utils.progress.ProgressTicket;
-import org.openide.util.Lookup;*/
-//import org.openide.util.lookup.ServiceProvider;
+import org.gephi.graph.store.EdgeImpl;
+import org.gephi.graph.store.EdgeStore;
+import org.gephi.graph.store.GraphStore;
+import org.gephi.graph.store.NodeImpl;
+
 
 /**
  * Generates a directed connected graph.
@@ -49,7 +45,7 @@ import org.openide.util.Lookup;*/
  *
  * @author Cezary Bartosiak
  */
-//@ServiceProvider(service = Generator.class)
+
 public class Kleinberg implements Generator {
 	private boolean cancel = false;
 	//private ProgressTicket progressTicket;
@@ -62,9 +58,9 @@ public class Kleinberg implements Generator {
 	private boolean torusBased = false;
 
 	@Override
-	public void generate(ContainerLoader container) {
+	public void generate(GraphStore graphStore) {
 		//Progress.start(progressTicket, n * n + n * n * (2 * p + 1) * (2 * p + 1) +
-			//	(int)Math.pow(n, 4) + n * n * q);
+		//		(int)Math.pow(n, 4) + n * n * q);
 		Random random = new Random();
 
 		// Timestamps
@@ -72,14 +68,14 @@ public class Kleinberg implements Generator {
 		int et = 1;
 
 		// Creating lattice n x n
-		NodeDraft[][] nodes = new NodeDraft[n][n];
+		NodeImpl[][] nodes = new NodeImpl[n][n];
 		for (int i = 0; i < n && !cancel; ++i)
 			for (int j = 0; j < n && !cancel; ++j) {
-				NodeDraft node = container.factory().newNodeDraft();
-				node.setLabel("Node " + i + " " + j);
+				NodeImpl node = new NodeImpl(String.valueOf("Node " + i + " " + j));
+				//node.setLabel("Node " + i + " " + j);)
 				//node.addTimeInterval(vt + "", 2 * n * n + "");
 				nodes[i][j] = node;
-				container.addNode(node);
+				graphStore.addNode(node);
 				//Progress.progress(progressTicket);
 			}
 
@@ -90,11 +86,13 @@ public class Kleinberg implements Generator {
 					for (int l = j - p; l <= j + p && !cancel; ++l) {
 						if ((torusBased || !torusBased && k >= 0 && k < n && l >= 0 && l < n) &&
 								d(i, j, k, l) <= p && nodes[i][j] != nodes[(k + n) % n][(l + n) % n]) {
-							EdgeDraft edge = container.factory().newEdgeDraft();
-							edge.setSource(nodes[i][j]);
-							edge.setTarget(nodes[(k + n) % n][(l + n) % n]);
-							//edge.addTimeInterval(et + "", 2 * n * n + "");
-							container.addEdge(edge);
+							EdgeStore edgeStore = new EdgeStore();
+                                                        EdgeImpl Edge = new EdgeImpl(String.valueOf(j),nodes[i][j],nodes[(k + n) % n][(l + n) % n],0,1.0,true);
+                                                        edgeStore.add(Edge);
+                                                        graphStore.addEdge(Edge);
+							
+							
+	
 						}
 						//Progress.progress(progressTicket);
 					}
@@ -121,7 +119,7 @@ public class Kleinberg implements Generator {
 								if (!torusBased && d(i, j, k, l) > p || torusBased && dtb(i, j, k, l) > p) {
 									pki += Math.pow(!torusBased ? d(i, j, k, l) : dtb(i, j, k, l), -r) / sum;
 
-									if (b <= pki && !container.edgeExists(nodes[i][j], nodes[k][l])) {
+									if (b <= pki && !edgeStore.) {
 										EdgeDraft edge = container.factory().newEdgeDraft();
 										edge.setSource(nodes[i][j]);
 										edge.setTarget(nodes[k][l]);
@@ -189,15 +187,7 @@ public class Kleinberg implements Generator {
 		this.torusBased = torusBased;
 	}
 
-	//@Override
-	public String getName() {
-		return "Kleinberg Small World model";
-	}
-
-	//@Override
-	//public GeneratorUI getUI() {
-	//	return Lookup.getDefault().lookup(KleinbergUI.class);
-	//}
+	
 
 	@Override
 	public boolean cancel() {
@@ -205,8 +195,5 @@ public class Kleinberg implements Generator {
 		return true;
 	}
 
-	//@Override
-	//public void setProgressTicket(ProgressTicket progressTicket) {
-	//	this.progressTicket = progressTicket;
-	//}
+	
 }
