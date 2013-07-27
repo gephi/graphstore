@@ -43,7 +43,12 @@ package org.gephi.graph.benchmark;
 
 import java.awt.Color;
 import java.util.Random;
-import org.openide.util.lookup.ServiceProvider;
+//import org.openide.util.lookup.ServiceProvider;
+import org.gephi.graph.api.Node;
+import org.gephi.graph.store.NodeImpl;
+import org.gephi.graph.store.NodeStore;
+import org.gephi.graph.store.EdgeStore;
+import org.gephi.graph.store.EdgeImpl;
 
 
 /**
@@ -51,7 +56,7 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Mathieu Bastian
  */
 
-@ServiceProvider(service = Generator.class)
+//@ServiceProvider(service = Generator.class)
 public class RandomGraph implements Generator {
 
     protected int numberOfNodes = 50;
@@ -70,24 +75,23 @@ public class RandomGraph implements Generator {
         int progressUnit = 0;
         Random random = new Random();
 
-        NodeDraft[] nodeArray = new NodeDraft[numberOfNodes];
+        final NodeStore nodeStore = new NodeStore();
         for (int i = 0; i < numberOfNodes && !cancel; i++) {
-            NodeDraft nodeDraft = container.factory().newNodeDraft();
-            container.addNode(nodeDraft);
-            nodeArray[i] = nodeDraft;
+            NodeImpl node = new NodeImpl(String.valueOf(i));
+            nodeStore.add(node);
             //Progress.progress(progress, ++progressUnit);
         }
 
         if (wiringProbability > 0) {
             for (int i = 0; i < numberOfNodes - 1 && !cancel; i++) {
-                NodeDraft node1 = nodeArray[i];
+                NodeImpl node1 = nodeStore.get(i);
                 for (int j = i + 1; j < numberOfNodes && !cancel; j++) {
-                    NodeDraft node2 = nodeArray[j];
+                    NodeImpl node2 = nodeStore.get(j);
                     if (random.nextDouble() < wiringProbability) {
-                        EdgeDraft edgeDraft = container.factory().newEdgeDraft();
-                        edgeDraft.setSource(node1);
-                        edgeDraft.setTarget(node2);
-                        container.addEdge(edgeDraft);
+                        EdgeStore edgeStore = new EdgeStore();
+                        EdgeImpl Edge = new EdgeImpl(String.valueOf(j),node1,node2,0,1.0,true);
+                        edgeStore.add(Edge);
+                        
                     }
                 }
              //   Progress.progress(progress, ++progressUnit);

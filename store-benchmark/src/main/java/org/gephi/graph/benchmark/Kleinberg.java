@@ -29,7 +29,7 @@ import org.gephi.io.importer.api.NodeDraft;
 import org.gephi.utils.progress.Progress;
 import org.gephi.utils.progress.ProgressTicket;
 import org.openide.util.Lookup;*/
-import org.openide.util.lookup.ServiceProvider;
+//import org.openide.util.lookup.ServiceProvider;
 
 /**
  * Generates a directed connected graph.
@@ -49,7 +49,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Cezary Bartosiak
  */
-@ServiceProvider(service = Generator.class)
+//@ServiceProvider(service = Generator.class)
 public class Kleinberg implements Generator {
 	private boolean cancel = false;
 	//private ProgressTicket progressTicket;
