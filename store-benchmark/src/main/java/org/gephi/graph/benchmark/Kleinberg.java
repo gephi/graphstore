@@ -62,6 +62,7 @@ public class Kleinberg implements Generator {
 		//Progress.start(progressTicket, n * n + n * n * (2 * p + 1) * (2 * p + 1) +
 		//		(int)Math.pow(n, 4) + n * n * q);
 		Random random = new Random();
+                EdgeStore edgeStore = new EdgeStore();
 
 		// Timestamps
 		int vt = 0;
@@ -86,7 +87,7 @@ public class Kleinberg implements Generator {
 					for (int l = j - p; l <= j + p && !cancel; ++l) {
 						if ((torusBased || !torusBased && k >= 0 && k < n && l >= 0 && l < n) &&
 								d(i, j, k, l) <= p && nodes[i][j] != nodes[(k + n) % n][(l + n) % n]) {
-							EdgeStore edgeStore = new EdgeStore();
+							
                                                         EdgeImpl Edge = new EdgeImpl(String.valueOf(j),nodes[i][j],nodes[(k + n) % n][(l + n) % n],0,1.0,true);
                                                         edgeStore.add(Edge);
                                                         graphStore.addEdge(Edge);
@@ -119,12 +120,12 @@ public class Kleinberg implements Generator {
 								if (!torusBased && d(i, j, k, l) > p || torusBased && dtb(i, j, k, l) > p) {
 									pki += Math.pow(!torusBased ? d(i, j, k, l) : dtb(i, j, k, l), -r) / sum;
 
-									if (b <= pki && !edgeStore.) {
-										EdgeDraft edge = container.factory().newEdgeDraft();
-										edge.setSource(nodes[i][j]);
-										edge.setTarget(nodes[k][l]);
-										//edge.addTimeInterval(et + "", 2 * n * n + "");
-										container.addEdge(edge);
+									if (b <= pki && !edgeStore.contains(nodes[i][j], nodes[k][l],edgeStore.get(nodes[i][j], nodes[k][l]).getType())) {
+                                                                            
+                                                                                
+                                                                                EdgeImpl Edge = new EdgeImpl(String.valueOf(j),nodes[i][j],nodes[k][l],0,1.0,true);
+                                                                                edgeStore.add(Edge);									
+										graphStore.addEdge(Edge);
 
 										e = true;
 									}
