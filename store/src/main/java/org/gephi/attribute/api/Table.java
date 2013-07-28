@@ -45,5 +45,7 @@ public interface Table extends Iterable<Column> {
 
     public int countColumns();
 
+    public Class getElementClass();
+
     public TableObserver getTableObserver();
 }

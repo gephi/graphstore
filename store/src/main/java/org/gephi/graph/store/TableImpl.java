@@ -68,7 +68,7 @@ public class TableImpl<T extends Element> implements Table {
             indexed = false;
         }
 
-        ColumnImpl column = new ColumnImpl(id, type, title, defaultValue, origin, indexed);
+        ColumnImpl column = new ColumnImpl(this, id, type, title, defaultValue, origin, indexed);
         store.addColumn(column);
 
         return column;
@@ -122,6 +122,11 @@ public class TableImpl<T extends Element> implements Table {
     @Override
     public TableObserver getTableObserver() {
         return store.createTableObserver(this);
+    }
+
+    @Override
+    public Class getElementClass() {
+        return store.elementType;
     }
 
     public void destroyTableObserver(TableObserver observer) {

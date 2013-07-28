@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.gephi.attribute.time.*;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Node;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -349,6 +351,14 @@ public class AttributeUtils {
 
     public static String printDateTime(double timestamp) {
         return DATE_TIME_PRINTER.print((long) timestamp);
+    }
+
+    public static boolean isNodeColumn(Column colum) {
+        return colum.getTable().getElementClass().equals(Node.class);
+    }
+
+    public static boolean isEdgeColumn(Column colum) {
+        return colum.getTable().getElementClass().equals(Edge.class);
     }
 
     /**

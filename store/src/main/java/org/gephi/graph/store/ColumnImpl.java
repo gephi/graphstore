@@ -18,6 +18,7 @@ package org.gephi.graph.store;
 import org.gephi.attribute.api.AttributeUtils;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.api.Table;
 import org.gephi.attribute.time.Estimator;
 import org.gephi.attribute.time.TimestampValueSet;
 
@@ -28,6 +29,7 @@ import org.gephi.attribute.time.TimestampValueSet;
 public class ColumnImpl implements Column {
 
     //Attributes
+    protected final TableImpl table;
     protected final String id;
     protected final Class typeClass;
     protected final String title;
@@ -39,13 +41,14 @@ public class ColumnImpl implements Column {
     //Store Id
     protected int storeId = ColumnStore.NULL_ID;
 
-    public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed) {
+    public ColumnImpl(TableImpl table, String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed) {
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("The column ID can't be null or empty");
         }
         if (typeClass == null) {
             throw new NullPointerException();
         }
+        this.table = table;
         this.id = id;
         this.typeClass = typeClass;
         this.title = title;
@@ -53,6 +56,10 @@ public class ColumnImpl implements Column {
         this.origin = origin;
         this.indexed = indexed;
         this.dynamic = TimestampValueSet.class.isAssignableFrom(typeClass);
+    }
+
+    public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed) {
+        this(null, id, typeClass, title, defaultValue, origin, indexed);
     }
 
     @Override
@@ -83,6 +90,11 @@ public class ColumnImpl implements Column {
     @Override
     public Origin getOrigin() {
         return origin;
+    }
+
+    @Override
+    public Table getTable() {
+        return table;
     }
 
     @Override

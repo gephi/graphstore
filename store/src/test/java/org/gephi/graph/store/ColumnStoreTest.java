@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.api.Table;
 import org.gephi.attribute.time.TimestampDoubleSet;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
@@ -114,6 +115,11 @@ public class ColumnStoreTest {
 
             @Override
             public boolean isProperty() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Table getTable() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });

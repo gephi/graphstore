@@ -31,6 +31,8 @@ public interface Column {
 
     public Origin getOrigin();
 
+    public Table getTable();
+
     public boolean isIndexed();
 
     public boolean isArray();
