@@ -33,6 +33,8 @@ public interface Table extends Iterable<Column> {
 
     public Column getColumn(String id);
 
+    public Column[] getColumns();
+
     public Estimator getEstimator(Column column);
 
     public void setEstimator(Column column, Estimator estimator);

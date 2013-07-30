@@ -215,6 +215,23 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         return new ColumnStoreIterator();
     }
 
+    public Column[] toArray() {
+        readLock();
+        try {
+            Column[] cols = new Column[size()];
+            int j = 0;
+            for (int i = 0; i < length; i++) {
+                Column c = columns[i];
+                if (c != null) {
+                    cols[j++] = c;
+                }
+            }
+            return cols;
+        } finally {
+            readUnlock();
+        }
+    }
+
     public Set<String> getColumnKeys() {
         readLock();
         try {

@@ -95,6 +95,11 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
+    public Column[] getColumns() {
+        return store.toArray();
+    }
+
+    @Override
     public boolean hasColumn(String id) {
         return store.hasColumn(id);
     }

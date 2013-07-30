@@ -387,4 +387,38 @@ public class ColumnStoreTest {
         ColumnImpl col2 = new ColumnImpl("0", int[].class, null, null, Origin.DATA, false);
         Assert.assertTrue(col2.isArray());
     }
+
+    @Test
+    public void testToArray() {
+        ColumnStore<Node> store = new ColumnStore<Node>(Node.class, false);
+
+        Assert.assertEquals(store.toArray().length, 0);
+
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        store.addColumn(col11);
+        store.addColumn(col12);
+
+        Column[] cols = store.toArray();
+        Assert.assertEquals(cols.length, 2);
+        Assert.assertSame(cols[0], col11);
+        Assert.assertEquals(cols[1], col12);
+    }
+
+    @Test
+    public void testToArrayWithGarbage() {
+        ColumnStore<Node> store = new ColumnStore<Node>(Node.class, false);
+
+        Assert.assertEquals(store.toArray().length, 0);
+
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        store.addColumn(col11);
+        store.addColumn(col12);
+        store.removeColumn(col11);
+
+        Column[] cols = store.toArray();
+        Assert.assertEquals(cols.length, 1);
+        Assert.assertSame(cols[0], col12);
+    }
 }
