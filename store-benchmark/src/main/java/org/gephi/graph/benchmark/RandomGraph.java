@@ -62,8 +62,10 @@ public class RandomGraph implements Generator {
 
     protected int numberOfNodes = 50;
     protected double wiringProbability = 0.05;
-   // protected ProgressTicket progress;
+  
     protected boolean cancel = false;
+     final NodeStore nodeStore = new NodeStore();
+     EdgeStore edgeStore = new EdgeStore();
 
     @Override
     public void generate(GraphStore container) {
@@ -73,12 +75,13 @@ public class RandomGraph implements Generator {
             max += numberOfNodes - 1;
         }
        // Progress.start(progress, max);
-        int progressUnit = 0;
+        
         Random random = new Random();
 
-        final NodeStore nodeStore = new NodeStore();
+       
         for (int i = 0; i < numberOfNodes && !cancel; i++) {
             NodeImpl node = new NodeImpl(String.valueOf(i));
+            System.out.println("i");
             nodeStore.add(node);
             //Progress.progress(progress, ++progressUnit);
         }
@@ -89,7 +92,7 @@ public class RandomGraph implements Generator {
                 for (int j = i + 1; j < numberOfNodes && !cancel; j++) {
                     NodeImpl node2 = nodeStore.get(j);
                     if (random.nextDouble() < wiringProbability) {
-                        EdgeStore edgeStore = new EdgeStore();
+                        
                         EdgeImpl Edge = new EdgeImpl(String.valueOf(j),node1,node2,0,1.0,true);
                         edgeStore.add(Edge);
                         

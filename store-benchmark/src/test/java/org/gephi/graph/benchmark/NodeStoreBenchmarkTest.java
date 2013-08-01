@@ -38,4 +38,9 @@ public class NodeStoreBenchmarkTest {
     public void testResetNodeStore() {
         NanoBench.create().measurements(100).measure("reset node store", new NodeStoreBenchmark().resetNodeStore());
     }
+    
+     @Test
+    public void testAddNode() {
+        NanoBench.create().measurements(100).measure("add node ", new NodeStoreBenchmark().addNode());
+    }
 }

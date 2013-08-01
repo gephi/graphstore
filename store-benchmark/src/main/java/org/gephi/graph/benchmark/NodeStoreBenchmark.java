@@ -97,4 +97,18 @@ public class NodeStoreBenchmark {
         };
         return runnable;
     }
+    
+    public Runnable addNode() {
+       //final NodeImpl[] nodeStock = new NodeImpl[NODES_WRITE];
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                RandomGraph randomGraph = new RandomGraph();
+               
+            }
+        };
+        return runnable;
+        
+    }
 }
