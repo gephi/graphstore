@@ -60,7 +60,7 @@ public interface Generator extends LongTask {
      * the graph to <code>GraphAPI</code>.
      * @param container the container the graph is to be pushed
      */
-    public void generate(GraphStore graphStore );
+    public void generate(GraphStore container);
 
     /**
      * Returns the generator display name.
