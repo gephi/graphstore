@@ -149,6 +149,61 @@ public class EdgeStoreBenchmark {
         };
         return runnable;
     }
+    
+     public Runnable addEdge(){
+        Runnable runnable = new Runnable(){
+
+            @Override
+            public void run() {
+                RandomGraph randomGraph = new RandomGraph();
+                Random random = new Random();
+                EdgeImpl Edge = new EdgeImpl(String.valueOf(randomGraph.numberOfNodes),randomGraph.nodeStore.get(String.valueOf(random.nextInt() % randomGraph.numberOfNodes)),randomGraph.nodeStore.get(String.valueOf(random.nextInt() % randomGraph.numberOfNodes)),0,1.0,true);
+                randomGraph.edgeStore.add(Edge);
+                
+            }
+            
+        };
+        return runnable;
+    }
+    
+    public Runnable removeEdge(){
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+              RandomGraph randomGraph = new RandomGraph();
+              Random random = new Random();
+              boolean flag = true;  // checking edge exists or not
+              while(flag){
+                  NodeImpl source = new NodeImpl(String.valueOf(random.nextInt() %randomGraph.numberOfNodes));
+                  NodeImpl dest = new NodeImpl(String.valueOf(random.nextInt() %randomGraph.numberOfNodes));
+                  if(randomGraph.edgeStore.contains(source, dest, NODES)){
+                      flag = false;
+                      randomGraph.edgeStore.remove(randomGraph.edgeStore.get(source, dest));
+                  }
+                  
+              }
+              
+            }
+        };
+        
+        return runnable;
+        
+    }
+    public Runnable iterateEdge(){
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                RandomGraph randomGraph = new RandomGraph();
+                Iterator<Edge> itr = randomGraph.edgeStore.iterator();
+                for (; itr.hasNext();) {
+                    edgeObject = (EdgeImpl) itr.next();
+                }
+                }
+        };
+        return runnable;
+    }
 
     private List<EdgeImpl> generateEdgeList() {
         final NodeStore nodeStore = new NodeStore();

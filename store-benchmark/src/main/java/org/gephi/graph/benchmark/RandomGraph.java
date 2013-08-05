@@ -65,7 +65,7 @@ public class RandomGraph implements Generator {
   
     protected boolean cancel = false;
      final NodeStore nodeStore = new NodeStore();
-     EdgeStore edgeStore = new EdgeStore();
+     final EdgeStore edgeStore = new EdgeStore();
 
     @Override
     public void generate(GraphStore container) {

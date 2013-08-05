@@ -16,7 +16,10 @@
 package org.gephi.graph.benchmark;
 
 import java.util.Iterator;
+import java.util.Random;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.store.EdgeImpl;
+import org.gephi.graph.store.EdgeStore;
 import org.gephi.graph.store.NodeImpl;
 import org.gephi.graph.store.NodeStore;
 
@@ -105,10 +108,70 @@ public class NodeStoreBenchmark {
             @Override
             public void run() {
                 RandomGraph randomGraph = new RandomGraph();
-               
+                NodeImpl newRNode = new NodeImpl(String.valueOf("newRandomNode"));
+                randomGraph.nodeStore.add(newRNode);
+                Random random = new Random();
+                if(random.nextDouble() < randomGraph.wiringProbability)
+                {
+                    EdgeImpl Edge = new EdgeImpl(String.valueOf(randomGraph.numberOfNodes),newRNode,randomGraph.nodeStore.get(String.valueOf(random.nextInt() % randomGraph.numberOfNodes)),0,1.0,true);
+                        randomGraph.edgeStore.add(Edge);
+                }
+                Kleinberg kleinbergGraph = new Kleinberg();
+                NodeImpl newKNode = new NodeImpl(String.valueOf("newKleinbergNode"));
+                kleinbergGraph.graphstore.addNode(newKNode);
+                
+                /// Add Edge implementation remaining
             }
         };
         return runnable;
         
     }
+    public Runnable removeNode() {
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                Random random = new Random();                
+                RandomGraph randomGraph = new RandomGraph();
+                randomGraph.nodeStore.remove(String.valueOf(random.nextInt() % randomGraph.numberOfNodes));
+                
+                Kleinberg kleinbergGraph = new Kleinberg();
+                
+            }
+            
+        };
+        return runnable;
 }
+   public Runnable iterateNodes(){
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                RandomGraph randomGraph = new RandomGraph();
+                Iterator<Node> m = randomGraph.nodeStore.iterator();
+                for (; m.hasNext();) {
+                    NodeImpl b = (NodeImpl) m.next();
+                    object = b;
+                }              
+            }
+        };
+        
+        return runnable;
+       
+   }
+   
+   public Runnable iterateNeighbors(){
+       Runnable runnable = new Runnable() {
+
+           @Override
+           public void run() {
+               RandomGraph randomGraph = new RandomGraph();
+               Random random = new Random();
+               NodeImpl node = randomGraph.nodeStore.get(random.nextInt()% randomGraph.numberOfNodes);
+               Iterator<Node> Neighbors = randomGraph.edgeStore.neighborIterator(node);
+               }
+       };
+       return runnable;
+   }
+
+}    

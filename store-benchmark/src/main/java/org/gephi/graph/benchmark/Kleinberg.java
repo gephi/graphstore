@@ -56,13 +56,14 @@ public class Kleinberg implements Generator {
 	private int r = 0;
 
 	private boolean torusBased = false;
-
+        final EdgeStore edgeStore = new EdgeStore();
+        final GraphStore graphstore = new GraphStore();
 	@Override
 	public void generate(GraphStore graphStore) {
 		//Progress.start(progressTicket, n * n + n * n * (2 * p + 1) * (2 * p + 1) +
 		//		(int)Math.pow(n, 4) + n * n * q);
 		Random random = new Random();
-                EdgeStore edgeStore = new EdgeStore();
+                
 
 		// Timestamps
 		int vt = 0;
