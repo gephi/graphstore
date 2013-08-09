@@ -108,12 +108,13 @@ public class NodeStoreBenchmark {
             @Override
             public void run() {
                 RandomGraph randomGraph = new RandomGraph();
-                NodeImpl newRNode = new NodeImpl(String.valueOf("newRandomNode"));
+                NodeImpl newRNode = new NodeImpl(String.valueOf(randomGraph.numberOfNodes + 1));
                 randomGraph.nodeStore.add(newRNode);
                 Random random = new Random();
                 if(random.nextDouble() < randomGraph.wiringProbability)
                 {
-                    EdgeImpl Edge = new EdgeImpl(String.valueOf(randomGraph.numberOfNodes),newRNode,randomGraph.nodeStore.get(String.valueOf(random.nextInt() % randomGraph.numberOfNodes)),0,1.0,true);
+                    int temp = random.nextInt(randomGraph.numberOfNodes) % randomGraph.numberOfNodes;
+                    EdgeImpl Edge = new EdgeImpl(String.valueOf(newRNode.getId()),randomGraph.nodeStore.get(String.valueOf(temp)),newRNode,0,1.0,true);
                         randomGraph.edgeStore.add(Edge);
                 }
                 Kleinberg kleinbergGraph = new Kleinberg();

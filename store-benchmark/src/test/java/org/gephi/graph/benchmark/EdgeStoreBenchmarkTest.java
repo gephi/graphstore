@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 public class EdgeStoreBenchmarkTest {
 
     @Test
-    public void testPushStore() {
+   /* public void testPushStore() {
         NanoBench.create().measurements(20).measure("push edge store", new EdgeStoreBenchmark().pushEdgeStore());
     }
 
@@ -51,5 +51,20 @@ public class EdgeStoreBenchmarkTest {
     @Test
     public void testResetEdgeStore() {
         NanoBench.create().cpuOnly().measurements(20).measure("reset edge store", new EdgeStoreBenchmark().resetEdgeStore());
+    }
+    
+    @Test*/
+    public void testAddEdge() {
+        NanoBench.create().cpuOnly().measurements(1).measure("add edge", new EdgeStoreBenchmark().addEdge());
+    }
+    
+   /* @Test
+    public void testRemoveEdge() {
+        NanoBench.create().cpuOnly().measurements(1).measure("testRemoveEdge", new EdgeStoreBenchmark().removeEdge());
+    }*/
+    
+    @Test
+    public void testIterateEdge() {
+        NanoBench.create().cpuOnly().measurements(300).measure("testIterateEdge", new EdgeStoreBenchmark().iterateEdge());
     }
 }

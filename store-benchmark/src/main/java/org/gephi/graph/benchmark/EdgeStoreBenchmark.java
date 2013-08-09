@@ -157,8 +157,10 @@ public class EdgeStoreBenchmark {
             public void run() {
                 RandomGraph randomGraph = new RandomGraph();
                 Random random = new Random();
-                EdgeImpl Edge = new EdgeImpl(String.valueOf(randomGraph.numberOfNodes),randomGraph.nodeStore.get(String.valueOf(random.nextInt() % randomGraph.numberOfNodes)),randomGraph.nodeStore.get(String.valueOf(random.nextInt() % randomGraph.numberOfNodes)),0,1.0,true);
-                randomGraph.edgeStore.add(Edge);
+                int temp = random.nextInt(randomGraph.numberOfNodes) % randomGraph.numberOfNodes;
+                
+              //  EdgeImpl Edge = new EdgeImpl(String.valueOf(),,,0,1.0,true);
+               // randomGraph.edgeStore.add(Edge);
                 
             }
             
@@ -175,8 +177,8 @@ public class EdgeStoreBenchmark {
               Random random = new Random();
               boolean flag = true;  // checking edge exists or not
               while(flag){
-                  NodeImpl source = new NodeImpl(String.valueOf(random.nextInt() %randomGraph.numberOfNodes));
-                  NodeImpl dest = new NodeImpl(String.valueOf(random.nextInt() %randomGraph.numberOfNodes));
+                  NodeImpl source = new NodeImpl(String.valueOf(random.nextInt(randomGraph.numberOfNodes) %randomGraph.numberOfNodes));
+                  NodeImpl dest = new NodeImpl(String.valueOf(random.nextInt(randomGraph.numberOfNodes) %randomGraph.numberOfNodes));
                   if(randomGraph.edgeStore.contains(source, dest, NODES)){
                       flag = false;
                       randomGraph.edgeStore.remove(randomGraph.edgeStore.get(source, dest));

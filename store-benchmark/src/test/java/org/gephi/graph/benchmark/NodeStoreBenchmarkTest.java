@@ -41,6 +41,18 @@ public class NodeStoreBenchmarkTest {
     
      @Test
     public void testAddNode() {
-        NanoBench.create().measurements(100).measure("add node ", new NodeStoreBenchmark().addNode());
+        NanoBench.create().measurements(5).measure("add node ", new NodeStoreBenchmark().addNode());
     }
+     @Test
+     public void testRemoveNode() {
+         NanoBench.create().measurements(5).measure("Remove Node", new NodeStoreBenchmark().removeNode());
+     }
+     @Test 
+     public void testIterateNode(){
+         NanoBench.create().measurements(5).measure("Iterate Nodes", new NodeStoreBenchmark().iterateNodes());
+     }
+     @Test 
+     public void testIterateNeighbors(){
+         NanoBench.create().measurements(5).measure("Iterate Neighbors", new NodeStoreBenchmark().iterateNeighbors());
+     }
 }
