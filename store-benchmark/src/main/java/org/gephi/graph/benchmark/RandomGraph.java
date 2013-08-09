@@ -41,6 +41,8 @@
  */
 package org.gephi.graph.benchmark;
 
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.awt.Color;
 import java.util.Random;
 //import org.openide.util.lookup.ServiceProvider;
@@ -60,13 +62,23 @@ import org.gephi.graph.store.GraphStore;
 //@ServiceProvider(service = Generator.class)
 public class RandomGraph implements Generator {
 
-    protected int numberOfNodes = 50;
-    protected double wiringProbability = 0.05;
-  
-    protected boolean cancel = false;
-     final NodeStore nodeStore = new NodeStore();
-     final EdgeStore edgeStore = new EdgeStore();
-
+    
+    protected int numberOfNodes;
+    protected double wiringProbability;
+    private double edgeCount;  
+    protected boolean cancel;
+    public NodeStore nodeStore;
+    public EdgeStore edgeStore;
+    public RandomGraph()
+    {
+       numberOfNodes = 500;
+       wiringProbability = 0.05;
+       edgeCount = 0;  
+       cancel = false;
+       nodeStore = new NodeStore();
+       edgeStore = new EdgeStore();
+       generate(null);
+    }
     @Override
     public void generate(GraphStore container) {
 
@@ -79,43 +91,35 @@ public class RandomGraph implements Generator {
         Random random = new Random();
 
        
-        for (int i = 0; i < numberOfNodes && !cancel; i++) {
-            NodeImpl node = new NodeImpl(String.valueOf(i));
-            System.out.println("i");
-            nodeStore.add(node);
-            //Progress.progress(progress, ++progressUnit);
-        }
+            for (int i = 0; i < numberOfNodes && !cancel; i++) {
+                NodeImpl node = new NodeImpl(String.valueOf(i));
+                nodeStore.add(node);
 
-        if (wiringProbability > 0) {
-            for (int i = 0; i < numberOfNodes - 1 && !cancel; i++) {
-                NodeImpl node1 = nodeStore.get(i);
-                for (int j = i + 1; j < numberOfNodes && !cancel; j++) {
-                    NodeImpl node2 = nodeStore.get(j);
-                    if (random.nextDouble() < wiringProbability) {
-                        
-                        EdgeImpl Edge = new EdgeImpl(String.valueOf(j),node1,node2,0,1.0,true);
-                        edgeStore.add(Edge);
-                        
-                    }
-                }
-             //   Progress.progress(progress, ++progressUnit);
             }
-        }
+            LongSet idSet = new LongOpenHashSet();
+            if (wiringProbability > 0) {
+                for (int i = 0; i < numberOfNodes - 1 && !cancel; i++) {
+                    NodeImpl source = nodeStore.get(i);
+                    for (int j = i + 1; j < numberOfNodes && !cancel; j++) {
+                        NodeImpl target = nodeStore.get(j);
 
-        //Progress.finish(progress);
-        //progress = null;
+
+                            EdgeImpl edge = new EdgeImpl(String.valueOf(edgeCount), source, target, 0, 1.0, true);
+                           if (random.nextDouble() < wiringProbability && !idSet.contains(edge.getLongId()) && source != target) {
+                            edgeStore.add(edge);
+                            edgeCount++;
+                            idSet.add(edge.getLongId());
+                        }
+                    }
+                 
+                }
+            }
+         
+        
     }
 
-   // @Override
-    //public String getName() {
-     //   return NbBundle.getMessage(RandomGraph.class, "RandomGraph.name");
-   // }
 
-    //@Override
-    //public GeneratorUI getUI() {
-     //   return Lookup.getDefault().lookup(RandomGraphUI.class);
-   // }
-
+    
     public void setNumberOfNodes(int numberOfNodes) {
         if (numberOfNodes < 0) {
             throw new IllegalArgumentException("# of nodes must be greater than 0");
@@ -144,10 +148,21 @@ public class RandomGraph implements Generator {
         return true;
     }
 
-    //@Override
-    //public void setProgressTicket(ProgressTicket progressTicket) {
-      //  this.progress = progressTicket;
-    //}
+    
+
+    /**
+     * @return the EdgeCount
+     */
+    public double getEdgeCount() {
+        return edgeCount;
+    }
+
+    /**
+     * @param EdgeCount the EdgeCount to set
+     */
+    public void setEdgeCount(double EdgeCount) {
+        this.edgeCount = EdgeCount;
+    }
 }
 
 

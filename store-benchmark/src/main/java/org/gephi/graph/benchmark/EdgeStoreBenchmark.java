@@ -150,23 +150,35 @@ public class EdgeStoreBenchmark {
         return runnable;
     }
     
-     public Runnable addEdge(){
-        Runnable runnable = new Runnable(){
+        public Runnable addEdge(){
+           Runnable runnable = new Runnable(){
 
-            @Override
-            public void run() {
-                RandomGraph randomGraph = new RandomGraph();
-                Random random = new Random();
-                int temp = random.nextInt(randomGraph.numberOfNodes) % randomGraph.numberOfNodes;
-                
-              //  EdgeImpl Edge = new EdgeImpl(String.valueOf(),,,0,1.0,true);
-               // randomGraph.edgeStore.add(Edge);
-                
-            }
-            
-        };
-        return runnable;
-    }
+               @Override
+               public void run() {
+                   RandomGraph randomGraph = new RandomGraph();
+                   Random random = new Random();
+                   boolean flag =true;
+                   while(flag){
+
+
+                       int sourceID = random.nextInt(randomGraph.numberOfNodes);
+                       int DestID = random.nextInt(randomGraph.numberOfNodes);
+                       NodeImpl source = randomGraph.nodeStore.get(sourceID);
+                       NodeImpl target = randomGraph.nodeStore.get(DestID);
+                       if(!randomGraph.edgeStore.contains(source, target,randomGraph.numberOfNodes ))
+                       {
+                           randomGraph.setEdgeCount(randomGraph.getEdgeCount()+1);
+                           EdgeImpl edge = new EdgeImpl(String.valueOf(randomGraph.getEdgeCount()), source, target, 0, 1.0, true);
+                           randomGraph.edgeStore.add(edge);
+                           flag = false;
+                       }
+                       
+                   }
+               }
+
+           };
+           return runnable;
+       }
     
     public Runnable removeEdge(){
         Runnable runnable = new Runnable() {

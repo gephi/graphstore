@@ -107,15 +107,33 @@ public class NodeStoreBenchmark {
 
             @Override
             public void run() {
-                RandomGraph randomGraph = new RandomGraph();
+                RandomGraph randomGraph = new RandomGraph();                
                 NodeImpl newRNode = new NodeImpl(String.valueOf(randomGraph.numberOfNodes + 1));
                 randomGraph.nodeStore.add(newRNode);
                 Random random = new Random();
-                if(random.nextDouble() < randomGraph.wiringProbability)
+                //if(random.nextDouble() < randomGraph.wiringProbability)
                 {
-                    int temp = random.nextInt(randomGraph.numberOfNodes) % randomGraph.numberOfNodes;
-                    EdgeImpl Edge = new EdgeImpl(String.valueOf(newRNode.getId()),randomGraph.nodeStore.get(String.valueOf(temp)),newRNode,0,1.0,true);
+                    randomGraph.setEdgeCount(randomGraph.getEdgeCount()+1);
+                    int temp = random.nextInt(randomGraph.numberOfNodes);
+                  //  System.out.println("temp:"+temp );
+                    NodeImpl source = randomGraph.nodeStore.get(String.valueOf(temp));
+                    
+                    NodeImpl dest = randomGraph.nodeStore.get(String.valueOf(1));
+                    EdgeImpl Edge = new EdgeImpl(String.valueOf(randomGraph.getEdgeCount()), source,newRNode, 0, 1.0, true);
+                    if(Edge.getSource()== null)
+                    {
+                        System.out.println("source null");
+                    }
+                    if(Edge.getTarget()== null)
+                    {
+                        System.out.println("target null");
+                    }
+                    //randomGraph.nodeStore.get(String.valueOf(randomGraph.numberOfNodes+1))
+                    if(source!=newRNode){
                         randomGraph.edgeStore.add(Edge);
+                     //   System.out.println("not equal");
+                    }
+                    
                 }
                 Kleinberg kleinbergGraph = new Kleinberg();
                 NodeImpl newKNode = new NodeImpl(String.valueOf("newKleinbergNode"));
@@ -134,7 +152,9 @@ public class NodeStoreBenchmark {
             public void run() {
                 Random random = new Random();                
                 RandomGraph randomGraph = new RandomGraph();
-                randomGraph.nodeStore.remove(String.valueOf(random.nextInt() % randomGraph.numberOfNodes));
+                int nodeID = random.nextInt(randomGraph.numberOfNodes);
+                
+                randomGraph.nodeStore.remove(randomGraph.nodeStore.get(nodeID));
                 
                 Kleinberg kleinbergGraph = new Kleinberg();
                 
@@ -168,7 +188,7 @@ public class NodeStoreBenchmark {
            public void run() {
                RandomGraph randomGraph = new RandomGraph();
                Random random = new Random();
-               NodeImpl node = randomGraph.nodeStore.get(random.nextInt()% randomGraph.numberOfNodes);
+               NodeImpl node = randomGraph.nodeStore.get(random.nextInt(randomGraph.numberOfNodes));
                Iterator<Node> Neighbors = randomGraph.edgeStore.neighborIterator(node);
                }
        };
