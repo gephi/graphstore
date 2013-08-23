@@ -20,6 +20,8 @@
  */
 package org.gephi.graph.benchmark;
 
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Random;
 import org.gephi.graph.store.EdgeImpl;
 import org.gephi.graph.store.EdgeStore;
@@ -47,17 +49,39 @@ import org.gephi.graph.store.NodeImpl;
  */
 
 public class Kleinberg implements Generator {
-	private boolean cancel = false;
-	//private ProgressTicket progressTicket;
-
-	private int n = 10;
-	private int p = 2;
-	private int q = 2;
-	private int r = 0;
-
-	private boolean torusBased = false;
-        final EdgeStore edgeStore = new EdgeStore();
-        final GraphStore graphstore = new GraphStore();
+	
+    
+    
+        private boolean cancel;
+	private int n ;
+	private int p ;
+	private int q;
+	private int r ;
+        private LongSet idSet;
+        private int edgeCount;
+        private int nodeCount;
+        private boolean torusBased ;
+        final EdgeStore edgeStore ;
+        final GraphStore graphstore ;
+        
+        Kleinberg()
+        {
+         cancel = false;
+	 n = 2;
+	 p = 1;
+	 q = 1;
+	 r = 0;
+         edgeCount=0;   
+         nodeCount=0;
+         torusBased = false;
+         idSet = new LongOpenHashSet();
+         edgeStore = new EdgeStore();
+         graphstore = new GraphStore();
+         generate(this.graphstore);
+        }
+    
+	
+        
 	@Override
 	public void generate(GraphStore graphStore) {
 		//Progress.start(progressTicket, n * n + n * n * (2 * p + 1) * (2 * p + 1) +
@@ -65,69 +89,75 @@ public class Kleinberg implements Generator {
 		Random random = new Random();
                 
 
-		// Timestamps
-		int vt = 0;
-		int et = 1;
-
+		
+		
+                
 		// Creating lattice n x n
 		NodeImpl[][] nodes = new NodeImpl[n][n];
-		for (int i = 0; i < n && !cancel; ++i)
-			for (int j = 0; j < n && !cancel; ++j) {
-				NodeImpl node = new NodeImpl(String.valueOf("Node " + i + " " + j));
-				//node.setLabel("Node " + i + " " + j);)
-				//node.addTimeInterval(vt + "", 2 * n * n + "");
+		for (int i = 0; i < n ; ++i)
+                    
+			for (int j = 0; j < n; ++j) 
+                        {
+                                
+				NodeImpl node = new NodeImpl(getNodeCount());
 				nodes[i][j] = node;
 				graphStore.addNode(node);
-				//Progress.progress(progressTicket);
+                                setNodeCount(getNodeCount() + 1);
+				
 			}
-
+                
+                 
 		// Creating edges from each node to p local contacts
-		for (int i = 0; i < n && !cancel; ++i)
-			for (int j = 0; j < n && !cancel; ++j, ++et)
-				for (int k = i - p; k <= i + p && !cancel; ++k)
-					for (int l = j - p; l <= j + p && !cancel; ++l) {
-						if ((torusBased || !torusBased && k >= 0 && k < n && l >= 0 && l < n) &&
+                
+                 
+                 
+		for (int i = 0; i < n; ++i)
+			for (int j = 0; j < n ; ++j)
+				for (int k = i - p; k <= i + p ; ++k)
+					for (int l = j - p; l <= j + p ; ++l) {
+						if ((isTorusBased() || !isTorusBased() && k >= 0 && k < n && l >= 0 && l < n) &&
 								d(i, j, k, l) <= p && nodes[i][j] != nodes[(k + n) % n][(l + n) % n]) {
 							
-                                                        EdgeImpl Edge = new EdgeImpl(String.valueOf(j),nodes[i][j],nodes[(k + n) % n][(l + n) % n],0,1.0,true);
-                                                        edgeStore.add(Edge);
+                                                        EdgeImpl Edge = new EdgeImpl(edgeCount,nodes[i][j],nodes[(k + n) % n][(l + n) % n],0,1.0,true);
+                                                        edgeCount++;
                                                         graphStore.addEdge(Edge);
+                                                        getIdSet().add(Edge.getLongId());
 							
 							
 	
 						}
 						//Progress.progress(progressTicket);
 					}
-
+               
 		// Creating edges from each node to q long-range contacts
 		for (int i = 0; i < n && !cancel; ++i)
-			for (int j = 0; j < n && !cancel; ++j, ++et) {
+			for (int j = 0; j < n && !cancel; ++j) {
 				double sum = 0.0;
 				for (int k = 0; k < n && !cancel; ++k)
 					for (int l = 0; l < n && !cancel; ++l) {
-						if (!torusBased && d(i, j, k, l) > p)
+						if (!isTorusBased() && d(i, j, k, l) > p)
 							sum += Math.pow(d(i, j, k, l), -r);
-						else if (torusBased && dtb(i, j, k, l) > p)
+						else if (isTorusBased() && dtb(i, j, k, l) > p)
 							sum += Math.pow(dtb(i, j, k, l), -r);
 						//Progress.progress(progressTicket);
 					}
 				for (int m = 0; m < q && !cancel; ++m) {
 					double  b = random.nextDouble();
 					boolean e = false;
-					while (!e && !cancel) {
+					while (!e) {
 						double pki = 0.0;
 						for (int k = 0; k < n && !e && !cancel; ++k)
 							for (int l = 0; l < n && !e && !cancel; ++l)
-								if (!torusBased && d(i, j, k, l) > p || torusBased && dtb(i, j, k, l) > p) {
-									pki += Math.pow(!torusBased ? d(i, j, k, l) : dtb(i, j, k, l), -r) / sum;
-
-									if (b <= pki && !edgeStore.contains(nodes[i][j], nodes[k][l],edgeStore.get(nodes[i][j], nodes[k][l]).getType())) {
+								if (!isTorusBased() && d(i, j, k, l) > p || isTorusBased() && dtb(i, j, k, l) > p) {
+									pki += Math.pow(!isTorusBased() ? d(i, j, k, l) : dtb(i, j, k, l), -r) / sum;
+                                                                        EdgeImpl Edge = new EdgeImpl(edgeCount,nodes[i][j],nodes[k][l],0,1.0,true);
+									if (b <= pki && !idSet.contains(Edge.getLongId())) {
                                                                             
                                                                                 
-                                                                                EdgeImpl Edge = new EdgeImpl(String.valueOf(j),nodes[i][j],nodes[k][l],0,1.0,true);
-                                                                                edgeStore.add(Edge);									
+                                                                                
+                                                                                edgeCount++;									
 										graphStore.addEdge(Edge);
-
+                                                                                getIdSet().add(Edge.getLongId());
 										e = true;
 									}
 								}
@@ -141,11 +171,11 @@ public class Kleinberg implements Generator {
 		//progressTicket = null;
 	}
 
-	private int d(int i, int j, int k, int l) {
+	public int d(int i, int j, int k, int l) {
 		return Math.abs(k - i) + Math.abs(l - j);
 	}
 
-	private int dtb(int i, int j, int k, int l) {
+	public int dtb(int i, int j, int k, int l) {
 		return Math.min(Math.abs(k - i), n - Math.abs(k - i)) + Math.min(Math.abs(l - j), n - Math.abs(l - j));
 	}
 
@@ -189,13 +219,48 @@ public class Kleinberg implements Generator {
 		this.torusBased = torusBased;
 	}
 
-	
+	 public int getEdgeCount() {
+        return edgeCount;
+    }
+
+        public void setEdgeCount(int edgeCount) {
+        this.edgeCount = edgeCount;
+        }
+       
 
 	@Override
 	public boolean cancel() {
 		cancel = true;
 		return true;
 	}
+
+    /**
+     * @return the nodeCount
+     */
+    public int getNodeCount() {
+        return nodeCount;
+    }
+
+    /**
+     * @param nodeCount the nodeCount to set
+     */
+    public void setNodeCount(int nodeCount) {
+        this.nodeCount = nodeCount;
+    }
+
+    /**
+     * @return the idSet
+     */
+    public LongSet getIdSet() {
+        return idSet;
+    }
+
+    /**
+     * @param idSet the idSet to set
+     */
+    public void setIdSet(LongSet idSet) {
+        this.idSet = idSet;
+    }
 
 	
 }

@@ -15,8 +15,13 @@
  */
 package org.gephi.graph.benchmark;
 
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Iterator;
 import java.util.Random;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.store.EdgeImpl;
 import org.gephi.graph.store.EdgeStore;
@@ -135,11 +140,7 @@ public class NodeStoreBenchmark {
                     }
                     
                 }
-                Kleinberg kleinbergGraph = new Kleinberg();
-                NodeImpl newKNode = new NodeImpl(String.valueOf("newKleinbergNode"));
-                kleinbergGraph.graphstore.addNode(newKNode);
-                
-                /// Add Edge implementation remaining
+               
             }
         };
         return runnable;
@@ -194,5 +195,141 @@ public class NodeStoreBenchmark {
        };
        return runnable;
    }
+   
+   public Runnable addKleinbergNode()
+   {
+       Runnable runnable = new Runnable() {
 
-}    
+           @Override
+           public void run() {
+               // Adding the Node
+               Kleinberg graph = new Kleinberg();
+               Random random = new Random();
+               NodeImpl newNode = new NodeImpl(String.valueOf(graph.getNodeCount()+1));
+               graph.setNodeCount(graph.getNodeCount()+1);
+               int p = graph.getp();
+               int q = graph.getq();
+               int n = graph.getn();
+               int r = graph.getr();
+               int i = graph.getNodeCount();
+             
+               int temp = 0;
+               
+               NodeImpl nodes[][] =new NodeImpl[n][n];
+               graph.graphstore.addNode(newNode);
+               for(int it=0;it<n;it++)
+                   for(int j=0;j<n;j++)
+                   {
+                       nodes[it][j] = graph.graphstore.getNode(temp);
+                       
+                       temp++;
+                   }
+                       
+               
+               
+               
+
+               // add edges that has this node as a source or destination and have atmost p local contacts
+               for (int j = 0; j < n ; ++j)
+               {
+                 //  System.out.println("in the l loop");
+				for (int k = i - p; k <= i + p ; ++k)
+                                {
+                                     //   System.out.println("break");
+					for (int l = j - p; l <= j + p ; ++l)
+                                        {
+                                            
+                                       //     System.out.println(l+" k ="+k+" n ="+n);
+						if ((graph.isTorusBased() || !graph.isTorusBased() && k >= 0  && l >= 0 ) &&
+                                                         graph.d(i, j, k, l) <= p )
+                                                {
+							//System.out.println("in local range");
+                                                        Object id  = nodes[(k + n) % n][(l + n) % n].getId();
+                                                        graph.setEdgeCount(graph.getEdgeCount()+1);
+                                                        EdgeImpl Edge = new EdgeImpl(graph.getEdgeCount(),newNode,graph.graphstore.getNode(id),0,1.0,true);
+                                                        
+                                                        graph.graphstore.addEdge(Edge);
+                                                        graph.getIdSet().add(Edge.getLongId());
+						}
+						
+					}
+              
+                                }
+               }
+               
+               // add edges that has this node as a source or destination and have atmost q local contacts
+               
+			for (int j = 0; j < n ; ++j)
+                        {
+                            
+				double sum = 0.0;
+				for (int k = 0; k < n ; ++k)
+					for (int l = 0; l < n ; ++l) 
+                                        {
+						if ( !graph.isTorusBased() && graph.d(i, j, k, l) > p)
+							sum += Math.pow(graph.d(i, j, k, l), -r);
+						else if ( graph.isTorusBased() && graph.dtb(i, j, k, l) > p)
+							sum += Math.pow(graph.dtb(i, j, k, l), -r);
+						
+					}
+                             //   System.out.println("sum = "+sum);
+				for (int m = 0; m < q ; ++m) 
+                                {
+                                    //    System.out.println("inside");
+					double  b = random.nextDouble();
+					boolean e = false;
+					while (!e) 
+                                        {
+                                                System.out.println("inside");
+						double pki = 0.0;
+						for (int k = 0; k < n && !e ; ++k)
+							for (int l = 0; l < n && !e; ++l)
+								if (!graph.isTorusBased() && graph.d(i, j, k, l) > p || graph.isTorusBased() && graph.dtb(i, j, k, l) > p)
+                                                                {
+									
+                                                                        pki += Math.pow(!graph.isTorusBased() ? graph.d(i, j, k, l) : graph.dtb(i, j, k, l), -r) / sum;
+                                                                        Object id  = nodes[k][l].getId();
+                                                                        EdgeImpl Edge = new EdgeImpl(graph.getEdgeCount()+1,newNode,graph.graphstore.getNode(id),0,1.0,true);
+									if ( !graph.getIdSet().contains(Edge.getLongId())) 
+                                                                        {    
+                                                                                System.out.println("in long range");									
+										graph.graphstore.addEdge(Edge);
+                                                                                graph.getIdSet().add(Edge.getLongId());
+										e = true;
+									}
+								}
+						b = random.nextDouble();
+					}
+					
+				}
+			}
+
+               
+           }
+       };
+       
+       return runnable;
+   }
+    
+public Runnable iterateKleinbergNodes(){
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                Kleinberg graph = new Kleinberg();
+                NodeStore nodeStore = new NodeStore();
+                nodeStore = (NodeStore) graph.graphstore.getNodes();
+                Iterator<Node> m = nodeStore.iterator();
+                for (; m.hasNext();) {
+                    NodeImpl b = (NodeImpl) m.next();
+                    object = b;
+                }              
+            }
+        };
+        
+        return runnable;
+       
+   }
+   
+   
+}

@@ -24,28 +24,28 @@ import org.testng.annotations.Test;
  */
 public class EdgeStoreBenchmarkTest {
 
-    @Test
-   /* public void testPushStore() {
-        NanoBench.create().measurements(20).measure("push edge store", new EdgeStoreBenchmark().pushEdgeStore());
+   /* @Test
+    public void testPushStore() {
+        NanoBench.create().measurements(2).measure("push edge store", new EdgeStoreBenchmark().pushEdgeStore());
     }
 
     @Test
     public void testIterateStore() {
-        NanoBench.create().cpuOnly().measurements(300).measure("iterate edge store", new EdgeStoreBenchmark().iterateEdgeStore());
+        NanoBench.create().cpuOnly().measurements(3).measure("iterate edge store", new EdgeStoreBenchmark().iterateEdgeStore());
     }
 
     public void testIterateStoreWithLocking() {
-        NanoBench.create().cpuOnly().measurements(300).measure("iterate edge store with locking", new EdgeStoreBenchmark().iterateEdgeStoreWithLocking());
+        NanoBench.create().cpuOnly().measurements(3).measure("iterate edge store with locking", new EdgeStoreBenchmark().iterateEdgeStoreWithLocking());
     }
 
     @Test
     public void testIterateOutNeighbors() {
-        NanoBench.create().cpuOnly().measurements(100).measure("iterate neighbors list out", new EdgeStoreBenchmark().iterateEdgeStoreNeighborsOut());
+        NanoBench.create().cpuOnly().measurements(10).measure("iterate neighbors list out", new EdgeStoreBenchmark().iterateEdgeStoreNeighborsOut());
     }
 
     @Test
     public void testIterateInOutNeighbors() {
-        NanoBench.create().cpuOnly().measurements(100).measure("iterate neighbors list in & out", new EdgeStoreBenchmark().iterateEdgeStoreNeighborsInOut());
+        NanoBench.create().cpuOnly().measurements(10).measure("iterate neighbors list in & out", new EdgeStoreBenchmark().iterateEdgeStoreNeighborsInOut());
     }
 
     @Test
@@ -53,18 +53,27 @@ public class EdgeStoreBenchmarkTest {
         NanoBench.create().cpuOnly().measurements(20).measure("reset edge store", new EdgeStoreBenchmark().resetEdgeStore());
     }
     
-    @Test*/
+    @Test
     public void testAddEdge() {
         NanoBench.create().cpuOnly().measurements(1).measure("add edge", new EdgeStoreBenchmark().addEdge());
     }
     
-   /* @Test
+    @Test
     public void testRemoveEdge() {
         NanoBench.create().cpuOnly().measurements(1).measure("testRemoveEdge", new EdgeStoreBenchmark().removeEdge());
-    }*/
+    }
     
     @Test
     public void testIterateEdge() {
-        NanoBench.create().cpuOnly().measurements(300).measure("testIterateEdge", new EdgeStoreBenchmark().iterateEdge());
+        NanoBench.create().cpuOnly().measurements(3).measure("testIterateEdge", new EdgeStoreBenchmark().iterateEdge());
     }
+     @Test
+    public void testKleinbergIterateEdge() {
+        NanoBench.create().cpuOnly().measurements(3).measure("testKleinbergIterateEdge", new EdgeStoreBenchmark().iterateKleinbergEdge());
+    }
+     @Test
+     public void testKleinbergAddNeighbors(){
+         System.out.println("testKleinbergAddNeighbors()");
+         NanoBench.create().measurements(10).measure("Kleinberg iterate neighbors", new EdgeStoreBenchmark().iterateKleinbergNeighbors());
+     }*/
 }

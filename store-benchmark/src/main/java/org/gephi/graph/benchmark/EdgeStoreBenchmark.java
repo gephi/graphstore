@@ -218,6 +218,52 @@ public class EdgeStoreBenchmark {
         };
         return runnable;
     }
+    public Runnable iterateKleinbergEdge(){
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                Kleinberg graph = new Kleinberg();
+                Iterator<Edge> itr = graph.edgeStore.iterator();
+                for (; itr.hasNext();) {
+                    edgeObject = (EdgeImpl) itr.next();
+                }
+                }
+        };
+        return runnable;
+    }
+    
+    public Runnable iterateKleinbergNeighbors(){
+       final Kleinberg graph = new Kleinberg();
+       Iterator<Edge> edgeIt =  graph.edgeStore.iterator();
+               ObjectSet<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
+               for(;edgeIt.hasNext();)
+               {
+                   EdgeImpl e = (EdgeImpl) edgeIt.next();
+                   nodeSet.add(e.getSource());
+                   nodeSet.add(e.getTarget());
+               }
+              final NodeImpl[] nodes = nodeSet.toArray(new NodeImpl[0]);
+       
+       Runnable runnable = new Runnable() {
+       
+           
+
+           @Override
+           public void run() {
+               for (NodeImpl node : nodes) {
+                    Iterator<Edge> itr = graph.edgeStore.edgeOutIterator(node);
+                    for (; itr.hasNext();) {
+                        edgeObject = (EdgeImpl) itr.next();
+                    }
+                }
+           
+              
+              
+               }
+       };
+       return runnable;
+   }
 
     private List<EdgeImpl> generateEdgeList() {
         final NodeStore nodeStore = new NodeStore();
@@ -243,4 +289,5 @@ public class EdgeStoreBenchmark {
         }
         return edgeList;
     }
+    
 }

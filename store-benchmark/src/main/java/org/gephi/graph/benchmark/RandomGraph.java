@@ -69,9 +69,10 @@ public class RandomGraph implements Generator {
     protected boolean cancel;
     public NodeStore nodeStore;
     public EdgeStore edgeStore;
+    
     public RandomGraph()
     {
-       numberOfNodes = 500;
+       numberOfNodes = 5;
        wiringProbability = 0.05;
        edgeCount = 0;  
        cancel = false;
@@ -79,6 +80,8 @@ public class RandomGraph implements Generator {
        edgeStore = new EdgeStore();
        generate(null);
     }
+    
+    
     @Override
     public void generate(GraphStore container) {
 

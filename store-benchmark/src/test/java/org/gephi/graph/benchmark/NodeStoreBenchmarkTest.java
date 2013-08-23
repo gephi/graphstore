@@ -23,20 +23,20 @@ import org.testng.annotations.Test;
  * @author mbastian
  */
 public class NodeStoreBenchmarkTest {
-
+/*
     @Test
     public void testPushStore() {
-        NanoBench.create().measurements(100).measure("push node store", new NodeStoreBenchmark().pushStore());
+        NanoBench.create().measurements(10).measure("push node store", new NodeStoreBenchmark().pushStore());
     }
 
     @Test
     public void testIterateStore() {
-        NanoBench.create().cpuOnly().measurements(100).measure("iterate node store", new NodeStoreBenchmark().iterateStore());
+        NanoBench.create().cpuOnly().measurements(10).measure("iterate node store", new NodeStoreBenchmark().iterateStore());
     }
 
     @Test
     public void testResetNodeStore() {
-        NanoBench.create().measurements(100).measure("reset node store", new NodeStoreBenchmark().resetNodeStore());
+        NanoBench.create().measurements(10).measure("reset node store", new NodeStoreBenchmark().resetNodeStore());
     }
     
      @Test
@@ -54,5 +54,18 @@ public class NodeStoreBenchmarkTest {
      @Test 
      public void testIterateNeighbors(){
          NanoBench.create().measurements(5).measure("Iterate Neighbors", new NodeStoreBenchmark().iterateNeighbors());
+     }*/
+     @Test
+     public void testKleinbergAddNode(){
+         System.out.println("testKleinbergAddNode()");
+         NanoBench.create().measurements(1).measure("Kleinberg add node", new NodeStoreBenchmark().addKleinbergNode());
+     
      }
+    /* @Test
+     public void testKleinbergIterateNode(){
+         System.out.println("testKleinbergIterateNode()");
+         NanoBench.create().measurements(10).measure("Kleinberg Iterate nodes", new NodeStoreBenchmark().iterateKleinbergNodes());
+     
+     }*/
+   
 }
