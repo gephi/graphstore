@@ -55,17 +55,23 @@ public class NodeStoreBenchmarkTest {
      public void testIterateNeighbors(){
          NanoBench.create().measurements(5).measure("Iterate Neighbors", new NodeStoreBenchmark().iterateNeighbors());
      }*/
-     @Test
+   /*  @Test
      public void testKleinbergAddNode(){
-         System.out.println("testKleinbergAddNode()");
+         
          NanoBench.create().measurements(1).measure("Kleinberg add node", new NodeStoreBenchmark().addKleinbergNode());
      
      }
-    /* @Test
-     public void testKleinbergIterateNode(){
-         System.out.println("testKleinbergIterateNode()");
-         NanoBench.create().measurements(10).measure("Kleinberg Iterate nodes", new NodeStoreBenchmark().iterateKleinbergNodes());
+     @Test
+     public void testKleinbergRemoveNode(){
+        
+         NanoBench.create().measurements(1).measure("Kleinberg remove node", new NodeStoreBenchmark().RemoveKleinbergNode());
      
      }*/
+    @Test
+     public void testKleinbergIterateNode(){
+         
+         NanoBench.create().measurements(10).measure("Kleinberg Iterate nodes", new NodeStoreBenchmark().iterateKleinbergNodes());
+     
+     }
    
 }

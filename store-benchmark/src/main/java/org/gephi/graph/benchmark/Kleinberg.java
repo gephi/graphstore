@@ -84,14 +84,8 @@ public class Kleinberg implements Generator {
         
 	@Override
 	public void generate(GraphStore graphStore) {
-		//Progress.start(progressTicket, n * n + n * n * (2 * p + 1) * (2 * p + 1) +
-		//		(int)Math.pow(n, 4) + n * n * q);
 		Random random = new Random();
-                
-
-		
-		
-                
+            
 		// Creating lattice n x n
 		NodeImpl[][] nodes = new NodeImpl[n][n];
 		for (int i = 0; i < n ; ++i)
@@ -151,7 +145,7 @@ public class Kleinberg implements Generator {
 								if (!isTorusBased() && d(i, j, k, l) > p || isTorusBased() && dtb(i, j, k, l) > p) {
 									pki += Math.pow(!isTorusBased() ? d(i, j, k, l) : dtb(i, j, k, l), -r) / sum;
                                                                         EdgeImpl Edge = new EdgeImpl(edgeCount,nodes[i][j],nodes[k][l],0,1.0,true);
-									if (b <= pki && !idSet.contains(Edge.getLongId())) {
+									if (b <= pki && !getIdSet().contains(Edge.getLongId())) {
                                                                             
                                                                                 
                                                                                 

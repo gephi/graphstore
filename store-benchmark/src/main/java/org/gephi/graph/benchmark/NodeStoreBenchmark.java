@@ -157,7 +157,7 @@ public class NodeStoreBenchmark {
                 
                 randomGraph.nodeStore.remove(randomGraph.nodeStore.get(nodeID));
                 
-                Kleinberg kleinbergGraph = new Kleinberg();
+                
                 
             }
             
@@ -211,7 +211,7 @@ public class NodeStoreBenchmark {
                int q = graph.getq();
                int n = graph.getn();
                int r = graph.getr();
-               int i = graph.getNodeCount();
+               //int i = graph.getNodeCount();
              
                int temp = 0;
                
@@ -230,6 +230,7 @@ public class NodeStoreBenchmark {
                
 
                // add edges that has this node as a source or destination and have atmost p local contacts
+               for (int i=0;i<n; i++)
                for (int j = 0; j < n ; ++j)
                {
                  //  System.out.println("in the l loop");
@@ -258,7 +259,7 @@ public class NodeStoreBenchmark {
                }
                
                // add edges that has this node as a source or destination and have atmost q local contacts
-               
+                 for(int i=0;i<n;i++)
 			for (int j = 0; j < n ; ++j)
                         {
                             
@@ -310,6 +311,22 @@ public class NodeStoreBenchmark {
        
        return runnable;
    }
+   
+public Runnable RemoveKleinbergNode(){
+    Runnable runnable = new Runnable() {
+
+        @Override
+        public void run() {
+            Kleinberg graph = new Kleinberg();
+            Random random = new Random();
+            int nodeID = random.nextInt(graph.getNodeCount());
+            graph.graphstore.clearEdges(graph.graphstore.getNode(nodeID));
+            graph.graphstore.removeNode(graph.graphstore.getNode(nodeID));
+            
+        }
+    };
+        return runnable;
+}
     
 public Runnable iterateKleinbergNodes(){
         Runnable runnable = new Runnable() {

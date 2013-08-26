@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Node;
 import org.gephi.graph.store.EdgeImpl;
 import org.gephi.graph.store.EdgeStore;
 import org.gephi.graph.store.GraphLock;
@@ -189,10 +190,11 @@ public class EdgeStoreBenchmark {
               Random random = new Random();
               boolean flag = true;  // checking edge exists or not
               while(flag){
-                  NodeImpl source = new NodeImpl(String.valueOf(random.nextInt(randomGraph.numberOfNodes) %randomGraph.numberOfNodes));
-                  NodeImpl dest = new NodeImpl(String.valueOf(random.nextInt(randomGraph.numberOfNodes) %randomGraph.numberOfNodes));
-                  if(randomGraph.edgeStore.contains(source, dest, NODES)){
-                      flag = false;
+                 NodeImpl source = randomGraph.nodeStore.get(random.nextInt(randomGraph.numberOfNodes) );
+                  NodeImpl dest = randomGraph.nodeStore.get(random.nextInt(randomGraph.numberOfNodes));
+                 
+                  if(randomGraph.edgeStore.contains(source, dest, 0)){
+                     flag = false;
                       randomGraph.edgeStore.remove(randomGraph.edgeStore.get(source, dest));
                   }
                   
@@ -264,6 +266,84 @@ public class EdgeStoreBenchmark {
        };
        return runnable;
    }
+    public Runnable removeKleinbergEdge()
+    {
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() 
+            {
+                
+              Kleinberg graph = new Kleinberg();
+              //Random random = new Random();
+              boolean flag = true;  // checking edge exists or not
+              while(flag)
+              {
+                  //System.out.println("in check");
+                  for(Node n :graph.graphstore.getNodes())
+                  {
+                      for(Node m:graph.graphstore.getNodes())
+                      {
+                          NodeImpl source = graph.graphstore.getNode(n.getId());
+                          NodeImpl dest = graph.graphstore.getNode(n.getId());
+                          if(graph.edgeStore.contains(source, dest, 0))
+                                {
+                                        flag = false;
+                                        graph.edgeStore.remove(graph.edgeStore.get(source, dest));
+                                }
+                      }
+                      flag = false;
+                      
+                  }
+                 
+                  
+                  
+              }
+                
+            }
+        };
+        
+        return runnable;
+        
+    }
+    
+    public Runnable addKleinbergEdge(){
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                Kleinberg graph = new Kleinberg();
+              Random random = new Random();
+              boolean flag = true;  // checking edge exists or not
+              while(flag)
+              {
+                  System.out.println("in check");
+                  for(Node n :graph.graphstore.getNodes())
+                  {
+                      for(Node m:graph.graphstore.getNodes())
+                      {
+                          NodeImpl source = graph.graphstore.getNode(n.getId());
+                          NodeImpl dest = graph.graphstore.getNode(n.getId());
+                          if(!graph.edgeStore.contains(source, dest, 0))
+                                {
+                                        flag = false;
+                                        graph.setEdgeCount(graph.getEdgeCount()+1);
+                                        EdgeImpl edge = new EdgeImpl(String.valueOf(graph.getEdgeCount()), source, dest, 0, 1.0, true);
+                                        graph.edgeStore.add(edge);
+                                }
+                      }
+                      flag = false;
+                      
+                  }
+                 
+                  
+                  
+              }
+                
+            }
+        };
+        return runnable;
+    }
 
     private List<EdgeImpl> generateEdgeList() {
         final NodeStore nodeStore = new NodeStore();
