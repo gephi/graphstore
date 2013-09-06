@@ -45,12 +45,16 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.awt.Color;
 import java.util.Random;
+import org.gephi.attribute.api.Column;
+import org.gephi.attribute.api.Origin;
 //import org.openide.util.lookup.ServiceProvider;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.store.ColumnImpl;
 import org.gephi.graph.store.NodeImpl;
 import org.gephi.graph.store.NodeStore;
 import org.gephi.graph.store.EdgeStore;
 import org.gephi.graph.store.EdgeImpl;
+import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
 import org.gephi.graph.store.GraphStore;
 
 
@@ -60,26 +64,42 @@ import org.gephi.graph.store.GraphStore;
  */
 
 //@ServiceProvider(service = Generator.class)
-public class RandomGraph implements Generator {
+public class RandomGraph extends GraphStore implements Generator {
 
     
     protected int numberOfNodes;
     protected double wiringProbability;
-    private double edgeCount;  
+    private int edgeCount;  
     protected boolean cancel;
-    public NodeStore nodeStore;
-    public EdgeStore edgeStore;
+   // public NodeStore nodeStore;
+    //public EdgeStore edgeStore;
+    public GraphStore graphStore;
+    protected String column;
     
     public RandomGraph()
     {
+       
        numberOfNodes = 5;
        wiringProbability = 0.05;
        edgeCount = 0;  
        cancel = false;
-       nodeStore = new NodeStore();
-       edgeStore = new EdgeStore();
-       generate(null);
+       column = null;
+       graphStore = new GraphStore();
+       generate(graphStore);
     }
+    public RandomGraph(String col)
+    {
+       
+       numberOfNodes = 5;
+       wiringProbability = 0.05;
+       edgeCount = 0;  
+       cancel = false; 
+       this.column = col;
+       graphStore = new GraphStore();
+       generate(graphStore);
+       
+    }
+    
     
     
     @Override
@@ -92,27 +112,34 @@ public class RandomGraph implements Generator {
        // Progress.start(progress, max);
         
         Random random = new Random();
-
+        Column column = generateBasicColumn(this,"id");
        
             for (int i = 0; i < numberOfNodes && !cancel; i++) {
                 NodeImpl node = new NodeImpl(String.valueOf(i));
-                nodeStore.add(node);
+                
+                node.setAttribute(column, i);
+                
+                container.addNode(node);
 
             }
             LongSet idSet = new LongOpenHashSet();
-            if (wiringProbability > 0) {
-                for (int i = 0; i < numberOfNodes - 1 && !cancel; i++) {
-                    NodeImpl source = nodeStore.get(i);
-                    for (int j = i + 1; j < numberOfNodes && !cancel; j++) {
-                        NodeImpl target = nodeStore.get(j);
+            if (wiringProbability > 0)
+            {
+                for (int i = 0; i < numberOfNodes - 1 && !cancel; i++)
+                {
+                    NodeImpl source = container.getNode(i);
+                    for (int j = i + 1; j < numberOfNodes && !cancel; j++)
+                    {
+                        NodeImpl target = container.getNode(j);
 
 
                             EdgeImpl edge = new EdgeImpl(String.valueOf(edgeCount), source, target, 0, 1.0, true);
-                           if (random.nextDouble() < wiringProbability && !idSet.contains(edge.getLongId()) && source != target) {
-                            edgeStore.add(edge);
-                            edgeCount++;
-                            idSet.add(edge.getLongId());
-                        }
+                           if (random.nextDouble() < wiringProbability  && source != target) 
+                           {
+                                container.addEdge(edge);
+                                edgeCount++;
+                                idSet.add(edge.getLongId());
+                           }
                     }
                  
                 }
@@ -141,6 +168,11 @@ public class RandomGraph implements Generator {
         return numberOfNodes;
     }
 
+    private Column generateBasicColumn(RandomGraph graph,String column) {
+        
+        graph.nodeColumnStore.addColumn(new ColumnImpl(column, Integer.class, "ID", null, Origin.DATA, true));
+        return graph.nodeColumnStore.getColumn(column);
+    }
     public double getWiringProbability() {
         return wiringProbability;
     }
@@ -156,14 +188,14 @@ public class RandomGraph implements Generator {
     /**
      * @return the EdgeCount
      */
-    public double getEdgeCount() {
+    public int getEdgeCount() {
         return edgeCount;
     }
 
     /**
      * @param EdgeCount the EdgeCount to set
      */
-    public void setEdgeCount(double EdgeCount) {
+    public void setEdgeCount(int EdgeCount) {
         this.edgeCount = EdgeCount;
     }
 }

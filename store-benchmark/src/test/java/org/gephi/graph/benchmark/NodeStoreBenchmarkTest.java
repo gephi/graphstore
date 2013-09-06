@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
  * @author mbastian
  */
 public class NodeStoreBenchmarkTest {
-/*
+
     @Test
     public void testPushStore() {
         NanoBench.create().measurements(10).measure("push node store", new NodeStoreBenchmark().pushStore());
@@ -54,24 +54,28 @@ public class NodeStoreBenchmarkTest {
      @Test 
      public void testIterateNeighbors(){
          NanoBench.create().measurements(5).measure("Iterate Neighbors", new NodeStoreBenchmark().iterateNeighbors());
-     }*/
-   /*  @Test
+     }
+    /* @Test
      public void testKleinbergAddNode(){
          
          NanoBench.create().measurements(1).measure("Kleinberg add node", new NodeStoreBenchmark().addKleinbergNode());
      
-     }
+     }*/
      @Test
      public void testKleinbergRemoveNode(){
         
          NanoBench.create().measurements(1).measure("Kleinberg remove node", new NodeStoreBenchmark().RemoveKleinbergNode());
      
-     }*/
+     }
     @Test
      public void testKleinbergIterateNode(){
          
          NanoBench.create().measurements(10).measure("Kleinberg Iterate nodes", new NodeStoreBenchmark().iterateKleinbergNodes());
      
      }
+    @Test
+    public void testGetAttributeRandom(){
+        NanoBench.create().measurements(10).measure("random get attributes", new NodeStoreBenchmark().addAttrRandomGraph());
+    }
    
 }

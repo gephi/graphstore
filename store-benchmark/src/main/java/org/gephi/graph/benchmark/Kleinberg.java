@@ -48,7 +48,7 @@ import org.gephi.graph.store.NodeImpl;
  * @author Cezary Bartosiak
  */
 
-public class Kleinberg implements Generator {
+public class Kleinberg extends GraphStore implements Generator  {
 	
     
     
@@ -61,7 +61,7 @@ public class Kleinberg implements Generator {
         private int edgeCount;
         private int nodeCount;
         private boolean torusBased ;
-        final EdgeStore edgeStore ;
+        EdgeStore edgeStore = super.edgeStore ;
         final GraphStore graphstore ;
         
         Kleinberg()
@@ -75,7 +75,7 @@ public class Kleinberg implements Generator {
          nodeCount=0;
          torusBased = false;
          idSet = new LongOpenHashSet();
-         edgeStore = new EdgeStore();
+         //edgeStore = new EdgeStore();
          graphstore = new GraphStore();
          generate(this.graphstore);
         }
