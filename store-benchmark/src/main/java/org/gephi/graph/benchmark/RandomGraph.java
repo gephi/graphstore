@@ -50,12 +50,18 @@ import org.gephi.attribute.api.Origin;
 //import org.openide.util.lookup.ServiceProvider;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.store.ColumnImpl;
+import org.gephi.graph.store.ColumnStore;
 import org.gephi.graph.store.NodeImpl;
-import org.gephi.graph.store.NodeStore;
+//import org.gephi.graph.store.NodeStore;
 import org.gephi.graph.store.EdgeStore;
 import org.gephi.graph.store.EdgeImpl;
+import org.gephi.graph.store.GraphLock;
 import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
 import org.gephi.graph.store.GraphStore;
+import org.gephi.graph.store.GraphStoreConfiguration;
+
+import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_INDEX_NODES;
+
 
 
 /**
@@ -64,38 +70,49 @@ import org.gephi.graph.store.GraphStore;
  */
 
 //@ServiceProvider(service = Generator.class)
-public class RandomGraph extends GraphStore implements Generator {
+public class RandomGraph implements Generator {
 
     
     protected int numberOfNodes;
     protected double wiringProbability;
     private int edgeCount;  
     protected boolean cancel;
-   // public NodeStore nodeStore;
-    //public EdgeStore edgeStore;
+    private LongSet idSet;
+    
     public GraphStore graphStore;
-    protected String column;
+    protected final GraphLock lock;
+    protected String columnName;
+    protected final ColumnStore<Node> nodeColumnStore;
+    
     
     public RandomGraph()
     {
+       lock = new GraphLock();
        
-       numberOfNodes = 5;
-       wiringProbability = 0.05;
+       nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
+       numberOfNodes = 50;
+       wiringProbability = 0.5;
        edgeCount = 0;  
        cancel = false;
-       column = null;
+       this.columnName = null;
+       
        graphStore = new GraphStore();
+       idSet = new LongOpenHashSet();
        generate(graphStore);
+       
     }
     public RandomGraph(String col)
     {
-       
-       numberOfNodes = 5;
-       wiringProbability = 0.05;
+       lock = new GraphLock();
+       nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
+       numberOfNodes = 50;
+       wiringProbability = 0.5;
        edgeCount = 0;  
        cancel = false; 
-       this.column = col;
+       this.columnName = col;
+       
        graphStore = new GraphStore();
+       idSet = new LongOpenHashSet();
        generate(graphStore);
        
     }
@@ -112,33 +129,36 @@ public class RandomGraph extends GraphStore implements Generator {
        // Progress.start(progress, max);
         
         Random random = new Random();
-        Column column = generateBasicColumn(this,"id");
+        Column column = generateBasicColumn("id");
        
             for (int i = 0; i < numberOfNodes && !cancel; i++) {
+                
                 NodeImpl node = new NodeImpl(String.valueOf(i));
-                
-                node.setAttribute(column, i);
-                
-                container.addNode(node);
+                node.setAttribute(column,i);
+                graphStore.addNode(node);
 
             }
-            LongSet idSet = new LongOpenHashSet();
+            if(idSet.isEmpty())
+            System.out.println("id set is empty ");
+           // LongSet idSet = new LongOpenHashSet();
             if (wiringProbability > 0)
             {
                 for (int i = 0; i < numberOfNodes - 1 && !cancel; i++)
                 {
-                    NodeImpl source = container.getNode(i);
+                    NodeImpl source = graphStore.getNode(String.valueOf(i));
                     for (int j = i + 1; j < numberOfNodes && !cancel; j++)
                     {
-                        NodeImpl target = container.getNode(j);
+                        NodeImpl target = graphStore.getNode(String.valueOf(j));
 
 
                             EdgeImpl edge = new EdgeImpl(String.valueOf(edgeCount), source, target, 0, 1.0, true);
                            if (random.nextDouble() < wiringProbability  && source != target) 
                            {
-                                container.addEdge(edge);
-                                edgeCount++;
-                                idSet.add(edge.getLongId());
+                               graphStore.addEdge(edge);
+                               //edgStore.add(edge);
+                               idSet.add(edge.getLongId());
+                               edgeCount++;
+                                
                            }
                     }
                  
@@ -168,10 +188,10 @@ public class RandomGraph extends GraphStore implements Generator {
         return numberOfNodes;
     }
 
-    private Column generateBasicColumn(RandomGraph graph,String column) {
+    private Column generateBasicColumn(String column) {
         
-        graph.nodeColumnStore.addColumn(new ColumnImpl(column, Integer.class, "ID", null, Origin.DATA, true));
-        return graph.nodeColumnStore.getColumn(column);
+        this.nodeColumnStore.addColumn(new ColumnImpl(column, Integer.class , "Label", null, Origin.DATA, true));
+        return this.nodeColumnStore.getColumn(column);
     }
     public double getWiringProbability() {
         return wiringProbability;
@@ -197,6 +217,20 @@ public class RandomGraph extends GraphStore implements Generator {
      */
     public void setEdgeCount(int EdgeCount) {
         this.edgeCount = EdgeCount;
+    }
+
+    /**
+     * @return the idSet
+     */
+    public LongSet getIdSet() {
+        return idSet;
+    }
+
+    /**
+     * @param idSet the idSet to set
+     */
+    public void setIdSet(LongSet idSet) {
+        this.idSet = idSet;
     }
 }
 

@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
  */
 public class EdgeStoreBenchmarkTest {
 
-   /* @Test
+    @Test
     public void testPushStore() {
         NanoBench.create().measurements(2).measure("push edge store", new EdgeStoreBenchmark().pushEdgeStore());
     }
@@ -48,9 +48,9 @@ public class EdgeStoreBenchmarkTest {
         NanoBench.create().cpuOnly().measurements(10).measure("iterate neighbors list in & out", new EdgeStoreBenchmark().iterateEdgeStoreNeighborsInOut());
     }
 
-    @Test
+   @Test
     public void testResetEdgeStore() {
-        NanoBench.create().cpuOnly().measurements(20).measure("reset edge store", new EdgeStoreBenchmark().resetEdgeStore());
+        NanoBench.create().cpuOnly().measurements(10).measure("reset edge store", new EdgeStoreBenchmark().resetEdgeStore());
     }
     
     @Test
@@ -62,7 +62,7 @@ public class EdgeStoreBenchmarkTest {
     public void testRemoveEdge() {
         NanoBench.create().cpuOnly().measurements(1).measure("testRemoveEdge", new EdgeStoreBenchmark().removeEdge());
     }
-    /*
+    
     @Test
     public void testIterateEdge() {
         NanoBench.create().cpuOnly().measurements(3).measure("testIterateEdge", new EdgeStoreBenchmark().iterateEdge());
@@ -70,7 +70,7 @@ public class EdgeStoreBenchmarkTest {
      @Test
     public void testKleinbergIterateEdge() {
         NanoBench.create().cpuOnly().measurements(3).measure("testKleinbergIterateEdge", new EdgeStoreBenchmark().iterateKleinbergEdge());
-    }*/
+    }
      @Test
      public void testKleinbergIterateNeighbors(){
          

@@ -15,8 +15,8 @@
  */
 package org.gephi.graph.benchmark;
 
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Iterator;
@@ -30,8 +30,8 @@ import org.gephi.graph.store.EdgeImpl;
 import org.gephi.graph.store.EdgeStore;
 import org.gephi.graph.store.NodeImpl;
 import org.gephi.graph.store.NodeStore;
-import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
-import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET;
+//import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
+//import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET;
 
 
 
@@ -118,8 +118,8 @@ public class NodeStoreBenchmark {
             @Override
             public void run() {
                 RandomGraph randomGraph = new RandomGraph();                
-                NodeImpl newRNode = new NodeImpl(String.valueOf(randomGraph.numberOfNodes + 1));
-                randomGraph.graphStore.getNodeStore().add(newRNode);
+                NodeImpl newRNode = new NodeImpl(String.valueOf(randomGraph.numberOfNodes+1));
+                randomGraph.graphStore.addNode(newRNode);
                 Random random = new Random();
                 //if(random.nextDouble() < randomGraph.wiringProbability)
                 {
@@ -128,7 +128,7 @@ public class NodeStoreBenchmark {
                   //  System.out.println("temp:"+temp );
                     NodeImpl source = randomGraph.graphStore.getNodeStore().get(String.valueOf(temp));
                     
-                    NodeImpl dest = randomGraph.graphStore.getNodeStore().get(String.valueOf(1));
+                    
                     EdgeImpl Edge = new EdgeImpl(String.valueOf(randomGraph.getEdgeCount()), source,newRNode, 0, 1.0, true);
                     if(Edge.getSource()== null)
                     {
@@ -159,8 +159,12 @@ public class NodeStoreBenchmark {
                 Random random = new Random();                
                 RandomGraph randomGraph = new RandomGraph();
                 int nodeID = random.nextInt(randomGraph.numberOfNodes);
+                NodeImpl node = randomGraph.graphStore.getNodeStore().get(String.valueOf(nodeID));
+                Column col = randomGraph.nodeColumnStore.getColumn("id");
+                node.removeAttribute(col);
                 
-                randomGraph.graphStore.getNodeStore().remove(randomGraph.graphStore.getNodeStore().get(nodeID));
+                randomGraph.graphStore.clearEdges(node);
+                randomGraph.graphStore.removeNode(node);
                 
                 
                 
@@ -247,15 +251,15 @@ public class NodeStoreBenchmark {
                                             
                                        //     System.out.println(l+" k ="+k+" n ="+n);
 						if ((graph.isTorusBased() || !graph.isTorusBased() && k >= 0  && l >= 0 ) &&
-                                                         graph.d(i, j, k, l) <= p )
+                                                         graph.d(i, j, k, l) <= p  )
                                                 {
 							//System.out.println("in local range");
                                                         Object id  = nodes[(k + n) % n][(l + n) % n].getId();
                                                         graph.setEdgeCount(graph.getEdgeCount()+1);
-                                                        EdgeImpl Edge = new EdgeImpl(graph.getEdgeCount(),newNode,graph.graphstore.getNode(id),0,1.0,true);
-                                                        
-                                                        graph.graphstore.addEdge(Edge);
+                                                        EdgeImpl Edge = new EdgeImpl(String.valueOf(graph.getEdgeCount()),newNode,graph.graphstore.getNode(id),0,1.0,true);
                                                         graph.getIdSet().add(Edge.getLongId());
+                                                        graph.graphstore.addEdge(Edge);
+                                                        
 						}
 						
 					}
@@ -295,14 +299,14 @@ public class NodeStoreBenchmark {
 									
                                                                         pki += Math.pow(!graph.isTorusBased() ? graph.d(i, j, k, l) : graph.dtb(i, j, k, l), -r) / sum;
                                                                         Object id  = nodes[k][l].getId();
-                                                                        EdgeImpl Edge = new EdgeImpl(graph.getEdgeCount()+1,newNode,graph.graphstore.getNode(id),0,1.0,true);
-									if ( !graph.getIdSet().contains(Edge.getLongId())) 
-                                                                        {    
+                                                                        EdgeImpl Edge = new EdgeImpl(String.valueOf(graph.getEdgeCount()+1),newNode,graph.graphstore.getNode(id),0,1.0,true);
+									 
+                                                                               graph.getIdSet().add(graph.getEdgeCount()+1);
                                                                                 System.out.println("in long range");									
 										graph.graphstore.addEdge(Edge);
-                                                                                graph.getIdSet().add(Edge.getLongId());
+                                                                                
 										e = true;
-									}
+				
 								}
 						b = random.nextDouble();
 					}
@@ -357,10 +361,12 @@ public Runnable addAttrRandomGraph(){
 
         @Override
         public void run() {
-             RandomGraph randomGraph = new RandomGraph("id"); 
-           //  Column column = randomGraph.generateBasicColumn(randomGraph,"id");
-             for(Node n:randomGraph.getNodeStore()){
-                 object =   n.getAttribute("id");
+             RandomGraph randomGraph = new RandomGraph("id");
+             Column col = randomGraph.nodeColumnStore.getColumn("id");
+             for(Node n:randomGraph.graphStore.getNodes())
+             {
+                 
+                 object =   n.getAttribute(col);
                  System.out.println("object id:"+object);
              }
                

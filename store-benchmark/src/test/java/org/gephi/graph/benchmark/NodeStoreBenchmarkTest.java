@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
  */
 public class NodeStoreBenchmarkTest {
 
-    @Test
+   @Test
     public void testPushStore() {
         NanoBench.create().measurements(10).measure("push node store", new NodeStoreBenchmark().pushStore());
     }
@@ -55,12 +55,12 @@ public class NodeStoreBenchmarkTest {
      public void testIterateNeighbors(){
          NanoBench.create().measurements(5).measure("Iterate Neighbors", new NodeStoreBenchmark().iterateNeighbors());
      }
-    /* @Test
+     @Test
      public void testKleinbergAddNode(){
          
          NanoBench.create().measurements(1).measure("Kleinberg add node", new NodeStoreBenchmark().addKleinbergNode());
      
-     }*/
+     }
      @Test
      public void testKleinbergRemoveNode(){
         

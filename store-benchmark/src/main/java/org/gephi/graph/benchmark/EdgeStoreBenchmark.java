@@ -17,6 +17,7 @@ import org.gephi.graph.store.GraphLock;
 import org.gephi.graph.store.NodeImpl;
 import org.gephi.graph.store.NodeStore;
 
+
 /**
  *
  * @author mbastian
@@ -163,10 +164,14 @@ public class EdgeStoreBenchmark {
 
 
                        int sourceID = random.nextInt(randomGraph.numberOfNodes);
+                       System.out.println("source Id "+sourceID);
                        int DestID = random.nextInt(randomGraph.numberOfNodes);
-                       NodeImpl source = randomGraph.graphStore.getNodeStore().get(sourceID);
-                       NodeImpl target = randomGraph.graphStore.getNodeStore().get(DestID);
-                       if(!randomGraph.graphStore.getEdgeStore().contains(source, target,randomGraph.numberOfNodes ))
+                       System.out.println("dest Id "+DestID);
+                       NodeImpl source = randomGraph.graphStore.getNodeStore().get(String.valueOf(sourceID));
+                       NodeImpl target = randomGraph.graphStore.getNodeStore().get(String.valueOf(DestID));
+                       if(source==null)
+                           System.out.println("Hello");
+                       if(!randomGraph.graphStore.getEdgeStore().contains(source, target,0))
                        {
                            randomGraph.setEdgeCount(randomGraph.getEdgeCount()+1);
                            EdgeImpl edge = new EdgeImpl(String.valueOf(randomGraph.getEdgeCount()), source, target, 0, 1.0, true);
@@ -181,7 +186,7 @@ public class EdgeStoreBenchmark {
            return runnable;
        }
     
-    public Runnable removeEdge(){
+     public Runnable removeEdge(){
         Runnable runnable = new Runnable() {
 
             @Override
@@ -190,13 +195,13 @@ public class EdgeStoreBenchmark {
               Random random = new Random();
               boolean flag = true;  // checking edge exists or not
               while(flag){
-                 NodeImpl source = randomGraph.graphStore.getNodeStore().get(random.nextInt(randomGraph.numberOfNodes) );
-                  NodeImpl dest = randomGraph.graphStore.getNodeStore().get(random.nextInt(randomGraph.numberOfNodes));
-                 
+                  System.out.println("flag true");
+                 NodeImpl source =  randomGraph.graphStore.getNodeStore().get(String.valueOf(random.nextInt(randomGraph.numberOfNodes) ));
+                 NodeImpl dest = randomGraph.graphStore.getNodeStore().get(String.valueOf(random.nextInt(randomGraph.numberOfNodes) ));
                   if(randomGraph.graphStore.getEdgeStore().contains(source, dest, 0)){
-                     flag = false;
-                      randomGraph.graphStore.getEdgeStore().remove(randomGraph.graphStore.getEdgeStore().get(source, dest));
-                  }
+                      flag = false;
+                      randomGraph.graphStore.getEdgeStore().remove(randomGraph.graphStore.getEdgeStore().get(source, dest,0));
+                 }
                   
               }
               

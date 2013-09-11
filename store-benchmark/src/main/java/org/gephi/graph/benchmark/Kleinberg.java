@@ -112,13 +112,13 @@ public class Kleinberg extends GraphStore implements Generator  {
 						if ((isTorusBased() || !isTorusBased() && k >= 0 && k < n && l >= 0 && l < n) &&
 								d(i, j, k, l) <= p && nodes[i][j] != nodes[(k + n) % n][(l + n) % n]) {
 							
-                                                        EdgeImpl Edge = new EdgeImpl(edgeCount,nodes[i][j],nodes[(k + n) % n][(l + n) % n],0,1.0,true);
+                                                        EdgeImpl Edge = new EdgeImpl(String.valueOf(edgeCount),nodes[i][j],nodes[(k + n) % n][(l + n) % n],0,1.0,true);
                                                         edgeCount++;
                                                         graphStore.addEdge(Edge);
                                                         getIdSet().add(Edge.getLongId());
+                                                        
 							
 							
-	
 						}
 						//Progress.progress(progressTicket);
 					}
@@ -144,7 +144,7 @@ public class Kleinberg extends GraphStore implements Generator  {
 							for (int l = 0; l < n && !e && !cancel; ++l)
 								if (!isTorusBased() && d(i, j, k, l) > p || isTorusBased() && dtb(i, j, k, l) > p) {
 									pki += Math.pow(!isTorusBased() ? d(i, j, k, l) : dtb(i, j, k, l), -r) / sum;
-                                                                        EdgeImpl Edge = new EdgeImpl(edgeCount,nodes[i][j],nodes[k][l],0,1.0,true);
+                                                                        EdgeImpl Edge = new EdgeImpl(String.valueOf(edgeCount),nodes[i][j],nodes[k][l],0,1.0,true);
 									if (b <= pki && !getIdSet().contains(Edge.getLongId())) {
                                                                             
                                                                                 
@@ -153,6 +153,7 @@ public class Kleinberg extends GraphStore implements Generator  {
 										graphStore.addEdge(Edge);
                                                                                 getIdSet().add(Edge.getLongId());
 										e = true;
+                                                                                //System.out.println("long edge added");
 									}
 								}
 						b = random.nextDouble();
