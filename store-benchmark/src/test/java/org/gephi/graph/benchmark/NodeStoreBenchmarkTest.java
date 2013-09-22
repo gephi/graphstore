@@ -39,43 +39,83 @@ public class NodeStoreBenchmarkTest {
         NanoBench.create().measurements(10).measure("reset node store", new NodeStoreBenchmark().resetNodeStore());
     }
     
-     @Test
+    @Test
     public void testAddNode() {
-        NanoBench.create().measurements(5).measure("add node ", new NodeStoreBenchmark().addNode());
+         int[] a =  {10,100,500,1000,5000,7000};
+         double[] p = {0.01,0.1,0.3};
+        for(int i =0;i<a.length;i++)
+            for(int j=0;j<p.length;j++)
+            {
+            NanoBench.create().measurements(5).measure("add node "+" "+a[i]+" "+p[j], new NodeStoreBenchmark().addNode(a[i],p[j]));
+            
+            }
     }
      @Test
      public void testRemoveNode() {
-         NanoBench.create().measurements(5).measure("Remove Node", new NodeStoreBenchmark().removeNode());
+         int[] a =  {10,100,500,1000,5000,7000};
+         double[] p = {0.1,};
+        for(int i =0;i<a.length;i++)
+            for(int j=0;j<p.length;j++)
+            {
+                if(a[i]==7000 && p[j]==0.3)
+                    continue;
+         NanoBench.create().measurements(5).measure("Remove Node"+" "+a[i]+" "+p[j], new NodeStoreBenchmark().removeNode(a[i],p[j]));
+            }
      }
      @Test 
      public void testIterateNode(){
-         NanoBench.create().measurements(5).measure("Iterate Nodes", new NodeStoreBenchmark().iterateNodes());
-     }
+         int[] a =  {10,100,500,1000,5000,7000};
+         double[] p = {0.1};
+        for(int i =0;i<a.length;i++)
+            for(int j=0;j<p.length;j++)
+            {
+                if(a[i]==7000 && p[j]==0.3)
+                    continue;
+     
+         NanoBench.create().measurements(5).measure("Iterate Nodes"+" "+a[i]+" "+p[j], new NodeStoreBenchmark().iterateNodes(a[i],p[j]));
+     
+            }}
      @Test 
      public void testIterateNeighbors(){
-         NanoBench.create().measurements(5).measure("Iterate Neighbors", new NodeStoreBenchmark().iterateNeighbors());
+         int[] a =  {10,100,500,1000,5000,7000};
+         double[] p = {0.1};
+        for(int i =0;i<a.length;i++)
+            for(int j=0;j<p.length;j++)
+            {
+                if(a[i]==7000 && p[j]==0.3)
+                    continue;
+         NanoBench.create().measurements(5).measure("Iterate Neighbors"+" "+a[i]+" "+p[j], new NodeStoreBenchmark().iterateNeighbors(a[i],p[j]));
+            } 
      }
      @Test
      public void testKleinbergAddNode(){
-         
-         NanoBench.create().measurements(1).measure("Kleinberg add node", new NodeStoreBenchmark().addKleinbergNode());
+         int[] no ={10,20,30,40,50};
+         for(int i=0;i<no.length;i++)
+         NanoBench.create().measurements(10).measure("Kleinberg add node"+" "+no[i], new NodeStoreBenchmark().addKleinbergNode(no[i],no[i]/2,5));
      
      }
      @Test
      public void testKleinbergRemoveNode(){
-        
-         NanoBench.create().measurements(1).measure("Kleinberg remove node", new NodeStoreBenchmark().RemoveKleinbergNode());
+         int[] no ={10,20,30,40,50};
+         for(int i=0;i<no.length;i++)
+         NanoBench.create().measurements(10).measure("Kleinberg remove node"+" "+no[i], new NodeStoreBenchmark().RemoveKleinbergNode(no[i],no[i]/2,5));
      
      }
     @Test
      public void testKleinbergIterateNode(){
-         
-         NanoBench.create().measurements(10).measure("Kleinberg Iterate nodes", new NodeStoreBenchmark().iterateKleinbergNodes());
+         int[] no ={10,20,30,40,50};
+         for(int i=0;i<no.length;i++)
+         NanoBench.create().measurements(10).measure("Kleinberg Iterate nodes"+" "+no[i], new NodeStoreBenchmark().iterateKleinbergNodes(no[i],no[i]/2,5));
      
      }
     @Test
     public void testGetAttributeRandom(){
-        NanoBench.create().measurements(10).measure("random get attributes", new NodeStoreBenchmark().addAttrRandomGraph());
+        int[] a =  {10,100,500,1000,5000,7000};
+         double[] p = {0.01,0.1,0.3};
+        for(int i =0;i<a.length;i++)
+            for(int j=0;j<p.length;j++)
+            {
+        NanoBench.create().measurements(10).measure("random get attributes"+" "+a[i]+" "+p[j], new NodeStoreBenchmark().addAttrRandomGraph(a[i],p[j]));
     }
-   
+    }
 }

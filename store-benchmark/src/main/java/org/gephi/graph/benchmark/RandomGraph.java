@@ -90,8 +90,8 @@ public class RandomGraph implements Generator {
        lock = new GraphLock();
        
        nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
-       numberOfNodes = 50;
-       wiringProbability = 0.5;
+       numberOfNodes = 10;
+       wiringProbability = 0.01;
        edgeCount = 0;  
        cancel = false;
        this.columnName = null;
@@ -101,12 +101,43 @@ public class RandomGraph implements Generator {
        generate(graphStore);
        
     }
+    public RandomGraph(int n,double p)
+    {
+       lock = new GraphLock();
+       
+       nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
+       numberOfNodes = n;
+       wiringProbability = p;
+       edgeCount = 0;  
+       cancel = false;
+       this.columnName = null;
+       
+      graphStore = new GraphStore();
+       idSet = new LongOpenHashSet();
+       generate(graphStore);
+       
+    }
     public RandomGraph(String col)
     {
        lock = new GraphLock();
        nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
-       numberOfNodes = 50;
-       wiringProbability = 0.5;
+       numberOfNodes = 10;
+       wiringProbability = 0.01;
+       edgeCount = 0;  
+       cancel = false; 
+       this.columnName = col;
+       
+       graphStore = new GraphStore();
+       idSet = new LongOpenHashSet();
+       generate(graphStore);
+       
+    }
+    public RandomGraph(String col,int n ,double p)
+    {
+       lock = new GraphLock();
+       nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
+       numberOfNodes = n;
+       wiringProbability = p;
        edgeCount = 0;  
        cancel = false; 
        this.columnName = col;
@@ -138,8 +169,8 @@ public class RandomGraph implements Generator {
                 graphStore.addNode(node);
 
             }
-            if(idSet.isEmpty())
-            System.out.println("id set is empty ");
+            
+           // System.out.println("id set is empty ");
            // LongSet idSet = new LongOpenHashSet();
             if (wiringProbability > 0)
             {

@@ -67,19 +67,34 @@ public class Kleinberg extends GraphStore implements Generator  {
         Kleinberg()
         {
          cancel = false;
-	 n = 2;
-	 p = 1;
-	 q = 1;
+	 n = 5;
+	 p = 2;
+	 q = 2;
 	 r = 0;
          edgeCount=0;   
          nodeCount=0;
          torusBased = false;
          idSet = new LongOpenHashSet();
-         //edgeStore = new EdgeStore();
+         
          graphstore = new GraphStore();
          generate(this.graphstore);
         }
     
+        Kleinberg(int no,int local,int Long)
+        {
+         cancel = false;
+	 n = no;
+	 p = local;
+	 q = Long;
+	 r = 0;
+         edgeCount=0;   
+         nodeCount=0;
+         torusBased = false;
+         idSet = new LongOpenHashSet();
+         
+         graphstore = new GraphStore();
+         generate(this.graphstore);
+        }
 	
         
 	@Override

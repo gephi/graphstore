@@ -152,25 +152,24 @@ public class EdgeStoreBenchmark {
         return runnable;
     }
     
-        public Runnable addEdge(){
+        public Runnable addEdge(final int n, final double p){
            Runnable runnable = new Runnable(){
 
                @Override
                public void run() {
-                   RandomGraph randomGraph = new RandomGraph();
+                  
+                   RandomGraph randomGraph = new RandomGraph(n,p);
                    Random random = new Random();
                    boolean flag =true;
                    while(flag){
 
 
                        int sourceID = random.nextInt(randomGraph.numberOfNodes);
-                       System.out.println("source Id "+sourceID);
+                      
                        int DestID = random.nextInt(randomGraph.numberOfNodes);
-                       System.out.println("dest Id "+DestID);
+                     
                        NodeImpl source = randomGraph.graphStore.getNodeStore().get(String.valueOf(sourceID));
                        NodeImpl target = randomGraph.graphStore.getNodeStore().get(String.valueOf(DestID));
-                       if(source==null)
-                           System.out.println("Hello");
                        if(!randomGraph.graphStore.getEdgeStore().contains(source, target,0))
                        {
                            randomGraph.setEdgeCount(randomGraph.getEdgeCount()+1);
@@ -186,16 +185,16 @@ public class EdgeStoreBenchmark {
            return runnable;
        }
     
-     public Runnable removeEdge(){
+     public Runnable removeEdge(final int n, final double p){
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-              RandomGraph randomGraph = new RandomGraph();
+              RandomGraph randomGraph = new RandomGraph(n,p);
               Random random = new Random();
               boolean flag = true;  // checking edge exists or not
               while(flag){
-                  System.out.println("flag true");
+              
                  NodeImpl source =  randomGraph.graphStore.getNodeStore().get(String.valueOf(random.nextInt(randomGraph.numberOfNodes) ));
                  NodeImpl dest = randomGraph.graphStore.getNodeStore().get(String.valueOf(random.nextInt(randomGraph.numberOfNodes) ));
                   if(randomGraph.graphStore.getEdgeStore().contains(source, dest, 0)){
@@ -211,12 +210,12 @@ public class EdgeStoreBenchmark {
         return runnable;
         
     }
-    public Runnable iterateEdge(){
+    public Runnable iterateEdge(final int n, final double p){
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-                RandomGraph randomGraph = new RandomGraph();
+                RandomGraph randomGraph = new RandomGraph(n,p);
                 Iterator<Edge> itr = randomGraph.graphStore.getEdgeStore().iterator();
                 for (; itr.hasNext();) {
                     edgeObject = (EdgeImpl) itr.next();
@@ -225,12 +224,12 @@ public class EdgeStoreBenchmark {
         };
         return runnable;
     }
-    public Runnable iterateKleinbergEdge(){
+    public Runnable iterateKleinbergEdge(final int no,final int local,final int Long){
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-                Kleinberg graph = new Kleinberg();
+                 Kleinberg graph = new Kleinberg(no,local,Long);
                 Iterator<Edge> itr = graph.edgeStore.iterator();
                 for (; itr.hasNext();) {
                     edgeObject = (EdgeImpl) itr.next();
@@ -240,8 +239,16 @@ public class EdgeStoreBenchmark {
         return runnable;
     }
     
-    public Runnable iterateKleinbergNeighbors(){
-       final Kleinberg graph = new Kleinberg();
+    public Runnable iterateKleinbergNeighbors(final int no,final int local,final int Long){
+       
+       
+       Runnable runnable = new Runnable() {
+       
+           
+
+           @Override
+           public void run() {
+               final  Kleinberg graph = new Kleinberg(no,local,Long);
        Iterator<Edge> edgeIt =  graph.edgeStore.iterator();
                ObjectSet<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
                for(;edgeIt.hasNext();)
@@ -251,13 +258,6 @@ public class EdgeStoreBenchmark {
                    nodeSet.add(e.getTarget());
                }
               final NodeImpl[] nodes = nodeSet.toArray(new NodeImpl[0]);
-       
-       Runnable runnable = new Runnable() {
-       
-           
-
-           @Override
-           public void run() {
                for (NodeImpl node : nodes) {
                     Iterator<Edge> itr = graph.edgeStore.edgeOutIterator(node);
                     for (; itr.hasNext();) {
@@ -271,7 +271,7 @@ public class EdgeStoreBenchmark {
        };
        return runnable;
    }
-    public Runnable removeKleinbergEdge()
+    public Runnable removeKleinbergEdge(final int no,final int local,final int Long)
     {
         Runnable runnable = new Runnable() {
 
@@ -279,12 +279,12 @@ public class EdgeStoreBenchmark {
             public void run() 
             {
                 
-              Kleinberg graph = new Kleinberg();
-              //Random random = new Random();
+               Kleinberg graph = new Kleinberg(no,local,Long);
+              
               boolean flag = true;  // checking edge exists or not
               while(flag)
               {
-                  //System.out.println("in check");
+                  
                   for(Node n :graph.graphstore.getNodes())
                   {
                       for(Node m:graph.graphstore.getNodes())
@@ -312,17 +312,17 @@ public class EdgeStoreBenchmark {
         
     }
     
-    public Runnable addKleinbergEdge(){
+    public Runnable addKleinbergEdge(final int no,final int local,final int Long){
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-                Kleinberg graph = new Kleinberg();
+                Kleinberg graph = new Kleinberg(no,local,Long);
               Random random = new Random();
               boolean flag = true;  // checking edge exists or not
               while(flag)
               {
-                  System.out.println("in check");
+                 
                   for(Node n :graph.graphstore.getNodes())
                   {
                       for(Node m:graph.graphstore.getNodes())

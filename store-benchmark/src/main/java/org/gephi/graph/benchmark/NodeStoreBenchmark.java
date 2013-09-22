@@ -30,10 +30,6 @@ import org.gephi.graph.store.EdgeImpl;
 import org.gephi.graph.store.EdgeStore;
 import org.gephi.graph.store.NodeImpl;
 import org.gephi.graph.store.NodeStore;
-//import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
-//import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET;
-
-
 
 
 /**
@@ -111,37 +107,37 @@ public class NodeStoreBenchmark {
         return runnable;
     }
     
-    public Runnable addNode() {
-       //final NodeImpl[] nodeStock = new NodeImpl[NODES_WRITE];
+    public Runnable addNode(final int n , final double p) {
+       
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-                RandomGraph randomGraph = new RandomGraph();                
+                RandomGraph randomGraph = new RandomGraph(n,p);                
                 NodeImpl newRNode = new NodeImpl(String.valueOf(randomGraph.numberOfNodes+1));
                 randomGraph.graphStore.addNode(newRNode);
                 Random random = new Random();
-                //if(random.nextDouble() < randomGraph.wiringProbability)
+                
                 {
                     randomGraph.setEdgeCount(randomGraph.getEdgeCount()+1);
                     int temp = random.nextInt(randomGraph.numberOfNodes);
-                  //  System.out.println("temp:"+temp );
+                  
                     NodeImpl source = randomGraph.graphStore.getNodeStore().get(String.valueOf(temp));
                     
                     
                     EdgeImpl Edge = new EdgeImpl(String.valueOf(randomGraph.getEdgeCount()), source,newRNode, 0, 1.0, true);
                     if(Edge.getSource()== null)
                     {
-                        System.out.println("source null");
+                       
                     }
                     if(Edge.getTarget()== null)
                     {
-                        System.out.println("target null");
+                       
                     }
-                    //randomGraph.nodeStore.get(String.valueOf(randomGraph.numberOfNodes+1))
+                    
                     if(source!=newRNode){
                         randomGraph.graphStore.getEdgeStore().add(Edge);
-                     //   System.out.println("not equal");
+                     
                     }
                     
                 }
@@ -151,13 +147,14 @@ public class NodeStoreBenchmark {
         return runnable;
         
     }
-    public Runnable removeNode() {
+    public Runnable removeNode(final int n, final double p) {
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
                 Random random = new Random();                
-                RandomGraph randomGraph = new RandomGraph();
+               // RandomGraph randomGraph = new RandomGraph();
+                RandomGraph randomGraph = new RandomGraph(n,p);
                 int nodeID = random.nextInt(randomGraph.numberOfNodes);
                 NodeImpl node = randomGraph.graphStore.getNodeStore().get(String.valueOf(nodeID));
                 Column col = randomGraph.nodeColumnStore.getColumn("id");
@@ -173,12 +170,13 @@ public class NodeStoreBenchmark {
         };
         return runnable;
 }
-   public Runnable iterateNodes(){
+   public Runnable iterateNodes(final int n , final double p){
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-                RandomGraph randomGraph = new RandomGraph();
+               
+                RandomGraph randomGraph = new RandomGraph(n,p); 
                 Iterator<Node> m = randomGraph.graphStore.getNodeStore().iterator();
                 for (; m.hasNext();) {
                     NodeImpl b = (NodeImpl) m.next();
@@ -191,12 +189,12 @@ public class NodeStoreBenchmark {
        
    }
    
-   public Runnable iterateNeighbors(){
+   public Runnable iterateNeighbors(final int n , final double p){
        Runnable runnable = new Runnable() {
 
            @Override
            public void run() {
-               RandomGraph randomGraph = new RandomGraph();
+            RandomGraph randomGraph = new RandomGraph(n,p); 
                Random random = new Random();
                NodeImpl node = randomGraph.graphStore.getNodeStore().get(random.nextInt(randomGraph.numberOfNodes));
                Iterator<Node> Neighbors = randomGraph.graphStore.getEdgeStore().neighborIterator(node);
@@ -205,14 +203,14 @@ public class NodeStoreBenchmark {
        return runnable;
    }
    
-   public Runnable addKleinbergNode()
+   public Runnable addKleinbergNode(final int no,final int local,final int Long)
    {
        Runnable runnable = new Runnable() {
 
            @Override
            public void run() {
                // Adding the Node
-               Kleinberg graph = new Kleinberg();
+               Kleinberg graph = new Kleinberg(no,local,Long);
                Random random = new Random();
                NodeImpl newNode = new NodeImpl(String.valueOf(graph.getNodeCount()+1));
                graph.setNodeCount(graph.getNodeCount()+1);
@@ -220,7 +218,7 @@ public class NodeStoreBenchmark {
                int q = graph.getq();
                int n = graph.getn();
                int r = graph.getr();
-               //int i = graph.getNodeCount();
+               
              
                int temp = 0;
                
@@ -242,18 +240,16 @@ public class NodeStoreBenchmark {
                for (int i=0;i<n; i++)
                for (int j = 0; j < n ; ++j)
                {
-                 //  System.out.println("in the l loop");
-				for (int k = i - p; k <= i + p ; ++k)
+                		for (int k = i - p; k <= i + p ; ++k)
                                 {
-                                     //   System.out.println("break");
-					for (int l = j - p; l <= j + p ; ++l)
+                                     for (int l = j - p; l <= j + p ; ++l)
                                         {
                                             
-                                       //     System.out.println(l+" k ="+k+" n ="+n);
+                                       
 						if ((graph.isTorusBased() || !graph.isTorusBased() && k >= 0  && l >= 0 ) &&
                                                          graph.d(i, j, k, l) <= p  )
                                                 {
-							//System.out.println("in local range");
+							
                                                         Object id  = nodes[(k + n) % n][(l + n) % n].getId();
                                                         graph.setEdgeCount(graph.getEdgeCount()+1);
                                                         EdgeImpl Edge = new EdgeImpl(String.valueOf(graph.getEdgeCount()),newNode,graph.graphstore.getNode(id),0,1.0,true);
@@ -282,15 +278,15 @@ public class NodeStoreBenchmark {
 							sum += Math.pow(graph.dtb(i, j, k, l), -r);
 						
 					}
-                             //   System.out.println("sum = "+sum);
+                            
 				for (int m = 0; m < q ; ++m) 
                                 {
-                                    //    System.out.println("inside");
+                                    
 					double  b = random.nextDouble();
 					boolean e = false;
 					while (!e) 
                                         {
-                                                System.out.println("inside");
+                                             
 						double pki = 0.0;
 						for (int k = 0; k < n && !e ; ++k)
 							for (int l = 0; l < n && !e; ++l)
@@ -302,7 +298,7 @@ public class NodeStoreBenchmark {
                                                                         EdgeImpl Edge = new EdgeImpl(String.valueOf(graph.getEdgeCount()+1),newNode,graph.graphstore.getNode(id),0,1.0,true);
 									 
                                                                                graph.getIdSet().add(graph.getEdgeCount()+1);
-                                                                                System.out.println("in long range");									
+                                                                               									
 										graph.graphstore.addEdge(Edge);
                                                                                 
 										e = true;
@@ -321,12 +317,12 @@ public class NodeStoreBenchmark {
        return runnable;
    }
    
-public Runnable RemoveKleinbergNode(){
+public Runnable RemoveKleinbergNode(final int no,final int local,final int Long){
     Runnable runnable = new Runnable() {
 
         @Override
         public void run() {
-            Kleinberg graph = new Kleinberg();
+            Kleinberg graph = new Kleinberg(no,local,Long);
             Random random = new Random();
             int nodeID = random.nextInt(graph.getNodeCount());
             graph.graphstore.clearEdges(graph.graphstore.getNode(nodeID));
@@ -337,12 +333,12 @@ public Runnable RemoveKleinbergNode(){
         return runnable;
 }
     
-public Runnable iterateKleinbergNodes(){
+public Runnable iterateKleinbergNodes(final int no,final int local,final int Long){
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-                Kleinberg graph = new Kleinberg();
+                Kleinberg graph = new Kleinberg(no,local,Long);
                 NodeStore nodeStore = new NodeStore();
                 nodeStore = (NodeStore) graph.graphstore.getNodes();
                 Iterator<Node> m = nodeStore.iterator();
@@ -356,18 +352,19 @@ public Runnable iterateKleinbergNodes(){
         return runnable;
        
    }
-public Runnable addAttrRandomGraph(){
+public Runnable addAttrRandomGraph(final int n, final double p){
     Runnable runnable = new Runnable() {
 
         @Override
         public void run() {
-             RandomGraph randomGraph = new RandomGraph("id");
+             
+            RandomGraph randomGraph = new RandomGraph("id",n,p);
              Column col = randomGraph.nodeColumnStore.getColumn("id");
              for(Node n:randomGraph.graphStore.getNodes())
              {
                  
                  object =   n.getAttribute(col);
-                 System.out.println("object id:"+object);
+              
              }
                
              
