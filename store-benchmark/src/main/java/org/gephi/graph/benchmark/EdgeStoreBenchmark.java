@@ -20,7 +20,7 @@ import org.gephi.graph.store.NodeStore;
 
 /**
  *
- * @author mbastian
+ * @author mbastian, niteshbhargv
  */
 public class EdgeStoreBenchmark {
 
@@ -152,6 +152,10 @@ public class EdgeStoreBenchmark {
         return runnable;
     }
     
+    /**
+     * addEdge - creates a random graph with given parameters and adds an edge
+     */
+    
         public Runnable addEdge(final int n, final double p){
            Runnable runnable = new Runnable(){
 
@@ -164,12 +168,11 @@ public class EdgeStoreBenchmark {
                    while(flag){
 
 
-                       int sourceID = random.nextInt(randomGraph.numberOfNodes);
-                      
-                       int DestID = random.nextInt(randomGraph.numberOfNodes);
-                     
+                       int sourceID = random.nextInt(randomGraph.numberOfNodes);                      
+                       int DestID = random.nextInt(randomGraph.numberOfNodes);                     
                        NodeImpl source = randomGraph.graphStore.getNodeStore().get(String.valueOf(sourceID));
                        NodeImpl target = randomGraph.graphStore.getNodeStore().get(String.valueOf(DestID));
+                       
                        if(!randomGraph.graphStore.getEdgeStore().contains(source, target,0))
                        {
                            randomGraph.setEdgeCount(randomGraph.getEdgeCount()+1);
@@ -184,6 +187,10 @@ public class EdgeStoreBenchmark {
            };
            return runnable;
        }
+        
+    /**
+     * removeEdge - creates a random graph with given parameters and removes a edge from the given set of edges 
+     */
     
      public Runnable removeEdge(final int n, final double p){
         Runnable runnable = new Runnable() {
@@ -210,6 +217,9 @@ public class EdgeStoreBenchmark {
         return runnable;
         
     }
+     /**
+     * iterateEdge - creates a random graph with given parameters and iterates throughout the given edges
+     */
     public Runnable iterateEdge(final int n, final double p){
         Runnable runnable = new Runnable() {
 
@@ -224,6 +234,10 @@ public class EdgeStoreBenchmark {
         };
         return runnable;
     }
+    
+   /**
+    * iterateKleinbergEdge - creates a Kleinberg graph with given parameters and iterates throughout the given edges
+    */
     public Runnable iterateKleinbergEdge(final int no,final int local,final int Long){
         Runnable runnable = new Runnable() {
 
@@ -238,7 +252,9 @@ public class EdgeStoreBenchmark {
         };
         return runnable;
     }
-    
+    /**
+    * iterateKleinbergEdge - creates a Kleinberg graph with given parameters and iterate among neighbors
+    */
     public Runnable iterateKleinbergNeighbors(final int no,final int local,final int Long){
        
        
@@ -249,7 +265,7 @@ public class EdgeStoreBenchmark {
            @Override
            public void run() {
                final  Kleinberg graph = new Kleinberg(no,local,Long);
-       Iterator<Edge> edgeIt =  graph.edgeStore.iterator();
+               Iterator<Edge> edgeIt =  graph.edgeStore.iterator();
                ObjectSet<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
                for(;edgeIt.hasNext();)
                {
@@ -271,6 +287,12 @@ public class EdgeStoreBenchmark {
        };
        return runnable;
    }
+    
+  /**
+    * iterateKleinbergEdge - creates a Kleinberg graph with given parameters and removes an edge randomly from the Kleinberg graph 
+    */
+    
+    
     public Runnable removeKleinbergEdge(final int no,final int local,final int Long)
     {
         Runnable runnable = new Runnable() {
@@ -279,8 +301,7 @@ public class EdgeStoreBenchmark {
             public void run() 
             {
                 
-               Kleinberg graph = new Kleinberg(no,local,Long);
-              
+              Kleinberg graph = new Kleinberg(no,local,Long);              
               boolean flag = true;  // checking edge exists or not
               while(flag)
               {
@@ -312,12 +333,18 @@ public class EdgeStoreBenchmark {
         
     }
     
+    
+    /**
+    * iterateKleinbergEdge - creates a Kleinberg graph with given parameters and adds a edge within given set of nodes  
+    */
+    
+    
     public Runnable addKleinbergEdge(final int no,final int local,final int Long){
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-                Kleinberg graph = new Kleinberg(no,local,Long);
+              Kleinberg graph = new Kleinberg(no,local,Long);
               Random random = new Random();
               boolean flag = true;  // checking edge exists or not
               while(flag)

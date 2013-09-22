@@ -34,7 +34,7 @@ import org.gephi.graph.store.NodeStore;
 
 /**
  *
- * @author mbastian
+ * @author mbastian, niteshbhargv
  */
 public class NodeStoreBenchmark {
 
@@ -107,6 +107,10 @@ public class NodeStoreBenchmark {
         return runnable;
     }
     
+    /**
+     * addNode - creates a random graph and adds a node into the graph 
+     */
+    
     public Runnable addNode(final int n , final double p) {
        
         Runnable runnable = new Runnable() {
@@ -117,24 +121,14 @@ public class NodeStoreBenchmark {
                 NodeImpl newRNode = new NodeImpl(String.valueOf(randomGraph.numberOfNodes+1));
                 randomGraph.graphStore.addNode(newRNode);
                 Random random = new Random();
-                
+                //edges being added taking wiring probability into the consideration
+                if(randomGraph.wiringProbability > random.nextDouble())
                 {
                     randomGraph.setEdgeCount(randomGraph.getEdgeCount()+1);
                     int temp = random.nextInt(randomGraph.numberOfNodes);
                   
                     NodeImpl source = randomGraph.graphStore.getNodeStore().get(String.valueOf(temp));
-                    
-                    
                     EdgeImpl Edge = new EdgeImpl(String.valueOf(randomGraph.getEdgeCount()), source,newRNode, 0, 1.0, true);
-                    if(Edge.getSource()== null)
-                    {
-                       
-                    }
-                    if(Edge.getTarget()== null)
-                    {
-                       
-                    }
-                    
                     if(source!=newRNode){
                         randomGraph.graphStore.getEdgeStore().add(Edge);
                      
@@ -147,20 +141,25 @@ public class NodeStoreBenchmark {
         return runnable;
         
     }
+    
+    /**
+     * removeNode - creates a random graph and randomly removes a node from the graph 
+     */
+    
     public Runnable removeNode(final int n, final double p) {
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
                 Random random = new Random();                
-               // RandomGraph randomGraph = new RandomGraph();
+               
                 RandomGraph randomGraph = new RandomGraph(n,p);
                 int nodeID = random.nextInt(randomGraph.numberOfNodes);
                 NodeImpl node = randomGraph.graphStore.getNodeStore().get(String.valueOf(nodeID));
                 Column col = randomGraph.nodeColumnStore.getColumn("id");
-                node.removeAttribute(col);
+                node.removeAttribute(col);  // remove the attribute from the removed node
                 
-                randomGraph.graphStore.clearEdges(node);
+                randomGraph.graphStore.clearEdges(node);    // clears the edges associated with the random graph
                 randomGraph.graphStore.removeNode(node);
                 
                 
@@ -170,6 +169,9 @@ public class NodeStoreBenchmark {
         };
         return runnable;
 }
+    /**
+     * iterateNodes - creates a random graph and iterates inside the given nodes 
+     */
    public Runnable iterateNodes(final int n , final double p){
         Runnable runnable = new Runnable() {
 
@@ -189,6 +191,10 @@ public class NodeStoreBenchmark {
        
    }
    
+   /**
+     * iterateNeighbors - creates a random graph and iterates inside the given node's neighbors 
+     */
+   
    public Runnable iterateNeighbors(final int n , final double p){
        Runnable runnable = new Runnable() {
 
@@ -202,6 +208,10 @@ public class NodeStoreBenchmark {
        };
        return runnable;
    }
+   
+   /**
+     * addKleinbergNode - creates a Kleinberg graph and adds nodes with local contacts and long range contacts  
+     */
    
    public Runnable addKleinbergNode(final int no,final int local,final int Long)
    {
@@ -317,6 +327,11 @@ public class NodeStoreBenchmark {
        return runnable;
    }
    
+   /**
+     * RemoveKleinbergNode - creates a Kleinberg graph and removes nodes (picks one at random) with local contacts and long range contacts  
+     */
+   
+   
 public Runnable RemoveKleinbergNode(final int no,final int local,final int Long){
     Runnable runnable = new Runnable() {
 
@@ -332,7 +347,12 @@ public Runnable RemoveKleinbergNode(final int no,final int local,final int Long)
     };
         return runnable;
 }
-    
+
+
+  /**
+     * iterateKleinbergNodes - creates a Kleinberg graph and iterates throughout nodes with local contacts and long range contacts  
+     */  
+
 public Runnable iterateKleinbergNodes(final int no,final int local,final int Long){
         Runnable runnable = new Runnable() {
 
@@ -352,6 +372,12 @@ public Runnable iterateKleinbergNodes(final int no,final int local,final int Lon
         return runnable;
        
    }
+
+
+/**
+  * addAttrRandomGraph - creates a random graph and gets the node's attributes. 
+  */
+
 public Runnable addAttrRandomGraph(final int n, final double p){
     Runnable runnable = new Runnable() {
 

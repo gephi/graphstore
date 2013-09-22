@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author mbastian
+ * @author mbastian,niteshbhargv
  */
 public class EdgeStoreBenchmarkTest {
 
@@ -55,62 +55,60 @@ public class EdgeStoreBenchmarkTest {
     
     @Test
     public void testAddEdge() {
-        int[] a =  {10,100,500,1000,5000,7000};
-         double[] p = {0.01,0.1,0.3};
+        int[] a =  {10,100,500,1000,5000,7000}; // number of nodes invariant
+        double[] p = {0.01,0.1,0.3};   // wiring probability invariant
         for(int i =0;i<a.length;i++)
             for(int j=0;j<p.length;j++)
             {
-        NanoBench.create().measurements(10).measure("add edge"+" "+a[i]+" "+p[j], new EdgeStoreBenchmark().addEdge(a[i],p[j]));
+                NanoBench.create().measurements(10).measure("add edge"+" "+a[i]+" "+p[j], new EdgeStoreBenchmark().addEdge(a[i],p[j]));
             }
     }
     
     @Test
     public void testRemoveEdge() {
-        int[] a =  {10,100,500,1000,5000,7000};
-         double[] p = {0.01,0.1,0.3};
+        int[] a =  {10,100,500,1000,5000,7000}; // number of nodes invariant
+        double[] p = {0.01,0.1,0.3};   // wiring probability invariant
         for(int i =0;i<a.length;i++)
             for(int j=0;j<p.length;j++)
             {
-                if(a[i]==7000 && p[j]==0.3)
-                    continue;
+                
     
-        NanoBench.create().measurements(5).measure(+a[i]+"\t"+p[j], new EdgeStoreBenchmark().removeEdge(a[i],p[j]));
+                NanoBench.create().measurements(5).measure(+a[i]+"\t"+p[j], new EdgeStoreBenchmark().removeEdge(a[i],p[j]));
             }
     }
     
     @Test
     public void testIterateEdge() {
-        int[] a =  {10,100,500,1000,5000,7000};
-         double[] p = {0.01,0.1,0.3};
+        int[] a =  {10,100,500,1000,5000,7000}; // number of nodes invariant
+         double[] p = {0.01,0.1,0.3};   // wiring probability invariant
         for(int i =0;i<a.length;i++)
             for(int j=0;j<p.length;j++)
             {
-                 if(a[i]==7000 && p[j]==0.3)
-                    continue;
+                
         NanoBench.create().cpuOnly().measurements(5).measure(a[i]+"\t"+p[j], new EdgeStoreBenchmark().iterateEdge(a[i],p[j]));
             }
-            }
+      }
      @Test
     public void testKleinbergIterateEdge() {
-         int[] no ={10,20,30,40,50};
+         int[] no ={10,20,30,40,50};    // number of nodes invariant
          for(int i=0;i<no.length;i++)
         NanoBench.create().measurements(10).measure("testKleinbergIterateEdge"+" "+no[i], new EdgeStoreBenchmark().iterateKleinbergEdge(no[i],no[i]/2,5));
     }
      @Test
      public void testKleinbergIterateNeighbors(){
-         int[] no ={10,20,30,40,50};
+         int[] no ={10,20,30,40,50};    // number of nodes invariant
          for(int i=0;i<no.length;i++)
          NanoBench.create().measurements(10).measure("Kleinberg iterate neighbors"+" "+no[i], new EdgeStoreBenchmark().iterateKleinbergNeighbors(no[i],no[i]/2,5));
      }
     @Test
      public void testKleinbergRemoveEdge(){
-         int[] no ={10,20,30,40,50};
+         int[] no ={10,20,30,40,50};    // number of nodes invariant
          for(int i=0;i<no.length;i++)
          NanoBench.create().measurements(10).measure("Kleinberg remove edge"+" "+no[i], new EdgeStoreBenchmark().removeKleinbergEdge(no[i],no[i]/2,5));
      }
     @Test
     public void testKleinbergAddEdge(){
-        int[] no ={10,20,30,40,50};
+        int[] no ={10,20,30,40,50}; // number of nodes invariant
          for(int i=0;i<no.length;i++)
         NanoBench.create().measurements(10).measure("Kleinberg Add Edges"+" "+no[i], new EdgeStoreBenchmark().addKleinbergEdge(no[i],no[i]/2,5));
     }

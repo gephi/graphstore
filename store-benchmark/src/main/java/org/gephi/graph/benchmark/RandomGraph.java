@@ -1,43 +1,17 @@
-/*
- Copyright 2008-2010 Gephi
- Authors : Mathieu Bastian <mathieu.bastian@gephi.org>
- Website : http://www.gephi.org
-
- This file is part of Gephi.
-
- DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-
- Copyright 2011 Gephi Consortium. All rights reserved.
-
- The contents of this file are subject to the terms of either the GNU
- General Public License Version 3 only ("GPL") or the Common
- Development and Distribution License("CDDL") (collectively, the
- "License"). You may not use this file except in compliance with the
- License. You can obtain a copy of the License at
- http://gephi.org/about/legal/license-notice/
- or /cddl-1.0.txt and /gpl-3.0.txt. See the License for the
- specific language governing permissions and limitations under the
- License.  When distributing the software, include this License Header
- Notice in each file and include the License files at
- /cddl-1.0.txt and /gpl-3.0.txt. If applicable, add the following below the
- License Header, with the fields enclosed by brackets [] replaced by
- your own identifying information:
- "Portions Copyrighted [year] [name of copyright owner]"
-
- If you wish your version of this file to be governed by only the CDDL
- or only the GPL Version 3, indicate your decision by adding
- "[Contributor] elects to include this software in this distribution
- under the [CDDL or GPL Version 3] license." If you do not indicate a
- single choice of license, a recipient has the option to distribute
- your version of this file under either the CDDL, the GPL Version 3 or
- to extend the choice of license to its licensees as provided above.
- However, if you add GPL Version 3 code and therefore, elected the GPL
- Version 3 license, then the option applies only if the new code is
- made subject to such option by the copyright holder.
-
- Contributor(s):
-
- Portions Copyrighted 2011 Gephi Consortium.
+/**
+ * Copyright 2012-2013 Gephi Consortium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.gephi.graph.benchmark;
 
@@ -47,36 +21,33 @@ import java.awt.Color;
 import java.util.Random;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
-//import org.openide.util.lookup.ServiceProvider;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.store.ColumnImpl;
 import org.gephi.graph.store.ColumnStore;
 import org.gephi.graph.store.NodeImpl;
-//import org.gephi.graph.store.NodeStore;
 import org.gephi.graph.store.EdgeStore;
 import org.gephi.graph.store.EdgeImpl;
 import org.gephi.graph.store.GraphLock;
 import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
 import org.gephi.graph.store.GraphStore;
 import org.gephi.graph.store.GraphStoreConfiguration;
-
 import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_INDEX_NODES;
 
 
 
 /**
- *
- * @author Mathieu Bastian
+ * Generates directed connected random graph with wiring probability p
+ * @author Mathieu Bastian, Nitesh Bhargava
  */
 
-//@ServiceProvider(service = Generator.class)
+
 public class RandomGraph implements Generator {
 
     
     protected int numberOfNodes;
     protected double wiringProbability;
     private int edgeCount;  
-    protected boolean cancel;
+    protected boolean cancel;   // cancel - to break the process anytime
     private LongSet idSet;
     
     public GraphStore graphStore;
@@ -84,7 +55,7 @@ public class RandomGraph implements Generator {
     protected String columnName;
     protected final ColumnStore<Node> nodeColumnStore;
     
-    
+    //Constructor
     public RandomGraph()
     {
        lock = new GraphLock();
@@ -101,6 +72,12 @@ public class RandomGraph implements Generator {
        generate(graphStore);
        
     }
+    
+    /* 
+     * used for user defined number of nodes and wiring probbability
+     * n = number of nodes, p = wiring probability
+    */
+    
     public RandomGraph(int n,double p)
     {
        lock = new GraphLock();
@@ -117,6 +94,9 @@ public class RandomGraph implements Generator {
        generate(graphStore);
        
     }
+    /*
+     * used for generating random graph with certain attributes
+     */
     public RandomGraph(String col)
     {
        lock = new GraphLock();
@@ -132,6 +112,14 @@ public class RandomGraph implements Generator {
        generate(graphStore);
        
     }
+    
+    /* 
+     * used for user defined number of nodes and wiring probbability
+     * n = number of nodes, p = wiring probability
+     * "col" used for generating random graph with certain attributes
+     * col = attribute id 
+     * 
+    */
     public RandomGraph(String col,int n ,double p)
     {
        lock = new GraphLock();
@@ -157,11 +145,14 @@ public class RandomGraph implements Generator {
         if (wiringProbability > 0) {
             max += numberOfNodes - 1;
         }
-       // Progress.start(progress, max);
+       
         
         Random random = new Random();
-        Column column = generateBasicColumn("id");
+        Column column = generateBasicColumn("id");  // node attribute added
        
+        /*
+         * Adding nodes into the graphstore
+         */
             for (int i = 0; i < numberOfNodes && !cancel; i++) {
                 
                 NodeImpl node = new NodeImpl(String.valueOf(i));
@@ -170,8 +161,10 @@ public class RandomGraph implements Generator {
 
             }
             
-           // System.out.println("id set is empty ");
-           // LongSet idSet = new LongOpenHashSet();
+        /*
+         * Adding edges into the graphstore with the wiring probability p
+         *
+         */
             if (wiringProbability > 0)
             {
                 for (int i = 0; i < numberOfNodes - 1 && !cancel; i++)
@@ -185,8 +178,7 @@ public class RandomGraph implements Generator {
                             EdgeImpl edge = new EdgeImpl(String.valueOf(edgeCount), source, target, 0, 1.0, true);
                            if (random.nextDouble() < wiringProbability  && source != target) 
                            {
-                               graphStore.addEdge(edge);
-                               //edgStore.add(edge);
+                               graphStore.addEdge(edge);                               
                                idSet.add(edge.getLongId());
                                edgeCount++;
                                 

@@ -1,22 +1,17 @@
-/*
- * Copyright 2008-2010 Gephi
- * Authors : Cezary Bartosiak
- * Website : http://www.gephi.org
- * 
- * This file is part of Gephi.
+/**
+ * Copyright 2012-2013 Gephi Consortium
  *
- * Gephi is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- * Gephi is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with Gephi.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.gephi.graph.benchmark;
 
@@ -45,7 +40,7 @@ import org.gephi.graph.store.NodeImpl;
  *
  * Ω(n^4 * q)
  *
- * @author Cezary Bartosiak
+ * @author Nitesh Bhargava
  */
 
 public class Kleinberg extends GraphStore implements Generator  {
@@ -80,6 +75,12 @@ public class Kleinberg extends GraphStore implements Generator  {
          generate(this.graphstore);
         }
     
+        /**
+         * User defined Kleinberg Graph 
+         * no*no = number of nodes 
+         * local = local contacts
+         * Long = long range contacts
+         */
         Kleinberg(int no,int local,int Long)
         {
          cancel = false;
@@ -135,7 +136,7 @@ public class Kleinberg extends GraphStore implements Generator  {
 							
 							
 						}
-						//Progress.progress(progressTicket);
+						
 					}
                
 		// Creating edges from each node to q long-range contacts
@@ -148,7 +149,7 @@ public class Kleinberg extends GraphStore implements Generator  {
 							sum += Math.pow(d(i, j, k, l), -r);
 						else if (isTorusBased() && dtb(i, j, k, l) > p)
 							sum += Math.pow(dtb(i, j, k, l), -r);
-						//Progress.progress(progressTicket);
+						
 					}
 				for (int m = 0; m < q && !cancel; ++m) {
 					double  b = random.nextDouble();
@@ -168,17 +169,16 @@ public class Kleinberg extends GraphStore implements Generator  {
 										graphStore.addEdge(Edge);
                                                                                 getIdSet().add(Edge.getLongId());
 										e = true;
-                                                                                //System.out.println("long edge added");
+                                                                                
 									}
 								}
 						b = random.nextDouble();
 					}
-					//Progress.progress(progressTicket);
+					
 				}
 			}
 
-		//Progress.finish(progressTicket);
-		//progressTicket = null;
+		
 	}
 
 	public int d(int i, int j, int k, int l) {
