@@ -16,6 +16,8 @@
 package org.gephi.attribute.api;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -51,12 +53,14 @@ public class AttributeUtils {
         SUPPORTED_TYPES.add(short.class);
         SUPPORTED_TYPES.add(Long.class);
         SUPPORTED_TYPES.add(long.class);
+        SUPPORTED_TYPES.add(BigInteger.class);
         SUPPORTED_TYPES.add(Byte.class);
         SUPPORTED_TYPES.add(byte.class);
         SUPPORTED_TYPES.add(Float.class);
         SUPPORTED_TYPES.add(float.class);
         SUPPORTED_TYPES.add(Double.class);
         SUPPORTED_TYPES.add(double.class);
+        SUPPORTED_TYPES.add(BigDecimal.class);
         SUPPORTED_TYPES.add(Character.class);
         SUPPORTED_TYPES.add(char.class);
 
@@ -72,12 +76,14 @@ public class AttributeUtils {
         SUPPORTED_TYPES.add(short[].class);
         SUPPORTED_TYPES.add(Long[].class);
         SUPPORTED_TYPES.add(long[].class);
+        SUPPORTED_TYPES.add(BigInteger[].class);
         SUPPORTED_TYPES.add(Byte[].class);
         SUPPORTED_TYPES.add(byte[].class);
         SUPPORTED_TYPES.add(Float[].class);
         SUPPORTED_TYPES.add(float[].class);
         SUPPORTED_TYPES.add(Double[].class);
         SUPPORTED_TYPES.add(double[].class);
+        SUPPORTED_TYPES.add(BigDecimal[].class);
         SUPPORTED_TYPES.add(Character[].class);
         SUPPORTED_TYPES.add(char[].class);
 
@@ -85,6 +91,7 @@ public class AttributeUtils {
         SUPPORTED_TYPES.add(String[].class);
 
         //Dynamic
+        SUPPORTED_TYPES.add(TimestampSet.class);
         SUPPORTED_TYPES.add(TimestampBooleanSet.class);
         SUPPORTED_TYPES.add(TimestampIntegerSet.class);
         SUPPORTED_TYPES.add(TimestampShortSet.class);
@@ -312,12 +319,8 @@ public class AttributeUtils {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         type = getStandardizedType(type);
-        if (type.equals(Integer.class)
-                || type.equals(Float.class)
-                || type.equals(Double.class)
-                || type.equals(Long.class)
-                || type.equals(Short.class)
-                || type.equals(Byte.class)
+        if (Number.class.isAssignableFrom(type) 
+                || Number[].class.isAssignableFrom(type)
                 || type.equals(TimestampIntegerSet.class)
                 || type.equals(TimestampFloatSet.class)
                 || type.equals(TimestampDoubleSet.class)

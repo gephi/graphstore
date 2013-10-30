@@ -281,7 +281,7 @@ public abstract class ElementImpl implements Element {
                 TimestampValueSet dynamicValue = null;
                 if (oldValue == null) {
                     try {
-                        dynamicValue = (TimestampValueSet) column.getTypeClass().newInstance();
+                        attributes[index] = dynamicValue = (TimestampValueSet) column.getTypeClass().newInstance();
                     } catch (InstantiationException ex) {
                         Logger.getLogger(ElementImpl.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IllegalAccessException ex) {
