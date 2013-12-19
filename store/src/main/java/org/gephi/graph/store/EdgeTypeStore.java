@@ -174,7 +174,7 @@ public class EdgeTypeStore {
                     || cl.equals(Long.class)
                     || cl.equals(Character.class)
                     || cl.equals(Boolean.class))) {
-                throw new IllegalArgumentException("The type id must be a primitive type (int, string, long...)");
+                throw new IllegalArgumentException("The type id is " + cl.getCanonicalName() + " but must be a primitive type (int, string, long...)");
             }
         }
     }

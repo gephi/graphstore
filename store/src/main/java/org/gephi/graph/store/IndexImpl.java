@@ -834,6 +834,12 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         protected void removeValue(Boolean value) {
+            throw new RuntimeException("Not supposed to call that");
+        }
+
+        @Override
+        public int countValues() {
+            return (trueSet.isEmpty() ? 0 : 1) + (falseSet.isEmpty() ? 0 : 1);
         }
 
         @Override
