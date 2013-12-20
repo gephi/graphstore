@@ -16,6 +16,7 @@
 package org.gephi.graph.api;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  *
@@ -96,6 +97,16 @@ public interface Graph {
     public void clearEdges();
 
     public GraphView getView();
+    
+    public Object getAttribute(String key);
+
+    public Object getAttribute(String key, double timestamp);
+    
+    public void setAttribute(String key, Object value);
+    
+    public void setAttribute(String key, Object value, double timestamp);
+    
+    public Set<String> getAttributeKeys();
 
     public boolean isDirected();
 

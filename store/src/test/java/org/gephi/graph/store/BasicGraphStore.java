@@ -375,6 +375,31 @@ public class BasicGraphStore implements DirectedGraph {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public Object getAttribute(String key) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object getAttribute(String key, double timestamp) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setAttribute(String key, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setAttribute(String key, Object value, double timestamp) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Set<String> getAttributeKeys() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     public static class BasicElement implements Element {
 
         protected final Map<String, Object> properties = new HashMap<String, Object>();

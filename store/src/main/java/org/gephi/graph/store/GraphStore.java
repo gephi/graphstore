@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.Interval;
 import org.gephi.attribute.time.TimestampSet;
@@ -48,6 +49,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected final ColumnStore<Edge> edgeColumnStore;
     protected final GraphViewStore viewStore;
     protected final TimestampStore timestampStore;
+    protected final GraphAttributesImpl attributes;
     //Factory
     protected final GraphFactoryImpl factory;
     //Lock
@@ -77,6 +79,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
         edgeColumnStore = new ColumnStore<Edge>(Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
         timestampStore = new TimestampStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
+        attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
 
         undirectedDecorator = new UndirectedDecorator(this);
@@ -214,8 +217,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public boolean removeNodeAll(Collection<? extends Node> nodes) {
         autoWriteLock();
         try {
-            for (Iterator<? extends Node> itr = nodes.iterator(); itr.hasNext();) {
-                Node node = itr.next();
+            for (Node node : nodes) {
                 nodeStore.checkNonNullNodeObject(node);
                 for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator((NodeImpl) node); edgeIterator.hasNext();) {
                     edgeIterator.next();
@@ -512,6 +514,31 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     @Override
     public GraphView getView() {
         return mainGraphView;
+    }
+    
+    @Override
+    public Object getAttribute(String key) {
+        return attributes.getValue(key);
+    }
+
+    @Override
+    public Object getAttribute(String key, double timestamp) {
+        return attributes.getValue(key, timestamp);
+    }
+
+    @Override
+    public Set<String> getAttributeKeys() {
+        return attributes.getKeys();
+    }
+    
+    @Override
+    public void setAttribute(String key, Object value) {
+        attributes.setValue(key, value);
+    }
+    
+    @Override
+    public void setAttribute(String key, Object value, double timestamp) {
+        attributes.setValue(key, value, timestamp);
     }
 
     @Override

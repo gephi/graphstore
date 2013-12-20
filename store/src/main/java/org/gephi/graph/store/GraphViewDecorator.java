@@ -17,6 +17,7 @@ package org.gephi.graph.store;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -500,6 +501,31 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         view.clearEdges();
     }
 
+    @Override
+    public Object getAttribute(String key) {
+        return view.attributes.getValue(key);
+    }
+
+    @Override
+    public Object getAttribute(String key, double timestamp) {
+        return view.attributes.getValue(key, timestamp);
+    }
+
+    @Override
+    public Set<String> getAttributeKeys() {
+        return view.attributes.getKeys();
+    }
+
+    @Override
+    public void setAttribute(String key, Object value) {
+        view.attributes.setValue(key, value);
+    }
+
+    @Override
+    public void setAttribute(String key, Object value, double timestamp) {
+        view.attributes.setValue(key, value, timestamp);
+    }
+    
     @Override
     public boolean isDirected() {
         return graphStore.isDirected();
