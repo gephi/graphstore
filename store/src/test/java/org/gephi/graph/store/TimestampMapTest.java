@@ -130,4 +130,19 @@ public class TimestampMapTest {
         int[] indicies = map.getTimestampIndices(new Interval(1.0, 2.0));
         Assert.assertEquals(indicies, new int[]{0});
     }
+    
+    @Test
+    public void testHasTimestampIndex() {
+        TimestampMap map = new TimestampMap();
+        
+        Assert.assertFalse(map.hasTimestampIndex(1.0));
+        
+        map.addTimestamp(1.0);
+        
+        Assert.assertTrue(map.hasTimestampIndex(1.0));
+        
+        map.removeTimestamp(1.0);
+        
+        Assert.assertFalse(map.hasTimestampIndex(1.0));
+    }
 }

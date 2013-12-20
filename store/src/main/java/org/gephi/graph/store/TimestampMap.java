@@ -57,6 +57,10 @@ public class TimestampMap {
         }
         return index;
     }
+    
+    public boolean hasTimestampIndex(double timestamp) {
+        return timestampMap.containsKey(timestamp);
+    }
 
     public int[] getTimestampIndices(Interval interval) {
         IntList res = new IntArrayList();
