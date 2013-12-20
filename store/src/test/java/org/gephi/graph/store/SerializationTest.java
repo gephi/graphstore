@@ -24,6 +24,16 @@ import java.util.Date;
 import java.util.Locale;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.Estimator;
+import org.gephi.attribute.time.TimestampBooleanSet;
+import org.gephi.attribute.time.TimestampByteSet;
+import org.gephi.attribute.time.TimestampCharSet;
+import org.gephi.attribute.time.TimestampDoubleSet;
+import org.gephi.attribute.time.TimestampFloatSet;
+import org.gephi.attribute.time.TimestampIntegerSet;
+import org.gephi.attribute.time.TimestampLongSet;
+import org.gephi.attribute.time.TimestampSet;
+import org.gephi.attribute.time.TimestampShortSet;
+import org.gephi.attribute.time.TimestampStringSet;
 import org.gephi.graph.api.Edge;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -338,6 +348,154 @@ public class SerializationTest {
         Assert.assertEquals(estimator, l);
     }
 
+    @Test
+    public void testTimestampSet() throws IOException, ClassNotFoundException {
+        TimestampSet timestampSet = new TimestampSet();
+        timestampSet.add(6);
+        timestampSet.add(1);
+        timestampSet.add(2);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampSet l = (TimestampSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampBooleanSet() throws IOException, ClassNotFoundException {
+        TimestampBooleanSet timestampSet = new TimestampBooleanSet();
+        timestampSet.put(6, true);
+        timestampSet.put(1, false);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampBooleanSet l = (TimestampBooleanSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampByteSet() throws IOException, ClassNotFoundException {
+        TimestampByteSet timestampSet = new TimestampByteSet();
+        timestampSet.put(6, (byte) 2);
+        timestampSet.put(1, (byte) 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampByteSet l = (TimestampByteSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampCharSet() throws IOException, ClassNotFoundException {
+        TimestampCharSet timestampSet = new TimestampCharSet();
+        timestampSet.put(6, 'a');
+        timestampSet.put(1, 'b');
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampCharSet l = (TimestampCharSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampFloatSet() throws IOException, ClassNotFoundException {
+        TimestampFloatSet timestampSet = new TimestampFloatSet();
+        timestampSet.put(6, 2f);
+        timestampSet.put(1, 1f);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampFloatSet l = (TimestampFloatSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampDoubleSet() throws IOException, ClassNotFoundException {
+        TimestampDoubleSet timestampSet = new TimestampDoubleSet();
+        timestampSet.put(6, 2.0);
+        timestampSet.put(1, 1.0);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampDoubleSet l = (TimestampDoubleSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampIntegerSet() throws IOException, ClassNotFoundException {
+        TimestampIntegerSet timestampSet = new TimestampIntegerSet();
+        timestampSet.put(6, 2);
+        timestampSet.put(1, 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampIntegerSet l = (TimestampIntegerSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampLongSet() throws IOException, ClassNotFoundException {
+        TimestampLongSet timestampSet = new TimestampLongSet();
+        timestampSet.put(6, 2l);
+        timestampSet.put(1, 1l);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampLongSet l = (TimestampLongSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampShortSet() throws IOException, ClassNotFoundException {
+        TimestampShortSet timestampSet = new TimestampShortSet();
+        timestampSet.put(6, (short) 2);
+        timestampSet.put(1, (short) 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampShortSet l = (TimestampShortSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampStringSet() throws IOException, ClassNotFoundException {
+        TimestampStringSet timestampSet = new TimestampStringSet();
+        timestampSet.put(6, "foo");
+        timestampSet.put(1, "bar");
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampSet);
+        TimestampStringSet l = (TimestampStringSet) ser.deserialize(buf);
+        Assert.assertEquals(timestampSet, l);
+    }
+
+    @Test
+    public void testTimestampMap() throws IOException, ClassNotFoundException {
+        TimestampMap timestampMap = new TimestampMap();
+        timestampMap.addTimestamp(6.0);
+        timestampMap.addTimestamp(2.0);
+        timestampMap.addTimestamp(4.0);
+        timestampMap.removeTimestamp(2.0);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampMap l = (TimestampMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testGraphAttributes() throws IOException, ClassNotFoundException {
+        GraphAttributesImpl graphAttributes = new GraphAttributesImpl();
+        graphAttributes.setValue("foo", "bar");
+        graphAttributes.setValue("A", "bar", 1.0);
+        graphAttributes.setValue("B", "bar", 2.0);
+        
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(graphAttributes);
+        GraphAttributesImpl l = (GraphAttributesImpl) ser.deserialize(buf);
+        Assert.assertEquals(graphAttributes, l);
+    }
+    
     @Test
     public void testInt() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);

@@ -27,9 +27,20 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.Estimator;
+import org.gephi.attribute.time.TimestampBooleanSet;
+import org.gephi.attribute.time.TimestampByteSet;
+import org.gephi.attribute.time.TimestampCharSet;
+import org.gephi.attribute.time.TimestampDoubleSet;
+import org.gephi.attribute.time.TimestampFloatSet;
+import org.gephi.attribute.time.TimestampIntegerSet;
+import org.gephi.attribute.time.TimestampLongSet;
 import org.gephi.attribute.time.TimestampSet;
+import org.gephi.attribute.time.TimestampShortSet;
+import org.gephi.attribute.time.TimestampStringSet;
+import org.gephi.attribute.time.TimestampValueSet;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.store.EdgeImpl.EdgePropertiesImpl;
@@ -43,7 +54,7 @@ import org.gephi.graph.utils.LongPacker;
  * @author mbastian
  */
 public class Serialization {
-
+    
     final static int NULL_ID = -1;
     final static int NULL = 0;
     final static int NORMAL = 1;
@@ -146,18 +157,29 @@ public class Serialization {
     final static int EDGE_PROPERTIES = 215;
     final static int TEXT_PROPERTIES = 216;
     final static int ESTIMATOR = 217;
+    final static int GRAPH_ATTRIBUTES = 218;
+    final static int TIMESTAMP_BOOLEAN_SET = 219;
+    final static int TIMESTAMP_BYTE_SET = 220;
+    final static int TIMESTAMP_CHAR_SET = 221;
+    final static int TIMESTAMP_DOUBLE_SET = 222;
+    final static int TIMESTAMP_FLOAT_SET = 223;
+    final static int TIMESTAMP_INTEGER_SET = 224;
+    final static int TIMESTAMP_LONG_SET = 225;
+    final static int TIMESTAMP_SHORT_SET = 226;
+    final static int TIMESTAMP_STRING_SET = 227;
+    final static int TIMESTAMP_MAP = 228;
     //Store
     protected final GraphStore store;
     protected final Int2IntMap idMap;
     //Deserialized configuration
     protected GraphStoreConfigurationVersion graphStoreConfigurationVersion;
-
+    
     public Serialization(GraphStore graphStore) {
         store = graphStore;
         idMap = new Int2IntOpenHashMap();
         idMap.defaultReturnValue(NULL_ID);
     }
-
+    
     public void serializeGraphStore(DataOutput out) throws IOException {
         //Configuration
         serializeGraphStoreConfiguration(out);
@@ -176,10 +198,13 @@ public class Serialization {
         //Factory
         serialize(out, store.factory);
 
+        //Atts
+        serialize(out, store.attributes);
+
         //Nodes + Edges
         int nodesAndEdges = store.nodeStore.size() + store.edgeStore.size();
         serialize(out, nodesAndEdges);
-
+        
         for (Node node : store.nodeStore) {
             serialize(out, node);
         }
@@ -190,7 +215,7 @@ public class Serialization {
         //Views
         serialize(out, store.viewStore);
     }
-
+    
     public GraphStore deserializeGraphStore(DataInput is) throws IOException, ClassNotFoundException {
         if (!store.nodeStore.isEmpty()) {   //TODO test other stores
             throw new IOException("The store is not empty");
@@ -200,7 +225,9 @@ public class Serialization {
         deserialize(is);
 
         //Graph Version
-        deserialize(is);
+        GraphVersion version = (GraphVersion) deserialize(is);
+        store.version.nodeVersion = version.nodeVersion;
+        store.version.edgeVersion = version.edgeVersion;
 
         //Edge types
         deserialize(is);
@@ -212,6 +239,10 @@ public class Serialization {
         //Factory
         deserialize(is);
 
+        //Atts
+        GraphAttributesImpl attributes = (GraphAttributesImpl) deserialize(is);
+        store.attributes.setGraphAttributes(attributes);
+
         //Nodes and edges
         int nodesAndEdges = (Integer) deserialize(is);
         for (int i = 0; i < nodesAndEdges; i++) {
@@ -220,17 +251,17 @@ public class Serialization {
 
         //ViewStore
         deserialize(is);
-
+        
         return store;
     }
-
+    
     private void serializeNode(DataOutput out, NodeImpl node) throws IOException {
         serialize(out, node.id);
         serialize(out, node.storeId);
         serialize(out, node.attributes);
         serialize(out, node.properties);
     }
-
+    
     private void serializeEdge(DataOutput out, EdgeImpl edge) throws IOException {
         serialize(out, edge.id);
         serialize(out, edge.source.storeId);
@@ -241,25 +272,25 @@ public class Serialization {
         serialize(out, edge.attributes);
         serialize(out, edge.properties);
     }
-
+    
     private NodeImpl deserializeNode(DataInput is) throws IOException, ClassNotFoundException {
         Object id = deserialize(is);
         int storeId = (Integer) deserialize(is);
         Object[] attributes = (Object[]) deserialize(is);
         NodePropertiesImpl properties = (NodePropertiesImpl) deserialize(is);
-
+        
         NodeImpl node = (NodeImpl) store.factory.newNode(id);
         node.attributes = attributes;
         if (node.properties != null) {
             node.setNodeProperties(properties);
         }
         store.nodeStore.add(node);
-
+        
         idMap.put(storeId, node.storeId);
-
+        
         return node;
     }
-
+    
     private EdgeImpl deserializeEdge(DataInput is) throws IOException, ClassNotFoundException {
         Object id = deserialize(is);
         int sourceId = (Integer) deserialize(is);
@@ -269,28 +300,28 @@ public class Serialization {
         boolean directed = (Boolean) deserialize(is);
         Object[] attributes = (Object[]) deserialize(is);
         EdgePropertiesImpl properties = (EdgePropertiesImpl) deserialize(is);
-
+        
         int sourceNewId = idMap.get(sourceId);
         int targetNewId = idMap.get(targetId);
-
+        
         if (sourceId == NULL_ID || targetId == NULL_ID) {
             throw new IOException("The edge source of target can't be found");
         }
-
+        
         NodeImpl source = store.nodeStore.get(sourceNewId);
         NodeImpl target = store.nodeStore.get(targetNewId);
-
+        
         EdgeImpl edge = (EdgeImpl) store.factory.newEdge(id, source, target, type, weight, directed);
         edge.attributes = attributes;
         if (edge.properties != null) {
             edge.setEdgeProperties(properties);
         }
-
+        
         store.edgeStore.add(edge);
-
+        
         return edge;
     }
-
+    
     private void serializeEdgeTypeStore(final DataOutput out) throws IOException {
         EdgeTypeStore edgeTypeStore = store.edgeTypeStore;
         int length = edgeTypeStore.length;
@@ -302,13 +333,13 @@ public class Serialization {
         short[] garbage = edgeTypeStore.getGarbage();
         serialize(out, garbage);
     }
-
+    
     private EdgeTypeStore deserializeEdgeTypeStore(final DataInput is) throws IOException, ClassNotFoundException {
         int length = (Integer) deserialize(is);
         short[] ids = (short[]) deserialize(is);
         Object[] labels = (Object[]) deserialize(is);
         short[] garbage = (short[]) deserialize(is);
-
+        
         EdgeTypeStore edgeTypeStore = store.edgeTypeStore;
         edgeTypeStore.length = length;
         for (int i = 0; i < ids.length; i++) {
@@ -322,21 +353,21 @@ public class Serialization {
         }
         return edgeTypeStore;
     }
-
+    
     private void serializeColumnStore(final DataOutput out, final ColumnStore columnStore) throws IOException {
         serialize(out, columnStore.elementType);
-
+        
         int length = columnStore.length;
         serialize(out, length);
-
+        
         for (int i = 0; i < length; i++) {
             ColumnImpl col = columnStore.columns[i];
             serialize(out, col);
         }
-
+        
         serialize(out, columnStore.garbageQueue.toShortArray());
     }
-
+    
     private ColumnStore deserializeColumnStore(final DataInput is) throws IOException, ClassNotFoundException {
         Class elementType = (Class) deserialize(is);
         ColumnStore columnStore = null;
@@ -347,10 +378,10 @@ public class Serialization {
         } else {
             throw new RuntimeException("Not recognized column store");
         }
-
+        
         int length = (Integer) deserialize(is);
         columnStore.length = length;
-
+        
         for (int i = 0; i < length; i++) {
             ColumnImpl col = (ColumnImpl) deserialize(is);
             if (col != null) {
@@ -361,14 +392,14 @@ public class Serialization {
                 }
             }
         }
-
+        
         short[] garbage = (short[]) deserialize(is);
         for (int i = 0; i < garbage.length; i++) {
             columnStore.garbageQueue.add(garbage[i]);
         }
         return columnStore;
     }
-
+    
     private void serializeColumn(final DataOutput out, final ColumnImpl column) throws IOException {
         serialize(out, column.id);
         serialize(out, column.title);
@@ -379,7 +410,7 @@ public class Serialization {
         serialize(out, column.indexed);
         serialize(out, column.estimator);
     }
-
+    
     private ColumnImpl deserializeColumn(final DataInput is) throws IOException, ClassNotFoundException {
         String id = (String) deserialize(is);
         String title = (String) deserialize(is);
@@ -389,47 +420,47 @@ public class Serialization {
         Object defaultValue = deserialize(is);
         boolean indexed = (Boolean) deserialize(is);
         Estimator estimator = (Estimator) deserialize(is);
-
+        
         ColumnImpl column = new ColumnImpl(id, typeClass, title, defaultValue, origin, indexed);
         column.storeId = storeId;
         column.setEstimator(estimator);
         return column;
     }
-
+    
     private void serializeGraphFactory(final DataOutput out) throws IOException {
         GraphFactoryImpl factory = store.factory;
-
+        
         serialize(out, factory.getNodeCounter());
         serialize(out, factory.getEdgeCounter());
     }
-
+    
     private GraphFactoryImpl deserializeGraphFactory(final DataInput is) throws IOException, ClassNotFoundException {
         GraphFactoryImpl graphFactory = store.factory;
-
+        
         int nodeCounter = (Integer) deserialize(is);
         int edgeCounter = (Integer) deserialize(is);
-
+        
         graphFactory.setNodeCounter(nodeCounter);
         graphFactory.setEdgeCounter(edgeCounter);
-
+        
         return graphFactory;
     }
-
+    
     private void serializeViewStore(final DataOutput out) throws IOException {
         GraphViewStore viewStore = store.viewStore;
-
+        
         serialize(out, viewStore.length);
         serialize(out, viewStore.views);
         serialize(out, viewStore.garbageQueue.toIntArray());
     }
-
+    
     private GraphViewStore deserializeViewStore(final DataInput is) throws IOException, ClassNotFoundException {
         GraphViewStore viewStore = store.viewStore;
-
+        
         int length = (Integer) deserialize(is);
         Object[] views = (Object[]) deserialize(is);
         int[] garbages = (int[]) deserialize(is);
-
+        
         viewStore.length = length;
         viewStore.views = new GraphViewImpl[views.length];
         System.arraycopy(views, 0, viewStore.views, 0, views.length);
@@ -438,27 +469,31 @@ public class Serialization {
         }
         return viewStore;
     }
-
+    
     private void serializeGraphView(final DataOutput out, final GraphViewImpl view) throws IOException {
         serialize(out, view.nodeView);
         serialize(out, view.edgeView);
         serialize(out, view.storeId);
         serialize(out, view.nodeCount);
         serialize(out, view.edgeCount);
-
+        
         serialize(out, view.nodeBitVector);
         serialize(out, view.edgeBitVector);
-
+        
         serialize(out, view.typeCounts);
         serialize(out, view.mutualEdgeTypeCounts);
         serialize(out, view.mutualEdgesCount);
+        
+        serialize(out, view.version);
+        
+        serialize(out, view.attributes);
     }
-
+    
     private GraphViewImpl deserializeGraphView(final DataInput is) throws IOException, ClassNotFoundException {
         boolean nodeView = (Boolean) deserialize(is);
         boolean edgeView = (Boolean) deserialize(is);
         GraphViewImpl view = new GraphViewImpl(store, nodeView, edgeView);
-
+        
         int storeId = (Integer) deserialize(is);
         int nodeCount = (Integer) deserialize(is);
         int edgeCount = (Integer) deserialize(is);
@@ -467,31 +502,38 @@ public class Serialization {
         int[] typeCounts = (int[]) deserialize(is);
         int[] mutualEdgeTypeCounts = (int[]) deserialize(is);
         int mutualEdgesCount = (Integer) deserialize(is);
-
+        GraphVersion version = (GraphVersion) deserialize(is);
+        GraphAttributesImpl atts = (GraphAttributesImpl) deserialize(is);
+        
         view.nodeCount = nodeCount;
         view.edgeCount = edgeCount;
         view.nodeBitVector = nodeCountVector;
         view.edgeBitVector = edgeCountVector;
         view.storeId = storeId;
-
+        
         view.typeCounts = typeCounts;
         view.mutualEdgesCount = mutualEdgesCount;
         view.mutualEdgeTypeCounts = mutualEdgeTypeCounts;
-
+        
+        view.version.nodeVersion = version.nodeVersion;
+        view.version.edgeVersion = version.edgeVersion;
+        
+        view.attributes.setGraphAttributes(atts);
+        
         return view;
     }
-
+    
     private void serializeBitVector(final DataOutput out, final BitVector bitVector) throws IOException {
         serialize(out, bitVector.size());
         serialize(out, bitVector.elements());
     }
-
+    
     private BitVector deserializeBitVector(final DataInput is) throws IOException, ClassNotFoundException {
         int size = (Integer) deserialize(is);
         long[] elements = (long[]) deserialize(is);
         return new BitVector(elements, size);
     }
-
+    
     private void serializeGraphStoreConfiguration(final DataOutput out) throws IOException {
         out.write(GRAPH_STORE_CONFIGURATION);
         serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_LABEL);
@@ -499,34 +541,34 @@ public class Serialization {
         serialize(out, GraphStoreConfiguration.ENABLE_NODE_PROPERTIES);
         serialize(out, GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES);
     }
-
+    
     private GraphStoreConfigurationVersion deserializeGraphStoreConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
         boolean enableElementLabel = (Boolean) deserialize(is);
         boolean enableElementTimestamp = (Boolean) deserialize(is);
         boolean enableNodeProperties = (Boolean) deserialize(is);
         boolean enableEdgeProperties = (Boolean) deserialize(is);
-
+        
         graphStoreConfigurationVersion = new GraphStoreConfigurationVersion(enableElementLabel, enableElementTimestamp, enableNodeProperties, enableEdgeProperties);
         return graphStoreConfigurationVersion;
     }
-
+    
     private void serializeGraphVersion(final DataOutput out, final GraphVersion graphVersion) throws IOException {
         serialize(out, graphVersion.nodeVersion);
         serialize(out, graphVersion.edgeVersion);
     }
-
+    
     private GraphVersion deserializeGraphVersion(final DataInput is) throws IOException, ClassNotFoundException {
-        GraphVersion graphVersion = store.version;
-
+        GraphVersion graphVersion = new GraphVersion(null);
+        
         int nodeVersion = (Integer) deserialize(is);
         int edgeVersion = (Integer) deserialize(is);
-
+        
         graphVersion.nodeVersion = nodeVersion;
         graphVersion.edgeVersion = edgeVersion;
-
+        
         return graphVersion;
     }
-
+    
     private void serializeNodeProperties(final DataOutput out, final NodePropertiesImpl nodeProperties) throws IOException {
         serialize(out, nodeProperties.x);
         serialize(out, nodeProperties.y);
@@ -536,7 +578,7 @@ public class Serialization {
         serialize(out, nodeProperties.fixed);
         serialize(out, nodeProperties.textProperties);
     }
-
+    
     private NodePropertiesImpl deserializeNodeProperties(final DataInput is) throws IOException, ClassNotFoundException {
         float x = (Float) deserialize(is);
         float y = (Float) deserialize(is);
@@ -545,7 +587,7 @@ public class Serialization {
         float size = (Float) deserialize(is);
         boolean fixed = (Boolean) deserialize(is);
         TextPropertiesImpl textProperties = (TextPropertiesImpl) deserialize(is);
-
+        
         NodePropertiesImpl props = new NodePropertiesImpl();
         props.x = x;
         props.y = y;
@@ -554,60 +596,168 @@ public class Serialization {
         props.size = size;
         props.fixed = fixed;
         props.setTextProperties(textProperties);
-
+        
         return props;
     }
-
+    
     private void serializeEdgeProperties(final DataOutput out, final EdgePropertiesImpl edgeProperties) throws IOException {
         serialize(out, edgeProperties.rgba);
         serialize(out, edgeProperties.textProperties);
     }
-
+    
     private EdgePropertiesImpl deserializeEdgeProperties(final DataInput is) throws IOException, ClassNotFoundException {
         int rgba = (Integer) deserialize(is);
         TextPropertiesImpl textProperties = (TextPropertiesImpl) deserialize(is);
-
+        
         EdgePropertiesImpl props = new EdgePropertiesImpl();
         props.rgba = rgba;
         props.setTextProperties(textProperties);
-
+        
         return props;
     }
-
+    
     private void serializeTextProperties(final DataOutput out, final TextPropertiesImpl textProperties) throws IOException {
         serialize(out, textProperties.size);
         serialize(out, textProperties.rgba);
         serialize(out, textProperties.visible);
         serialize(out, textProperties.text);
     }
-
+    
     private TextPropertiesImpl deserializeTextProperties(final DataInput is) throws IOException, ClassNotFoundException {
         float size = (Float) deserialize(is);
         int rgba = (Integer) deserialize(is);
         boolean visible = (Boolean) deserialize(is);
         String text = (String) deserialize(is);
-
+        
         TextPropertiesImpl props = new TextPropertiesImpl();
         props.size = size;
         props.rgba = rgba;
         props.visible = visible;
         props.text = text;
-
+        
         return props;
+    }
+    
+    private void serializeTimestampSet(final DataOutput out, final TimestampSet timestampSet) throws IOException {
+        serialize(out, timestampSet.getTimestamps());
+    }
+    
+    private TimestampSet deserializeTimestampSet(DataInput is) throws IOException, ClassNotFoundException {
+        int[] r = (int[]) deserialize(is);
+        
+        return new TimestampSet(r);
+    }
+    
+    private void serializeTimestampValueSet(final DataOutput out, final TimestampValueSet timestampValueSet) throws IOException {
+        serialize(out, timestampValueSet.size());
+        serialize(out, timestampValueSet.getTimestamps());
+        serialize(out, timestampValueSet.toArray());
+    }
+    
+    private TimestampValueSet deserializeTimestampValueSet(final DataInput is, int head) throws IOException, ClassNotFoundException {
+        int size = (Integer) deserialize(is);
+        TimestampValueSet valueSet;
+        switch (head) {
+            case TIMESTAMP_BOOLEAN_SET:
+                valueSet = new TimestampBooleanSet(size);
+                break;
+            case TIMESTAMP_BYTE_SET:
+                valueSet = new TimestampByteSet(size);
+                break;
+            case TIMESTAMP_CHAR_SET:
+                valueSet = new TimestampCharSet(size);
+                break;
+            case TIMESTAMP_DOUBLE_SET:
+                valueSet = new TimestampDoubleSet(size);
+                break;
+            case TIMESTAMP_FLOAT_SET:
+                valueSet = new TimestampFloatSet(size);
+                break;
+            case TIMESTAMP_INTEGER_SET:
+                valueSet = new TimestampIntegerSet(size);
+                break;
+            case TIMESTAMP_LONG_SET:
+                valueSet = new TimestampLongSet(size);
+                break;
+            case TIMESTAMP_SHORT_SET:
+                valueSet = new TimestampShortSet(size);
+                break;
+            case TIMESTAMP_STRING_SET:
+                valueSet = new TimestampStringSet(size);
+                break;
+            default:
+                throw new RuntimeException("Not recognized Timestamp value set type");
+        }
+        int[] timeStamps = (int[]) deserialize(is);
+        Object[] values = (Object[]) deserialize(is);
+        
+        for (int i = 0; i < timeStamps.length; i++) {
+            valueSet.put(timeStamps[i], values[i]);
+        }
+        
+        return valueSet;
+    }
+    
+    private void serializeTimestampMap(final DataOutput out, final TimestampMap timestampMap) throws IOException {
+        serialize(out, timestampMap.length);
+        serialize(out, timestampMap.timestampSortedMap.keySet().toDoubleArray());
+        serialize(out, timestampMap.timestampSortedMap.values().toIntArray());
+        serialize(out, timestampMap.garbageQueue.toIntArray());
+    }
+    
+    private TimestampMap deserializeTimestampMap(final DataInput is) throws IOException, ClassNotFoundException {
+        TimestampMap timestampMap = new TimestampMap();
+        int length = (Integer) deserialize(is);
+        double[] doubles = (double[]) deserialize(is);
+        int[] ints = (int[]) deserialize(is);
+        int[] garbage = (int[]) deserialize(is);
+        
+        timestampMap.length = length;
+        for (int i : garbage) {
+            timestampMap.garbageQueue.add(i);
+        }
+        for (int i = 0; i < ints.length; i++) {
+            timestampMap.timestampMap.put(doubles[i], ints[i]);
+            timestampMap.timestampSortedMap.put(doubles[i], ints[i]);
+            timestampMap.ensureArraySize(ints[i]);
+            timestampMap.indexMap[ints[i]] = doubles[i];
+        }
+        return timestampMap;
+    }
+    
+    private void serializeGraphAttributes(final DataOutput out, final GraphAttributesImpl graphAttributes) throws IOException {
+        serialize(out, graphAttributes.timestampMap);
+        serialize(out, graphAttributes.attributes.size());
+        for (Map.Entry<String, Object> entry : graphAttributes.attributes.entrySet()) {
+            serialize(out, entry.getKey());
+            serialize(out, entry.getValue());
+        }
+    }
+    
+    private GraphAttributesImpl deserializeGraphAttributes(final DataInput is) throws IOException, ClassNotFoundException {
+        GraphAttributesImpl attributes = new GraphAttributesImpl();
+        attributes.timestampMap.setTimestampMap((TimestampMap) deserialize(is));
+        int size = (Integer) deserialize(is);
+        for (int i = 0; i < size; i++) {
+            String key = (String) deserialize(is);
+            Object value = deserialize(is);
+            attributes.attributes.put(key, value);
+        }
+        return attributes;
     }
 
     //SERIALIZE PRIMITIVES
     protected byte[] serialize(Object obj) throws IOException {
         DataInputOutput ba = new DataInputOutput();
-
+        
         serialize(ba, obj);
-
+        
         return ba.toByteArray();
     }
-
+    
     protected void serialize(final DataOutput out, final Object obj) throws IOException {
         final Class clazz = obj != null ? obj.getClass() : null;
-
+        
         if (obj == null) {
             out.write(NULL);
         } else if (clazz == Boolean.class) {
@@ -651,7 +801,7 @@ public class Serialization {
             } else if (v >= Short.MIN_VALUE && v <= Short.MAX_VALUE && (short) v == v) {
                 out.write(FLOAT_SHORT);
                 out.writeShort((int) v);
-
+                
             } else {
                 out.write(FLOAT_FULL);
                 out.writeFloat(v);
@@ -771,7 +921,7 @@ public class Serialization {
         } else if (obj instanceof TimestampSet) {
             TimestampSet b = (TimestampSet) obj;
             out.write(TIMESTAMP_SET);
-            serialize(out, b.getTimestamps());
+            serializeTimestampSet(out, b);
         } else if (obj instanceof NodeImpl) {
             NodeImpl b = (NodeImpl) obj;
             out.write(NODE);
@@ -836,11 +986,55 @@ public class Serialization {
             Estimator b = (Estimator) obj;
             out.write(ESTIMATOR);
             serializeString(out, b.name());
+        } else if (obj instanceof TimestampBooleanSet) {
+            TimestampBooleanSet b = (TimestampBooleanSet) obj;
+            out.write(TIMESTAMP_BOOLEAN_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampByteSet) {
+            TimestampByteSet b = (TimestampByteSet) obj;
+            out.write(TIMESTAMP_BYTE_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampCharSet) {
+            TimestampCharSet b = (TimestampCharSet) obj;
+            out.write(TIMESTAMP_CHAR_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampDoubleSet) {
+            TimestampDoubleSet b = (TimestampDoubleSet) obj;
+            out.write(TIMESTAMP_DOUBLE_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampFloatSet) {
+            TimestampFloatSet b = (TimestampFloatSet) obj;
+            out.write(TIMESTAMP_FLOAT_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampIntegerSet) {
+            TimestampIntegerSet b = (TimestampIntegerSet) obj;
+            out.write(TIMESTAMP_INTEGER_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampLongSet) {
+            TimestampLongSet b = (TimestampLongSet) obj;
+            out.write(TIMESTAMP_LONG_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampShortSet) {
+            TimestampShortSet b = (TimestampShortSet) obj;
+            out.write(TIMESTAMP_SHORT_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampStringSet) {
+            TimestampStringSet b = (TimestampStringSet) obj;
+            out.write(TIMESTAMP_STRING_SET);
+            serializeTimestampValueSet(out, b);
+        } else if (obj instanceof TimestampMap) {
+            TimestampMap b = (TimestampMap) obj;
+            out.write(TIMESTAMP_MAP);
+            serializeTimestampMap(out, b);
+        } else if (obj instanceof GraphAttributesImpl) {
+            GraphAttributesImpl b = (GraphAttributesImpl) obj;
+            out.write(GRAPH_ATTRIBUTES);
+            serializeGraphAttributes(out, b);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
     }
-
+    
     public static void serializeString(DataOutput out, String obj) throws IOException {
         final int len = obj.length();
         LongPacker.packInt(out, len);
@@ -849,12 +1043,12 @@ public class Serialization {
             LongPacker.packInt(out, c);
         }
     }
-
+    
     private void serializeByteArrayInt(DataOutput out, byte[] b) throws IOException {
         LongPacker.packInt(out, b.length);
         out.write(b);
     }
-
+    
     private void writeLongArray(DataOutput da, long[] obj) throws IOException {
         long max = Long.MIN_VALUE;
         long min = Long.MAX_VALUE;
@@ -862,7 +1056,7 @@ public class Serialization {
             max = Math.max(max, i);
             min = Math.min(min, i);
         }
-
+        
         if (0 <= min && max <= 255) {
             da.write(ARRAY_LONG_B);
             LongPacker.packInt(da, obj.length);
@@ -895,7 +1089,7 @@ public class Serialization {
             }
         }
     }
-
+    
     private void writeIntArray(DataOutput da, int[] obj) throws IOException {
         int max = Integer.MIN_VALUE;
         int min = Integer.MAX_VALUE;
@@ -903,11 +1097,10 @@ public class Serialization {
             max = Math.max(max, i);
             min = Math.min(min, i);
         }
-
+        
         boolean fitsInByte = 0 <= min && max <= 255;
         boolean fitsInShort = Short.MIN_VALUE >= min && max <= Short.MAX_VALUE;
-
-
+        
         if (obj.length <= 255 && fitsInByte) {
             da.write(ARRAY_INT_B_255);
             da.write(obj.length);
@@ -939,9 +1132,9 @@ public class Serialization {
                 da.writeInt(i);
             }
         }
-
+        
     }
-
+    
     private void writeInteger(DataOutput da, final int val) throws IOException {
         if (val == -1) {
             da.write(INTEGER_MINUS_1);
@@ -976,7 +1169,7 @@ public class Serialization {
             LongPacker.packInt(da, val);
         }
     }
-
+    
     private void writeLong(DataOutput da, final long val) throws IOException {
         if (val == -1) {
             da.write(LONG_MINUS_1);
@@ -1019,15 +1212,15 @@ public class Serialization {
         if (bs.available() != 0) {
             throw new RuntimeException("bytes left: " + bs.available());
         }
-
+        
         return ret;
     }
-
+    
     protected Object deserialize(DataInput is) throws IOException, ClassNotFoundException {
         Object ret = null;
-
+        
         final int head = is.readUnsignedByte();
-
+        
         switch (head) {
             case NULL:
                 break;
@@ -1333,36 +1526,69 @@ public class Serialization {
             case ESTIMATOR:
                 ret = Estimator.valueOf(deserializeString(is));
                 break;
+            case TIMESTAMP_BOOLEAN_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_BYTE_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_CHAR_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_DOUBLE_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_FLOAT_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_INTEGER_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_LONG_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_SHORT_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_STRING_SET:
+                ret = deserializeTimestampValueSet(is, head);
+                break;
+            case TIMESTAMP_MAP:
+                ret = deserializeTimestampMap(is);
+                break;
+            case GRAPH_ATTRIBUTES:
+                ret = deserializeGraphAttributes(is);
+                break;
             case -1:
                 throw new EOFException();
-
+            
         }
         return ret;
     }
-
+    
     public static String deserializeString(DataInput buf) throws IOException {
         int len = LongPacker.unpackInt(buf);
         char[] b = new char[len];
         for (int i = 0; i < len; i++) {
             b[i] = (char) LongPacker.unpackInt(buf);
         }
-
+        
         return new String(b);
     }
-
+    
     private Class deserializeClass(DataInput is) throws IOException, ClassNotFoundException {
         String className = (String) deserialize(is);
         Class cls = Class.forName(className);
         return cls;
     }
-
+    
     private byte[] deserializeArrayByteInt(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         byte[] b = new byte[size];
         is.readFully(b);
         return b;
     }
-
+    
     private long[] deserializeArrayLongL(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         long[] ret = new long[size];
@@ -1371,7 +1597,7 @@ public class Serialization {
         }
         return ret;
     }
-
+    
     private long[] deserializeArrayLongI(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         long[] ret = new long[size];
@@ -1380,7 +1606,7 @@ public class Serialization {
         }
         return ret;
     }
-
+    
     private long[] deserializeArrayLongS(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         long[] ret = new long[size];
@@ -1389,7 +1615,7 @@ public class Serialization {
         }
         return ret;
     }
-
+    
     private long[] deserializeArrayLongB(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         long[] ret = new long[size];
@@ -1401,7 +1627,7 @@ public class Serialization {
         }
         return ret;
     }
-
+    
     private int[] deserializeArrayIntIInt(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         int[] ret = new int[size];
@@ -1410,7 +1636,7 @@ public class Serialization {
         }
         return ret;
     }
-
+    
     private int[] deserializeArrayIntSInt(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         int[] ret = new int[size];
@@ -1419,7 +1645,7 @@ public class Serialization {
         }
         return ret;
     }
-
+    
     private int[] deserializeArrayIntBInt(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         int[] ret = new int[size];
@@ -1431,39 +1657,39 @@ public class Serialization {
         }
         return ret;
     }
-
+    
     private int[] deserializeArrayIntPack(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         if (size < 0) {
             throw new EOFException();
         }
-
+        
         int[] ret = new int[size];
         for (int i = 0; i < size; i++) {
             ret[i] = LongPacker.unpackInt(is);
         }
         return ret;
     }
-
+    
     private long[] deserializeArrayLongPack(DataInput is) throws IOException {
         int size = LongPacker.unpackInt(is);
         if (size < 0) {
             throw new EOFException();
         }
-
+        
         long[] ret = new long[size];
         for (int i = 0; i < size; i++) {
             ret[i] = LongPacker.unpackLong(is);
         }
         return ret;
     }
-
+    
     private int[] deserializeArrayIntB255(DataInput is) throws IOException {
         int size = is.readUnsignedByte();
         if (size < 0) {
             throw new EOFException();
         }
-
+        
         int[] ret = new int[size];
         for (int i = 0; i < size; i++) {
             ret[i] = is.readUnsignedByte();
@@ -1473,30 +1699,24 @@ public class Serialization {
         }
         return ret;
     }
-
+    
     private Object[] deserializeArrayObject(DataInput is) throws IOException, ClassNotFoundException {
         int size = LongPacker.unpackInt(is);
-
+        
         Object[] s = (Object[]) Array.newInstance(Object.class, size);
         for (int i = 0; i < size; i++) {
             s[i] = deserialize(is);
         }
         return s;
     }
-
-    private TimestampSet deserializeTimestampSet(DataInput is) throws IOException, ClassNotFoundException {
-        int[] r = (int[]) deserialize(is);
-
-        return new TimestampSet(r);
-    }
-
+    
     protected static class GraphStoreConfigurationVersion {
-
+        
         protected final boolean enableElementLabel;
         protected final boolean enableElementTimestamp;
         protected final boolean enableNodeProperties;
         protected final boolean enableEdgeProperties;
-
+        
         public GraphStoreConfigurationVersion(boolean enableElementLabel, boolean enableElementTimestamp, boolean enableNodeProperties, boolean enableEdgeProperties) {
             this.enableElementLabel = enableElementLabel;
             this.enableElementTimestamp = enableElementTimestamp;
