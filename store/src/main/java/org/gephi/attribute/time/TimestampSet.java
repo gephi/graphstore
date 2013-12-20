@@ -32,7 +32,7 @@ public class TimestampSet {
 
     public TimestampSet(int capacity) {
         array = new int[capacity];
-        Arrays.fill(array, -1);
+        Arrays.fill(array, Integer.MAX_VALUE);
     }
 
     public TimestampSet(int[] arr) {
@@ -42,11 +42,11 @@ public class TimestampSet {
     }
 
     public boolean add(int timestampIndex) {
-        return addInner(timestampIndex, false) >= 0 ? true : false;
+        return addInner(timestampIndex, false) >= 0;
     }
 
     public boolean remove(int timestampIndex) {
-        return removeInner(timestampIndex) >= 0 ? true : false;
+        return removeInner(timestampIndex) >= 0;
     }
 
     protected int addInner(int timestampIndex, boolean allowSet) {
@@ -117,4 +117,38 @@ public class TimestampSet {
         size = 0;
         array = new int[0];
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 37 * hash + this.size;
+        for (int i = 0; i < size; i++) {
+            int index = this.array[i];
+            hash = 37 * hash + index;
+        }
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TimestampSet other = (TimestampSet) obj;
+        if (this.size != other.size) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            int i1 = this.array[i];
+            int i2 = other.array[i];
+            if (i1 != i2) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

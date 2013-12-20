@@ -74,9 +74,6 @@ public class Timestamp implements Comparable<Timestamp> {
             return false;
         }
         final Timestamp other = (Timestamp) obj;
-        if (Double.doubleToLongBits(this.timestamp) != Double.doubleToLongBits(other.timestamp)) {
-            return false;
-        }
-        return true;
+        return Double.doubleToLongBits(this.timestamp) == Double.doubleToLongBits(other.timestamp);
     }
 }

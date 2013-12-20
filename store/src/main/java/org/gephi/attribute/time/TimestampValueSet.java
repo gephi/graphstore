@@ -34,7 +34,7 @@ public abstract class TimestampValueSet<T> {
 
     public TimestampValueSet(int capacity) {
         array = new int[capacity];
-        Arrays.fill(array, -1);
+        Arrays.fill(array, Integer.MAX_VALUE);
     }
 
     public abstract void put(int timestampIndex, T value);
@@ -72,7 +72,6 @@ public abstract class TimestampValueSet<T> {
             }
 
             size++;
-            return insertIndex;
         }
         return index;
     }
@@ -124,6 +123,46 @@ public abstract class TimestampValueSet<T> {
     public void clear() {
         size = 0;
         array = new int[0];
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + this.size;
+        for (int i = 0; i < size; i++) {
+            int index = this.array[i];
+            hash = 29 * hash + index;
+            Object obj = this.getValue(i);
+            hash = 29 * hash + obj.hashCode();
+        }
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TimestampValueSet<?> other = (TimestampValueSet<?>) obj;
+        if (this.size != other.size) {
+            return false;
+        }
+        for (int i = 0; i < this.array.length && i < other.array.length; i++) {
+            int i1 = this.array[i];
+            int i2 = other.array[i];
+            if (i1 != i2) {
+                return false;
+            }
+            Object o1 = this.getValue(i);
+            Object o2 = other.getValue(i);
+            if ((o1 == null && o2 != null) || (o1 != null && o2 == null) || (o1 != null && o2 != null && !o1.equals(o2))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     //Estimators

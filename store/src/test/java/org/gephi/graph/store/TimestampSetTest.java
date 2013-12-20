@@ -180,6 +180,38 @@ public class TimestampSetTest {
         Assert.assertFalse(set.contains(1));
     }
 
+    @Test
+    public void testEquals() {
+        TimestampSet set1 = new TimestampSet();
+        set1.add(6);
+        set1.add(1);
+
+        TimestampSet set2 = new TimestampSet();
+        set2.add(6);
+        set2.add(1);
+
+        Assert.assertTrue(set1.equals(set2));
+        Assert.assertTrue(set2.equals(set1));
+
+        Assert.assertTrue(set1.hashCode() == set2.hashCode());
+    }
+    
+    @Test
+    public void testEqualsWithCapacity() {
+        TimestampSet set1 = new TimestampSet(10);
+        set1.add(6);
+        set1.add(1);
+
+        TimestampSet set2 = new TimestampSet();
+        set2.add(6);
+        set2.add(1);
+
+        Assert.assertTrue(set1.equals(set2));
+        Assert.assertTrue(set2.equals(set1));
+
+        Assert.assertTrue(set1.hashCode() == set2.hashCode());
+    }
+
     //UTILITY
     private void testIntArrayEquals(int[] a, int[] b) {
         Assert.assertEquals(a.length, b.length);
