@@ -26,6 +26,8 @@ public interface Table extends Iterable<Column> {
     public Column addColumn(String id, Class type);
 
     public Column addColumn(String id, Class type, Origin origin);
+    
+    public Column addColumn(String id, String title, Class type, Object defaultValue);
 
     public Column addColumn(String id, String title, Class type, Origin origin, Object defaultValue, boolean indexed);
 

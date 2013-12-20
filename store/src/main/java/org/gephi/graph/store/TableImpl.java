@@ -48,6 +48,11 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
+    public Column addColumn(String id, String title, Class type, Object defaultValue) {
+        return addColumn(id, title, type, Origin.DATA, defaultValue, true);
+    }
+    
+    @Override
     public Column addColumn(String id, String title, Class type, Origin origin, Object defaultValue, boolean indexed) {
         checkValidId(id);
         checkSupportedTypes(type);
