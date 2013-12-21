@@ -44,4 +44,8 @@ public interface AttributeModel {
      * @return the edge table, contains edge columns
      */
     public Table getEdgeTable();
+    
+    public TimeFormat getTimeFormat();
+    
+    public void setTimeFormat(TimeFormat timeFormat);
 }

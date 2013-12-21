@@ -18,6 +18,7 @@ package org.gephi.graph.store;
 import org.gephi.attribute.api.AttributeModel;
 import org.gephi.attribute.api.Index;
 import org.gephi.attribute.api.Table;
+import org.gephi.attribute.api.TimeFormat;
 import org.gephi.attribute.api.TimestampIndex;
 import org.gephi.attribute.time.Interval;
 import org.gephi.graph.api.DirectedGraph;
@@ -306,6 +307,16 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
         } finally {
             store.autoWriteUnlock();
         }
+    }
+
+    @Override
+    public TimeFormat getTimeFormat() {
+        return store.timeFormat;
+    }
+
+    @Override
+    public void setTimeFormat(TimeFormat timeFormat) {
+        store.timeFormat = timeFormat;
     }
 
     public void destroyGraphObserver(GraphObserver observer) {

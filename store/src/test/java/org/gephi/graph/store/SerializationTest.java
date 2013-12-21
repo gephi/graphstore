@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Locale;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.Estimator;
+import org.gephi.attribute.api.TimeFormat;
 import org.gephi.attribute.time.TimestampBooleanSet;
 import org.gephi.attribute.time.TimestampByteSet;
 import org.gephi.attribute.time.TimestampCharSet;
@@ -494,6 +495,17 @@ public class SerializationTest {
         byte[] buf = ser.serialize(graphAttributes);
         GraphAttributesImpl l = (GraphAttributesImpl) ser.deserialize(buf);
         Assert.assertEquals(graphAttributes, l);
+    }
+    
+    @Test
+    public void testTimeFormat() throws IOException, ClassNotFoundException {
+        GraphStore store = new GraphStore();
+        store.timeFormat = TimeFormat.DATETIME;
+        
+        Serialization ser = new Serialization(store);
+        byte[] buf = ser.serialize(store.timeFormat);
+        TimeFormat l = (TimeFormat) ser.deserialize(buf);
+        Assert.assertEquals(TimeFormat.DATETIME, l);
     }
     
     @Test

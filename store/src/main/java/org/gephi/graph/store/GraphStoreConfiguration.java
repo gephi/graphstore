@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.store;
 
+import org.gephi.attribute.api.TimeFormat;
+
 /**
  *
  * @author mbastian
@@ -50,4 +52,6 @@ public final class GraphStoreConfiguration {
     //Properties index
     public static final int ELEMENT_TIMESTAMP_INDEX = 0;
     public static final int ELEMENT_LABEL_INDEX = ENABLE_ELEMENT_TIMESTAMP_SET ? 1 : 0;
+    //TimeFormat
+    public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
 }

@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.api.TimeFormat;
 import org.gephi.attribute.time.Interval;
 import org.gephi.attribute.time.TimestampSet;
 import org.gephi.graph.api.DirectedGraph;
@@ -61,6 +62,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected final UndirectedDecorator undirectedDecorator;
     //Main Graph view
     protected final GraphView mainGraphView;
+    //TimeFormat
+    protected TimeFormat timeFormat;
 
     public GraphStore() {
         this(null);
@@ -81,6 +84,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         timestampStore = new TimestampStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null);
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
+        timeFormat = GraphStoreConfiguration.DEFAULT_TIME_FORMAT;
 
         undirectedDecorator = new UndirectedDecorator(this);
 
