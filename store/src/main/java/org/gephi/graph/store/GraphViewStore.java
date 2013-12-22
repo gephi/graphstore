@@ -56,14 +56,7 @@ public class GraphViewStore {
     }
 
     public GraphViewImpl createView() {
-        graphStore.autoWriteLock();
-        try {
-            GraphViewImpl graphView = new GraphViewImpl(graphStore, true, true);
-            addView(graphView);
-            return graphView;
-        } finally {
-            graphStore.autoWriteUnlock();
-        }
+        return createView(true, true);
     }
 
     public GraphViewImpl createView(boolean nodes, boolean edges) {
@@ -78,30 +71,32 @@ public class GraphViewStore {
     }
 
     public GraphViewImpl createView(GraphView view) {
-        checkNonNullViewObject(view);
-        checkViewExist((GraphViewImpl) view);
-
-        graphStore.autoWriteLock();
-        try {
-            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, true, true);
-            addView(graphView);
-            return graphView;
-        } finally {
-            graphStore.autoWriteUnlock();
-        }
+        return createView(view, true, true);
     }
 
     public GraphViewImpl createView(GraphView view, boolean nodes, boolean edges) {
-        checkNonNullViewObject(view);
-        checkViewExist((GraphViewImpl) view);
+        if (view.isMainView()) {
+            graphStore.autoWriteLock();
+            try {
+                GraphViewImpl graphView = new GraphViewImpl(graphStore, nodes, edges);
+                graphView.fill();
+                addView(graphView);
+                return graphView;
+            } finally {
+                graphStore.autoWriteUnlock();
+            }
+        } else {
+            checkNonNullViewObject(view);
+            checkViewExist((GraphViewImpl) view);
 
-        graphStore.autoWriteLock();
-        try {
-            GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, nodes, edges);
-            addView(graphView);
-            return graphView;
-        } finally {
-            graphStore.autoWriteUnlock();
+            graphStore.autoWriteLock();
+            try {
+                GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, nodes, edges);
+                addView(graphView);
+                return graphView;
+            } finally {
+                graphStore.autoWriteUnlock();
+            }
         }
     }
 

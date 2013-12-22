@@ -97,6 +97,10 @@ public interface GraphModel {
     public TimestampIndex<Edge> getEdgeTimestampIndex();
 
     public TimestampIndex<Edge> getEdgeTimestampIndex(GraphView view);
+    
+    public Interval getTimeBounds();
+    
+    public Interval getTimeBoundsVisible();
 
     public GraphObserver getGraphObserver(Graph graph, boolean withGraphDiff);
 }
