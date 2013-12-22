@@ -353,11 +353,15 @@ public class GraphViewImpl implements GraphView {
 
     public void fill() {
         if (nodeView) {
-            nodeBitVector = new BitVector(graphStore.nodeStore.maxStoreId());
+            if(nodeCount > 0) {
+                nodeBitVector = new BitVector(graphStore.nodeStore.maxStoreId());
+            }
             nodeBitVector.not();
             this.nodeCount = graphStore.nodeStore.size();
         }
-        edgeBitVector = new BitVector(graphStore.edgeStore.maxStoreId());
+        if(edgeCount > 0) {
+            edgeBitVector = new BitVector(graphStore.edgeStore.maxStoreId());
+        }
         edgeBitVector.not();
 
         this.edgeCount = graphStore.edgeStore.size();
