@@ -41,7 +41,7 @@ import org.gephi.graph.api.Element;
  */
 public class IndexImpl<T extends Element> implements Index<T> {
 
-    protected final GraphLock lock;
+    protected final TableLock lock;
     protected final ColumnStore<T> columnStore;
     protected AbstractIndex[] columns;
 
@@ -65,12 +65,12 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public int count(Column column, Object value) {
         checkNonNullColumnObject(column);
 
-        readLock();
+        lock();
         try {
             AbstractIndex index = getIndex((ColumnImpl) column);
             return index.getCount(value);
         } finally {
-            readUnlock();
+            unlock();
         }
     }
 
@@ -93,7 +93,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         checkNonNullColumnObject(column);
 
         if (lock != null) {
-            lock.readLock();
+            lock.lock();
             AbstractIndex index = getIndex((ColumnImpl) column);
             return new LockableIterable<T>(index.getValueSet(value));
         }
@@ -105,24 +105,24 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Number getMinValue(Column column) {
         checkNonNullColumnObject(column);
 
-        readLock();
+        lock();
         try {
             AbstractIndex index = getIndex((ColumnImpl) column);
             return index.getMinValue();
         } finally {
-            readUnlock();
+            unlock();
         }
     }
 
     @Override
     public Number getMaxValue(Column column) {
         checkNonNullColumnObject(column);
-        readLock();
+        lock();
         try {
             AbstractIndex index = getIndex((ColumnImpl) column);
             return index.getMaxValue();
         } finally {
-            readUnlock();
+            unlock();
         }
     }
 
@@ -137,36 +137,36 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Collection values(Column column) {
         checkNonNullColumnObject(column);
 
-        readLock();
+        lock();
         try {
             AbstractIndex index = getIndex((ColumnImpl) column);
             return new ArrayList(index.values());
         } finally {
-            readUnlock();
+            unlock();
         }
     }
 
     @Override
     public int countValues(Column column) {
         checkNonNullColumnObject(column);
-        readLock();
+        lock();
         try {
             AbstractIndex index = getIndex((ColumnImpl) column);
             return index.countValues();
         } finally {
-            readUnlock();
+            unlock();
         }
     }
 
     @Override
     public int countElements(Column column) {
         checkNonNullColumnObject(column);
-        readLock();
+        lock();
         try {
             AbstractIndex index = getIndex((ColumnImpl) column);
             return index.elements;
         } finally {
-            readUnlock();
+            unlock();
         }
     }
 
@@ -343,27 +343,15 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
     }
 
-    void readLock() {
+    void lock() {
         if (lock != null) {
-            lock.readLock();
+            lock.lock();
         }
     }
 
-    void readUnlock() {
+    void unlock() {
         if (lock != null) {
-            lock.readUnlock();
-        }
-    }
-
-    void writeLock() {
-        if (lock != null) {
-            lock.writeLock();
-        }
-    }
-
-    void writeUnlock() {
-        if (lock != null) {
-            lock.writeUnlock();
+            lock.unlock();
         }
     }
 
@@ -1288,7 +1276,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public boolean hasNext() {
             boolean n = itr.hasNext();
             if (!n) {
-                readUnlock();
+                lock.unlock();
             }
             return n;
         }
