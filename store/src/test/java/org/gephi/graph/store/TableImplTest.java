@@ -78,10 +78,10 @@ public class TableImplTest {
         Assert.assertSame(col, c);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGetColumnBadId() {
         TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
-        table.getColumn("0");
+        Assert.assertNull(table.getColumn("0"));
     }
 
     @Test

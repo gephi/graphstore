@@ -183,11 +183,10 @@ public class ColumnStoreTest {
         store.removeColumn(col);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGetColumnUnknown() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
-        store.getColumn("");
+        Assert.assertNull(store.getColumn(""));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

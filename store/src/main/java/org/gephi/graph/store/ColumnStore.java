@@ -192,7 +192,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         try {
             short id = idMap.getShort(key);
             if (id == NULL_SHORT) {
-                throw new IllegalArgumentException("The column doesnt exist");
+                return null;
             }
             return columns[shortToInt(id)];
         } finally {
