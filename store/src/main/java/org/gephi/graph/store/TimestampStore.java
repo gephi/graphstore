@@ -16,6 +16,7 @@
 package org.gephi.graph.store;
 
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
 
 /**
@@ -41,12 +42,25 @@ public class TimestampStore {
         nodeIndexStore = new TimestampIndexStore<Node>(this, nodeMap);
         edgeIndexStore = new TimestampIndexStore<Edge>(this, edgeMap);
     }
+    
+    public double getMin(Graph graph) {
+        double nodeMin = nodeIndexStore.getIndex(graph).getMinTimestamp();
+        double edgeMin = edgeIndexStore.getIndex(graph).getMinTimestamp();
+        return Math.min(nodeMin, edgeMin);
+    }
+    
+    public double getMax(Graph graph) {
+        double nodeMax = nodeIndexStore.getIndex(graph).getMaxTimestamp();
+        double edgeMax = edgeIndexStore.getIndex(graph).getMaxTimestamp();
+        return Math.max(nodeMax, edgeMax);
+    }
 
     public boolean isEmpty() {
         return nodeMap.size() == 0 && edgeMap.size() == 0;
     }
 
     public void clear() {
+        //TODO
     }
 
     public void clearEdges() {
