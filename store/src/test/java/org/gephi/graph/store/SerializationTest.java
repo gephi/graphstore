@@ -509,6 +509,24 @@ public class SerializationTest {
     }
     
     @Test
+    public void testTimestampStore() throws IOException, ClassNotFoundException {
+        GraphStore store = new GraphStore();
+        TimestampStore timestampStore = store.timestampStore;
+        timestampStore.nodeMap.getTimestampIndex(1.0);
+        timestampStore.nodeMap.getTimestampIndex(2.0);
+        timestampStore.edgeMap.getTimestampIndex(3.0);
+        timestampStore.edgeMap.getTimestampIndex(4.0);
+        
+        Serialization ser = new Serialization(store);
+        byte[] buf = ser.serialize(timestampStore);
+        
+        store = new GraphStore();
+        ser = new Serialization(store);
+        TimestampStore l = (TimestampStore) ser.deserialize(buf);
+        Assert.assertEquals(timestampStore, l);
+    }
+    
+    @Test
     public void testInt() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);
         int[] vals = {

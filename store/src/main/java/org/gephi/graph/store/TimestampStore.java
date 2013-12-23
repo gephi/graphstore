@@ -66,27 +66,29 @@ public class TimestampStore {
     public void clearEdges() {
     }
 
-    private void readLock() {
-        if (lock != null) {
-            lock.readLock();
-        }
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 79 * hash + (this.nodeMap != null ? this.nodeMap.hashCode() : 0);
+        hash = 79 * hash + (this.edgeMap != null ? this.edgeMap.hashCode() : 0);
+        return hash;
     }
 
-    private void readUnlock() {
-        if (lock != null) {
-            lock.readUnlock();
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
         }
-    }
-
-    private void writeLock() {
-        if (lock != null) {
-            lock.writeLock();
+        if (getClass() != obj.getClass()) {
+            return false;
         }
-    }
-
-    private void writeUnlock() {
-        if (lock != null) {
-            lock.writeUnlock();
+        final TimestampStore other = (TimestampStore) obj;
+        if (this.nodeMap != other.nodeMap && (this.nodeMap == null || !this.nodeMap.equals(other.nodeMap))) {
+            return false;
         }
+        if (this.edgeMap != other.edgeMap && (this.edgeMap == null || !this.edgeMap.equals(other.edgeMap))) {
+            return false;
+        }
+        return true;
     }
 }

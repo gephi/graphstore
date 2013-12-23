@@ -170,6 +170,7 @@ public class Serialization {
     final static int TIMESTAMP_STRING_SET = 227;
     final static int TIMESTAMP_MAP = 228;
     final static int TIME_FORMAT = 229;
+    final static int TIMESTAMP_STORE = 230;
     //Store
     protected final GraphStore store;
     protected final Int2IntMap idMap;
@@ -196,6 +197,9 @@ public class Serialization {
         //Column
         serialize(out, store.nodeColumnStore);
         serialize(out, store.edgeColumnStore);
+        
+        //Timestamp
+        serialize(out, store.timestampStore);
 
         //Factory
         serialize(out, store.factory);
@@ -239,6 +243,9 @@ public class Serialization {
 
         //Columns
         deserialize(is);
+        deserialize(is);
+        
+        //Timestamp
         deserialize(is);
 
         //Factory
@@ -766,6 +773,25 @@ public class Serialization {
 
         return tf;
     }
+    
+    private void serializeTimestampStore(final DataOutput out) throws IOException {
+        TimestampStore timestampStore = store.timestampStore;
+        
+        serialize(out, timestampStore.nodeMap);
+        serialize(out, timestampStore.edgeMap);
+    }
+    
+    private TimestampStore deserializeTimestampStore(final DataInput is) throws IOException, ClassNotFoundException {
+        TimestampStore timestampStore = store.timestampStore;
+        
+        TimestampMap nodeMap = (TimestampMap)deserialize(is);
+        TimestampMap edgeMap = (TimestampMap)deserialize(is);
+        
+        timestampStore.nodeMap.setTimestampMap(nodeMap);
+        timestampStore.edgeMap.setTimestampMap(edgeMap);
+        
+        return timestampStore;
+    }
 
     //SERIALIZE PRIMITIVES
     protected byte[] serialize(Object obj) throws IOException {
@@ -1055,6 +1081,10 @@ public class Serialization {
             TimeFormat b = (TimeFormat) obj;
             out.write(TIME_FORMAT);
             serializeTimeFormat(out, b);
+        } else if (obj instanceof TimestampStore) {
+            TimestampStore b = (TimestampStore) obj;
+            out.write(TIMESTAMP_STORE);
+            serializeTimestampStore(out);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1586,6 +1616,9 @@ public class Serialization {
                 break;
             case TIME_FORMAT:
                 ret = deserializeTimeFormat(is);
+                break;
+            case TIMESTAMP_STORE:
+                ret = deserializeTimestampStore(is);
                 break;
             case -1:
                 throw new EOFException();
