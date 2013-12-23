@@ -36,8 +36,18 @@ public class GraphFactoryImpl implements GraphFactory {
     }
 
     @Override
-    public Edge newEdge(Node source, Node target, int type) {
-        return new EdgeImpl(EDGE_IDS.getAndIncrement(), store, (NodeImpl) source, (NodeImpl) target, type, 1.0, true);
+    public Edge newEdge(Node source, Node target) {
+        return new EdgeImpl(EDGE_IDS.getAndIncrement(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, 1.0, true);
+    }
+
+    @Override
+    public Edge newEdge(Node source, Node target, boolean directed) {
+        return new EdgeImpl(EDGE_IDS.getAndIncrement(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, 1.0, directed);
+    }
+
+    @Override
+    public Edge newEdge(Node source, Node target, int type, boolean directed) {
+        return new EdgeImpl(EDGE_IDS.getAndIncrement(), store, (NodeImpl) source, (NodeImpl) target, type, 1.0, directed);
     }
 
     @Override

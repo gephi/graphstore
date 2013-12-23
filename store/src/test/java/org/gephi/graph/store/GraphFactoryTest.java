@@ -57,7 +57,7 @@ public class GraphFactoryTest {
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
         Node source = graphFactory.newNode("source");
         Node target = graphFactory.newNode("target");
-        Edge edge = graphFactory.newEdge(source, target, 9);
+        Edge edge = graphFactory.newEdge(source, target, 9, true);
 
         Assert.assertEquals(edge.getId(), 0);
         Assert.assertEquals(graphFactory.getEdgeCounter(), 1);

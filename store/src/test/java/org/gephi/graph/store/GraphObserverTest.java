@@ -275,7 +275,7 @@ public class GraphObserverTest {
         store.addAllNodes(Arrays.asList(addedNodes));
 
         graphObserver.hasGraphChanged();
-        Edge[] addedEdges = new Edge[]{store.factory.newEdge(addedNodes[0], addedNodes[1], 0)};
+        Edge[] addedEdges = new Edge[]{store.factory.newEdge(addedNodes[0], addedNodes[1], 0, true)};
         store.addEdge(addedEdges[0]);
 
         boolean a = graphObserver.hasGraphChanged();
@@ -320,7 +320,7 @@ public class GraphObserverTest {
 
         Node[] addedNodes = new Node[]{store.factory.newNode(), store.factory.newNode()};
         store.addAllNodes(Arrays.asList(addedNodes));
-        Edge[] addedEdges = new Edge[]{store.factory.newEdge(addedNodes[0], addedNodes[1], 0)};
+        Edge[] addedEdges = new Edge[]{store.factory.newEdge(addedNodes[0], addedNodes[1], 0, true)};
         store.addEdge(addedEdges[0]);
         graphObserver.hasGraphChanged();
         store.removeEdge(addedEdges[0]);

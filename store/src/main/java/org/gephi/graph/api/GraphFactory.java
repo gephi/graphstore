@@ -20,8 +20,12 @@ package org.gephi.graph.api;
  * @author mbastian
  */
 public interface GraphFactory {
+    
+    public Edge newEdge(Node source, Node target);
+    
+    public Edge newEdge(Node source, Node target, boolean directed);
 
-    public Edge newEdge(Node source, Node target, int type);
+    public Edge newEdge(Node source, Node target, int type, boolean directed);
 
     public Edge newEdge(Node source, Node target, int type, double weight, boolean directed);
 
