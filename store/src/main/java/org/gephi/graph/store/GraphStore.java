@@ -90,12 +90,12 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
         //Default cols
         if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET) {
-            nodeColumnStore.addColumn(new ColumnImpl("timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false));
-            edgeColumnStore.addColumn(new ColumnImpl("timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false));
+            nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false));
+            edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false));
         }
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
-            nodeColumnStore.addColumn(new ColumnImpl("label", String.class, "Label", null, Origin.PROPERTY, false));
-            edgeColumnStore.addColumn(new ColumnImpl("label", String.class, "Label", null, Origin.PROPERTY, false));
+            nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false));
+            edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false));
         }
     }
 
@@ -519,7 +519,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public GraphView getView() {
         return mainGraphView;
     }
-    
+
     @Override
     public Object getAttribute(String key) {
         return attributes.getValue(key);
@@ -534,12 +534,12 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public Set<String> getAttributeKeys() {
         return attributes.getKeys();
     }
-    
+
     @Override
     public void setAttribute(String key, Object value) {
         attributes.setValue(key, value);
     }
-    
+
     @Override
     public void setAttribute(String key, Object value, double timestamp) {
         attributes.setValue(key, value, timestamp);
