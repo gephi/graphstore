@@ -23,6 +23,7 @@ import org.gephi.attribute.time.TimestampBooleanSet;
 import org.gephi.attribute.time.TimestampByteSet;
 import org.gephi.attribute.time.TimestampCharSet;
 import org.gephi.attribute.time.TimestampDoubleSet;
+import org.gephi.attribute.time.TimestampDoubleSetOptional;
 import org.gephi.attribute.time.TimestampFloatSet;
 import org.gephi.attribute.time.TimestampIntegerSet;
 import org.gephi.attribute.time.TimestampLongSet;
@@ -41,8 +42,6 @@ public abstract class ElementImpl implements Element {
 
     //Reference to store
     protected final GraphStore graphStore;
-    //Id
-    protected final Object id;
     //Attributes
     protected Object[] attributes;
 
@@ -50,9 +49,9 @@ public abstract class ElementImpl implements Element {
         if (id == null) {
             throw new NullPointerException();
         }
-        this.id = id;
         this.graphStore = graphStore;
-        this.attributes = new Object[0];
+        this.attributes = new Object[GraphStoreConfiguration.ELEMENT_ID_INDEX + 1];
+        this.attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = id;
     }
 
     abstract ColumnStore getColumnStore();
@@ -65,7 +64,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object getId() {
-        return id;
+        return attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX];
     }
 
     @Override
@@ -193,6 +192,7 @@ public abstract class ElementImpl implements Element {
     @Override
     public Object removeAttribute(Column column) {
         checkColumn(column);
+        checkReadOnlyColumn(column);
 
         ColumnStore columnStore = getColumnStore();
         int index = column.getIndex();
@@ -231,8 +231,9 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public void setAttribute(Column column, Object value) {
-        checkType(column, value);
         checkColumn(column);
+        checkReadOnlyColumn(column);
+        checkType(column, value);
 
         int index = column.getIndex();
         ColumnStore columnStore = getColumnStore();
@@ -262,9 +263,10 @@ public abstract class ElementImpl implements Element {
     @Override
     public void setAttribute(Column column, Object value, double timestamp) {
         checkEnabledTimestampSet();
+        checkColumn(column);
+        checkReadOnlyColumn(column);
         checkType(column, value);
         checkDouble(timestamp);
-        checkColumn(column);
 
         final TimestampMap timestampMap = getColumnStore().getTimestampMap(column);
         if (timestampMap != null) {
@@ -398,8 +400,32 @@ public abstract class ElementImpl implements Element {
                 timestampSet.clear();
             }
 
-            attributes = new Object[0];
+            Object[] newAttributes = new Object[GraphStoreConfiguration.ELEMENT_ID_INDEX + 1];
+            newAttributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX];
+            attributes = newAttributes;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + this.getId().hashCode();
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ElementImpl other = (ElementImpl) obj;
+        if (!this.getId().equals(other.getId())) {
+            return false;
+        }
+        return true;
     }
 
     protected GraphStore getGraphStore() {
@@ -428,6 +454,12 @@ public abstract class ElementImpl implements Element {
         }
     }
 
+    private void checkReadOnlyColumn(Column column) {
+        if (column.isReadOnly()) {
+            throw new RuntimeException("Can't modify the read-only '" + column.getId() + "' column");
+        }
+    }
+
     private void checkColumnDynamic(Column column) {
         if (!((ColumnImpl) column).isDynamic()) {
             throw new IllegalArgumentException("The column is not dynamic");
@@ -438,7 +470,7 @@ public abstract class ElementImpl implements Element {
         if (value != null) {
             Class typeClass = column.getTypeClass();
             if (TimestampValueSet.class.isAssignableFrom(typeClass)) {
-                if ((value instanceof Double && !typeClass.equals(TimestampDoubleSet.class))
+                if ((value instanceof Double && (!typeClass.equals(TimestampDoubleSet.class) && !typeClass.equals(TimestampDoubleSetOptional.class)))
                         || (value instanceof Float && !typeClass.equals(TimestampFloatSet.class))
                         || (value instanceof Boolean && !typeClass.equals(TimestampBooleanSet.class))
                         || (value instanceof Integer && !typeClass.equals(TimestampIntegerSet.class))

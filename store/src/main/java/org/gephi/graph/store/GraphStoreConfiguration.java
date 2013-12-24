@@ -50,8 +50,10 @@ public final class GraphStoreConfiguration {
     public static final boolean ENABLE_ELEMENT_LABEL = true;
     public static final boolean ENABLE_ELEMENT_TIMESTAMP_SET = true;
     //Properties index
-    public static final int ELEMENT_TIMESTAMP_INDEX = 0;
-    public static final int ELEMENT_LABEL_INDEX = ENABLE_ELEMENT_TIMESTAMP_SET ? 1 : 0;
+    public static final int ELEMENT_ID_INDEX = 0;
+    public static final int ELEMENT_LABEL_INDEX = 1;
+    public static final int ELEMENT_TIMESTAMP_INDEX = ENABLE_ELEMENT_LABEL ? 2 : 1;
+    public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIMESTAMP_SET ? 2 : 1;
     //TimeFormat
     public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
 }

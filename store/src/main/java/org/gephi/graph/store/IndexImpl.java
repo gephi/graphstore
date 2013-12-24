@@ -230,9 +230,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     protected void addAllColumns(ColumnImpl[] cols) {
         ensureColumnSize(cols.length);
-
-        for (int i = 0; i < cols.length; i++) {
-            ColumnImpl col = cols[i];
+        for (ColumnImpl col : cols) {
             if (col.isIndexed()) {
                 AbstractIndex index = createIndex(col);
                 columns[col.storeId] = index;
@@ -271,6 +269,10 @@ public class IndexImpl<T extends Element> implements Index<T> {
             ai.destroy();
         }
         columns = null;
+    }
+    
+    protected int size() {
+        return columns.length;
     }
 
     AbstractIndex createIndex(ColumnImpl column) {

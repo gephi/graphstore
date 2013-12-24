@@ -30,10 +30,19 @@ import org.testng.annotations.Test;
 public class IndexStoreTest {
 
     @Test
+    public void testEmpty() {
+        GraphStore graphStore = new GraphStore();
+        ColumnStore<Node> columnStore = graphStore.nodeColumnStore;
+        IndexStore<Node> indexStore = columnStore.indexStore;
+        IndexImpl<Node> mainIndex = indexStore.mainIndex;
+        Assert.assertEquals(mainIndex.size(), 0);
+    }
+
+    @Test
     public void testAddColumn() {
         ColumnStore<Node> store = generateEmptyNodeStore();
         IndexStore<Node> indexStore = store.indexStore;
-        ColumnImpl col = generateIdColumn();
+        ColumnImpl col = generateFooColumn();
         store.addColumn(col);
 
         Assert.assertTrue(col.storeId != ColumnStore.NULL_ID);
@@ -44,7 +53,7 @@ public class IndexStoreTest {
     public void testRemoveColumn() {
         ColumnStore<Node> store = generateEmptyNodeStore();
         IndexStore<Node> indexStore = store.indexStore;
-        ColumnImpl col = generateIdColumn();
+        ColumnImpl col = generateFooColumn();
         store.addColumn(col);
         store.removeColumn(col);
 
@@ -75,7 +84,7 @@ public class IndexStoreTest {
         IndexStore<Node> indexStore = columnStore.indexStore;
         IndexImpl<Node> mainIndex = indexStore.mainIndex;
 
-        Column col1 = columnStore.getColumn("id");
+        Column col1 = columnStore.getColumn("foo");
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl n = new NodeImpl("0");
@@ -84,7 +93,7 @@ public class IndexStoreTest {
         indexStore.index(n);
 
         Assert.assertEquals(mainIndex.count(col1, "A"), 1);
-        Assert.assertEquals(mainIndex.count("id", "A"), 1);
+        Assert.assertEquals(mainIndex.count("foo", "A"), 1);
         Assert.assertEquals(mainIndex.count(col2, 20), 1);
         Assert.assertEquals(mainIndex.count("age", 20), 1);
         Assert.assertEquals(mainIndex.countElements(col1), 1);
@@ -104,7 +113,7 @@ public class IndexStoreTest {
         IndexStore<Node> indexStore = columnStore.indexStore;
         IndexImpl<Node> mainIndex = indexStore.mainIndex;
 
-        Column col1 = columnStore.getColumn("id");
+        Column col1 = columnStore.getColumn("foo");
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl n = new NodeImpl("0");
@@ -131,7 +140,7 @@ public class IndexStoreTest {
         IndexStore<Node> indexStore = columnStore.indexStore;
         IndexImpl<Node> mainIndex = indexStore.mainIndex;
 
-        Column col1 = columnStore.getColumn("id");
+        Column col1 = columnStore.getColumn("foo");
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl n = new NodeImpl("0");
@@ -157,7 +166,7 @@ public class IndexStoreTest {
         IndexStore<Node> indexStore = columnStore.indexStore;
         IndexImpl<Node> mainIndex = indexStore.mainIndex;
 
-        Column col1 = columnStore.getColumn("id");
+        Column col1 = columnStore.getColumn("foo");
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl n = new NodeImpl("0");
@@ -183,7 +192,7 @@ public class IndexStoreTest {
         IndexStore<Node> indexStore = columnStore.indexStore;
         IndexImpl<Node> mainIndex = indexStore.mainIndex;
 
-        Column col1 = columnStore.getColumn("id");
+        Column col1 = columnStore.getColumn("foo");
         Column col2 = columnStore.getColumn("age");
 
         NodeImpl[] nodes = generateNodesWithUniqueAttributes(columnStore);
@@ -243,8 +252,8 @@ public class IndexStoreTest {
     private ColumnStore<Node> generateBasicNodeColumnStore() {
         GraphStore graphStore = new GraphStore();
         ColumnStore<Node> columnStore = graphStore.nodeColumnStore;
-        columnStore.addColumn(new ColumnImpl("id", String.class, "ID", null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true));
+        columnStore.addColumn(new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
         return columnStore;
     }
 
@@ -254,8 +263,8 @@ public class IndexStoreTest {
         return columnStore;
     }
 
-    private ColumnImpl generateIdColumn() {
-        return new ColumnImpl("id", String.class, "ID", null, Origin.DATA, true);
+    private ColumnImpl generateFooColumn() {
+        return new ColumnImpl("foo", String.class, "FOO", null, Origin.DATA, true, false);
     }
 
     private Node[] getIterable(Iterable<Node> itr) {

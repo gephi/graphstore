@@ -128,9 +128,9 @@ public class SerializationTest {
     public void testNode() throws IOException, ClassNotFoundException {
         GraphStore graphStore = new GraphStore();
         ColumnStore columnStore = graphStore.nodeColumnStore;
-        ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false);
-        ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false);
-        ColumnImpl col3 = new ColumnImpl("2", int[].class, null, null, Origin.PROPERTY, false);
+        ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false, false);
+        ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false, false);
+        ColumnImpl col3 = new ColumnImpl("2", int[].class, null, null, Origin.PROPERTY, false, false);
         columnStore.addColumn(col1);
         columnStore.addColumn(col2);
         columnStore.addColumn(col3);
@@ -190,9 +190,9 @@ public class SerializationTest {
         GraphStore graphStore = new GraphStore();
 
         ColumnStore columnStore = graphStore.nodeColumnStore;
-        ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false);
-        ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false);
-        ColumnImpl col3 = new ColumnImpl("2", int[].class, null, null, Origin.PROPERTY, false);
+        ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false, false);
+        ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false, false);
+        ColumnImpl col3 = new ColumnImpl("2", int[].class, null, null, Origin.PROPERTY, false, false);
         columnStore.addColumn(col1);
         columnStore.addColumn(col2);
         columnStore.addColumn(col3);
@@ -209,7 +209,7 @@ public class SerializationTest {
 
     @Test
     public void testColumn() throws IOException, ClassNotFoundException {
-        ColumnImpl col = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false, false);
 
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(col);

@@ -37,11 +37,12 @@ public class ColumnImpl implements Column {
     protected final Origin origin;
     protected final boolean indexed;
     protected final boolean dynamic;
+    protected final boolean readOnly;
     protected Estimator estimator;
     //Store Id
     protected int storeId = ColumnStore.NULL_ID;
 
-    public ColumnImpl(TableImpl table, String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed) {
+    public ColumnImpl(TableImpl table, String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed, boolean readOnly) {
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("The column ID can't be null or empty");
         }
@@ -55,11 +56,12 @@ public class ColumnImpl implements Column {
         this.defaultValue = defaultValue;
         this.origin = origin;
         this.indexed = indexed;
+        this.readOnly = readOnly;
         this.dynamic = TimestampValueSet.class.isAssignableFrom(typeClass);
     }
 
-    public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed) {
-        this(null, id, typeClass, title, defaultValue, origin, indexed);
+    public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed, boolean readOnly) {
+        this(null, id, typeClass, title, defaultValue, origin, indexed, readOnly);
     }
 
     @Override
@@ -110,6 +112,11 @@ public class ColumnImpl implements Column {
     @Override
     public boolean isDynamic() {
         return dynamic;
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     @Override

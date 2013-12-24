@@ -42,6 +42,8 @@ public interface Column {
     public boolean isNumber();
 
     public boolean isProperty();
+    
+    public boolean isReadOnly();
 
     public Object getDefaultValue();
 }

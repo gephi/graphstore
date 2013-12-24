@@ -69,7 +69,7 @@ public class ElementImplTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetAttributeUnknownColumn() {
         GraphStore store = new GraphStore();
-        ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false);
+        ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false, false);
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(columnImpl, "0");
     }
@@ -136,7 +136,7 @@ public class ElementImplTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetAttributeUnknownColumn() {
         GraphStore store = new GraphStore();
-        ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false);
+        ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false, false);
         NodeImpl node = new NodeImpl(0, store);
         node.getAttribute(columnImpl);
     }
@@ -155,7 +155,7 @@ public class ElementImplTest {
     public void testGetDefaultValue() {
         GraphStore store = new GraphStore();
         Integer defaultValue = 25;
-        Column column = new ColumnImpl("age", Integer.class, "Age", defaultValue, Origin.DATA, true);
+        Column column = new ColumnImpl("age", Integer.class, "Age", defaultValue, Origin.DATA, true, false);
         store.nodeColumnStore.addColumn(column);
 
         NodeImpl node = new NodeImpl(0, store);
@@ -209,13 +209,13 @@ public class ElementImplTest {
 
     //Utility
     private Column generateBasicColumn(GraphStore graphStore) {
-        graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true));
+        graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
         return graphStore.nodeColumnStore.getColumn("age");
     }
 
     //Properties size
     public int getElementPropertiesLength() {
-        return (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIMESTAMP_SET ? 1 : 0);
+        return 1 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIMESTAMP_SET ? 1 : 0);
     }
 
     public int getFirstNonPropertyIndex() {

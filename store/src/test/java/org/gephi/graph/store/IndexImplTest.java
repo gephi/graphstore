@@ -144,13 +144,13 @@ public class IndexImplTest {
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testMinValueNoNumber() {
         IndexImpl<Node> index = generateEmptyIndex();
-        index.getMinValue(index.columnStore.getColumn("id"));
+        index.getMinValue(index.columnStore.getColumn("foo"));
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testMaxValueNoNumber() {
         IndexImpl<Node> index = generateEmptyIndex();
-        index.getMaxValue(index.columnStore.getColumn("id"));
+        index.getMaxValue(index.columnStore.getColumn("foo"));
     }
 
     @Test
@@ -236,12 +236,12 @@ public class IndexImplTest {
     @Test
     public void testPrimitiveNumberTypes() {
         ColumnStore<Node> columnStore = generateEmptyNodeStore();
-        columnStore.addColumn(new ColumnImpl("c1", Integer.class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c2", Short.class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c3", Float.class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c4", Double.class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c5", Long.class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c6", Byte.class, null, null, Origin.DATA, true));
+        columnStore.addColumn(new ColumnImpl("c1", Integer.class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c2", Short.class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c3", Float.class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c4", Double.class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c5", Long.class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c6", Byte.class, null, null, Origin.DATA, true, false));
 
         IndexImpl<Node> index = columnStore.indexStore.mainIndex;
         NodeImpl n1 = new NodeImpl(0);
@@ -302,12 +302,12 @@ public class IndexImplTest {
     @Test
     public void testArrayNumberTypes() {
         ColumnStore<Node> columnStore = generateEmptyNodeStore();
-        columnStore.addColumn(new ColumnImpl("c1", int[].class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c2", short[].class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c3", float[].class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c4", double[].class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c5", long[].class, null, null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("c6", byte[].class, null, null, Origin.DATA, true));
+        columnStore.addColumn(new ColumnImpl("c1", int[].class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c2", short[].class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c3", float[].class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c4", double[].class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c5", long[].class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c6", byte[].class, null, null, Origin.DATA, true, false));
 
         IndexImpl<Node> index = columnStore.indexStore.mainIndex;
         NodeImpl n1 = new NodeImpl(0);
@@ -333,7 +333,6 @@ public class IndexImplTest {
             Number max = index.getMaxValue(column);
             Assert.assertEquals(max.byteValue(), (byte) 2);
 
-
             Assert.assertEquals(index.count("c" + i, null), 1);
             Assert.assertEquals(index.countElements(column), 3);
             Assert.assertEquals(index.countValues(column), 3);
@@ -353,13 +352,15 @@ public class IndexImplTest {
             nodes[i] = n;
 
             for (Column col : index.columnStore) {
-                if (withNulls && random.nextDouble() < 0.1) {
-                    n.setAttribute(col, null);
-                } else {
-                    if (col.getTypeClass().equals(String.class)) {
-                        n.setAttribute(col, "" + i);
-                    } else if (col.getTypeClass().equals(Integer.class)) {
-                        n.setAttribute(col, i);
+                if (!col.isReadOnly()) {
+                    if (withNulls && random.nextDouble() < 0.1) {
+                        n.setAttribute(col, null);
+                    } else {
+                        if (col.getTypeClass().equals(String.class)) {
+                            n.setAttribute(col, "" + i);
+                        } else if (col.getTypeClass().equals(Integer.class)) {
+                            n.setAttribute(col, i);
+                        }
                     }
                 }
             }
@@ -380,8 +381,8 @@ public class IndexImplTest {
 
     private IndexImpl<Node> generateEmptyIndex() {
         ColumnStore<Node> columnStore = generateEmptyNodeStore();
-        columnStore.addColumn(new ColumnImpl("id", String.class, "ID", null, Origin.DATA, true));
-        columnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true));
+        columnStore.addColumn(new ColumnImpl("foo", String.class, "foo", null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
         return columnStore.indexStore.mainIndex;
     }
 

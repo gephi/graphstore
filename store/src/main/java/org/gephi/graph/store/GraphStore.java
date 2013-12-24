@@ -89,13 +89,15 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         undirectedDecorator = new UndirectedDecorator(this);
 
         //Default cols
-        if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET) {
-            nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false));
-            edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false));
-        }
+        nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "id", Object.class, "Id", null, Origin.PROPERTY, false, true));
+        edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "id", Object.class, "Id", null, Origin.PROPERTY, false, true));
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
-            nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false));
-            edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false));
+            nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
+            edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
+        }
+        if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET) {
+            nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+            edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
         }
     }
 

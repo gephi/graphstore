@@ -73,7 +73,7 @@ public class TableImpl<T extends Element> implements Table {
             indexed = false;
         }
 
-        ColumnImpl column = new ColumnImpl(this, id, type, title, defaultValue, origin, indexed);
+        ColumnImpl column = new ColumnImpl(this, id, type, title, defaultValue, origin, indexed, false);
         store.addColumn(column);
 
         return column;

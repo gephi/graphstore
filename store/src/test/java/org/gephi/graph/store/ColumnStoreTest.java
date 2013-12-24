@@ -42,7 +42,7 @@ public class ColumnStoreTest {
     @Test
     public void testAddColumn() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
 
         store.addColumn(col);
 
@@ -122,13 +122,18 @@ public class ColumnStoreTest {
             public Table getTable() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            @Override
+            public boolean isReadOnly() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddColumnTwice() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store.addColumn(col);
         store.addColumn(col);
     }
@@ -137,7 +142,7 @@ public class ColumnStoreTest {
     public void testDefaultValue() {
         Integer defaultValue = 25;
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, defaultValue, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, defaultValue, Origin.DATA, false, false);
 
         store.addColumn(col);
         Assert.assertEquals(col.getDefaultValue(), defaultValue);
@@ -146,7 +151,7 @@ public class ColumnStoreTest {
     @Test
     public void testRemoveColumn() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
 
         store.addColumn(col);
         store.removeColumn(col);
@@ -159,7 +164,7 @@ public class ColumnStoreTest {
     @Test
     public void testRemoveColumnString() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
 
         store.addColumn(col);
         store.removeColumn("0");
@@ -179,7 +184,7 @@ public class ColumnStoreTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRemoveColumnNotExist() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store.removeColumn(col);
     }
 
@@ -204,7 +209,7 @@ public class ColumnStoreTest {
     @Test
     public void testGetColumnIndex() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store.addColumn(col);
 
         Assert.assertEquals(store.getColumnIndex("0"), 0);
@@ -213,7 +218,7 @@ public class ColumnStoreTest {
     @Test
     public void testHasColumn() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store.addColumn(col);
 
         Assert.assertTrue(store.hasColumn(col.getId()));
@@ -224,7 +229,7 @@ public class ColumnStoreTest {
     @Test
     public void testGetColumnKeys() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store.addColumn(col);
 
         ObjectSet<String> set = new ObjectOpenHashSet<String>();
@@ -235,7 +240,7 @@ public class ColumnStoreTest {
     @Test
     public void testClear() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
 
         store.addColumn(col);
         store.clear();
@@ -247,7 +252,7 @@ public class ColumnStoreTest {
     @Test
     public void testGarbage() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
 
         store.addColumn(col);
         store.removeColumn(col);
@@ -286,17 +291,17 @@ public class ColumnStoreTest {
     @Test
     public void testEquals() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store1.addColumn(col1);
 
         ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col2 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col2 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store2.addColumn(col2);
 
         Assert.assertEquals(store1, store2);
 
         ColumnStore<Node> store3 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col3 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false);
+        ColumnImpl col3 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         store3.addColumn(col3);
 
         Assert.assertNotEquals(store1, store3);
@@ -305,17 +310,17 @@ public class ColumnStoreTest {
     @Test
     public void testHashCode() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store1.addColumn(col1);
 
         ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col2 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
+        ColumnImpl col2 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store2.addColumn(col2);
 
         Assert.assertEquals(store1.hashCode(), store2.hashCode());
 
         ColumnStore<Node> store3 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col3 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false);
+        ColumnImpl col3 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         store3.addColumn(col3);
 
         Assert.assertNotEquals(store1.hashCode(), store3.hashCode());
@@ -324,15 +329,15 @@ public class ColumnStoreTest {
     @Test
     public void testEqualsWithGarbage() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
-        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
         store1.addColumn(col11);
         store1.addColumn(col12);
         store1.removeColumn(col11);
 
         ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col21 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
-        ColumnImpl col22 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        ColumnImpl col21 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col22 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
         store2.addColumn(col21);
         store2.addColumn(col22);
         store2.removeColumn(col21);
@@ -343,15 +348,15 @@ public class ColumnStoreTest {
     @Test
     public void testHashCodeWithGarbage() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
-        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
         store1.addColumn(col11);
         store1.addColumn(col12);
         store1.removeColumn(col11);
 
         ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
-        ColumnImpl col21 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
-        ColumnImpl col22 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        ColumnImpl col21 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col22 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
         store2.addColumn(col21);
         store2.addColumn(col22);
         store2.removeColumn(col21);
@@ -361,29 +366,29 @@ public class ColumnStoreTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testColumnNullId() {
-        new ColumnImpl(null, null, null, this, Origin.DATA, true);
+        new ColumnImpl(null, null, null, this, Origin.DATA, true, false);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testColumnEmptyId() {
-        new ColumnImpl("", null, null, this, Origin.DATA, true);
+        new ColumnImpl("", null, null, this, Origin.DATA, true, false);
     }
 
     @Test
     public void testColumnIsDynamic() {
-        ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false);
+        ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         Assert.assertFalse(col1.isDynamic());
 
-        ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleSet.class, null, null, Origin.DATA, false);
+        ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleSet.class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col2.isDynamic());
     }
 
     @Test
     public void testColumnIsArray() {
-        ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false);
+        ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         Assert.assertFalse(col1.isArray());
 
-        ColumnImpl col2 = new ColumnImpl("0", int[].class, null, null, Origin.DATA, false);
+        ColumnImpl col2 = new ColumnImpl("0", int[].class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col2.isArray());
     }
 
@@ -393,8 +398,8 @@ public class ColumnStoreTest {
 
         Assert.assertEquals(store.toArray().length, 0);
 
-        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
-        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
         store.addColumn(col11);
         store.addColumn(col12);
 
@@ -410,8 +415,8 @@ public class ColumnStoreTest {
 
         Assert.assertEquals(store.toArray().length, 0);
 
-        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false);
-        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false);
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
         store.addColumn(col11);
         store.addColumn(col12);
         store.removeColumn(col11);

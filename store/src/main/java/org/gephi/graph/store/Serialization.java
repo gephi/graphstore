@@ -271,14 +271,14 @@ public class Serialization {
     }
 
     private void serializeNode(DataOutput out, NodeImpl node) throws IOException {
-        serialize(out, node.id);
+        serialize(out, node.getId());
         serialize(out, node.storeId);
         serialize(out, node.attributes);
         serialize(out, node.properties);
     }
 
     private void serializeEdge(DataOutput out, EdgeImpl edge) throws IOException {
-        serialize(out, edge.id);
+        serialize(out, edge.getId());
         serialize(out, edge.source.storeId);
         serialize(out, edge.target.storeId);
         serialize(out, edge.type);
@@ -423,6 +423,7 @@ public class Serialization {
         serialize(out, column.typeClass);
         serialize(out, column.defaultValue);
         serialize(out, column.indexed);
+        serialize(out, column.readOnly);
         serialize(out, column.estimator);
     }
 
@@ -434,9 +435,10 @@ public class Serialization {
         Class typeClass = (Class) deserialize(is);
         Object defaultValue = deserialize(is);
         boolean indexed = (Boolean) deserialize(is);
+        boolean readOnly = (Boolean) deserialize(is);
         Estimator estimator = (Estimator) deserialize(is);
 
-        ColumnImpl column = new ColumnImpl(id, typeClass, title, defaultValue, origin, indexed);
+        ColumnImpl column = new ColumnImpl(id, typeClass, title, defaultValue, origin, indexed, readOnly);
         column.storeId = storeId;
         column.setEstimator(estimator);
         return column;
