@@ -39,7 +39,9 @@ public class NodeImpl extends ElementImpl implements Node {
 
     public NodeImpl(Object id, GraphStore graphStore) {
         super(id, graphStore);
-        properties = GraphStoreConfiguration.ENABLE_NODE_PROPERTIES ? new NodePropertiesImpl() : null;
+        this.properties = GraphStoreConfiguration.ENABLE_NODE_PROPERTIES ? new NodePropertiesImpl() : null;
+        this.attributes = new Object[GraphStoreConfiguration.ELEMENT_ID_INDEX + 1];
+        this.attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = id;
     }
 
     public NodeImpl(Object id) {

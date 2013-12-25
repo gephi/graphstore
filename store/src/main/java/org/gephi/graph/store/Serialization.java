@@ -282,7 +282,7 @@ public class Serialization {
         serialize(out, edge.source.storeId);
         serialize(out, edge.target.storeId);
         serialize(out, edge.type);
-        serialize(out, edge.weight);
+        serialize(out, edge.getWeight());
         serialize(out, edge.isDirected());
         serialize(out, edge.attributes);
         serialize(out, edge.properties);

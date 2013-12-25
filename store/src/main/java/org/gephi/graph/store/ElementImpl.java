@@ -23,7 +23,6 @@ import org.gephi.attribute.time.TimestampBooleanSet;
 import org.gephi.attribute.time.TimestampByteSet;
 import org.gephi.attribute.time.TimestampCharSet;
 import org.gephi.attribute.time.TimestampDoubleSet;
-import org.gephi.attribute.time.TimestampDoubleSetOptional;
 import org.gephi.attribute.time.TimestampFloatSet;
 import org.gephi.attribute.time.TimestampIntegerSet;
 import org.gephi.attribute.time.TimestampLongSet;
@@ -50,8 +49,6 @@ public abstract class ElementImpl implements Element {
             throw new NullPointerException();
         }
         this.graphStore = graphStore;
-        this.attributes = new Object[GraphStoreConfiguration.ELEMENT_ID_INDEX + 1];
-        this.attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = id;
     }
 
     abstract ColumnStore getColumnStore();
@@ -144,9 +141,6 @@ public abstract class ElementImpl implements Element {
             return getAttribute(column);
         } else {
             Interval interval = view.getTimeInterval();
-            if (interval == null) {
-                return getAttribute(column);
-            }
             checkEnabledTimestampSet();
             checkViewExist((GraphViewImpl) view);
             final ColumnStore columnStore = getColumnStore();
@@ -158,7 +152,7 @@ public abstract class ElementImpl implements Element {
                     if (index < attributes.length) {
                         dynamicValue = (TimestampValueSet) attributes[index];
                     }
-                    if (dynamicValue != null && dynamicValue.isEmpty()) {
+                    if (dynamicValue != null && !dynamicValue.isEmpty()) {
                         int[] timestampIndices = timestampMap.getTimestampIndices(interval);
                         Estimator estimator = columnStore.getEstimator(column);
                         if (estimator == null) {
@@ -264,6 +258,7 @@ public abstract class ElementImpl implements Element {
     public void setAttribute(Column column, Object value, double timestamp) {
         checkEnabledTimestampSet();
         checkColumn(column);
+        checkColumnDynamic(column);
         checkReadOnlyColumn(column);
         checkType(column, value);
         checkDouble(timestamp);
@@ -432,19 +427,19 @@ public abstract class ElementImpl implements Element {
         return graphStore;
     }
 
-    private void checkEnabledTimestampSet() {
+    void checkEnabledTimestampSet() {
         if (!GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET) {
             throw new RuntimeException("Can't call timestamp methods if they are disabled");
         }
     }
 
-    private void checkDouble(double timestamp) {
+    void checkDouble(double timestamp) {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
-            throw new IllegalArgumentException("Timestamp can' be NaN or infinity");
+            throw new IllegalArgumentException("Timestamp can't be NaN or infinity");
         }
     }
 
-    private void checkColumn(Column column) {
+    void checkColumn(Column column) {
         if (column.getIndex() == ColumnStore.NULL_ID) {
             throw new IllegalArgumentException("The column does not exist");
         }
@@ -454,23 +449,23 @@ public abstract class ElementImpl implements Element {
         }
     }
 
-    private void checkReadOnlyColumn(Column column) {
+    void checkReadOnlyColumn(Column column) {
         if (column.isReadOnly()) {
             throw new RuntimeException("Can't modify the read-only '" + column.getId() + "' column");
         }
     }
 
-    private void checkColumnDynamic(Column column) {
+    void checkColumnDynamic(Column column) {
         if (!((ColumnImpl) column).isDynamic()) {
             throw new IllegalArgumentException("The column is not dynamic");
         }
     }
 
-    private void checkType(Column column, Object value) {
+    void checkType(Column column, Object value) {
         if (value != null) {
             Class typeClass = column.getTypeClass();
             if (TimestampValueSet.class.isAssignableFrom(typeClass)) {
-                if ((value instanceof Double && (!typeClass.equals(TimestampDoubleSet.class) && !typeClass.equals(TimestampDoubleSetOptional.class)))
+                if ((value instanceof Double && (!typeClass.equals(TimestampDoubleSet.class)))
                         || (value instanceof Float && !typeClass.equals(TimestampFloatSet.class))
                         || (value instanceof Boolean && !typeClass.equals(TimestampBooleanSet.class))
                         || (value instanceof Integer && !typeClass.equals(TimestampIntegerSet.class))
@@ -487,7 +482,7 @@ public abstract class ElementImpl implements Element {
         }
     }
 
-    private void checkViewExist(final GraphViewImpl view) {
+    void checkViewExist(final GraphViewImpl view) {
         graphStore.viewStore.checkNonNullViewObject(view);
         graphStore.viewStore.checkViewExist(view);
     }

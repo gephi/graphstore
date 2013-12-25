@@ -16,6 +16,10 @@
 package org.gephi.graph.store;
 
 import java.awt.Color;
+import org.gephi.attribute.time.Estimator;
+import org.gephi.attribute.time.Interval;
+import org.gephi.attribute.time.TimestampDoubleSet;
+import org.gephi.attribute.time.TimestampValueSet;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
@@ -42,8 +46,6 @@ public class EdgeImpl extends ElementImpl implements Edge {
     protected int previousInEdge = EdgeStore.NULL_ID;
     //Flags
     protected byte flags;
-    //Other fields
-    protected double weight;
     //Props
     protected final EdgePropertiesImpl properties;
 
@@ -52,9 +54,11 @@ public class EdgeImpl extends ElementImpl implements Edge {
         this.source = source;
         this.target = target;
         this.flags = (byte) (directed ? 1 : 0);
-        this.weight = weight;
         this.type = type;
         this.properties = GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES ? new EdgePropertiesImpl() : null;
+        this.attributes = new Object[GraphStoreConfiguration.EDGE_WEIGHT_INDEX + 1];
+        this.attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = id;
+        this.attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
     }
 
     public EdgeImpl(Object id, NodeImpl source, NodeImpl target, int type, double weight, boolean directed) {
@@ -73,26 +77,74 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public double getWeight() {
-        return weight;
+        synchronized (this) {
+            return (Double) attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+        }
     }
 
     @Override
     public boolean hasDynamicWeight() {
-        return false;
+        synchronized (this) {
+            return !(attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] instanceof Double);
+        }
     }
 
     @Override
     public void setWeight(double weight, double timestamp) {
+        synchronized (this) {
+            final TimestampMap timestampMap = getTimestampMap();
+            if (timestampMap != null) {
+                Object oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+                TimestampDoubleSet dynamicValue = null;
+                if (!(oldValue instanceof TimestampValueSet)) {
+                    dynamicValue = new TimestampDoubleSet();
+                } else {
+                    dynamicValue = (TimestampDoubleSet) oldValue;
+                }
+                int timestampIndex = timestampMap.getTimestampIndex(timestamp);
+                dynamicValue.put(timestampIndex, weight);
+            }
+        }
     }
 
     @Override
     public double getWeight(double timestamp) {
-        return weight;
+        synchronized (this) {
+            final TimestampMap timestampMap = getTimestampMap();
+            if (timestampMap != null) {
+                TimestampDoubleSet dynamicValue = (TimestampDoubleSet) attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+                int timestampIndex = timestampMap.getTimestampIndex(timestamp);
+                return dynamicValue.getDouble(timestampIndex, 0.0);
+            }
+        }
+        return 0;
     }
 
     @Override
     public double getWeight(GraphView view) {
-        return weight;
+        synchronized (this) {
+            Object value = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+            if (value instanceof TimestampDoubleSet) {
+                Interval interval = view.getTimeInterval();
+                checkEnabledTimestampSet();
+                checkViewExist((GraphViewImpl) view);
+                final ColumnStore columnStore = getColumnStore();
+                final TimestampMap timestampMap = columnStore.getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+                if (timestampMap != null) {
+                    TimestampDoubleSet dynamicValue = (TimestampDoubleSet) attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+                    int[] timestampIndices = timestampMap.getTimestampIndices(interval);
+                    Estimator estimator = columnStore.getEstimator(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+                    if (estimator == null) {
+                        estimator = Estimator.FIRST;
+                    }
+                    return (Double) dynamicValue.get(null, timestampIndices, estimator);
+                } else {
+                    throw new RuntimeException("The timestamp store is not available");
+                }
+            } else {
+                return (Double) value;
+            }
+        }
     }
 
     @Override
@@ -107,7 +159,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public void setWeight(double weight) {
-        this.weight = weight;
+        attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
     }
 
     public int getNextOutEdge() {

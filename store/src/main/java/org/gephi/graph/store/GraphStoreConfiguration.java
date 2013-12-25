@@ -53,7 +53,7 @@ public final class GraphStoreConfiguration {
     public static final int ELEMENT_ID_INDEX = 0;
     public static final int ELEMENT_LABEL_INDEX = 1;
     public static final int ELEMENT_TIMESTAMP_INDEX = ENABLE_ELEMENT_LABEL ? 2 : 1;
-    public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIMESTAMP_SET ? 2 : 1;
+    public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIMESTAMP_SET ? ELEMENT_TIMESTAMP_INDEX + 1 : ELEMENT_TIMESTAMP_INDEX;
     //TimeFormat
     public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
 }

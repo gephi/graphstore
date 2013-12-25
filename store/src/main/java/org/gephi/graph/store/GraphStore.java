@@ -23,6 +23,7 @@ import java.util.Set;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.api.TimeFormat;
 import org.gephi.attribute.time.Interval;
+import org.gephi.attribute.time.TimestampDoubleSet;
 import org.gephi.attribute.time.TimestampSet;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -99,6 +100,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
             edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
         }
+        edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "weight", TimestampDoubleSet.class, "Weight", null, Origin.PROPERTY, false, false));
     }
 
     @Override
@@ -821,7 +823,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
         @Override
         public Interval getTimeInterval() {
-            return null;
+            return Interval.INFINITY_INTERVAL;
         }
     }
 }
