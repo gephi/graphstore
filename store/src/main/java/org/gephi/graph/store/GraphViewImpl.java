@@ -490,6 +490,9 @@ public class GraphViewImpl implements GraphView {
     }
 
     public void setTimeInterval(Interval interval) {
+        if(interval == null) {
+            interval = Interval.INFINITY_INTERVAL;
+        }
         this.interval = interval;
     }
 
