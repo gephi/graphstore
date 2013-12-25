@@ -38,7 +38,7 @@ public class ElementPropertiesTest {
     }
 
     @Test
-    public void testsetRGB() {
+    public void testSetRGB() {
         NodeImpl.NodePropertiesImpl properties = new NodeImpl.NodePropertiesImpl();
         Assert.assertEquals(properties.getColor(), new Color(0, 0, 0, 255));
 
