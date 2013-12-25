@@ -319,17 +319,14 @@ public class AttributeUtils {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         type = getStandardizedType(type);
-        if (Number.class.isAssignableFrom(type) 
+        return Number.class.isAssignableFrom(type)
                 || Number[].class.isAssignableFrom(type)
                 || type.equals(TimestampIntegerSet.class)
                 || type.equals(TimestampFloatSet.class)
                 || type.equals(TimestampDoubleSet.class)
                 || type.equals(TimestampLongSet.class)
                 || type.equals(TimestampShortSet.class)
-                || type.equals(TimestampByteSet.class)) {
-            return true;
-        }
-        return false;
+                || type.equals(TimestampByteSet.class);
     }
 
     public static boolean isDynamicType(Class type) {
