@@ -151,6 +151,10 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         checkNonNullColumnObject(column);
         return ((ColumnImpl) column).getEstimator();
     }
+    
+    protected Estimator getEstimator(int index) {
+        return ((ColumnImpl) columns[index]).getEstimator();
+    }
 
     public int getColumnIndex(final String key) {
         checkNonNullObject(key);
@@ -238,13 +242,18 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     }
 
     public void clear() {
-        garbageQueue.clear();
-        idMap.clear();
-        length = 0;
-        Arrays.fill(columns, null);
-        Arrays.fill(timestampMaps, null);
-        if (indexStore != null) {
-            indexStore.clear();
+        lock();
+        try {
+            garbageQueue.clear();
+            idMap.clear();
+            length = 0;
+            Arrays.fill(columns, null);
+            Arrays.fill(timestampMaps, null);
+            if (indexStore != null) {
+                indexStore.clear();
+            }
+        } finally {
+            unlock();
         }
     }
 
@@ -253,13 +262,22 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     }
 
     public TimestampMap getTimestampMap(Column column) {
-        int index = column.getIndex();
-        TimestampMap timestampStore = timestampMaps[index];
-        if (timestampStore == null) {
-            timestampStore = new TimestampMap();
-            timestampMaps[index] = timestampStore;
+        return getTimestampMap(column.getIndex());
+    }
+
+    protected TimestampMap getTimestampMap(int index) {
+        lock();
+        try {
+
+            TimestampMap timestampStore = timestampMaps[index];
+            if (timestampStore == null) {
+                timestampStore = new TimestampMap();
+                timestampMaps[index] = timestampStore;
+            }
+            return timestampStore;
+        } finally {
+            unlock();
         }
-        return timestampStore;
     }
 
     protected TableObserverImpl createTableObserver(TableImpl table) {
