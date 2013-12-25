@@ -21,6 +21,8 @@ package org.gephi.attribute.time;
  */
 public final class Interval {
 
+    public static final Interval INFINITY_INTERVAL = new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+    
     private final double low;   // the left endpoint
     private final double high;  // the right endpoint
     private final boolean lopen; // indicates if the left endpoint is excluded
