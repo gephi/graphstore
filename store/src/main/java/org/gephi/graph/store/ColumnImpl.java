@@ -126,12 +126,7 @@ public class ColumnImpl implements Column {
 
     @Override
     public boolean isProperty() {
-        if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL && id.equals("label")) {
-            return true;
-        } else if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET && id.equals("timestamp")) {
-            return true;
-        }
-        return false;
+        return origin.equals(Origin.PROPERTY);
     }
 
     public int getStoreId() {
