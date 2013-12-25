@@ -89,6 +89,14 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
         }
         throw new IllegalArgumentException("The element doesn't exist");
     }
+    
+    public char getCharacter(int timestampIndex, char defaultValue) {
+        final int index = getIndex(timestampIndex);
+        if (index >= 0) {
+            return values[index];
+        }
+        return defaultValue;
+    }
 
     @Override
     public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {

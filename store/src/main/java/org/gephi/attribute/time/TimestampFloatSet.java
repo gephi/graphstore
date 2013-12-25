@@ -97,6 +97,14 @@ public final class TimestampFloatSet extends TimestampValueSet<Float> {
         }
         throw new IllegalArgumentException("The element doesn't exist");
     }
+    
+    public float getFloat(int timestampIndex, float defaultValue) {
+        final int index = getIndex(timestampIndex);
+        if (index >= 0) {
+            return values[index];
+        }
+        return defaultValue;
+    }
 
     @Override
     public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {

@@ -81,6 +81,22 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
         }
         return defaultValue;
     }
+    
+    public boolean getBoolean(int timestampIndex) {
+        final int index = getIndex(timestampIndex);
+        if (index >= 0) {
+            return values[index];
+        }
+        throw new IllegalArgumentException("The element doesn't exist");
+    }
+    
+    public boolean getBoolean(int timestampIndex, boolean defaultValue) {
+        final int index = getIndex(timestampIndex);
+        if (index >= 0) {
+            return values[index];
+        }
+        return defaultValue;
+    }
 
     @Override
     public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
@@ -138,14 +154,6 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
             return Boolean.FALSE;
         }
         return null;
-    }
-
-    public boolean getBoolean(int timestampIndex) {
-        final int index = getIndex(timestampIndex);
-        if (index >= 0) {
-            return values[index];
-        }
-        throw new IllegalArgumentException("The element doesn't exist");
     }
 
     @Override

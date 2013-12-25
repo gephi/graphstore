@@ -91,6 +91,14 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
         }
         throw new IllegalArgumentException("The element doesn't exist");
     }
+    
+    public int getInteger(int timestampIndex, int defaultValue) {
+        final int index = getIndex(timestampIndex);
+        if (index >= 0) {
+            return values[index];
+        }
+        return defaultValue;
+    }
 
     @Override
     public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {

@@ -91,6 +91,14 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
         }
         throw new IllegalArgumentException("The element doesn't exist");
     }
+    
+    public short getShort(int timestampIndex, short defaultValue) {
+        final int index = getIndex(timestampIndex);
+        if (index >= 0) {
+            return values[index];
+        }
+        return defaultValue;
+    }
 
     @Override
     public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
