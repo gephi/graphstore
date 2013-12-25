@@ -15,8 +15,6 @@
  */
 package org.gephi.attribute.api;
 
-import org.gephi.attribute.api.AttributeUtils;
-
 /**
  *
  * @author mbastian
