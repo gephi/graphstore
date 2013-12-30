@@ -374,6 +374,11 @@ public class GraphStoreTest {
             public Object getAttribute(Column column, GraphView view) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            @Override
+            public boolean hasTimestamp(double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
     }
 

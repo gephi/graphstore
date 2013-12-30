@@ -144,7 +144,7 @@ public class ElementImplTest {
 
         Assert.assertEquals(node.getAttribute(column, 2.0), 1);
     }
-    
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetAttributeNonDynamic() {
         GraphStore store = new GraphStore();
@@ -174,7 +174,7 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 1, Double.NaN);
     }
-    
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInfiniteTimestamp() {
         GraphStore store = new GraphStore();
@@ -228,7 +228,7 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl(0, store);
         node.getAttribute(column);
     }
-    
+
     @Test
     public void testGetAttributeDynamicColumn() {
         GraphStore store = new GraphStore();
@@ -236,10 +236,10 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 1, 1.0);
-        
+
         Assert.assertEquals(node.getAttribute(column, 1.0), 1);
     }
-    
+
     @Test
     public void testGetAttributeDynamicString() {
         GraphStore store = new GraphStore();
@@ -247,10 +247,10 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 1, 1.0);
-        
+
         Assert.assertEquals(node.getAttribute("age", 1.0), 1);
     }
-    
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetAttributeNonDynamic() {
         GraphStore store = new GraphStore();
@@ -258,7 +258,7 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 1);
-        
+
         node.getAttribute(column, 1.0);
     }
 
@@ -316,6 +316,85 @@ public class ElementImplTest {
         node.setLabel(null);
 
         Assert.assertNull(node.getLabel());
+    }
+
+    @Test
+    public void testAddTimestamp() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl(0, store);
+        Assert.assertTrue(node.addTimestamp(1.0));
+
+        Assert.assertTrue(node.hasTimestamp(1.0));
+    }
+
+    @Test
+    public void testRemoveTimestamp() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.addTimestamp(1.0);
+        Assert.assertTrue(node.removeTimestamp(1.0));
+        Assert.assertFalse(node.hasTimestamp(1.0));
+    }
+
+    @Test
+    public void testHasTimestampEmpty() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl(0, store);
+        Assert.assertFalse(node.hasTimestamp(1.0));
+    }
+
+    @Test
+    public void testRemoveAttribute() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.setAttribute(column, 14);
+        
+        Object r = node.removeAttribute(column);
+        Assert.assertEquals(r, 14);
+        
+        Assert.assertNull(node.getAttribute(column));
+    }
+    
+    @Test
+    public void testRemoveAttributeString() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.setAttribute(column, 14);
+        
+        Object r = node.removeAttribute("age");
+        Assert.assertEquals(r, 14);
+        
+        Assert.assertNull(node.getAttribute("age"));
+    }
+
+    @Test
+    public void testGetTimestampsEmpty() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl(0, store);
+        Assert.assertEquals(node.getTimestamps(), new double[0]);
+    }
+
+    @Test
+    public void testGetTimestamps() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.addTimestamp(1.0);
+        node.addTimestamp(2.0);
+
+        Assert.assertEquals(node.getTimestamps(), new double[]{1.0, 2.0});
+
+        node.removeTimestamp(1.0);
+
+        Assert.assertEquals(node.getTimestamps(), new double[]{2.0});
     }
 
     //Utility

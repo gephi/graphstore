@@ -578,6 +578,11 @@ public class BasicGraphStore implements DirectedGraph {
         public void setColor(Color color) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public boolean hasTimestamp(double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
 
     public static class BasicNode extends BasicElement implements Node {
