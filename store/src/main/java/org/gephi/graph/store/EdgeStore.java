@@ -923,10 +923,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     boolean isValidIndex(int id) {
-        if (id < 0 || id >= currentBlock.offset + currentBlock.nodeLength) {
-            return false;
-        }
-        return true;
+        return id >= 0 && id < currentBlock.offset + currentBlock.nodeLength;
     }
 
     void checkCollection(final Collection<?> collection) {
@@ -1008,10 +1005,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     boolean isUndirectedToIgnore(EdgeImpl edge) {
-        if (edge.isMutual() && edge.source.storeId < edge.target.storeId) {
-            return true;
-        }
-        return false;
+        return edge.isMutual() && edge.source.storeId < edge.target.storeId;
     }
 
     int maxStoreId() {
@@ -1149,6 +1143,14 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 }
             }
             return true;
+        }
+
+        @Override
+        public void remove() {
+            if (pointer.isMutual()) {
+                throw new UnsupportedOperationException("Removing directed edges from undirected iterator is not supported");
+            }
+            EdgeStore.this.remove(pointer);
         }
     }
 
@@ -1611,7 +1613,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         @Override
         public void remove() {
-            itr.remove();
+            if (pointer.isMutual()) {
+                throw new UnsupportedOperationException("Removing directed edges from undirected iterator is not supported");
+            }
+            EdgeStore.this.remove(pointer);
         }
     }
 }
