@@ -499,6 +499,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         try {
             edgeStore.clear();
             nodeStore.clear();
+            edgeTypeStore.clear();
             edgeColumnStore.indexStore.clear();
             nodeColumnStore.indexStore.clear();
             timestampStore.clear();
@@ -512,6 +513,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         autoWriteLock();
         try {
             edgeStore.clear();
+            edgeTypeStore.clear();
             edgeColumnStore.indexStore.clear();
             timestampStore.clearEdges();
         } finally {
@@ -688,6 +690,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         int hash = 3;
         hash = 29 * hash + (this.nodeStore != null ? this.nodeStore.hashCode() : 0);
         hash = 29 * hash + (this.edgeStore != null ? this.edgeStore.hashCode() : 0);
+        hash = 29 * hash + (this.edgeTypeStore != null ? this.edgeTypeStore.hashCode() : 0);
         return hash;
     }
 
@@ -704,6 +707,9 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             return false;
         }
         if (this.edgeStore != other.edgeStore && (this.edgeStore == null || !this.edgeStore.equals(other.edgeStore))) {
+            return false;
+        }
+        if (this.edgeTypeStore != other.edgeTypeStore && (this.edgeTypeStore == null || !this.edgeTypeStore.equals(other.edgeTypeStore))) {
             return false;
         }
         return true;
