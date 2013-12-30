@@ -140,6 +140,19 @@ public class EdgeTypeStoreTest {
 
         Assert.assertTrue(edgeTypeStore.contains(type));
     }
+    
+    @Test
+    public void testClear() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        edgeTypeStore.addType("0");
+        edgeTypeStore.addType("1");
+        edgeTypeStore.removeType("0");
+        edgeTypeStore.clear();
+        
+        Assert.assertEquals(edgeTypeStore.size(), 1);
+        Assert.assertTrue(edgeTypeStore.contains(null));
+        Assert.assertTrue(edgeTypeStore.garbageQueue.isEmpty());
+    }
 
     @Test
     public void testMaximumLength() {

@@ -141,7 +141,16 @@ public class EdgeTypeStore {
     }
 
     public void clear() {
-        //TODO
+        labelMap.clear();
+        idMap.clear();
+        garbageQueue.clear();
+        length = 0;
+        
+        //Add null type
+        short id = intToShort(NULL_LABEL);
+        length++;
+        labelMap.put(null, id);
+        idMap.put(id, null);
     }
 
     public int size() {
