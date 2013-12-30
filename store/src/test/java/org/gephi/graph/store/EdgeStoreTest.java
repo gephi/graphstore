@@ -1213,7 +1213,6 @@ public class EdgeStoreTest {
         Assert.assertFalse(b);
         Assert.assertFalse(c);
 
-
         Assert.assertEquals(edgeStore.isEmpty(), false);
         Assert.assertEquals(edgeStore.size(), 1);
 
@@ -1634,6 +1633,66 @@ public class EdgeStoreTest {
         }
 
         Assert.assertEquals(0, edgeSet.size());
+    }
+
+    @Test
+    public void testUndirectedIteratorRemove() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallUndirectedEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        EdgeStore.EdgeStoreIterator undirectedIterator = edgeStore.iteratorUndirected();
+        for (; undirectedIterator.hasNext();) {
+            EdgeImpl e = undirectedIterator.next();
+            undirectedIterator.remove();
+        }
+
+        Assert.assertEquals(edgeStore.size(), 0);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testUndirectedIteratorRemoveDecorator() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        EdgeStore.EdgeStoreIterator undirectedIterator = edgeStore.iteratorUndirected();
+        for (; undirectedIterator.hasNext();) {
+            EdgeImpl e = undirectedIterator.next();
+            undirectedIterator.remove();
+        }
+    }
+
+    @Test
+    public void testInOutUndirectedIteratorRemove() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallUndirectedEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        for (NodeImpl n : getNodes(edges)) {
+            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n);
+            for (; itr.hasNext();) {
+                itr.next();
+                itr.remove();
+            }
+        }
+
+        Assert.assertEquals(edgeStore.size(), 0);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testInOutUndirectedIteratorRemoveDecorator() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        for (NodeImpl n : getNodes(edges)) {
+            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n);
+            for (; itr.hasNext();) {
+                itr.next();
+                itr.remove();
+            }
+        }
     }
 
     @Test
