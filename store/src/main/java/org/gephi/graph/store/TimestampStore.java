@@ -42,26 +42,26 @@ public class TimestampStore {
         nodeIndexStore = new TimestampIndexStore<Node>(this, nodeMap);
         edgeIndexStore = new TimestampIndexStore<Edge>(this, edgeMap);
     }
-    
+
     public double getMin(Graph graph) {
         double nodeMin = nodeIndexStore.getIndex(graph).getMinTimestamp();
         double edgeMin = edgeIndexStore.getIndex(graph).getMinTimestamp();
-        if(Double.isInfinite(nodeMin)) {
+        if (Double.isInfinite(nodeMin)) {
             return edgeMin;
         }
-        if(Double.isInfinite(edgeMin)) {
+        if (Double.isInfinite(edgeMin)) {
             return nodeMin;
         }
         return Math.min(nodeMin, edgeMin);
     }
-    
+
     public double getMax(Graph graph) {
         double nodeMax = nodeIndexStore.getIndex(graph).getMaxTimestamp();
         double edgeMax = edgeIndexStore.getIndex(graph).getMaxTimestamp();
-        if(Double.isInfinite(nodeMax)) {
+        if (Double.isInfinite(nodeMax)) {
             return edgeMax;
         }
-        if(Double.isInfinite(edgeMax)) {
+        if (Double.isInfinite(edgeMax)) {
             return nodeMax;
         }
         return Math.max(nodeMax, edgeMax);
