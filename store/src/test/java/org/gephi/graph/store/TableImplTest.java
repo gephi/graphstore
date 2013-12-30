@@ -93,6 +93,14 @@ public class TableImplTest {
         Assert.assertSame(col, c);
     }
 
+    @Test
+    public void testHasColumn() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table.addColumn("0", Integer.class);
+
+        Assert.assertTrue(table.hasColumn("0"));
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetColumnBadIndex() {
         TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
@@ -160,5 +168,39 @@ public class TableImplTest {
         Object d = col.getDefaultValue();
         Assert.assertEquals(d.getClass(), int[].class);
         Assert.assertEquals(d, new int[]{1, 2});
+    }
+
+    @Test
+    public void testRemoveColumn() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Column col = table.addColumn("0", Integer.class);
+
+        table.removeColumn(col);
+        Assert.assertFalse(table.hasColumn("0"));
+    }
+
+    @Test
+    public void testRemoveColumnString() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table.addColumn("0", Integer.class);
+
+        table.removeColumn("0");
+        Assert.assertFalse(table.hasColumn("0"));
+    }
+
+    @Test
+    public void testCountColumns() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table.addColumn("0", Integer.class);
+
+        table.removeColumn("0");
+        table.addColumn("0", Integer.class);
+        Assert.assertEquals(table.countColumns(), 1);
+    }
+
+    @Test
+    public void testGetElementClass() {
+        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        Assert.assertEquals(table.getElementClass(), Node.class);
     }
 }
