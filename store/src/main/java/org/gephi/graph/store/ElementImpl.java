@@ -355,6 +355,24 @@ public abstract class ElementImpl implements Element {
         }
         return new double[0];
     }
+    
+    @Override
+    public boolean hasTimestamp(double timestamp) {
+        checkEnabledTimestampSet();
+
+        synchronized (this) {
+            TimestampSet timestampSet = getTimestampSet();
+            if (timestampSet != null) {
+                final TimestampMap timestampMap = getTimestampMap();
+                if (timestampMap != null) {
+                    if(timestampMap.hasTimestampIndex(timestamp)) {
+                        return timestampSet.contains(timestampMap.getTimestampIndex(timestamp));
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     protected TimestampSet getTimestampSet() {
         if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET && GraphStoreConfiguration.ELEMENT_TIMESTAMP_INDEX < attributes.length) {

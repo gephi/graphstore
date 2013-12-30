@@ -63,6 +63,8 @@ public interface Element extends ElementProperties {
     public boolean addTimestamp(double timestamp);
 
     public boolean removeTimestamp(double timestamp);
+    
+    public boolean hasTimestamp(double timestamp);
 
     public double[] getTimestamps();
 
