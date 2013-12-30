@@ -17,6 +17,7 @@ package org.gephi.graph.store;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.util.Iterator;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.api.Table;
@@ -424,5 +425,35 @@ public class ColumnStoreTest {
         Column[] cols = store.toArray();
         Assert.assertEquals(cols.length, 1);
         Assert.assertSame(cols[0], col12);
+    }
+
+    @Test
+    public void testColumnStoreIterator() {
+        ColumnStore<Node> store = new ColumnStore<Node>(Node.class, false);
+
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
+        store.addColumn(col11);
+        store.addColumn(col12);
+
+        Iterator<Column> itr = store.iterator();
+        Assert.assertTrue(itr.hasNext());
+        Assert.assertSame(itr.next(), col11);
+        Assert.assertTrue(itr.hasNext());
+        Assert.assertSame(itr.next(), col12);
+        Assert.assertFalse(itr.hasNext());
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testColumnStoreIteratorRemove() {
+        ColumnStore<Node> store = new ColumnStore<Node>(Node.class, false);
+
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        store.addColumn(col11);
+
+        Iterator<Column> itr = store.iterator();
+        Assert.assertTrue(itr.hasNext());
+        Assert.assertSame(itr.next(), col11);
+        itr.remove();
     }
 }
