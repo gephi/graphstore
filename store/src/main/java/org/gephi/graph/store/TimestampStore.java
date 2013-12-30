@@ -46,12 +46,24 @@ public class TimestampStore {
     public double getMin(Graph graph) {
         double nodeMin = nodeIndexStore.getIndex(graph).getMinTimestamp();
         double edgeMin = edgeIndexStore.getIndex(graph).getMinTimestamp();
+        if(Double.isInfinite(nodeMin)) {
+            return edgeMin;
+        }
+        if(Double.isInfinite(edgeMin)) {
+            return nodeMin;
+        }
         return Math.min(nodeMin, edgeMin);
     }
     
     public double getMax(Graph graph) {
         double nodeMax = nodeIndexStore.getIndex(graph).getMaxTimestamp();
         double edgeMax = edgeIndexStore.getIndex(graph).getMaxTimestamp();
+        if(Double.isInfinite(nodeMax)) {
+            return edgeMax;
+        }
+        if(Double.isInfinite(edgeMax)) {
+            return nodeMax;
+        }
         return Math.max(nodeMax, edgeMax);
     }
 
@@ -60,10 +72,12 @@ public class TimestampStore {
     }
 
     public void clear() {
-        //TODO
+        nodeMap.clear();
+        edgeMap.clear();
     }
 
     public void clearEdges() {
+        edgeMap.clear();
     }
 
     @Override
