@@ -154,7 +154,12 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public Object getTypeLabel() {
-        return graphStore.edgeTypeStore.getLabel(type);
+         graphStore.autoReadLock();
+        try {
+            return graphStore.edgeTypeStore.getLabel(type);
+        } finally {
+            graphStore.autoReadUnlock();
+        }
     }
 
     @Override
