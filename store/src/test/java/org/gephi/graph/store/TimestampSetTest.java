@@ -195,7 +195,7 @@ public class TimestampSetTest {
 
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
     }
-    
+
     @Test
     public void testEqualsWithCapacity() {
         TimestampSet set1 = new TimestampSet(10);
@@ -210,6 +210,16 @@ public class TimestampSetTest {
         Assert.assertTrue(set2.equals(set1));
 
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
+    }
+
+    @Test
+    public void tesGetTimestamps() {
+        TimestampSet set = new TimestampSet();
+        set.add(0);
+        set.add(1);
+        set.remove(0);
+
+        Assert.assertEquals(set.getTimestamps(), new int[]{1});
     }
 
     //UTILITY

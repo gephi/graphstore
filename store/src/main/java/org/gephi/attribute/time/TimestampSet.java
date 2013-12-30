@@ -104,7 +104,7 @@ public class TimestampSet {
     }
 
     public int[] getTimestamps() {
-        if (size < array.length - 1) {
+        if (size < array.length) {
             int[] res = new int[size];
             System.arraycopy(array, 0, res, 0, size);
             return res;

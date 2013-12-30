@@ -91,7 +91,7 @@ public class TimestampMap {
         for (int i = 0; i < indicesLength; i++) {
             int index = indices[i];
             checkIndex(index);
-            res[i] = indexMap[i];
+            res[i] = indexMap[index];
         }
         return res;
     }
