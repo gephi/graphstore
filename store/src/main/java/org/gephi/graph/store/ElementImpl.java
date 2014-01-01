@@ -15,6 +15,9 @@
  */
 package org.gephi.graph.store;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.time.Estimator;
@@ -355,7 +358,7 @@ public abstract class ElementImpl implements Element {
         }
         return new double[0];
     }
-    
+
     @Override
     public boolean hasTimestamp(double timestamp) {
         checkEnabledTimestampSet();
@@ -365,13 +368,38 @@ public abstract class ElementImpl implements Element {
             if (timestampSet != null) {
                 final TimestampMap timestampMap = getTimestampMap();
                 if (timestampMap != null) {
-                    if(timestampMap.hasTimestampIndex(timestamp)) {
+                    if (timestampMap.hasTimestampIndex(timestamp)) {
                         return timestampSet.contains(timestampMap.getTimestampIndex(timestamp));
                     }
                 }
             }
         }
         return false;
+    }
+
+    public Iterable<Map.Entry<Double, Object>> getAttributes(Column column) {
+        checkEnabledTimestampSet();
+        checkColumn(column);
+        checkColumnDynamic(column);
+
+        Object res = null;
+        final TimestampMap timestampMap = getColumnStore().getTimestampMap(column);
+        if (timestampMap != null) {
+
+            int index = column.getIndex();
+            TimestampValueSet dynamicValue = null;
+            synchronized (this) {
+                if (index < attributes.length) {
+                    dynamicValue = (TimestampValueSet) attributes[index];
+                }
+                if (dynamicValue != null) {
+                    Object[] values = dynamicValue.toArray();
+                    double[] timestamps = timestampMap.getTimestamps(dynamicValue.getTimestamps());
+                    return new DynamicValueIterable(timestamps, values);
+                }
+            }
+        }
+        return DynamicValueIterable.EMPTY_ITERABLE;
     }
 
     protected TimestampSet getTimestampSet() {
@@ -503,5 +531,80 @@ public abstract class ElementImpl implements Element {
     void checkViewExist(final GraphViewImpl view) {
         graphStore.viewStore.checkNonNullViewObject(view);
         graphStore.viewStore.checkViewExist(view);
+    }
+
+    private static class DynamicValueIterable implements Iterable<Map.Entry<Double, Object>> {
+
+        private static Iterable<Map.Entry<Double, Object>> EMPTY_ITERABLE = new Iterable<Map.Entry<Double, Object>>() {
+
+            @Override
+            public Iterator<Map.Entry<Double, Object>> iterator() {
+                return Collections.emptyIterator();
+            }
+        };
+        private final double[] timestamps;
+        private final Object[] values;
+
+        public DynamicValueIterable(double[] timestamps, Object[] values) {
+            this.timestamps = timestamps;
+            this.values = values;
+        }
+
+        @Override
+        public Iterator<Map.Entry<Double, Object>> iterator() {
+            return new DynamicValueIterator(timestamps, values);
+        }
+    }
+
+    private static class DynamicValueIterator implements Iterator<Map.Entry<Double, Object>> {
+
+        private final Entry entry = new Entry();
+        private final double[] timestamps;
+        private final Object[] values;
+        private int index;
+
+        public DynamicValueIterator(double[] timestamps, Object[] values) {
+            this.timestamps = timestamps;
+            this.values = values;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return index < timestamps.length;
+        }
+
+        @Override
+        public Map.Entry<Double, Object> next() {
+            entry.timestamp = timestamps[index];
+            entry.value = values[index++];
+            return entry;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
+        }
+
+        private static class Entry implements Map.Entry<Double, Object> {
+
+            private double timestamp;
+            private Object value;
+
+            @Override
+            public Double getKey() {
+                return timestamp;
+            }
+
+            @Override
+            public Object getValue() {
+                return value;
+            }
+
+            @Override
+            public Object setValue(Object value) {
+                throw new UnsupportedOperationException("Not supported");
+            }
+
+        }
     }
 }

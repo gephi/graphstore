@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.store;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
@@ -353,13 +355,13 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 14);
-        
+
         Object r = node.removeAttribute(column);
         Assert.assertEquals(r, 14);
-        
+
         Assert.assertNull(node.getAttribute(column));
     }
-    
+
     @Test
     public void testRemoveAttributeString() {
         GraphStore store = new GraphStore();
@@ -367,10 +369,10 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 14);
-        
+
         Object r = node.removeAttribute("age");
         Assert.assertEquals(r, 14);
-        
+
         Assert.assertNull(node.getAttribute("age"));
     }
 
@@ -395,6 +397,52 @@ public class ElementImplTest {
         node.removeTimestamp(1.0);
 
         Assert.assertEquals(node.getTimestamps(), new double[]{2.0});
+    }
+
+    @Test
+    public void testGetDynamicAttributes() {
+        GraphStore store = new GraphStore();
+        Column column = generateDynamicColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.setAttribute(column, 12, 1.0);
+        node.setAttribute(column, 14, 3.0);
+        node.setAttribute(column, 13, 2.0);
+
+        Iterator<Map.Entry<Double, Object>> itr = node.getAttributes(column).iterator();
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Double, Object> entry1 = itr.next();
+        Assert.assertEquals(entry1.getKey(), 1.0);
+        Assert.assertEquals(entry1.getValue(), 12);
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Double, Object> entry2 = itr.next();
+        Assert.assertEquals(entry2.getKey(), 3.0);
+        Assert.assertEquals(entry2.getValue(), 14);
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Double, Object> entry3 = itr.next();
+        Assert.assertEquals(entry3.getKey(), 2.0);
+        Assert.assertEquals(entry3.getValue(), 13);
+        Assert.assertFalse(itr.hasNext());
+    }
+
+    @Test
+    public void testGetDynamicAttributesEmpty() {
+        GraphStore store = new GraphStore();
+        Column column = generateDynamicColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+
+        Iterator<Map.Entry<Double, Object>> itr = node.getAttributes(column).iterator();
+        Assert.assertFalse(itr.hasNext());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetDynamicAttributesStaticColumn() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.getAttributes(column);
     }
 
     //Utility
