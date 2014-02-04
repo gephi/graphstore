@@ -35,7 +35,7 @@ public class NanoBench {
     }
     private static final Logger logger = Logger.getLogger(NanoBench.class.getSimpleName());
     private int numberOfMeasurement = 50;
-    private int numberOfWarmUp = 20;
+    private int numberOfWarmUp = 0;
     private List<MeasureListener> listeners;
 
     public NanoBench() {
