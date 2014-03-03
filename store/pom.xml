@@ -1,16 +1,27 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.gephi</groupId>
-    <artifactId>graph-store</artifactId>
+    <artifactId>graphstore-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>GraphStore</name>
+    
     <url>https://github.com/gephi/graphstore</url>
     
-    <properties>
+    <!-- Licenses -->
+    <licenses>
+        <license>
+            <name>Apache 2.0</name>
+            <url>http://www.opensource.org/licenses/Apache-2.0</url>
+            <comments>Apache License, Version 2.0</comments>
+        </license>
+    </licenses>
+    
+    <!-- Properties -->
+    <properties>        
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- Repository URLs -->
@@ -19,7 +30,7 @@
         <release.repository.url>http://nexus.gephi.org/nexus/content/repositories/releases</release.repository.url>
         <snapshot.repository.url>http://nexus.gephi.org/nexus/content/repositories/snapshots</snapshot.repository.url>
     </properties>
-    
+
     <build>
         <pluginManagement>
             <plugins>
@@ -45,7 +56,7 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        
+		
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -81,6 +92,7 @@
             </plugin>
         </plugins>
     </build>
+
     <profiles>
         <profile>
             <id>netbeans-private-testng</id>
@@ -104,7 +116,6 @@
             </build>
         </profile>
     </profiles>
-    
 
     <reporting>
         <plugins>
@@ -115,7 +126,7 @@
             </plugin>
         </plugins>
     </reporting>
-    
+
     <!-- Locations of the artifacts published -->
     <distributionManagement>
         <!-- Publish versioned releases here -->
@@ -132,28 +143,10 @@
             <url>${snapshot.repository.url}</url>
         </snapshotRepository>
     </distributionManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.8.5</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
-            <version>6.5.9</version>
-        </dependency>
-        <dependency>
-            <groupId>colt</groupId>
-            <artifactId>colt</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.2</version>
-        </dependency>
-    </dependencies>
+                
+    <!-- List of modules -->
+    <modules>
+        <module>graphstore-api</module>
+        <module>graphstore-impl</module>
+    </modules>
 </project>

@@ -3,3 +3,5 @@ target/**
 nbactions.xml
 /store/target/
 /store-benchmark/target/
+/store/graphstore-api/target/
+/store/graphstore-impl/target/
