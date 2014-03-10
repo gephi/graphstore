@@ -16,8 +16,7 @@
 package org.gephi.graph.api;
 
 /**
- *
- * @author mbastian
+ * A directed subgraph.
  */
 public interface DirectedSubgraph extends DirectedGraph, Subgraph {
 }

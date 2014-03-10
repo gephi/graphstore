@@ -16,8 +16,7 @@
 package org.gephi.graph.api;
 
 /**
- *
- * @author mbastian
+ * A node.
  */
 public interface Node extends Element, NodeProperties {
 }

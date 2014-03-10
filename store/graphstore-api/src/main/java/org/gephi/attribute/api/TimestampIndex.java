@@ -19,16 +19,38 @@ import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 
 /**
- *
- * @author mbastian
+ * Holds an index for timestamps.
  */
 public interface TimestampIndex<T extends Element> {
 
+    /**
+     * Returns the minimum timestamp in this index.
+     * 
+     * @return the minimum timestamp, or -inf if not defined
+     */
     public double getMinTimestamp();
 
+    /**
+     * Returns the maximum timestamp in this index.
+     * 
+     * @return the maximum timestamp, or +inf if not defined
+     */
     public double getMaxTimestamp();
 
+    /**
+     * Returns all elements at the given timestamp.
+     * 
+     * @param timestamp a timestamp
+     * @return elements at this timestamp
+     */
     public ElementIterable<T> get(double timestamp);
 
+    /**
+     * Returns all elements between the given [from, to] interval.
+     * 
+     * @param from the interval start (included)
+     * @param to the interval end (included)
+     * @return elements at this interval
+     */
     public ElementIterable<T> get(double from, double to);
 }

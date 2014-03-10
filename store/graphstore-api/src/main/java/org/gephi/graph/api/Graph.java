@@ -24,30 +24,109 @@ import java.util.Set;
  */
 public interface Graph {
 
+    /**
+     * Adds an edge to this graph.
+     * 
+     * @param edge the edge to add
+     * @return true if the edge has been added, false if it already exists
+     */
     public boolean addEdge(Edge edge);
 
+    /**
+     * Adds a node to this graph.
+     * 
+     * @param node the node to add
+     * @return true if the node has been added, false if it already exists
+     */
     public boolean addNode(Node node);
 
+    /**
+     * Adds all edges in the collection to this graph.
+     * 
+     * @param edges the edge collection
+     * @return true if at least one edge has been added, false otherwise
+     */
     public boolean addAllEdges(Collection<? extends Edge> edges);
 
+    /**
+     * Adds all nodes in the collection to this graph.
+     * 
+     * @param nodes the node collection
+     * @return true if at least one node has been added, false otherwise
+     */
     public boolean addAllNodes(Collection<? extends Node> nodes);
 
+    /**
+     * Removes an edge from this graph.
+     * 
+     * @param edge the edge to remove
+     * @return true if the edge was removed, false if it didn't exist
+     */
     public boolean removeEdge(Edge edge);
 
+    /**
+     * Removes a node from this graph.
+     * 
+     * @param node the node to remove
+     * @return true if the node was removed, false if it didn't exist
+     */
     public boolean removeNode(Node node);
 
+    /**
+     * Removes all edges in the collection from this graph.
+     * 
+     * @param edges the edge collection
+     * @return true if at least one edge has been removed, false otherwise
+     */
     public boolean removeEdgeAll(Collection<? extends Edge> edges);
 
+    /**
+     * Removes all nodes in the collection from this graph.
+     * 
+     * @param nodes the node collection
+     * @return true if at least one node has been removed, false otherwise
+     */
     public boolean removeNodeAll(Collection<? extends Node> nodes);
 
+    /**
+     * Returns true if <em>node</em> is contained in this graph.
+     * 
+     * @param node the node to test
+     * @return true if this graph contains <em>node</em>, false otherwise
+     */
     public boolean contains(Node node);
 
+    /**
+     * Returns true if <em>edge</em> is contained in this graph.
+     * 
+     * @param edge the edge to test
+     * @return true if this graph contains <em>edge</em>, false otherwise
+     */
     public boolean contains(Edge edge);
 
+    /**
+     * Gets a node given its identifier.
+     * 
+     * @param id the node id
+     * @return the node, or null if not found
+     */
     public Node getNode(Object id);
 
+    /**
+     * Gets an edge by its identifier.
+     * 
+     * @param id the edge id
+     * @return the edge, or null if not found
+     */
     public Edge getEdge(Object id);
 
+    /**
+     * Gets the edge adjacent to node1 and node2.
+     *
+     * @param node1 the first node
+     * @param node2 the second node
+     * @return the adjacent edge, or null if not found
+     */
     public Edge getEdge(Node node1, Node node2);
 
     public Edge getEdge(Node node1, Node node2, int type);

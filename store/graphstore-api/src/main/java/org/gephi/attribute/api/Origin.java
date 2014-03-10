@@ -16,8 +16,7 @@
 package org.gephi.attribute.api;
 
 /**
- *
- * @author mbastian
+ * The column's data origin.
  */
 public enum Origin {
 

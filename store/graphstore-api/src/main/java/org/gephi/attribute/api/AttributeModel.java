@@ -25,9 +25,8 @@ public interface AttributeModel {
      * Returns the <b>node</b> table. Contains all the columns associated to
      * node elements.
      * <p>
-     * An
-     * <code>AttributeModel</code> has always <b>node</b>, <b>edge</b> and
-     * <b>graph</b> tables by default.
+     * An <code>AttributeModel</code> has always <b>node</b> and <b>edge</b>
+     * tables by default.
      *
      * @return the node table, contains node columns
      */
@@ -37,15 +36,24 @@ public interface AttributeModel {
      * Returns the <b>edge</b> table. Contains all the columns associated to
      * edge elements.
      * <p>
-     * An
-     * <code>AttributeModel</code> has always <b>node</b>, <b>edge</b> and
-     * <b>graph</b> tables by default.
+     * An <code>AttributeModel</code> has always <b>node</b> and <b>edge</b>
+     * tables by default.
      *
      * @return the edge table, contains edge columns
      */
     public Table getEdgeTable();
-    
+
+    /**
+     * Returns the time format used to display time.
+     *
+     * @return the time format
+     */
     public TimeFormat getTimeFormat();
-    
+
+    /**
+     * Sets the time format used to display time.
+     *
+     * @param timeFormat the time format
+     */
     public void setTimeFormat(TimeFormat timeFormat);
 }

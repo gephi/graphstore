@@ -130,7 +130,7 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
-    public TableObserver getTableObserver() {
+    public TableObserver newTableObserver() {
         return store.createTableObserver(this);
     }
 

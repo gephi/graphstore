@@ -16,8 +16,7 @@
 package org.gephi.graph.api;
 
 /**
- *
- * @author mbastian
+ * Edge properties
  */
 public interface EdgeProperties extends ElementProperties {
 }

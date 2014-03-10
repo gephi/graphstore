@@ -21,20 +21,42 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- *
- * @author mbastian
+ * Element iterable.
+ * 
+ * @param <T> the element class
  */
 public interface ElementIterable<T extends Element> extends Iterable<T> {
 
+    /**
+     * Empty iterable.
+     */
     final ElementIterable EMPTY = new ElementIterable.ElementIterableEmpty();
 
+    /**
+     * Returns the element iterator.
+     * 
+     * @return the iterator.
+     */
     @Override
     public Iterator<T> iterator();
 
+    /**
+     * Returns the iterator content as an array.
+     *
+     * @return edge array
+     */
     public T[] toArray();
 
+    /**
+     * Returns the iterator content as a collection.
+     *
+     * @return edge array
+     */
     public Collection<T> toCollection();
 
+    /**
+     * Break the iterator and release read lock (if any).
+     */
     public void doBreak();
 
     static final class ElementIterableEmpty implements Iterator<Element>, ElementIterable {

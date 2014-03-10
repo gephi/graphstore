@@ -9,4 +9,6 @@ package org.gephi.graph.query;
  * @author mbastian
  */
 public class DefaultQuery {
+    
+    
 }

@@ -16,8 +16,7 @@
 package org.gephi.attribute.api;
 
 /**
- *
- * @author mbastian
+ * Different representation of time.
  */
 public enum TimeFormat {
 
@@ -56,7 +55,19 @@ public enum TimeFormat {
 
             };
 
+    /**
+     * Parses the given string into the time format.
+     *
+     * @param str the string to parse
+     * @return the time, in milliseconds
+     */
     public abstract double parse(String str);
 
+    /**
+     * Prints the given time in this format.
+     *
+     * @param time the time
+     * @return a formatted time
+     */
     public abstract String print(double time);
 }

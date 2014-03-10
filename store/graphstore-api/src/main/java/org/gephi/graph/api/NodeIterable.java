@@ -21,19 +21,36 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- *
- * @author mbastian
+ * A node iterable.
  */
 public interface NodeIterable extends ElementIterable<Node> {
 
+    /**
+     * The static empty iterable.
+     */
     static final NodeIterable EMPTY = new NodeIterableEmpty();
 
+    /**
+     * Returns a node iterator.
+     *
+     * @return node iterator
+     */
     @Override
     public Iterator<Node> iterator();
 
+    /**
+     * Returns the iterator content as an array.
+     *
+     * @return node array
+     */
     @Override
     public Node[] toArray();
 
+    /**
+     * Returns the iterator content as a collection.
+     *
+     * @return node collection
+     */
     @Override
     public Collection<Node> toCollection();
 

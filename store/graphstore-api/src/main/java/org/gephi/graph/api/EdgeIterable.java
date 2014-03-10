@@ -21,19 +21,36 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- *
- * @author mbastian
+ * An edge iterable.
  */
 public interface EdgeIterable extends ElementIterable<Edge> {
 
+    /**
+     * The static empty iterable.
+     */
     public static final EdgeIterable EMPTY = new EdgeIterableEmpty();
 
+    /**
+     * Returns an edge iterator.
+     *
+     * @return edge iterator
+     */
     @Override
     public Iterator<Edge> iterator();
 
+    /**
+     * Returns the iterator content as an array.
+     *
+     * @return edge array
+     */
     @Override
     public Edge[] toArray();
 
+    /**
+     * Returns the iterator content as a collection.
+     *
+     * @return edge collection
+     */
     @Override
     public Collection<Edge> toCollection();
 
