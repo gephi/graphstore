@@ -78,6 +78,7 @@ public class GraphViewImpl implements GraphView {
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
         this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
+        this.interval = Interval.INFINITY_INTERVAL;
     }
 
     public GraphViewImpl(final GraphViewImpl view, boolean nodes, boolean edges) {
@@ -353,13 +354,13 @@ public class GraphViewImpl implements GraphView {
 
     public void fill() {
         if (nodeView) {
-            if(nodeCount > 0) {
+            if (nodeCount > 0) {
                 nodeBitVector = new BitVector(graphStore.nodeStore.maxStoreId());
             }
             nodeBitVector.not();
             this.nodeCount = graphStore.nodeStore.size();
         }
-        if(edgeCount > 0) {
+        if (edgeCount > 0) {
             edgeBitVector = new BitVector(graphStore.edgeStore.maxStoreId());
         }
         edgeBitVector.not();
@@ -490,7 +491,7 @@ public class GraphViewImpl implements GraphView {
     }
 
     public void setTimeInterval(Interval interval) {
-        if(interval == null) {
+        if (interval == null) {
             interval = Interval.INFINITY_INTERVAL;
         }
         this.interval = interval;
