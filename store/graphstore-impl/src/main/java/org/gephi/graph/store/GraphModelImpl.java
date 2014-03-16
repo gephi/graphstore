@@ -292,7 +292,7 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
     }
 
     @Override
-    public GraphObserver getGraphObserver(Graph graph, boolean withGraphDiff) {
+    public GraphObserver createGraphObserver(Graph graph, boolean withGraphDiff) {
         store.autoWriteLock();
         try {
             if (graph.getView().isMainView()) {
@@ -317,24 +317,21 @@ public class GraphModelImpl implements GraphModel, AttributeModel {
 
     @Override
     public Interval getTimeBounds() {
-        TimestampStore timestampStore = store.timestampStore;
-        store.autoReadLock();
-        try {
-            double min = timestampStore.getMin(store);
-            double max = timestampStore.getMax(store);
-            return new Interval(min, max);
-        } finally {
-            store.autoReadUnlock();
-        }
+        return getTimeBounds(store.getView());
     }
 
     @Override
     public Interval getTimeBoundsVisible() {
+        return getTimeBounds(getGraphVisible().getView());
+    }
+    
+    @Override
+    public Interval getTimeBounds(GraphView view) {
         TimestampStore timestampStore = store.timestampStore;
         store.autoReadLock();
         try {
-            double min = timestampStore.getMin(getGraphVisible());
-            double max = timestampStore.getMax(getGraphVisible());
+            double min = timestampStore.getMin(getGraph(view));
+            double max = timestampStore.getMax(getGraph(view));
             return new Interval(min, max);
         } finally {
             store.autoReadUnlock();
