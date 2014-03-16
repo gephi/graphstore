@@ -16,8 +16,7 @@
 package org.gephi.graph.api;
 
 /**
- *
- * @author mbastian
+ * Undirected graph
  */
 public interface UndirectedGraph extends Graph {
 }

@@ -16,8 +16,7 @@
 package org.gephi.graph.api;
 
 /**
- *
- * @author mbastian
+ * Directed graph.
  */
 public interface DirectedGraph extends Graph {
 
@@ -66,7 +65,7 @@ public interface DirectedGraph extends Graph {
     public boolean isAdjacent(Node source, Node target, int type);
 
     /**
-     * Returns the node's predecessors.
+     * Gets the node's predecessors.
      * <p>
      * A node predecessor is a node connected by an incoming edge.
      *
@@ -76,7 +75,7 @@ public interface DirectedGraph extends Graph {
     public NodeIterable getPredecessors(Node node);
 
     /**
-     * Returns the node's predecessors through a specific edge type.
+     * Gets the node's predecessors through a specific edge type.
      * <p>
      * A node predecessor is a node connected by an incoming edge.
      *
@@ -87,7 +86,7 @@ public interface DirectedGraph extends Graph {
     public NodeIterable getPredecessors(Node node, int type);
 
     /**
-     * Returns the node's successors.
+     * Gets the node's successors.
      * <p>
      * A node successor is a node connected by an outgoing edge.
      *
@@ -97,7 +96,7 @@ public interface DirectedGraph extends Graph {
     public NodeIterable getSuccessors(Node node);
 
     /**
-     * Returns the node's successors through a specific edge type.
+     * Gets the node's successors through a specific edge type.
      * <p>
      * A node successor is a node connected by an outgoing edge.
      *
@@ -108,7 +107,7 @@ public interface DirectedGraph extends Graph {
     public NodeIterable getSuccessors(Node node, int type);
 
     /**
-     * Returns the node's incoming edges.
+     * Gets the node's incoming edges.
      *
      * @param node the node to get incoming edges
      * @return an iterable on <em>node</em>'s incoming edges
@@ -116,7 +115,7 @@ public interface DirectedGraph extends Graph {
     public EdgeIterable getInEdges(Node node);
 
     /**
-     * Returns the node's incoming edges for the given type.
+     * Gets the node's incoming edges for the given type.
      *
      * @param node the node to get incoming edges
      * @param type the edge type
@@ -125,7 +124,7 @@ public interface DirectedGraph extends Graph {
     public EdgeIterable getInEdges(Node node, int type);
 
     /**
-     * Returns the node's outgoing edges.
+     * Gets the node's outgoing edges.
      *
      * @param node the node to get outgoing edges
      * @return an iterable on <em>node</em>'s outgoing edges
@@ -133,7 +132,7 @@ public interface DirectedGraph extends Graph {
     public EdgeIterable getOutEdges(Node node);
 
     /**
-     * Returns the node's incoming edges for the given type.
+     * Gets the node's incoming edges for the given type.
      *
      * @param node the node to get incoming edges
      * @param type the edge type
@@ -142,7 +141,7 @@ public interface DirectedGraph extends Graph {
     public EdgeIterable getOutEdges(Node node, int type);
 
     /**
-     * Returns the edge in the other direction of the given edge.
+     * Gets the edge in the other direction of the given edge.
      * <p>
      * This takes in account the edge type so only edges of the same type can be
      * mutual.
@@ -153,7 +152,7 @@ public interface DirectedGraph extends Graph {
     public Edge getMutualEdge(Edge edge);
 
     /**
-     * Returns the edge's in-degree.
+     * Gets the edge's in-degree.
      *
      * @param node the node to get the in-degree from
      * @return the in-degree number
@@ -161,7 +160,7 @@ public interface DirectedGraph extends Graph {
     public int getInDegree(Node node);
 
     /**
-     * Returns the edge's out-degree.
+     * Gets the edge's out-degree.
      *
      * @param node the node to get the out-degree from
      * @return the out-degree number

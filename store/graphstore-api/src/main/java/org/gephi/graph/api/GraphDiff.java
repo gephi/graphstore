@@ -16,16 +16,38 @@
 package org.gephi.graph.api;
 
 /**
- *
- * @author mbastian
+ * Interface to retrieve added and removed elements from the graph.
+ * <p>
+ * This interface is associated with a {@link  GraphObserver} and provides an
+ * easy access to the elements added or removed.
  */
 public interface GraphDiff {
 
+    /**
+     * Gets all added nodes.
+     *
+     * @return an iterable over added nodes
+     */
     public NodeIterable getAddedNodes();
 
+    /**
+     * Gets all removed nodes.
+     *
+     * @return an iterable over removed nodes
+     */
     public NodeIterable getRemovedNodes();
 
+    /**
+     * Gets all added edges.
+     *
+     * @return an iterable over added edges
+     */
     public EdgeIterable getAddedEdges();
 
+    /**
+     * Gets all removed edges.
+     *
+     * @return an iterable over removed edges
+     */
     public EdgeIterable getRemovedEdges();
 }

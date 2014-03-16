@@ -18,18 +18,50 @@ package org.gephi.graph.api;
 import org.gephi.attribute.time.Interval;
 
 /**
- *
- * @author mbastian
+ * View on the graph.
+ * <p>
+ * Each graph can have views on the entire graph and use these views to obtain
+ * subgraphs. A view is a filter on the main graph structure where some nodes
+ * and/or edges are missing.
+ * 
+ * @see GraphModel
  */
 public interface GraphView {
 
+    /**
+     * Gets the graph model this view belongs to.
+     *
+     * @return the graph model
+     */
     public GraphModel getGraphModel();
 
+    /**
+     * Returns true if this view is the main view.
+     *
+     * @return true if main view, false otherwise
+     */
     public boolean isMainView();
 
+    /**
+     * Returns true if this view supports node filtering.
+     *
+     * @return true if node view, false otherwise
+     */
     public boolean isNodeView();
 
+    /**
+     * Returns true if this view supports edge filtering.
+     *
+     * @return true if edge view, false otherwise
+     */
     public boolean isEdgeView();
 
+    /**
+     * Gets the time interval for this view.
+     * <p>
+     * If no interval is set, it returns a [-inf, +inf] interval.
+     *
+     * @return the time interval, or [-inf, +inf] if not set
+     */
     public Interval getTimeInterval();
 }

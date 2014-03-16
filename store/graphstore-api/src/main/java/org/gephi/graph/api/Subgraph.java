@@ -21,12 +21,34 @@ package org.gephi.graph.api;
  */
 public interface Subgraph extends Graph {
 
+    /**
+     * Gets the view associated with this subgraph.
+     * 
+     * @return the graph view
+     */
     @Override
     public GraphView getView();
 
+    /**
+     * Fills the subgraph so all elements in the graph are in the subgraph.
+     */
     public void fill();
 
+    /**
+     * Unions the given subgraph with this sugbgraph.
+     * <p>
+     * The given subgraph remains unchanged.
+     * 
+     * @param subGraph the subgraph to do the union with
+     */
     public void union(Subgraph subGraph);
 
+    /**
+     * Intersects the given subgraph with this sugbgraph.
+     * <p>
+     * The given subgraph remains unchanged.
+     * 
+     * @param subGraph the subgraph to do the intersection with
+     */
     public void intersection(Subgraph subGraph);
 }

@@ -16,18 +16,60 @@
 package org.gephi.graph.api;
 
 /**
+ * Observer over a graph to monitor changes and obtain the list of differences.
+ * <p>
+ * The graph observer is a mechanism used to monitor periodically changes made
+ * to the graph. This scenario is common in multi-threaded application where a
+ * thread is modifying the graph and one or multiple threads need to take action
+ * when updates are made.
+ * <p>
+ * Graph observer users should periodically call the
+ * <code>hasGraphChanged()</code> method to check the status. Each call resets
+ * the observer so if the method returns true and the graph doesn't change after
+ * that it will return false next time.
+ * <p>
+ * In addition of a boolean flag whether the graph has changed, an observer can
+ * collect data about the differences such as nodes added or removed. Users
+ * should call the <code>getDiff()</code> method after calling
+ * <code>hasGraphChanged()</code> to obtain the diff.
+ * <p>
+ * Observers should be destroyed when not needed anymore. A new observer can be
+ * obtained from the <code>GraphModel</code>.
  *
- * @author mbastian
+ * @see GraphModel
  */
 public interface GraphObserver {
 
+    /**
+     * Returns true if the graph has changed.
+     *
+     * @return true if changed, false otherwise
+     */
     public boolean hasGraphChanged();
 
+    /**
+     * Gets the graph difference.
+     *
+     * @return the graph diff
+     */
     public GraphDiff getDiff();
 
+    /**
+     * Gets the graph this observer is observing.
+     *
+     * @return the graph
+     */
     public Graph getGraph();
 
+    /**
+     * Destroys this graph observer
+     */
     public void destroy();
 
+    /**
+     * Returns true if this observer has been destroyed.
+     *
+     * @return true if destroyed, false otherwise
+     */
     public boolean isDestroyed();
 }
