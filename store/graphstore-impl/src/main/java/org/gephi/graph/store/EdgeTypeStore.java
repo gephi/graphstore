@@ -68,6 +68,7 @@ public class EdgeTypeStore {
 
     public Object getLabel(final int id) {
         checkValidId(id);
+        checkIdExists(id);
 
         return idMap.get(intToShort(id));
     }
@@ -185,6 +186,12 @@ public class EdgeTypeStore {
                     || cl.equals(Boolean.class))) {
                 throw new IllegalArgumentException("The type id is " + cl.getCanonicalName() + " but must be a primitive type (int, string, long...)");
             }
+        }
+    }
+    
+    private void checkIdExists(final int id) {
+        if(!idMap.containsKey(intToShort(id))) {
+            throw new IllegalArgumentException("The id "+id+" doesn' exist");
         }
     }
 

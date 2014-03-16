@@ -121,16 +121,26 @@ public class EdgeTypeStoreTest {
         int type = edgeTypeStore.addType("0");
 
         Assert.assertEquals(edgeTypeStore.getLabel(type), "0");
-
-        Assert.assertNull(edgeTypeStore.getLabel(type + 1));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInvalidId() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        int type = edgeTypeStore.addType("0");
+        edgeTypeStore.addType("0");
 
         edgeTypeStore.getLabel(-1);
+    }
+    
+    @Test
+    public void testNullId() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertNull(edgeTypeStore.getLabel(0));
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testUnknowdId() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        edgeTypeStore.getLabel(4);
     }
 
     @Test
