@@ -15,9 +15,14 @@
  */
 package org.gephi.graph.spi;
 
+import org.gephi.graph.api.Node;
+
 /**
- *
- * @author mbastian
+ * Interface for node metadata to handle custom layout attributes more
+ * efficiently.
+ * <p>
+ * Layout implementations can implement this interface and use the {@link Node#setLayoutData(org.gephi.graph.spi.LayoutData)
+ * } method to associate any metadata with the node.
  */
 public interface LayoutData {
 }

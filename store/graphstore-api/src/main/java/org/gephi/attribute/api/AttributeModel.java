@@ -16,8 +16,11 @@
 package org.gephi.attribute.api;
 
 /**
- *
- * @author mbastian
+ * Entry point for attribute columns management.
+ * <p>
+ * This model gives access to the node and edge tables, which controls the set
+ * of columns each element (node/edge) has. It also provide method to get and
+ * set the current time display format.
  */
 public interface AttributeModel {
 

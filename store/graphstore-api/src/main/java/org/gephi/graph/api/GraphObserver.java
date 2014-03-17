@@ -62,7 +62,7 @@ public interface GraphObserver {
     public Graph getGraph();
 
     /**
-     * Destroys this graph observer
+     * Destroys this graph observer.
      */
     public void destroy();
 
