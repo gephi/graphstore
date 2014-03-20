@@ -21,7 +21,7 @@ import org.gephi.attribute.api.TimestampIndex;
 import org.gephi.attribute.time.Interval;
 
 /**
- *
+ * 
  * @author mbastian
  */
 public interface GraphModel {

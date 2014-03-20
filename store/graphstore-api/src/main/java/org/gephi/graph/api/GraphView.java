@@ -20,10 +20,28 @@ import org.gephi.attribute.time.Interval;
 /**
  * View on the graph.
  * <p>
- * Each graph can have views on the entire graph and use these views to obtain
- * subgraphs. A view is a filter on the main graph structure where some nodes
- * and/or edges are missing.
- * 
+ * Each graph can have views and use these views to obtain subgraphs. A view is
+ * a filter on the main graph structure where some nodes and/or edges are
+ * missing.
+ * <p>
+ * The graph model has a main view, which is always 100% of nodes and edges.
+ * Users can then create views and modify them by enabling/disabling elements.
+ * Views can only have elements which are in the model. As a consequence, if a
+ * element is removed from the graph it's also removed from all the views. By
+ * default, the view is empty.
+ * <p>
+ * The main benefits of views is the ability to obtain a <code>Graph</code>
+ * object from it. Users can call the
+ * {@link GraphModel#getGraph(org.gephi.graph.api.GraphView) } method and obtain
+ * a graph backed by the view. Update operations such as add or remove on this
+ * graph are in-fact modifying the view rather than the model. Indeed, adding a
+ * node to a view is enabling this node in the view. Similarly for removal.
+ * <p>
+ * Views can apply on nodes only, edges only or both. This is configured when
+ * the view is created. Nodes-only view let the system automatically control the
+ * set of edges. Enabling a node in the view will automatically enable all it's
+ * edges if the opposite nodes are also in the view.
+ *
  * @see GraphModel
  */
 public interface GraphView {
