@@ -139,18 +139,7 @@ public class GraphViewImpl implements GraphView {
 
                             incrementEdgeVersion();
 
-                            edgeBitVector.set(edgeid);
-                            edgeCount++;
-
-                            int type = edge.type;
-                            ensureTypeCountArrayCapacity(type);
-
-                            typeCounts[type]++;
-
-                            if (edge.isMutual() && edge.source.storeId < edge.target.storeId) {
-                                mutualEdgeTypeCounts[type]++;
-                                mutualEdgesCount++;
-                            }
+                            addEdge(edge);
                         }
                         //End
                     }
@@ -190,20 +179,7 @@ public class GraphViewImpl implements GraphView {
         if (!isSet) {
             checkIncidentNodesExists(edgeImpl);
 
-            incrementEdgeVersion();
-
-            edgeBitVector.set(id);
-            edgeCount++;
-
-            int type = edgeImpl.type;
-            ensureTypeCountArrayCapacity(type);
-
-            typeCounts[type]++;
-
-            if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
-                mutualEdgeTypeCounts[type]++;
-                mutualEdgesCount++;
-            }
+            addEdge(edgeImpl);
             return true;
         }
         return false;
@@ -248,16 +224,7 @@ public class GraphViewImpl implements GraphView {
                 int edgeId = edgeImpl.storeId;
                 boolean edgeSet = edgeBitVector.get(edgeId);
                 if (edgeSet) {
-                    incrementEdgeVersion();
-
-                    edgeBitVector.clear(edgeId);
-                    edgeCount--;
-                    typeCounts[edgeImpl.type]--;
-
-                    if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
-                        mutualEdgeTypeCounts[edgeImpl.type]--;
-                        mutualEdgesCount--;
-                    }
+                    removeEdge(edgeImpl);
                 }
             }
             return true;
@@ -290,16 +257,8 @@ public class GraphViewImpl implements GraphView {
         int id = edgeImpl.storeId;
         boolean isSet = edgeBitVector.get(id);
         if (isSet) {
-            incrementEdgeVersion();
+            removeEdge(edgeImpl);
 
-            edgeBitVector.clear(id);
-            edgeCount--;
-            typeCounts[edgeImpl.type]--;
-
-            if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
-                mutualEdgeTypeCounts[edgeImpl.type]--;
-                mutualEdgesCount--;
-            }
             return true;
         }
         return false;
@@ -441,6 +400,14 @@ public class GraphViewImpl implements GraphView {
         }
     }
 
+    public void addEdgeInNodeView(EdgeImpl edge) {
+        if (nodeBitVector.get(edge.source.getStoreId()) && nodeBitVector.get(edge.target.getStoreId())) {
+            incrementEdgeVersion();
+
+            addEdge(edge);
+        }
+    }
+
     public int getNodeCount() {
         if (nodeView) {
             return nodeCount;
@@ -553,6 +520,36 @@ public class GraphViewImpl implements GraphView {
         if (sid >= edgeBitVector.size()) {
             int newSize = Math.min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
             edgeBitVector = growBitVector(edgeBitVector, newSize);
+        }
+    }
+
+    private void addEdge(EdgeImpl edgeImpl) {
+        incrementEdgeVersion();
+
+        edgeBitVector.set(edgeImpl.storeId);
+        edgeCount++;
+
+        int type = edgeImpl.type;
+        ensureTypeCountArrayCapacity(type);
+
+        typeCounts[type]++;
+
+        if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
+            mutualEdgeTypeCounts[type]++;
+            mutualEdgesCount++;
+        }
+    }
+
+    private void removeEdge(EdgeImpl edgeImpl) {
+        incrementEdgeVersion();
+
+        edgeBitVector.clear(edgeImpl.storeId);
+        edgeCount--;
+        typeCounts[edgeImpl.type]--;
+
+        if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
+            mutualEdgeTypeCounts[edgeImpl.type]--;
+            mutualEdgesCount--;
         }
     }
 

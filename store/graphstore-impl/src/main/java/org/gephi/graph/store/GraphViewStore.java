@@ -246,6 +246,10 @@ public class GraphViewStore {
         if (views.length > 0) {
             for (GraphViewImpl view : views) {
                 view.ensureEdgeVectorSize(edge);
+                
+                if(view.nodeView && !view.edgeView) {
+                    view.addEdgeInNodeView(edge);
+                }
             }
         }
     }

@@ -833,6 +833,7 @@ public class GraphViewStoreTest {
         Assert.assertTrue(view.nodeBitVector.size() >= node.storeId);
         boolean a = view.addNode(node);
         Assert.assertTrue(a);
+        Assert.assertTrue(view.containsNode(node));
     }
 
     @Test
@@ -854,6 +855,7 @@ public class GraphViewStoreTest {
         Assert.assertTrue(view.edgeBitVector.size() >= edge.storeId);
         boolean a = view.addEdge(edge);
         Assert.assertTrue(a);
+        Assert.assertTrue(view.containsEdge(edge));
     }
 
     @Test
@@ -999,6 +1001,25 @@ public class GraphViewStoreTest {
     }
 
     @Test
+    public void testNodeViewEdgeUpdate() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(true, false);
+
+        NodeImpl n1 = graphStore.getNode("0");
+        NodeImpl n2 = graphStore.getNode("1");
+        
+        view.addNode(n1);
+        view.addNode(n2);
+        
+        Assert.assertNull(graphStore.getEdge(n1, n2));
+        EdgeImpl edge = (EdgeImpl)graphStore.factory.newEdge(n1, n2);
+        graphStore.addEdge(edge);
+        
+        Assert.assertTrue(view.containsEdge(edge));
+    }
+
+    @Test
     public void testIsNodeView() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
         GraphViewStore store = graphStore.viewStore;
@@ -1008,6 +1029,18 @@ public class GraphViewStoreTest {
 
         Assert.assertTrue(v1.isNodeView() && v1.isEdgeView());
         Assert.assertTrue(v2.isNodeView() && !v2.isEdgeView());
+    }
+
+    @Test
+    public void testIsEdgeView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        GraphView v1 = store.createView();
+        GraphView v2 = store.createView(false, true);
+
+        Assert.assertTrue(v1.isNodeView() && v1.isEdgeView());
+        Assert.assertTrue(!v2.isNodeView() && v2.isEdgeView());
     }
 
     @Test
