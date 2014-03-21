@@ -139,6 +139,6 @@
     <!-- List of modules -->
     <modules>
         <module>graphstore-api</module>
-        <module>graphstore-impl</module>
+        <module>graphstore</module>
     </modules>
 </project>
