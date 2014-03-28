@@ -77,7 +77,7 @@ public interface Graph {
      * @param edges the edge collection
      * @return true if at least one edge has been removed, false otherwise
      */
-    public boolean removeEdgeAll(Collection<? extends Edge> edges);
+    public boolean removeAllEdges(Collection<? extends Edge> edges);
 
     /**
      * Removes all nodes in the collection from this graph.
@@ -85,7 +85,7 @@ public interface Graph {
      * @param nodes the node collection
      * @return true if at least one node has been removed, false otherwise
      */
-    public boolean removeNodeAll(Collection<? extends Node> nodes);
+    public boolean removeAllNodes(Collection<? extends Node> nodes);
 
     /**
      * Returns true if <em>node</em> is contained in this graph.

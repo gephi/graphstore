@@ -152,12 +152,12 @@ public class BasicGraphStore implements DirectedGraph {
     }
 
     @Override
-    public boolean removeEdgeAll(Collection<? extends Edge> edges) {
+    public boolean removeAllEdges(Collection<? extends Edge> edges) {
         return edgeStore.removeAll(edges);
     }
 
     @Override
-    public boolean removeNodeAll(Collection<? extends Node> nodes) {
+    public boolean removeAllNodes(Collection<? extends Node> nodes) {
         for (Node n : nodes) {
             removeNode(n);
         }

@@ -299,7 +299,7 @@ public class GraphObserverTest {
         store.addAllNodes(Arrays.asList(removedNodes));
 
         graphObserver.hasGraphChanged();
-        store.removeNodeAll(Arrays.asList(removedNodes));
+        store.removeAllNodes(Arrays.asList(removedNodes));
 
         boolean a = graphObserver.hasGraphChanged();
         GraphDiff diff = graphObserver.getDiff();

@@ -108,7 +108,7 @@ public interface Subgraph extends Graph {
      * @return true if at least a node is removed, false otherwise
      */
     @Override
-    public boolean removeNodeAll(Collection<? extends Node> nodes);
+    public boolean removeAllNodes(Collection<? extends Node> nodes);
 
     /**
      * Removes an edge from this subgraph.
@@ -130,7 +130,7 @@ public interface Subgraph extends Graph {
      * @return true if at least an edge has been removed, false otherwise
      */
     @Override
-    public boolean removeEdgeAll(Collection<? extends Edge> edges);
+    public boolean removeAllEdges(Collection<? extends Edge> edges);
 
     /**
      * Fills the subgraph so all elements in the graph are in the subgraph.

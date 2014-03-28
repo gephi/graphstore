@@ -222,7 +222,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
-    public boolean removeNodeAll(Collection<? extends Node> nodes) {
+    public boolean removeAllNodes(Collection<? extends Node> nodes) {
         autoWriteLock();
         try {
             for (Node node : nodes) {
@@ -239,7 +239,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
-    public boolean removeEdgeAll(Collection<? extends Edge> edges) {
+    public boolean removeAllEdges(Collection<? extends Edge> edges) {
         autoWriteLock();
         try {
             return edgeStore.removeAll(edges);

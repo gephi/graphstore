@@ -224,7 +224,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     }
 
     @Override
-    public boolean removeEdgeAll(Collection<? extends Edge> edges) {
+    public boolean removeAllEdges(Collection<? extends Edge> edges) {
         graphStore.autoWriteLock();
         try {
             return view.removeEdgeAll(edges);
@@ -234,7 +234,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     }
 
     @Override
-    public boolean removeNodeAll(Collection<? extends Node> nodes) {
+    public boolean removeAllNodes(Collection<? extends Node> nodes) {
         graphStore.autoWriteLock();
         try {
             return view.removeNodeAll(nodes);

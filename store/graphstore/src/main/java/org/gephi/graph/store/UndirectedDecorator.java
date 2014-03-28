@@ -78,13 +78,13 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
-    public boolean removeEdgeAll(Collection<? extends Edge> edges) {
-        return store.removeEdgeAll(edges);
+    public boolean removeAllEdges(Collection<? extends Edge> edges) {
+        return store.removeAllEdges(edges);
     }
 
     @Override
-    public boolean removeNodeAll(Collection<? extends Node> nodes) {
-        return store.removeNodeAll(nodes);
+    public boolean removeAllNodes(Collection<? extends Node> nodes) {
+        return store.removeAllNodes(nodes);
     }
 
     @Override

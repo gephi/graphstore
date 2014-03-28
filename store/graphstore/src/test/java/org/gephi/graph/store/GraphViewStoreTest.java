@@ -512,14 +512,14 @@ public class GraphViewStoreTest {
         graph.addAllNodes(graphStore.getNodes().toCollection());
         graph.addAllEdges(graphStore.getEdges().toCollection());
 
-        graph.removeEdgeAll(graphStore.getEdges().toCollection());
+        graph.removeAllEdges(graphStore.getEdges().toCollection());
 
         Assert.assertEquals(graph.getEdgeCount(), 0);
         for (Edge e : graphStore.getEdges()) {
             Assert.assertFalse(graph.contains(e));
         }
 
-        graph.removeNodeAll(graphStore.getNodes().toCollection());
+        graph.removeAllNodes(graphStore.getNodes().toCollection());
 
         Assert.assertEquals(graph.getNodeCount(), 0);
         for (Node n : graphStore.getNodes()) {
@@ -537,14 +537,14 @@ public class GraphViewStoreTest {
         graph.addAllNodes(graphStore.getNodes().toCollection());
         graph.addAllEdges(graphStore.getEdges().toCollection());
 
-        graph.removeEdgeAll(graphStore.getEdges().toCollection());
+        graph.removeAllEdges(graphStore.getEdges().toCollection());
 
         Assert.assertEquals(graph.getEdgeCount(), 0);
         for (Edge e : graphStore.getEdges()) {
             Assert.assertFalse(graph.contains(e));
         }
 
-        graph.removeNodeAll(graphStore.getNodes().toCollection());
+        graph.removeAllNodes(graphStore.getNodes().toCollection());
 
         Assert.assertEquals(graph.getNodeCount(), 0);
         for (Node n : graphStore.getNodes()) {
