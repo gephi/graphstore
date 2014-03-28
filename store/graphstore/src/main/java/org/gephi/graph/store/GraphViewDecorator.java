@@ -21,6 +21,7 @@ import java.util.Set;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
@@ -603,6 +604,11 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         } finally {
             graphStore.autoWriteUnlock();
         }
+    }
+
+    @Override
+    public Graph getRootGraph() {
+        return graphStore;
     }
 
     void checkWriteLock() {

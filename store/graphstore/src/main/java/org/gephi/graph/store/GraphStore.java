@@ -644,6 +644,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public void fill() {
         throw new UnsupportedOperationException("Not supported for the main view.");
     }
+    
+    @Override
+    public Graph getRootGraph() {
+        return this;
+    }
 
     protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
         if (graph.getView() != mainGraphView) {

@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Set;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
@@ -317,5 +318,10 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     @Override
     public void fill() {
         throw new UnsupportedOperationException("Not supported yet for the main view.");
+    }
+    
+    @Override
+    public Graph getRootGraph() {
+        return this;
     }
 }
