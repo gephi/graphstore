@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * Graph interface
+ * Graph interface.
  */
 public interface Graph {
 
