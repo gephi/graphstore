@@ -57,6 +57,8 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>jar</shadedClassifierName>
                             <artifactSet>
                                 <includes>
                                     <include>org.gephi:graphstore-api</include>
