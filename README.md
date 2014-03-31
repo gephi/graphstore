@@ -19,7 +19,7 @@ GraphStore is an in-memory graph structure implementation written in Java. It is
 
 No stable version has been released yet. You can download the development version:
 
-[graphstore-0.1-SNAPSHOT.jar](http://nexus.gephi.org/nexus/service/local/artifact/maven/content?r=snapshots&g=org.gephi&a=graphstore&v=0.1-SNAPSHOT&p=jar)
+[graphstore-0.1-SNAPSHOT.jar](http://nexus.gephi.org/nexus/service/local/artifact/maven/content?r=snapshots&g=org.gephi&a=graphstore&v=0.1-SNAPSHOT&p=jar&c=jar)
 
 ## Dependencies
 
