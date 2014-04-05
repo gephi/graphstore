@@ -18,24 +18,29 @@ package org.gephi.graph.benchmark;
 import org.gephi.nanobench.NanoBench;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class NodeStoreBenchmarkTest {
 
     @Test
     public void testPushStore() {
-        NanoBench.create().measurements(100).measure("push node store", new NodeStoreBenchmark().pushStore());
+        int[] n = {100, 1000, 10000, 100000};
+        for (int nodes : n) {
+            NanoBench.create().measurements(10).measure("push node store " + nodes, new NodeStoreBenchmark().pushStore(nodes));
+        }
     }
 
     @Test
     public void testIterateStore() {
-        NanoBench.create().cpuOnly().measurements(100).measure("iterate node store", new NodeStoreBenchmark().iterateStore());
+        int[] n = {100, 1000, 10000, 100000};
+        for (int nodes : n) {
+            NanoBench.create().cpuOnly().measurements(10).measure("iterate node store " + nodes, new NodeStoreBenchmark().iterateStore(nodes));
+        }
     }
 
     @Test
     public void testResetNodeStore() {
-        NanoBench.create().measurements(100).measure("reset node store", new NodeStoreBenchmark().resetNodeStore());
+        int[] n = {100, 1000, 10000, 100000};
+        for (int nodes : n) {
+            NanoBench.create().measurements(10).measure("reset node store "+nodes, new NodeStoreBenchmark().resetNodeStore(nodes));
+        }
     }
 }

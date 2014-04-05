@@ -21,21 +21,18 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author mbastian
- */
 public class LockingBenchmark {
 
-    private DataStruture struture = new DataStruture();
+    private final DataStruture struture = new DataStruture();
     private double number;
-    private int READS = 500;
-    private int WRITES = 100;
-    private int READER_THREADS = 4;
-    private int WRITER_THREADS = 4;
+    private final int READS = 500;
+    private final int WRITES = 100;
+    private final int READER_THREADS = 4;
+    private final int WRITER_THREADS = 4;
 
     public Runnable readWithoutLock() {
         return new Runnable() {
+            @Override
             public void run() {
                 for (int i = 0; i < READS; i++) {
                     struture.read();
@@ -47,6 +44,7 @@ public class LockingBenchmark {
     public Runnable readWithLock() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(true);
         return new Runnable() {
+            @Override
             public void run() {
                 for (int i = 0; i < READS; i++) {
                     lock.readLock().lock();
@@ -60,8 +58,10 @@ public class LockingBenchmark {
     public Runnable fairReadOnly() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(true);
         return new Runnable() {
+            @Override
             public void run() {
                 Runnable r = new Runnable() {
+                    @Override
                     public void run() {
                         for (int i = 0; i < READS; i++) {
                             lock.readLock().lock();
@@ -90,8 +90,10 @@ public class LockingBenchmark {
     public Runnable unfairReadOnly() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(false);
         return new Runnable() {
+            @Override
             public void run() {
                 Runnable r = new Runnable() {
+                    @Override
                     public void run() {
                         for (int i = 0; i < READS; i++) {
                             lock.readLock().lock();
@@ -120,8 +122,10 @@ public class LockingBenchmark {
     public Runnable fairWriteOnly() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(true);
         return new Runnable() {
+            @Override
             public void run() {
                 Runnable r = new Runnable() {
+                    @Override
                     public void run() {
                         for (int i = 0; i < WRITES; i++) {
                             lock.writeLock().lock();
@@ -150,8 +154,10 @@ public class LockingBenchmark {
     public Runnable unfairWriteOnly() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(false);
         return new Runnable() {
+            @Override
             public void run() {
                 Runnable r = new Runnable() {
+                    @Override
                     public void run() {
                         for (int i = 0; i < WRITES; i++) {
                             lock.writeLock().lock();
@@ -180,8 +186,10 @@ public class LockingBenchmark {
     public Runnable fairReadWrites() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(true);
         return new Runnable() {
+            @Override
             public void run() {
                 Runnable reader = new Runnable() {
+                    @Override
                     public void run() {
                         for (int i = 0; i < READS; i++) {
                             lock.readLock().lock();
@@ -191,6 +199,7 @@ public class LockingBenchmark {
                     }
                 };
                 Runnable writer = new Runnable() {
+                    @Override
                     public void run() {
                         for (int i = 0; i < WRITES; i++) {
                             lock.writeLock().lock();
@@ -225,8 +234,10 @@ public class LockingBenchmark {
     public Runnable unfairReadWrites() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(false);
         return new Runnable() {
+            @Override
             public void run() {
                 Runnable reader = new Runnable() {
+                    @Override
                     public void run() {
                         for (int i = 0; i < READS; i++) {
                             lock.readLock().lock();
@@ -236,6 +247,7 @@ public class LockingBenchmark {
                     }
                 };
                 Runnable writer = new Runnable() {
+                    @Override
                     public void run() {
                         for (int i = 0; i < WRITES; i++) {
                             lock.writeLock().lock();
@@ -270,8 +282,8 @@ public class LockingBenchmark {
     private class DataStruture {
 
         private final int[] values = new int[10000];
-        private int readLoops = 10;
-        private int writeLoops = 5;
+        private final int readLoops = 10;
+        private final int writeLoops = 5;
 
         public DataStruture() {
             Random rand = new Random(454);

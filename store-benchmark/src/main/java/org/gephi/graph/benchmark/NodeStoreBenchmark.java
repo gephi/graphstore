@@ -16,31 +16,25 @@
 package org.gephi.graph.benchmark;
 
 import java.util.Iterator;
+import java.util.List;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.store.NodeImpl;
 import org.gephi.graph.store.NodeStore;
 
 /**
  *
- * @author mbastian
+ * @author mbastian, niteshbhargv
  */
 public class NodeStoreBenchmark {
 
-    private static int NODES_READ = 500000;
-    private static int NODES_WRITE = 50000;
     private Object object;
 
-    public Runnable iterateStore() {
-        final NodeStore nodeStore = new NodeStore();
-        int nodes = NODES_READ;
-        for (int i = 0; i < nodes; i++) {
-            NodeImpl n = new NodeImpl(String.valueOf(i));
-            nodeStore.add(n);
-        }
+    public Runnable iterateStore(final int nodes) {
+        final RandomGraph graph = new RandomGraph(nodes, 0).generate().commit();
+        final NodeStore nodeStore = graph.getStore().getNodeStore();
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                int sum = 0;
                 Iterator<Node> m = nodeStore.iterator();
                 for (; m.hasNext();) {
                     NodeImpl b = (NodeImpl) m.next();
@@ -51,23 +45,17 @@ public class NodeStoreBenchmark {
         return runnable;
     }
 
-    public Runnable resetNodeStore() {
-        int nodes = NODES_WRITE;
-        final NodeStore nodeStore = new NodeStore();
-        final NodeImpl[] nodeArray = new NodeImpl[nodes];
-        for (int i = 0; i < nodes; i++) {
-            NodeImpl n = new NodeImpl(String.valueOf(i));
-            nodeStore.add(n);
-            nodeArray[i] = n;
-        }
+    public Runnable resetNodeStore(final int nodes) {
+        final RandomGraph graph = new RandomGraph(nodes, 0).generate().commit();
+        final NodeStore nodeStore = graph.getStore().getNodeStore();
+        final List<Node> nodeList = graph.getNodes();
         Runnable runnable = new Runnable() {
+            @Override
             public void run() {
-                for (int i = 0; i < nodeArray.length; i++) {
-                    NodeImpl n = nodeArray[i];
+                for (Node n : nodeList) {
                     nodeStore.remove(n);
                 }
-                for (int i = 0; i < nodeArray.length; i++) {
-                    NodeImpl n = nodeArray[i];
+                for (Node n : nodeList) {
                     nodeStore.add(n);
                 }
             }
@@ -75,21 +63,18 @@ public class NodeStoreBenchmark {
         return runnable;
     }
 
-    public Runnable pushStore() {
-        final NodeImpl[] nodeStock = new NodeImpl[NODES_WRITE];
+    public Runnable pushStore(int nodes) {
+        final RandomGraph graph = new RandomGraph(nodes, 0).generate();
+        final NodeStore nodeStore = graph.getStore().getNodeStore();
+        final List<Node> nodeList = graph.getNodes();
+
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                for (int i = 0; i < NODES_WRITE; i++) {
-                    nodeStock[i] = new NodeImpl(String.valueOf(i));
-                }
-                int nodes = NODES_WRITE;
-                NodeStore nodeStore = new NodeStore();
-                for (int i = 0; i < nodes; i++) {
-                    NodeImpl n = nodeStock[i];
+                nodeStore.clear();
+                for (Node n : nodeList) {
                     nodeStore.add(n);
                 }
-                object = nodeStore;
             }
         };
         return runnable;

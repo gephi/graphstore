@@ -40,6 +40,7 @@ public class ControlBenchmarkTest {
             final int[] array = new int[10000000];
             int m = 0;
 
+            @Override
             public void run() {
                 int dummy = 0;
                 for (int doNotIgnoreMe : array) {
