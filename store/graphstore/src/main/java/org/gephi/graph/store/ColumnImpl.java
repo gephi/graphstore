@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.store;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.gephi.attribute.api.AttributeUtils;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
@@ -35,10 +37,13 @@ public class ColumnImpl implements Column {
     protected final String title;
     protected final Object defaultValue;
     protected final Origin origin;
+    protected final ColumnVersion version;
     protected final boolean indexed;
     protected final boolean dynamic;
     protected final boolean readOnly;
     protected Estimator estimator;
+    //Observers
+    protected final List<ColumnObserverImpl> observers;
     //Store Id
     protected int storeId = ColumnStore.NULL_ID;
 
@@ -54,10 +59,12 @@ public class ColumnImpl implements Column {
         this.typeClass = typeClass;
         this.title = title;
         this.defaultValue = defaultValue;
+        this.version = new ColumnVersion(this);
         this.origin = origin;
         this.indexed = indexed;
         this.readOnly = readOnly;
         this.dynamic = TimestampValueSet.class.isAssignableFrom(typeClass);
+        this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<ColumnObserverImpl>() : null;
     }
 
     public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed, boolean readOnly) {
@@ -148,6 +155,28 @@ public class ColumnImpl implements Column {
 
     public void setEstimator(Estimator estimator) {
         this.estimator = estimator;
+    }
+    
+    @Override
+    public synchronized ColumnObserverImpl createColumnObserver() {
+        if (observers != null) {
+            ColumnObserverImpl observer = new ColumnObserverImpl(this);
+            observers.add(observer);
+
+            return observer;
+        }
+        return null;
+    }
+
+    protected void destroyColumnObserver(ColumnObserverImpl observer) {
+        if (observers != null) {
+            observers.remove(observer);
+            observer.destroyObserver();
+        }
+    }
+    
+    protected void incrementVersion() {
+        version.incrementAndGetVersion();
     }
 
     @Override

@@ -151,7 +151,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         checkNonNullColumnObject(column);
         return ((ColumnImpl) column).getEstimator();
     }
-    
+
     protected Estimator getEstimator(int index) {
         return ((ColumnImpl) columns[index]).getEstimator();
     }
@@ -268,7 +268,6 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     protected TimestampMap getTimestampMap(int index) {
         lock();
         try {
-
             TimestampMap timestampStore = timestampMaps[index];
             if (timestampStore == null) {
                 timestampStore = new TimestampMap();
@@ -282,18 +281,28 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
 
     protected TableObserverImpl createTableObserver(TableImpl table) {
         if (observers != null) {
-            TableObserverImpl observer = new TableObserverImpl(table);
-            observers.add(observer);
+            lock();
+            try {
+                TableObserverImpl observer = new TableObserverImpl(table);
+                observers.add(observer);
 
-            return observer;
+                return observer;
+            } finally {
+                unlock();
+            }
         }
         return null;
     }
 
-    protected void destroyGraphObserver(TableObserverImpl observer) {
+    protected void destroyTablesObserver(TableObserverImpl observer) {
         if (observers != null) {
-            observers.remove(observer);
-            observer.destroyObserver();
+            lock();
+            try {
+                observers.remove(observer);
+                observer.destroyObserver();
+            } finally {
+                unlock();
+            }
         }
     }
 

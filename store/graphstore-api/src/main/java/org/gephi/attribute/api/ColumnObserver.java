@@ -16,38 +16,24 @@
 package org.gephi.attribute.api;
 
 /**
- * Observer over a table to monitor changes.
- * <p>
- * The table observer is a mechanism used to monitor periodically changes made
- * to the table. This scenario is common in multi-threaded application where a
- * thread is modifying the table and one or multiple threads need to take action
- * when updates are made.
- * <p>
- * Table observer users should periodically call the
- * <code>hasTableChanged()</code> method to check the status. Each call resets
- * the observer so if the method returns true and the table doesn't change after
- * that it will return false next time.
- * <p>
- * Observers should be destroyed when not needed anymore. A new observer can be
- * obtained from the <code>AttributeModel</code>.
  *
- * @see AttributeModel
+ * @author mbastian
  */
-public interface TableObserver {
+public interface ColumnObserver {
 
     /**
-     * Returns true if the table has changed.
+     * Returns true if the column has changed.
      *
      * @return true if changed, false otherwise
      */
-    public boolean hasTableChanged();
+    public boolean hasColumnChanged();
 
     /**
-     * Gets the table this observer belongs to.
+     * Gets the column this observer belongs to.
      *
      * @return the table
      */
-    public Table getTable();
+    public Column getColumn();
 
     /**
      * Destroys this observer.

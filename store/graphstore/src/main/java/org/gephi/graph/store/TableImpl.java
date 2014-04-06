@@ -130,7 +130,7 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
-    public TableObserver newTableObserver() {
+    public TableObserver createTableObserver() {
         return store.createTableObserver(this);
     }
 
@@ -142,7 +142,7 @@ public class TableImpl<T extends Element> implements Table {
     public void destroyTableObserver(TableObserver observer) {
         checkableTableObserver(observer);
 
-        store.destroyGraphObserver((TableObserverImpl) observer);
+        store.destroyTablesObserver((TableObserverImpl) observer);
     }
 
     @Override

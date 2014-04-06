@@ -145,5 +145,5 @@ public interface Table extends Iterable<Column> {
      *
      * @return a newly created table observer
      */
-    public TableObserver newTableObserver();
+    public TableObserver createTableObserver();
 }

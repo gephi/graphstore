@@ -28,7 +28,7 @@ public class TableObserverTest {
     @Test
     public void testDefaultObserver() {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
-        TableObserverImpl tableObserver = (TableObserverImpl) table.newTableObserver();
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
 
         Assert.assertFalse(tableObserver.destroyed);
         Assert.assertEquals(table.hashCode(), tableObserver.tableHash);
@@ -40,10 +40,21 @@ public class TableObserverTest {
     @Test
     public void testObserverAddColumn() {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
-        TableObserverImpl tableObserver = (TableObserverImpl) table.newTableObserver();
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
 
         table.addColumn("0", Integer.class);
 
+        Assert.assertTrue(tableObserver.hasTableChanged());
+        Assert.assertFalse(tableObserver.hasTableChanged());
+    }
+    
+    @Test
+    public void testObserverRemoveColumn() {
+        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        table.addColumn("0", Integer.class);
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
+        table.removeColumn("0");
+        
         Assert.assertTrue(tableObserver.hasTableChanged());
         Assert.assertFalse(tableObserver.hasTableChanged());
     }
@@ -51,7 +62,7 @@ public class TableObserverTest {
     @Test
     public void testDestroyObserver() {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
-        TableObserverImpl tableObserver = (TableObserverImpl) table.newTableObserver();
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
 
         tableObserver.destroy();
 

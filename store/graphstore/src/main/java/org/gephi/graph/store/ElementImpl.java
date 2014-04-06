@@ -200,6 +200,7 @@ public abstract class ElementImpl implements Element {
                 if (column.isIndexed() && columnStore != null && isValid()) {
                     columnStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
                 }
+                ((ColumnImpl)column).incrementVersion();
                 return oldValue;
             }
         }
@@ -249,6 +250,7 @@ public abstract class ElementImpl implements Element {
                 value = columnStore.indexStore.set(column, oldValue, value, this);
             }
             attributes[index] = value;
+            ((ColumnImpl)column).incrementVersion();
         }
     }
 
@@ -292,6 +294,7 @@ public abstract class ElementImpl implements Element {
 
                 int timestampIndex = timestampMap.getTimestampIndex(timestamp);
                 dynamicValue.put(timestampIndex, value);
+                ((ColumnImpl)column).incrementVersion();
             }
         } else {
             throw new RuntimeException("The timestamp store is not available");

@@ -114,4 +114,11 @@ public interface Column {
      * @return the default value, or null
      */
     public Object getDefaultValue();
+    
+    /**
+     * Create a new column observer.
+     * 
+     * @return the column observer
+     */
+    public ColumnObserver createColumnObserver();
 }

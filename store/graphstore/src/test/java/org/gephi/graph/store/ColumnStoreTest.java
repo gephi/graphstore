@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Iterator;
 import org.gephi.attribute.api.Column;
+import org.gephi.attribute.api.ColumnObserver;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.api.Table;
 import org.gephi.attribute.time.TimestampDoubleSet;
@@ -126,6 +127,11 @@ public class ColumnStoreTest {
 
             @Override
             public boolean isReadOnly() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ColumnObserver createColumnObserver() {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         });

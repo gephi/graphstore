@@ -25,7 +25,7 @@ public class TableObserverImpl implements TableObserver {
     }
 
     @Override
-    public boolean hasTableChanged() {
+    public synchronized boolean hasTableChanged() {
         int newHash = table.hashCode();
         boolean changed = newHash != tableHash;
         tableHash = newHash;
@@ -47,7 +47,7 @@ public class TableObserverImpl implements TableObserver {
         return destroyed;
     }
 
-    public synchronized void destroyObserver() {
+    protected void destroyObserver() {
         tableHash = 0;
         destroyed = true;
     }
