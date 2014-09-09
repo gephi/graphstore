@@ -355,6 +355,7 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 14);
+        store.addNode(node);
 
         Object r = node.removeAttribute(column);
         Assert.assertEquals(r, 14);
@@ -363,12 +364,28 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testRemoveAttributeString() {
+    public void testRemoveAttributeBoolean() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicBooleanColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.setAttribute(column, true);
+        store.addNode(node);
+
+        Object r = node.removeAttribute(column);
+        Assert.assertEquals(r, true);
+
+        Assert.assertNull(node.getAttribute(column));
+    }
+
+    @Test
+    public void testRemoveAttributeByString() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
         NodeImpl node = new NodeImpl(0, store);
         node.setAttribute(column, 14);
+        store.addNode(node);
 
         Object r = node.removeAttribute("age");
         Assert.assertEquals(r, 14);
@@ -449,6 +466,11 @@ public class ElementImplTest {
     private Column generateBasicColumn(GraphStore graphStore) {
         graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
         return graphStore.nodeColumnStore.getColumn("age");
+    }
+
+    private Column generateBasicBooleanColumn(GraphStore graphStore) {
+        graphStore.nodeColumnStore.addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA, true, false));
+        return graphStore.nodeColumnStore.getColumn("visible");
     }
 
     private Column generateDynamicColumn(GraphStore graphStore) {

@@ -270,7 +270,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
         columns = null;
     }
-    
+
     protected int size() {
         return columns.length;
     }
@@ -824,7 +824,6 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         protected void removeValue(Boolean value) {
-            throw new RuntimeException("Not supposed to call that");
         }
 
         @Override
