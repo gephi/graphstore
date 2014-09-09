@@ -130,7 +130,7 @@ public interface GraphModel {
     /**
      * Gets the edge type for the given label.
      *
-     * @param label
+     * @param label the edge label
      * @return the edge type identifier, or -1 if not found
      */
     public int getEdgeType(Object label);

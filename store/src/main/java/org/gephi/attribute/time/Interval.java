@@ -55,13 +55,13 @@ public final class Interval {
     /**
      * Compares this interval with the specified interval for order.
      *
-     * <p>Any two intervals <i>i</i> and <i>i'</i> satisfy the {@code interval
-     * trichotomy}; that is, exactly one of the following three properties
-     * holds: <ol> <li> <i>i</i> and <i>i'</i> overlap;
-     *
-     * <li> <i>i</i> is to the left of <i>i'</i> (<i>i.high < i'.low</i>);
-     *
-     * <li> <i>i</i> is to the right of <i>i'</i> (<i>i'.high < i.low</i>).
+     * <p>Any two intervals <i>i</i> and <i>i'</i> satisfy the interval
+     * trichotomy; that is, exactly one of the following three properties
+     * holds: 
+     * <ol> 
+     * <li> <i>i</i> and <i>i'</i> overlap
+     * <li> <i>i</i> is to the left of <i>i'</i>
+     * <li> <i>i</i> is to the right of <i>i'</i>
      * </ol>
      *
      * <p>Note that if two intervals are equal ({@code i.low = i'.low} and
@@ -141,8 +141,6 @@ public final class Interval {
      * @return {@code true} if and only if the specified {@code Object} is a
      * {@code Interval} whose low and high are equal to this {@code Interval's}.
      *
-     * @see #compareTo(org.gephi.data.attributes.type.Interval)
-     * @see #hashCode
      */
     @Override
     public boolean equals(Object obj) {

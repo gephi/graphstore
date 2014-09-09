@@ -22,7 +22,7 @@ import java.io.IOException;
 /**
  * Packing utility for non-negative
  * <code>long</code> and values.
- * <p/>
+ * 
  * Originally developed for Kryo by Nathan Sweet. Modified for JDBM by Jan Kotek
  */
 public final class LongPacker {
@@ -31,9 +31,9 @@ public final class LongPacker {
      * Pack non-negative long into output stream. It will occupy 1-10 bytes
      * depending on value (lower values occupy smaller space)
      *
-     * @param os
-     * @param value
-     * @throws IOException
+     * @param os data output stream
+     * @param value value to pack
+     * @throws IOException if error when writing to the stream
      */
     static public void packLong(DataOutput os, long value) throws IOException {
 
@@ -51,9 +51,9 @@ public final class LongPacker {
     /**
      * Unpack positive long value from the input stream.
      *
-     * @param is The input stream.
-     * @return The long value.
-     * @throws java.io.IOException
+     * @param is The input stream
+     * @return The long value
+     * @throws IOException if error when reading from the stream
      */
     static public long unpackLong(DataInput is) throws IOException {
 
@@ -72,9 +72,9 @@ public final class LongPacker {
      * Pack non-negative long into output stream. It will occupy 1-5 bytes
      * depending on value (lower values occupy smaller space)
      *
-     * @param os
-     * @param value
-     * @throws IOException
+     * @param os data output stream
+     * @param value value to pack
+     * @throws IOException if error when writing to the stream
      */
     static public void packInt(DataOutput os, int value) throws IOException {
 

@@ -269,9 +269,6 @@ public class DataInputOutput implements DataInput, DataOutput, ObjectInput, Obje
         Serialization.serializeString(this, s);
     }
 
-    /**
-     * helper method to write data directly from PageIo
-     */
     public void writeFromByteBuffer(ByteBuffer b, int offset, int length) {
         ensureAvail(length);
         b.position(offset);
