@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.gephi</groupId>
-    <artifactId>graphstore-parent</artifactId>
+    <artifactId>graphstore</artifactId>
     <version>0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>GraphStore</name>
+    <description>Fast in-memory graph structure</description>
+    <inceptionYear>2013</inceptionYear>
     
-    <url>https://github.com/gephi/graphstore</url>
+    <url>http://github.com/gephi/graphstore</url>
     
     <!-- Licenses -->
     <licenses>
@@ -20,16 +21,50 @@
         </license>
     </licenses>
     
+    <!-- SCM -->
+    <scm>
+        <connection>scm:git:git://github.com/gephi/graphstore.git</connection>
+        <developerConnection>scm:git:git@github.com:gephi/graphstore.git</developerConnection>
+        <url>http://github.com/gephi/graphstore</url>
+    </scm>
+    
+    <!-- Developers -->
+    <developers>
+        <developer>
+            <id>mbastian</id>
+            <name>Mathieu Bastian</name>
+            <email>mathieu.bastian@gephi.org</email>
+        </developer>
+    </developers>
+    
     <!-- Properties -->
     <properties>        
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        
-        <!-- Repository URLs -->
-        <release.repository.id>gephi-nexus</release.repository.id>
-        <snapshot.repository.id>gephi-nexus</snapshot.repository.id>
-        <release.repository.url>http://nexus.gephi.org/nexus/content/repositories/releases</release.repository.url>
-        <snapshot.repository.url>http://nexus.gephi.org/nexus/content/repositories/snapshots</snapshot.repository.url>
     </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>6.5.15</version>
+        </dependency>
+        <dependency>
+            <groupId>colt</groupId>
+            <artifactId>colt</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.4</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
@@ -42,17 +77,22 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.14.1</version>
+                    <version>2.17</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.4</version>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.2</version>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.9.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>1.5</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -67,47 +107,48 @@
                 </configuration>
             </plugin>
             
-            <!-- Assembly to produce final sources and javadoc artifacts -->
+            <!-- Sources and Javadoc artifacts -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <tarLongFileMode>gnu</tarLongFileMode>
-                    <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                    <finalName>graphstore-${project.version}</finalName>
-                    <descriptors>
-                        <descriptor>assembly/sources.xml</descriptor>
-                        <descriptor>assembly/javadoc.xml</descriptor>
-                    </descriptors>
-                    <attach>false</attach>
-                </configuration>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+                
+            <!-- GPG Signed Components -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>netbeans-private-testng</id>
-            <activation>
-                <property>
-                    <name>netbeans.testng.action</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <suiteXmlFiles>
-                                <suiteXmlFile>target/nb-private/testng-suite.xml</suiteXmlFile>
-                            </suiteXmlFiles>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <reporting>
         <plugins>
@@ -121,24 +162,13 @@
 
     <!-- Locations of the artifacts published -->
     <distributionManagement>
-        <!-- Publish versioned releases here -->
-        <repository>
-            <id>${release.repository.id}</id>
-            <name>Gephi Release Repository</name>
-            <url>${release.repository.url}</url>
-        </repository>
- 
-        <!-- Publish snapshots here -->
         <snapshotRepository>
-            <id>${snapshot.repository.id}</id>
-            <name>Gephi Snapshot Repository</name>
-            <url>${snapshot.repository.url}</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
     </distributionManagement>
-                
-    <!-- List of modules -->
-    <modules>
-        <module>graphstore-api</module>
-        <module>graphstore</module>
-    </modules>
 </project>

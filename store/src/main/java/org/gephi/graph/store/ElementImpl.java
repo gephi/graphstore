@@ -15,7 +15,6 @@
  */
 package org.gephi.graph.store;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -200,7 +199,7 @@ public abstract class ElementImpl implements Element {
                 if (column.isIndexed() && columnStore != null && isValid()) {
                     columnStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
                 }
-                ((ColumnImpl)column).incrementVersion();
+                ((ColumnImpl) column).incrementVersion();
                 return oldValue;
             }
         }
@@ -250,7 +249,7 @@ public abstract class ElementImpl implements Element {
                 value = columnStore.indexStore.set(column, oldValue, value, this);
             }
             attributes[index] = value;
-            ((ColumnImpl)column).incrementVersion();
+            ((ColumnImpl) column).incrementVersion();
         }
     }
 
@@ -294,7 +293,7 @@ public abstract class ElementImpl implements Element {
 
                 int timestampIndex = timestampMap.getTimestampIndex(timestamp);
                 dynamicValue.put(timestampIndex, value);
-                ((ColumnImpl)column).incrementVersion();
+                ((ColumnImpl) column).incrementVersion();
             }
         } else {
             throw new RuntimeException("The timestamp store is not available");
@@ -538,11 +537,12 @@ public abstract class ElementImpl implements Element {
 
     private static class DynamicValueIterable implements Iterable<Map.Entry<Double, Object>> {
 
+        private static Iterator<Map.Entry<Double, Object>> EMPTY_ITERATOR = new EmptyIterator<Map.Entry<Double, Object>>();
         private static Iterable<Map.Entry<Double, Object>> EMPTY_ITERABLE = new Iterable<Map.Entry<Double, Object>>() {
 
             @Override
             public Iterator<Map.Entry<Double, Object>> iterator() {
-                return Collections.emptyIterator();
+                return EMPTY_ITERATOR;
             }
         };
         private final double[] timestamps;
@@ -556,6 +556,24 @@ public abstract class ElementImpl implements Element {
         @Override
         public Iterator<Map.Entry<Double, Object>> iterator() {
             return new DynamicValueIterator(timestamps, values);
+        }
+
+        private static class EmptyIterator<T> implements Iterator<T> {
+
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public T next() {
+                throw new UnsupportedOperationException("Not supposed to call this for empty iterator.");
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not supposed to call this for empty iterator.");
+            }
         }
     }
 
