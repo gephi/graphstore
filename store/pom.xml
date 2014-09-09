@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
 
     <name>GraphStore</name>
-    <description>Fast in-memory graph structure</description>
+    <description>Fast and robust in-memory graph structure for large graphs written in Java</description>
     <inceptionYear>2013</inceptionYear>
     
     <url>http://github.com/gephi/graphstore</url>
