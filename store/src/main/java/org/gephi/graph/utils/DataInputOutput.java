@@ -47,9 +47,10 @@ public class DataInputOutput implements DataInput, DataOutput, ObjectInput, Obje
         return pos;
     }
 
-    public void reset() {
+    public DataInputOutput reset() {
         pos = 0;
         count = 0;
+        return this;
     }
 
     public void resetForReading() {
@@ -57,10 +58,11 @@ public class DataInputOutput implements DataInput, DataOutput, ObjectInput, Obje
         pos = 0;
     }
 
-    public void reset(byte[] b) {
+    public DataInputOutput reset(byte[] b) {
         pos = 0;
         buf = b;
         count = b.length;
+        return this;
     }
 
     public byte[] toByteArray() {
