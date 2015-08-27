@@ -288,6 +288,9 @@ public class AttributeUtils {
 
     /**
      * Returns true if <em>type</em> is a standardized type.
+     * <p>
+     * Non standardized types are transformed into standardized types using 
+     * {@link #getStandardizedType(java.lang.Class) }.
      *
      * @param type the type to test
      * @return true if <em>type</em> is standardized, false otherwise
@@ -296,13 +299,7 @@ public class AttributeUtils {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
-        Class t = TYPES_STANDARDIZATION.get(type);
-        if (t != null && t.equals(type)) {
-            return true;
-        } else if (t == null) {
-            return true;
-        }
-        return false;
+        return TYPES_STANDARDIZATION.get(type) == null;
     }
 
     /**
@@ -428,7 +425,8 @@ public class AttributeUtils {
      * @return true if <em>type</em> is a dynamic type, false otherwise
      */
     public static boolean isDynamicType(Class type) {
-        return TimestampValueSet.class.isAssignableFrom(type);
+        return !type.equals(TimestampValueSet.class)
+                && TimestampValueSet.class.isAssignableFrom(type);
     }
 
     /**

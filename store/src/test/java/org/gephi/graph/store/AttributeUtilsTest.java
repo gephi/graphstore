@@ -16,7 +16,12 @@
 package org.gephi.graph.store;
 
 import java.awt.Color;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collections;
+import java.util.Set;
 import org.gephi.attribute.api.AttributeUtils;
+import org.gephi.attribute.api.Column;
 import org.gephi.attribute.time.TimestampBooleanSet;
 import org.gephi.attribute.time.TimestampByteSet;
 import org.gephi.attribute.time.TimestampCharSet;
@@ -25,6 +30,10 @@ import org.gephi.attribute.time.TimestampFloatSet;
 import org.gephi.attribute.time.TimestampIntegerSet;
 import org.gephi.attribute.time.TimestampLongSet;
 import org.gephi.attribute.time.TimestampShortSet;
+import org.gephi.attribute.time.TimestampStringSet;
+import org.gephi.attribute.time.TimestampValueSet;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -35,7 +44,16 @@ import org.testng.annotations.Test;
 public class AttributeUtilsTest {
 
     @Test
+    public void testGetSupportedTypes() {
+        Set<Class> types = AttributeUtils.getSupportedTypes();
+        Assert.assertNotNull(types);
+        Assert.assertFalse(types.isEmpty());
+        Assert.assertTrue(Collections.unmodifiableSet(types).getClass().isInstance(types));
+    }
+
+    @Test
     public void testParse() {
+        Assert.assertEquals(AttributeUtils.parse("foo", String.class), "foo");
         Assert.assertEquals(AttributeUtils.parse("0", Integer.class), 0);
         Assert.assertEquals(AttributeUtils.parse("0", Float.class), 0f);
         Assert.assertEquals(AttributeUtils.parse("0", Double.class), 0.0);
@@ -119,6 +137,8 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isStandardizedType(Integer.class));
         Assert.assertTrue(AttributeUtils.isStandardizedType(int[].class));
         Assert.assertFalse(AttributeUtils.isStandardizedType(Integer[].class));
+        Assert.assertFalse(AttributeUtils.isStandardizedType(Integer[].class));
+        Assert.assertTrue(AttributeUtils.isStandardizedType(String.class));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -134,6 +154,11 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isSupported(TimestampDoubleSet.class));
 
         Assert.assertFalse(AttributeUtils.isSupported(Color.class));
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testIsSupportedNull() {
+        AttributeUtils.isSupported(null);
     }
 
     @Test
@@ -154,6 +179,24 @@ public class AttributeUtilsTest {
     }
 
     @Test
+    public void testGetStaticType() {
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampIntegerSet.class), Integer.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampFloatSet.class), Float.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampDoubleSet.class), Double.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampLongSet.class), Long.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampCharSet.class), Character.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampShortSet.class), Short.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampByteSet.class), Byte.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampBooleanSet.class), Boolean.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampStringSet.class), String.class);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetStaticTypeUnsupportedType() {
+        AttributeUtils.getStaticType(TimestampValueSet.class);
+    }
+
+    @Test
     public void testStandardizeValue() {
         Assert.assertEquals(AttributeUtils.standardizeValue(new Integer(1)), 1);
         Assert.assertEquals((int[]) AttributeUtils.standardizeValue(new Integer[]{1, 2}), new int[]{1, 2});
@@ -170,7 +213,7 @@ public class AttributeUtilsTest {
     }
 
     @Test
-    public void parseDate() {
+    public void testParseDate() {
         double d = AttributeUtils.parseDateTime("1970-01-01T00:00:00+00:00");
         Assert.assertEquals(d, 0.0);
 
@@ -180,7 +223,7 @@ public class AttributeUtilsTest {
     }
 
     @Test
-    public void printDate() {
+    public void testPrintDate() {
         String date = "2003-01-01";
         double d = AttributeUtils.parseDateTime(date);
 
@@ -188,7 +231,7 @@ public class AttributeUtilsTest {
     }
 
     @Test
-    public void printDateTime() {
+    public void testPrintDateTime() {
         String date = "2003-01-01T00:00:00.000-08:00";
         double d = AttributeUtils.parseDateTime(date);
 
@@ -222,5 +265,45 @@ public class AttributeUtilsTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testIsNumberTypeUnsupportedType() {
         AttributeUtils.isNumberType(Color.class);
+    }
+
+    @Test
+    public void testIsDynamicType() {
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampFloatSet.class));
+        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampFloatSet[].class));
+        Assert.assertFalse(AttributeUtils.isDynamicType(Integer.class));
+        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampValueSet.class));
+    }
+
+    @Test
+    public void getTypeName() {
+        Assert.assertEquals(AttributeUtils.getTypeName(Integer.class), Integer.class.getSimpleName().toLowerCase());
+        Assert.assertEquals(AttributeUtils.getTypeName(int.class), Integer.class.getSimpleName().toLowerCase());
+        Assert.assertEquals(AttributeUtils.getTypeName(Integer[].class), int[].class.getSimpleName().toLowerCase());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testgetTypeNameUnsupportedType() {
+        AttributeUtils.getTypeName(Color.class);
+    }
+
+    @Test
+    public void testIsNodeColumn() {
+        TableImpl tableNode = new TableImpl(new ColumnStore(Node.class, false));
+        TableImpl tableEdge = new TableImpl(new ColumnStore(Edge.class, false));
+        Column column = tableNode.addColumn("0", Integer.class);
+
+        Assert.assertTrue(AttributeUtils.isNodeColumn(column));
+        Assert.assertFalse(AttributeUtils.isNodeColumn(tableEdge.addColumn("0", Float.class)));
+    }
+
+    @Test
+    public void testIsEdgeColumn() {
+        TableImpl tableNode = new TableImpl(new ColumnStore(Node.class, false));
+        TableImpl tableEdge = new TableImpl(new ColumnStore(Edge.class, false));
+        Column column = tableEdge.addColumn("0", Integer.class);
+
+        Assert.assertTrue(AttributeUtils.isEdgeColumn(column));
+        Assert.assertFalse(AttributeUtils.isEdgeColumn(tableNode.addColumn("0", Float.class)));
     }
 }
