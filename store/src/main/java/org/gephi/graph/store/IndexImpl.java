@@ -797,58 +797,10 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     protected class BooleanIndex extends AbstractIndex<Boolean> {
 
-        private final Collection values;
-        private ValueSet trueSet;
-        private ValueSet falseSet;
-
         public BooleanIndex(ColumnImpl column) {
             super(column);
-            trueSet = new ValueSet(Boolean.TRUE);
-            falseSet = new ValueSet(Boolean.FALSE);
-            values = Arrays.asList(new Object[]{Boolean.TRUE, Boolean.FALSE});
-        }
 
-        @Override
-        protected Set<T> getValueSet(Boolean value) {
-            if (value.equals(Boolean.TRUE)) {
-                return trueSet;
-            } else {
-                return falseSet;
-            }
-        }
-
-        @Override
-        protected Set<T> addValue(Boolean value) {
-            throw new RuntimeException("Not supposed to call that");
-        }
-
-        @Override
-        protected void removeValue(Boolean value) {
-        }
-
-        @Override
-        public int countValues() {
-            return (trueSet.isEmpty() ? 0 : 1) + (falseSet.isEmpty() ? 0 : 1);
-        }
-
-        @Override
-        public Collection values() {
-            return values;
-        }
-
-        @Override
-        protected void destroy() {
-            super.destroy();
-            trueSet = new ValueSet(Boolean.TRUE);
-            falseSet = new ValueSet(Boolean.FALSE);
-        }
-
-        @Override
-        protected void clear() {
-            trueSet = new ValueSet(Boolean.TRUE);
-            falseSet = new ValueSet(Boolean.FALSE);
-            elements = 0;
-            nullSet.clear();
+            map = new Object2ObjectOpenHashMap<Boolean, Set<T>>();
         }
     }
 
