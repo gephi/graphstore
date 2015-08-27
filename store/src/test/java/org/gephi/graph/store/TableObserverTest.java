@@ -30,7 +30,8 @@ public class TableObserverTest {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
 
-        Assert.assertFalse(tableObserver.destroyed);
+        Assert.assertSame(tableObserver.getTable(), table);
+        Assert.assertFalse(tableObserver.isDestroyed());
         Assert.assertEquals(table.hashCode(), tableObserver.tableHash);
         Assert.assertTrue(table.store.observers.contains(tableObserver));
 

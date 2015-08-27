@@ -203,4 +203,26 @@ public class TableImplTest {
         TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
         Assert.assertEquals(table.getElementClass(), Node.class);
     }
+
+    @Test
+    public void testEquals() {
+        TableImpl<Node> table1 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table1.addColumn("0", Integer.class);
+
+        TableImpl<Node> table2 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table2.addColumn("0", Integer.class);
+
+        Assert.assertEquals(table1, table2);
+    }
+
+    @Test
+    public void testHashCode() {
+        TableImpl<Node> table1 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table1.addColumn("0", Integer.class);
+
+        TableImpl<Node> table2 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
+        table2.addColumn("0", Integer.class);
+
+        Assert.assertEquals(table1.hashCode(), table2.hashCode());
+    }
 }

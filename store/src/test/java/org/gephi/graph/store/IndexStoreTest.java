@@ -105,6 +105,10 @@ public class IndexStoreTest {
         Assert.assertTrue(mainIndex.values(col2).contains(20));
 
         Assert.assertSame(getIterable(mainIndex.get(col1, "A"))[0], n);
+        Assert.assertNull(mainIndex.get(col1, "B"));
+
+        Assert.assertSame(getIterable(mainIndex.get("foo", "A"))[0], n);
+        Assert.assertNull(mainIndex.get("foo", "B"));
     }
 
     @Test
