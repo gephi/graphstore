@@ -21,6 +21,7 @@ import org.gephi.graph.api.Element;
 /**
  * An index is associated with each table and keeps track of each unique value
  * in indexed columns.
+ * @param <T> Element class
  */
 public interface Index<T extends Element> {
 
@@ -40,7 +41,8 @@ public interface Index<T extends Element> {
      *
      * @param column the column to get values
      * @param value the value
-     * @return an iterable with element with <em>value</em> in <em>column</em>
+     * @return an iterable with element with <em>value</em> in <em>column</em>,
+     * or null if value not found
      */
     public Iterable<T> get(Column column, Object value);
 

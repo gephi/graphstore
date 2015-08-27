@@ -25,7 +25,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectAVLTreeMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -95,7 +94,8 @@ public class IndexImpl<T extends Element> implements Index<T> {
         if (lock != null) {
             lock.lock();
             AbstractIndex index = getIndex((ColumnImpl) column);
-            return new LockableIterable<T>(index.getValueSet(value));
+            Set<T> valueSet = index.getValueSet(value);
+            return valueSet == null ? null : new LockableIterable<T>(index.getValueSet(value));
         }
         AbstractIndex index = getIndex((ColumnImpl) column);
         return index.getValueSet(value);
