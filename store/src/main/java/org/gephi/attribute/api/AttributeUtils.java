@@ -407,7 +407,12 @@ public class AttributeUtils {
         }
         type = getStandardizedType(type);
         return Number.class.isAssignableFrom(type)
-                || Number[].class.isAssignableFrom(type)
+                || int[].class.isAssignableFrom(type)
+                || float[].class.isAssignableFrom(type)
+                || double[].class.isAssignableFrom(type)
+                || byte[].class.isAssignableFrom(type)
+                || short[].class.isAssignableFrom(type)
+                || long[].class.isAssignableFrom(type)
                 || type.equals(TimestampIntegerSet.class)
                 || type.equals(TimestampFloatSet.class)
                 || type.equals(TimestampDoubleSet.class)

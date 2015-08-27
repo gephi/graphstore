@@ -195,4 +195,32 @@ public class AttributeUtilsTest {
         String pr = AttributeUtils.printDateTime(d);
         Assert.assertEquals(AttributeUtils.parseDateTime(pr), d);
     }
+
+    @Test
+    public void testIsNumberType() {
+        Assert.assertTrue(AttributeUtils.isNumberType(Integer.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(Integer[].class));
+        Assert.assertTrue(AttributeUtils.isNumberType(int.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(int[].class));
+        Assert.assertTrue(AttributeUtils.isNumberType(float[].class));
+        Assert.assertTrue(AttributeUtils.isNumberType(double[].class));
+        Assert.assertTrue(AttributeUtils.isNumberType(short[].class));
+        Assert.assertTrue(AttributeUtils.isNumberType(long[].class));
+        Assert.assertTrue(AttributeUtils.isNumberType(byte[].class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampByteSet.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampDoubleSet.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampFloatSet.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampIntegerSet.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampLongSet.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampShortSet.class));
+        Assert.assertFalse(AttributeUtils.isNumberType(String.class));
+        Assert.assertFalse(AttributeUtils.isNumberType(String[].class));
+        Assert.assertTrue(AttributeUtils.isNumberType(BigDecimal.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(BigInteger.class));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testIsNumberTypeUnsupportedType() {
+        AttributeUtils.isNumberType(Color.class);
+    }
 }
