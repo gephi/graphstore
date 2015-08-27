@@ -19,10 +19,13 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
@@ -234,6 +237,126 @@ public class IndexImplTest {
     }
 
     @Test
+    public void testGetIteratorNull() {
+        ColumnStore<Node> columnStore = generateEmptyNodeStore();
+        columnStore.addColumn(new ColumnImpl("c", String.class, null, null, Origin.DATA, true, false));
+
+        IndexImpl<Node> index = columnStore.indexStore.mainIndex;
+        NodeImpl n = new NodeImpl(0);
+        index.put("c", null, n);
+
+        Iterator<Node> itr = index.get("c", null).iterator();
+        Assert.assertTrue(itr.hasNext());
+        Assert.assertSame(itr.next(), n);
+    }
+
+    @Test
+    public void testGetNullEntry() {
+        ColumnStore<Node> columnStore = generateEmptyNodeStore();
+        columnStore.addColumn(new ColumnImpl("c", String.class, null, null, Origin.DATA, true, false));
+
+        IndexImpl<Node> index = columnStore.indexStore.mainIndex;
+        NodeImpl n = new NodeImpl(0);
+        index.put("c", null, n);
+
+        Iterator<Entry<Object, Set<Node>>> itr = index.get(columnStore.getColumn("c")).iterator();
+        Assert.assertTrue(itr.hasNext());
+        Entry<Object, Set<Node>> entry = itr.next();
+        Assert.assertNull(entry.getKey());
+        Assert.assertEquals(entry.getValue().size(), 1);
+        Assert.assertTrue(entry.getValue().contains(n));
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testGetNullEntrySetValue() {
+        ColumnStore<Node> columnStore = generateEmptyNodeStore();
+        columnStore.addColumn(new ColumnImpl("c", String.class, null, null, Origin.DATA, true, false));
+
+        IndexImpl<Node> index = columnStore.indexStore.mainIndex;
+        NodeImpl n = new NodeImpl(0);
+        index.put("c", null, n);
+
+        Iterator<Entry<Object, Set<Node>>> itr = index.get(columnStore.getColumn("c")).iterator();
+        Assert.assertTrue(itr.hasNext());
+        Entry<Object, Set<Node>> entry = itr.next();
+        entry.setValue(null);
+    }
+
+    @Test
+    public void testNonNumberTypes() {
+        ColumnStore<Node> columnStore = generateEmptyNodeStore();
+        columnStore.addColumn(new ColumnImpl("c1", String.class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c2", Boolean.class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c3", Character.class, null, null, Origin.DATA, true, false));
+
+        IndexImpl<Node> index = columnStore.indexStore.mainIndex;
+        NodeImpl n1 = new NodeImpl(0);
+        NodeImpl n2 = new NodeImpl(1);
+
+        Object[] values = new Object[]{"foo", Boolean.TRUE, 'f'};
+
+        for (int i = 1; i <= values.length; i++) {
+            index.put("c" + i, values[i - 1], n1);
+            index.put("c" + i, null, n2);
+        }
+
+        for (int i = 1; i <= values.length; i++) {
+            Column column = columnStore.getColumn("c" + i);
+
+            Assert.assertEquals(index.countElements(column), 2);
+            Assert.assertEquals(index.countValues(column), 2);
+
+            Assert.assertSame(getIterable(index.get("c" + i, values[i - 1]))[0], n1);
+            Assert.assertSame(getIterable(index.get("c" + i, null))[0], n2);
+            Assert.assertSame(getIterable(index.get(column, values[i - 1]))[0], n1);
+            Assert.assertSame(getIterable(index.get(column, null))[0], n2);
+            Assert.assertEquals(index.count("c" + i, values[i - 1]), 1);
+            Assert.assertEquals(index.count("c" + i, null), 1);
+            Assert.assertEquals(index.count(column, values[i - 1]), 1);
+            Assert.assertEquals(index.count(column, null), 1);
+            Assert.assertTrue(index.values(column).contains(null));
+            Assert.assertTrue(index.values(column).contains(values[i - 1]));
+        }
+    }
+
+    @Test
+    public void testArrayNonNumberTypes() {
+        ColumnStore<Node> columnStore = generateEmptyNodeStore();
+        columnStore.addColumn(new ColumnImpl("c1", boolean[].class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c2", char[].class, null, null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("c3", String[].class, null, null, Origin.DATA, true, false));
+
+        IndexImpl<Node> index = columnStore.indexStore.mainIndex;
+        NodeImpl n1 = new NodeImpl(0);
+        NodeImpl n2 = new NodeImpl(1);
+
+        Object[] values = new Object[]{new boolean[]{false, true}, new char[]{'f', 'o'}, new String[]{"foo", "bar"}};
+
+        for (int i = 1; i <= values.length; i++) {
+            index.put("c" + i, values[i - 1], n1);
+            index.put("c" + i, null, n2);
+        }
+
+        for (int i = 1; i <= values.length; i++) {
+            Column column = columnStore.getColumn("c" + i);
+
+            Assert.assertEquals(index.countElements(column), 3);
+            Assert.assertEquals(index.countValues(column), 3);
+
+            Assert.assertSame(getIterable(index.get("c" + i, Array.get(values[i - 1], 0)))[0], n1);
+            Assert.assertSame(getIterable(index.get("c" + i, null))[0], n2);
+            Assert.assertSame(getIterable(index.get(column, Array.get(values[i - 1], 0)))[0], n1);
+            Assert.assertSame(getIterable(index.get(column, null))[0], n2);
+            Assert.assertEquals(index.count("c" + i, Array.get(values[i - 1], 0)), 1);
+            Assert.assertEquals(index.count("c" + i, null), 1);
+            Assert.assertEquals(index.count(column, Array.get(values[i - 1], 0)), 1);
+            Assert.assertEquals(index.count(column, null), 1);
+            Assert.assertTrue(index.values(column).contains(null));
+            Assert.assertTrue(index.values(column).contains(Array.get(values[i - 1], 0)));
+        }
+    }
+
+    @Test
     public void testPrimitiveNumberTypes() {
         ColumnStore<Node> columnStore = generateEmptyNodeStore();
         columnStore.addColumn(new ColumnImpl("c1", Integer.class, null, null, Origin.DATA, true, false));
@@ -247,55 +370,34 @@ public class IndexImplTest {
         NodeImpl n1 = new NodeImpl(0);
         NodeImpl n2 = new NodeImpl(1);
 
-        index.put("c1", new Integer(1), n1);
-        index.put("c2", new Short((short) 1), n1);
-        index.put("c3", new Float(1f), n1);
-        index.put("c4", new Double(1.0), n1);
-        index.put("c5", new Long(1l), n1);
-        index.put("c6", new Byte((byte) 1), n1);
+        Object[] values = new Object[]{1, (short) 1, 1f, 1.0, 1l, (byte) 1};
 
-        for (int i = 1; i < 7; i++) {
+        for (int i = 1; i <= values.length; i++) {
+            index.put("c" + i, values[i - 1], n1);
             index.put("c" + i, null, n2);
         }
 
-        for (int i = 1; i < 7; i++) {
+        for (int i = 1; i <= values.length; i++) {
             Column column = columnStore.getColumn("c" + i);
+
+            Assert.assertEquals(index.countElements(column), 2);
+            Assert.assertEquals(index.countValues(column), 2);
+
+            Assert.assertSame(getIterable(index.get("c" + i, values[i - 1]))[0], n1);
+            Assert.assertSame(getIterable(index.get("c" + i, null))[0], n2);
+            Assert.assertSame(getIterable(index.get(column, values[i - 1]))[0], n1);
+            Assert.assertSame(getIterable(index.get(column, null))[0], n2);
+            Assert.assertEquals(index.count("c" + i, values[i - 1]), 1);
+            Assert.assertEquals(index.count("c" + i, null), 1);
+            Assert.assertEquals(index.count(column, values[i - 1]), 1);
+            Assert.assertEquals(index.count(column, null), 1);
+            Assert.assertTrue(index.values(column).contains(null));
+            Assert.assertTrue(index.values(column).contains(values[i - 1]));
+
             Number min = index.getMinValue(column);
             Assert.assertEquals(min.byteValue(), (byte) 1);
             Number max = index.getMaxValue(column);
             Assert.assertEquals(max.byteValue(), (byte) 1);
-
-            Assert.assertEquals(index.count("c" + i, null), 1);
-            Assert.assertEquals(index.countElements(column), 2);
-            Assert.assertEquals(index.countValues(column), 2);
-
-            Assert.assertTrue(index.values(column).contains(null));
-
-            if (column.getTypeClass().equals(Integer.class)) {
-                Assert.assertSame(getIterable(index.get("c" + i, new Integer(1)))[0], n1);
-                Assert.assertEquals(index.count("c" + i, new Integer(1)), 1);
-                Assert.assertTrue(index.values(column).contains(new Integer(1)));
-            } else if (column.getTypeClass().equals(Short.class)) {
-                Assert.assertSame(getIterable(index.get("c" + i, new Short((short) 1)))[0], n1);
-                Assert.assertEquals(index.count("c" + i, new Short((short) 1)), 1);
-                Assert.assertTrue(index.values(column).contains(new Short((short) 1)));
-            } else if (column.getTypeClass().equals(Long.class)) {
-                Assert.assertSame(getIterable(index.get("c" + i, new Long(1l)))[0], n1);
-                Assert.assertEquals(index.count("c" + i, new Long(1l)), 1);
-                Assert.assertTrue(index.values(column).contains(new Long(1l)));
-            } else if (column.getTypeClass().equals(Byte.class)) {
-                Assert.assertSame(getIterable(index.get("c" + i, new Byte((byte) 1)))[0], n1);
-                Assert.assertEquals(index.count("c" + i, new Byte((byte) 1)), 1);
-                Assert.assertTrue(index.values(column).contains(new Byte((byte) 1)));
-            } else if (column.getTypeClass().equals(Float.class)) {
-                Assert.assertSame(getIterable(index.get("c" + i, new Float(1f)))[0], n1);
-                Assert.assertEquals(index.count("c" + i, new Float(1f)), 1);
-                Assert.assertTrue(index.values(column).contains(new Float(1f)));
-            } else if (column.getTypeClass().equals(Double.class)) {
-                Assert.assertSame(getIterable(index.get("c" + i, new Double(1.0)))[0], n1);
-                Assert.assertEquals(index.count("c" + i, new Double(1.0)), 1);
-                Assert.assertTrue(index.values(column).contains(new Double(1.0)));
-            }
         }
     }
 
@@ -328,16 +430,25 @@ public class IndexImplTest {
 
         for (int i = 1; i < 7; i++) {
             Column column = columnStore.getColumn("c" + i);
+
+            Assert.assertEquals(index.countElements(column), 3);
+            Assert.assertEquals(index.countValues(column), 3);
+
+            Assert.assertSame(getIterable(index.get("c" + i, Array.get(n1Objects[i - 1], 0)))[0], n1);
+            Assert.assertSame(getIterable(index.get("c" + i, null))[0], n2);
+            Assert.assertSame(getIterable(index.get(column, Array.get(n1Objects[i - 1], 0)))[0], n1);
+            Assert.assertSame(getIterable(index.get(column, null))[0], n2);
+            Assert.assertEquals(index.count("c" + i, Array.get(n1Objects[i - 1], 0)), 1);
+            Assert.assertEquals(index.count("c" + i, null), 1);
+            Assert.assertEquals(index.count(column, Array.get(n1Objects[i - 1], 0)), 1);
+            Assert.assertEquals(index.count(column, null), 1);
+            Assert.assertTrue(index.values(column).contains(null));
+            Assert.assertTrue(index.values(column).contains(Array.get(n1Objects[i - 1], 0)));
+
             Number min = index.getMinValue(column);
             Assert.assertEquals(min.byteValue(), (byte) 1);
             Number max = index.getMaxValue(column);
             Assert.assertEquals(max.byteValue(), (byte) 2);
-
-            Assert.assertEquals(index.count("c" + i, null), 1);
-            Assert.assertEquals(index.countElements(column), 3);
-            Assert.assertEquals(index.countValues(column), 3);
-
-            Assert.assertTrue(index.values(column).contains(null));
         }
 
     }
@@ -355,12 +466,10 @@ public class IndexImplTest {
                 if (!col.isReadOnly()) {
                     if (withNulls && random.nextDouble() < 0.1) {
                         n.setAttribute(col, null);
-                    } else {
-                        if (col.getTypeClass().equals(String.class)) {
-                            n.setAttribute(col, "" + i);
-                        } else if (col.getTypeClass().equals(Integer.class)) {
-                            n.setAttribute(col, i);
-                        }
+                    } else if (col.getTypeClass().equals(String.class)) {
+                        n.setAttribute(col, "" + i);
+                    } else if (col.getTypeClass().equals(Integer.class)) {
+                        n.setAttribute(col, i);
                     }
                 }
             }
