@@ -16,6 +16,7 @@
 package org.gephi.graph.store;
 
 import java.awt.Color;
+import org.gephi.graph.spi.LayoutData;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,6 +25,30 @@ import org.testng.annotations.Test;
  * @author mbastian
  */
 public class ElementPropertiesTest {
+
+    @Test
+    public void testNodeProperties() {
+        NodeImpl.NodePropertiesImpl p = new NodeImpl.NodePropertiesImpl();
+        p.setX(1f);
+        p.setY(2f);
+        p.setZ(3f);
+        p.setR(0.2f);
+        p.setG(0.4f);
+        p.setB(0.6f);
+        p.setAlpha(0.4f);
+        p.setSize(5f);
+        p.setFixed(true);
+
+        Assert.assertEquals(p.x(), 1f);
+        Assert.assertEquals(p.y(), 2f);
+        Assert.assertEquals(p.z(), 3f);
+        Assert.assertEquals(p.r(), 0.2f);
+        Assert.assertEquals(p.g(), 0.4f);
+        Assert.assertEquals(p.b(), 0.6f);
+        Assert.assertEquals(p.alpha(), 0.4f);
+        Assert.assertEquals(p.size(), 5f);
+        Assert.assertTrue(p.isFixed());
+    }
 
     @Test
     public void testNodePropertiesEquals() {
@@ -38,7 +63,44 @@ public class ElementPropertiesTest {
     }
 
     @Test
-    public void testSetRGB() {
+    public void testNodePropertiesHashCode() {
+        NodeImpl.NodePropertiesImpl properties = new NodeImpl.NodePropertiesImpl();
+        NodeImpl.NodePropertiesImpl properties2 = new NodeImpl.NodePropertiesImpl();
+
+        Assert.assertEquals(properties.hashCode(), properties2.hashCode());
+
+        properties.x = 1;
+
+        Assert.assertNotEquals(properties.hashCode(), properties2.hashCode());
+    }
+
+    @Test
+    public void testNodeSetPosition() {
+        NodeImpl.NodePropertiesImpl properties = new NodeImpl.NodePropertiesImpl();
+        properties.setPosition(12f, 5f);
+        Assert.assertEquals(properties.x(), 12f);
+        Assert.assertEquals(properties.y(), 5f);
+        Assert.assertEquals(properties.z(), 0f);
+        properties.setPosition(1f, 2f, 3f);
+        Assert.assertEquals(properties.x(), 1f);
+        Assert.assertEquals(properties.y(), 2f);
+        Assert.assertEquals(properties.z(), 3f);
+    }
+
+    @Test
+    public void testNodeSetColor() {
+        Color color = new Color(0.2f, 0.4f, 0.6f, 0.8f);
+        NodeImpl.NodePropertiesImpl properties = new NodeImpl.NodePropertiesImpl();
+        properties.setColor(color);
+        Assert.assertEquals(properties.getColor(), color);
+        Assert.assertEquals(properties.r(), 0.2f);
+        Assert.assertEquals(properties.g(), 0.4f);
+        Assert.assertEquals(properties.b(), 0.6f);
+        Assert.assertEquals(properties.alpha(), 0.8f);
+    }
+
+    @Test
+    public void testNodeSetRGB() {
         NodeImpl.NodePropertiesImpl properties = new NodeImpl.NodePropertiesImpl();
         Assert.assertEquals(properties.getColor(), new Color(0, 0, 0, 255));
 
@@ -61,5 +123,89 @@ public class ElementPropertiesTest {
 
         Color rgbaColor = new Color(properties.r(), properties.g(), properties.b(), properties.alpha());
         Assert.assertEquals(rgbaColor, color);
+    }
+
+    @Test
+    public void testNodeSetLayoutData() {
+        NodeImpl.NodePropertiesImpl p = new NodeImpl.NodePropertiesImpl();
+        LayoutData ld = new LayoutData() {
+        };
+        p.setLayoutData(ld);
+        Assert.assertSame(p.getLayoutData(), ld);
+    }
+
+    @Test
+    public void testNodeSetTestProperties() {
+        NodeImpl.NodePropertiesImpl p = new NodeImpl.NodePropertiesImpl();
+        TextPropertiesImpl tp = new TextPropertiesImpl();
+        tp.setSize(42f);
+        p.setTextProperties(tp);
+        Assert.assertEquals(p.getTextProperties(), tp);
+    }
+
+    @Test
+    public void testTextProperties() {
+        TextPropertiesImpl p = new TextPropertiesImpl();
+        p.setR(0.2f);
+        p.setG(0.4f);
+        p.setB(0.6f);
+        p.setAlpha(0.4f);
+        p.setSize(5f);
+        p.setText("foo");
+        p.setVisible(false);
+
+        Assert.assertEquals(p.getR(), 0.2f);
+        Assert.assertEquals(p.getG(), 0.4f);
+        Assert.assertEquals(p.getB(), 0.6f);
+        Assert.assertEquals(p.getAlpha(), 0.4f);
+        Assert.assertEquals(p.getSize(), 5f);
+        Assert.assertEquals(p.getText(), "foo");
+        Assert.assertFalse(p.isVisible());
+    }
+
+    @Test
+    public void testTextPropertiesEquals() {
+        TextPropertiesImpl properties = new TextPropertiesImpl();
+        TextPropertiesImpl properties2 = new TextPropertiesImpl();
+
+        Assert.assertEquals(properties, properties2);
+
+        properties.size = 5f;
+
+        Assert.assertNotEquals(properties, properties2);
+    }
+
+    @Test
+    public void testTextPropertiesHashCode() {
+        TextPropertiesImpl properties = new TextPropertiesImpl();
+        TextPropertiesImpl properties2 = new TextPropertiesImpl();
+
+        Assert.assertEquals(properties, properties2);
+
+        properties.size = 5f;
+
+        Assert.assertNotEquals(properties.hashCode(), properties2.hashCode());
+    }
+
+    @Test
+    public void testTextSetColor() {
+        Color color = new Color(0.2f, 0.4f, 0.6f, 0.8f);
+        TextPropertiesImpl properties = new TextPropertiesImpl();
+        properties.setColor(color);
+        Assert.assertEquals(properties.getColor(), color);
+        Assert.assertEquals(properties.getR(), 0.2f);
+        Assert.assertEquals(properties.getG(), 0.4f);
+        Assert.assertEquals(properties.getB(), 0.6f);
+        Assert.assertEquals(properties.getAlpha(), 0.8f);
+    }
+
+    @Test
+    public void testTextSetRGBA() {
+        Color color = new Color(0.2f, 0.4f, 0.6f, 0.8f);
+        TextPropertiesImpl properties = new TextPropertiesImpl();
+        properties.setColor(color);
+
+        Color newColor = new Color(properties.getRGBA(), true);
+        Assert.assertEquals(newColor, color);
     }
 }
