@@ -31,12 +31,12 @@ public class ColumnObserverImpl implements ColumnObserver {
 
     public ColumnObserverImpl(ColumnImpl column) {
         this.column = column;
-        this.version = column.version.version;
+        this.version = column.version.version.get();
     }
 
     @Override
     public synchronized boolean hasColumnChanged() {
-        int v = column.version.version;
+        int v = column.version.version.get();
         boolean changed = v != version;
         version = v;
         return changed;

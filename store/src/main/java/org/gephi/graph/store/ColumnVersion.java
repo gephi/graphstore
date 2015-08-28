@@ -15,29 +15,26 @@
  */
 package org.gephi.graph.store;
 
-/**
- *
- * @author mbastian
- */
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class ColumnVersion {
 
     protected final ColumnImpl column;
-    protected int version = Integer.MIN_VALUE + 1;
+    protected final AtomicInteger version = new AtomicInteger(Integer.MIN_VALUE);
 
     public ColumnVersion(ColumnImpl column) {
         this.column = column;
     }
 
-    public synchronized int incrementAndGetVersion() {
-        version++;
-        if (version == Integer.MAX_VALUE) {
-            version = Integer.MIN_VALUE + 1;
+    public int incrementAndGetVersion() {
+        int v = version.incrementAndGet();
+        if (v == Integer.MIN_VALUE) {
             handleReset();
         }
-        return version;
+        return v;
     }
 
-    private void handleReset() {
+    private synchronized void handleReset() {
 
     }
 }
