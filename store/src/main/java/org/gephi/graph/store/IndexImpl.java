@@ -253,26 +253,39 @@ public class IndexImpl<T extends Element> implements Index<T> {
     protected boolean hasColumn(ColumnImpl col) {
         if (col.isIndexed()) {
             int id = col.storeId;
-            if (id != ColumnStore.NULL_ID && columns[id].column == col) {
+            if (id != ColumnStore.NULL_ID && columns.length > id && columns[id].column == col) {
                 return true;
             }
         }
         return false;
     }
 
-    protected AbstractIndex getIndex(ColumnImpl column) {
-        return columns[column.getStoreId()];
+    protected AbstractIndex getIndex(ColumnImpl col) {
+        if (col.isIndexed()) {
+            int id = col.storeId;
+            if (id != ColumnStore.NULL_ID && columns.length > id) {
+                AbstractIndex index = columns[id];
+                if (index != null && index.column == col) {
+                    return index;
+                }
+            }
+        }
+        return null;
     }
 
     protected AbstractIndex getIndex(String key) {
-        return columns[columnStore.getColumnIndex(key)];
+        int id = columnStore.getColumnIndex(key);
+        if (id != ColumnStore.NULL_ID && columns.length > id) {
+            return columns[id];
+        }
+        return null;
     }
 
     protected void destroy() {
         for (AbstractIndex ai : columns) {
             ai.destroy();
         }
-        columns = null;
+        columns = new AbstractIndex[0];;
         columnsCount = 0;
     }
 

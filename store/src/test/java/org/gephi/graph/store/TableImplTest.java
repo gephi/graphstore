@@ -212,7 +212,7 @@ public class TableImplTest {
         TableImpl<Node> table2 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
         table2.addColumn("0", Integer.class);
 
-        Assert.assertEquals(table1, table2);
+        Assert.assertTrue(table1.equals(table2));
     }
 
     @Test

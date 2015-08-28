@@ -57,18 +57,51 @@ public class GraphFactoryTest {
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
         Node source = graphFactory.newNode("source");
         Node target = graphFactory.newNode("target");
-        Edge edge = graphFactory.newEdge(source, target, 9, true);
+        Edge edge = graphFactory.newEdge(source, target);
+
+        Assert.assertEquals(edge.getId(), 0);
+        Assert.assertEquals(graphFactory.getEdgeCounter(), 1);
+        Assert.assertSame(edge.getSource(), source);
+        Assert.assertSame(edge.getTarget(), target);
+        Assert.assertEquals(edge.getWeight(), 1.0);
+        Assert.assertEquals(edge.getType(), EdgeTypeStore.NULL_LABEL);
+        Assert.assertTrue(edge.isDirected());
+    }
+
+    @Test
+    public void testNewEdgeWithDirected() {
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        Node source = graphFactory.newNode("source");
+        Node target = graphFactory.newNode("target");
+        Edge edge = graphFactory.newEdge(source, target, false);
+
+        Assert.assertEquals(edge.getId(), 0);
+        Assert.assertEquals(graphFactory.getEdgeCounter(), 1);
+        Assert.assertSame(edge.getSource(), source);
+        Assert.assertSame(edge.getTarget(), target);
+        Assert.assertEquals(edge.getWeight(), 1.0);
+        Assert.assertEquals(edge.getType(), EdgeTypeStore.NULL_LABEL);
+        Assert.assertFalse(edge.isDirected());
+    }
+
+    @Test
+    public void testNewEdgeWithDirectedAndType() {
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        Node source = graphFactory.newNode("source");
+        Node target = graphFactory.newNode("target");
+        Edge edge = graphFactory.newEdge(source, target, 9, false);
 
         Assert.assertEquals(edge.getId(), 0);
         Assert.assertEquals(graphFactory.getEdgeCounter(), 1);
         Assert.assertSame(edge.getSource(), source);
         Assert.assertSame(edge.getTarget(), target);
         Assert.assertEquals(edge.getType(), 9);
-        Assert.assertTrue(edge.isDirected());
+        Assert.assertEquals(edge.getWeight(), 1.0);
+        Assert.assertFalse(edge.isDirected());
     }
 
     @Test
-    public void testNewEdgeWithDirected() {
+    public void testNewEdgeWithDirectedAndTypeAndWeight() {
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
         Node source = graphFactory.newNode("source");
         Node target = graphFactory.newNode("target");
@@ -127,5 +160,43 @@ public class GraphFactoryTest {
         edge.setMutual(true);
 
         Assert.assertFalse(edge.isMutual());
+    }
+
+    @Test
+    public void testEquals() {
+        GraphFactoryImpl gf1 = new GraphFactoryImpl(null);
+        GraphFactoryImpl gf2 = new GraphFactoryImpl(null);
+
+        Assert.assertTrue(gf1.equals(gf2));
+        Assert.assertTrue(gf1.equals(gf1));
+
+        gf1.setNodeCounter(42);
+        gf1.setEdgeCounter(12);
+
+        gf2.setNodeCounter(44);
+        gf2.setEdgeCounter(5);
+
+        Assert.assertFalse(gf1.equals(gf2));
+        gf2.setNodeCounter(42);
+        Assert.assertFalse(gf1.equals(gf2));
+    }
+
+    @Test
+    public void testHashCode() {
+        GraphFactoryImpl gf1 = new GraphFactoryImpl(null);
+        GraphFactoryImpl gf2 = new GraphFactoryImpl(null);
+
+        Assert.assertEquals(gf1.hashCode(), gf2.hashCode());
+        Assert.assertEquals(gf1.hashCode(), gf1.hashCode());
+        
+        gf1.setNodeCounter(42);
+        gf1.setEdgeCounter(12);
+
+        gf2.setNodeCounter(44);
+        gf2.setEdgeCounter(5);
+
+        Assert.assertNotEquals(gf1.hashCode(), gf2.hashCode());
+        gf2.setNodeCounter(42);
+        Assert.assertNotEquals(gf1.hashCode(), gf2.hashCode());
     }
 }
