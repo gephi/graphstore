@@ -43,6 +43,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
     protected final TableLock lock;
     protected final ColumnStore<T> columnStore;
     protected AbstractIndex[] columns;
+    protected int columnsCount;
 
     public IndexImpl(ColumnStore<T> columnStore) {
         this.columnStore = columnStore;
@@ -225,6 +226,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
             ensureColumnSize(col.storeId);
             AbstractIndex index = createIndex(col);
             columns[col.storeId] = index;
+            columnsCount++;
         }
     }
 
@@ -234,6 +236,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
             if (col.isIndexed()) {
                 AbstractIndex index = createIndex(col);
                 columns[col.storeId] = index;
+                columnsCount++;
             }
         }
     }
@@ -243,6 +246,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
             AbstractIndex index = columns[col.storeId];
             index.destroy();
             columns[col.storeId] = null;
+            columnsCount--;
         }
     }
 
@@ -269,10 +273,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
             ai.destroy();
         }
         columns = null;
+        columnsCount = 0;
     }
 
     protected int size() {
-        return columns.length;
+        return columnsCount;
     }
 
     AbstractIndex createIndex(ColumnImpl column) {
