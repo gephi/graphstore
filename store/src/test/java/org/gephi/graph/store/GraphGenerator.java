@@ -352,6 +352,17 @@ public class GraphGenerator {
         return nodes;
     }
 
+    public static GraphStore generateTinyGraphStore() {
+        GraphStore graphStore = new GraphStore(null);
+        NodeImpl n1 = new NodeImpl("1", graphStore);
+        NodeImpl n2 = new NodeImpl("2", graphStore);
+        EdgeImpl e = new EdgeImpl("0", graphStore, n1, n2, EdgeTypeStore.NULL_LABEL, 1.0, true);
+        graphStore.addNode(n1);
+        graphStore.addNode(n2);
+        graphStore.addEdge(e);
+        return graphStore;
+    }
+
     public static GraphStore generateSmallGraphStore() {
         int edgeCount = 100;
         GraphStore graphStore = new GraphStore();
