@@ -92,7 +92,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     public void setWeight(double weight, double timestamp) {
         synchronized (this) {
-            final TimestampMap timestampMap = getTimestampMap();
+            final TimestampMap timestampMap = getColumnStore().getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
             if (timestampMap != null) {
                 Object oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
                 TimestampDoubleSet dynamicValue = null;
@@ -110,7 +110,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     public double getWeight(double timestamp) {
         synchronized (this) {
-            final TimestampMap timestampMap = getTimestampMap();
+            final TimestampMap timestampMap = getColumnStore().getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
             if (timestampMap != null) {
                 TimestampDoubleSet dynamicValue = (TimestampDoubleSet) attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
                 int timestampIndex = timestampMap.getTimestampIndex(timestamp);
