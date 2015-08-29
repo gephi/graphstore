@@ -78,7 +78,11 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     public double getWeight() {
         synchronized (this) {
-            return (Double) attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+            Object weightObject = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+            if (weightObject instanceof Double) {
+                return (Double) weightObject;
+            }
+            throw new IllegalStateException("The weight is dynamic, call getWeight(timestamp) instead");
         }
     }
 
@@ -112,12 +116,16 @@ public class EdgeImpl extends ElementImpl implements Edge {
         synchronized (this) {
             final TimestampMap timestampMap = getColumnStore().getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
             if (timestampMap != null) {
-                TimestampDoubleSet dynamicValue = (TimestampDoubleSet) attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+                Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+                if (weightValue instanceof Double) {
+                    throw new IllegalStateException("The weight is static, call getWeight() instead");
+                }
+                TimestampDoubleSet dynamicValue = (TimestampDoubleSet) weightValue;
                 int timestampIndex = timestampMap.getTimestampIndex(timestamp);
                 return dynamicValue.getDouble(timestampIndex, 0.0);
             }
         }
-        return 0;
+        return 0.0;
     }
 
     @Override
@@ -154,7 +162,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public Object getTypeLabel() {
-         graphStore.autoReadLock();
+        graphStore.autoReadLock();
         try {
             return graphStore.edgeTypeStore.getLabel(type);
         } finally {
