@@ -99,9 +99,11 @@ public class EdgeImpl extends ElementImpl implements Edge {
             final TimestampMap timestampMap = getColumnStore().getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
             if (timestampMap != null) {
                 Object oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-                TimestampDoubleSet dynamicValue = null;
+                TimestampDoubleSet dynamicValue;
                 if (!(oldValue instanceof TimestampValueSet)) {
                     dynamicValue = new TimestampDoubleSet();
+                    attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue;
+                    timestampMap.clear();
                 } else {
                     dynamicValue = (TimestampDoubleSet) oldValue;
                 }
