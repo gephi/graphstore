@@ -127,7 +127,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
             if (value instanceof TimestampDoubleSet) {
                 Interval interval = view.getTimeInterval();
                 checkEnabledTimestampSet();
-                checkViewExist((GraphViewImpl) view);
+                checkViewExist((GraphView) view);
                 final ColumnStore columnStore = getColumnStore();
                 final TimestampMap timestampMap = columnStore.getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
                 if (timestampMap != null) {

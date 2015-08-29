@@ -144,7 +144,7 @@ public abstract class ElementImpl implements Element {
         } else {
             Interval interval = view.getTimeInterval();
             checkEnabledTimestampSet();
-            checkViewExist((GraphViewImpl) view);
+            checkViewExist((GraphView) view);
             final ColumnStore columnStore = getColumnStore();
             final TimestampMap timestampMap = columnStore.getTimestampMap(column);
             if (timestampMap != null) {
@@ -530,9 +530,11 @@ public abstract class ElementImpl implements Element {
         }
     }
 
-    void checkViewExist(final GraphViewImpl view) {
+    void checkViewExist(final GraphView view) {
         graphStore.viewStore.checkNonNullViewObject(view);
-        graphStore.viewStore.checkViewExist(view);
+        if (!view.isMainView()) {
+            graphStore.viewStore.checkViewExist((GraphViewImpl) view);
+        }
     }
 
     private static class DynamicValueIterable implements Iterable<Map.Entry<Double, Object>> {
