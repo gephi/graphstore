@@ -59,6 +59,7 @@ public class TimestampIndexStore<T extends Element> {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't create a view index for the main view");
         }
+
         TimestampIndexImpl viewIndex = new TimestampIndexImpl(this, false);
         viewIndexes.put(graph.getView(), viewIndex);
 
@@ -77,93 +78,36 @@ public class TimestampIndexStore<T extends Element> {
     }
 
     public void deleteViewIndex(Graph graph) {
-        if (GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP) {
-            if (graph.getView().isMainView()) {
-                throw new IllegalArgumentException("Can't delete a view index for the main view");
-            }
-            TimestampIndexImpl index = viewIndexes.remove(graph.getView());
-            if (index != null) {
-                index.clear();
-            }
+        if (graph.getView().isMainView()) {
+            throw new IllegalArgumentException("Can't delete a view index for the main view");
         }
+        TimestampIndexImpl index = viewIndexes.remove(graph.getView());
+        if (index != null) {
+            index.clear();
+        }
+
     }
 
     public void clear() {
-        if (GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP) {
-            mainIndex.clear();
+        mainIndex.clear();
 
-            if (!viewIndexes.isEmpty()) {
-                for (TimestampIndexImpl index : viewIndexes.values()) {
-                    index.clear();
-                }
+        if (!viewIndexes.isEmpty()) {
+            for (TimestampIndexImpl index : viewIndexes.values()) {
+                index.clear();
             }
         }
+
     }
 
     protected void index(ElementImpl element) {
-        if (GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP) {
-            TimestampSet set = element.getTimestampSet();
-            if (set != null) {
-                int[] ts = set.getTimestamps();
-                int tsLength = ts.length;
-                for (int i = 0; i < tsLength; i++) {
-                    int timestamp = ts[i];
-                    mainIndex.add(timestamp, element);
-                }
-
-                if (!viewIndexes.isEmpty()) {
-                    for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
-                        GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                        DirectedSubgraph graph = graphView.getDirectedGraph();
-                        boolean node = element instanceof Node;
-                        if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
-                            for (int i = 0; i < tsLength; i++) {
-                                int timestamp = ts[i];
-                                entry.getValue().add(timestamp, element);
-                            }
-                        }
-                    }
-                }
+        TimestampSet set = element.getTimestampSet();
+        if (set != null) {
+            int[] ts = set.getTimestamps();
+            int tsLength = ts.length;
+            for (int i = 0; i < tsLength; i++) {
+                int timestamp = ts[i];
+                mainIndex.add(timestamp, element);
             }
-        }
-    }
-
-    protected void clear(ElementImpl element) {
-        if (GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP) {
-            TimestampSet set = element.getTimestampSet();
-            if (set != null) {
-                int[] ts = set.getTimestamps();
-                int tsLength = ts.length;
-                for (int i = 0; i < tsLength; i++) {
-                    int timestamp = ts[i];
-                    mainIndex.remove(timestamp, element);
-
-                    if (mainIndex.timestamps[i] == null) {
-                        timestampMap.removeTimestamp(timestampMap.indexMap[i]);
-                    }
-                }
-
-                if (!viewIndexes.isEmpty()) {
-                    for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
-                        GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                        DirectedSubgraph graph = graphView.getDirectedGraph();
-                        boolean node = element instanceof Node;
-                        if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
-                            for (int i = 0; i < tsLength; i++) {
-                                int timestamp = ts[i];
-                                entry.getValue().remove(timestamp, element);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public int add(double timestamp, ElementImpl element) {
-        int timestampIndex = timestampMap.getTimestampIndex(timestamp);
-        if (GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP) {
-            mainIndex.add(timestampIndex, element);
 
             if (!viewIndexes.isEmpty()) {
                 for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
@@ -171,10 +115,63 @@ public class TimestampIndexStore<T extends Element> {
                     DirectedSubgraph graph = graphView.getDirectedGraph();
                     boolean node = element instanceof Node;
                     if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
-                        entry.getValue().add(timestampIndex, element);
+                        for (int i = 0; i < tsLength; i++) {
+                            int timestamp = ts[i];
+                            entry.getValue().add(timestamp, element);
+                        }
                     }
                 }
             }
+        }
+
+    }
+
+    protected void clear(ElementImpl element) {
+        TimestampSet set = element.getTimestampSet();
+        if (set != null) {
+            int[] ts = set.getTimestamps();
+            int tsLength = ts.length;
+            for (int i = 0; i < tsLength; i++) {
+                int timestamp = ts[i];
+                mainIndex.remove(timestamp, element);
+
+                if (mainIndex.timestamps[i] == null) {
+                    timestampMap.removeTimestamp(timestampMap.indexMap[i]);
+                }
+            }
+
+            if (!viewIndexes.isEmpty()) {
+                for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                    DirectedSubgraph graph = graphView.getDirectedGraph();
+                    boolean node = element instanceof Node;
+                    if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
+                        for (int i = 0; i < tsLength; i++) {
+                            int timestamp = ts[i];
+                            entry.getValue().remove(timestamp, element);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    public int add(double timestamp, ElementImpl element) {
+        int timestampIndex = timestampMap.getTimestampIndex(timestamp);
+
+        mainIndex.add(timestampIndex, element);
+
+        if (!viewIndexes.isEmpty()) {
+            for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                DirectedSubgraph graph = graphView.getDirectedGraph();
+                boolean node = element instanceof Node;
+                if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
+                    entry.getValue().add(timestampIndex, element);
+                }
+            }
+
         }
 
         return timestampIndex;
@@ -182,28 +179,24 @@ public class TimestampIndexStore<T extends Element> {
 
     public int remove(double timestamp, ElementImpl element) {
         int timestampIndex = timestampMap.getTimestampIndex(timestamp);
-        if (GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP) {
-            mainIndex.remove(timestampIndex, element);
+        mainIndex.remove(timestampIndex, element);
 
-            if (!viewIndexes.isEmpty()) {
-                for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
-                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                    DirectedSubgraph graph = graphView.getDirectedGraph();
-                    if (element instanceof Node) {
-                        if (graph.contains((Node) element)) {
-                            entry.getValue().remove(timestampIndex, element);
-                        }
-                    } else {
-                        if (graph.contains((Edge) element)) {
-                            entry.getValue().remove(timestampIndex, element);
-                        }
+        if (!viewIndexes.isEmpty()) {
+            for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
+                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                DirectedSubgraph graph = graphView.getDirectedGraph();
+                if (element instanceof Node) {
+                    if (graph.contains((Node) element)) {
+                        entry.getValue().remove(timestampIndex, element);
                     }
+                } else if (graph.contains((Edge) element)) {
+                    entry.getValue().remove(timestampIndex, element);
                 }
             }
+        }
 
-            if (mainIndex.timestamps[timestampIndex] == null) {
-                timestampMap.removeTimestamp(timestamp);
-            }
+        if (mainIndex.timestamps[timestampIndex] == null) {
+            timestampMap.removeTimestamp(timestamp);
         }
 
         return timestampIndex;

@@ -19,6 +19,8 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.List;
+import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -30,40 +32,8 @@ import org.testng.annotations.Test;
 public class TimestampIndexStoreTest {
 
     @Test
-    public void testGetMin() {
-        TimestampStore timestampStore = new TimestampStore(null, null);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
-        Assert.assertEquals(store.mainIndex.getMinTimestamp(), Double.NEGATIVE_INFINITY);
-
-        store.timestampMap.addTimestamp(1.0);
-        Assert.assertEquals(store.mainIndex.getMinTimestamp(), 1.0);
-
-        store.timestampMap.addTimestamp(2.0);
-        Assert.assertEquals(store.mainIndex.getMinTimestamp(), 1.0);
-
-        store.timestampMap.removeTimestamp(1.0);
-        Assert.assertEquals(store.mainIndex.getMinTimestamp(), 2.0);
-    }
-
-    @Test
-    public void testGetMax() {
-        TimestampStore timestampStore = new TimestampStore(null, null);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
-        Assert.assertEquals(store.mainIndex.getMaxTimestamp(), Double.POSITIVE_INFINITY);
-
-        store.timestampMap.addTimestamp(1.0);
-        Assert.assertEquals(store.mainIndex.getMaxTimestamp(), 1.0);
-
-        store.timestampMap.addTimestamp(2.0);
-        Assert.assertEquals(store.mainIndex.getMaxTimestamp(), 2.0);
-
-        store.timestampMap.removeTimestamp(2.0);
-        Assert.assertEquals(store.mainIndex.getMaxTimestamp(), 1.0);
-    }
-
-    @Test
     public void testAddElement() {
-        TimestampStore timestampStore = new TimestampStore(null, null);
+        TimestampStore timestampStore = new TimestampStore(null, null, true);
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
         NodeImpl nodeImpl = new NodeImpl(0);
@@ -75,7 +45,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testRemoveElement() {
-        TimestampStore timestampStore = new TimestampStore(null, null);
+        TimestampStore timestampStore = new TimestampStore(null, null, true);
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
         NodeImpl nodeImpl = new NodeImpl(0);
@@ -84,84 +54,6 @@ public class TimestampIndexStoreTest {
         store.remove(1.0, nodeImpl);
 
         Assert.assertEquals(getArrayFromIterable(store.mainIndex.get(1.0)).length, 0);
-    }
-
-    @Test
-    public void testGetElements() {
-        TimestampStore timestampStore = new TimestampStore(null, null);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
-
-        NodeImpl n0 = new NodeImpl(0);
-        NodeImpl n1 = new NodeImpl(1);
-        NodeImpl n2 = new NodeImpl(2);
-        NodeImpl n3 = new NodeImpl(3);
-
-        store.add(1.0, n0);
-        store.add(1.0, n1);
-        store.add(2.0, n2);
-        store.add(3.0, n3);
-
-        ObjectSet r1 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(1.0, 1.0)));
-        Assert.assertTrue(r1.contains(n0));
-        Assert.assertTrue(r1.contains(n1));
-        Assert.assertEquals(r1.size(), 2);
-
-        ObjectSet r2 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(-1, 1.9)));
-        Assert.assertTrue(r2.contains(n0));
-        Assert.assertTrue(r2.contains(n1));
-        Assert.assertEquals(r2.size(), 2);
-
-        ObjectSet r3 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(-1, 2.0)));
-        Assert.assertTrue(r3.contains(n0));
-        Assert.assertTrue(r3.contains(n1));
-        Assert.assertTrue(r3.contains(n2));
-        Assert.assertEquals(r3.size(), 3);
-
-        ObjectSet r4 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(2.0, 2.0)));
-        Assert.assertTrue(r4.contains(n2));
-        Assert.assertEquals(r4.size(), 1);
-
-        ObjectSet r5 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(2.0, 3.5)));
-        Assert.assertTrue(r5.contains(n2));
-        Assert.assertTrue(r5.contains(n3));
-        Assert.assertEquals(r5.size(), 2);
-    }
-
-    @Test
-    public void testHasNodesEdgesEmpty() {
-        TimestampStore timestampStore = new TimestampStore(null, null);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
-        Assert.assertFalse(store.mainIndex.hasElements());
-    }
-
-    @Test
-    public void testHasNodes() {
-        TimestampStore timestampStore = new TimestampStore(null, null);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
-        Assert.assertFalse(store.mainIndex.hasElements());
-
-        NodeImpl nodeImpl = new NodeImpl(0);
-
-        store.add(1.0, nodeImpl);
-        store.add(2.0, nodeImpl);
-        Assert.assertTrue(store.mainIndex.hasElements());
-
-        store.remove(1.0, nodeImpl);
-        Assert.assertTrue(store.mainIndex.hasElements());
-        store.remove(2.0, nodeImpl);
-        Assert.assertFalse(store.mainIndex.hasElements());
-    }
-
-    @Test
-    public void testHasNodesClear() {
-        TimestampStore timestampStore = new TimestampStore(null, null);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
-
-        NodeImpl nodeImpl = new NodeImpl(0);
-
-        store.add(1.0, nodeImpl);
-        store.clear();
-        Assert.assertFalse(store.mainIndex.hasElements());
     }
 
     @Test
@@ -296,6 +188,23 @@ public class TimestampIndexStoreTest {
         graphStore.removeNode(nodeImpl);
 
         Assert.assertEquals(store.timestampMap.size(), 0);
+    }
+
+    @Test
+    public void testCreateView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+        n1.addTimestamp(2.0);
+
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        TimestampIndexImpl index = store.createViewIndex(graph, true, true);
+        Assert.assertSame(store.getIndex(graph), index);
+
     }
 
     //UTILITY

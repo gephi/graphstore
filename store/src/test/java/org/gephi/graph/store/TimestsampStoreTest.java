@@ -27,14 +27,14 @@ public class TimestsampStoreTest {
     
     @Test
     public void testEmpty() {
-        TimestampStore store = new TimestampStore(null, null);
+        TimestampStore store = new TimestampStore(null, null, false);
         Assert.assertTrue(store.isEmpty());
     }
     
     @Test
     public void testEqualsEmpty() {
-        TimestampStore store1 = new TimestampStore(null, null);
-        TimestampStore store2 = new TimestampStore(null, null);
+        TimestampStore store1 = new TimestampStore(null, null, false);
+        TimestampStore store2 = new TimestampStore(null, null, false);
         
         Assert.assertTrue(store1.equals(store2));
         Assert.assertTrue(store1.hashCode() == store2.hashCode());
@@ -43,21 +43,21 @@ public class TimestsampStoreTest {
     @Test
     public void testGetMinNull() {
         GraphStore graphStore = new GraphStore();
-        TimestampStore store = new TimestampStore(graphStore, null);
+        TimestampStore store = new TimestampStore(graphStore, null, true);
         Assert.assertEquals(store.getMin(graphStore), Double.NEGATIVE_INFINITY);
     }
     
     @Test
     public void testGetMaxNull() {
         GraphStore graphStore = new GraphStore();
-        TimestampStore store = new TimestampStore(graphStore, null);
+        TimestampStore store = new TimestampStore(graphStore, null, true);
         Assert.assertEquals(store.getMax(graphStore), Double.POSITIVE_INFINITY);
     }
     
     @Test
     public void testGetMin() {
         GraphStore graphStore = new GraphStore();
-        TimestampStore store = new TimestampStore(graphStore, null);
+        TimestampStore store = new TimestampStore(graphStore, null, true);
         store.nodeMap.addTimestamp(1.0);
         store.nodeMap.addTimestamp(2.0);
         Assert.assertEquals(store.getMin(graphStore), 1.0);
@@ -66,7 +66,7 @@ public class TimestsampStoreTest {
     @Test
     public void testGetMax() {
         GraphStore graphStore = new GraphStore();
-        TimestampStore store = new TimestampStore(graphStore, null);
+        TimestampStore store = new TimestampStore(graphStore, null, true);
         store.nodeMap.addTimestamp(1.0);
         store.nodeMap.addTimestamp(2.0);
         Assert.assertEquals(store.getMax(graphStore), 2.0);
@@ -74,7 +74,7 @@ public class TimestsampStoreTest {
     
     @Test
     public void testClearEdges() {
-        TimestampStore store = new TimestampStore(null, null);
+        TimestampStore store = new TimestampStore(null, null, true);
         store.nodeMap.addTimestamp(1.0);
         store.edgeMap.addTimestamp(2.0);
         store.clearEdges();
@@ -85,7 +85,7 @@ public class TimestsampStoreTest {
     
     @Test
     public void testClear() {
-        TimestampStore store = new TimestampStore(null, null);
+        TimestampStore store = new TimestampStore(null, null, true);
         store.nodeMap.addTimestamp(1.0);
         store.edgeMap.addTimestamp(2.0);
         store.clear();
@@ -96,8 +96,8 @@ public class TimestsampStoreTest {
     
     @Test
     public void testEquals() {
-        TimestampStore store1 = new TimestampStore(null, null);
-        TimestampStore store2 = new TimestampStore(null, null);
+        TimestampStore store1 = new TimestampStore(null, null, true);
+        TimestampStore store2 = new TimestampStore(null, null, true);
         store1.nodeMap.addTimestamp(1.0);
         store1.edgeMap.addTimestamp(2.0);
         store2.nodeMap.addTimestamp(1.0);

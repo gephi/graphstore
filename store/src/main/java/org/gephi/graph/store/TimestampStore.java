@@ -34,16 +34,20 @@ public class TimestampStore {
     protected final TimestampIndexStore<Node> nodeIndexStore;
     protected final TimestampIndexStore<Edge> edgeIndexStore;
 
-    public TimestampStore(GraphStore store, GraphLock graphLock) {
+    public TimestampStore(GraphStore store, GraphLock graphLock, boolean indexed) {
         lock = graphLock;
         graphStore = store;
         nodeMap = new TimestampMap();
         edgeMap = new TimestampMap();
-        nodeIndexStore = new TimestampIndexStore<Node>(this, nodeMap);
-        edgeIndexStore = new TimestampIndexStore<Edge>(this, edgeMap);
+        nodeIndexStore = indexed ? new TimestampIndexStore<Node>(this, nodeMap) : null;
+        edgeIndexStore = indexed ? new TimestampIndexStore<Edge>(this, edgeMap) : null;
     }
 
     public double getMin(Graph graph) {
+        if(nodeIndexStore == null || edgeIndexStore == null) {
+            //TODO: Manual calculation
+            return Double.NEGATIVE_INFINITY;
+        }
         double nodeMin = nodeIndexStore.getIndex(graph).getMinTimestamp();
         double edgeMin = edgeIndexStore.getIndex(graph).getMinTimestamp();
         if (Double.isInfinite(nodeMin)) {
@@ -56,6 +60,10 @@ public class TimestampStore {
     }
 
     public double getMax(Graph graph) {
+        if(nodeIndexStore == null || edgeIndexStore == null) {
+            //TODO: Manual calculation
+            return Double.POSITIVE_INFINITY;
+        }
         double nodeMax = nodeIndexStore.getIndex(graph).getMaxTimestamp();
         double edgeMax = edgeIndexStore.getIndex(graph).getMaxTimestamp();
         if (Double.isInfinite(nodeMax)) {
