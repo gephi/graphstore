@@ -5,4 +5,4 @@ before_script: cd store
 after_success:
   - echo "<settings><servers><server><id>ossrh</id><username>\${env.OSSRH_USER}</username><password>\${env.OSSRH_PASS}</password></server></servers></settings>" > ~/settings.xml
   - mvn clean deploy --settings ~/settings.xml -Djava.awt.headless=true -Dgpg.skip=true
-  - mvn clean cobertura:cobertura coveralls:report
+  - mvn clean test jacoco:report coveralls:report
