@@ -35,7 +35,6 @@ public class GraphLock {
         writeLock = readWriteLock.writeLock();
     }
 
-    //Locking
     public void readLock() {
         readLock.lock();
     }
@@ -64,7 +63,7 @@ public class GraphLock {
 
     public void checkHoldWriteLock() {
         if (!readWriteLock.isWriteLockedByCurrentThread()) {
-            throw new IllegalArgumentException("Impossible to perform a write operation while holding only a read lock. Wrap your code with a write loop to solve this.");
+            throw new IllegalMonitorStateException("Impossible to perform a write operation without lock. Wrap your code with a write lock to solve this.");
         }
     }
 }
