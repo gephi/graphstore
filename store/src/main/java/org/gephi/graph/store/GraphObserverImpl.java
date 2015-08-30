@@ -222,7 +222,7 @@ public class GraphObserverImpl implements GraphObserver {
     public void destroy() {
         checkNotDestroyed();
 
-        graphStore.graphModel.destroyGraphObserver(this);
+        graphStore.destroyGraphObserver(this);
     }
 
     @Override

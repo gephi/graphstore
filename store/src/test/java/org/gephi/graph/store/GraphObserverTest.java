@@ -110,6 +110,17 @@ public class GraphObserverTest {
         Assert.assertFalse(store.observers.contains(graphObserver));
     }
 
+    @Test
+    public void testDestroyGraphObserverAlternative() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphObserverImpl graphObserver = store.createGraphObserver(store, false);
+        graphObserver.destroy();
+
+        Assert.assertTrue(graphObserver.destroyed);
+        Assert.assertTrue(graphObserver.isDestroyed());
+        Assert.assertFalse(store.observers.contains(graphObserver));
+    }
+
     @Test(expectedExceptions = RuntimeException.class)
     public void testCheckDestroyOtherStore() {
         GraphStore store = new GraphStore();
@@ -181,6 +192,16 @@ public class GraphObserverTest {
 
         store.addNode(store.factory.newNode());
         Assert.assertTrue(graphObserver.hasGraphChanged());
+        Assert.assertFalse(graphObserver.hasGraphChanged());
+    }
+
+    @Test
+    public void testHasGraphChangedAfterDestroy() {
+        GraphStore store = new GraphStore();
+        GraphObserverImpl graphObserver = store.createGraphObserver(store, false);
+        store.addNode(store.factory.newNode());
+        graphObserver.destroy();
+
         Assert.assertFalse(graphObserver.hasGraphChanged());
     }
 
@@ -380,7 +401,7 @@ public class GraphObserverTest {
     }
 
     @Test
-    public void testResetVersion() {
+    public void testResetNodeVersion() {
         GraphStore store = GraphGenerator.generateSmallGraphStore();
         store.version.nodeVersion = Integer.MAX_VALUE - 1;
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
@@ -391,5 +412,21 @@ public class GraphObserverTest {
 
         Assert.assertEquals(nodeVersion, Integer.MIN_VALUE + 1);
         Assert.assertEquals(graphObserver.nodeVersion, Integer.MIN_VALUE);
+    }
+
+    @Test
+    public void testResetEdgeVersion() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        Node n1 = store.getNode("1");
+        Node n2 = store.getNode("2");
+        store.version.edgeVersion = Integer.MAX_VALUE - 1;
+        GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
+        graphObserver.hasGraphChanged();
+        store.addEdge(store.factory.newEdge(n2, n1));
+
+        int edgeVersion = store.version.edgeVersion;
+
+        Assert.assertEquals(edgeVersion, Integer.MIN_VALUE + 1);
+        Assert.assertEquals(graphObserver.edgeVersion, Integer.MIN_VALUE);
     }
 }

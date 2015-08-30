@@ -30,11 +30,11 @@ public class GraphAttributesImpl {
 
     protected final TimestampMap timestampMap = new TimestampMap();
     protected final Map<String, Object> attributes = new HashMap<String, Object>();
-    
+
     public synchronized Set<String> getKeys() {
         return attributes.keySet();
     }
-    
+
     public synchronized void setValue(String key, Object value) {
         if (value != null) {
             checkSupportedTypes(value.getClass());
@@ -81,7 +81,7 @@ public class GraphAttributesImpl {
 
         valueSet.put(index, value);
     }
-    
+
     protected void setGraphAttributes(GraphAttributesImpl graphAttributes) {
         timestampMap.setTimestampMap(graphAttributes.timestampMap);
         attributes.putAll(graphAttributes.attributes);
@@ -120,7 +120,7 @@ public class GraphAttributesImpl {
         if (!MapDeepEquals.mapDeepEquals(attributes, other.attributes)) {
             return false;
         }
-        if(!timestampMap.equals(other.timestampMap)) {
+        if (!timestampMap.equals(other.timestampMap)) {
             return false;
         }
         return true;
