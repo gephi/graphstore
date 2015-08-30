@@ -329,7 +329,7 @@ public class GraphVersionTest {
         g4.nodeVersion = 0;
         g4.edgeVersion = 10;
         Assert.assertEquals(g1.hashCode(), g2.hashCode());
-        Assert.assertNotEquals(g1.hashCode(), g2.hashCode());
-        Assert.assertNotEquals(g1.hashCode(), g2.hashCode());
+        Assert.assertNotEquals(g1.hashCode(), g3.hashCode());
+        Assert.assertNotEquals(g1.hashCode(), g4.hashCode());
     }
 }

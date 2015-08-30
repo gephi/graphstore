@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
@@ -119,15 +120,9 @@ public class GraphStoreTest {
         GraphStore graphStore = new GraphStore();
         NodeImpl[] nodes = GraphGenerator.generateNodeList(1);
 
-        boolean a = graphStore.addNode(nodes[0]);
-        boolean b = graphStore.addNode(nodes[0]);
-
-        Assert.assertTrue(a);
-        Assert.assertFalse(b);
-
-        boolean c = graphStore.contains(nodes[0]);
-
-        Assert.assertTrue(c);
+        Assert.assertTrue(graphStore.addNode(nodes[0]));
+        Assert.assertFalse(graphStore.addNode(nodes[0]));
+        Assert.assertTrue(graphStore.contains(nodes[0]));
     }
 
     @Test(expectedExceptions = ClassCastException.class)
@@ -448,6 +443,194 @@ public class GraphStoreTest {
         Assert.assertEquals(graphStore.getEdgeCount(), 0);
     }
 
+    @Test
+    public void testGetNode() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("foo");
+        graphStore.addNode(n1);
+        Assert.assertSame(graphStore.getNode("foo"), n1);
+        Assert.assertNull(graphStore.getNode("bar"));
+    }
+
+    @Test
+    public void testGetEdge() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Assert.assertNotNull(graphStore.getEdge("0"));
+        Assert.assertNull(graphStore.getEdge("bar"));
+    }
+
+    @Test
+    public void testGetMutualEdge() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        Node n3 = graphStore.factory.newNode("3");
+        graphStore.addAllNodes(Arrays.asList(new Node[]{n1, n2, n3}));
+
+        Edge e1 = graphStore.factory.newEdge(n1, n2);
+        Edge e2 = graphStore.factory.newEdge(n2, n1);
+        Edge e3 = graphStore.factory.newEdge(n1, n3);
+        graphStore.addAllEdges(Arrays.asList(new Edge[]{e1, e2, e3}));
+
+        Assert.assertSame(graphStore.getMutualEdge(e1), e2);
+        Assert.assertSame(graphStore.getMutualEdge(e2), e1);
+        Assert.assertNull(graphStore.getMutualEdge(e3));
+    }
+
+    @Test
+    public void testGetNodes() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+        NodeIterable nodeIterable = graphStore.getNodes();
+        testNodeIterable(nodeIterable, nodes);
+    }
+
+    @Test
+    public void testGetEdges() {
+        GraphStore graphStore = new GraphStore();
+        NodeStore nodeStore = GraphGenerator.generateNodeStore(5);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 4, 0, true, true);
+        graphStore.addAllEdges(Arrays.asList(edges));
+        EdgeIterable edgeIterable = graphStore.getEdges();
+        testEdgeIterable(edgeIterable, edges);
+    }
+
+    @Test
+    public void testRemoveNode() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        Node[] nodes = graphStore.getNodes().toArray();
+        for (Node n : nodes) {
+            Edge[] edges = graphStore.getEdges(n).toArray();
+            Assert.assertTrue(graphStore.removeNode(n));
+            Assert.assertFalse(graphStore.contains(n));
+            for (Edge e : edges) {
+                Assert.assertFalse(graphStore.contains(e));
+            }
+        }
+        Assert.assertEquals(graphStore.getNodeCount(), 0);
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testRemoveEdge() {
+        GraphStore graphStore = new GraphStore();
+        NodeStore nodeStore = GraphGenerator.generateNodeStore(2);
+        EdgeImpl edge = GraphGenerator.generateEdgeList(nodeStore, 1, 0, true, true)[0];
+        graphStore.addEdge(edge);
+
+        Assert.assertTrue(graphStore.removeEdge(edge));
+        Assert.assertFalse(graphStore.contains(edge));
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+        Assert.assertFalse(graphStore.removeEdge(edge));
+    }
+
+    @Test
+    public void testRemoveAllNode() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        Node[] nodes = graphStore.getNodes().toArray();
+        Assert.assertTrue(graphStore.removeAllNodes(Arrays.asList(nodes)));
+        Assert.assertEquals(graphStore.getNodeCount(), 0);
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testRemoveAllEdges() {
+        GraphStore graphStore = new GraphStore();
+        NodeStore nodeStore = GraphGenerator.generateNodeStore(5);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 5, 0, true, true);
+        graphStore.addAllEdges(Arrays.asList(edges));
+
+        graphStore.removeAllEdges(Arrays.asList(edges));
+
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+        for (EdgeImpl e : edges) {
+            Assert.assertFalse(graphStore.contains(e));
+        }
+    }
+
+    @Test
+    public void testGetOpposite() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        Node n2 = graphStore.getNode("2");
+
+        Edge e = graphStore.getEdge("0");
+        Assert.assertSame(graphStore.getOpposite(n1, e), n2);
+    }
+
+    @Test
+    public void testIsAdjacent() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        Node n2 = graphStore.getNode("2");
+
+        Assert.assertTrue(graphStore.isAdjacent(n1, n2));
+        Assert.assertFalse(graphStore.isAdjacent(n2, n1));
+        graphStore.clearEdges();
+        Assert.assertFalse(graphStore.isAdjacent(n1, n2));
+    }
+
+    @Test
+    public void testIsAdjacentByType() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        Node n2 = graphStore.getNode("2");
+
+        Assert.assertTrue(graphStore.isAdjacent(n1, n2, 0));
+        Assert.assertFalse(graphStore.isAdjacent(n2, n1, 0));
+        graphStore.clearEdges();
+        Assert.assertFalse(graphStore.isAdjacent(n1, n2, 0));
+    }
+
+    @Test
+    public void testClearEdges() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        graphStore.clearEdges(n1);
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testClearEdgesByType() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        graphStore.clearEdges(n1, 0);
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testEquals() {
+        GraphStore g1 = GraphGenerator.generateTinyGraphStore();
+        GraphStore g2 = GraphGenerator.generateTinyGraphStore();
+        Assert.assertTrue(g1.equals(g2));
+        Assert.assertTrue(g2.equals(g1));
+    }
+
+    @Test
+    public void testHashCode() {
+        GraphStore g1 = GraphGenerator.generateTinyGraphStore();
+        GraphStore g2 = GraphGenerator.generateTinyGraphStore();
+        Assert.assertEquals(g1.hashCode(), g2.hashCode());
+    }
+
+    //UTILITY
+    private void testNodeIterable(NodeIterable iterable, NodeImpl[] nodes) {
+        Set<Node> nodeSet = new HashSet<Node>(iterable.toCollection());
+        for (NodeImpl n : nodes) {
+            Assert.assertTrue(nodeSet.remove(n));
+        }
+        Assert.assertEquals(nodeSet.size(), 0);
+    }
+
+    private void testEdgeIterable(EdgeIterable iterable, EdgeImpl[] edges) {
+        Set<Edge> edgeSet = new HashSet<Edge>(iterable.toCollection());
+        for (EdgeImpl n : edges) {
+            Assert.assertTrue(edgeSet.remove(n));
+        }
+        Assert.assertEquals(edgeSet.size(), 0);
+    }
+
     private void testBasicStoreEquals(GraphStore graphStore, BasicGraphStore basicGraphStore) {
         BasicGraphStore.BasicEdgeStore basicEdgeStore = basicGraphStore.edgeStore;
         BasicGraphStore.BasicNodeStore basicNodeStore = basicGraphStore.nodeStore;
@@ -526,6 +709,8 @@ public class GraphStoreTest {
 
             nodeCount++;
         }
+
+        Assert.assertEquals(nodeStore.size(), nodeCount);
     }
 
     private void testEdgeSets(EdgeIterable e1, EdgeIterable e2) {
