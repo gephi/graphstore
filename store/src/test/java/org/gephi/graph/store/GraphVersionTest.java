@@ -294,4 +294,42 @@ public class GraphVersionTest {
         Assert.assertEquals(view.version.edgeVersion, edgeVersion + 1);
         Assert.assertEquals(view.version.nodeVersion, nodeVersion);
     }
+
+    @Test
+    public void testEquals() {
+        GraphVersion g1 = new GraphVersion(null);
+        g1.nodeVersion = 5;
+        g1.edgeVersion = 10;
+        GraphVersion g2 = new GraphVersion(null);
+        g2.nodeVersion = 5;
+        g2.edgeVersion = 10;
+        GraphVersion g3 = new GraphVersion(null);
+        g3.nodeVersion = 5;
+        g3.edgeVersion = 0;
+        GraphVersion g4 = new GraphVersion(null);
+        g4.nodeVersion = 0;
+        g4.edgeVersion = 10;
+        Assert.assertTrue(g1.equals(g2));
+        Assert.assertFalse(g1.equals(g3));
+        Assert.assertFalse(g1.equals(g4));
+    }
+
+    @Test
+    public void testHashCode() {
+        GraphVersion g1 = new GraphVersion(null);
+        g1.nodeVersion = 5;
+        g1.edgeVersion = 10;
+        GraphVersion g2 = new GraphVersion(null);
+        g2.nodeVersion = 5;
+        g2.edgeVersion = 10;
+        GraphVersion g3 = new GraphVersion(null);
+        g3.nodeVersion = 5;
+        g3.edgeVersion = 0;
+        GraphVersion g4 = new GraphVersion(null);
+        g4.nodeVersion = 0;
+        g4.edgeVersion = 10;
+        Assert.assertEquals(g1.hashCode(), g2.hashCode());
+        Assert.assertNotEquals(g1.hashCode(), g2.hashCode());
+        Assert.assertNotEquals(g1.hashCode(), g2.hashCode());
+    }
 }
