@@ -39,8 +39,8 @@ public class TimestampStore {
         graphStore = store;
         nodeMap = new TimestampMap();
         edgeMap = new TimestampMap();
-        nodeIndexStore = indexed ? new TimestampIndexStore<Node>(this, nodeMap) : null;
-        edgeIndexStore = indexed ? new TimestampIndexStore<Edge>(this, edgeMap) : null;
+        nodeIndexStore = indexed ? new TimestampIndexStore<Node>(this, Node.class, nodeMap) : null;
+        edgeIndexStore = indexed ? new TimestampIndexStore<Edge>(this, Edge.class, edgeMap) : null;
     }
 
     public double getMin(Graph graph) {

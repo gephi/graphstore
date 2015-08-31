@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -234,6 +236,201 @@ public class IndexStoreTest {
         Assert.assertTrue(mainIndex.values(col).isEmpty());
     }
 
+    @Test
+    public void testCreateViewIndex() {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        IndexImpl index = indexStore.createViewIndex(graph);
+        Assert.assertSame(indexStore.getIndex(graph), index);
+        for (ColumnImpl col : graphStore.nodeColumnStore.toArray()) {
+            if (col.isIndexed()) {
+                Assert.assertTrue(index.hasColumn(col));
+            }
+        }
+    }
+
+    @Test
+    public void testGetIndexWithView() {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        IndexImpl index = indexStore.getIndex(graph);
+        Assert.assertNotNull(index);
+        Assert.assertSame(indexStore.getIndex(graph), index);
+        for (ColumnImpl col : graphStore.nodeColumnStore.toArray()) {
+            if (col.isIndexed()) {
+                Assert.assertTrue(index.hasColumn(col));
+            }
+        }
+    }
+
+    @Test
+    public void testCreateViewIndexWithElements() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeColumnStore.addColumn(column);
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.setAttribute(column, "bar");
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        IndexImpl index = indexStore.createViewIndex(graph);
+        Assert.assertEquals(index.countElements(column), 2);
+        Assert.assertEquals(index.countValues(column), 2);
+        Assert.assertEquals(index.count(column, "bar"), 1);
+        Assert.assertEquals(index.count(column, null), 1);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testCreateViewIndexMainView() {
+        GraphStore graphStore = new GraphStore();
+        graphStore.nodeColumnStore.indexStore.createViewIndex(graphStore);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testDeleteViewIndexMainView() {
+        GraphStore graphStore = new GraphStore();
+        graphStore.nodeColumnStore.indexStore.deleteViewIndex(graphStore);
+    }
+
+    @Test
+    public void testDeleteViewIndex() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeColumnStore.addColumn(column);
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.setAttribute(column, "bar");
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        IndexImpl index = indexStore.createViewIndex(graph);
+        indexStore.deleteViewIndex(graph);
+        Assert.assertFalse(index.hasColumn(column));
+    }
+
+    @Test
+    public void testAddColumnWithView() {
+        GraphStore graphStore = new GraphStore();
+        GraphView view = graphStore.viewStore.createView();
+        IndexImpl index = graphStore.nodeColumnStore.indexStore.createViewIndex(graphStore.viewStore.getGraph(view));
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeColumnStore.addColumn(column);
+        Assert.assertTrue(index.hasColumn(column));
+    }
+
+    @Test
+    public void testRemoveColumnWithView() {
+        GraphStore graphStore = new GraphStore();
+        GraphView view = graphStore.viewStore.createView();
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeColumnStore.addColumn(column);
+
+        IndexImpl index = graphStore.nodeColumnStore.indexStore.createViewIndex(graphStore.viewStore.getGraph(view));
+        graphStore.nodeColumnStore.removeColumn(column);
+        Assert.assertFalse(index.hasColumn(column));
+    }
+
+    @Test
+    public void testSetWithView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        NodeImpl n2 = graphStore.getNode("2");
+
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        graph.addNode(n1);
+
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeColumnStore.addColumn(column);
+
+        IndexImpl index = indexStore.createViewIndex(graphStore.viewStore.getGraph(view));
+
+        n1.setAttribute(column, "foo");
+        n2.setAttribute(column, "bar");
+
+        Assert.assertEquals(index.countElements(column), 1);
+        Assert.assertEquals(index.countValues(column), 1);
+        Assert.assertEquals(index.count(column, "foo"), 1);
+
+        n1.removeAttribute(column);
+
+        Assert.assertEquals(index.countElements(column), 1);
+        Assert.assertEquals(index.countValues(column), 1);
+        Assert.assertEquals(index.count(column, null), 1);
+    }
+
+    @Test
+    public void testIndexWithView() {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+        IndexImpl index = indexStore.createViewIndex(graphStore.viewStore.getGraph(view));
+
+        Column column = graphStore.nodeColumnStore.getColumn("foo");
+        Node n1 = graphStore.factory.newNode("1");
+        n1.setAttribute(column, "bar");
+        graphStore.addNode(n1);
+        graph.addNode(n1);
+
+        Assert.assertEquals(index.countElements(column), 1);
+        Assert.assertEquals(index.countValues(column), 1);
+        Assert.assertEquals(index.count(column, "bar"), 1);
+    }
+
+    @Test
+    public void testClearWithView() {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+
+        Column column = graphStore.nodeColumnStore.getColumn("foo");
+        Node n1 = graphStore.factory.newNode("1");
+        n1.setAttribute(column, "bar");
+        graphStore.addNode(n1);
+        graph.addNode(n1);
+
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+        IndexImpl index = indexStore.createViewIndex(graphStore.viewStore.getGraph(view));
+
+        graphStore.removeNode(n1);
+
+        Assert.assertEquals(index.countElements(column), 0);
+        Assert.assertEquals(index.countValues(column), 0);
+        Assert.assertEquals(index.count(column, "bar"), 0);
+    }
+
+    @Test
+    public void testClearInView() {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+
+        Column column = graphStore.nodeColumnStore.getColumn("foo");
+        Node n1 = graphStore.factory.newNode("1");
+        n1.setAttribute(column, "bar");
+        graphStore.addNode(n1);
+        graph.addNode(n1);
+
+        IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+        IndexImpl index = indexStore.createViewIndex(graphStore.viewStore.getGraph(view));
+
+        graph.removeNode(n1);
+
+        Assert.assertEquals(index.countElements(column), 0);
+        Assert.assertEquals(index.countValues(column), 0);
+        Assert.assertEquals(index.count(column, "bar"), 0);
+    }
+
     //UTILITY
     private NodeImpl[] generateNodesWithUniqueAttributes(ColumnStore<Node> columnStore) {
         int count = 100;
@@ -251,6 +448,14 @@ public class IndexStoreTest {
             }
         }
         return nodes;
+    }
+
+    private GraphStore generateBasicGraphStoreWithColumns() {
+        GraphStore graphStore = new GraphStore();
+        ColumnStore<Node> columnStore = graphStore.nodeColumnStore;
+        columnStore.addColumn(new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
+        return graphStore;
     }
 
     private ColumnStore<Node> generateBasicNodeColumnStore() {

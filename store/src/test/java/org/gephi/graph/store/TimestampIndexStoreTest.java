@@ -202,9 +202,131 @@ public class TimestampIndexStoreTest {
 
         GraphView view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
-        TimestampIndexImpl index = store.createViewIndex(graph, true, true);
+        TimestampIndexImpl index = store.createViewIndex(graph);
         Assert.assertSame(store.getIndex(graph), index);
+        Assert.assertFalse(index.hasElements());
+    }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testCreateViewMainView() {
+        GraphStore graphStore = new GraphStore();
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        store.createViewIndex(graphStore);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testDeleteViewMainView() {
+        GraphStore graphStore = new GraphStore();
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        store.deleteViewIndex(graphStore);
+    }
+
+    @Test
+    public void testCreateViewWithElements() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+        n1.addTimestamp(2.0);
+
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        view.fill();
+        TimestampIndexImpl index = store.createViewIndex(graph);
+        Assert.assertTrue(index.hasElements());
+    }
+
+    @Test
+    public void testDeleteViewWithElements() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+        n1.addTimestamp(2.0);
+
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        view.fill();
+        TimestampIndexImpl index = store.createViewIndex(graph);
+        store.deleteViewIndex(graph);
+        Assert.assertFalse(index.hasElements());
+        Assert.assertNull(store.getIndex(graph));
+    }
+
+    @Test
+    public void testIndexWithView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+
+        TimestampIndexImpl index = store.createViewIndex(graph);
+        graph.addNode(n1);
+
+        Assert.assertTrue(index.hasElements());
+        Assert.assertSame(getArrayFromIterable(index.get(1.0))[0], n1);
+    }
+
+    @Test
+    public void testClearWithView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        view.fill();
+        TimestampIndexImpl index = store.createViewIndex(graph);
+        store.clear();
+        Assert.assertFalse(index.hasElements());
+    }
+
+    @Test
+    public void testClearElementWithView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        view.fill();
+        TimestampIndexImpl index = store.createViewIndex(graph);
+        n1.clearAttributes();
+        Assert.assertFalse(index.hasElements());
+    }
+
+    @Test
+    public void testClearViewWithView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        view.fill();
+        TimestampIndexImpl index = store.createViewIndex(graph);
+        view.clear();
+        Assert.assertFalse(index.hasElements());
     }
 
     //UTILITY

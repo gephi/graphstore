@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.List;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -42,14 +43,28 @@ public class TimestampIndexImplTest {
     }
 
     @Test
-    public void testGetMinWithView() {
-        GraphStore store = GraphGenerator.generateTinyGraphStore();
-        Node n1 = store.getNode("1");
-        Node n2 = store.getNode("2");
+    public void testGetMinMaxWithView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        Node n2 = graphStore.getNode("2");
         n1.addTimestamp(1.0);
         n1.addTimestamp(5.0);
         n2.addTimestamp(2.0);
         n2.addTimestamp(3.0);
+
+        TimestampStore timestampStore = graphStore.timestampStore;
+        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        view.fill();
+        TimestampIndexImpl index = store.createViewIndex(graph);
+
+        Assert.assertEquals(index.getMinTimestamp(), 1.0);
+        Assert.assertEquals(index.getMaxTimestamp(), 5.0);
+        graph.removeNode(n1);
+        Assert.assertEquals(index.getMinTimestamp(), 2.0);
+        Assert.assertEquals(index.getMaxTimestamp(), 3.0);
     }
 
     @Test

@@ -16,8 +16,10 @@
 package org.gephi.graph.store;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.gephi.attribute.api.Column;
 import org.gephi.attribute.time.TimestampSet;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
@@ -32,6 +34,8 @@ import org.gephi.graph.api.Node;
  */
 public class TimestampIndexStore<T extends Element> {
 
+    //Element
+    protected final Class<T> elementType;
     //Timestamp
     protected final TimestampStore timestampStore;
     protected final TimestampMap timestampMap;
@@ -39,8 +43,9 @@ public class TimestampIndexStore<T extends Element> {
     protected final TimestampIndexImpl mainIndex;
     protected final Map<GraphView, TimestampIndexImpl> viewIndexes;
 
-    public TimestampIndexStore(TimestampStore store, TimestampMap map) {
+    public TimestampIndexStore(TimestampStore store, Class<T> type, TimestampMap map) {
         timestampStore = store;
+        elementType = type;
         timestampMap = map;
         mainIndex = new TimestampIndexImpl<T>(this, true);
         viewIndexes = new Object2ObjectOpenHashMap<GraphView, TimestampIndexImpl>();
@@ -52,27 +57,20 @@ public class TimestampIndexStore<T extends Element> {
             return mainIndex;
         }
         TimestampIndexImpl viewIndex = viewIndexes.get(graph.getView());
+        // TODO: Create if doesn't exist
         return viewIndex;
     }
 
-    public TimestampIndexImpl createViewIndex(Graph graph, boolean indexNode, boolean indexEdge) {
+    public TimestampIndexImpl createViewIndex(Graph graph) {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't create a view index for the main view");
         }
 
         TimestampIndexImpl viewIndex = new TimestampIndexImpl(this, false);
+        // TODO: Check view doesn't exist already
         viewIndexes.put(graph.getView(), viewIndex);
 
-        if (indexNode) {
-            for (Node node : graph.getNodes()) {
-                index((NodeImpl) node);
-            }
-        }
-        if (indexEdge) {
-            for (Edge edge : graph.getEdges()) {
-                index((EdgeImpl) edge);
-            }
-        }
+        indexView(graph);
 
         return viewIndex;
     }
@@ -108,22 +106,7 @@ public class TimestampIndexStore<T extends Element> {
                 int timestamp = ts[i];
                 mainIndex.add(timestamp, element);
             }
-
-            if (!viewIndexes.isEmpty()) {
-                for (Entry<GraphView, TimestampIndexImpl> entry : viewIndexes.entrySet()) {
-                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                    DirectedSubgraph graph = graphView.getDirectedGraph();
-                    boolean node = element instanceof Node;
-                    if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
-                        for (int i = 0; i < tsLength; i++) {
-                            int timestamp = ts[i];
-                            entry.getValue().add(timestamp, element);
-                        }
-                    }
-                }
-            }
         }
-
     }
 
     protected void clear(ElementImpl element) {
@@ -154,7 +137,6 @@ public class TimestampIndexStore<T extends Element> {
                 }
             }
         }
-
     }
 
     public int add(double timestamp, ElementImpl element) {
@@ -202,25 +184,75 @@ public class TimestampIndexStore<T extends Element> {
         return timestampIndex;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 59 * hash + (this.timestampMap != null ? this.timestampMap.hashCode() : 0);
-        return hash;
+    public void indexView(Graph graph) {
+        TimestampIndexImpl viewIndex = viewIndexes.get(graph.getView());
+        if (viewIndex != null) {
+            graph.readLock();
+            try {
+                Iterator<T> iterator = null;
+
+                if (elementType.equals(Node.class)) {
+                    iterator = (Iterator<T>) graph.getNodes().iterator();
+                } else if (elementType.equals(Edge.class)) {
+                    iterator = (Iterator<T>) graph.getEdges().iterator();
+                }
+
+                if (iterator != null) {
+                    while (iterator.hasNext()) {
+                        ElementImpl element = (ElementImpl) iterator.next();
+                        TimestampSet set = element.getTimestampSet();
+                        if (set != null) {
+                            int[] ts = set.getTimestamps();
+                            int tsLength = ts.length;
+                            for (int i = 0; i < tsLength; i++) {
+                                int timestamp = ts[i];
+                                viewIndex.add(timestamp, element);
+                            }
+                        }
+                    }
+                }
+            } finally {
+                graph.readUnlock();
+            }
+        }
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
+    public void indexInView(T element, GraphView view) {
+        ElementImpl elementImpl = (ElementImpl) element;
+        TimestampIndexImpl viewIndex = viewIndexes.get(view);
+        if (viewIndex != null) {
+            TimestampSet set = elementImpl.getTimestampSet();
+            if (set != null) {
+                int[] ts = set.getTimestamps();
+                int tsLength = ts.length;
+                for (int i = 0; i < tsLength; i++) {
+                    int timestamp = ts[i];
+                    viewIndex.add(timestamp, elementImpl);
+                }
+            }
         }
-        if (getClass() != obj.getClass()) {
-            return false;
+    }
+
+    public void clearInView(T element, GraphView view) {
+        ElementImpl elementImpl = (ElementImpl) element;
+        TimestampIndexImpl viewIndex = viewIndexes.get(view);
+        if (viewIndex != null) {
+            TimestampSet set = elementImpl.getTimestampSet();
+            if (set != null) {
+                int[] ts = set.getTimestamps();
+                int tsLength = ts.length;
+                for (int i = 0; i < tsLength; i++) {
+                    int timestamp = ts[i];
+                    viewIndex.remove(timestamp, elementImpl);
+                }
+            }
         }
-        final TimestampIndexStore<T> other = (TimestampIndexStore<T>) obj;
-        if (this.timestampMap != other.timestampMap && (this.timestampMap == null || !this.timestampMap.equals(other.timestampMap))) {
-            return false;
+    }
+
+    public void clear(GraphView view) {
+        TimestampIndexImpl viewIndex = viewIndexes.get(view);
+        if (viewIndex != null) {
+            viewIndex.clear();
         }
-        return true;
     }
 }

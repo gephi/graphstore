@@ -274,12 +274,13 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         if (id != NodeStore.NULL_ID) {
             checkNodeExists(node);
 
-            node.clearAttributes();
-
-            incrementVersion();
             if (viewStore != null) {
                 viewStore.removeNode(node);
             }
+
+            node.clearAttributes();
+
+            incrementVersion();
 
             int storeIndex = id / GraphStoreConfiguration.NODESTORE_BLOCK_SIZE;
             NodeBlock block = blocks[storeIndex];
