@@ -17,7 +17,6 @@ package org.gephi.graph.store;
 
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
-import java.util.Arrays;
 import org.gephi.attribute.time.Interval;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;

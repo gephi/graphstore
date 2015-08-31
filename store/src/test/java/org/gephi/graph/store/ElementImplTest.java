@@ -20,7 +20,18 @@ import java.util.Map;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
+import org.gephi.attribute.time.Estimator;
+import org.gephi.attribute.time.Interval;
+import org.gephi.attribute.time.TimestampBooleanSet;
+import org.gephi.attribute.time.TimestampByteSet;
+import org.gephi.attribute.time.TimestampCharSet;
+import org.gephi.attribute.time.TimestampDoubleSet;
+import org.gephi.attribute.time.TimestampFloatSet;
 import org.gephi.attribute.time.TimestampIntegerSet;
+import org.gephi.attribute.time.TimestampLongSet;
+import org.gephi.attribute.time.TimestampShortSet;
+import org.gephi.attribute.time.TimestampStringSet;
+import org.gephi.graph.api.GraphView;
 import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
 import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET;
 import org.testng.Assert;
@@ -41,6 +52,12 @@ public class ElementImplTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testIdNull() {
         new NodeImpl(null);
+    }
+
+    @Test
+    public void testGetAttributes() {
+        NodeImpl nodeImpl = new NodeImpl(0);
+        Assert.assertNotNull(nodeImpl.getAttributes());
     }
 
     @Test
@@ -460,6 +477,56 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl(0, store);
         node.getAttributes(column);
+    }
+
+    @Test
+    public void testGetAttributeInView() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.setAttribute(column, 1);
+
+        GraphView view = store.viewStore.createView();
+
+        Assert.assertEquals(node.getAttribute(column, view), 1);
+    }
+
+    @Test
+    public void testGetDynamicAttributeInView() {
+        GraphStore store = new GraphStore();
+        Column column = generateDynamicColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.setAttribute(column, 10, 1.0);
+
+        GraphView view = store.viewStore.createView();
+
+        Assert.assertEquals(node.getAttribute(column, view), 10);
+        node.setAttribute(column, 0, 5.0);
+        node.setAttribute(column, 20, 2.0);
+
+        store.viewStore.setTimeInterval(view, new Interval(5.0, 5.0));
+        Assert.assertEquals(node.getAttribute(column, view), 0);
+        store.viewStore.setTimeInterval(view, new Interval(1.0, 2.0));
+        store.nodeColumnStore.setEstimator(column, Estimator.AVERAGE);
+        Assert.assertEquals(node.getAttribute(column, view), 15.0);
+    }
+
+    @Test
+    public void testCheckType() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl(0, store);
+        node.checkType(new ColumnImpl("0", TimestampIntegerSet.class, null, null, Origin.DATA, false, false), 1);
+        node.checkType(new ColumnImpl("0", TimestampDoubleSet.class, null, null, Origin.DATA, false, false), 1.0);
+        node.checkType(new ColumnImpl("0", TimestampFloatSet.class, null, null, Origin.DATA, false, false), 1f);
+        node.checkType(new ColumnImpl("0", TimestampByteSet.class, null, null, Origin.DATA, false, false), (byte) 1);
+        node.checkType(new ColumnImpl("0", TimestampShortSet.class, null, null, Origin.DATA, false, false), (short) 1);
+        node.checkType(new ColumnImpl("0", TimestampLongSet.class, null, null, Origin.DATA, false, false), 1l);
+        node.checkType(new ColumnImpl("0", TimestampCharSet.class, null, null, Origin.DATA, false, false), 'a');
+        node.checkType(new ColumnImpl("0", TimestampBooleanSet.class, null, null, Origin.DATA, false, false), true);
+        node.checkType(new ColumnImpl("0", TimestampStringSet.class, null, null, Origin.DATA, false, false), "foo");
     }
 
     //Utility
