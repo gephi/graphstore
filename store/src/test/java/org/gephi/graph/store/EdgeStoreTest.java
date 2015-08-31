@@ -404,7 +404,7 @@ public class EdgeStoreTest {
     }
 
     @Test
-    public void testEqualsAndHashCode() {
+    public void testDeepEqualsAndDeepHashCode() {
         EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         EdgeImpl[] edges2 = GraphGenerator.generateEdgeList(3);
         EdgeImpl[] edges3 = GraphGenerator.generateEdgeList(3);
@@ -415,20 +415,20 @@ public class EdgeStoreTest {
         EdgeStore edgeStore1 = new EdgeStore();
         EdgeStore edgeStore2 = new EdgeStore();
 
-        Assert.assertEquals(edgeStore1, edgeStore2);
-        Assert.assertEquals(edgeStore1.hashCode(), edgeStore2.hashCode());
+        Assert.assertTrue(edgeStore1.deepEquals(edgeStore2));
+        Assert.assertEquals(edgeStore1.deepHashCode(), edgeStore2.deepHashCode());
 
         edgeStore1.addAll(Arrays.asList(edges));
         edgeStore2.addAll(Arrays.asList(edges2));
 
-        Assert.assertEquals(edgeStore1, edgeStore2);
-        Assert.assertEquals(edgeStore1.hashCode(), edgeStore2.hashCode());
+        Assert.assertTrue(edgeStore1.deepEquals(edgeStore2));
+        Assert.assertEquals(edgeStore1.deepHashCode(), edgeStore2.deepHashCode());
 
         EdgeStore edgeStore3 = new EdgeStore();
         edgeStore3.addAll(Arrays.asList(edges3));
 
-        Assert.assertNotEquals(edgeStore1, edgeStore3);
-        Assert.assertNotEquals(edgeStore1.hashCode(), edgeStore3.hashCode());
+        Assert.assertFalse(edgeStore1.deepEquals(edgeStore3));
+        Assert.assertNotEquals(edgeStore1.deepHashCode(), edgeStore3.deepHashCode());
     }
 
     @Test

@@ -246,8 +246,8 @@ public class GraphViewStore {
         if (views.length > 0) {
             for (GraphViewImpl view : views) {
                 view.ensureEdgeVectorSize(edge);
-                
-                if(view.nodeView && !view.edgeView) {
+
+                if (view.nodeView && !view.edgeView) {
                     view.addEdgeInNodeView(edge);
                 }
             }
@@ -302,29 +302,41 @@ public class GraphViewStore {
         }
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 5;
-        hash = 67 * hash + Arrays.deepHashCode(this.views);
+        for (GraphViewImpl view : this.views) {
+            hash = 67 * hash + view.deepHashCode();
+        }
         hash = 67 * hash + this.length;
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(GraphViewStore obj) {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.length != obj.length) {
             return false;
         }
-        final GraphViewStore other = (GraphViewStore) obj;
-        if (!Arrays.deepEquals(this.views, other.views)) {
+        int l = this.views.length;
+        if (l != obj.views.length) {
             return false;
         }
-        if (this.length != other.length) {
-            return false;
+        for (int i = 0; i < l; i++) {
+            GraphViewImpl e1 = this.views[i];
+            GraphViewImpl e2 = obj.views[i];
+
+            if (e1 == e2) {
+                continue;
+            }
+            if (e1 == null) {
+                return false;
+            }
+            if (!e1.deepEquals(e2)) {
+                return false;
+            }
         }
+
         return true;
     }
 

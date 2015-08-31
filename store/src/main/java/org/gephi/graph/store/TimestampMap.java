@@ -166,8 +166,7 @@ public class TimestampMap {
         }
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 3;
         for (Double2IntMap.Entry entry : timestampSortedMap.double2IntEntrySet()) {
             hash = 29 * hash + entry.getKey().hashCode();
@@ -176,16 +175,11 @@ public class TimestampMap {
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(TimestampMap obj) {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final TimestampMap other = (TimestampMap) obj;
-        if (!MapDeepEquals.mapDeepEquals(timestampSortedMap, other.timestampSortedMap)) {
+        if (!MapDeepEquals.mapDeepEquals(timestampSortedMap, obj.timestampSortedMap)) {
             return false;
         }
         return true;

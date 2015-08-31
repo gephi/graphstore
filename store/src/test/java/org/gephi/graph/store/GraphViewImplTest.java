@@ -103,7 +103,7 @@ public class GraphViewImplTest {
     }
 
     @Test
-    public void testViewEquals() {
+    public void testViewDeepEquals() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
         GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
@@ -111,18 +111,18 @@ public class GraphViewImplTest {
         NodeImpl n1 = graphStore.getNode("0");
         view.addNode(n1);
 
-        Assert.assertTrue(view.equals(view));
+        Assert.assertTrue(view.deepEquals(view));
 
         GraphViewImpl view2 = store.createView();
 
         NodeImpl n2 = graphStore.getNode("0");
         view2.addNode(n2);
 
-        Assert.assertTrue(view.equals(view2));
+        Assert.assertTrue(view.deepEquals(view2));
     }
 
     @Test
-    public void testViewHashCode() {
+    public void testViewDeepHashCode() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
         GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();
@@ -137,7 +137,7 @@ public class GraphViewImplTest {
         NodeImpl n2 = graphStore.getNode("0");
         view2.addNode(n2);
 
-        Assert.assertEquals(view.hashCode(), view2.hashCode());
+        Assert.assertEquals(view.deepHashCode(), view2.deepHashCode());
     }
 
     @Test
@@ -174,7 +174,7 @@ public class GraphViewImplTest {
         Assert.assertFalse(view.containsNode(n4));
         Assert.assertFalse(view.containsEdge(e2));
 
-        Assert.assertTrue(view2.equals(view));
+        Assert.assertTrue(view2.deepEquals(view));
     }
 
     @Test

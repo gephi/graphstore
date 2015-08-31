@@ -296,7 +296,7 @@ public class GraphVersionTest {
     }
 
     @Test
-    public void testEquals() {
+    public void testDeepEquals() {
         GraphVersion g1 = new GraphVersion(null);
         g1.nodeVersion = 5;
         g1.edgeVersion = 10;
@@ -309,9 +309,9 @@ public class GraphVersionTest {
         GraphVersion g4 = new GraphVersion(null);
         g4.nodeVersion = 0;
         g4.edgeVersion = 10;
-        Assert.assertTrue(g1.equals(g2));
-        Assert.assertFalse(g1.equals(g3));
-        Assert.assertFalse(g1.equals(g4));
+        Assert.assertTrue(g1.deepEquals(g2));
+        Assert.assertFalse(g1.deepEquals(g3));
+        Assert.assertFalse(g1.deepEquals(g4));
     }
 
     @Test
@@ -328,8 +328,8 @@ public class GraphVersionTest {
         GraphVersion g4 = new GraphVersion(null);
         g4.nodeVersion = 0;
         g4.edgeVersion = 10;
-        Assert.assertEquals(g1.hashCode(), g2.hashCode());
-        Assert.assertNotEquals(g1.hashCode(), g3.hashCode());
-        Assert.assertNotEquals(g1.hashCode(), g4.hashCode());
+        Assert.assertEquals(g1.deepHashCode(), g2.deepHashCode());
+        Assert.assertNotEquals(g1.deepHashCode(), g3.deepHashCode());
+        Assert.assertNotEquals(g1.deepHashCode(), g4.deepHashCode());
     }
 }

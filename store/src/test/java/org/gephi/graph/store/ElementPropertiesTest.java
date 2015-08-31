@@ -76,27 +76,27 @@ public class ElementPropertiesTest {
     }
 
     @Test
-    public void testNodePropertiesEquals() {
+    public void testNodePropertiesDeepEquals() {
         NodeImpl.NodePropertiesImpl properties = new NodeImpl.NodePropertiesImpl();
         NodeImpl.NodePropertiesImpl properties2 = new NodeImpl.NodePropertiesImpl();
 
-        Assert.assertEquals(properties, properties2);
+        Assert.assertTrue(properties.deepEquals(properties2));
 
         properties.x = 1;
 
-        Assert.assertNotEquals(properties, properties2);
+         Assert.assertFalse(properties.deepEquals(properties2));
     }
 
     @Test
-    public void testNodePropertiesHashCode() {
+    public void testNodePropertiesDeepHashCode() {
         NodeImpl.NodePropertiesImpl properties = new NodeImpl.NodePropertiesImpl();
         NodeImpl.NodePropertiesImpl properties2 = new NodeImpl.NodePropertiesImpl();
 
-        Assert.assertEquals(properties.hashCode(), properties2.hashCode());
+        Assert.assertEquals(properties.deepHashCode(), properties2.deepHashCode());
 
         properties.x = 1;
 
-        Assert.assertNotEquals(properties.hashCode(), properties2.hashCode());
+        Assert.assertNotEquals(properties.deepHashCode(), properties2.deepHashCode());
     }
 
     @Test
@@ -195,7 +195,7 @@ public class ElementPropertiesTest {
         TextPropertiesImpl tp = new TextPropertiesImpl();
         tp.setSize(42f);
         p.setTextProperties(tp);
-        Assert.assertEquals(p.getTextProperties(), tp);
+        Assert.assertTrue(p.textProperties.deepEquals(tp));
     }
 
     @Test
@@ -225,27 +225,27 @@ public class ElementPropertiesTest {
     }
 
     @Test
-    public void testTextPropertiesEquals() {
+    public void testTextPropertiesDeepEquals() {
         TextPropertiesImpl properties = new TextPropertiesImpl();
         TextPropertiesImpl properties2 = new TextPropertiesImpl();
 
-        Assert.assertEquals(properties, properties2);
+        Assert.assertTrue(properties.deepEquals(properties2));
 
         properties.size = 5f;
 
-        Assert.assertNotEquals(properties, properties2);
+        Assert.assertFalse(properties.deepEquals(properties2));
     }
 
     @Test
-    public void testTextPropertiesHashCode() {
+    public void testTextPropertiesDeepHashCode() {
         TextPropertiesImpl properties = new TextPropertiesImpl();
         TextPropertiesImpl properties2 = new TextPropertiesImpl();
 
-        Assert.assertEquals(properties, properties2);
+        Assert.assertEquals(properties.deepHashCode(), properties2.deepHashCode());
 
         properties.size = 5f;
 
-        Assert.assertNotEquals(properties.hashCode(), properties2.hashCode());
+        Assert.assertNotEquals(properties.deepHashCode(), properties2.deepHashCode());
     }
 
     @Test
@@ -346,27 +346,27 @@ public class ElementPropertiesTest {
     }
 
     @Test
-    public void testEdgePropertiesEquals() {
+    public void testEdgePropertiesDeepEquals() {
         EdgeImpl.EdgePropertiesImpl properties = new EdgeImpl.EdgePropertiesImpl();
         EdgeImpl.EdgePropertiesImpl properties2 = new EdgeImpl.EdgePropertiesImpl();
 
-        Assert.assertEquals(properties, properties2);
+        Assert.assertTrue(properties.deepEquals(properties2));
 
         properties.rgba = 555;
 
-        Assert.assertNotEquals(properties, properties2);
+        Assert.assertFalse(properties.deepEquals(properties2));
     }
 
     @Test
-    public void testEdgePropertiesHashCode() {
+    public void testEdgePropertiesDeepHashCode() {
         EdgeImpl.EdgePropertiesImpl properties = new EdgeImpl.EdgePropertiesImpl();
         EdgeImpl.EdgePropertiesImpl properties2 = new EdgeImpl.EdgePropertiesImpl();
 
-        Assert.assertEquals(properties.hashCode(), properties2.hashCode());
+        Assert.assertEquals(properties.deepHashCode(), properties2.deepHashCode());
 
         properties.rgba = 555;
 
-        Assert.assertNotEquals(properties.hashCode(), properties2.hashCode());
+        Assert.assertNotEquals(properties.deepHashCode(), properties2.deepHashCode());
     }
 
     @Test
@@ -375,7 +375,7 @@ public class ElementPropertiesTest {
         TextPropertiesImpl tp = new TextPropertiesImpl();
         tp.setSize(42f);
         p.setTextProperties(tp);
-        Assert.assertEquals(p.getTextProperties(), tp);
+        Assert.assertTrue(p.textProperties.deepEquals(tp));
     }
 
     @Test

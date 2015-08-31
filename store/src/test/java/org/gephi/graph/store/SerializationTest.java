@@ -120,8 +120,8 @@ public class SerializationTest {
         graphStore = new GraphStore();
         ser = new Serialization(graphStore);
         GraphStore l = (GraphStore) ser.deserialize(buf);
-        Assert.assertTrue(nodeStore.equals(l.nodeStore));
-        Assert.assertTrue(edgeStore.equals(l.edgeStore));
+        Assert.assertTrue(nodeStore.deepEquals(l.nodeStore));
+        Assert.assertTrue(edgeStore.deepEquals(l.edgeStore));
     }
 
     @Test
@@ -163,7 +163,7 @@ public class SerializationTest {
         graphStore = new GraphStore();
         ser = new Serialization(graphStore);
         GraphFactoryImpl l = (GraphFactoryImpl) ser.deserialize(buf);
-        Assert.assertTrue(factory.equals(l));
+        Assert.assertTrue(factory.deepEquals(l));
     }
 
     @Test
@@ -182,7 +182,7 @@ public class SerializationTest {
         graphStore = new GraphStore();
         ser = new Serialization(graphStore);
         EdgeTypeStore l = (EdgeTypeStore) ser.deserialize(buf);
-        Assert.assertTrue(edgeTypeStore.equals(l));
+        Assert.assertTrue(edgeTypeStore.deepEquals(l));
     }
 
     @Test
@@ -204,7 +204,7 @@ public class SerializationTest {
         graphStore = new GraphStore();
         ser = new Serialization(graphStore);
         ColumnStore l = (ColumnStore) ser.deserialize(buf);
-        Assert.assertTrue(columnStore.equals(l));
+        Assert.assertTrue(columnStore.deepEquals(l));
     }
 
     @Test
@@ -243,7 +243,7 @@ public class SerializationTest {
         graphStore = new GraphStore();
         ser = new Serialization(graphStore);
         GraphViewStore l = (GraphViewStore) ser.deserialize(buf);
-        Assert.assertEquals(viewStore, l);
+        Assert.assertTrue(viewStore.deepEquals(l));
     }
 
     @Test
@@ -262,7 +262,7 @@ public class SerializationTest {
         graphStore = new GraphStore();
         ser = new Serialization(graphStore);
         GraphViewImpl l = (GraphViewImpl) ser.deserialize(buf);
-        Assert.assertEquals(view, l);
+        Assert.assertTrue(view.deepEquals(l));
     }
 
     @Test
@@ -287,7 +287,7 @@ public class SerializationTest {
         Serialization ser = new Serialization(store);
         byte[] buf = ser.serialize(version);
         GraphVersion l = (GraphVersion) ser.deserialize(buf);
-        Assert.assertEquals(version, l);
+        Assert.assertTrue(version.deepEquals(l));
     }
 
     @Test
@@ -301,7 +301,7 @@ public class SerializationTest {
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(textProperties);
         TextPropertiesImpl l = (TextPropertiesImpl) ser.deserialize(buf);
-        Assert.assertEquals(textProperties, l);
+        Assert.assertTrue(textProperties.deepEquals(l));
     }
 
     @Test
@@ -321,7 +321,7 @@ public class SerializationTest {
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(nodeProperties);
         NodeImpl.NodePropertiesImpl l = (NodeImpl.NodePropertiesImpl) ser.deserialize(buf);
-        Assert.assertEquals(nodeProperties, l);
+        Assert.assertTrue(nodeProperties.deepEquals(l));
     }
 
     @Test
@@ -336,7 +336,7 @@ public class SerializationTest {
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(edgeProperties);
         EdgeImpl.EdgePropertiesImpl l = (EdgeImpl.EdgePropertiesImpl) ser.deserialize(buf);
-        Assert.assertEquals(edgeProperties, l);
+        Assert.assertTrue(edgeProperties.deepEquals(l));
     }
 
     @Test
@@ -481,7 +481,7 @@ public class SerializationTest {
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(timestampMap);
         TimestampMap l = (TimestampMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampMap, l);
+        Assert.assertTrue(timestampMap.deepEquals(l));
     }
 
     @Test
@@ -490,24 +490,24 @@ public class SerializationTest {
         graphAttributes.setValue("foo", "bar");
         graphAttributes.setValue("A", "bar", 1.0);
         graphAttributes.setValue("B", "bar", 2.0);
-        
+
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(graphAttributes);
         GraphAttributesImpl l = (GraphAttributesImpl) ser.deserialize(buf);
-        Assert.assertEquals(graphAttributes, l);
+        Assert.assertTrue(graphAttributes.deepEquals(l));
     }
-    
+
     @Test
     public void testTimeFormat() throws IOException, ClassNotFoundException {
         GraphStore store = new GraphStore();
         store.timeFormat = TimeFormat.DATETIME;
-        
+
         Serialization ser = new Serialization(store);
         byte[] buf = ser.serialize(store.timeFormat);
         TimeFormat l = (TimeFormat) ser.deserialize(buf);
         Assert.assertEquals(TimeFormat.DATETIME, l);
     }
-    
+
     @Test
     public void testTimestampStore() throws IOException, ClassNotFoundException {
         GraphStore store = new GraphStore();
@@ -516,16 +516,16 @@ public class SerializationTest {
         timestampStore.nodeMap.getTimestampIndex(2.0);
         timestampStore.edgeMap.getTimestampIndex(3.0);
         timestampStore.edgeMap.getTimestampIndex(4.0);
-        
+
         Serialization ser = new Serialization(store);
         byte[] buf = ser.serialize(timestampStore);
-        
+
         store = new GraphStore();
         ser = new Serialization(store);
         TimestampStore l = (TimestampStore) ser.deserialize(buf);
-        Assert.assertEquals(timestampStore, l);
+        Assert.assertTrue(timestampStore.deepEquals(l));
     }
-    
+
     @Test
     public void testInt() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);

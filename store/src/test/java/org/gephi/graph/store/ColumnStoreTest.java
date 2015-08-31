@@ -276,27 +276,25 @@ public class ColumnStoreTest {
     }
 
     @Test
-    public void testEqualsEmpty() {
+    public void testDeepEqualsEmpty() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
-        Assert.assertEquals(store1, store1);
+        Assert.assertTrue(store1.deepEquals(store1));
         ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
-        Assert.assertEquals(store1, store2);
-        ColumnStore<Edge> store3 = new ColumnStore<Edge>(Edge.class, false);
-        Assert.assertNotEquals(store1, store3);
+        Assert.assertTrue(store1.deepEquals(store2));
     }
 
     @Test
-    public void testHashCodeEmpty() {
+    public void testDeepHashCodeEmpty() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
-        Assert.assertEquals(store1.hashCode(), store1.hashCode());
+        Assert.assertEquals(store1.deepHashCode(), store1.deepHashCode());
         ColumnStore<Node> store2 = new ColumnStore<Node>(Node.class, false);
-        Assert.assertEquals(store1.hashCode(), store2.hashCode());
+        Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
         ColumnStore<Edge> store3 = new ColumnStore<Edge>(Edge.class, false);
-        Assert.assertNotEquals(store1.hashCode(), store3.hashCode());
+        Assert.assertNotEquals(store1.deepHashCode(), store3.deepHashCode());
     }
 
     @Test
-    public void testEquals() {
+    public void testDeepEquals() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
         ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store1.addColumn(col1);
@@ -305,17 +303,17 @@ public class ColumnStoreTest {
         ColumnImpl col2 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store2.addColumn(col2);
 
-        Assert.assertEquals(store1, store2);
+        Assert.assertTrue(store1.deepEquals(store2));
 
         ColumnStore<Node> store3 = new ColumnStore<Node>(Node.class, false);
         ColumnImpl col3 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         store3.addColumn(col3);
 
-        Assert.assertNotEquals(store1, store3);
+        Assert.assertFalse(store1.deepEquals(store3));
     }
 
     @Test
-    public void testHashCode() {
+    public void testDeepHashCode() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
         ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store1.addColumn(col1);
@@ -324,17 +322,17 @@ public class ColumnStoreTest {
         ColumnImpl col2 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         store2.addColumn(col2);
 
-        Assert.assertEquals(store1.hashCode(), store2.hashCode());
+        Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
 
         ColumnStore<Node> store3 = new ColumnStore<Node>(Node.class, false);
         ColumnImpl col3 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         store3.addColumn(col3);
 
-        Assert.assertNotEquals(store1.hashCode(), store3.hashCode());
+        Assert.assertNotEquals(store1.deepHashCode(), store3.deepHashCode());
     }
 
     @Test
-    public void testEqualsWithGarbage() {
+    public void testDeepEqualsWithGarbage() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
         ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
@@ -349,11 +347,11 @@ public class ColumnStoreTest {
         store2.addColumn(col22);
         store2.removeColumn(col21);
 
-        Assert.assertEquals(store1, store2);
+        Assert.assertTrue(store1.deepEquals(store2));
     }
 
     @Test
-    public void testHashCodeWithGarbage() {
+    public void testDeepHashCodeWithGarbage() {
         ColumnStore<Node> store1 = new ColumnStore<Node>(Node.class, false);
         ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
         ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
@@ -368,7 +366,7 @@ public class ColumnStoreTest {
         store2.addColumn(col22);
         store2.removeColumn(col21);
 
-        Assert.assertEquals(store1.hashCode(), store2.hashCode());
+        Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

@@ -195,8 +195,7 @@ public class EdgeTypeStore {
         }
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 3;
         short[] keys = idMap.keySet().toShortArray();
         Arrays.sort(keys);
@@ -209,8 +208,7 @@ public class EdgeTypeStore {
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(Object obj) {
         if (obj == null) {
             return false;
         }

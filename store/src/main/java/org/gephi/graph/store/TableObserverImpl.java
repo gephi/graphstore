@@ -21,12 +21,12 @@ public class TableObserverImpl implements TableObserver {
     public TableObserverImpl(TableImpl table) {
         this.table = table;
 
-        tableHash = table.hashCode();
+        tableHash = table.deepHashCode();
     }
 
     @Override
     public synchronized boolean hasTableChanged() {
-        int newHash = table.hashCode();
+        int newHash = table.deepHashCode();
         boolean changed = newHash != tableHash;
         tableHash = newHash;
         return changed;

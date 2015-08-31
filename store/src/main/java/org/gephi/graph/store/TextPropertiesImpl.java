@@ -120,8 +120,7 @@ public class TextPropertiesImpl implements TextProperties {
         this.text = text;
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 7;
         hash = 97 * hash + (this.visible ? 1 : 0);
         hash = 97 * hash + this.rgba;
@@ -130,25 +129,20 @@ public class TextPropertiesImpl implements TextProperties {
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    public boolean deepEquals(TextPropertiesImpl obj) {
+        if(obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.visible != obj.visible) {
             return false;
         }
-        final TextPropertiesImpl other = (TextPropertiesImpl) obj;
-        if (this.visible != other.visible) {
+        if (this.rgba != obj.rgba) {
             return false;
         }
-        if (this.rgba != other.rgba) {
+        if (Float.floatToIntBits(this.size) != Float.floatToIntBits(obj.size)) {
             return false;
         }
-        if (Float.floatToIntBits(this.size) != Float.floatToIntBits(other.size)) {
-            return false;
-        }
-        if ((this.text == null) ? (other.text != null) : !this.text.equals(other.text)) {
+        if ((this.text == null) ? (obj.text != null) : !this.text.equals(obj.text)) {
             return false;
         }
         return true;

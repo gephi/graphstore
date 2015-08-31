@@ -88,27 +88,21 @@ public class TimestampStore {
         edgeMap.clear();
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 3;
-        hash = 79 * hash + (this.nodeMap != null ? this.nodeMap.hashCode() : 0);
-        hash = 79 * hash + (this.edgeMap != null ? this.edgeMap.hashCode() : 0);
+        hash = 79 * hash + (this.nodeMap != null ? this.nodeMap.deepHashCode(): 0);
+        hash = 79 * hash + (this.edgeMap != null ? this.edgeMap.deepHashCode() : 0);
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(TimestampStore obj) {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.nodeMap != obj.nodeMap && (this.nodeMap == null || !this.nodeMap.deepEquals(obj.nodeMap))) {
             return false;
         }
-        final TimestampStore other = (TimestampStore) obj;
-        if (this.nodeMap != other.nodeMap && (this.nodeMap == null || !this.nodeMap.equals(other.nodeMap))) {
-            return false;
-        }
-        if (this.edgeMap != other.edgeMap && (this.edgeMap == null || !this.edgeMap.equals(other.edgeMap))) {
+        if (this.edgeMap != obj.edgeMap && (this.edgeMap == null || !this.edgeMap.deepEquals(obj.edgeMap))) {
             return false;
         }
         return true;

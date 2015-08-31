@@ -89,20 +89,15 @@ public class GraphVersion {
         }
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 3;
         hash = 17 * hash + this.nodeVersion;
         hash = 17 * hash + this.edgeVersion;
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(GraphVersion obj) {
         if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
             return false;
         }
         final GraphVersion other = (GraphVersion) obj;

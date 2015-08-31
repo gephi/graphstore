@@ -51,7 +51,7 @@ public class TableImpl<T extends Element> implements Table {
     public Column addColumn(String id, String title, Class type, Object defaultValue) {
         return addColumn(id, title, type, Origin.DATA, defaultValue, true);
     }
-    
+
     @Override
     public Column addColumn(String id, String title, Class type, Origin origin, Object defaultValue, boolean indexed) {
         checkValidId(id);
@@ -145,26 +145,17 @@ public class TableImpl<T extends Element> implements Table {
         store.destroyTablesObserver((TableObserverImpl) observer);
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 71 * hash + (this.store != null ? this.store.hashCode() : 0);
-        return hash;
+    public boolean deepEquals(TableImpl<T> obj) {
+        if(obj == null) {
+            return false;
+        }
+        return !(this.store != obj.store && (this.store == null || !this.store.deepEquals(obj.store)));
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final TableImpl<T> other = (TableImpl<T>) obj;
-        if (this.store != other.store && (this.store == null || !this.store.equals(other.store))) {
-            return false;
-        }
-        return true;
+    
+    public int deepHashCode() {
+        int hash = 3;
+        hash = 71 * hash + (this.store != null ? this.store.deepHashCode(): 0);
+        return hash;
     }
 
     private void checkValidId(String id) {

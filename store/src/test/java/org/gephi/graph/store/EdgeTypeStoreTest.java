@@ -207,25 +207,25 @@ public class EdgeTypeStoreTest {
     }
 
     @Test
-    public void testEqualsEmpty() {
+    public void testDeepEqualsEmpty() {
         EdgeTypeStore edgeTypeStore1 = new EdgeTypeStore();
-        Assert.assertEquals(edgeTypeStore1, edgeTypeStore1);
+        Assert.assertTrue(edgeTypeStore1.deepEquals(edgeTypeStore1));
 
         EdgeTypeStore edgeTypeStore2 = new EdgeTypeStore();
-        Assert.assertEquals(edgeTypeStore1, edgeTypeStore2);
+        Assert.assertTrue(edgeTypeStore1.deepEquals(edgeTypeStore2));
     }
 
     @Test
-    public void testHashCodeEmpty() {
+    public void testDeepHashCodeEmpty() {
         EdgeTypeStore edgeTypeStore1 = new EdgeTypeStore();
-        Assert.assertEquals(edgeTypeStore1.hashCode(), edgeTypeStore1.hashCode());
+        Assert.assertEquals(edgeTypeStore1.deepHashCode(), edgeTypeStore1.deepHashCode());
 
         EdgeTypeStore edgeTypeStore2 = new EdgeTypeStore();
-        Assert.assertEquals(edgeTypeStore1.hashCode(), edgeTypeStore2.hashCode());
+        Assert.assertEquals(edgeTypeStore1.deepHashCode(), edgeTypeStore2.deepHashCode());
     }
 
     @Test
-    public void testEquals() {
+    public void testDeepEquals() {
         EdgeTypeStore edgeTypeStore1 = new EdgeTypeStore();
         edgeTypeStore1.addType("Foo");
         edgeTypeStore1.addType("Bar");
@@ -241,12 +241,12 @@ public class EdgeTypeStoreTest {
         EdgeTypeStore edgeTypeStore3 = new EdgeTypeStore();
         edgeTypeStore3.addType("Foo");
 
-        Assert.assertEquals(edgeTypeStore1, edgeTypeStore2);
-        Assert.assertNotEquals(edgeTypeStore1, edgeTypeStore3);
+        Assert.assertTrue(edgeTypeStore1.deepEquals(edgeTypeStore2));
+        Assert.assertFalse(edgeTypeStore1.deepEquals(edgeTypeStore3));
     }
 
     @Test
-    public void testHashCode() {
+    public void testDeepHashCode() {
         EdgeTypeStore edgeTypeStore1 = new EdgeTypeStore();
         edgeTypeStore1.addType("Foo");
         edgeTypeStore1.addType("Bar");
@@ -262,7 +262,7 @@ public class EdgeTypeStoreTest {
         EdgeTypeStore edgeTypeStore3 = new EdgeTypeStore();
         edgeTypeStore3.addType("Foo");
 
-        Assert.assertEquals(edgeTypeStore1.hashCode(), edgeTypeStore2.hashCode());
-        Assert.assertNotEquals(edgeTypeStore1.hashCode(), edgeTypeStore3.hashCode());
+        Assert.assertEquals(edgeTypeStore1.deepHashCode(), edgeTypeStore2.deepHashCode());
+        Assert.assertNotEquals(edgeTypeStore1.deepHashCode(), edgeTypeStore3.deepHashCode());
     }
 }

@@ -243,7 +243,7 @@ public class NodeImpl extends ElementImpl implements Node {
     public void setLayoutData(LayoutData layoutData) {
         properties.setLayoutData(layoutData);
     }
-    
+
     protected static class NodePropertiesImpl implements NodeProperties {
 
         protected final TextPropertiesImpl textProperties;
@@ -400,8 +400,7 @@ public class NodeImpl extends ElementImpl implements Node {
             this.layoutData = layoutData;
         }
 
-        @Override
-        public int hashCode() {
+        public int deepHashCode() {
             int hash = 3;
             hash = 53 * hash + Float.floatToIntBits(this.x);
             hash = 53 * hash + Float.floatToIntBits(this.y);
@@ -410,41 +409,36 @@ public class NodeImpl extends ElementImpl implements Node {
             hash = 53 * hash + Float.floatToIntBits(this.size);
             hash = 53 * hash + (this.fixed ? 1 : 0);
             hash = 53 * hash + (this.layoutData != null ? this.layoutData.hashCode() : 0);
-            hash = 53 * hash + (this.textProperties != null ? this.textProperties.hashCode() : 0);
+            hash = 53 * hash + (this.textProperties != null ? this.textProperties.deepHashCode() : 0);
             return hash;
         }
 
-        @Override
-        public boolean equals(Object obj) {
+        public boolean deepEquals(NodePropertiesImpl obj) {
             if (obj == null) {
                 return false;
             }
-            if (getClass() != obj.getClass()) {
+            if (Float.floatToIntBits(this.x) != Float.floatToIntBits(obj.x)) {
                 return false;
             }
-            final NodePropertiesImpl other = (NodePropertiesImpl) obj;
-            if (Float.floatToIntBits(this.x) != Float.floatToIntBits(other.x)) {
+            if (Float.floatToIntBits(this.y) != Float.floatToIntBits(obj.y)) {
                 return false;
             }
-            if (Float.floatToIntBits(this.y) != Float.floatToIntBits(other.y)) {
+            if (Float.floatToIntBits(this.z) != Float.floatToIntBits(obj.z)) {
                 return false;
             }
-            if (Float.floatToIntBits(this.z) != Float.floatToIntBits(other.z)) {
+            if (this.rgba != obj.rgba) {
                 return false;
             }
-            if (this.rgba != other.rgba) {
+            if (Float.floatToIntBits(this.size) != Float.floatToIntBits(obj.size)) {
                 return false;
             }
-            if (Float.floatToIntBits(this.size) != Float.floatToIntBits(other.size)) {
+            if (this.fixed != obj.fixed) {
                 return false;
             }
-            if (this.fixed != other.fixed) {
+            if (this.layoutData != obj.layoutData && (this.layoutData == null || !this.layoutData.equals(obj.layoutData))) {
                 return false;
             }
-            if (this.layoutData != other.layoutData && (this.layoutData == null || !this.layoutData.equals(other.layoutData))) {
-                return false;
-            }
-            if (this.textProperties != other.textProperties && (this.textProperties == null || !this.textProperties.equals(other.textProperties))) {
+            if (this.textProperties != obj.textProperties && (this.textProperties == null || !this.textProperties.deepEquals(obj.textProperties))) {
                 return false;
             }
             return true;

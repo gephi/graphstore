@@ -580,8 +580,7 @@ public class GraphViewImpl implements GraphView {
         }
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 5;
         hash = 17 * hash + (this.nodeView ? 1 : 0);
         hash = 17 * hash + (this.edgeView ? 1 : 0);
@@ -595,40 +594,35 @@ public class GraphViewImpl implements GraphView {
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(GraphViewImpl obj) {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.nodeBitVector != obj.nodeBitVector && (this.nodeBitVector == null || !this.nodeBitVector.equals(obj.nodeBitVector))) {
             return false;
         }
-        final GraphViewImpl other = (GraphViewImpl) obj;
-        if (this.nodeBitVector != other.nodeBitVector && (this.nodeBitVector == null || !this.nodeBitVector.equals(other.nodeBitVector))) {
+        if (this.edgeBitVector != obj.edgeBitVector && (this.edgeBitVector == null || !this.edgeBitVector.equals(obj.edgeBitVector))) {
             return false;
         }
-        if (this.edgeBitVector != other.edgeBitVector && (this.edgeBitVector == null || !this.edgeBitVector.equals(other.edgeBitVector))) {
+        if (this.nodeCount != obj.nodeCount) {
             return false;
         }
-        if (this.nodeCount != other.nodeCount) {
+        if (this.edgeCount != obj.edgeCount) {
             return false;
         }
-        if (this.edgeCount != other.edgeCount) {
+        if (this.nodeView != obj.nodeView) {
             return false;
         }
-        if (this.nodeView != other.nodeView) {
+        if (this.edgeView != obj.edgeView) {
             return false;
         }
-        if (this.edgeView != other.edgeView) {
+        if (!Arrays.equals(this.typeCounts, obj.typeCounts)) {
             return false;
         }
-        if (!Arrays.equals(this.typeCounts, other.typeCounts)) {
+        if (!Arrays.equals(this.mutualEdgeTypeCounts, obj.mutualEdgeTypeCounts)) {
             return false;
         }
-        if (!Arrays.equals(this.mutualEdgeTypeCounts, other.mutualEdgeTypeCounts)) {
-            return false;
-        }
-        if (this.mutualEdgesCount != other.mutualEdgesCount) {
+        if (this.mutualEdgesCount != obj.mutualEdgesCount) {
             return false;
         }
         return true;

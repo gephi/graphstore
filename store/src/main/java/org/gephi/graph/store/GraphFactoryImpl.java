@@ -86,8 +86,7 @@ public class GraphFactoryImpl implements GraphFactory {
         EDGE_IDS.set(count);
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 3;
         Integer node = this.NODE_IDS.get();
         Integer edge = this.EDGE_IDS.get();
@@ -96,23 +95,18 @@ public class GraphFactoryImpl implements GraphFactory {
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(GraphFactoryImpl obj) {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final GraphFactoryImpl other = (GraphFactoryImpl) obj;
         Integer node = this.NODE_IDS.get();
         Integer edge = this.EDGE_IDS.get();
-        Integer otherNode = other.NODE_IDS.get();
-        Integer otherEdge = other.EDGE_IDS.get();
-        if (this.NODE_IDS != other.NODE_IDS && (!node.equals(otherNode))) {
+        Integer otherNode = obj.NODE_IDS.get();
+        Integer otherEdge = obj.EDGE_IDS.get();
+        if (this.NODE_IDS != obj.NODE_IDS && (!node.equals(otherNode))) {
             return false;
         }
-        if (this.EDGE_IDS != other.EDGE_IDS && (!edge.equals(otherEdge))) {
+        if (this.EDGE_IDS != obj.EDGE_IDS && (!edge.equals(otherEdge))) {
             return false;
         }
         return true;

@@ -690,31 +690,25 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         return new NodeIterableWrapper(nodeIterator, blocking);
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 3;
-        hash = 29 * hash + (this.nodeStore != null ? this.nodeStore.hashCode() : 0);
-        hash = 29 * hash + (this.edgeStore != null ? this.edgeStore.hashCode() : 0);
-        hash = 29 * hash + (this.edgeTypeStore != null ? this.edgeTypeStore.hashCode() : 0);
+        hash = 29 * hash + (this.nodeStore != null ? this.nodeStore.deepHashCode(): 0);
+        hash = 29 * hash + (this.edgeStore != null ? this.edgeStore.deepHashCode() : 0);
+        hash = 29 * hash + (this.edgeTypeStore != null ? this.edgeTypeStore.deepHashCode() : 0);
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(GraphStore obj) {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.nodeStore != obj.nodeStore && (this.nodeStore == null || !this.nodeStore.deepEquals(obj.nodeStore))) {
             return false;
         }
-        final GraphStore other = (GraphStore) obj;
-        if (this.nodeStore != other.nodeStore && (this.nodeStore == null || !this.nodeStore.equals(other.nodeStore))) {
+        if (this.edgeStore != obj.edgeStore && (this.edgeStore == null || !this.edgeStore.deepEquals(obj.edgeStore))) {
             return false;
         }
-        if (this.edgeStore != other.edgeStore && (this.edgeStore == null || !this.edgeStore.equals(other.edgeStore))) {
-            return false;
-        }
-        if (this.edgeTypeStore != other.edgeTypeStore && (this.edgeTypeStore == null || !this.edgeTypeStore.equals(other.edgeTypeStore))) {
+        if (this.edgeTypeStore != obj.edgeTypeStore && (this.edgeTypeStore == null || !this.edgeTypeStore.deepEquals(obj.edgeTypeStore))) {
             return false;
         }
         return true;

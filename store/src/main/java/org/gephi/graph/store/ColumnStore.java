@@ -215,13 +215,13 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         return new ColumnStoreIterator();
     }
 
-    public Column[] toArray() {
+    public ColumnImpl[] toArray() {
         lock();
         try {
-            Column[] cols = new Column[size()];
+            ColumnImpl[] cols = new ColumnImpl[size()];
             int j = 0;
             for (int i = 0; i < length; i++) {
-                Column c = columns[i];
+                ColumnImpl c = columns[i];
                 if (c != null) {
                     cols[j++] = c;
                 }
@@ -389,32 +389,16 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
             throw new UnsupportedOperationException("Not supported");
         }
     }
-
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 11 * hash + (this.elementType != null ? this.elementType.hashCode() : 0);
-        Iterator<Column> itr = this.iterator();
-        while (itr.hasNext()) {
-            hash = 11 * hash + itr.next().hashCode();
-        }
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    
+    public boolean deepEquals(ColumnStore<T> obj) {
+        if(obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ColumnStore<T> other = (ColumnStore<T>) obj;
-        if (this.elementType != other.elementType && (this.elementType == null || !this.elementType.equals(other.elementType))) {
+        if (this.elementType != obj.elementType && (this.elementType == null || !this.elementType.equals(obj.elementType))) {
             return false;
         }
         Iterator<Column> itr1 = this.iterator();
-        Iterator<Column> itr2 = other.iterator();
+        Iterator<Column> itr2 = obj.iterator();
         while (itr1.hasNext()) {
             if (!itr2.hasNext()) {
                 return false;
@@ -434,5 +418,16 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
             }
         }
         return true;
+    }
+
+    public int deepHashCode() {
+        int hash = 3;
+        hash = 11 * hash + (this.elementType != null ? this.elementType.hashCode() : 0);
+        Iterator<Column> itr = this.iterator();
+        while (itr.hasNext()) {
+            hash = 11 * hash + itr.next().hashCode();
+        }
+        //TODO what about timestampmap
+        return hash;
     }
 }

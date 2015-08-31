@@ -205,24 +205,24 @@ public class TableImplTest {
     }
 
     @Test
-    public void testEquals() {
+    public void testDeepEquals() {
         TableImpl<Node> table1 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
         table1.addColumn("0", Integer.class);
 
         TableImpl<Node> table2 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
         table2.addColumn("0", Integer.class);
 
-        Assert.assertTrue(table1.equals(table2));
+        Assert.assertTrue(table1.deepEquals(table2));
     }
 
     @Test
-    public void testHashCode() {
+    public void testDeepHashCode() {
         TableImpl<Node> table1 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
         table1.addColumn("0", Integer.class);
 
         TableImpl<Node> table2 = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
         table2.addColumn("0", Integer.class);
 
-        Assert.assertEquals(table1.hashCode(), table2.hashCode());
+        Assert.assertEquals(table1.deepHashCode(), table2.deepHashCode());
     }
 }

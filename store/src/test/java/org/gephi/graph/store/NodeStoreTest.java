@@ -375,7 +375,7 @@ public class NodeStoreTest {
     }
 
     @Test
-    public void testEqualsAndHashCode() {
+    public void testDeepEqualsAndDeepHashCode() {
         NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
         NodeImpl[] nodes2 = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
         NodeImpl[] nodes3 = new NodeImpl[]{new NodeImpl("1"), new NodeImpl("0"), new NodeImpl("2")};
@@ -383,20 +383,20 @@ public class NodeStoreTest {
         NodeStore nodeStore1 = new NodeStore();
         NodeStore nodeStore2 = new NodeStore();
 
-        Assert.assertEquals(nodeStore1, nodeStore2);
-        Assert.assertEquals(nodeStore1.hashCode(), nodeStore2.hashCode());
+        Assert.assertTrue(nodeStore1.deepEquals(nodeStore2));
+        Assert.assertEquals(nodeStore1.deepHashCode(), nodeStore2.deepHashCode());
 
         nodeStore1.addAll(Arrays.asList(nodes));
         nodeStore2.addAll(Arrays.asList(nodes2));
 
-        Assert.assertEquals(nodeStore1, nodeStore2);
-        Assert.assertEquals(nodeStore1.hashCode(), nodeStore2.hashCode());
+        Assert.assertTrue(nodeStore1.deepEquals(nodeStore2));
+        Assert.assertEquals(nodeStore1.deepHashCode(), nodeStore2.deepHashCode());
 
         NodeStore nodeStore3 = new NodeStore();
         nodeStore3.addAll(Arrays.asList(nodes3));
 
-        Assert.assertNotEquals(nodeStore1, nodeStore3);
-        Assert.assertNotEquals(nodeStore1.hashCode(), nodeStore3.hashCode());
+        Assert.assertFalse(nodeStore1.deepEquals(nodeStore3));
+        Assert.assertNotEquals(nodeStore1.deepHashCode(), nodeStore3.deepHashCode());
     }
 
     @Test

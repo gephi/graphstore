@@ -163,12 +163,12 @@ public class GraphFactoryTest {
     }
 
     @Test
-    public void testEquals() {
+    public void testDeepEquals() {
         GraphFactoryImpl gf1 = new GraphFactoryImpl(null);
         GraphFactoryImpl gf2 = new GraphFactoryImpl(null);
 
-        Assert.assertTrue(gf1.equals(gf2));
-        Assert.assertTrue(gf1.equals(gf1));
+        Assert.assertTrue(gf1.deepEquals(gf2));
+        Assert.assertTrue(gf1.deepEquals(gf1));
 
         gf1.setNodeCounter(42);
         gf1.setEdgeCounter(12);
@@ -176,18 +176,18 @@ public class GraphFactoryTest {
         gf2.setNodeCounter(44);
         gf2.setEdgeCounter(5);
 
-        Assert.assertFalse(gf1.equals(gf2));
+        Assert.assertFalse(gf1.deepEquals(gf2));
         gf2.setNodeCounter(42);
-        Assert.assertFalse(gf1.equals(gf2));
+        Assert.assertFalse(gf1.deepEquals(gf2));
     }
 
     @Test
-    public void testHashCode() {
+    public void testDeepHashCode() {
         GraphFactoryImpl gf1 = new GraphFactoryImpl(null);
         GraphFactoryImpl gf2 = new GraphFactoryImpl(null);
 
-        Assert.assertEquals(gf1.hashCode(), gf2.hashCode());
-        Assert.assertEquals(gf1.hashCode(), gf1.hashCode());
+        Assert.assertEquals(gf1.deepHashCode(), gf2.deepHashCode());
+        Assert.assertEquals(gf1.deepHashCode(), gf1.deepHashCode());
         
         gf1.setNodeCounter(42);
         gf1.setEdgeCounter(12);
@@ -195,8 +195,8 @@ public class GraphFactoryTest {
         gf2.setNodeCounter(44);
         gf2.setEdgeCounter(5);
 
-        Assert.assertNotEquals(gf1.hashCode(), gf2.hashCode());
+        Assert.assertNotEquals(gf1.deepHashCode(), gf2.deepHashCode());
         gf2.setNodeCounter(42);
-        Assert.assertNotEquals(gf1.hashCode(), gf2.hashCode());
+        Assert.assertNotEquals(gf1.deepHashCode(), gf2.deepHashCode());
     }
 }

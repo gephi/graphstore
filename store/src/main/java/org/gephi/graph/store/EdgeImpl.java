@@ -403,27 +403,21 @@ public class EdgeImpl extends ElementImpl implements Edge {
             rgba = (color.getAlpha() << 24) | color.getRGB();
         }
 
-        @Override
-        public int hashCode() {
+        public int deepHashCode() {
             int hash = 3;
             hash = 29 * hash + this.rgba;
-            hash = 29 * hash + (this.textProperties != null ? this.textProperties.hashCode() : 0);
+            hash = 29 * hash + (this.textProperties != null ? this.textProperties.deepHashCode() : 0);
             return hash;
         }
 
-        @Override
-        public boolean equals(Object obj) {
+        public boolean deepEquals(EdgePropertiesImpl obj) {
             if (obj == null) {
                 return false;
             }
-            if (getClass() != obj.getClass()) {
+            if (this.rgba != obj.rgba) {
                 return false;
             }
-            final EdgePropertiesImpl other = (EdgePropertiesImpl) obj;
-            if (this.rgba != other.rgba) {
-                return false;
-            }
-            if (this.textProperties != other.textProperties && (this.textProperties == null || !this.textProperties.equals(other.textProperties))) {
+            if (this.textProperties != obj.textProperties && (this.textProperties == null || !this.textProperties.deepEquals(obj.textProperties))) {
                 return false;
             }
             return true;

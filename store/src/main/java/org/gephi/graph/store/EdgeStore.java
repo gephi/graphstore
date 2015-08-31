@@ -807,8 +807,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return false;
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 7;
         hash = 67 * hash + this.size;
         EdgeStoreIterator itr = this.iterator();
@@ -818,20 +817,12 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final EdgeStore other = (EdgeStore) obj;
-        if (this.size != other.size) {
+    public boolean deepEquals(EdgeStore obj) {
+        if (obj == null || this.size != obj.size) {
             return false;
         }
         EdgeStoreIterator itr1 = this.iterator();
-        EdgeStoreIterator itr2 = other.iterator();
+        EdgeStoreIterator itr2 = obj.iterator();
         while (itr1.hasNext()) {
             if (!itr2.hasNext()) {
                 return false;

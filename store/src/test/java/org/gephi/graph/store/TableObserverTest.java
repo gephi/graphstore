@@ -32,7 +32,7 @@ public class TableObserverTest {
 
         Assert.assertSame(tableObserver.getTable(), table);
         Assert.assertFalse(tableObserver.isDestroyed());
-        Assert.assertEquals(table.hashCode(), tableObserver.tableHash);
+        Assert.assertEquals(table.deepHashCode(), tableObserver.tableHash);
         Assert.assertTrue(table.store.observers.contains(tableObserver));
 
         Assert.assertFalse(tableObserver.hasTableChanged());

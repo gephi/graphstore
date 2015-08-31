@@ -600,18 +600,18 @@ public class GraphStoreTest {
     }
 
     @Test
-    public void testEquals() {
+    public void testDeepEquals() {
         GraphStore g1 = GraphGenerator.generateTinyGraphStore();
         GraphStore g2 = GraphGenerator.generateTinyGraphStore();
-        Assert.assertTrue(g1.equals(g2));
-        Assert.assertTrue(g2.equals(g1));
+        Assert.assertTrue(g1.deepEquals(g2));
+        Assert.assertTrue(g2.deepEquals(g1));
     }
 
     @Test
-    public void testHashCode() {
+    public void testDeepHashCode() {
         GraphStore g1 = GraphGenerator.generateTinyGraphStore();
         GraphStore g2 = GraphGenerator.generateTinyGraphStore();
-        Assert.assertEquals(g1.hashCode(), g2.hashCode());
+        Assert.assertEquals(g1.deepHashCode(), g2.deepHashCode());
     }
 
     //UTILITY

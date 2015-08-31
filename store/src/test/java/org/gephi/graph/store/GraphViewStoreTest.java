@@ -325,8 +325,8 @@ public class GraphViewStoreTest {
         Assert.assertTrue(view.containsNode(n1));
 
         GraphViewImpl copyView = store.createView(view);
-        Assert.assertTrue(copyView.equals(view));
-        Assert.assertEquals(copyView.hashCode(), view.hashCode());
+        Assert.assertTrue(copyView.deepEquals(view));
+        Assert.assertEquals(copyView.deepHashCode(), view.deepHashCode());
 
         Assert.assertTrue(copyView.containsNode(n1));
         view.removeNode(n1);

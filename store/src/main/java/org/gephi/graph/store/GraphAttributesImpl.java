@@ -101,26 +101,21 @@ public class GraphAttributesImpl {
         }
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 3;
         hash = 47 * hash + (this.attributes != null ? this.attributes.hashCode() : 0);
+        hash = 47 * hash + (this.timestampMap != null ? this.timestampMap.deepHashCode(): 0);
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(GraphAttributesImpl obj) {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!MapDeepEquals.mapDeepEquals(attributes, obj.attributes)) {
             return false;
         }
-        final GraphAttributesImpl other = (GraphAttributesImpl) obj;
-        if (!MapDeepEquals.mapDeepEquals(attributes, other.attributes)) {
-            return false;
-        }
-        if (!timestampMap.equals(other.timestampMap)) {
+        if (!timestampMap.deepEquals(obj.timestampMap)) {
             return false;
         }
         return true;

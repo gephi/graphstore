@@ -215,25 +215,25 @@ public class TimestampMapTest {
     }
 
     @Test
-    public void testEqualsEmpty() {
+    public void testDeepEqualsEmpty() {
         TimestampMap store1 = new TimestampMap();
-        Assert.assertEquals(store1, store1);
+        Assert.assertTrue(store1.deepEquals(store1));
 
         TimestampMap store2 = new TimestampMap();
-        Assert.assertEquals(store1, store2);
+        Assert.assertTrue(store1.deepEquals(store2));
     }
 
     @Test
-    public void testHashCodeEmpty() {
+    public void testDeepHashCodeEmpty() {
         TimestampMap store1 = new TimestampMap();
-        Assert.assertEquals(store1, store1);
+        Assert.assertEquals(store1.deepHashCode(), store1.deepHashCode());
 
         TimestampMap store2 = new TimestampMap();
-        Assert.assertEquals(store1.hashCode(), store2.hashCode());
+        Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
     }
 
     @Test
-    public void testEquals() {
+    public void testDeepEquals() {
         TimestampMap store1 = new TimestampMap();
         store1.addTimestamp(1.0);
         store1.addTimestamp(2.0);
@@ -249,12 +249,12 @@ public class TimestampMapTest {
         TimestampMap store3 = new TimestampMap();
         store3.addTimestamp(1.0);
 
-        Assert.assertEquals(store1, store2);
-        Assert.assertNotEquals(store1, store3);
+        Assert.assertTrue(store1.deepEquals(store2));
+        Assert.assertFalse(store1.deepEquals(store3));
     }
 
     @Test
-    public void testHashCode() {
+    public void testDeepHashCode() {
         TimestampMap store1 = new TimestampMap();
         store1.addTimestamp(1.0);
         store1.addTimestamp(2.0);
@@ -270,7 +270,7 @@ public class TimestampMapTest {
         TimestampMap store3 = new TimestampMap();
         store3.addTimestamp(1.0);
 
-        Assert.assertEquals(store1.hashCode(), store2.hashCode());
-        Assert.assertNotEquals(store1.hashCode(), store3.hashCode());
+        Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
+        Assert.assertNotEquals(store1.deepHashCode(), store3.deepHashCode());
     }
 }

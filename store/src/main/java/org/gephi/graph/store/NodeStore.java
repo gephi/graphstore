@@ -413,8 +413,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         return false;
     }
 
-    @Override
-    public int hashCode() {
+    public int deepHashCode() {
         int hash = 7;
         hash = 67 * hash + this.size;
         NodeStoreIterator itr = this.iterator();
@@ -424,20 +423,15 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean deepEquals(NodeStore obj) {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final NodeStore other = (NodeStore) obj;
-        if (this.size != other.size) {
+        if (this.size != obj.size) {
             return false;
         }
         NodeStoreIterator itr1 = this.iterator();
-        NodeStoreIterator itr2 = other.iterator();
+        NodeStoreIterator itr2 = obj.iterator();
         while (itr1.hasNext()) {
             if (!itr2.hasNext()) {
                 return false;
