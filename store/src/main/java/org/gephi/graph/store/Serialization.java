@@ -197,7 +197,7 @@ public class Serialization {
         //Column
         serialize(out, store.nodeColumnStore);
         serialize(out, store.edgeColumnStore);
-        
+
         //Timestamp
         serialize(out, store.timestampStore);
 
@@ -244,7 +244,7 @@ public class Serialization {
         //Columns
         deserialize(is);
         deserialize(is);
-        
+
         //Timestamp
         deserialize(is);
 
@@ -775,23 +775,23 @@ public class Serialization {
 
         return tf;
     }
-    
+
     private void serializeTimestampStore(final DataOutput out) throws IOException {
         TimestampStore timestampStore = store.timestampStore;
-        
+
         serialize(out, timestampStore.nodeMap);
         serialize(out, timestampStore.edgeMap);
     }
-    
+
     private TimestampStore deserializeTimestampStore(final DataInput is) throws IOException, ClassNotFoundException {
         TimestampStore timestampStore = store.timestampStore;
-        
-        TimestampMap nodeMap = (TimestampMap)deserialize(is);
-        TimestampMap edgeMap = (TimestampMap)deserialize(is);
-        
+
+        TimestampMap nodeMap = (TimestampMap) deserialize(is);
+        TimestampMap edgeMap = (TimestampMap) deserialize(is);
+
         timestampStore.nodeMap.setTimestampMap(nodeMap);
         timestampStore.edgeMap.setTimestampMap(edgeMap);
-        
+
         return timestampStore;
     }
 

@@ -527,6 +527,28 @@ public class SerializationTest {
     }
 
     @Test
+    public void testByte() throws IOException, ClassNotFoundException {
+        Serialization ser = new Serialization(null);
+        byte[] vals = {
+            -1, 0, 1, 2, Byte.MIN_VALUE, Byte.MAX_VALUE
+        };
+        for (byte i : vals) {
+            byte[] buf = ser.serialize(i);
+            Object l2 = ser.deserialize(buf);
+            Assert.assertTrue(l2.getClass() == Byte.class);
+            Assert.assertEquals(l2, i);
+        }
+
+        for (byte i : vals) {
+            byte[] array = new byte[]{i};
+            byte[] buf = ser.serialize(array);
+            Object l2 = ser.deserialize(buf);
+            Assert.assertTrue(l2.getClass() == byte[].class);
+            Assert.assertTrue(Arrays.equals(array, (byte[]) l2));
+        }
+    }
+
+    @Test
     public void testInt() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);
         int[] vals = {
@@ -544,6 +566,21 @@ public class SerializationTest {
             Assert.assertTrue(l2.getClass() == Integer.class);
             Assert.assertEquals(l2, i);
         }
+
+        for (int i : vals) {
+            int[] array = new int[]{i};
+            byte[] buf = ser.serialize(array);
+            Object l2 = ser.deserialize(buf);
+            Assert.assertTrue(l2.getClass() == int[].class);
+            Assert.assertTrue(Arrays.equals(array, (int[]) l2));
+        }
+
+        int[] longArrayByteValues = new int[256];
+        longArrayByteValues[45] = 45;
+        byte[] bufLongArray = ser.serialize(longArrayByteValues);
+        Object l2LongArray = ser.deserialize(bufLongArray);
+        Assert.assertTrue(l2LongArray.getClass() == int[].class);
+        Assert.assertTrue(Arrays.equals(longArrayByteValues, (int[]) l2LongArray));
     }
 
     @Test
@@ -562,6 +599,14 @@ public class SerializationTest {
             Assert.assertTrue(l2.getClass() == Short.class);
             Assert.assertEquals(l2, i);
         }
+
+        for (short i : vals) {
+            short[] array = new short[]{i};
+            byte[] buf = ser.serialize(array);
+            Object l2 = ser.deserialize(buf);
+            Assert.assertTrue(l2.getClass() == short[].class);
+            Assert.assertTrue(Arrays.equals(array, (short[]) l2));
+        }
     }
 
     @Test
@@ -575,6 +620,14 @@ public class SerializationTest {
             Object l2 = ser.deserialize(buf);
             Assert.assertTrue(l2.getClass() == Double.class);
             Assert.assertEquals(l2, i);
+        }
+
+        for (double i : vals) {
+            double[] array = new double[]{i};
+            byte[] buf = ser.serialize(array);
+            Object l2 = ser.deserialize(buf);
+            Assert.assertTrue(l2.getClass() == double[].class);
+            Assert.assertTrue(Arrays.equals(array, (double[]) l2));
         }
     }
 
@@ -590,6 +643,14 @@ public class SerializationTest {
             Assert.assertTrue(l2.getClass() == Float.class);
             Assert.assertEquals(l2, i);
         }
+
+        for (float i : vals) {
+            float[] array = new float[]{i};
+            byte[] buf = ser.serialize(array);
+            Object l2 = ser.deserialize(buf);
+            Assert.assertTrue(l2.getClass() == float[].class);
+            Assert.assertTrue(Arrays.equals(array, (float[]) l2));
+        }
     }
 
     @Test
@@ -603,6 +664,14 @@ public class SerializationTest {
             Object l2 = ser.deserialize(buf);
             Assert.assertTrue(l2.getClass() == Character.class);
             Assert.assertEquals(l2, i);
+        }
+
+        for (char i : vals) {
+            char[] array = new char[]{i};
+            byte[] buf = ser.serialize(array);
+            Object l2 = ser.deserialize(buf);
+            Assert.assertTrue(l2.getClass() == char[].class);
+            Assert.assertTrue(Arrays.equals(array, (char[]) l2));
         }
     }
 
@@ -625,6 +694,14 @@ public class SerializationTest {
             Assert.assertTrue(l2.getClass() == Long.class);
             Assert.assertEquals(l2, i);
         }
+
+        for (long i : vals) {
+            long[] array = new long[]{i};
+            byte[] buf = ser.serialize(array);
+            Object l2 = ser.deserialize(buf);
+            Assert.assertTrue(l2.getClass() == long[].class);
+            Assert.assertTrue(Arrays.equals(array, (long[]) l2));
+        }
     }
 
     @Test
@@ -640,6 +717,11 @@ public class SerializationTest {
         Assert.assertTrue(l22.getClass() == Boolean.class);
         Assert.assertEquals(l22, false);
 
+        boolean[] array = new boolean[]{true, false, true};
+        byte[] bufArray = ser.serialize(array);
+        Object l2Array = ser.deserialize(bufArray);
+        Assert.assertTrue(l2Array.getClass() == boolean[].class);
+        Assert.assertTrue(Arrays.equals(array, (boolean[]) l2Array));
     }
 
     @Test
@@ -648,6 +730,20 @@ public class SerializationTest {
         byte[] buf = ser.serialize("Abcd");
         String l2 = (String) ser.deserialize(buf);
         Assert.assertEquals(l2, "Abcd");
+
+        String[] array = new String[]{"foo", "bar"};
+        byte[] bufArray = ser.serialize(array);
+        Object l2Array = ser.deserialize(bufArray);
+        Assert.assertTrue(l2Array.getClass() == Object[].class);
+        Assert.assertTrue(Arrays.equals(array, (Object[]) l2Array));
+    }
+
+    @Test
+    public void testStringEmpty() throws IOException, ClassNotFoundException {
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize("");
+        String l2 = (String) ser.deserialize(buf);
+        Assert.assertEquals(l2, "");
     }
 
     @Test
@@ -685,30 +781,6 @@ public class SerializationTest {
         byte[] buf = ser.serialize(s);
         Object l2 = ser.deserialize(buf);
         Assert.assertEquals(l2, s);
-    }
-
-    @Test
-    public void testNegativeLongsArray() throws ClassNotFoundException, IOException {
-        Serialization ser = new Serialization(null);
-        long[] l = new long[]{-12};
-        Object deserialize = ser.deserialize(ser.serialize(l));
-        Assert.assertTrue(Arrays.equals(l, (long[]) deserialize));
-    }
-
-    @Test
-    public void testNegativeIntArray() throws ClassNotFoundException, IOException {
-        Serialization ser = new Serialization(null);
-        int[] l = new int[]{-12};
-        Object deserialize = ser.deserialize(ser.serialize(l));
-        Assert.assertTrue(Arrays.equals(l, (int[]) deserialize));
-    }
-
-    @Test
-    public void testNegativeShortArray() throws ClassNotFoundException, IOException {
-        Serialization ser = new Serialization(null);
-        short[] l = new short[]{-12};
-        Object deserialize = ser.deserialize(ser.serialize(l));
-        Assert.assertTrue(Arrays.equals(l, (short[]) deserialize));
     }
 
     @Test
