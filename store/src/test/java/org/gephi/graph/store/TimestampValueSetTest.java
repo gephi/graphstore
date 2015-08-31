@@ -65,7 +65,7 @@ public class TimestampValueSetTest {
         Assert.assertEquals(set.get(1, null), 2.0);
         Assert.assertEquals(set.getDouble(1), 2.0);
     }
-    
+
     @Test
     public void testMultiplePut() {
         TimestampDoubleSet set = new TimestampDoubleSet();
@@ -79,7 +79,7 @@ public class TimestampValueSetTest {
         Assert.assertEquals(set.getDouble(t2), 1.0);
         Assert.assertEquals(set.getDouble(t1), 2.0);
     }
-    
+
     @Test
     public void testMultiplePutWithCapacity() {
         TimestampDoubleSet set = new TimestampDoubleSet(10);
@@ -214,6 +214,17 @@ public class TimestampValueSetTest {
         set.put(2, 2.0);
 
         testIntArrayEquals(new int[]{1, 2}, set.getTimestamps());
+    }
+
+    @Test
+    public void testGetTimestampsTrim() {
+        TimestampDoubleSet set = new TimestampDoubleSet();
+
+        set.put(1, 1.0);
+        set.put(2, 2.0);
+        set.remove(2);
+
+        testIntArrayEquals(new int[]{1}, set.getTimestamps());
     }
 
     @Test
@@ -472,67 +483,67 @@ public class TimestampValueSetTest {
         Object last = set.get(null, indices, Estimator.LAST);
         Assert.assertEquals(last, values[3]);
     }
-    
+
     @Test
     public void testEquals() {
         int[] indices = new int[]{1, 2, 6};
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringSet set1 = new TimestampStringSet();
         TimestampStringSet set2 = new TimestampStringSet();
-        
+
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
         set1.put(indices[2], values[2]);
-        
+
         set2.put(indices[2], values[2]);
         set2.put(indices[1], values[1]);
         set2.put(indices[0], values[0]);
-        
+
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
-        
+
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
     }
-    
+
     @Test
     public void testEqualsWithCapacity() {
         int[] indices = new int[]{1, 2, 6};
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringSet set1 = new TimestampStringSet(10);
         TimestampStringSet set2 = new TimestampStringSet();
-        
+
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
         set1.put(indices[2], values[2]);
-        
+
         set2.put(indices[2], values[2]);
         set2.put(indices[1], values[1]);
         set2.put(indices[0], values[0]);
-        
+
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
-        
+
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
     }
-    
+
     @Test
     public void testEqualsWithRemove() {
         int[] indices = new int[]{1, 2, 6};
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringSet set1 = new TimestampStringSet();
         TimestampStringSet set2 = new TimestampStringSet();
-        
+
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
         set1.put(indices[2], values[2]);
         set1.remove(indices[1]);
-        
+
         set2.put(indices[0], values[0]);
         set2.put(indices[2], values[2]);
-        
+
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
-        
+
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
     }
 
