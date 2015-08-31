@@ -283,9 +283,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     protected void destroy() {
         for (AbstractIndex ai : columns) {
-            ai.destroy();
+            if (ai != null) {
+                ai.destroy();
+            }
         }
-        columns = new AbstractIndex[0];;
+        columns = new AbstractIndex[0];
         columnsCount = 0;
     }
 
