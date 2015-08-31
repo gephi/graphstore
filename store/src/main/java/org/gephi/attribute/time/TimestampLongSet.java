@@ -95,7 +95,7 @@ public final class TimestampLongSet extends TimestampValueSet<Long> {
         }
         throw new IllegalArgumentException("The element doesn't exist");
     }
-    
+
     public long getLong(int timestampIndex, long defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {

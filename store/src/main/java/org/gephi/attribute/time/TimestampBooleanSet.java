@@ -79,7 +79,7 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
         }
         return defaultValue;
     }
-    
+
     public boolean getBoolean(int timestampIndex) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
@@ -87,7 +87,7 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
         }
         throw new IllegalArgumentException("The element doesn't exist");
     }
-    
+
     public boolean getBoolean(int timestampIndex, boolean defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {

@@ -87,7 +87,7 @@ public final class TimestampByteSet extends TimestampValueSet<Byte> {
         }
         throw new IllegalArgumentException("The element doesn't exist");
     }
-    
+
     public byte getByte(int timestampIndex, byte defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {

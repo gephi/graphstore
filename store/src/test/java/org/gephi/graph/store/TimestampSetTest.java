@@ -190,10 +190,17 @@ public class TimestampSetTest {
         set2.add(6);
         set2.add(1);
 
+        TimestampSet set3 = new TimestampSet();
+        set3.add(6);
+        set3.add(2);
+
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
+        Assert.assertFalse(set1.equals(set3));
+        Assert.assertFalse(set3.equals(set1));
 
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
+        Assert.assertFalse(set1.hashCode() == set3.hashCode());
     }
 
     @Test
@@ -210,6 +217,19 @@ public class TimestampSetTest {
         Assert.assertTrue(set2.equals(set1));
 
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
+    }
+
+    @Test
+    public void testEqualsDifferentSize() {
+        TimestampSet set1 = new TimestampSet();
+        set1.add(6);
+        set1.add(1);
+
+        TimestampSet set2 = new TimestampSet();
+        set2.add(6);
+
+        Assert.assertFalse(set1.equals(set2));
+        Assert.assertFalse(set2.equals(set1));
     }
 
     @Test

@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.store;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import org.gephi.attribute.time.Estimator;
 import org.gephi.attribute.time.TimestampBooleanSet;
 import org.gephi.attribute.time.TimestampByteSet;
@@ -25,6 +27,7 @@ import org.gephi.attribute.time.TimestampIntegerSet;
 import org.gephi.attribute.time.TimestampLongSet;
 import org.gephi.attribute.time.TimestampShortSet;
 import org.gephi.attribute.time.TimestampStringSet;
+import org.gephi.attribute.time.TimestampValueSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -36,174 +39,138 @@ public class TimestampValueSetTest {
 
     @Test
     public void testEmpty() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
-
-        Assert.assertTrue(set.isEmpty());
-        Assert.assertEquals(set.size(), 0);
+        for (TimestampValueSet set : getAllInstances()) {
+            Assert.assertTrue(set.isEmpty());
+            Assert.assertEquals(set.size(), 0);
+        }
     }
 
     @Test
     public void testPutOne() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        for (TimestampValueSet set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
 
-        set.put(1, 1.0);
-        Assert.assertEquals(set.size(), 1);
-        Assert.assertFalse(set.isEmpty());
-        Assert.assertTrue(set.contains(1));
-        Assert.assertEquals(set.get(1, null), 1.0);
-        Assert.assertEquals(set.getDouble(1), 1.0);
+            set.put(1, defaultValues[0]);
+            testValues(set, new int[]{1}, new Object[]{defaultValues[0]});
+        }
     }
 
     @Test
     public void testPutTwice() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        for (TimestampValueSet set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
 
-        int t = 1;
-        set.put(t, 1.0);
-        set.put(t, 2.0);
-        Assert.assertTrue(set.contains(t));
-        Assert.assertEquals(set.get(1, null), 2.0);
-        Assert.assertEquals(set.getDouble(1), 2.0);
+            set.put(1, defaultValues[0]);
+            set.put(1, defaultValues[1]);
+            testValues(set, new int[]{1}, new Object[]{defaultValues[1]});
+        }
     }
 
     @Test
     public void testMultiplePut() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        for (TimestampValueSet set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
 
-        int t1 = 1;
-        int t2 = 6;
-        set.put(t2, 1.0);
-        set.put(t1, 2.0);
-        Assert.assertTrue(set.contains(t1));
-        Assert.assertTrue(set.contains(t2));
-        Assert.assertEquals(set.getDouble(t2), 1.0);
-        Assert.assertEquals(set.getDouble(t1), 2.0);
+            set.put(1, defaultValues[0]);
+            set.put(6, defaultValues[1]);
+            testValues(set, new int[]{1, 6}, defaultValues);
+        }
     }
 
     @Test
     public void testMultiplePutWithCapacity() {
-        TimestampDoubleSet set = new TimestampDoubleSet(10);
+        for (TimestampValueSet set : getAllInstances(10)) {
+            Object[] defaultValues = getTestValues(set);
 
-        int t1 = 1;
-        int t2 = 6;
-        set.put(t2, 1.0);
-        set.put(t1, 2.0);
-        Assert.assertTrue(set.contains(t1));
-        Assert.assertTrue(set.contains(t2));
-        Assert.assertEquals(set.getDouble(t2), 1.0);
-        Assert.assertEquals(set.getDouble(t1), 2.0);
+            set.put(1, defaultValues[0]);
+            set.put(6, defaultValues[1]);
+            testValues(set, new int[]{1, 6}, defaultValues);
+        }
     }
 
     @Test
     public void testRemove() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        for (TimestampValueSet set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
 
-        int t = 1;
-        set.put(t, 1.0);
-
-        set.remove(t);
-        Assert.assertTrue(set.isEmpty());
-        Assert.assertFalse(set.contains(t));
+            set.put(1, defaultValues[0]);
+            set.put(2, defaultValues[1]);
+            set.remove(1);
+            Assert.assertFalse(set.contains(1));
+            Assert.assertEquals(set.get(2, null), defaultValues[1]);
+            set.remove(2);
+            Assert.assertTrue(set.isEmpty());
+            Assert.assertFalse(set.contains(1));
+        }
     }
 
     @Test
     public void testRemoveAdd() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        for (TimestampValueSet set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
 
-        set.put(1, 1.0);
-        set.put(2, 1.0);
+            set.put(1, defaultValues[0]);
+            set.put(2, defaultValues[1]);
+            set.remove(1);
+            set.put(1, defaultValues[0]);
+            testValues(set, new int[]{1, 2}, defaultValues);
+            set.remove(2);
+            set.put(2, defaultValues[1]);
+            testValues(set, new int[]{1, 2}, defaultValues);
+        }
+    }
 
-        set.remove(1);
-        set.put(1, 1.0);
+    @Test
+    public void testRemoveUnknown() {
+        for (TimestampValueSet set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
 
-        Assert.assertEquals(set.size(), 2);
-        Assert.assertEquals(set.getTimestamps()[0], 1);
-        Assert.assertEquals(set.getTimestamps()[1], 2);
+            set.put(1, defaultValues[0]);
+            set.put(2, defaultValues[1]);
+            set.remove(3);
+            set.remove(0);
+            testValues(set, new int[]{1, 2}, defaultValues);
+        }
     }
 
     @Test
     public void testClear() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        for (TimestampValueSet set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
+            set.put(1, defaultValues[0]);
+            set.clear();
 
-        set.put(1, 1.0);
-        set.clear();
-
-        Assert.assertEquals(set.size(), 0);
-        Assert.assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testGet() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
-
-        set.put(1, 1.0);
-
-        Assert.assertEquals(set.get(1, null), 1.0);
-    }
-
-    @Test
-    public void testGetDouble() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
-
-        set.put(1, 1.0);
-
-        Assert.assertEquals(set.getDouble(1), 1.0);
-    }
-
-    @Test(expectedExceptions = NullPointerException.class)
-    public void testPutNull() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
-        set.put(1, null);
-    }
-
-    @Test
-    public void testGetUnknown() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
-
-        Assert.assertNull(set.get(1, null));
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testGetDoubleUnknown() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
-
-        set.getDouble(1);
-    }
-
-    @Test
-    public void testToArrayEmpty() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
-
-        Assert.assertEquals(set.toArray().length, 0);
-        Assert.assertEquals(set.toDoubleArray().length, 0);
-    }
-
-    @Test
-    public void testToArray() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
-
-        set.put(1, 1.0);
-        set.put(2, 2.0);
-
-        Double[] res = set.toArray();
-        double[] primitive = new double[res.length];
-        for (int i = 0; i < res.length; i++) {
-            Double d = res[i];
-            Assert.assertNotNull(d);
-            primitive[i] = d;
+            Assert.assertEquals(set.size(), 0);
+            Assert.assertTrue(set.isEmpty());
         }
-
-        testDoubleArrayEquals(new double[]{1.0, 2.0}, primitive);
     }
 
     @Test
-    public void testToDoubleArray() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+    public void testClearAdd() {
+        for (TimestampValueSet set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
+            set.put(1, defaultValues[0]);
+            set.clear();
+            set.put(1, defaultValues[0]);
+            set.put(2, defaultValues[1]);
 
-        set.put(1, 1.0);
-        set.put(2, 2.0);
+            testValues(set, new int[]{1, 2}, defaultValues);
+        }
+    }
 
-        testDoubleArrayEquals(new double[]{1.0, 2.0}, set.toDoubleArray());
+    @Test
+    public void testPutNull() {
+        for (TimestampValueSet set : getAllInstances()) {
+            boolean thrown = false;
+            try {
+                set.put(1, null);
+            } catch (NullPointerException e) {
+                thrown = true;
+            }
+            if (!thrown) {
+                Assert.fail("Didn't throw an exception for " + set.getClass());
+            }
+        }
     }
 
     @Test
@@ -225,6 +192,25 @@ public class TimestampValueSetTest {
         set.remove(2);
 
         testIntArrayEquals(new int[]{1}, set.getTimestamps());
+    }
+
+    @Test
+    public void testIsSupported() {
+        for (TimestampValueSet set : getAllInstances()) {
+            Assert.assertTrue(set.isSupported(Estimator.FIRST));
+            Assert.assertTrue(set.isSupported(Estimator.LAST));
+        }
+    }
+
+    @Test
+    public void testEstimatorDefault() {
+        for (TimestampValueSet set : getAllInstances()) {
+            for (Estimator e : Estimator.values()) {
+                if (set.isSupported(e)) {
+                    Assert.assertNull(set.get(null, new int[]{99}, e));
+                }
+            }
+        }
     }
 
     @Test
@@ -490,6 +476,9 @@ public class TimestampValueSetTest {
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringSet set1 = new TimestampStringSet();
         TimestampStringSet set2 = new TimestampStringSet();
+        TimestampStringSet set3 = new TimestampStringSet();
+        TimestampStringSet set4 = new TimestampStringSet();
+        TimestampStringSet set5 = new TimestampStringSet();
 
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
@@ -499,10 +488,24 @@ public class TimestampValueSetTest {
         set2.put(indices[1], values[1]);
         set2.put(indices[0], values[0]);
 
+        set3.put(indices[0], "f");
+        set3.put(indices[1], "o");
+        set3.put(indices[2], "o");
+
+        set4.put(7, values[0]);
+        set4.put(8, values[1]);
+        set4.put(9, values[2]);
+
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
 
+        Assert.assertFalse(set1.equals(set3));
+        Assert.assertFalse(set1.equals(set4));
+        Assert.assertFalse(set1.equals(set5));
+
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
+        Assert.assertFalse(set1.hashCode() == set3.hashCode());
+        Assert.assertFalse(set1.hashCode() == set4.hashCode());
     }
 
     @Test
@@ -555,10 +558,123 @@ public class TimestampValueSetTest {
         }
     }
 
-    private void testDoubleArrayEquals(double[] a, double[] b) {
-        Assert.assertEquals(a.length, b.length);
-        for (int i = 0; i < a.length; i++) {
-            Assert.assertEquals(a[i], b[i]);
+    private TimestampValueSet[] getAllInstances() {
+        return new TimestampValueSet[]{
+            new TimestampDoubleSet(),
+            new TimestampByteSet(),
+            new TimestampFloatSet(),
+            new TimestampIntegerSet(),
+            new TimestampLongSet(),
+            new TimestampShortSet(),
+            new TimestampStringSet(),
+            new TimestampCharSet(),
+            new TimestampBooleanSet()
+        };
+    }
+
+    private TimestampValueSet[] getAllInstances(int capacity) {
+        return new TimestampValueSet[]{
+            new TimestampDoubleSet(capacity),
+            new TimestampByteSet(capacity),
+            new TimestampFloatSet(capacity),
+            new TimestampIntegerSet(capacity),
+            new TimestampLongSet(capacity),
+            new TimestampShortSet(capacity),
+            new TimestampStringSet(capacity),
+            new TimestampCharSet(capacity),
+            new TimestampBooleanSet(capacity)
+        };
+    }
+
+    private Object[] getTestValues(TimestampValueSet set) {
+        if (set.getTypeClass().equals(String.class)) {
+            return new String[]{"foo", "bar"};
+        } else if (set.getTypeClass().equals(Boolean.class)) {
+            return new Boolean[]{Boolean.TRUE, Boolean.FALSE};
+        } else if (set.getTypeClass().equals(Float.class)) {
+            return new Float[]{1f, 2f};
+        } else if (set.getTypeClass().equals(Double.class)) {
+            return new Double[]{1.0, 2.0};
+        } else if (set.getTypeClass().equals(Integer.class)) {
+            return new Integer[]{1, 2};
+        } else if (set.getTypeClass().equals(Short.class)) {
+            return new Short[]{1, 2};
+        } else if (set.getTypeClass().equals(Long.class)) {
+            return new Long[]{1l, 2l};
+        } else if (set.getTypeClass().equals(Byte.class)) {
+            return new Byte[]{1, 2};
+        } else if (set.getTypeClass().equals(Character.class)) {
+            return new Character[]{'f', 'o'};
+        } else {
+            throw new RuntimeException("Unrecognized type");
+        }
+    }
+
+    private Object getDefaultValue(TimestampValueSet set) {
+        if (set.getTypeClass().equals(Boolean.class)) {
+            return Boolean.FALSE;
+        } else if (set.getTypeClass().equals(Float.class)) {
+            return -1f;
+        } else if (set.getTypeClass().equals(Double.class)) {
+            return -1.0;
+        } else if (set.getTypeClass().equals(Integer.class)) {
+            return -1;
+        } else if (set.getTypeClass().equals(Short.class)) {
+            return (short) -1;
+        } else if (set.getTypeClass().equals(Long.class)) {
+            return -1l;
+        } else if (set.getTypeClass().equals(Byte.class)) {
+            return (byte) -1;
+        } else if (set.getTypeClass().equals(Character.class)) {
+            return '#';
+        } else if (set.getTypeClass().equals(String.class)) {
+            return "-1";
+        } else {
+            throw new RuntimeException("Unrecognized type " + set.getTypeClass());
+        }
+    }
+
+    private void testValues(TimestampValueSet set, int[] expectedTimestamp, Object[] expectedValues) {
+        Class typeClass = set.getTypeClass();
+
+        Assert.assertEquals(expectedTimestamp.length, expectedValues.length);
+        Assert.assertEquals(set.size(), expectedTimestamp.length);
+        for (int i = 0; i < expectedTimestamp.length; i++) {
+            Assert.assertEquals(set.get(expectedTimestamp[i], null), expectedValues[i]);
+            Assert.assertEquals(set.get(99, getDefaultValue(set)), getDefaultValue(set));
+            Assert.assertTrue(set.contains(expectedTimestamp[i]));
+
+            if (typeClass != String.class) {
+                try {
+                    Method getMethod = set.getClass().getMethod("get" + typeClass.getSimpleName(), int.class);
+                    Method getMethodWithDefault = set.getClass().getMethod("get" + typeClass.getSimpleName(), int.class, getMethod.getReturnType());
+
+                    Assert.assertEquals(getMethod.invoke(set, expectedTimestamp[i]), expectedValues[i]);
+                    Assert.assertEquals(getMethodWithDefault.invoke(set, expectedTimestamp[i], getDefaultValue(set)), expectedValues[i]);
+                    Assert.assertEquals(getMethodWithDefault.invoke(set, 99, getDefaultValue(set)), getDefaultValue(set));
+
+                    boolean thrown = false;
+                    try {
+                        getMethod.invoke(set, 99);
+                    } catch (InvocationTargetException e) {
+                        thrown = e.getTargetException().getClass().equals(IllegalArgumentException.class);
+                    }
+                    if (!thrown) {
+                        Assert.fail("The get method didn't throw an IllegalArgumentException exception");
+                    }
+                } catch (Exception ex) {
+                    Assert.fail("Error in getMethod for " + typeClass, ex);
+                }
+            }
+        }
+        Assert.assertEquals(set.toArray(), expectedValues);
+        if (typeClass != String.class) {
+            try {
+                Method toArrayMethod = set.getClass().getMethod("to" + typeClass.getSimpleName() + "Array");
+                Assert.assertEquals(toArrayMethod.invoke(set), expectedValues);
+            } catch (Exception ex) {
+                Assert.fail("Error in getMethod for " + typeClass, ex);
+            }
         }
     }
 }
