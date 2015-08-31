@@ -68,10 +68,8 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
     @Override
     public void remove(int timestampIndex) {
         final int removeIndex = removeInner(timestampIndex);
-        if (removeIndex > 0) {
-            if (removeIndex != size) {
-                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
-            }
+        if (removeIndex >= 0 && removeIndex != size) {
+            System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
         }
     }
 
