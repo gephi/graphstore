@@ -1156,7 +1156,7 @@ public class Serialization {
         }
 
         boolean fitsInByte = 0 <= min && max <= 255;
-        boolean fitsInShort = Short.MIN_VALUE >= min && max <= Short.MAX_VALUE;
+        boolean fitsInShort = min >= Short.MIN_VALUE && max <= Short.MAX_VALUE;
 
         if (obj.length <= 255 && fitsInByte) {
             da.write(ARRAY_INT_B_255);
