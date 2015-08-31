@@ -58,7 +58,7 @@ public abstract class TimestampValueSet<T> {
         if (index < 0) {
             int insertIndex = -index - 1;
 
-            if (size < array.length - 1) {
+            if (size < array.length) {
                 if (insertIndex < size) {
                     System.arraycopy(array, insertIndex, array, insertIndex + 1, size - insertIndex);
                 }

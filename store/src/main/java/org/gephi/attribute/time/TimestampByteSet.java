@@ -46,7 +46,7 @@ public final class TimestampByteSet extends TimestampValueSet<Byte> {
         if (index < 0) {
             int insertIndex = -index - 1;
 
-            if (size < values.length) {
+            if (size - 1 < values.length) {
                 if (insertIndex < size - 1) {
                     System.arraycopy(values, insertIndex, values, insertIndex + 1, size - insertIndex - 1);
                 }
