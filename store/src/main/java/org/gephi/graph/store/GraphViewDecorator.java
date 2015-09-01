@@ -370,6 +370,9 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
 
     @Override
     public Node getOpposite(Node node, Edge edge) {
+        checkValidInViewNodeObject(node);
+        checkValidInViewEdgeObject(edge);
+
         return graphStore.getOpposite(node, edge);
     }
 
@@ -526,7 +529,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     public void setAttribute(String key, Object value, double timestamp) {
         view.attributes.setValue(key, value, timestamp);
     }
-    
+
     @Override
     public boolean isDirected() {
         return graphStore.isDirected();

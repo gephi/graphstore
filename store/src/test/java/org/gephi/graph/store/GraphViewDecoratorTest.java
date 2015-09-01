@@ -28,7 +28,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class GraphViewDecoratorTest {
-    
+
     @Test
     public void testDirectedAdd() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
@@ -442,7 +442,7 @@ public class GraphViewDecoratorTest {
             Assert.assertEquals(graph.getEdgeCount(i), 0);
         }
     }
-    
+
     @Test
     public void testDirectedIterators() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
@@ -569,6 +569,127 @@ public class GraphViewDecoratorTest {
         Node[] nodes = graph.getNodes().toArray();
         Assert.assertNull(graph.getEdge(nodes[0], nodes[1], 0));
     }
+
+    @Test
+    public void testGetMutualEdge() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        for (Edge e : graph.getEdges()) {
+            if (graph.getEdge(e.getTarget(), e.getSource()) != null) {
+                Edge m = graph.getMutualEdge(e);
+                Assert.assertSame(m, graph.getEdge(e.getTarget(), e.getSource()));
+            } else {
+                Assert.assertNull(graph.getMutualEdge(e));
+            }
+        }
+    }
+
+    @Test
+    public void testClearEdgesForNode() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        for (Node n : graph.getNodes().toArray()) {
+            graph.clearEdges(n);
+            Assert.assertEquals(graph.getDegree(n), 0);
+        }
+        Assert.assertEquals(graph.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testClearEdgesForNodeType() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        for (Node n : graph.getNodes().toArray()) {
+            graph.clearEdges(n, 0);
+            Assert.assertEquals(graph.getDegree(n), 0);
+        }
+        Assert.assertEquals(graph.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testIsAdjacent() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        for (Edge e : graph.getEdges()) {
+            Assert.assertTrue(graph.isAdjacent(e.getSource(), e.getTarget()));
+        }
+        graph.clearEdges();
+        Node[] nodes = graph.getNodes().toArray();
+        Assert.assertFalse(graph.isAdjacent(nodes[0], nodes[1]));
+    }
+
+    @Test
+    public void testIsAdjacentWithType() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        for (Edge e : graph.getEdges()) {
+            Assert.assertTrue(graph.isAdjacent(e.getSource(), e.getTarget(), e.getType()));
+        }
+        graph.clearEdges();
+        Node[] nodes = graph.getNodes().toArray();
+        Assert.assertFalse(graph.isAdjacent(nodes[0], nodes[1], 0));
+    }
+
+    @Test
+    public void testGetNodeById() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        NodeImpl n1 = graphStore.getNode("1");
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        graph.addNode(n1);
+
+        Assert.assertSame(graph.getNode("1"), n1);
+        Assert.assertNull(graph.getNode("2"));
+        Assert.assertNull(graph.getNode("99"));
+    }
+
+    @Test
+    public void testGetEdgeById() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        view.fill();
+
+        Assert.assertSame(graph.getEdge("0"), graphStore.getEdges().toArray()[0]);
+        Assert.assertNull(graph.getEdge("99"));
+    }
+
+    @Test
+    public void testGetOpposite() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        view.fill();
+
+        Assert.assertSame(graph.getOpposite(graph.getNode("1"), graph.getEdge("0")), graph.getNode("2"));
+    }
+
     //UTILITY
     private boolean isIterablesEqual(ElementIterable n1, ElementIterable n2) {
         ObjectSet s1 = new ObjectOpenHashSet();
