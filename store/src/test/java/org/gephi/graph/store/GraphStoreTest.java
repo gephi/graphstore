@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
+import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.GraphView;
@@ -612,6 +613,101 @@ public class GraphStoreTest {
         GraphStore g1 = GraphGenerator.generateTinyGraphStore();
         GraphStore g2 = GraphGenerator.generateTinyGraphStore();
         Assert.assertEquals(g1.deepHashCode(), g2.deepHashCode());
+    }
+
+    @Test
+    public void testIsSelfLoop() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        Edge edge = graphStore.factory.newEdge(n1, n1);
+        graphStore.addEdge(edge);
+
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        view.fill();
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        Assert.assertTrue(graph.isSelfLoop(edge));
+        Assert.assertFalse(graph.isSelfLoop(graph.getEdge("0")));
+    }
+
+    @Test
+    public void testIsDirected() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Assert.assertTrue(graphStore.isDirected(graphStore.getEdge("0")));
+    }
+
+    @Test
+    public void testIsIncident() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+
+        Node n1 = graphStore.getNode("1");
+        Assert.assertTrue(graphStore.isIncident(n1, graphStore.getEdge("0")));
+
+        Edge edge = graphStore.factory.newEdge(n1, n1);
+        graphStore.addEdge(edge);
+        Assert.assertTrue(graphStore.isIncident(edge, graphStore.getEdge("0")));
+    }
+
+    @Test
+    public void testAttributes() {
+        GraphStore graphStore = new GraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        Assert.assertNull(graph.getAttribute("foo"));
+        graph.setAttribute("foo", "bar");
+        Assert.assertEquals(graph.getAttribute("foo"), "bar");
+        Assert.assertTrue(graph.getAttributeKeys().contains("foo"));
+    }
+
+    @Test
+    public void testAttributesWithTimestamps() {
+        GraphStore graphStore = new GraphStore();
+
+        Assert.assertNull(graphStore.getAttribute("foo", 1.0));
+        graphStore.setAttribute("foo", "bar", 1.0);
+        Assert.assertEquals(graphStore.getAttribute("foo", 1.0), "bar");
+        Assert.assertTrue(graphStore.getAttributeKeys().contains("foo"));
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testUnion() {
+        GraphStore graphStore = new GraphStore();
+        graphStore.union(null);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testIntersection() {
+        GraphStore graphStore = new GraphStore();
+        graphStore.intersection(null);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testFill() {
+        GraphStore graphStore = new GraphStore();
+        graphStore.fill();
+    }
+
+    @Test
+    public void testNodeIterableToArray() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node[] expected = new Node[]{graphStore.getNode("1"), graphStore.getNode("2")};
+        Node[] nodeArray = graphStore.getNodes().toArray();
+        Node[] nodeCollection = graphStore.getNodes().toCollection().toArray(new Node[0]);
+        Assert.assertEquals(nodeArray, expected);
+        Assert.assertEquals(nodeCollection, expected);
+    }
+
+    @Test
+    public void testEdgeIterableToArray() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Edge[] expected = new Edge[]{graphStore.getEdge("0")};
+        Edge[] edgeArray = graphStore.getEdges().toArray();
+        Edge[] edgeCollection = graphStore.getEdges().toCollection().toArray(new Edge[0]);
+        Assert.assertEquals(edgeArray, expected);
+        Assert.assertEquals(edgeCollection, expected);
     }
 
     //UTILITY

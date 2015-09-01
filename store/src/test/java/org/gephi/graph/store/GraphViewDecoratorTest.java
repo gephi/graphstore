@@ -690,6 +690,116 @@ public class GraphViewDecoratorTest {
         Assert.assertSame(graph.getOpposite(graph.getNode("1"), graph.getEdge("0")), graph.getNode("2"));
     }
 
+    @Test
+    public void testIsSelfLoop() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        Edge edge = graphStore.factory.newEdge(n1, n1);
+        graphStore.addEdge(edge);
+
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        view.fill();
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        Assert.assertTrue(graph.isSelfLoop(edge));
+        Assert.assertFalse(graph.isSelfLoop(graph.getEdge("0")));
+    }
+
+    @Test
+    public void testIsDirected() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        graph.fill();
+        Assert.assertTrue(graph.isDirected(graph.getEdge("0")));
+    }
+
+    @Test
+    public void testIsIncident() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        view.fill();
+
+        Node n1 = graph.getNode("1");
+        Assert.assertTrue(graph.isIncident(n1, graph.getEdge("0")));
+
+        Edge edge = graphStore.factory.newEdge(n1, n1);
+        graphStore.addEdge(edge);
+        Assert.assertTrue(graph.isIncident(edge, graph.getEdge("0")));
+    }
+
+    @Test
+    public void testAttributes() {
+        GraphStore graphStore = new GraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        Assert.assertNull(graph.getAttribute("foo"));
+        graph.setAttribute("foo", "bar");
+        Assert.assertEquals(graph.getAttribute("foo"), "bar");
+        Assert.assertTrue(graph.getAttributeKeys().contains("foo"));
+    }
+
+    @Test
+    public void testAttributesWithTimestamps() {
+        GraphStore graphStore = new GraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        Assert.assertNull(graph.getAttribute("foo", 1.0));
+        graph.setAttribute("foo", "bar", 1.0);
+        Assert.assertEquals(graph.getAttribute("foo", 1.0), "bar");
+        Assert.assertTrue(graph.getAttributeKeys().contains("foo"));
+    }
+
+    @Test
+    public void testUnion() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        GraphViewImpl view1 = store.createView();
+        GraphViewImpl view2 = store.createView();
+        DirectedSubgraph graph1 = store.getDirectedGraph(view1);
+        DirectedSubgraph graph2 = store.getDirectedGraph(view2);
+
+        Node n1 = graphStore.getNode("1");
+        Node n2 = graphStore.getNode("2");
+
+        graph1.addNode(n1);
+        graph2.addNode(n2);
+
+        graph1.union(graph2);
+        Assert.assertTrue(graph1.contains(n2));
+    }
+
+    @Test
+    public void testIntersection() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        GraphViewImpl view1 = store.createView();
+        GraphViewImpl view2 = store.createView();
+        DirectedSubgraph graph1 = store.getDirectedGraph(view1);
+        DirectedSubgraph graph2 = store.getDirectedGraph(view2);
+
+        Node n1 = graphStore.getNode("1");
+        Node n2 = graphStore.getNode("2");
+
+        graph1.addNode(n1);
+        graph1.addNode(n2);
+        graph2.addNode(n2);
+
+        graph1.intersection(graph2);
+        Assert.assertFalse(graph1.contains(n1));
+        Assert.assertTrue(graph1.contains(n2));
+    }
+
     //UTILITY
     private boolean isIterablesEqual(ElementIterable n1, ElementIterable n2) {
         ObjectSet s1 = new ObjectOpenHashSet();
