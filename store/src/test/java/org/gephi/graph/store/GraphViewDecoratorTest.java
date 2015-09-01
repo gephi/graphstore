@@ -537,7 +537,38 @@ public class GraphViewDecoratorTest {
             Assert.assertEquals(graph.getDegree(n), copyGraphStore.undirectedDecorator.getDegree(m));
         }
     }
-    
+
+    @Test
+    public void testGetEdge() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        for (Edge e : graph.getEdges()) {
+            Assert.assertSame(graph.getEdge(e.getSource(), e.getTarget()), e);
+        }
+        graph.clearEdges();
+        Node[] nodes = graph.getNodes().toArray();
+        Assert.assertNull(graph.getEdge(nodes[0], nodes[1]));
+    }
+
+    @Test
+    public void testGetEdgeWithType() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        addSomeElements(graphStore, view);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        for (Edge e : graph.getEdges()) {
+            Assert.assertSame(graph.getEdge(e.getSource(), e.getTarget(), e.getType()), e);
+        }
+        graph.clearEdges();
+        Node[] nodes = graph.getNodes().toArray();
+        Assert.assertNull(graph.getEdge(nodes[0], nodes[1], 0));
+    }
     //UTILITY
     private boolean isIterablesEqual(ElementIterable n1, ElementIterable n2) {
         ObjectSet s1 = new ObjectOpenHashSet();

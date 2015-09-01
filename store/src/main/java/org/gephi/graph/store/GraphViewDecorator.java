@@ -48,8 +48,8 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     public Edge getEdge(Node node1, Node node2) {
         graphStore.autoReadLock();
         try {
-            EdgeImpl edge = graphStore.edgeStore.get(node1, node1);
-            if (view.containsEdge(edge)) {
+            EdgeImpl edge = graphStore.edgeStore.get(node1, node2);
+            if (edge != null && view.containsEdge(edge)) {
                 return edge;
             }
             return null;
@@ -62,8 +62,8 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     public Edge getEdge(Node node1, Node node2, int type) {
         graphStore.autoReadLock();
         try {
-            EdgeImpl edge = graphStore.edgeStore.get(node1, node1, type);
-            if (view.containsEdge(edge)) {
+            EdgeImpl edge = graphStore.edgeStore.get(node1, node2, type);
+            if (edge != null && view.containsEdge(edge)) {
                 return edge;
             }
             return null;
