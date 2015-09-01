@@ -256,7 +256,7 @@ public class TimestampIndexStoreTest {
         TimestampIndexImpl index = store.createViewIndex(graph);
         store.deleteViewIndex(graph);
         Assert.assertFalse(index.hasElements());
-        Assert.assertNull(store.getIndex(graph));
+        Assert.assertFalse(store.viewIndexes.containsKey(view));
     }
 
     @Test

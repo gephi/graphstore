@@ -57,7 +57,11 @@ public class TimestampIndexStore<T extends Element> {
             return mainIndex;
         }
         TimestampIndexImpl viewIndex = viewIndexes.get(graph.getView());
-        // TODO: Create if doesn't exist
+        if (viewIndex == null) {
+            // TODO Make the auto-creation optional?
+            viewIndex = createViewIndex(graph);
+            viewIndexes.put(graph.getView(), viewIndex);
+        }
         return viewIndex;
     }
 
