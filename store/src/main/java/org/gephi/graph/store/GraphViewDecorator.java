@@ -77,7 +77,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         graphStore.autoReadLock();
         try {
             EdgeImpl edge = graphStore.edgeStore.getMutualEdge(e);
-            if (view.containsEdge(edge)) {
+            if (edge != null && view.containsEdge(edge)) {
                 return edge;
             }
             return null;
@@ -270,7 +270,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         graphStore.autoReadLock();
         try {
             NodeImpl node = graphStore.getNode(id);
-            if (view.containsNode(node)) {
+            if (node != null && view.containsNode(node)) {
                 return node;
             }
             return null;
@@ -284,7 +284,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         graphStore.autoReadLock();
         try {
             EdgeImpl edge = graphStore.getEdge(id);
-            if (view.containsEdge(edge)) {
+            if (edge != null && view.containsEdge(edge)) {
                 return edge;
             }
             return null;
