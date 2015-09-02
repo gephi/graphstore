@@ -7,22 +7,24 @@ GraphStore is an in-memory graph structure implementation written in Java. It is
 
 ## Features Highlight
 
-* Blazing fast graph data structure optimized for reading and writing. 
-* Comprehensive APIs to read and modify the graph structure.
-* Low memory footprint. Reduced usage of Java objects and collections optimized for caching.
+* Blazing fast graph data structure optimized for reading and writing
+* Comprehensive APIs to read and modify the graph structure
+* Low memory footprint - reduced usage of Java objects and collections optimized for caching
 * Supports directed, undirected and mixed graphs
-* Supports parallel edges. Edges can have a label.
-* Any number of attributes can be associated with nodes or edges.
-* Thread-safe. Implements read-write locking mechanism to allow multiple reading threads.
-* Supports dynamic graphs (graphs over time).
-* Built-in index on attribute values.
-* Fast and compact binary serialization.
+* Supports parallel edges (i.e. edges can have a label)
+* Any number of attributes can be associated with nodes or edges
+* Thread-safe - Implements read-write locking mechanism to allow multiple reading threads
+* Supports dynamic graphs (graphs over time)
+* Built-in index on attribute values
+* Fast and compact binary serialization
 
 ## Download
 
-No stable version has been released yet. You can download the development version:
+Stable releases can be found on [Maven central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.gephi%22%20AND%20a%3A%22graphstore%22).
 
-[graphstore-0.1-SNAPSHOT.jar](http://nexus.gephi.org/nexus/service/local/artifact/maven/content?r=snapshots&g=org.gephi&a=graphstore&v=0.1-SNAPSHOT&p=jar&c=jar)
+## Documentation
+
+API Documentation is available [here](http://gephi.github.com/graphstore/apidocs/index.html).
 
 ## Dependencies
 
@@ -42,6 +44,10 @@ GraphStore uses Maven for building.
 ### How to test
 
 	> mvn test
+
+## How to obtain code coverage report
+
+        > mvn jacoco:report
 
 ## Contribute
 
