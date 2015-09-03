@@ -17,12 +17,16 @@ package org.gephi.graph.api;
 
 import org.gephi.attribute.api.Index;
 import org.gephi.attribute.api.Table;
+import org.gephi.attribute.api.TimeFormat;
 import org.gephi.attribute.api.TimestampIndex;
 import org.gephi.attribute.time.Interval;
 
 /**
+ * Entry point.
  * 
- * @author mbastian
+ *  This model gives access to the node and edge tables, which controls the set
+ * of columns each element (node/edge) has. It also provide method to get and
+ * set the current time display format.
  */
 public interface GraphModel {
 
@@ -239,16 +243,24 @@ public interface GraphModel {
     public void setTimeInterval(GraphView view, Interval interval);
 
     /**
-     * Gets the node table.
+     * Returns the <b>node</b> table. Contains all the columns associated to
+     * node elements.
+     * <p>
+     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b>
+     * tables by default.
      *
-     * @return the node table
+     * @return the node table, contains node columns
      */
     public Table getNodeTable();
 
     /**
-     * Gets the edge table.
+     * Returns the <b>edge</b> table. Contains all the columns associated to
+     * edge elements.
+     * <p>
+     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b>
+     * tables by default.
      *
-     * @return the edge table
+     * @return the edge table, contains edge columns
      */
     public Table getEdgeTable();
 
@@ -352,4 +364,18 @@ public interface GraphModel {
      * @return the newly created graph observer
      */
     public GraphObserver createGraphObserver(Graph graph, boolean withGraphDiff);
+
+    /**
+     * Returns the time format used to display time.
+     *
+     * @return the time format
+     */
+    public TimeFormat getTimeFormat();
+
+    /**
+     * Sets the time format used to display time.
+     *
+     * @param timeFormat the time format
+     */
+    public void setTimeFormat(TimeFormat timeFormat);
 }

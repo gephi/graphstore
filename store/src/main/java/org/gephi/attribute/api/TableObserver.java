@@ -29,9 +29,9 @@ package org.gephi.attribute.api;
  * that it will return false next time.
  * <p>
  * Observers should be destroyed when not needed anymore. A new observer can be
- * obtained from the <code>AttributeModel</code>.
+ * obtained from the <code>Table</code> instance.
  *
- * @see AttributeModel
+ * @see Table
  */
 public interface TableObserver {
 

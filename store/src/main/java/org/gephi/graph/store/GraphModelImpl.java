@@ -15,7 +15,6 @@
  */
 package org.gephi.graph.store;
 
-import org.gephi.attribute.api.AttributeModel;
 import org.gephi.attribute.api.Index;
 import org.gephi.attribute.api.Table;
 import org.gephi.attribute.api.TimeFormat;
@@ -34,11 +33,7 @@ import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
-/**
- *
- * @author mbastian
- */
-public class GraphModelImpl implements GraphModel, AttributeModel {
+public class GraphModelImpl implements GraphModel {
 
     protected final GraphStore store;
     protected final TableImpl<Node> nodeTable;

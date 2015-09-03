@@ -30,7 +30,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 /**
- * Attribute utilities.
+ * Set of utility methods to manipulate supported attribute types.
  * <p>
  * The attribute system is built with a set of supported column types. This
  * class contains utilities to parse and convert supported types. It also
@@ -137,6 +137,10 @@ public class AttributeUtils {
         DATE_TIME_FORMATTER = ISODateTimeFormat.dateOptionalTimeParser();
         DATE_PRINTER = ISODateTimeFormat.date();
         DATE_TIME_PRINTER = ISODateTimeFormat.dateTime();
+    }
+
+    private AttributeUtils() {
+        // Only static methods
     }
 
     /**

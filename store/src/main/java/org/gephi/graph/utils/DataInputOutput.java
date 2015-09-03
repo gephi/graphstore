@@ -24,7 +24,10 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import org.gephi.graph.store.Serialization;
 
-public class DataInputOutput implements DataInput, DataOutput, ObjectInput, ObjectOutput {
+/**
+ * Input/Output utility.
+ */
+public final class DataInputOutput implements DataInput, DataOutput, ObjectInput, ObjectOutput {
 
     private int pos = 0;
     private int count = 0;

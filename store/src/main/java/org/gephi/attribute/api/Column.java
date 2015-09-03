@@ -16,7 +16,12 @@
 package org.gephi.attribute.api;
 
 /**
- * A column is a dimension of the data.
+ * A column belongs to a table and represent a dimension in the data.
+ * <p>
+ * A column has primarily a unique identifier and a type, which both are set
+ * at the creation time.
+ * 
+ * @see Table
  */
 public interface Column {
 

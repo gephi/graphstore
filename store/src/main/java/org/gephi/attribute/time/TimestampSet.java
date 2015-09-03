@@ -21,35 +21,122 @@ import java.util.Arrays;
  *
  * @author mbastian
  */
-public class TimestampSet {
+public final class TimestampSet {
 
-    protected int[] array;
-    protected int size = 0;
+    private int[] array;
+    private int size = 0;
 
+    /**
+     * Default constructor.
+     * <p>
+     * The set is empty with zero capacity.
+     */
     public TimestampSet() {
         array = new int[0];
     }
 
+    /**
+     * Constructor with capacity.
+     * <p>
+     * Using this constructor can improve performances if the number of
+     * timestamps is known in advance as it minimizes array resizes.
+     *
+     * @param capacity
+     */
     public TimestampSet(int capacity) {
         array = new int[capacity];
         Arrays.fill(array, Integer.MAX_VALUE);
     }
 
+    /**
+     * Constructor with an initial timestamp set.
+     * <p>
+     * The given array must be sorted and contain no duplicates.
+     *
+     * @param arr initial set content
+     */
     public TimestampSet(int[] arr) {
         array = new int[arr.length];
         System.arraycopy(arr, 0, array, 0, arr.length);
         size = arr.length;
     }
 
+    /**
+     * Adds timestamp index to this set.
+     *
+     * @param timestampIndex timestamp index
+     * @return true of added, false otherwise
+     */
     public boolean add(int timestampIndex) {
         return addInner(timestampIndex, false) >= 0;
     }
 
+    /**
+     * Removes timestamp index from this set.
+     *
+     * @param timestampIndex timestamp index
+     * @return true if removed, false otherwise
+     */
     public boolean remove(int timestampIndex) {
         return removeInner(timestampIndex) >= 0;
     }
 
-    protected int addInner(int timestampIndex, boolean allowSet) {
+    /**
+     * Returns the size of this set.
+     *
+     * @return the number of elements in this set
+     */
+    public int size() {
+        return size;
+    }
+
+    /**
+     * Returns true if this set is empty.
+     *
+     * @return true if empty, false otherwise
+     */
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    /**
+     * Returns true if this set contains <code>timestampIndex</code>.
+     *
+     * @param timestampIndex timestamp index
+     * @return true if contains, false otherwise
+     */
+    public boolean contains(int timestampIndex) {
+        int index = Arrays.binarySearch(array, timestampIndex);
+        return index >= 0 && index < size;
+    }
+
+    /**
+     * Returns an array of all timestamps in this set.
+     * <p>
+     * This method may return a reference to the underlying array so clients
+     * should make a copy if the array is written to.
+     *
+     * @return array of all timestamps
+     */
+    public int[] getTimestamps() {
+        if (size < array.length) {
+            int[] res = new int[size];
+            System.arraycopy(array, 0, res, 0, size);
+            return res;
+        } else {
+            return array;
+        }
+    }
+
+    /**
+     * Empties this set.
+     */
+    public void clear() {
+        size = 0;
+        array = new int[0];
+    }
+
+    private int addInner(int timestampIndex, boolean allowSet) {
         int index = Arrays.binarySearch(array, 0, size, timestampIndex);
         if (index < 0) {
             int insertIndex = -index - 1;
@@ -73,7 +160,7 @@ public class TimestampSet {
         return allowSet ? index : -1;
     }
 
-    protected int removeInner(int timestampIndex) {
+    private int removeInner(int timestampIndex) {
         int index = Arrays.binarySearch(array, 0, size, timestampIndex);
         if (index >= 0) {
             int removeIndex = index;
@@ -88,34 +175,6 @@ public class TimestampSet {
             return removeIndex;
         }
         return -1;
-    }
-
-    public int size() {
-        return size;
-    }
-
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    public boolean contains(int timestampIndex) {
-        int index = Arrays.binarySearch(array, timestampIndex);
-        return index >= 0 && index < size;
-    }
-
-    public int[] getTimestamps() {
-        if (size < array.length) {
-            int[] res = new int[size];
-            System.arraycopy(array, 0, res, 0, size);
-            return res;
-        } else {
-            return array;
-        }
-    }
-
-    public void clear() {
-        size = 0;
-        array = new int[0];
     }
 
     @Override

@@ -18,10 +18,6 @@ package org.gephi.graph.store;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.ColumnObserver;
 
-/**
- *
- * @author mbastian
- */
 public class ColumnObserverImpl implements ColumnObserver {
 
     protected final ColumnImpl column;

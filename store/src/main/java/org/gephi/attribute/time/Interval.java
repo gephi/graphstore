@@ -16,11 +16,13 @@
 package org.gephi.attribute.time;
 
 /**
- *
- * @author mbastian
+ * Immutable time interval which supports included and excluded bounds.
  */
 public final class Interval {
 
+    /**
+     * Infinity interval on both bounds.
+     */
     public static final Interval INFINITY_INTERVAL = new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
     
     private final double low;   // the left endpoint
@@ -28,6 +30,11 @@ public final class Interval {
     private final boolean lopen; // indicates if the left endpoint is excluded
     private final boolean ropen; // indicates if the right endpoint is excluded
 
+    /**
+     * Copy constructor.
+     * 
+     * @param interval interval to copy
+     */
     public Interval(Interval interval) {
         this.low = interval.low;
         this.high = interval.high;
@@ -35,6 +42,14 @@ public final class Interval {
         this.ropen = interval.ropen;
     }
 
+    /**
+     * Constructor with bounds and whether they are included or excluded.
+     * 
+     * @param low interval's low bound
+     * @param high interval's high bound
+     * @param lopen whether the low bound is excluded
+     * @param ropen whether the high bound is excluded
+     */
     public Interval(double low, double high, boolean lopen, boolean ropen) {
         if (low > high) {
             throw new IllegalArgumentException(
@@ -48,6 +63,12 @@ public final class Interval {
         this.ropen = ropen;
     }
 
+    /**
+     * Constructor with low and high bounds, both included. 
+     * 
+     * @param low interval's low bound
+     * @param high interval's high bound
+     */
     public Interval(double low, double high) {
         this(low, high, false, false);
     }

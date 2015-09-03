@@ -17,7 +17,14 @@ package org.gephi.graph.utils;
 
 import java.util.Map;
 
-public class MapDeepEquals {
+/**
+ * Utility to compare two maps for equality.
+ */
+public final class MapDeepEquals {
+
+    private MapDeepEquals() {
+        // Only static 
+    }
 
     /**
      * Compares two maps for equality. This is based around the idea that if the

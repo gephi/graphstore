@@ -21,6 +21,7 @@ import org.gephi.graph.api.Element;
 /**
  * An index is associated with each table and keeps track of each unique value
  * in indexed columns.
+ * <p>
  * @param <T> Element class
  */
 public interface Index<T extends Element> {
