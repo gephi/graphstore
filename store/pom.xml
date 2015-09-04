@@ -240,6 +240,7 @@
                         <configuration>
                             <show>public</show>
                             <doctitle>GraphStore ${project.version} API Index</doctitle>
+                            <subpackages>org.gephi.graph.api:org.gephi.graph.spi:org.gephi.graph.api.types</subpackages>
                             <nohelp>true</nohelp>
                             <detectLinks>true</detectLinks>
                             <detectOfflineLinks>true</detectOfflineLinks>
