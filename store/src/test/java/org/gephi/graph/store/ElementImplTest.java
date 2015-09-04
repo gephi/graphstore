@@ -22,15 +22,15 @@ import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.Estimator;
 import org.gephi.attribute.time.Interval;
-import org.gephi.attribute.time.TimestampBooleanSet;
-import org.gephi.attribute.time.TimestampByteSet;
-import org.gephi.attribute.time.TimestampCharSet;
-import org.gephi.attribute.time.TimestampDoubleSet;
-import org.gephi.attribute.time.TimestampFloatSet;
-import org.gephi.attribute.time.TimestampIntegerSet;
-import org.gephi.attribute.time.TimestampLongSet;
-import org.gephi.attribute.time.TimestampShortSet;
-import org.gephi.attribute.time.TimestampStringSet;
+import org.gephi.attribute.time.TimestampBooleanMap;
+import org.gephi.attribute.time.TimestampByteMap;
+import org.gephi.attribute.time.TimestampCharMap;
+import org.gephi.attribute.time.TimestampDoubleMap;
+import org.gephi.attribute.time.TimestampFloatMap;
+import org.gephi.attribute.time.TimestampIntegerMap;
+import org.gephi.attribute.time.TimestampLongMap;
+import org.gephi.attribute.time.TimestampShortMap;
+import org.gephi.attribute.time.TimestampStringMap;
 import org.gephi.graph.api.GraphView;
 import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
 import static org.gephi.graph.store.GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET;
@@ -148,7 +148,7 @@ public class ElementImplTest {
         node.setAttribute(column, 2, 1.0);
 
         Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()].getClass(), TimestampIntegerSet.class);
+        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()].getClass(), TimestampIntegerMap.class);
         Assert.assertEquals(node.getAttribute(column, 2.0), 1);
         Assert.assertEquals(node.getAttribute(column, 1.0), 2);
     }
@@ -518,15 +518,15 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
 
         NodeImpl node = new NodeImpl(0, store);
-        node.checkType(new ColumnImpl("0", TimestampIntegerSet.class, null, null, Origin.DATA, false, false), 1);
-        node.checkType(new ColumnImpl("0", TimestampDoubleSet.class, null, null, Origin.DATA, false, false), 1.0);
-        node.checkType(new ColumnImpl("0", TimestampFloatSet.class, null, null, Origin.DATA, false, false), 1f);
-        node.checkType(new ColumnImpl("0", TimestampByteSet.class, null, null, Origin.DATA, false, false), (byte) 1);
-        node.checkType(new ColumnImpl("0", TimestampShortSet.class, null, null, Origin.DATA, false, false), (short) 1);
-        node.checkType(new ColumnImpl("0", TimestampLongSet.class, null, null, Origin.DATA, false, false), 1l);
-        node.checkType(new ColumnImpl("0", TimestampCharSet.class, null, null, Origin.DATA, false, false), 'a');
-        node.checkType(new ColumnImpl("0", TimestampBooleanSet.class, null, null, Origin.DATA, false, false), true);
-        node.checkType(new ColumnImpl("0", TimestampStringSet.class, null, null, Origin.DATA, false, false), "foo");
+        node.checkType(new ColumnImpl("0", TimestampIntegerMap.class, null, null, Origin.DATA, false, false), 1);
+        node.checkType(new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false), 1.0);
+        node.checkType(new ColumnImpl("0", TimestampFloatMap.class, null, null, Origin.DATA, false, false), 1f);
+        node.checkType(new ColumnImpl("0", TimestampByteMap.class, null, null, Origin.DATA, false, false), (byte) 1);
+        node.checkType(new ColumnImpl("0", TimestampShortMap.class, null, null, Origin.DATA, false, false), (short) 1);
+        node.checkType(new ColumnImpl("0", TimestampLongMap.class, null, null, Origin.DATA, false, false), 1l);
+        node.checkType(new ColumnImpl("0", TimestampCharMap.class, null, null, Origin.DATA, false, false), 'a');
+        node.checkType(new ColumnImpl("0", TimestampBooleanMap.class, null, null, Origin.DATA, false, false), true);
+        node.checkType(new ColumnImpl("0", TimestampStringMap.class, null, null, Origin.DATA, false, false), "foo");
     }
 
     //Utility
@@ -541,7 +541,7 @@ public class ElementImplTest {
     }
 
     private Column generateDynamicColumn(GraphStore graphStore) {
-        graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", TimestampIntegerSet.class, "Age", null, Origin.DATA, false, false));
+        graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA, false, false));
         return graphStore.nodeColumnStore.getColumn("age");
     }
 

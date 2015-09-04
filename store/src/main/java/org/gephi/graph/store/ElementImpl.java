@@ -21,17 +21,17 @@ import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.time.Estimator;
 import org.gephi.attribute.time.Interval;
-import org.gephi.attribute.time.TimestampBooleanSet;
-import org.gephi.attribute.time.TimestampByteSet;
-import org.gephi.attribute.time.TimestampCharSet;
-import org.gephi.attribute.time.TimestampDoubleSet;
-import org.gephi.attribute.time.TimestampFloatSet;
-import org.gephi.attribute.time.TimestampIntegerSet;
-import org.gephi.attribute.time.TimestampLongSet;
+import org.gephi.attribute.time.TimestampBooleanMap;
+import org.gephi.attribute.time.TimestampByteMap;
+import org.gephi.attribute.time.TimestampCharMap;
+import org.gephi.attribute.time.TimestampDoubleMap;
+import org.gephi.attribute.time.TimestampFloatMap;
+import org.gephi.attribute.time.TimestampIntegerMap;
+import org.gephi.attribute.time.TimestampLongMap;
 import org.gephi.attribute.time.TimestampSet;
-import org.gephi.attribute.time.TimestampShortSet;
-import org.gephi.attribute.time.TimestampStringSet;
-import org.gephi.attribute.time.TimestampValueSet;
+import org.gephi.attribute.time.TimestampShortMap;
+import org.gephi.attribute.time.TimestampStringMap;
+import org.gephi.attribute.time.TimestampValueMap;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphView;
 
@@ -55,7 +55,7 @@ public abstract class ElementImpl implements Element {
 
     abstract ColumnStore getColumnStore();
 
-    abstract TimestampMap getTimestampMap();
+    abstract TimestampInternalMap getTimestampMap();
 
     abstract TimestampIndexStore getTimestampIndexStore();
 
@@ -110,14 +110,14 @@ public abstract class ElementImpl implements Element {
         checkColumnDynamic(column);
 
         Object res = null;
-        final TimestampMap timestampMap = getTimestampMap();
+        final TimestampInternalMap timestampMap = getTimestampMap();
         if (timestampMap != null) {
 
             int index = column.getIndex();
-            TimestampValueSet dynamicValue = null;
+            TimestampValueMap dynamicValue = null;
             synchronized (this) {
                 if (index < attributes.length) {
-                    dynamicValue = (TimestampValueSet) attributes[index];
+                    dynamicValue = (TimestampValueMap) attributes[index];
                 }
                 if (dynamicValue != null) {
                     int timestampIndex = timestampMap.getTimestampIndex(timestamp);
@@ -146,13 +146,13 @@ public abstract class ElementImpl implements Element {
             checkEnabledTimestampSet();
             checkViewExist((GraphView) view);
             final ColumnStore columnStore = getColumnStore();
-            final TimestampMap timestampMap = columnStore.getTimestampMap(column);
+            final TimestampInternalMap timestampMap = columnStore.getTimestampMap(column);
             if (timestampMap != null) {
                 int index = column.getIndex();
-                TimestampValueSet dynamicValue = null;
+                TimestampValueMap dynamicValue = null;
                 synchronized (this) {
                     if (index < attributes.length) {
-                        dynamicValue = (TimestampValueSet) attributes[index];
+                        dynamicValue = (TimestampValueMap) attributes[index];
                     }
                     if (dynamicValue != null && !dynamicValue.isEmpty()) {
                         int[] timestampIndices = timestampMap.getTimestampIndices(interval);
@@ -267,7 +267,7 @@ public abstract class ElementImpl implements Element {
         checkType(column, value);
         checkDouble(timestamp);
 
-        final TimestampMap timestampMap = getColumnStore().getTimestampMap(column);
+        final TimestampInternalMap timestampMap = getColumnStore().getTimestampMap(column);
         if (timestampMap != null) {
             int index = column.getIndex();
             Object oldValue = null;
@@ -280,15 +280,15 @@ public abstract class ElementImpl implements Element {
                     oldValue = attributes[index];
                 }
 
-                TimestampValueSet dynamicValue = null;
+                TimestampValueMap dynamicValue = null;
                 if (oldValue == null) {
                     try {
-                        attributes[index] = dynamicValue = (TimestampValueSet) column.getTypeClass().newInstance();
+                        attributes[index] = dynamicValue = (TimestampValueMap) column.getTypeClass().newInstance();
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
                 } else {
-                    dynamicValue = (TimestampValueSet) oldValue;
+                    dynamicValue = (TimestampValueMap) oldValue;
                 }
 
                 int timestampIndex = timestampMap.getTimestampIndex(timestamp);
@@ -351,7 +351,7 @@ public abstract class ElementImpl implements Element {
         synchronized (this) {
             TimestampSet timestampSet = getTimestampSet();
             if (timestampSet != null) {
-                final TimestampMap timestampMap = getTimestampMap();
+                final TimestampInternalMap timestampMap = getTimestampMap();
                 if (timestampMap != null) {
                     final int[] indices = timestampSet.getTimestamps();
                     return timestampMap.getTimestamps(indices);
@@ -368,7 +368,7 @@ public abstract class ElementImpl implements Element {
         synchronized (this) {
             TimestampSet timestampSet = getTimestampSet();
             if (timestampSet != null) {
-                final TimestampMap timestampMap = getTimestampMap();
+                final TimestampInternalMap timestampMap = getTimestampMap();
                 if (timestampMap != null) {
                     if (timestampMap.hasTimestampIndex(timestamp)) {
                         return timestampSet.contains(timestampMap.getTimestampIndex(timestamp));
@@ -385,14 +385,14 @@ public abstract class ElementImpl implements Element {
         checkColumnDynamic(column);
 
         Object res = null;
-        final TimestampMap timestampMap = getColumnStore().getTimestampMap(column);
+        final TimestampInternalMap timestampMap = getColumnStore().getTimestampMap(column);
         if (timestampMap != null) {
 
             int index = column.getIndex();
-            TimestampValueSet dynamicValue = null;
+            TimestampValueMap dynamicValue = null;
             synchronized (this) {
                 if (index < attributes.length) {
-                    dynamicValue = (TimestampValueSet) attributes[index];
+                    dynamicValue = (TimestampValueMap) attributes[index];
                 }
                 if (dynamicValue != null) {
                     Object[] values = dynamicValue.toArray();
@@ -512,16 +512,16 @@ public abstract class ElementImpl implements Element {
     void checkType(Column column, Object value) {
         if (value != null) {
             Class typeClass = column.getTypeClass();
-            if (TimestampValueSet.class.isAssignableFrom(typeClass)) {
-                if ((value instanceof Double && (!typeClass.equals(TimestampDoubleSet.class)))
-                        || (value instanceof Float && !typeClass.equals(TimestampFloatSet.class))
-                        || (value instanceof Boolean && !typeClass.equals(TimestampBooleanSet.class))
-                        || (value instanceof Integer && !typeClass.equals(TimestampIntegerSet.class))
-                        || (value instanceof Long && !typeClass.equals(TimestampLongSet.class))
-                        || (value instanceof Short && !typeClass.equals(TimestampShortSet.class))
-                        || (value instanceof Byte && !typeClass.equals(TimestampByteSet.class))
-                        || (value instanceof String && !typeClass.equals(TimestampStringSet.class))
-                        || (value instanceof Character && !typeClass.equals(TimestampCharSet.class))) {
+            if (TimestampValueMap.class.isAssignableFrom(typeClass)) {
+                if ((value instanceof Double && (!typeClass.equals(TimestampDoubleMap.class)))
+                        || (value instanceof Float && !typeClass.equals(TimestampFloatMap.class))
+                        || (value instanceof Boolean && !typeClass.equals(TimestampBooleanMap.class))
+                        || (value instanceof Integer && !typeClass.equals(TimestampIntegerMap.class))
+                        || (value instanceof Long && !typeClass.equals(TimestampLongMap.class))
+                        || (value instanceof Short && !typeClass.equals(TimestampShortMap.class))
+                        || (value instanceof Byte && !typeClass.equals(TimestampByteMap.class))
+                        || (value instanceof String && !typeClass.equals(TimestampStringMap.class))
+                        || (value instanceof Character && !typeClass.equals(TimestampCharMap.class))) {
                     throw new IllegalArgumentException("The object class does not match with the dynamic type (" + typeClass.getName() + ")");
                 }
             } else if (!value.getClass().equals(typeClass)) {

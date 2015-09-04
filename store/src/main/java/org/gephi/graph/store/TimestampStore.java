@@ -29,16 +29,16 @@ public class TimestampStore {
     //Lock (optional
     protected final GraphLock lock;
     //Store
-    protected final TimestampMap nodeMap;
-    protected final TimestampMap edgeMap;
+    protected final TimestampInternalMap nodeMap;
+    protected final TimestampInternalMap edgeMap;
     protected final TimestampIndexStore<Node> nodeIndexStore;
     protected final TimestampIndexStore<Edge> edgeIndexStore;
 
     public TimestampStore(GraphStore store, GraphLock graphLock, boolean indexed) {
         lock = graphLock;
         graphStore = store;
-        nodeMap = new TimestampMap();
-        edgeMap = new TimestampMap();
+        nodeMap = new TimestampInternalMap();
+        edgeMap = new TimestampInternalMap();
         nodeIndexStore = indexed ? new TimestampIndexStore<Node>(this, Node.class, nodeMap) : null;
         edgeIndexStore = indexed ? new TimestampIndexStore<Edge>(this, Edge.class, edgeMap) : null;
     }

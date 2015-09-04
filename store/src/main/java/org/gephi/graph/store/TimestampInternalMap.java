@@ -30,7 +30,7 @@ import org.gephi.graph.utils.MapDeepEquals;
  *
  * @author mbastian
  */
-public class TimestampMap {
+public class TimestampInternalMap {
 
     //Const
     public static final int NULL_INDEX = -1;
@@ -41,7 +41,7 @@ public class TimestampMap {
     protected double[] indexMap;
     protected int length;
 
-    public TimestampMap() {
+    public TimestampInternalMap() {
         timestampMap = new Double2IntOpenHashMap();
         timestampMap.defaultReturnValue(NULL_INDEX);
         garbageQueue = new IntRBTreeSet();
@@ -144,7 +144,7 @@ public class TimestampMap {
         }
     }
 
-    protected void setTimestampMap(TimestampMap map) {
+    protected void setTimestampMap(TimestampInternalMap map) {
         clear();
         timestampMap.putAll(map.timestampMap);
         timestampSortedMap.putAll(map.timestampSortedMap);
@@ -175,7 +175,7 @@ public class TimestampMap {
         return hash;
     }
 
-    public boolean deepEquals(TimestampMap obj) {
+    public boolean deepEquals(TimestampInternalMap obj) {
         if (obj == null) {
             return false;
         }

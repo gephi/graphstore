@@ -22,16 +22,16 @@ import java.util.Collections;
 import java.util.Set;
 import org.gephi.attribute.api.AttributeUtils;
 import org.gephi.attribute.api.Column;
-import org.gephi.attribute.time.TimestampBooleanSet;
-import org.gephi.attribute.time.TimestampByteSet;
-import org.gephi.attribute.time.TimestampCharSet;
-import org.gephi.attribute.time.TimestampDoubleSet;
-import org.gephi.attribute.time.TimestampFloatSet;
-import org.gephi.attribute.time.TimestampIntegerSet;
-import org.gephi.attribute.time.TimestampLongSet;
-import org.gephi.attribute.time.TimestampShortSet;
-import org.gephi.attribute.time.TimestampStringSet;
-import org.gephi.attribute.time.TimestampValueSet;
+import org.gephi.attribute.time.TimestampBooleanMap;
+import org.gephi.attribute.time.TimestampByteMap;
+import org.gephi.attribute.time.TimestampCharMap;
+import org.gephi.attribute.time.TimestampDoubleMap;
+import org.gephi.attribute.time.TimestampFloatMap;
+import org.gephi.attribute.time.TimestampIntegerMap;
+import org.gephi.attribute.time.TimestampLongMap;
+import org.gephi.attribute.time.TimestampShortMap;
+import org.gephi.attribute.time.TimestampStringMap;
+import org.gephi.attribute.time.TimestampValueMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
@@ -151,7 +151,7 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isSupported(Integer.class));
         Assert.assertTrue(AttributeUtils.isSupported(int.class));
         Assert.assertTrue(AttributeUtils.isSupported(int[].class));
-        Assert.assertTrue(AttributeUtils.isSupported(TimestampDoubleSet.class));
+        Assert.assertTrue(AttributeUtils.isSupported(TimestampDoubleMap.class));
 
         Assert.assertFalse(AttributeUtils.isSupported(Color.class));
     }
@@ -163,14 +163,14 @@ public class AttributeUtilsTest {
 
     @Test
     public void testGetDynamicType() {
-        Assert.assertEquals(AttributeUtils.getDynamicType(Integer.class), TimestampIntegerSet.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Float.class), TimestampFloatSet.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Double.class), TimestampDoubleSet.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Long.class), TimestampLongSet.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Character.class), TimestampCharSet.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Short.class), TimestampShortSet.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Byte.class), TimestampByteSet.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Boolean.class), TimestampBooleanSet.class);
+        Assert.assertEquals(AttributeUtils.getDynamicType(Integer.class), TimestampIntegerMap.class);
+        Assert.assertEquals(AttributeUtils.getDynamicType(Float.class), TimestampFloatMap.class);
+        Assert.assertEquals(AttributeUtils.getDynamicType(Double.class), TimestampDoubleMap.class);
+        Assert.assertEquals(AttributeUtils.getDynamicType(Long.class), TimestampLongMap.class);
+        Assert.assertEquals(AttributeUtils.getDynamicType(Character.class), TimestampCharMap.class);
+        Assert.assertEquals(AttributeUtils.getDynamicType(Short.class), TimestampShortMap.class);
+        Assert.assertEquals(AttributeUtils.getDynamicType(Byte.class), TimestampByteMap.class);
+        Assert.assertEquals(AttributeUtils.getDynamicType(Boolean.class), TimestampBooleanMap.class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -180,20 +180,20 @@ public class AttributeUtilsTest {
 
     @Test
     public void testGetStaticType() {
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampIntegerSet.class), Integer.class);
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampFloatSet.class), Float.class);
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampDoubleSet.class), Double.class);
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampLongSet.class), Long.class);
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampCharSet.class), Character.class);
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampShortSet.class), Short.class);
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampByteSet.class), Byte.class);
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampBooleanSet.class), Boolean.class);
-        Assert.assertEquals(AttributeUtils.getStaticType(TimestampStringSet.class), String.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampIntegerMap.class), Integer.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampFloatMap.class), Float.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampDoubleMap.class), Double.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampLongMap.class), Long.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampCharMap.class), Character.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampShortMap.class), Short.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampByteMap.class), Byte.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampBooleanMap.class), Boolean.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(TimestampStringMap.class), String.class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetStaticTypeUnsupportedType() {
-        AttributeUtils.getStaticType(TimestampValueSet.class);
+        AttributeUtils.getStaticType(TimestampValueMap.class);
     }
 
     @Test
@@ -250,12 +250,12 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isNumberType(short[].class));
         Assert.assertTrue(AttributeUtils.isNumberType(long[].class));
         Assert.assertTrue(AttributeUtils.isNumberType(byte[].class));
-        Assert.assertTrue(AttributeUtils.isNumberType(TimestampByteSet.class));
-        Assert.assertTrue(AttributeUtils.isNumberType(TimestampDoubleSet.class));
-        Assert.assertTrue(AttributeUtils.isNumberType(TimestampFloatSet.class));
-        Assert.assertTrue(AttributeUtils.isNumberType(TimestampIntegerSet.class));
-        Assert.assertTrue(AttributeUtils.isNumberType(TimestampLongSet.class));
-        Assert.assertTrue(AttributeUtils.isNumberType(TimestampShortSet.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampByteMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampDoubleMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampFloatMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampIntegerMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampLongMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(TimestampShortMap.class));
         Assert.assertFalse(AttributeUtils.isNumberType(String.class));
         Assert.assertFalse(AttributeUtils.isNumberType(String[].class));
         Assert.assertTrue(AttributeUtils.isNumberType(BigDecimal.class));
@@ -269,10 +269,10 @@ public class AttributeUtilsTest {
 
     @Test
     public void testIsDynamicType() {
-        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampFloatSet.class));
-        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampFloatSet[].class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampFloatMap.class));
+        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampFloatMap[].class));
         Assert.assertFalse(AttributeUtils.isDynamicType(Integer.class));
-        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampValueSet.class));
+        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampValueMap.class));
     }
 
     @Test

@@ -19,7 +19,7 @@ import java.awt.Color;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.Estimator;
-import org.gephi.attribute.time.TimestampByteSet;
+import org.gephi.attribute.time.TimestampByteMap;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -118,7 +118,7 @@ public class TableImplTest {
     @Test
     public void testSetEstimator() {
         TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
-        Column col = table.addColumn("0", TimestampByteSet.class);
+        Column col = table.addColumn("0", TimestampByteMap.class);
         Estimator est = Estimator.AVERAGE;
         table.setEstimator(col, est);
 

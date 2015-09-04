@@ -18,16 +18,16 @@ package org.gephi.graph.store;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.gephi.attribute.time.Estimator;
-import org.gephi.attribute.time.TimestampBooleanSet;
-import org.gephi.attribute.time.TimestampByteSet;
-import org.gephi.attribute.time.TimestampCharSet;
-import org.gephi.attribute.time.TimestampDoubleSet;
-import org.gephi.attribute.time.TimestampFloatSet;
-import org.gephi.attribute.time.TimestampIntegerSet;
-import org.gephi.attribute.time.TimestampLongSet;
-import org.gephi.attribute.time.TimestampShortSet;
-import org.gephi.attribute.time.TimestampStringSet;
-import org.gephi.attribute.time.TimestampValueSet;
+import org.gephi.attribute.time.TimestampBooleanMap;
+import org.gephi.attribute.time.TimestampByteMap;
+import org.gephi.attribute.time.TimestampCharMap;
+import org.gephi.attribute.time.TimestampDoubleMap;
+import org.gephi.attribute.time.TimestampFloatMap;
+import org.gephi.attribute.time.TimestampIntegerMap;
+import org.gephi.attribute.time.TimestampLongMap;
+import org.gephi.attribute.time.TimestampShortMap;
+import org.gephi.attribute.time.TimestampStringMap;
+import org.gephi.attribute.time.TimestampValueMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -39,7 +39,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testEmpty() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Assert.assertTrue(set.isEmpty());
             Assert.assertEquals(set.size(), 0);
         }
@@ -47,7 +47,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testPutOne() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
             set.put(1, defaultValues[0]);
@@ -57,7 +57,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testPutTwice() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
             set.put(1, defaultValues[0]);
@@ -68,7 +68,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testMultiplePut() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
             set.put(1, defaultValues[0]);
@@ -79,7 +79,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testMultiplePutWithCapacity() {
-        for (TimestampValueSet set : getAllInstances(10)) {
+        for (TimestampValueMap set : getAllInstances(10)) {
             Object[] defaultValues = getTestValues(set);
 
             set.put(1, defaultValues[0]);
@@ -90,7 +90,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testRemove() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
             set.put(1, defaultValues[0]);
@@ -106,7 +106,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testRemoveAdd() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
             set.put(1, defaultValues[0]);
@@ -122,7 +122,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testRemoveUnknown() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
             set.put(1, defaultValues[0]);
@@ -135,7 +135,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testClear() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
             set.put(1, defaultValues[0]);
             set.clear();
@@ -147,7 +147,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testClearAdd() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
             set.put(1, defaultValues[0]);
             set.clear();
@@ -160,7 +160,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testPutNull() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             boolean thrown = false;
             try {
                 set.put(1, null);
@@ -175,7 +175,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testGetTimestamps() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        TimestampDoubleMap set = new TimestampDoubleMap();
 
         set.put(1, 1.0);
         set.put(2, 2.0);
@@ -185,7 +185,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testGetTimestampsTrim() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        TimestampDoubleMap set = new TimestampDoubleMap();
 
         set.put(1, 1.0);
         set.put(2, 2.0);
@@ -196,7 +196,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testIsSupported() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             Assert.assertTrue(set.isSupported(Estimator.FIRST));
             Assert.assertTrue(set.isSupported(Estimator.LAST));
         }
@@ -204,7 +204,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testEstimatorDefault() {
-        for (TimestampValueSet set : getAllInstances()) {
+        for (TimestampValueMap set : getAllInstances()) {
             for (Estimator e : Estimator.values()) {
                 if (set.isSupported(e)) {
                     Assert.assertNull(set.get(null, new int[]{99}, e));
@@ -215,7 +215,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testBooleanEstimators() {
-        TimestampBooleanSet set = new TimestampBooleanSet();
+        TimestampBooleanMap set = new TimestampBooleanMap();
         int[] indices = new int[]{1, 2, 6, 7};
 
         set.put(indices[0], Boolean.TRUE);
@@ -238,7 +238,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testByteEstimators() {
-        TimestampByteSet set = new TimestampByteSet();
+        TimestampByteMap set = new TimestampByteMap();
         int[] indices = new int[]{1, 2, 6, 7};
         byte[] values = new byte[]{12, 45, -31, 64};
 
@@ -270,7 +270,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testCharEstimators() {
-        TimestampCharSet set = new TimestampCharSet();
+        TimestampCharMap set = new TimestampCharMap();
         int[] indices = new int[]{1, 2, 6, 7};
         char[] values = new char[]{'a', 'z', 'e', 'c'};
 
@@ -294,7 +294,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testDoubleEstimators() {
-        TimestampDoubleSet set = new TimestampDoubleSet();
+        TimestampDoubleMap set = new TimestampDoubleMap();
         int[] indices = new int[]{1, 2, 6, 7};
         double[] values = new double[]{12.0, 45.3, -31.3, 64.4};
 
@@ -326,7 +326,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testFloatEstimators() {
-        TimestampFloatSet set = new TimestampFloatSet();
+        TimestampFloatMap set = new TimestampFloatMap();
         int[] indices = new int[]{1, 2, 6, 7};
         float[] values = new float[]{12f, 45.3f, -31.3f, 64.4f};
 
@@ -358,7 +358,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testIntegerEstimators() {
-        TimestampIntegerSet set = new TimestampIntegerSet();
+        TimestampIntegerMap set = new TimestampIntegerMap();
         int[] indices = new int[]{1, 2, 6, 7};
         int[] values = new int[]{120, 450, -3100, 6400};
 
@@ -390,7 +390,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testLongEstimators() {
-        TimestampLongSet set = new TimestampLongSet();
+        TimestampLongMap set = new TimestampLongMap();
         int[] indices = new int[]{1, 2, 6, 7};
         long[] values = new long[]{120l, 450000l, -31000002343l, 640000000001232l};
 
@@ -422,7 +422,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testShortEstimators() {
-        TimestampShortSet set = new TimestampShortSet();
+        TimestampShortMap set = new TimestampShortMap();
         int[] indices = new int[]{1, 2, 6, 7};
         short[] values = new short[]{12, 45, -31, 64};
 
@@ -454,7 +454,7 @@ public class TimestampValueSetTest {
 
     @Test
     public void testStringEstimators() {
-        TimestampStringSet set = new TimestampStringSet();
+        TimestampStringMap set = new TimestampStringMap();
         int[] indices = new int[]{1, 2, 6, 7};
         String[] values = new String[]{"a", "z", "e", "ch"};
 
@@ -474,11 +474,11 @@ public class TimestampValueSetTest {
     public void testEquals() {
         int[] indices = new int[]{1, 2, 6};
         String[] values = new String[]{"a", "z", "e"};
-        TimestampStringSet set1 = new TimestampStringSet();
-        TimestampStringSet set2 = new TimestampStringSet();
-        TimestampStringSet set3 = new TimestampStringSet();
-        TimestampStringSet set4 = new TimestampStringSet();
-        TimestampStringSet set5 = new TimestampStringSet();
+        TimestampStringMap set1 = new TimestampStringMap();
+        TimestampStringMap set2 = new TimestampStringMap();
+        TimestampStringMap set3 = new TimestampStringMap();
+        TimestampStringMap set4 = new TimestampStringMap();
+        TimestampStringMap set5 = new TimestampStringMap();
 
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
@@ -512,8 +512,8 @@ public class TimestampValueSetTest {
     public void testEqualsWithCapacity() {
         int[] indices = new int[]{1, 2, 6};
         String[] values = new String[]{"a", "z", "e"};
-        TimestampStringSet set1 = new TimestampStringSet(10);
-        TimestampStringSet set2 = new TimestampStringSet();
+        TimestampStringMap set1 = new TimestampStringMap(10);
+        TimestampStringMap set2 = new TimestampStringMap();
 
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
@@ -533,8 +533,8 @@ public class TimestampValueSetTest {
     public void testEqualsWithRemove() {
         int[] indices = new int[]{1, 2, 6};
         String[] values = new String[]{"a", "z", "e"};
-        TimestampStringSet set1 = new TimestampStringSet();
-        TimestampStringSet set2 = new TimestampStringSet();
+        TimestampStringMap set1 = new TimestampStringMap();
+        TimestampStringMap set2 = new TimestampStringMap();
 
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
@@ -558,35 +558,35 @@ public class TimestampValueSetTest {
         }
     }
 
-    private TimestampValueSet[] getAllInstances() {
-        return new TimestampValueSet[]{
-            new TimestampDoubleSet(),
-            new TimestampByteSet(),
-            new TimestampFloatSet(),
-            new TimestampIntegerSet(),
-            new TimestampLongSet(),
-            new TimestampShortSet(),
-            new TimestampStringSet(),
-            new TimestampCharSet(),
-            new TimestampBooleanSet()
+    private TimestampValueMap[] getAllInstances() {
+        return new TimestampValueMap[]{
+            new TimestampDoubleMap(),
+            new TimestampByteMap(),
+            new TimestampFloatMap(),
+            new TimestampIntegerMap(),
+            new TimestampLongMap(),
+            new TimestampShortMap(),
+            new TimestampStringMap(),
+            new TimestampCharMap(),
+            new TimestampBooleanMap()
         };
     }
 
-    private TimestampValueSet[] getAllInstances(int capacity) {
-        return new TimestampValueSet[]{
-            new TimestampDoubleSet(capacity),
-            new TimestampByteSet(capacity),
-            new TimestampFloatSet(capacity),
-            new TimestampIntegerSet(capacity),
-            new TimestampLongSet(capacity),
-            new TimestampShortSet(capacity),
-            new TimestampStringSet(capacity),
-            new TimestampCharSet(capacity),
-            new TimestampBooleanSet(capacity)
+    private TimestampValueMap[] getAllInstances(int capacity) {
+        return new TimestampValueMap[]{
+            new TimestampDoubleMap(capacity),
+            new TimestampByteMap(capacity),
+            new TimestampFloatMap(capacity),
+            new TimestampIntegerMap(capacity),
+            new TimestampLongMap(capacity),
+            new TimestampShortMap(capacity),
+            new TimestampStringMap(capacity),
+            new TimestampCharMap(capacity),
+            new TimestampBooleanMap(capacity)
         };
     }
 
-    private Object[] getTestValues(TimestampValueSet set) {
+    private Object[] getTestValues(TimestampValueMap set) {
         if (set.getTypeClass().equals(String.class)) {
             return new String[]{"foo", "bar"};
         } else if (set.getTypeClass().equals(Boolean.class)) {
@@ -610,7 +610,7 @@ public class TimestampValueSetTest {
         }
     }
 
-    private Object getDefaultValue(TimestampValueSet set) {
+    private Object getDefaultValue(TimestampValueMap set) {
         if (set.getTypeClass().equals(Boolean.class)) {
             return Boolean.FALSE;
         } else if (set.getTypeClass().equals(Float.class)) {
@@ -634,7 +634,7 @@ public class TimestampValueSetTest {
         }
     }
 
-    private void testValues(TimestampValueSet set, int[] expectedTimestamp, Object[] expectedValues) {
+    private void testValues(TimestampValueMap set, int[] expectedTimestamp, Object[] expectedValues) {
         Class typeClass = set.getTypeClass();
 
         Assert.assertEquals(expectedTimestamp.length, expectedValues.length);

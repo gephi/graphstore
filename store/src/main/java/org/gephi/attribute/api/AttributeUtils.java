@@ -96,15 +96,15 @@ public class AttributeUtils {
 
         //Dynamic
         supportedTypes.add(TimestampSet.class);
-        supportedTypes.add(TimestampBooleanSet.class);
-        supportedTypes.add(TimestampIntegerSet.class);
-        supportedTypes.add(TimestampShortSet.class);
-        supportedTypes.add(TimestampLongSet.class);
-        supportedTypes.add(TimestampByteSet.class);
-        supportedTypes.add(TimestampFloatSet.class);
-        supportedTypes.add(TimestampDoubleSet.class);
-        supportedTypes.add(TimestampCharSet.class);
-        supportedTypes.add(TimestampStringSet.class);
+        supportedTypes.add(TimestampBooleanMap.class);
+        supportedTypes.add(TimestampIntegerMap.class);
+        supportedTypes.add(TimestampShortMap.class);
+        supportedTypes.add(TimestampLongMap.class);
+        supportedTypes.add(TimestampByteMap.class);
+        supportedTypes.add(TimestampFloatMap.class);
+        supportedTypes.add(TimestampDoubleMap.class);
+        supportedTypes.add(TimestampCharMap.class);
+        supportedTypes.add(TimestampStringMap.class);
 
         //Assign
         SUPPORTED_TYPES = Collections.unmodifiableSet(supportedTypes);
@@ -312,29 +312,29 @@ public class AttributeUtils {
      * @param type the static type
      * @return the dynamic type
      */
-    public static Class<? extends TimestampValueSet> getDynamicType(Class type) {
+    public static Class<? extends TimestampValueMap> getDynamicType(Class type) {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         type = getStandardizedType(type);
         if (type.equals(Boolean.class)) {
-            return TimestampBooleanSet.class;
+            return TimestampBooleanMap.class;
         } else if (type.equals(Integer.class)) {
-            return TimestampIntegerSet.class;
+            return TimestampIntegerMap.class;
         } else if (type.equals(Short.class)) {
-            return TimestampShortSet.class;
+            return TimestampShortMap.class;
         } else if (type.equals(Long.class)) {
-            return TimestampLongSet.class;
+            return TimestampLongMap.class;
         } else if (type.equals(Byte.class)) {
-            return TimestampByteSet.class;
+            return TimestampByteMap.class;
         } else if (type.equals(Float.class)) {
-            return TimestampFloatSet.class;
+            return TimestampFloatMap.class;
         } else if (type.equals(Double.class)) {
-            return TimestampDoubleSet.class;
+            return TimestampDoubleMap.class;
         } else if (type.equals(Character.class)) {
-            return TimestampCharSet.class;
+            return TimestampCharMap.class;
         } else if (type.equals(String.class)) {
-            return TimestampStringSet.class;
+            return TimestampStringMap.class;
         }
         throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
     }
@@ -345,27 +345,27 @@ public class AttributeUtils {
      * @param type the dynamic type
      * @return the static type
      */
-    public static Class getStaticType(Class<? extends TimestampValueSet> type) {
+    public static Class getStaticType(Class<? extends TimestampValueMap> type) {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
-        if (type.equals(TimestampBooleanSet.class)) {
+        if (type.equals(TimestampBooleanMap.class)) {
             return Boolean.class;
-        } else if (type.equals(TimestampIntegerSet.class)) {
+        } else if (type.equals(TimestampIntegerMap.class)) {
             return Integer.class;
-        } else if (type.equals(TimestampShortSet.class)) {
+        } else if (type.equals(TimestampShortMap.class)) {
             return Short.class;
-        } else if (type.equals(TimestampLongSet.class)) {
+        } else if (type.equals(TimestampLongMap.class)) {
             return Long.class;
-        } else if (type.equals(TimestampByteSet.class)) {
+        } else if (type.equals(TimestampByteMap.class)) {
             return Byte.class;
-        } else if (type.equals(TimestampFloatSet.class)) {
+        } else if (type.equals(TimestampFloatMap.class)) {
             return Float.class;
-        } else if (type.equals(TimestampDoubleSet.class)) {
+        } else if (type.equals(TimestampDoubleMap.class)) {
             return Double.class;
-        } else if (type.equals(TimestampCharSet.class)) {
+        } else if (type.equals(TimestampCharMap.class)) {
             return Character.class;
-        } else if (type.equals(TimestampStringSet.class)) {
+        } else if (type.equals(TimestampStringMap.class)) {
             return String.class;
         }
         throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
@@ -414,12 +414,12 @@ public class AttributeUtils {
                 || byte[].class.isAssignableFrom(type)
                 || short[].class.isAssignableFrom(type)
                 || long[].class.isAssignableFrom(type)
-                || type.equals(TimestampIntegerSet.class)
-                || type.equals(TimestampFloatSet.class)
-                || type.equals(TimestampDoubleSet.class)
-                || type.equals(TimestampLongSet.class)
-                || type.equals(TimestampShortSet.class)
-                || type.equals(TimestampByteSet.class);
+                || type.equals(TimestampIntegerMap.class)
+                || type.equals(TimestampFloatMap.class)
+                || type.equals(TimestampDoubleMap.class)
+                || type.equals(TimestampLongMap.class)
+                || type.equals(TimestampShortMap.class)
+                || type.equals(TimestampByteMap.class);
     }
 
     /**
@@ -429,8 +429,8 @@ public class AttributeUtils {
      * @return true if <em>type</em> is a dynamic type, false otherwise
      */
     public static boolean isDynamicType(Class type) {
-        return !type.equals(TimestampValueSet.class)
-                && TimestampValueSet.class.isAssignableFrom(type);
+        return !type.equals(TimestampValueMap.class)
+                && TimestampValueMap.class.isAssignableFrom(type);
     }
 
     /**

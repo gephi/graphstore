@@ -31,17 +31,17 @@ import java.util.Map;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.time.Estimator;
 import org.gephi.attribute.api.TimeFormat;
-import org.gephi.attribute.time.TimestampBooleanSet;
-import org.gephi.attribute.time.TimestampByteSet;
-import org.gephi.attribute.time.TimestampCharSet;
-import org.gephi.attribute.time.TimestampDoubleSet;
-import org.gephi.attribute.time.TimestampFloatSet;
-import org.gephi.attribute.time.TimestampIntegerSet;
-import org.gephi.attribute.time.TimestampLongSet;
+import org.gephi.attribute.time.TimestampBooleanMap;
+import org.gephi.attribute.time.TimestampByteMap;
+import org.gephi.attribute.time.TimestampCharMap;
+import org.gephi.attribute.time.TimestampDoubleMap;
+import org.gephi.attribute.time.TimestampFloatMap;
+import org.gephi.attribute.time.TimestampIntegerMap;
+import org.gephi.attribute.time.TimestampLongMap;
 import org.gephi.attribute.time.TimestampSet;
-import org.gephi.attribute.time.TimestampShortSet;
-import org.gephi.attribute.time.TimestampStringSet;
-import org.gephi.attribute.time.TimestampValueSet;
+import org.gephi.attribute.time.TimestampShortMap;
+import org.gephi.attribute.time.TimestampStringMap;
+import org.gephi.attribute.time.TimestampValueMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.store.EdgeImpl.EdgePropertiesImpl;
@@ -665,42 +665,42 @@ public class Serialization {
         return new TimestampSet(r);
     }
 
-    private void serializeTimestampValueSet(final DataOutput out, final TimestampValueSet timestampValueSet) throws IOException {
+    private void serializeTimestampValueSet(final DataOutput out, final TimestampValueMap timestampValueSet) throws IOException {
         serialize(out, timestampValueSet.size());
         serialize(out, timestampValueSet.getTimestamps());
         serialize(out, timestampValueSet.toArray());
     }
 
-    private TimestampValueSet deserializeTimestampValueSet(final DataInput is, int head) throws IOException, ClassNotFoundException {
+    private TimestampValueMap deserializeTimestampValueSet(final DataInput is, int head) throws IOException, ClassNotFoundException {
         int size = (Integer) deserialize(is);
-        TimestampValueSet valueSet;
+        TimestampValueMap valueSet;
         switch (head) {
             case TIMESTAMP_BOOLEAN_SET:
-                valueSet = new TimestampBooleanSet(size);
+                valueSet = new TimestampBooleanMap(size);
                 break;
             case TIMESTAMP_BYTE_SET:
-                valueSet = new TimestampByteSet(size);
+                valueSet = new TimestampByteMap(size);
                 break;
             case TIMESTAMP_CHAR_SET:
-                valueSet = new TimestampCharSet(size);
+                valueSet = new TimestampCharMap(size);
                 break;
             case TIMESTAMP_DOUBLE_SET:
-                valueSet = new TimestampDoubleSet(size);
+                valueSet = new TimestampDoubleMap(size);
                 break;
             case TIMESTAMP_FLOAT_SET:
-                valueSet = new TimestampFloatSet(size);
+                valueSet = new TimestampFloatMap(size);
                 break;
             case TIMESTAMP_INTEGER_SET:
-                valueSet = new TimestampIntegerSet(size);
+                valueSet = new TimestampIntegerMap(size);
                 break;
             case TIMESTAMP_LONG_SET:
-                valueSet = new TimestampLongSet(size);
+                valueSet = new TimestampLongMap(size);
                 break;
             case TIMESTAMP_SHORT_SET:
-                valueSet = new TimestampShortSet(size);
+                valueSet = new TimestampShortMap(size);
                 break;
             case TIMESTAMP_STRING_SET:
-                valueSet = new TimestampStringSet(size);
+                valueSet = new TimestampStringMap(size);
                 break;
             default:
                 throw new RuntimeException("Not recognized Timestamp value set type");
@@ -715,15 +715,15 @@ public class Serialization {
         return valueSet;
     }
 
-    private void serializeTimestampMap(final DataOutput out, final TimestampMap timestampMap) throws IOException {
+    private void serializeTimestampMap(final DataOutput out, final TimestampInternalMap timestampMap) throws IOException {
         serialize(out, timestampMap.length);
         serialize(out, timestampMap.timestampSortedMap.keySet().toDoubleArray());
         serialize(out, timestampMap.timestampSortedMap.values().toIntArray());
         serialize(out, timestampMap.garbageQueue.toIntArray());
     }
 
-    private TimestampMap deserializeTimestampMap(final DataInput is) throws IOException, ClassNotFoundException {
-        TimestampMap timestampMap = new TimestampMap();
+    private TimestampInternalMap deserializeTimestampMap(final DataInput is) throws IOException, ClassNotFoundException {
+        TimestampInternalMap timestampMap = new TimestampInternalMap();
         int length = (Integer) deserialize(is);
         double[] doubles = (double[]) deserialize(is);
         int[] ints = (int[]) deserialize(is);
@@ -753,7 +753,7 @@ public class Serialization {
 
     private GraphAttributesImpl deserializeGraphAttributes(final DataInput is) throws IOException, ClassNotFoundException {
         GraphAttributesImpl attributes = new GraphAttributesImpl();
-        attributes.timestampMap.setTimestampMap((TimestampMap) deserialize(is));
+        attributes.timestampMap.setTimestampMap((TimestampInternalMap) deserialize(is));
         int size = (Integer) deserialize(is);
         for (int i = 0; i < size; i++) {
             String key = (String) deserialize(is);
@@ -786,8 +786,8 @@ public class Serialization {
     private TimestampStore deserializeTimestampStore(final DataInput is) throws IOException, ClassNotFoundException {
         TimestampStore timestampStore = store.timestampStore;
 
-        TimestampMap nodeMap = (TimestampMap) deserialize(is);
-        TimestampMap edgeMap = (TimestampMap) deserialize(is);
+        TimestampInternalMap nodeMap = (TimestampInternalMap) deserialize(is);
+        TimestampInternalMap edgeMap = (TimestampInternalMap) deserialize(is);
 
         timestampStore.nodeMap.setTimestampMap(nodeMap);
         timestampStore.edgeMap.setTimestampMap(edgeMap);
@@ -1035,44 +1035,44 @@ public class Serialization {
             Estimator b = (Estimator) obj;
             out.write(ESTIMATOR);
             serializeString(out, b.name());
-        } else if (obj instanceof TimestampBooleanSet) {
-            TimestampBooleanSet b = (TimestampBooleanSet) obj;
+        } else if (obj instanceof TimestampBooleanMap) {
+            TimestampBooleanMap b = (TimestampBooleanMap) obj;
             out.write(TIMESTAMP_BOOLEAN_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampByteSet) {
-            TimestampByteSet b = (TimestampByteSet) obj;
+        } else if (obj instanceof TimestampByteMap) {
+            TimestampByteMap b = (TimestampByteMap) obj;
             out.write(TIMESTAMP_BYTE_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampCharSet) {
-            TimestampCharSet b = (TimestampCharSet) obj;
+        } else if (obj instanceof TimestampCharMap) {
+            TimestampCharMap b = (TimestampCharMap) obj;
             out.write(TIMESTAMP_CHAR_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampDoubleSet) {
-            TimestampDoubleSet b = (TimestampDoubleSet) obj;
+        } else if (obj instanceof TimestampDoubleMap) {
+            TimestampDoubleMap b = (TimestampDoubleMap) obj;
             out.write(TIMESTAMP_DOUBLE_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampFloatSet) {
-            TimestampFloatSet b = (TimestampFloatSet) obj;
+        } else if (obj instanceof TimestampFloatMap) {
+            TimestampFloatMap b = (TimestampFloatMap) obj;
             out.write(TIMESTAMP_FLOAT_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampIntegerSet) {
-            TimestampIntegerSet b = (TimestampIntegerSet) obj;
+        } else if (obj instanceof TimestampIntegerMap) {
+            TimestampIntegerMap b = (TimestampIntegerMap) obj;
             out.write(TIMESTAMP_INTEGER_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampLongSet) {
-            TimestampLongSet b = (TimestampLongSet) obj;
+        } else if (obj instanceof TimestampLongMap) {
+            TimestampLongMap b = (TimestampLongMap) obj;
             out.write(TIMESTAMP_LONG_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampShortSet) {
-            TimestampShortSet b = (TimestampShortSet) obj;
+        } else if (obj instanceof TimestampShortMap) {
+            TimestampShortMap b = (TimestampShortMap) obj;
             out.write(TIMESTAMP_SHORT_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampStringSet) {
-            TimestampStringSet b = (TimestampStringSet) obj;
+        } else if (obj instanceof TimestampStringMap) {
+            TimestampStringMap b = (TimestampStringMap) obj;
             out.write(TIMESTAMP_STRING_SET);
             serializeTimestampValueSet(out, b);
-        } else if (obj instanceof TimestampMap) {
-            TimestampMap b = (TimestampMap) obj;
+        } else if (obj instanceof TimestampInternalMap) {
+            TimestampInternalMap b = (TimestampInternalMap) obj;
             out.write(TIMESTAMP_MAP);
             serializeTimestampMap(out, b);
         } else if (obj instanceof GraphAttributesImpl) {

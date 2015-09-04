@@ -40,7 +40,7 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
     //Data
     protected final GraphLock lock;
     protected final TimestampIndexStore timestampIndexStore;
-    protected final TimestampMap timestampMap;
+    protected final TimestampInternalMap timestampMap;
     protected final boolean mainIndex;
     protected TimestampIndexEntry[] timestamps;
     protected int elementCount;

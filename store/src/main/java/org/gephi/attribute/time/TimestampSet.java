@@ -41,7 +41,7 @@ public final class TimestampSet {
      * Using this constructor can improve performances if the number of
      * timestamps is known in advance as it minimizes array resizes.
      *
-     * @param capacity
+     * @param capacity timestamp capacity
      */
     public TimestampSet(int capacity) {
         array = new int[capacity];

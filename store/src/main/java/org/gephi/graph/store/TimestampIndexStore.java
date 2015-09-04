@@ -38,12 +38,12 @@ public class TimestampIndexStore<T extends Element> {
     protected final Class<T> elementType;
     //Timestamp
     protected final TimestampStore timestampStore;
-    protected final TimestampMap timestampMap;
+    protected final TimestampInternalMap timestampMap;
     //Index
     protected final TimestampIndexImpl mainIndex;
     protected final Map<GraphView, TimestampIndexImpl> viewIndexes;
 
-    public TimestampIndexStore(TimestampStore store, Class<T> type, TimestampMap map) {
+    public TimestampIndexStore(TimestampStore store, Class<T> type, TimestampInternalMap map) {
         timestampStore = store;
         elementType = type;
         timestampMap = map;

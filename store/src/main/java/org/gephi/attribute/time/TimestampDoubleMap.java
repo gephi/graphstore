@@ -16,34 +16,59 @@
 package org.gephi.attribute.time;
 
 import java.math.BigDecimal;
+import static org.gephi.attribute.time.Estimator.AVERAGE;
+import static org.gephi.attribute.time.Estimator.FIRST;
+import static org.gephi.attribute.time.Estimator.LAST;
+import static org.gephi.attribute.time.Estimator.MAX;
+import static org.gephi.attribute.time.Estimator.MIN;
+import static org.gephi.attribute.time.Estimator.SUM;
 
 /**
- *
- * @author mbastian
+ * Sorted map where keys are timestamp indices and values double values.
  */
-public final class TimestampShortSet extends TimestampValueSet<Short> {
+public final class TimestampDoubleMap extends TimestampValueMap<Double> {
 
-    private short[] values;
+    private double[] values;
 
-    public TimestampShortSet() {
+    /**
+     * Default constructor.
+     * <p>
+     * The map is empty with zero capacity.
+     */
+    public TimestampDoubleMap() {
         super();
-        values = new short[0];
+        values = new double[0];
     }
 
-    public TimestampShortSet(int capacity) {
+    /**
+     * Constructor with capacity.
+     * <p>
+     * Using this constructor can improve performances if the number of
+     * timestamps is known in advance as it minimizes array resizes.
+     *
+     * @param capacity timestamp capacity
+     */
+    public TimestampDoubleMap(int capacity) {
         super(capacity);
-        values = new short[capacity];
+        values = new double[capacity];
     }
 
     @Override
-    public void put(int timestampIndex, Short value) {
+    public void put(int timestampIndex, Double value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putShort(timestampIndex, value);
+        putDouble(timestampIndex, value);
     }
 
-    public void putShort(int timestampIndex, short value) {
+    /**
+     * Put the <code>value</code> in this map at the given
+     * <code>timestampIndex</code> key.
+     *
+     * @param timestampIndex timestamp index
+     * @param value value
+     */
+    public void putDouble(int timestampIndex, double value) {
         final int index = putInner(timestampIndex);
         if (index < 0) {
             int insertIndex = -index - 1;
@@ -54,7 +79,7 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
                 }
                 values[insertIndex] = value;
             } else {
-                short[] newArray = new short[values.length + 1];
+                double[] newArray = new double[values.length + 1];
                 System.arraycopy(values, 0, newArray, 0, insertIndex);
                 System.arraycopy(values, insertIndex, newArray, insertIndex + 1, values.length - insertIndex);
                 newArray[insertIndex] = value;
@@ -74,7 +99,7 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
     }
 
     @Override
-    public Short get(int timestampIndex, Short defaultValue) {
+    public Double get(int timestampIndex, Double defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -82,7 +107,14 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
         return defaultValue;
     }
 
-    public short getShort(int timestampIndex) {
+    /**
+     * Get the value for the given timestamp index.
+
+     * @param timestampIndex timestamp index
+     * @return found value or the default value if not found
+     * @throws IllegalArgumentException if the element doesn't exist
+     */
+    public double getDouble(int timestampIndex) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -90,7 +122,16 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
         throw new IllegalArgumentException("The element doesn't exist");
     }
 
-    public short getShort(int timestampIndex, short defaultValue) {
+    /**
+     * Get the value for the given timestamp index.
+     * <p>
+     * Return <code>defaultValue</code> if the value is not found.
+     *
+     * @param timestampIndex timestamp index
+     * @param defaultValue default value
+     * @return found value or the default value if not found
+     */
+    public double getDouble(int timestampIndex, double defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -106,37 +147,27 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
                 if (ra != null) {
                     return ra.doubleValue();
                 }
-                return null;
             case SUM:
                 BigDecimal rs = getSumBigDecimal(timestampIndices);
                 if (rs != null) {
-                    return rs.intValue();
+                    return rs.doubleValue();
                 }
-                return null;
             case MIN:
-                Double min = (Double) getMin(timestampIndices);
-                if (min != null) {
-                    return min.shortValue();
-                }
-                return null;
+                return getMin(timestampIndices);
             case MAX:
-                Double max = (Double) getMax(timestampIndices);
-                if (max != null) {
-                    return max.shortValue();
-                }
-                return null;
+                return getMax(timestampIndices);
             case FIRST:
                 return getFirst(timestampIndices);
             case LAST:
                 return getLast(timestampIndices);
             default:
-                throw new IllegalArgumentException("Unknown estimator.");
+                throw new UnsupportedOperationException("Unknown estimator.");
         }
     }
 
     @Override
-    public Short[] toArray() {
-        final Short[] res = new Short[size];
+    public Double[] toArray() {
+        final Double[] res = new Double[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
@@ -144,13 +175,21 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
     }
 
     @Override
-    public Class<Short> getTypeClass() {
-        return Short.class;
+    public Class<Double> getTypeClass() {
+        return Double.class;
     }
 
-    public short[] toShortArray() {
+    /**
+     * Returns an array of all values in this map.
+     * <p>
+     * This method may return a reference to the underlying array so clients
+     * should make a copy if the array is written to.
+     *
+     * @return array of all values
+     */
+    public double[] toDoubleArray() {
         if (size < values.length - 1) {
-            final short[] res = new short[size];
+            final double[] res = new double[size];
             System.arraycopy(values, 0, res, 0, size);
             return res;
         } else {
@@ -161,7 +200,7 @@ public final class TimestampShortSet extends TimestampValueSet<Short> {
     @Override
     public void clear() {
         super.clear();
-        values = new short[0];
+        values = new double[0];
     }
 
     @Override

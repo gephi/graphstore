@@ -22,7 +22,7 @@ import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.api.Table;
 import org.gephi.attribute.time.Estimator;
-import org.gephi.attribute.time.TimestampValueSet;
+import org.gephi.attribute.time.TimestampValueMap;
 
 /**
  *
@@ -63,7 +63,7 @@ public class ColumnImpl implements Column {
         this.origin = origin;
         this.indexed = indexed;
         this.readOnly = readOnly;
-        this.dynamic = TimestampValueSet.class.isAssignableFrom(typeClass);
+        this.dynamic = TimestampValueMap.class.isAssignableFrom(typeClass);
         this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<ColumnObserverImpl>() : null;
     }
 

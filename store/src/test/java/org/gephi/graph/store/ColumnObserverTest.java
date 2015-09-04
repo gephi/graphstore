@@ -17,7 +17,7 @@ package org.gephi.graph.store;
 
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.ColumnObserver;
-import org.gephi.attribute.time.TimestampIntegerSet;
+import org.gephi.attribute.time.TimestampIntegerMap;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -77,7 +77,7 @@ public class ColumnObserverTest {
     public void testSetDynamicAttribute() {
         GraphStore store = new GraphStore();
         TableImpl table = new TableImpl(store.nodeColumnStore);
-        Column column = table.addColumn("0", TimestampIntegerSet.class);
+        Column column = table.addColumn("0", TimestampIntegerMap.class);
 
         Node node = store.factory.newNode();
 

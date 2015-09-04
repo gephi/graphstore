@@ -16,32 +16,51 @@
 package org.gephi.attribute.time;
 
 /**
- *
- * @author mbastian
+ * Sorted map where keys are timestamp indices and values boolean values.
  */
-public final class TimestampCharSet extends TimestampValueSet<Character> {
+public final class TimestampBooleanMap extends TimestampValueMap<Boolean> {
 
-    private char[] values;
+    private boolean[] values;
 
-    public TimestampCharSet() {
+    /**
+     * Default constructor.
+     * <p>
+     * The map is empty with zero capacity.
+     */
+    public TimestampBooleanMap() {
         super();
-        values = new char[0];
+        values = new boolean[0];
     }
 
-    public TimestampCharSet(int capacity) {
+    /**
+     * Constructor with capacity.
+     * <p>
+     * Using this constructor can improve performances if the number of
+     * timestamps is known in advance as it minimizes array resizes.
+     *
+     * @param capacity timestamp capacity
+     */
+    public TimestampBooleanMap(int capacity) {
         super(capacity);
-        values = new char[capacity];
+        values = new boolean[capacity];
     }
 
     @Override
-    public void put(int timestampIndex, Character value) {
+    public void put(int timestampIndex, Boolean value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putCharacter(timestampIndex, value);
+        putBoolean(timestampIndex, value);
     }
 
-    public void putCharacter(int timestampIndex, char value) {
+    /**
+     * Put the <code>value</code> in this map at the given
+     * <code>timestampIndex</code> key.
+     *
+     * @param timestampIndex timestamp index
+     * @param value value
+     */
+    public void putBoolean(int timestampIndex, boolean value) {
         final int index = putInner(timestampIndex);
         if (index < 0) {
             int insertIndex = -index - 1;
@@ -52,7 +71,7 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
                 }
                 values[insertIndex] = value;
             } else {
-                char[] newArray = new char[values.length + 1];
+                boolean[] newArray = new boolean[values.length + 1];
                 System.arraycopy(values, 0, newArray, 0, insertIndex);
                 System.arraycopy(values, insertIndex, newArray, insertIndex + 1, values.length - insertIndex);
                 newArray[insertIndex] = value;
@@ -72,7 +91,7 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
     }
 
     @Override
-    public Character get(int timestampIndex, Character defaultValue) {
+    public Boolean get(int timestampIndex, Boolean defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -80,7 +99,14 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
         return defaultValue;
     }
 
-    public char getCharacter(int timestampIndex) {
+    /**
+     * Get the value for the given timestamp index.
+
+     * @param timestampIndex timestamp index
+     * @return found value or the default value if not found
+     * @throws IllegalArgumentException if the element doesn't exist
+     */
+    public boolean getBoolean(int timestampIndex) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -88,7 +114,16 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
         throw new IllegalArgumentException("The element doesn't exist");
     }
 
-    public char getCharacter(int timestampIndex, char defaultValue) {
+    /**
+     * Get the value for the given timestamp index.
+     * <p>
+     * Return <code>defaultValue</code> if the value is not found.
+     *
+     * @param timestampIndex timestamp index
+     * @param defaultValue default value
+     * @return found value or the default value if not found
+     */
+    public boolean getBoolean(int timestampIndex, boolean defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -108,51 +143,55 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
             case LAST:
                 return getLast(timestampIndices);
             default:
-                throw new UnsupportedOperationException("Unknown estimator.");
+                throw new UnsupportedOperationException("Not supported estimator.");
         }
     }
 
     @Override
-    protected Object getMin(int[] timestampIndices) {
-        char min = Character.MAX_VALUE;
-        boolean found = false;
+    protected Object getMin(final int[] timestampIndices) {
+        boolean t = false;
         for (int i = 0; i < timestampIndices.length; i++) {
             int timestampIndex = timestampIndices[i];
             int index = getIndex(timestampIndex);
             if (index >= 0) {
-                char val = values[index];
-                min = (char) Math.min(min, val);
-                found = true;
+                boolean val = values[index];
+                if (!val) {
+                    return Boolean.FALSE;
+                } else {
+                    t = true;
+                }
             }
         }
-        if (!found) {
-            return null;
+        if (t) {
+            return Boolean.TRUE;
         }
-        return min;
+        return null;
     }
 
     @Override
-    protected Object getMax(int[] timestampIndices) {
-        char max = Character.MIN_VALUE;
-        boolean found = false;
+    protected Object getMax(final int[] timestampIndices) {
+        boolean f = false;
         for (int i = 0; i < timestampIndices.length; i++) {
             int timestampIndex = timestampIndices[i];
             int index = getIndex(timestampIndex);
             if (index >= 0) {
-                char val = values[index];
-                max = (char) Math.max(max, val);
-                found = true;
+                boolean val = values[index];
+                if (val) {
+                    return Boolean.TRUE;
+                } else {
+                    f = true;
+                }
             }
         }
-        if (!found) {
-            return null;
+        if (f) {
+            return Boolean.FALSE;
         }
-        return max;
+        return null;
     }
 
     @Override
-    public Character[] toArray() {
-        final Character[] res = new Character[size];
+    public Boolean[] toArray() {
+        final Boolean[] res = new Boolean[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
@@ -160,13 +199,21 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
     }
 
     @Override
-    public Class<Character> getTypeClass() {
-        return Character.class;
+    public Class<Boolean> getTypeClass() {
+        return Boolean.class;
     }
 
-    public char[] toCharacterArray() {
+    /**
+     * Returns an array of all values in this map.
+     * <p>
+     * This method may return a reference to the underlying array so clients
+     * should make a copy if the array is written to.
+     *
+     * @return array of all values
+     */
+    public boolean[] toBooleanArray() {
         if (size < values.length - 1) {
-            final char[] res = new char[size];
+            final boolean[] res = new boolean[size];
             System.arraycopy(values, 0, res, 0, size);
             return res;
         } else {
@@ -177,7 +224,7 @@ public final class TimestampCharSet extends TimestampValueSet<Character> {
     @Override
     public void clear() {
         super.clear();
-        values = new char[0];
+        values = new boolean[0];
     }
 
     @Override

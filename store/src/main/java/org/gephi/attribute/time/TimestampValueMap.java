@@ -20,35 +20,101 @@ import java.math.RoundingMode;
 import java.util.Arrays;
 
 /**
+ * Abstract class that implement a sorted map between timestamp indices and
+ * attribute values.
+ * <p>
+ * Implementations which extend this class customize the map for a unique type,
+ * which is represented by the <code>T</code> parameter.
  *
- * @author mbastian
+ * @param <T> Value type
  */
-public abstract class TimestampValueSet<T> {
+public abstract class TimestampValueMap<T> {
 
     protected int[] array;
     protected int size = 0;
 
-    public TimestampValueSet() {
+    /**
+     * Default constructor.
+     * <p>
+     * The map is empty with zero capacity.
+     */
+    public TimestampValueMap() {
         array = new int[0];
     }
 
-    public TimestampValueSet(int capacity) {
+    /**
+     * Constructor with capacity.
+     * <p>
+     * Using this constructor can improve performances if the number of
+     * timestamps is known in advance as it minimizes array resizes.
+     *
+     * @param capacity timestamp capacity
+     */
+    public TimestampValueMap(int capacity) {
         array = new int[capacity];
         Arrays.fill(array, Integer.MAX_VALUE);
     }
 
+    /**
+     * Put the value at the given timestamp index.
+     *
+     * @param timestampIndex timestamp index
+     * @param value value
+     */
     public abstract void put(int timestampIndex, T value);
 
+    /**
+     * Remove the value at the given timestamp index.
+     *
+     * @param timestampIndex timestamp index
+     */
     public abstract void remove(int timestampIndex);
 
+    /**
+     * Get the value for the given timestamp index.
+     * <p>
+     * Return <code>defaultValue</code> if the value is not found.
+     *
+     * @param timestampIndex timestamp index
+     * @param defaultValue default value
+     * @return found value or the default value if not found
+     */
     public abstract T get(int timestampIndex, T defaultValue);
 
+    /**
+     * Get the estimated value for the given array of timestamps.
+     * <p>
+     * The estimator is used to determine the way multiple timestamp values are
+     * merged together (e.g average).
+     *
+     * @param timestamps the timestamp values
+     * @param timestampIndices the timestamp indices for the given
+     * <code>timestamps</code>
+     * @param estimator the estimator used
+     * @return the estimated value
+     */
     public abstract Object get(double[] timestamps, int[] timestampIndices, Estimator estimator);
 
+    /**
+     * Returns all the values as an array.
+     *
+     * @return values array
+     */
     public abstract T[] toArray();
 
+    /**
+     * Returns the value type class.
+     *
+     * @return type class
+     */
     public abstract Class<T> getTypeClass();
 
+    /**
+     * Returns whether <code>estimator</code> is supported.
+     *
+     * @param estimator estimator
+     * @return true if this map supports <code>estimator</code>
+     */
     public abstract boolean isSupported(Estimator estimator);
 
     protected abstract Object getValue(int index);
@@ -93,10 +159,20 @@ public abstract class TimestampValueSet<T> {
         return -1;
     }
 
+    /**
+     * Returns the size.
+     *
+     * @return the number of elements in this map
+     */
     public int size() {
         return size;
     }
 
+    /**
+     * Returns true if this map is empty.
+     *
+     * @return true if empty, false otherwise
+     */
     public boolean isEmpty() {
         return size == 0;
     }
@@ -105,11 +181,25 @@ public abstract class TimestampValueSet<T> {
         return Arrays.binarySearch(array, timestampIndex);
     }
 
+    /**
+     * Returns true if this map contains <code>timestampIndex</code>.
+     *
+     * @param timestampIndex timestamp index
+     * @return true if contains, false otherwise
+     */
     public boolean contains(int timestampIndex) {
         int index = Arrays.binarySearch(array, timestampIndex);
         return index >= 0 && index < size;
     }
 
+    /**
+     * Returns an array of all timestamps in this map.
+     * <p>
+     * This method may return a reference to the underlying array so clients
+     * should make a copy if the array is written to.
+     *
+     * @return array of all timestamps
+     */
     public int[] getTimestamps() {
         if (size < array.length) {
             int[] res = new int[size];
@@ -120,6 +210,9 @@ public abstract class TimestampValueSet<T> {
         }
     }
 
+    /**
+     * Empties this map.
+     */
     public void clear() {
         size = 0;
         array = new int[0];
@@ -146,7 +239,7 @@ public abstract class TimestampValueSet<T> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final TimestampValueSet<?> other = (TimestampValueSet<?>) obj;
+        final TimestampValueMap<?> other = (TimestampValueMap<?>) obj;
         if (this.size != other.size) {
             return false;
         }

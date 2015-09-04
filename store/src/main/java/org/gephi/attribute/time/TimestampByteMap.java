@@ -16,32 +16,51 @@
 package org.gephi.attribute.time;
 
 /**
- *
- * @author mbastian
+ * Sorted map where keys are timestamp indices and values byte values.
  */
-public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
+public final class TimestampByteMap extends TimestampValueMap<Byte> {
 
-    private boolean[] values;
+    private byte[] values;
 
-    public TimestampBooleanSet() {
+    /**
+     * Default constructor.
+     * <p>
+     * The map is empty with zero capacity.
+     */
+    public TimestampByteMap() {
         super();
-        values = new boolean[0];
+        values = new byte[0];
     }
 
-    public TimestampBooleanSet(int capacity) {
+    /**
+     * Constructor with capacity.
+     * <p>
+     * Using this constructor can improve performances if the number of
+     * timestamps is known in advance as it minimizes array resizes.
+     *
+     * @param capacity timestamp capacity
+     */
+    public TimestampByteMap(int capacity) {
         super(capacity);
-        values = new boolean[capacity];
+        values = new byte[capacity];
     }
 
     @Override
-    public void put(int timestampIndex, Boolean value) {
+    public void put(int timestampIndex, Byte value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putBoolean(timestampIndex, value);
+        putByte(timestampIndex, value);
     }
 
-    public void putBoolean(int timestampIndex, boolean value) {
+    /**
+     * Put the <code>value</code> in this map at the given
+     * <code>timestampIndex</code> key.
+     *
+     * @param timestampIndex timestamp index
+     * @param value value
+     */
+    public void putByte(int timestampIndex, byte value) {
         final int index = putInner(timestampIndex);
         if (index < 0) {
             int insertIndex = -index - 1;
@@ -52,7 +71,7 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
                 }
                 values[insertIndex] = value;
             } else {
-                boolean[] newArray = new boolean[values.length + 1];
+                byte[] newArray = new byte[values.length + 1];
                 System.arraycopy(values, 0, newArray, 0, insertIndex);
                 System.arraycopy(values, insertIndex, newArray, insertIndex + 1, values.length - insertIndex);
                 newArray[insertIndex] = value;
@@ -72,7 +91,7 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
     }
 
     @Override
-    public Boolean get(int timestampIndex, Boolean defaultValue) {
+    public Byte get(int timestampIndex, Byte defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -80,7 +99,14 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
         return defaultValue;
     }
 
-    public boolean getBoolean(int timestampIndex) {
+    /**
+     * Get the value for the given timestamp index.
+     *
+     * @param timestampIndex timestamp index
+     * @return found value or the default value if not found
+     * @throws IllegalArgumentException if the element doesn't exist
+     */
+    public byte getByte(int timestampIndex) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -88,7 +114,16 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
         throw new IllegalArgumentException("The element doesn't exist");
     }
 
-    public boolean getBoolean(int timestampIndex, boolean defaultValue) {
+    /**
+     * Get the value for the given timestamp index.
+     * <p>
+     * Return <code>defaultValue</code> if the value is not found.
+     *
+     * @param timestampIndex timestamp index
+     * @param defaultValue default value
+     * @return found value or the default value if not found
+     */
+    public byte getByte(int timestampIndex, byte defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -99,64 +134,71 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
     @Override
     public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
         switch (estimator) {
+            case AVERAGE:
+                return getAverage(timestampIndices);
+            case SUM:
+                return getSum(timestampIndices);
             case MIN:
-                return getMin(timestampIndices);
+                Object rmin = getMin(timestampIndices);
+                if (rmin != null) {
+                    return ((Double) rmin).byteValue();
+                }
+                return null;
             case MAX:
-                return getMax(timestampIndices);
+                Object rmax = getMax(timestampIndices);
+                if (rmax != null) {
+                    return ((Double) rmax).byteValue();
+                }
+                return null;
             case FIRST:
                 return getFirst(timestampIndices);
             case LAST:
                 return getLast(timestampIndices);
             default:
-                throw new UnsupportedOperationException("Not supported estimator.");
+                throw new UnsupportedOperationException("Unknown estimator.");
         }
     }
 
-    @Override
-    protected Object getMin(final int[] timestampIndices) {
-        boolean t = false;
+    private Object getAverage(final int[] timestampIndices) {
+        double sum = 0;
+        int count = 0;
         for (int i = 0; i < timestampIndices.length; i++) {
             int timestampIndex = timestampIndices[i];
             int index = getIndex(timestampIndex);
             if (index >= 0) {
-                boolean val = values[index];
-                if (!val) {
-                    return Boolean.FALSE;
-                } else {
-                    t = true;
-                }
+                byte val = values[index];
+                sum += val;
+                count++;
             }
         }
-        if (t) {
-            return Boolean.TRUE;
+        if (count == 0) {
+            return null;
         }
-        return null;
+        sum /= count;
+        return sum;
     }
 
-    @Override
-    protected Object getMax(final int[] timestampIndices) {
-        boolean f = false;
+    private Object getSum(final int[] timestampIndices) {
+        int sum = 0;
+        int count = 0;
         for (int i = 0; i < timestampIndices.length; i++) {
             int timestampIndex = timestampIndices[i];
             int index = getIndex(timestampIndex);
             if (index >= 0) {
-                boolean val = values[index];
-                if (val) {
-                    return Boolean.TRUE;
-                } else {
-                    f = true;
-                }
+                byte val = values[index];
+                sum += val;
+                count++;
             }
         }
-        if (f) {
-            return Boolean.FALSE;
+        if (count == 0) {
+            return null;
         }
-        return null;
+        return sum;
     }
 
     @Override
-    public Boolean[] toArray() {
-        final Boolean[] res = new Boolean[size];
+    public Byte[] toArray() {
+        final Byte[] res = new Byte[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
@@ -164,13 +206,21 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
     }
 
     @Override
-    public Class<Boolean> getTypeClass() {
-        return Boolean.class;
+    public Class<Byte> getTypeClass() {
+        return Byte.class;
     }
 
-    public boolean[] toBooleanArray() {
+    /**
+     * Returns an array of all values in this map.
+     * <p>
+     * This method may return a reference to the underlying array so clients
+     * should make a copy if the array is written to.
+     *
+     * @return array of all values
+     */
+    public byte[] toByteArray() {
         if (size < values.length - 1) {
-            final boolean[] res = new boolean[size];
+            final byte[] res = new byte[size];
             System.arraycopy(values, 0, res, 0, size);
             return res;
         } else {
@@ -181,12 +231,12 @@ public final class TimestampBooleanSet extends TimestampValueSet<Boolean> {
     @Override
     public void clear() {
         super.clear();
-        values = new boolean[0];
+        values = new byte[0];
     }
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST);
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE, Estimator.SUM);
     }
 
     @Override

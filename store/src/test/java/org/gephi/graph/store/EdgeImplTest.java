@@ -102,7 +102,7 @@ public class EdgeImplTest {
         e.setWeight(4.0);
         Assert.assertEquals(e.getWeight(graphStore.getView()), 4.0);
         e.setWeight(5.0, 2.0);
-        TimestampMap timestampMap = graphStore.edgeColumnStore.getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        TimestampInternalMap timestampMap = graphStore.edgeColumnStore.getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
         Assert.assertEquals(timestampMap.size(), 1);
         Assert.assertFalse(timestampMap.contains(1.0));
     }

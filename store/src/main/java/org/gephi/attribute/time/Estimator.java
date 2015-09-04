@@ -16,8 +16,10 @@
 package org.gephi.attribute.time;
 
 /**
- *
- * @author mbastian
+ * Estimators specify the strategy to merge attribute values over time.
+ * <p>
+ * Estimators are associated with actions that require to transform a sorted set
+ * of values over time into a single value.
  */
 public enum Estimator {
 
@@ -29,10 +31,23 @@ public enum Estimator {
     FIRST,
     LAST;
 
+    /**
+     * Returns true if this estimator is equals to <code>estimator</code>.
+     *
+     * @param estimator estimator to test equality
+     * @return true if <code>estimator</code> is equal to this instance
+     */
     public boolean is(Estimator estimator) {
         return estimator.equals(this);
     }
 
+    /**
+     * Returns true if this estimator is any of the given
+     * <code>estimators</code>.
+     *
+     * @param estimators estimators to test equality
+     * @return true if <code>estimators</code> contains this estimator
+     */
     public boolean is(Estimator... estimators) {
         for (Estimator e : estimators) {
             if (e.equals(this)) {

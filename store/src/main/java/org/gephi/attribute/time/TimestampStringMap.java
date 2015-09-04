@@ -16,19 +16,31 @@
 package org.gephi.attribute.time;
 
 /**
- *
- * @author mbastian
+ * Sorted map where keys are timestamp indices and values string values.
  */
-public final class TimestampStringSet extends TimestampValueSet<String> {
+public final class TimestampStringMap extends TimestampValueMap<String> {
 
     private String[] values;
 
-    public TimestampStringSet() {
+    /**
+     * Default constructor.
+     * <p>
+     * The map is empty with zero capacity.
+     */
+    public TimestampStringMap() {
         super();
         values = new String[0];
     }
 
-    public TimestampStringSet(int capacity) {
+    /**
+     * Constructor with capacity.
+     * <p>
+     * Using this constructor can improve performances if the number of
+     * timestamps is known in advance as it minimizes array resizes.
+     *
+     * @param capacity timestamp capacity
+     */
+    public TimestampStringMap(int capacity) {
         super(capacity);
         values = new String[capacity];
     }

@@ -16,34 +16,59 @@
 package org.gephi.attribute.time;
 
 import java.math.BigDecimal;
+import static org.gephi.attribute.time.Estimator.AVERAGE;
+import static org.gephi.attribute.time.Estimator.FIRST;
+import static org.gephi.attribute.time.Estimator.LAST;
+import static org.gephi.attribute.time.Estimator.MAX;
+import static org.gephi.attribute.time.Estimator.MIN;
+import static org.gephi.attribute.time.Estimator.SUM;
 
 /**
- *
- * @author mbastian
+ * Sorted map where keys are timestamp indices and values long values.
  */
-public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
+public final class TimestampLongMap extends TimestampValueMap<Long> {
 
-    private int[] values;
+    private long[] values;
 
-    public TimestampIntegerSet() {
+    /**
+     * Default constructor.
+     * <p>
+     * The map is empty with zero capacity.
+     */
+    public TimestampLongMap() {
         super();
-        values = new int[0];
+        values = new long[0];
     }
 
-    public TimestampIntegerSet(int capacity) {
+    /**
+     * Constructor with capacity.
+     * <p>
+     * Using this constructor can improve performances if the number of
+     * timestamps is known in advance as it minimizes array resizes.
+     *
+     * @param capacity timestamp capacity
+     */
+    public TimestampLongMap(int capacity) {
         super(capacity);
-        values = new int[capacity];
+        values = new long[capacity];
     }
 
     @Override
-    public void put(int timestampIndex, Integer value) {
+    public void put(int timestampIndex, Long value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putInteger(timestampIndex, value);
+        putLong(timestampIndex, value);
     }
 
-    public void putInteger(int timestampIndex, int value) {
+    /**
+     * Put the <code>value</code> in this map at the given
+     * <code>timestampIndex</code> key.
+     *
+     * @param timestampIndex timestamp index
+     * @param value value
+     */
+    public void putLong(int timestampIndex, long value) {
         final int index = putInner(timestampIndex);
         if (index < 0) {
             int insertIndex = -index - 1;
@@ -54,7 +79,7 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
                 }
                 values[insertIndex] = value;
             } else {
-                int[] newArray = new int[values.length + 1];
+                long[] newArray = new long[values.length + 1];
                 System.arraycopy(values, 0, newArray, 0, insertIndex);
                 System.arraycopy(values, insertIndex, newArray, insertIndex + 1, values.length - insertIndex);
                 newArray[insertIndex] = value;
@@ -74,7 +99,7 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
     }
 
     @Override
-    public Integer get(int timestampIndex, Integer defaultValue) {
+    public Long get(int timestampIndex, Long defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -82,7 +107,14 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
         return defaultValue;
     }
 
-    public int getInteger(int timestampIndex) {
+    /**
+     * Get the value for the given timestamp index.
+
+     * @param timestampIndex timestamp index
+     * @return found value or the default value if not found
+     * @throws IllegalArgumentException if the element doesn't exist
+     */
+    public long getLong(int timestampIndex) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -90,7 +122,16 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
         throw new IllegalArgumentException("The element doesn't exist");
     }
 
-    public int getInteger(int timestampIndex, int defaultValue) {
+    /**
+     * Get the value for the given timestamp index.
+     * <p>
+     * Return <code>defaultValue</code> if the value is not found.
+     *
+     * @param timestampIndex timestamp index
+     * @param defaultValue default value
+     * @return found value or the default value if not found
+     */
+    public long getLong(int timestampIndex, long defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
             return values[index];
@@ -116,13 +157,13 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
             case MIN:
                 Double min = (Double) getMin(timestampIndices);
                 if (min != null) {
-                    return min.intValue();
+                    return min.longValue();
                 }
                 return null;
             case MAX:
                 Double max = (Double) getMax(timestampIndices);
                 if (max != null) {
-                    return max.intValue();
+                    return max.longValue();
                 }
                 return null;
             case FIRST:
@@ -135,8 +176,8 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
     }
 
     @Override
-    public Integer[] toArray() {
-        final Integer[] res = new Integer[size];
+    public Long[] toArray() {
+        final Long[] res = new Long[size];
         for (int i = 0; i < size; i++) {
             res[i] = values[i];
         }
@@ -144,13 +185,21 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
     }
 
     @Override
-    public Class<Integer> getTypeClass() {
-        return Integer.class;
+    public Class<Long> getTypeClass() {
+        return Long.class;
     }
 
-    public int[] toIntegerArray() {
+    /**
+     * Returns an array of all values in this map.
+     * <p>
+     * This method may return a reference to the underlying array so clients
+     * should make a copy if the array is written to.
+     *
+     * @return array of all values
+     */
+    public long[] toLongArray() {
         if (size < values.length - 1) {
-            final int[] res = new int[size];
+            final long[] res = new long[size];
             System.arraycopy(values, 0, res, 0, size);
             return res;
         } else {
@@ -161,7 +210,7 @@ public final class TimestampIntegerSet extends TimestampValueSet<Integer> {
     @Override
     public void clear() {
         super.clear();
-        values = new int[0];
+        values = new long[0];
     }
 
     @Override

@@ -24,19 +24,31 @@ import static org.gephi.attribute.time.Estimator.MIN;
 import static org.gephi.attribute.time.Estimator.SUM;
 
 /**
- *
- * @author mbastian
+ * Sorted map where keys are timestamp indices and values float values.
  */
-public final class TimestampFloatSet extends TimestampValueSet<Float> {
+public final class TimestampFloatMap extends TimestampValueMap<Float> {
 
     private float[] values;
 
-    public TimestampFloatSet() {
+    /**
+     * Default constructor.
+     * <p>
+     * The map is empty with zero capacity.
+     */
+    public TimestampFloatMap() {
         super();
         values = new float[0];
     }
 
-    public TimestampFloatSet(int capacity) {
+    /**
+     * Constructor with capacity.
+     * <p>
+     * Using this constructor can improve performances if the number of
+     * timestamps is known in advance as it minimizes array resizes.
+     *
+     * @param capacity timestamp capacity
+     */
+    public TimestampFloatMap(int capacity) {
         super(capacity);
         values = new float[capacity];
     }
@@ -49,6 +61,13 @@ public final class TimestampFloatSet extends TimestampValueSet<Float> {
         putFloat(timestampIndex, value);
     }
 
+    /**
+     * Put the <code>value</code> in this map at the given
+     * <code>timestampIndex</code> key.
+     *
+     * @param timestampIndex timestamp index
+     * @param value value
+     */
     public void putFloat(int timestampIndex, float value) {
         final int index = putInner(timestampIndex);
         if (index < 0) {
@@ -88,6 +107,13 @@ public final class TimestampFloatSet extends TimestampValueSet<Float> {
         return defaultValue;
     }
 
+    /**
+     * Get the value for the given timestamp index.
+
+     * @param timestampIndex timestamp index
+     * @return found value or the default value if not found
+     * @throws IllegalArgumentException if the element doesn't exist
+     */
     public float getFloat(int timestampIndex) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
@@ -96,6 +122,15 @@ public final class TimestampFloatSet extends TimestampValueSet<Float> {
         throw new IllegalArgumentException("The element doesn't exist");
     }
 
+    /**
+     * Get the value for the given timestamp index.
+     * <p>
+     * Return <code>defaultValue</code> if the value is not found.
+     *
+     * @param timestampIndex timestamp index
+     * @param defaultValue default value
+     * @return found value or the default value if not found
+     */
     public float getFloat(int timestampIndex, float defaultValue) {
         final int index = getIndex(timestampIndex);
         if (index >= 0) {
@@ -154,6 +189,14 @@ public final class TimestampFloatSet extends TimestampValueSet<Float> {
         return Float.class;
     }
 
+    /**
+     * Returns an array of all values in this map.
+     * <p>
+     * This method may return a reference to the underlying array so clients
+     * should make a copy if the array is written to.
+     *
+     * @return array of all values
+     */
     public float[] toFloatArray() {
         if (size < values.length - 1) {
             final float[] res = new float[size];

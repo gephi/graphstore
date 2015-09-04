@@ -22,7 +22,7 @@ import org.gephi.attribute.api.Column;
 import org.gephi.attribute.api.ColumnObserver;
 import org.gephi.attribute.api.Origin;
 import org.gephi.attribute.api.Table;
-import org.gephi.attribute.time.TimestampDoubleSet;
+import org.gephi.attribute.time.TimestampDoubleMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
@@ -384,7 +384,7 @@ public class ColumnStoreTest {
         ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         Assert.assertFalse(col1.isDynamic());
 
-        ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleSet.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col2.isDynamic());
     }
 

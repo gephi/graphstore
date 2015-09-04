@@ -23,17 +23,17 @@ import org.testng.annotations.Test;
  *
  * @author mbastian
  */
-public class TimestampMapTest {
+public class TimestampInternalMapTest {
 
     @Test
     public void testEmpty() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         Assert.assertTrue(map.size() == 0);
     }
 
     @Test
     public void testAddOne() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         int a = map.addTimestamp(1.0);
 
         Assert.assertEquals(a, 0);
@@ -44,19 +44,19 @@ public class TimestampMapTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddInfinityTimestamp() {
-        TimestampMap store = new TimestampMap();
+        TimestampInternalMap store = new TimestampInternalMap();
         store.addTimestamp(Double.POSITIVE_INFINITY);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddNaNTimestamp() {
-        TimestampMap store = new TimestampMap();
+        TimestampInternalMap store = new TimestampInternalMap();
         store.addTimestamp(Double.NaN);
     }
 
     @Test
     public void testAddOnGet() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         int a = map.getTimestampIndex(1.0);
 
         Assert.assertEquals(a, 0);
@@ -67,7 +67,7 @@ public class TimestampMapTest {
 
     @Test
     public void testMultipleGet() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         int a = map.getTimestampIndex(1.0);
         int b = map.getTimestampIndex(1.0);
 
@@ -80,19 +80,19 @@ public class TimestampMapTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testContainsNaN() {
-        TimestampMap store = new TimestampMap();
+        TimestampInternalMap store = new TimestampInternalMap();
         store.contains(Double.NaN);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testContainsInfinity() {
-        TimestampMap store = new TimestampMap();
+        TimestampInternalMap store = new TimestampInternalMap();
         store.contains(Double.POSITIVE_INFINITY);
     }
 
     @Test
     public void testRemove() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         map.addTimestamp(1.0);
         map.removeTimestamp(1.0);
 
@@ -102,25 +102,25 @@ public class TimestampMapTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRemoveNaN() {
-        TimestampMap store = new TimestampMap();
+        TimestampInternalMap store = new TimestampInternalMap();
         store.removeTimestamp(Double.NaN);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRemoveInfinity() {
-        TimestampMap store = new TimestampMap();
+        TimestampInternalMap store = new TimestampInternalMap();
         store.removeTimestamp(Double.POSITIVE_INFINITY);
     }
 
     @Test
     public void testNotContains() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         Assert.assertFalse(map.contains(1.0));
     }
 
     @Test
     public void testAddAfterRemove() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         map.addTimestamp(1.0);
         map.removeTimestamp(1.0);
         int a = map.addTimestamp(2.0);
@@ -131,7 +131,7 @@ public class TimestampMapTest {
 
     @Test
     public void testGetIndicies() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         map.addTimestamp(1.0);
         map.addTimestamp(2.0);
 
@@ -144,7 +144,7 @@ public class TimestampMapTest {
 
     @Test
     public void testGetIndiciesOpen() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         map.addTimestamp(1.0);
         map.addTimestamp(2.0);
 
@@ -160,7 +160,7 @@ public class TimestampMapTest {
 
     @Test
     public void testGetIndiciesUnique() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
         map.addTimestamp(1.0);
 
         int[] indicies = map.getTimestampIndices(new Interval(1.0, 2.0));
@@ -169,7 +169,7 @@ public class TimestampMapTest {
 
     @Test
     public void testHasTimestampIndex() {
-        TimestampMap map = new TimestampMap();
+        TimestampInternalMap map = new TimestampInternalMap();
 
         Assert.assertFalse(map.hasTimestampIndex(1.0));
 
@@ -184,7 +184,7 @@ public class TimestampMapTest {
 
     @Test
     public void testGarbage() {
-        TimestampMap store = new TimestampMap();
+        TimestampInternalMap store = new TimestampInternalMap();
 
         store.addTimestamp(1.0);
         int pos = store.addTimestamp(2.0);
@@ -204,7 +204,7 @@ public class TimestampMapTest {
 
     @Test
     public void testClear() {
-        TimestampMap store = new TimestampMap();
+        TimestampInternalMap store = new TimestampInternalMap();
         store.clear();
 
         store.addTimestamp(1.0);
@@ -216,37 +216,37 @@ public class TimestampMapTest {
 
     @Test
     public void testDeepEqualsEmpty() {
-        TimestampMap store1 = new TimestampMap();
+        TimestampInternalMap store1 = new TimestampInternalMap();
         Assert.assertTrue(store1.deepEquals(store1));
 
-        TimestampMap store2 = new TimestampMap();
+        TimestampInternalMap store2 = new TimestampInternalMap();
         Assert.assertTrue(store1.deepEquals(store2));
     }
 
     @Test
     public void testDeepHashCodeEmpty() {
-        TimestampMap store1 = new TimestampMap();
+        TimestampInternalMap store1 = new TimestampInternalMap();
         Assert.assertEquals(store1.deepHashCode(), store1.deepHashCode());
 
-        TimestampMap store2 = new TimestampMap();
+        TimestampInternalMap store2 = new TimestampInternalMap();
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
     }
 
     @Test
     public void testDeepEquals() {
-        TimestampMap store1 = new TimestampMap();
+        TimestampInternalMap store1 = new TimestampInternalMap();
         store1.addTimestamp(1.0);
         store1.addTimestamp(2.0);
         store1.addTimestamp(3.0);
         store1.removeTimestamp(1.0);
 
-        TimestampMap store2 = new TimestampMap();
+        TimestampInternalMap store2 = new TimestampInternalMap();
         store2.addTimestamp(1.0);
         store2.addTimestamp(2.0);
         store2.addTimestamp(3.0);
         store2.removeTimestamp(1.0);
 
-        TimestampMap store3 = new TimestampMap();
+        TimestampInternalMap store3 = new TimestampInternalMap();
         store3.addTimestamp(1.0);
 
         Assert.assertTrue(store1.deepEquals(store2));
@@ -255,19 +255,19 @@ public class TimestampMapTest {
 
     @Test
     public void testDeepHashCode() {
-        TimestampMap store1 = new TimestampMap();
+        TimestampInternalMap store1 = new TimestampInternalMap();
         store1.addTimestamp(1.0);
         store1.addTimestamp(2.0);
         store1.addTimestamp(3.0);
         store1.removeTimestamp(1.0);
 
-        TimestampMap store2 = new TimestampMap();
+        TimestampInternalMap store2 = new TimestampInternalMap();
         store2.addTimestamp(1.0);
         store2.addTimestamp(2.0);
         store2.addTimestamp(3.0);
         store2.removeTimestamp(1.0);
 
-        TimestampMap store3 = new TimestampMap();
+        TimestampInternalMap store3 = new TimestampInternalMap();
         store3.addTimestamp(1.0);
 
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());

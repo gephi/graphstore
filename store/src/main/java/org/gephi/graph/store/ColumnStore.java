@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 import org.gephi.attribute.api.Column;
 import org.gephi.attribute.time.Estimator;
-import org.gephi.attribute.time.TimestampValueSet;
+import org.gephi.attribute.time.TimestampValueMap;
 import org.gephi.graph.api.Element;
 
 /**
@@ -46,7 +46,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     //Columns
     protected final Object2ShortMap<String> idMap;
     protected final ColumnImpl[] columns;
-    protected final TimestampMap[] timestampMaps;
+    protected final TimestampInternalMap[] timestampMaps;
     protected final ShortSortedSet garbageQueue;
     //Index
     protected final IndexStore<T> indexStore;
@@ -65,7 +65,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<String>(MAX_SIZE);
         this.columns = new ColumnImpl[MAX_SIZE];
-        this.timestampMaps = new TimestampMap[MAX_SIZE];
+        this.timestampMaps = new TimestampInternalMap[MAX_SIZE];
         this.elementType = elementType;
         this.indexStore = indexed ? new IndexStore<T>(this) : null;
         idMap.defaultReturnValue(NULL_SHORT);
@@ -261,16 +261,16 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         return length - garbageQueue.size();
     }
 
-    public TimestampMap getTimestampMap(Column column) {
+    public TimestampInternalMap getTimestampMap(Column column) {
         return getTimestampMap(column.getIndex());
     }
 
-    protected TimestampMap getTimestampMap(int index) {
+    protected TimestampInternalMap getTimestampMap(int index) {
         lock();
         try {
-            TimestampMap timestampStore = timestampMaps[index];
+            TimestampInternalMap timestampStore = timestampMaps[index];
             if (timestampStore == null) {
-                timestampStore = new TimestampMap();
+                timestampStore = new TimestampInternalMap();
                 timestampMaps[index] = timestampStore;
             }
             return timestampStore;
@@ -354,9 +354,9 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     }
 
     void checkEstimator(final Column column, final Estimator estimator) {
-        Class<? extends TimestampValueSet> typeClass = column.getTypeClass();
+        Class<? extends TimestampValueMap> typeClass = column.getTypeClass();
         try {
-            TimestampValueSet vs = typeClass.newInstance();
+            TimestampValueMap vs = typeClass.newInstance();
             if (!vs.isSupported(estimator)) {
                 throw new IllegalArgumentException("The column doesnt't support this estimator");
             }
@@ -408,8 +408,8 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
             if (!c1.equals(c2)) {
                 return false;
             }
-            TimestampMap s1 = timestampMaps[c1.getIndex()];
-            TimestampMap s2 = timestampMaps[c2.getIndex()];
+            TimestampInternalMap s1 = timestampMaps[c1.getIndex()];
+            TimestampInternalMap s2 = timestampMaps[c2.getIndex()];
             if ((s1 == null && s2 != null) || (s1 != null && s2 == null)) {
                 return false;
             }
