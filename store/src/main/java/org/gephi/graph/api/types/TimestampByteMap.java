@@ -20,7 +20,7 @@ import org.gephi.graph.api.Estimator;
 /**
  * Sorted map where keys are timestamp indices and values byte values.
  */
-public final class TimestampByteMap extends TimestampValueMap<Byte> {
+public final class TimestampByteMap extends TimestampMap<Byte> {
 
     private byte[] values;
 

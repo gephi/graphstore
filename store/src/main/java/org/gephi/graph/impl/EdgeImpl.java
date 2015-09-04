@@ -19,7 +19,7 @@ import java.awt.Color;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampValueMap;
+import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
@@ -100,7 +100,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
             if (timestampMap != null) {
                 Object oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
                 TimestampDoubleMap dynamicValue;
-                if (!(oldValue instanceof TimestampValueMap)) {
+                if (!(oldValue instanceof TimestampMap)) {
                     dynamicValue = new TimestampDoubleMap();
                     attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue;
                     timestampMap.clear();

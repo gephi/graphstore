@@ -15,7 +15,7 @@
  */
 package org.gephi.graph.api;
 
-import org.gephi.graph.api.types.TimestampValueMap;
+import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampLongMap;
 import org.gephi.graph.api.types.TimestampSet;
@@ -322,7 +322,7 @@ public class AttributeUtils {
      * @param type the static type
      * @return the dynamic type
      */
-    public static Class<? extends TimestampValueMap> getDynamicType(Class type) {
+    public static Class<? extends TimestampMap> getDynamicType(Class type) {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
@@ -355,7 +355,7 @@ public class AttributeUtils {
      * @param type the dynamic type
      * @return the static type
      */
-    public static Class getStaticType(Class<? extends TimestampValueMap> type) {
+    public static Class getStaticType(Class<? extends TimestampMap> type) {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
@@ -439,8 +439,8 @@ public class AttributeUtils {
      * @return true if <em>type</em> is a dynamic type, false otherwise
      */
     public static boolean isDynamicType(Class type) {
-        return !type.equals(TimestampValueMap.class)
-                && TimestampValueMap.class.isAssignableFrom(type);
+        return !type.equals(TimestampMap.class)
+                && TimestampMap.class.isAssignableFrom(type);
     }
 
     /**

@@ -41,7 +41,7 @@ import org.gephi.graph.api.types.TimestampLongMap;
 import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
-import org.gephi.graph.api.types.TimestampValueMap;
+import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.impl.EdgeImpl.EdgePropertiesImpl;
@@ -665,15 +665,15 @@ public class Serialization {
         return new TimestampSet(r);
     }
 
-    private void serializeTimestampValueSet(final DataOutput out, final TimestampValueMap timestampValueSet) throws IOException {
+    private void serializeTimestampValueSet(final DataOutput out, final TimestampMap timestampValueSet) throws IOException {
         serialize(out, timestampValueSet.size());
         serialize(out, timestampValueSet.getTimestamps());
         serialize(out, timestampValueSet.toArray());
     }
 
-    private TimestampValueMap deserializeTimestampValueSet(final DataInput is, int head) throws IOException, ClassNotFoundException {
+    private TimestampMap deserializeTimestampValueSet(final DataInput is, int head) throws IOException, ClassNotFoundException {
         int size = (Integer) deserialize(is);
-        TimestampValueMap valueSet;
+        TimestampMap valueSet;
         switch (head) {
             case TIMESTAMP_BOOLEAN_SET:
                 valueSet = new TimestampBooleanMap(size);

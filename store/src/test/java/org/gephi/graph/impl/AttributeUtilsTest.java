@@ -33,7 +33,7 @@ import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.gephi.graph.api.types.TimestampLongMap;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
-import org.gephi.graph.api.types.TimestampValueMap;
+import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
@@ -195,7 +195,7 @@ public class AttributeUtilsTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetStaticTypeUnsupportedType() {
-        AttributeUtils.getStaticType(TimestampValueMap.class);
+        AttributeUtils.getStaticType(TimestampMap.class);
     }
 
     @Test
@@ -274,7 +274,7 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isDynamicType(TimestampFloatMap.class));
         Assert.assertFalse(AttributeUtils.isDynamicType(TimestampFloatMap[].class));
         Assert.assertFalse(AttributeUtils.isDynamicType(Integer.class));
-        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampValueMap.class));
+        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampMap.class));
     }
 
     @Test

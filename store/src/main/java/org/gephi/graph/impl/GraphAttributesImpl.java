@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.AttributeUtils;
-import org.gephi.graph.api.types.TimestampValueMap;
+import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
 /**
@@ -47,7 +47,7 @@ public class GraphAttributesImpl {
     }
 
     public synchronized Object getValue(String key, double timestamp) {
-        TimestampValueMap valueSet = (TimestampValueMap) attributes.get(key);
+        TimestampMap valueSet = (TimestampMap) attributes.get(key);
         if (valueSet != null && timestampMap.hasTimestampIndex(timestamp)) {
             int index = timestampMap.getTimestampIndex(timestamp);
             return valueSet.get(index, null);
@@ -64,9 +64,9 @@ public class GraphAttributesImpl {
         AttributeUtils.getDynamicType(value.getClass());
         int index = timestampMap.getTimestampIndex(timestamp);
 
-        TimestampValueMap valueSet = null;
+        TimestampMap valueSet = null;
         if (attributes.containsKey(key)) {
-            valueSet = (TimestampValueMap) attributes.get(key);
+            valueSet = (TimestampMap) attributes.get(key);
         } else {
             try {
                 valueSet = AttributeUtils.getDynamicType(value.getClass()).newInstance();

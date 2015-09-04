@@ -29,7 +29,7 @@ import java.util.Arrays;
  *
  * @param <T> Value type
  */
-public abstract class TimestampValueMap<T> {
+public abstract class TimestampMap<T> {
 
     protected int[] array;
     protected int size = 0;
@@ -39,7 +39,7 @@ public abstract class TimestampValueMap<T> {
      * <p>
      * The map is empty with zero capacity.
      */
-    public TimestampValueMap() {
+    public TimestampMap() {
         array = new int[0];
     }
 
@@ -51,7 +51,7 @@ public abstract class TimestampValueMap<T> {
      *
      * @param capacity timestamp capacity
      */
-    public TimestampValueMap(int capacity) {
+    public TimestampMap(int capacity) {
         array = new int[capacity];
         Arrays.fill(array, Integer.MAX_VALUE);
     }
@@ -240,7 +240,7 @@ public abstract class TimestampValueMap<T> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final TimestampValueMap<?> other = (TimestampValueMap<?>) obj;
+        final TimestampMap<?> other = (TimestampMap<?>) obj;
         if (this.size != other.size) {
             return false;
         }

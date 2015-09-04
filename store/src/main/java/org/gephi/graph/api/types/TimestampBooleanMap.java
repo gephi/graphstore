@@ -20,7 +20,7 @@ import org.gephi.graph.api.Estimator;
 /**
  * Sorted map where keys are timestamp indices and values boolean values.
  */
-public final class TimestampBooleanMap extends TimestampValueMap<Boolean> {
+public final class TimestampBooleanMap extends TimestampMap<Boolean> {
 
     private boolean[] values;
 

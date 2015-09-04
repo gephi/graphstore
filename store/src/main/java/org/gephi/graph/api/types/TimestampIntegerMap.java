@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 /**
  * Sorted map where keys are timestamp indices and values integer values.
  */
-public final class TimestampIntegerMap extends TimestampValueMap<Integer> {
+public final class TimestampIntegerMap extends TimestampMap<Integer> {
 
     private int[] values;
 

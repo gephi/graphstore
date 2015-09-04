@@ -27,7 +27,7 @@ import static org.gephi.graph.api.Estimator.SUM;
 /**
  * Sorted map where keys are timestamp indices and values long values.
  */
-public final class TimestampLongMap extends TimestampValueMap<Long> {
+public final class TimestampLongMap extends TimestampMap<Long> {
 
     private long[] values;
 

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Estimator;
-import org.gephi.graph.api.types.TimestampValueMap;
+import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Element;
 
 /**
@@ -354,9 +354,9 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
     }
 
     void checkEstimator(final Column column, final Estimator estimator) {
-        Class<? extends TimestampValueMap> typeClass = column.getTypeClass();
+        Class<? extends TimestampMap> typeClass = column.getTypeClass();
         try {
-            TimestampValueMap vs = typeClass.newInstance();
+            TimestampMap vs = typeClass.newInstance();
             if (!vs.isSupported(estimator)) {
                 throw new IllegalArgumentException("The column doesnt't support this estimator");
             }

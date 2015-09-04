@@ -20,7 +20,7 @@ import org.gephi.graph.api.Estimator;
 /**
  * Sorted map where keys are timestamp indices and values string values.
  */
-public final class TimestampStringMap extends TimestampValueMap<String> {
+public final class TimestampStringMap extends TimestampMap<String> {
 
     private String[] values;
 
