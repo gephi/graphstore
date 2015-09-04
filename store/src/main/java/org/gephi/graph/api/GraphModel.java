@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.api;
 
+import org.gephi.graph.impl.GraphModelImpl;
+
 /**
  * Graph API's entry point.
  * <p>
@@ -31,10 +33,14 @@ package org.gephi.graph.api;
  * it.
  * </ul>
  * <p>
- * This API revolves around a set of simple concepts. A <code>GraphModel</code>
- * encapsulate all elements and metadata associated with a graph structure. In
- * other words its a single graph but it also contains configuration, indices,
- * views and other less important services such as observers.
+ * New instances can be obtained via the embedded factory:
+ * <pre>
+ * GraphModel model = GraphModel.Factory.newInstance();
+ * </pre> This API revolves around a set of simple concepts. A
+ * <code>GraphModel</code> encapsulate all elements and metadata associated with
+ * a graph structure. In other words its a single graph but it also contains
+ * configuration, indices, views and other less important services such as
+ * observers.
  * <p>
  * Then, <code>GraphModel</code> gives access to the <code>Graph</code>
  * interface, which focuses only on the graph structure and provide methods to
@@ -61,6 +67,13 @@ package org.gephi.graph.api;
  * nodes and edges in the view by obtaining a <code>Subgraph</code> for a
  * specific <code>GraphView</code>. Views can directly be created and destroyed
  * from this model.
+ * <p>
+ * Elements should be created through the {@link #factory() } method.
+ * <p>
+ * For performance reasons, edge labels are internally represented as integers
+ * and the mapping between arbitrary labels is managed through the {@link #addEdgeType(java.lang.Object)
+ * } and {@link #getEdgeType(java.lang.Object) } methods. By default, edges have
+ * a <code>null</code> label, which is internally represented as zero.
  *
  * @see Graph
  * @see Element
@@ -70,6 +83,21 @@ package org.gephi.graph.api;
  * @see GraphView
  */
 public interface GraphModel {
+
+    /**
+     * Utility to create new graph model instances.
+     */
+    public static class Factory {
+
+        /**
+         * Returns a new instance.
+         *
+         * @return new instance
+         */
+        public static GraphModel newInstance() {
+            return new GraphModelImpl();
+        }
+    }
 
     /**
      * Returns the graph factory.

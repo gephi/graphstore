@@ -23,6 +23,7 @@ import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimestampIndex;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
@@ -30,6 +31,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class GraphModelTest {
+
+    @Test
+    public void testFactory() {
+        Assert.assertNotNull(GraphModel.Factory.newInstance());
+    }
 
     @Test
     public void testEmpty() {
@@ -354,7 +360,7 @@ public class GraphModelTest {
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 1.0);
     }
-    
+
     @Test
     public void testGetNodeTimestampIndexInView() {
         GraphModelImpl graphModel = new GraphModelImpl();
