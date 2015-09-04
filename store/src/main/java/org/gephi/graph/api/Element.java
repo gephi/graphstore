@@ -16,7 +16,6 @@
 package org.gephi.graph.api;
 
 import java.util.Set;
-import org.gephi.attribute.api.Column;
 
 /**
  * An element is a node or an edge.

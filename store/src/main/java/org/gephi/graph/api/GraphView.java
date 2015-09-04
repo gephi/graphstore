@@ -15,8 +15,6 @@
  */
 package org.gephi.graph.api;
 
-import org.gephi.attribute.time.Interval;
-
 /**
  * View on the graph.
  * <p>

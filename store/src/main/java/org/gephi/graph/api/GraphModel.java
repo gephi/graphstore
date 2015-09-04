@@ -15,12 +15,6 @@
  */
 package org.gephi.graph.api;
 
-import org.gephi.attribute.api.Index;
-import org.gephi.attribute.api.Table;
-import org.gephi.attribute.api.TimeFormat;
-import org.gephi.attribute.api.TimestampIndex;
-import org.gephi.attribute.time.Interval;
-
 /**
  * Entry point.
  * 
