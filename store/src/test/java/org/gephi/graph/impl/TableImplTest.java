@@ -15,8 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.ColumnStore;
-import org.gephi.graph.impl.TableImpl;
 import java.awt.Color;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Origin;

@@ -15,10 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.GraphObserverImpl;
-import org.gephi.graph.impl.GraphViewImpl;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.GraphViewStore;
 import java.util.Arrays;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;

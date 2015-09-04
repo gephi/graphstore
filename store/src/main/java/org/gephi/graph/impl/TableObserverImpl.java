@@ -7,10 +7,6 @@ package org.gephi.graph.impl;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TableObserver;
 
-/**
- *
- * @author mbastian
- */
 public class TableObserverImpl implements TableObserver {
 
     protected final TableImpl table;

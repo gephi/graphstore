@@ -17,10 +17,6 @@ package org.gephi.graph.impl;
 
 import org.gephi.graph.api.TimeFormat;
 
-/**
- *
- * @author mbastian
- */
 public final class GraphStoreConfiguration {
 
     //Features

@@ -26,10 +26,6 @@ import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
-/**
- *
- * @author mbastian
- */
 public class TimestampInternalMap {
 
     //Const

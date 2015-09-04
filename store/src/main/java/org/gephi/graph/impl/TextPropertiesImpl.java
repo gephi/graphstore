@@ -18,10 +18,6 @@ package org.gephi.graph.impl;
 import java.awt.Color;
 import org.gephi.graph.api.TextProperties;
 
-/**
- *
- * @author mbastian
- */
 public class TextPropertiesImpl implements TextProperties {
 
     protected boolean visible;
@@ -130,7 +126,7 @@ public class TextPropertiesImpl implements TextProperties {
     }
 
     public boolean deepEquals(TextPropertiesImpl obj) {
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
         if (this.visible != obj.visible) {

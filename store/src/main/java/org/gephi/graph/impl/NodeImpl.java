@@ -21,10 +21,6 @@ import org.gephi.graph.api.NodeProperties;
 import org.gephi.graph.api.TextProperties;
 import org.gephi.graph.spi.LayoutData;
 
-/**
- *
- * @author mbastian
- */
 public class NodeImpl extends ElementImpl implements Node {
 
     protected int storeId = NodeStore.NULL_ID;

@@ -20,10 +20,6 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.Node;
 
-/**
- *
- * @author mbastian
- */
 public class GraphFactoryImpl implements GraphFactory {
 
     protected final AtomicInteger NODE_IDS = new AtomicInteger();

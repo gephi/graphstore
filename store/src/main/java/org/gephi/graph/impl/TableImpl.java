@@ -24,10 +24,6 @@ import org.gephi.graph.api.TableObserver;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Element;
 
-/**
- *
- * @author mbastian
- */
 public class TableImpl<T extends Element> implements Table {
 
     //Store
@@ -146,15 +142,15 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     public boolean deepEquals(TableImpl<T> obj) {
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
         return !(this.store != obj.store && (this.store == null || !this.store.deepEquals(obj.store)));
     }
-    
+
     public int deepHashCode() {
         int hash = 3;
-        hash = 71 * hash + (this.store != null ? this.store.deepHashCode(): 0);
+        hash = 71 * hash + (this.store != null ? this.store.deepHashCode() : 0);
         return hash;
     }
 

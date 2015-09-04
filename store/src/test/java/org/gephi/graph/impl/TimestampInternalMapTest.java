@@ -15,7 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.TimestampInternalMap;
 import org.gephi.graph.api.Interval;
 import org.testng.Assert;
 import org.testng.annotations.Test;

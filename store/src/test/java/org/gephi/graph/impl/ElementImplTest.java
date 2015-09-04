@@ -15,9 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.ColumnImpl;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.NodeImpl;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;

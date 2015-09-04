@@ -28,10 +28,6 @@ import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
-/**
- *
- * @author mbastian
- */
 public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph {
 
     protected final boolean undirected;

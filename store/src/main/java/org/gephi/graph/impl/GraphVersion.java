@@ -17,10 +17,6 @@ package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Graph;
 
-/**
- *
- * @author mbastian
- */
 public class GraphVersion {
 
     protected final Graph graph;

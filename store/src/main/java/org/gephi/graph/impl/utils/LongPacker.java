@@ -24,7 +24,8 @@ import java.nio.ByteBuffer;
  * Packing utility for non-negative <code>long</code> and <code>int</code>
  * values.
  * <p>
- * Originally developed for Kryo by Nathan Sweet. Modified for JDBM by Jan Kotek.
+ * Originally developed for Kryo by Nathan Sweet. Modified for JDBM by Jan
+ * Kotek.
  */
 public final class LongPacker {
 

@@ -24,10 +24,6 @@ import it.unimi.dsi.fastutil.shorts.ShortSortedSet;
 import java.util.Arrays;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
-/**
- *
- * @author mbastian
- */
 public class EdgeTypeStore {
 
     //Const
@@ -146,7 +142,7 @@ public class EdgeTypeStore {
         idMap.clear();
         garbageQueue.clear();
         length = 0;
-        
+
         //Add null type
         short id = intToShort(NULL_LABEL);
         length++;
@@ -188,10 +184,10 @@ public class EdgeTypeStore {
             }
         }
     }
-    
+
     private void checkIdExists(final int id) {
-        if(!idMap.containsKey(intToShort(id))) {
-            throw new IllegalArgumentException("The id "+id+" doesn' exist");
+        if (!idMap.containsKey(intToShort(id))) {
+            throw new IllegalArgumentException("The id " + id + " doesn' exist");
         }
     }
 

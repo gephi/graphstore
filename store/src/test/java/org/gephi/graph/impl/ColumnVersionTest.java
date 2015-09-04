@@ -15,8 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.ColumnVersion;
-import org.gephi.graph.impl.ColumnImpl;
 import org.gephi.graph.api.Origin;
 import org.testng.Assert;
 import org.testng.annotations.Test;

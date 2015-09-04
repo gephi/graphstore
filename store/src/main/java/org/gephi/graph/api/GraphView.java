@@ -31,9 +31,10 @@ package org.gephi.graph.api;
  * The main benefits of views is the ability to obtain a <code>Subgraph</code>
  * object from it. Users can call the
  * {@link GraphModel#getGraph(org.gephi.graph.api.GraphView) } method and obtain
- * a subgraph backed by the view. Update operations such as add or remove on this
- * graph are in-fact modifying the view rather than the model. Indeed, adding a
- * node to a view is enabling this node in the view. Similarly for removal.
+ * a subgraph backed by the view. Update operations such as add or remove on
+ * this graph are in-fact modifying the view rather than the model. Indeed,
+ * adding a node to a view is enabling this node in the view. Similarly for
+ * removal.
  * <p>
  * Views can apply on nodes only, edges only or both. This is configured when
  * the view is created. Nodes-only view let the system automatically control the

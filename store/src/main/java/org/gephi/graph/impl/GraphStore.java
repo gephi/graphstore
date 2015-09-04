@@ -36,10 +36,6 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Subgraph;
 
-/**
- *
- * @author mbastian
- */
 public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     protected final GraphModelImpl graphModel;
@@ -644,7 +640,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public void fill() {
         throw new UnsupportedOperationException("Not supported for the main view.");
     }
-    
+
     @Override
     public Graph getRootGraph() {
         return this;
@@ -692,7 +688,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     public int deepHashCode() {
         int hash = 3;
-        hash = 29 * hash + (this.nodeStore != null ? this.nodeStore.deepHashCode(): 0);
+        hash = 29 * hash + (this.nodeStore != null ? this.nodeStore.deepHashCode() : 0);
         hash = 29 * hash + (this.edgeStore != null ? this.edgeStore.deepHashCode() : 0);
         hash = 29 * hash + (this.edgeTypeStore != null ? this.edgeTypeStore.deepHashCode() : 0);
         return hash;

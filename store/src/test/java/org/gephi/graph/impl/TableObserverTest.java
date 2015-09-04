@@ -15,9 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.ColumnStore;
-import org.gephi.graph.impl.TableObserverImpl;
-import org.gephi.graph.impl.TableImpl;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;

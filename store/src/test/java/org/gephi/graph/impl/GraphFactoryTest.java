@@ -15,10 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.EdgeImpl;
-import org.gephi.graph.impl.EdgeTypeStore;
-import org.gephi.graph.impl.GraphFactoryImpl;
-import org.gephi.graph.impl.NodeImpl;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;

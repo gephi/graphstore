@@ -54,6 +54,9 @@ public interface EdgeIterable extends ElementIterable<Edge> {
     @Override
     public Collection<Edge> toCollection();
 
+    /**
+     * Empty edge iterable.
+     */
     static final class EdgeIterableEmpty implements Iterator<Edge>, EdgeIterable {
 
         @Override

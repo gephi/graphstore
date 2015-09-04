@@ -29,10 +29,6 @@ import org.gephi.graph.api.TimestampIndex;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 
-/**
- *
- * @author mbastian
- */
 public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> {
     //Const
 

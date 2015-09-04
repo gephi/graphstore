@@ -25,10 +25,6 @@ import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.TextProperties;
 
-/**
- *
- * @author mbastian
- */
 public class EdgeImpl extends ElementImpl implements Edge {
 
     //Const

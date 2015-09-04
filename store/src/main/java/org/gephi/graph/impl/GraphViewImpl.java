@@ -31,10 +31,6 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.gephi.graph.impl.EdgeStore.EdgeInOutIterator;
 
-/**
- *
- * @author mbastian
- */
 public class GraphViewImpl implements GraphView {
 
     //Data

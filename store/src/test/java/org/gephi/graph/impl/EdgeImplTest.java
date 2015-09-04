@@ -15,13 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.EdgeImpl;
-import org.gephi.graph.impl.EdgeTypeStore;
-import org.gephi.graph.impl.GraphViewImpl;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.NodeImpl;
-import org.gephi.graph.impl.GraphStoreConfiguration;
-import org.gephi.graph.impl.TimestampInternalMap;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;

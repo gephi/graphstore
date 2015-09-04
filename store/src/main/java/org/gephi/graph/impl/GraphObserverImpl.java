@@ -26,10 +26,6 @@ import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 
-/**
- *
- * @author mbastian
- */
 public class GraphObserverImpl implements GraphObserver {
 
     //Store and graph

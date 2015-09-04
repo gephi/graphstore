@@ -27,10 +27,6 @@ import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 
-/**
- *
- * @author mbastian
- */
 public class IndexStore<T extends Element> {
 
     protected final ColumnStore<T> columnStore;

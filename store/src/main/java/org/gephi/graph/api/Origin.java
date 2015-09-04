@@ -20,6 +20,12 @@ package org.gephi.graph.api;
  */
 public enum Origin {
 
+    /**
+     * Property.
+     */
     PROPERTY,
+    /**
+     * Data.
+     */
     DATA
 }

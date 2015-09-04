@@ -16,11 +16,58 @@
 package org.gephi.graph.api;
 
 /**
- * Entry point.
- * 
- *  This model gives access to the node and edge tables, which controls the set
- * of columns each element (node/edge) has. It also provide method to get and
- * set the current time display format.
+ * Graph API's entry point.
+ * <p>
+ * <code>GraphModel</code> is the entry point for this API and provide methods
+ * to create, access and modify graphs. It supports the most common graph
+ * paradigms and a complete support for graphs over time as well.
+ * <ul>
+ * <li>Directed: Edges can have a direction. Graphs can be directed, undirected
+ * or mixed.
+ * <li>Weighted: Edges can have a weight.
+ * <li>Self-loops: Nodes can have self-loops.
+ * <li>Labelled edges: Edges can have a label.
+ * <li>Properties: Each element in the graph can have properties associated to
+ * it.
+ * </ul>
+ * <p>
+ * This API revolves around a set of simple concepts. A <code>GraphModel</code>
+ * encapsulate all elements and metadata associated with a graph structure. In
+ * other words its a single graph but it also contains configuration, indices,
+ * views and other less important services such as observers.
+ * <p>
+ * Then, <code>GraphModel</code> gives access to the <code>Graph</code>
+ * interface, which focuses only on the graph structure and provide methods to
+ * add, remove, get and iterate nodes and edges.
+ * <p>
+ * The <code>Graph</code> contains nodes and edges, which both implement the
+ * <code>Element</code> interface. This <code>Element</code> interface gives
+ * access to methods that manipulate the attributes associated to nodes and
+ * edges.
+ * <p>
+ * Any number of attributes can be associated to elements but are managed
+ * through the <code>Table</code> and <code>Column</code> interfaces. A
+ * <code>GraphModel</code> gives access by default to a node and edge table. A
+ * <code>Table</code> is simply a list of columns, which each has a unique
+ * identifier and a type (e.g. integer). Attribute values can only be associated
+ * with elements for existing columns.
+ * <p>
+ * Attributes are automatically indexed and information such as the number of
+ * elements with a particular value can be obtained from the <code>Index</code>
+ * interface.
+ * <p>
+ * Finally, this API supports the concept of graph views. A view is a mask on
+ * the graph structure and represents a subgraph. The user controls the set of
+ * nodes and edges in the view by obtaining a <code>Subgraph</code> for a
+ * specific <code>GraphView</code>. Views can directly be created and destroyed
+ * from this model.
+ *
+ * @see Graph
+ * @see Element
+ * @see Table
+ * @see Column
+ * @see Index
+ * @see GraphView
  */
 public interface GraphModel {
 

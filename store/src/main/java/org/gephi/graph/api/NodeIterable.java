@@ -54,6 +54,9 @@ public interface NodeIterable extends ElementIterable<Node> {
     @Override
     public Collection<Node> toCollection();
 
+    /**
+     * Empty node iterable.
+     */
     static final class NodeIterableEmpty implements Iterator<Node>, NodeIterable {
 
         @Override

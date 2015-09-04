@@ -27,10 +27,6 @@ import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
-/**
- *
- * @author mbastian
- */
 public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph {
 
     protected final GraphStore store;
@@ -234,8 +230,8 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     public void clearEdges() {
         store.clearEdges();
     }
-    
-     @Override
+
+    @Override
     public Object getAttribute(String key) {
         return store.attributes.getValue(key);
     }
@@ -319,7 +315,7 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     public void fill() {
         throw new UnsupportedOperationException("Not supported yet for the main view.");
     }
-    
+
     @Override
     public Graph getRootGraph() {
         return this;

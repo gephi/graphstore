@@ -23,12 +23,33 @@ package org.gephi.graph.api;
  */
 public enum Estimator {
 
+    /**
+     * Average value.
+     */
     AVERAGE,
+    /**
+     * Median value.
+     */
     MEDIAN,
+    /**
+     * Sum value.
+     */
     SUM,
+    /**
+     * Minimum value.
+     */
     MIN,
+    /**
+     * Maximum value.
+     */
     MAX,
+    /**
+     * First value.
+     */
     FIRST,
+    /**
+     * Last value.
+     */
     LAST;
 
     /**

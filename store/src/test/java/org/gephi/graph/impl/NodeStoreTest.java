@@ -15,9 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.NodeStore;
-import org.gephi.graph.impl.NodeImpl;
-import org.gephi.graph.impl.GraphStoreConfiguration;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.ArrayList;

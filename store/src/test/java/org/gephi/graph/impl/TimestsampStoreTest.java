@@ -15,8 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.TimestampStore;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

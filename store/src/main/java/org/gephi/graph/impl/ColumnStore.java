@@ -30,10 +30,6 @@ import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Element;
 
-/**
- *
- * @author mbastian
- */
 public class ColumnStore<T extends Element> implements Iterable<Column> {
 
     //Config
@@ -389,9 +385,9 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
             throw new UnsupportedOperationException("Not supported");
         }
     }
-    
+
     public boolean deepEquals(ColumnStore<T> obj) {
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
         if (this.elementType != obj.elementType && (this.elementType == null || !this.elementType.equals(obj.elementType))) {

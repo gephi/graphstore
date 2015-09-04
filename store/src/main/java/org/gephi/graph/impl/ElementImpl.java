@@ -35,10 +35,6 @@ import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphView;
 
-/**
- *
- * @author mbastian
- */
 public abstract class ElementImpl implements Element {
 
     //Reference to store

@@ -15,23 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.EdgeImpl;
-import org.gephi.graph.impl.ColumnStore;
-import org.gephi.graph.impl.GraphViewImpl;
-import org.gephi.graph.impl.GraphVersion;
-import org.gephi.graph.impl.GraphFactoryImpl;
-import org.gephi.graph.impl.ColumnImpl;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.TimestampInternalMap;
-import org.gephi.graph.impl.EdgeTypeStore;
-import org.gephi.graph.impl.GraphAttributesImpl;
-import org.gephi.graph.impl.TextPropertiesImpl;
-import org.gephi.graph.impl.Serialization;
-import org.gephi.graph.impl.EdgeStore;
-import org.gephi.graph.impl.NodeStore;
-import org.gephi.graph.impl.NodeImpl;
-import org.gephi.graph.impl.TimestampStore;
-import org.gephi.graph.impl.GraphViewStore;
 import cern.colt.bitvector.BitVector;
 import java.io.IOException;
 import java.math.BigDecimal;

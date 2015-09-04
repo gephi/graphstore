@@ -15,12 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.GraphViewImpl;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.TimestampIndexImpl;
-import org.gephi.graph.impl.TimestampIndexStore;
-import org.gephi.graph.impl.NodeImpl;
-import org.gephi.graph.impl.TimestampStore;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;

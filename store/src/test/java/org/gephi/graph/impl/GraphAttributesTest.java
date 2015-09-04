@@ -15,9 +15,7 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.GraphAttributesImpl;
 import java.awt.Color;
-import java.awt.Transparency;
 import java.util.Set;
 import org.testng.Assert;
 import org.testng.annotations.Test;

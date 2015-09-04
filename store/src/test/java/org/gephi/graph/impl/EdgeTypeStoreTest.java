@@ -15,7 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.EdgeTypeStore;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

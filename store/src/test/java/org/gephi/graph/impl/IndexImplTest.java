@@ -15,11 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.ColumnStore;
-import org.gephi.graph.impl.ColumnImpl;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.IndexImpl;
-import org.gephi.graph.impl.NodeImpl;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;

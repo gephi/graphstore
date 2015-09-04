@@ -49,11 +49,7 @@ import org.gephi.graph.impl.NodeImpl.NodePropertiesImpl;
 import org.gephi.graph.impl.utils.DataInputOutput;
 import org.gephi.graph.impl.utils.LongPacker;
 
-/**
- * Greatly inspired from JDBM https://github.com/jankotek/JDBM3
- *
- * @author mbastian
- */
+// Greatly inspired from JDBM https://github.com/jankotek/JDBM3
 public class Serialization {
 
     final static int NULL_ID = -1;

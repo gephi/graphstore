@@ -19,10 +19,6 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
 
-/**
- *
- * @author mbastian
- */
 public class TimestampStore {
 
     protected final GraphStore graphStore;
@@ -44,7 +40,7 @@ public class TimestampStore {
     }
 
     public double getMin(Graph graph) {
-        if(nodeIndexStore == null || edgeIndexStore == null) {
+        if (nodeIndexStore == null || edgeIndexStore == null) {
             //TODO: Manual calculation
             return Double.NEGATIVE_INFINITY;
         }
@@ -60,7 +56,7 @@ public class TimestampStore {
     }
 
     public double getMax(Graph graph) {
-        if(nodeIndexStore == null || edgeIndexStore == null) {
+        if (nodeIndexStore == null || edgeIndexStore == null) {
             //TODO: Manual calculation
             return Double.POSITIVE_INFINITY;
         }
@@ -90,7 +86,7 @@ public class TimestampStore {
 
     public int deepHashCode() {
         int hash = 3;
-        hash = 79 * hash + (this.nodeMap != null ? this.nodeMap.deepHashCode(): 0);
+        hash = 79 * hash + (this.nodeMap != null ? this.nodeMap.deepHashCode() : 0);
         hash = 79 * hash + (this.edgeMap != null ? this.edgeMap.deepHashCode() : 0);
         return hash;
     }

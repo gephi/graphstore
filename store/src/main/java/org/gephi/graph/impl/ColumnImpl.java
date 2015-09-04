@@ -24,10 +24,6 @@ import org.gephi.graph.api.Table;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.types.TimestampMap;
 
-/**
- *
- * @author mbastian
- */
 public class ColumnImpl implements Column {
 
     //Attributes
@@ -156,7 +152,7 @@ public class ColumnImpl implements Column {
     public void setEstimator(Estimator estimator) {
         this.estimator = estimator;
     }
-    
+
     @Override
     public synchronized ColumnObserverImpl createColumnObserver() {
         if (observers != null) {
@@ -174,7 +170,7 @@ public class ColumnImpl implements Column {
             observer.destroyObserver();
         }
     }
-    
+
     protected void incrementVersion() {
         version.incrementAndGetVersion();
     }

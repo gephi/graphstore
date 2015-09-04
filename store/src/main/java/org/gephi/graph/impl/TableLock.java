@@ -13,27 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.gephi.graph.impl;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- *
- * @author mbastian
- */
 public class TableLock {
-    
+
     protected final ReentrantLock lock;
-    
+
     public TableLock() {
         lock = new ReentrantLock();
     }
-    
+
     public void lock() {
         lock.lock();
     }
-    
+
     public void unlock() {
         lock.unlock();
     }

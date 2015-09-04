@@ -15,9 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.EdgeImpl;
-import org.gephi.graph.impl.TextPropertiesImpl;
-import org.gephi.graph.impl.NodeImpl;
 import java.awt.Color;
 import org.gephi.graph.spi.LayoutData;
 import org.testng.Assert;

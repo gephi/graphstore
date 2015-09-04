@@ -15,13 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.ColumnStore;
-import org.gephi.graph.impl.GraphViewImpl;
-import org.gephi.graph.impl.ColumnImpl;
-import org.gephi.graph.impl.IndexStore;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.IndexImpl;
-import org.gephi.graph.impl.NodeImpl;
 import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.Column;

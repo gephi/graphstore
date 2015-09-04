@@ -15,13 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.EdgeImpl;
-import org.gephi.graph.impl.GraphViewImpl;
-import org.gephi.graph.impl.EdgeStore;
-import org.gephi.graph.impl.NodeStore;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.NodeImpl;
-import org.gephi.graph.impl.GraphViewStore;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;

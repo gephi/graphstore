@@ -19,7 +19,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.gephi.graph.api.Column;
 import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
@@ -28,10 +27,6 @@ import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 
-/**
- *
- * @author mbastian
- */
 public class TimestampIndexStore<T extends Element> {
 
     //Element

@@ -110,7 +110,7 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
 
     /**
      * Get the value for the given timestamp index.
-
+     *
      * @param timestampIndex timestamp index
      * @return found value or the default value if not found
      * @throws IllegalArgumentException if the element doesn't exist

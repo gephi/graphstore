@@ -26,10 +26,6 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
-/**
- *
- * @author mbastian
- */
 public class GraphViewStore {
 
     //Const

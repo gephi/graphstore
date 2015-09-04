@@ -19,10 +19,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-/**
- *
- * @author mbastian
- */
 public class GraphLock {
 
     protected final ReentrantReadWriteLock readWriteLock;

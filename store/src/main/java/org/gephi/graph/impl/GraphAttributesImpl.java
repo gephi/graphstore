@@ -22,10 +22,6 @@ import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
-/**
- *
- * @author mbastian
- */
 public class GraphAttributesImpl {
 
     protected final TimestampInternalMap timestampMap = new TimestampInternalMap();
@@ -104,7 +100,7 @@ public class GraphAttributesImpl {
     public int deepHashCode() {
         int hash = 3;
         hash = 47 * hash + (this.attributes != null ? this.attributes.hashCode() : 0);
-        hash = 47 * hash + (this.timestampMap != null ? this.timestampMap.deepHashCode(): 0);
+        hash = 47 * hash + (this.timestampMap != null ? this.timestampMap.deepHashCode() : 0);
         return hash;
     }
 

@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Element iterable.
- * 
+ *
  * @param <T> the element class
  */
 public interface ElementIterable<T extends Element> extends Iterable<T> {
@@ -34,7 +34,7 @@ public interface ElementIterable<T extends Element> extends Iterable<T> {
 
     /**
      * Returns the element iterator.
-     * 
+     *
      * @return the iterator.
      */
     @Override
@@ -59,6 +59,9 @@ public interface ElementIterable<T extends Element> extends Iterable<T> {
      */
     public void doBreak();
 
+    /**
+     * Empty element iterable.
+     */
     static final class ElementIterableEmpty implements Iterator<Element>, ElementIterable {
 
         @Override

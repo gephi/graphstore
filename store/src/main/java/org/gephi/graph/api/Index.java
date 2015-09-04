@@ -16,7 +16,6 @@
 package org.gephi.graph.api;
 
 import java.util.Collection;
-import org.gephi.graph.api.Element;
 
 /**
  * An index is associated with each table and keeps track of each unique value

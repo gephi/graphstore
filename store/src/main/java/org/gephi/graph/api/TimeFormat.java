@@ -20,40 +20,49 @@ package org.gephi.graph.api;
  */
 public enum TimeFormat {
 
+    /**
+     * Date representation.
+     */
     DATE {
-                @Override
-                public double parse(String str) {
-                    return AttributeUtils.parseDateTime(str);
-                }
+        @Override
+        public double parse(String str) {
+            return AttributeUtils.parseDateTime(str);
+        }
 
-                @Override
-                public String print(double time) {
-                    return AttributeUtils.printDate(time);
-                }
-            },
+        @Override
+        public String print(double time) {
+            return AttributeUtils.printDate(time);
+        }
+    },
+    /**
+     * Date and time representation.
+     */
     DATETIME {
-                @Override
-                public double parse(String str) {
-                    return AttributeUtils.parseDateTime(str);
-                }
+        @Override
+        public double parse(String str) {
+            return AttributeUtils.parseDateTime(str);
+        }
 
-                @Override
-                public String print(double time) {
-                    return AttributeUtils.printDateTime(time);
-                }
-            },
+        @Override
+        public String print(double time) {
+            return AttributeUtils.printDateTime(time);
+        }
+    },
+    /**
+     * Date represented as a double number.
+     */
     DOUBLE {
-                @Override
-                public double parse(String str) {
-                    return Double.parseDouble(str);
-                }
+        @Override
+        public double parse(String str) {
+            return Double.parseDouble(str);
+        }
 
-                @Override
-                public String print(double time) {
-                    return String.valueOf(time);
-                }
+        @Override
+        public String print(double time) {
+            return String.valueOf(time);
+        }
 
-            };
+    };
 
     /**
      * Parses the given string into the time format.

@@ -15,7 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.GraphModelImpl;
 import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Index;

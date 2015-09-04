@@ -15,11 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.impl.EdgeImpl;
-import org.gephi.graph.impl.GraphViewImpl;
-import org.gephi.graph.impl.GraphStore;
-import org.gephi.graph.impl.NodeImpl;
-import org.gephi.graph.impl.GraphViewStore;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Random;

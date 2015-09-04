@@ -24,7 +24,7 @@ public final class Interval {
      * Infinity interval on both bounds.
      */
     public static final Interval INFINITY_INTERVAL = new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-    
+
     private final double low;   // the left endpoint
     private final double high;  // the right endpoint
     private final boolean lopen; // indicates if the left endpoint is excluded
@@ -32,7 +32,7 @@ public final class Interval {
 
     /**
      * Copy constructor.
-     * 
+     *
      * @param interval interval to copy
      */
     public Interval(Interval interval) {
@@ -44,7 +44,7 @@ public final class Interval {
 
     /**
      * Constructor with bounds and whether they are included or excluded.
-     * 
+     *
      * @param low interval's low bound
      * @param high interval's high bound
      * @param lopen whether the low bound is excluded
@@ -64,8 +64,8 @@ public final class Interval {
     }
 
     /**
-     * Constructor with low and high bounds, both included. 
-     * 
+     * Constructor with low and high bounds, both included.
+     *
      * @param low interval's low bound
      * @param high interval's high bound
      */
@@ -76,16 +76,17 @@ public final class Interval {
     /**
      * Compares this interval with the specified interval for order.
      *
-     * <p>Any two intervals <i>i</i> and <i>i'</i> satisfy the interval
-     * trichotomy; that is, exactly one of the following three properties
-     * holds: 
-     * <ol> 
+     * <p>
+     * Any two intervals <i>i</i> and <i>i'</i> satisfy the interval trichotomy;
+     * that is, exactly one of the following three properties holds:
+     * <ol>
      * <li> <i>i</i> and <i>i'</i> overlap
      * <li> <i>i</i> is to the left of <i>i'</i>
      * <li> <i>i</i> is to the right of <i>i'</i>
      * </ol>
      *
-     * <p>Note that if two intervals are equal ({@code i.low = i'.low} and
+     * <p>
+     * Note that if two intervals are equal ({@code i.low = i'.low} and
      * {@code i.high = i'.high}), they overlap as well. But if they simply
      * overlap (for instance {@code i.low < i'.low} and {@code i.high >
      * i'.high}) they aren't equal. Remember that if two intervals are equal,
@@ -154,7 +155,8 @@ public final class Interval {
     /**
      * Compares this interval with the specified object for equality.
      *
-     * <p>Note that two intervals are equal if {@code i.low = i'.low} and
+     * <p>
+     * Note that two intervals are equal if {@code i.low = i'.low} and
      * {@code i.high = i'.high} and they have got the bounds excluded/included.
      *
      * @param obj object to which this interval is to be compared

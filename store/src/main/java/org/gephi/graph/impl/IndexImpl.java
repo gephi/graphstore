@@ -34,10 +34,6 @@ import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Element;
 
-/**
- *
- * @author mbastian
- */
 public class IndexImpl<T extends Element> implements Index<T> {
 
     protected final TableLock lock;

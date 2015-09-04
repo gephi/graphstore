@@ -18,7 +18,6 @@ package org.gephi.graph.api.types;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.Random;
-import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.impl.NumberGenerator;
 import org.testng.Assert;
 import org.testng.annotations.Test;

@@ -18,8 +18,9 @@ package org.gephi.graph.api;
 /**
  * Directed graph.
  * <p>
- * This interface has additional methods specific to directed graphs compared to the
- * <em>Graph</em> interface it inherits from. 
+ * This interface has additional methods specific to directed graphs compared to
+ * the
+ * <em>Graph</em> interface it inherits from.
  */
 public interface DirectedGraph extends Graph {
 

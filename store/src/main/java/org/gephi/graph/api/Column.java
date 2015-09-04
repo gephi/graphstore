@@ -18,9 +18,9 @@ package org.gephi.graph.api;
 /**
  * A column belongs to a table and represent a dimension in the data.
  * <p>
- * A column has primarily a unique identifier and a type, which both are set
- * at the creation time.
- * 
+ * A column has primarily a unique identifier and a type, which both are set at
+ * the creation time.
+ *
  * @see Table
  */
 public interface Column {
@@ -119,10 +119,10 @@ public interface Column {
      * @return the default value, or null
      */
     public Object getDefaultValue();
-    
+
     /**
      * Create a new column observer.
-     * 
+     *
      * @return the column observer
      */
     public ColumnObserver createColumnObserver();

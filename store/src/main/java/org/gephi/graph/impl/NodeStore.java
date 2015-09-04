@@ -25,10 +25,6 @@ import java.util.List;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 
-/**
- *
- * @author mbastian
- */
 public class NodeStore implements Collection<Node>, NodeIterable {
 
     //Const

@@ -18,16 +18,6 @@ package org.gephi.graph.api.types;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.gephi.graph.api.Estimator;
-import org.gephi.graph.api.types.TimestampBooleanMap;
-import org.gephi.graph.api.types.TimestampByteMap;
-import org.gephi.graph.api.types.TimestampCharMap;
-import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampFloatMap;
-import org.gephi.graph.api.types.TimestampIntegerMap;
-import org.gephi.graph.api.types.TimestampLongMap;
-import org.gephi.graph.api.types.TimestampShortMap;
-import org.gephi.graph.api.types.TimestampStringMap;
-import org.gephi.graph.api.types.TimestampMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

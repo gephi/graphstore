@@ -227,7 +227,7 @@ public class GraphModelImpl implements GraphModel {
     public Index getNodeIndex(GraphView view) {
         IndexStore<Node> indexStore = store.nodeColumnStore.indexStore;
         if (indexStore != null) {
-            if(view.isMainView()) {
+            if (view.isMainView()) {
                 return indexStore.getIndex(store);
             }
             return indexStore.getIndex(((GraphViewImpl) view).directedDecorator);
@@ -244,7 +244,7 @@ public class GraphModelImpl implements GraphModel {
     public Index getEdgeIndex(GraphView view) {
         IndexStore<Edge> indexStore = store.edgeColumnStore.indexStore;
         if (indexStore != null) {
-            if(view.isMainView()) {
+            if (view.isMainView()) {
                 return indexStore.getIndex(store);
             }
             return indexStore.getIndex(((GraphViewImpl) view).directedDecorator);
@@ -261,7 +261,7 @@ public class GraphModelImpl implements GraphModel {
     public TimestampIndex<Node> getNodeTimestampIndex(GraphView view) {
         TimestampIndexStore timestampStore = store.timestampStore.nodeIndexStore;
         if (timestampStore != null) {
-            if(view.isMainView()) {
+            if (view.isMainView()) {
                 return timestampStore.getIndex(store);
             }
             return timestampStore.getIndex(((GraphViewImpl) view).directedDecorator);
@@ -278,7 +278,7 @@ public class GraphModelImpl implements GraphModel {
     public TimestampIndex<Edge> getEdgeTimestampIndex(GraphView view) {
         TimestampIndexStore timestampStore = store.timestampStore.edgeIndexStore;
         if (timestampStore != null) {
-            if(view.isMainView()) {
+            if (view.isMainView()) {
                 return timestampStore.getIndex(store);
             }
             return timestampStore.getIndex(((GraphViewImpl) view).directedDecorator);
@@ -319,7 +319,7 @@ public class GraphModelImpl implements GraphModel {
     public Interval getTimeBoundsVisible() {
         return getTimeBounds(getGraphVisible().getView());
     }
-    
+
     @Override
     public Interval getTimeBounds(GraphView view) {
         TimestampStore timestampStore = store.timestampStore;
