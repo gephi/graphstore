@@ -26,11 +26,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Element;
 
-public class ColumnStore<T extends Element> implements Iterable<Column> {
+public class ColumnStore<T extends Element> implements ColumnIterable {
 
     //Config
     protected final static int MAX_SIZE = 65534;
@@ -211,6 +212,7 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         return new ColumnStoreIterator();
     }
 
+    @Override
     public ColumnImpl[] toArray() {
         lock();
         try {
@@ -226,6 +228,28 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         } finally {
             unlock();
         }
+    }
+
+    @Override
+    public List<Column> toList() {
+        lock();
+        try {
+            List<Column> cols = new ArrayList<Column>(size());
+            for (int i = 0; i < length; i++) {
+                ColumnImpl c = columns[i];
+                if (c != null) {
+                    cols.add(c);
+                }
+            }
+            return cols;
+        } finally {
+            unlock();
+        }
+    }
+
+    @Override
+    public void doBreak() {
+        unlock();
     }
 
     public Set<String> getColumnKeys() {
@@ -366,11 +390,19 @@ public class ColumnStore<T extends Element> implements Iterable<Column> {
         private int index;
         private ColumnImpl pointer;
 
+        public ColumnStoreIterator() {
+            lock();
+        }
+
         @Override
         public boolean hasNext() {
             while (index < length && (pointer = columns[index++]) == null) {
             }
-            return pointer != null;
+            if (pointer == null) {
+                unlock();
+                return false;
+            }
+            return true;
         }
 
         @Override

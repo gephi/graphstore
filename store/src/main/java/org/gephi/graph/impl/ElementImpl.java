@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.types.TimestampBooleanMap;
@@ -174,6 +175,11 @@ public abstract class ElementImpl implements Element {
     @Override
     public Set<String> getAttributeKeys() {
         return getColumnStore().getColumnKeys();
+    }
+
+    @Override
+    public ColumnIterable getAttributeColumns() {
+        return getColumnStore();
     }
 
     @Override

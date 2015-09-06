@@ -18,7 +18,7 @@ package org.gephi.graph.api;
 /**
  * The table is the container for columns.
  */
-public interface Table extends Iterable<Column> {
+public interface Table extends ColumnIterable {
 
     /**
      * Adds a new column to this table.
@@ -78,13 +78,6 @@ public interface Table extends Iterable<Column> {
      * @return the found column
      */
     public Column getColumn(String id);
-
-    /**
-     * Returns an array of all columns.
-     *
-     * @return the columns array
-     */
-    public Column[] getColumns();
 
     /**
      * Returns the estimator for the given column

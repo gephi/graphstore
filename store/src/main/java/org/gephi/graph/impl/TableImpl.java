@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import java.util.Iterator;
+import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Origin;
@@ -86,6 +87,21 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
+    public void doBreak() {
+        store.doBreak();
+    }
+
+    @Override
+    public Column[] toArray() {
+        return store.toArray();
+    }
+
+    @Override
+    public List<Column> toList() {
+        return store.toList();
+    }
+
+    @Override
     public Column getColumn(int index) {
         return store.getColumnByIndex(index);
     }
@@ -93,11 +109,6 @@ public class TableImpl<T extends Element> implements Table {
     @Override
     public Column getColumn(String id) {
         return store.getColumn(id);
-    }
-
-    @Override
-    public Column[] getColumns() {
-        return store.toArray();
     }
 
     @Override

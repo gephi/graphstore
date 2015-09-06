@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -432,6 +433,11 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public Set<String> getAttributeKeys() {
             return properties.keySet();
+        }
+
+        @Override
+        public ColumnIterable getAttributeColumns() {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
@@ -1302,12 +1308,10 @@ public class BasicGraphStore implements DirectedGraph {
         protected static String getStringId(BasicNode source, BasicNode target, boolean directed) {
             if (directed) {
                 return source.getId() + "->" + target.getId();
+            } else if (source.getId().hashCode() > target.getId().hashCode()) {
+                return source.getId() + "->" + target.getId();
             } else {
-                if (source.getId().hashCode() > target.getId().hashCode()) {
-                    return source.getId() + "->" + target.getId();
-                } else {
-                    return target.getId() + "->" + source.getId();
-                }
+                return target.getId() + "->" + source.getId();
             }
         }
 

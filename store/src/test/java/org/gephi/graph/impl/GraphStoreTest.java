@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -163,6 +164,11 @@ public class GraphStoreTest {
 
             @Override
             public Set<String> getAttributeKeys() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public ColumnIterable getAttributeColumns() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 

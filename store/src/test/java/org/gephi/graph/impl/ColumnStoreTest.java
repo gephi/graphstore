@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Iterator;
+import java.util.List;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnObserver;
 import org.gephi.graph.api.Origin;
@@ -429,6 +430,40 @@ public class ColumnStoreTest {
         Column[] cols = store.toArray();
         Assert.assertEquals(cols.length, 1);
         Assert.assertSame(cols[0], col12);
+    }
+
+    @Test
+    public void testToList() {
+        ColumnStore<Node> store = new ColumnStore<Node>(Node.class, false);
+
+        Assert.assertEquals(store.toList().size(), 0);
+
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
+        store.addColumn(col11);
+        store.addColumn(col12);
+
+        List<Column> cols = store.toList();
+        Assert.assertEquals(cols.size(), 2);
+        Assert.assertSame(cols.get(0), col11);
+        Assert.assertEquals(cols.get(1), col12);
+    }
+
+    @Test
+    public void testToListWithGarbage() {
+        ColumnStore<Node> store = new ColumnStore<Node>(Node.class, false);
+
+        Assert.assertEquals(store.toList().size(), 0);
+
+        ColumnImpl col11 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col12 = new ColumnImpl("1", String.class, "title", "default", Origin.PROPERTY, false, false);
+        store.addColumn(col11);
+        store.addColumn(col12);
+        store.removeColumn(col11);
+
+        List<Column> cols = store.toList();
+        Assert.assertEquals(cols.size(), 1);
+        Assert.assertSame(cols.get(0), col12);
     }
 
     @Test

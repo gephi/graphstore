@@ -105,6 +105,13 @@ public interface Element extends ElementProperties {
     public Set<String> getAttributeKeys();
 
     /**
+     * Returns the columns.
+     *
+     * @return the attribute columns
+     */
+    public ColumnIterable getAttributeColumns();
+
+    /**
      * Returns the location of this element in the store.
      *
      * @return the store id

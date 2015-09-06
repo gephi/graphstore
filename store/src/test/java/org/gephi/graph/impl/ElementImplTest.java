@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
@@ -318,6 +319,34 @@ public class ElementImplTest {
         Set<String> pk = node.getAttributeKeys();
         Assert.assertTrue(pk.contains(column.getId()));
         Assert.assertEquals(pk.size(), 1 + getElementPropertiesLength());
+    }
+
+    @Test
+    public void testGetAttributeColumnsEmpty() {
+        GraphStore store = new GraphStore();
+        NodeImpl node = new NodeImpl(0, store);
+        Iterable<Column> pk = node.getAttributeColumns();
+        Assert.assertNotNull(pk);
+        Iterator<Column> itr = pk.iterator();
+        Assert.assertNotNull(itr);
+        int size = 0;
+        for (; itr.hasNext();) {
+            Column c = itr.next();
+            Assert.assertTrue(c.isProperty());
+            size++;
+        }
+        Assert.assertTrue(size == getElementPropertiesLength());
+    }
+
+    @Test
+    public void testGetAttributeColumns() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl(0, store);
+        ColumnIterable ci = node.getAttributeColumns();
+        Assert.assertTrue(ci.toList().contains(column));
+        Assert.assertEquals(ci.toList().size(), 1 + getElementPropertiesLength());
     }
 
     @Test

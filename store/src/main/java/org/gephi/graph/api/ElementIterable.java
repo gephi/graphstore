@@ -43,14 +43,14 @@ public interface ElementIterable<T extends Element> extends Iterable<T> {
     /**
      * Returns the iterator content as an array.
      *
-     * @return edge array
+     * @return element array
      */
     public T[] toArray();
 
     /**
      * Returns the iterator content as a collection.
      *
-     * @return edge array
+     * @return element collection
      */
     public Collection<T> toCollection();
 
