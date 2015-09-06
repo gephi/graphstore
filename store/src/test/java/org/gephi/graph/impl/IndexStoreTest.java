@@ -440,6 +440,9 @@ public class IndexStoreTest {
             nodes[i] = n;
 
             for (Column col : columnStore) {
+                if (col.isProperty()) {
+                    continue;
+                }
                 if (col.getTypeClass().equals(String.class)) {
                     n.setAttribute(col, "" + i);
                 } else if (col.getTypeClass().equals(Integer.class)) {

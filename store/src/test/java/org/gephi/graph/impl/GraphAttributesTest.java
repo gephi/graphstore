@@ -151,13 +151,13 @@ public class GraphAttributesTest {
     public void testDeepEquals() {
         GraphAttributesImpl atts1 = new GraphAttributesImpl();
         GraphAttributesImpl atts2 = new GraphAttributesImpl();
-        
+
         Assert.assertTrue(atts1.deepEquals(atts2));
         Assert.assertEquals(atts1.deepHashCode(), atts2.deepHashCode());
-        
+
         atts1.setValue("foo", "bar", 1.0);
         atts2.setValue("foo", "bar", 1.0);
-        
+
         Assert.assertTrue(atts1.deepEquals(atts2));
         Assert.assertEquals(atts1.deepHashCode(), atts2.deepHashCode());
     }

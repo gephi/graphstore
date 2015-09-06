@@ -1,0 +1,136 @@
+/*
+ * Copyright 2012-2013 Gephi Consortium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.gephi.graph.api;
+
+/**
+ * Global configuration set at initialization.
+ * <p>
+ * This class can be passed as a parameter to
+ * {@link GraphModel.Factory#newInstance(org.gephi.graph.api.Configuration)} to
+ * create a <em>GraphModel</em> with custom configuration.
+ * <p>
+ * Note that setting configurations after the <em>GraphModel</em> has been
+ * created won't have any effect.
+ * <p>
+ * By default, both node and edge id types are <code>String.class</code>.
+ *
+ * @see GraphModel
+ */
+public class Configuration {
+
+    private static final Class DEFAULT_NODE_ID_TYPE = String.class;
+    private static final Class DEFAULT_EDGE_ID_TYPE = String.class;
+
+    private Class nodeIdType;
+    private Class edgeIdType;
+
+    /**
+     * Default constructor.
+     */
+    public Configuration() {
+        nodeIdType = DEFAULT_NODE_ID_TYPE;
+        edgeIdType = DEFAULT_EDGE_ID_TYPE;
+    }
+
+    /**
+     * Returns the node id type.
+     *
+     * @return node id type
+     */
+    public Class getNodeIdType() {
+        return nodeIdType;
+    }
+
+    /**
+     * Sets the node id type.
+     * <p>
+     * Only simple types such as primitives, wrappers and String are supported.
+     *
+     * @param nodeIdType node id type
+     * @throws IllegalArgumentException if the type isn't supported
+     */
+    public void setNodeIdType(Class nodeIdType) {
+        if (!AttributeUtils.isSimpleType(nodeIdType)) {
+            throw new IllegalArgumentException("Unsupported type " + nodeIdType.getClass().getCanonicalName());
+        }
+        this.nodeIdType = nodeIdType;
+    }
+
+    /**
+     * Returns the edge id type.
+     *
+     * @return edge id type
+     */
+    public Class getEdgeIdType() {
+        return edgeIdType;
+    }
+
+    /**
+     * Sets the edge id type.
+     * <p>
+     * Only simple types such as primitives, wrappers and String are supported.
+     *
+     * @param edgeIdType edge id type
+     * @throws IllegalArgumentException if the type isn't supported
+     */
+    public void setEdgeIdType(Class edgeIdType) {
+        if (!AttributeUtils.isSimpleType(edgeIdType)) {
+            throw new IllegalArgumentException("Unsupported type " + edgeIdType.getClass().getCanonicalName());
+        }
+        this.edgeIdType = edgeIdType;
+    }
+
+    /**
+     * Copy this configuration.
+     *
+     * @return a copy of this configuration
+     */
+    public Configuration copy() {
+        Configuration copy = new Configuration();
+        copy.nodeIdType = nodeIdType;
+        copy.edgeIdType = edgeIdType;
+        return copy;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 19 * hash + (this.nodeIdType != null ? this.nodeIdType.hashCode() : 0);
+        hash = 19 * hash + (this.edgeIdType != null ? this.edgeIdType.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Configuration other = (Configuration) obj;
+        if (this.nodeIdType != other.nodeIdType && (this.nodeIdType == null || !this.nodeIdType.equals(other.nodeIdType))) {
+            return false;
+        }
+        if (this.edgeIdType != other.edgeIdType && (this.edgeIdType == null || !this.edgeIdType.equals(other.edgeIdType))) {
+            return false;
+        }
+        return true;
+    }
+}

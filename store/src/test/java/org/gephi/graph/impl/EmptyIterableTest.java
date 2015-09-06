@@ -56,7 +56,7 @@ public class EmptyIterableTest {
         EdgeIterable itr = EdgeIterable.EMPTY;
         Assert.assertEquals(itr.toCollection(), new ArrayList<Edge>());
     }
-    
+
     @Test
     public void testEdgeIterableDoBreak() {
         EdgeIterable.EMPTY.doBreak();
@@ -89,12 +89,12 @@ public class EmptyIterableTest {
         NodeIterable itr = NodeIterable.EMPTY;
         Assert.assertEquals(itr.toCollection(), new ArrayList<Node>());
     }
-    
+
     @Test
     public void testNodeIterableDoBreak() {
         NodeIterable.EMPTY.doBreak();
     }
-    
+
     @Test
     public void testElementIterableHasNext() {
         Iterator<Element> itr = ElementIterable.EMPTY.iterator();
@@ -122,7 +122,7 @@ public class EmptyIterableTest {
         ElementIterable itr = ElementIterable.EMPTY;
         Assert.assertEquals(itr.toCollection(), new ArrayList<Element>());
     }
-    
+
     @Test
     public void testElementIterableDoBreak() {
         ElementIterable.EMPTY.doBreak();

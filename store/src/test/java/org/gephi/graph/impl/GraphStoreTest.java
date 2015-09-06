@@ -625,7 +625,7 @@ public class GraphStoreTest {
     public void testIsSelfLoop() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         NodeImpl n1 = graphStore.getNode("1");
-        Edge edge = graphStore.factory.newEdge(n1, n1);
+        Edge edge = graphStore.factory.newEdge("edge", n1, n1, EdgeTypeStore.NULL_LABEL, 1.0, true);
         graphStore.addEdge(edge);
 
         GraphViewStore store = graphStore.viewStore;
@@ -650,7 +650,7 @@ public class GraphStoreTest {
         Node n1 = graphStore.getNode("1");
         Assert.assertTrue(graphStore.isIncident(n1, graphStore.getEdge("0")));
 
-        Edge edge = graphStore.factory.newEdge(n1, n1);
+        Edge edge = graphStore.factory.newEdge("edge", n1, n1, EdgeTypeStore.NULL_LABEL, 1.0, true);
         graphStore.addEdge(edge);
         Assert.assertTrue(graphStore.isIncident(edge, graphStore.getEdge("0")));
     }

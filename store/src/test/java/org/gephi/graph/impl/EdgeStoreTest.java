@@ -769,12 +769,10 @@ public class EdgeStoreTest {
                         Assert.assertEquals(outEdgeMap.remove(e.getId()), e);
                         Assert.assertEquals(inEdgeMap.remove(e.getId()), e);
                     }
+                } else if (e.source == n) {
+                    Assert.assertEquals(outEdgeMap.remove(e.getId()), e);
                 } else {
-                    if (e.source == n) {
-                        Assert.assertEquals(outEdgeMap.remove(e.getId()), e);
-                    } else {
-                        Assert.assertEquals(inEdgeMap.remove(e.getId()), e);
-                    }
+                    Assert.assertEquals(inEdgeMap.remove(e.getId()), e);
                 }
             }
         }
@@ -815,12 +813,10 @@ public class EdgeStoreTest {
                         Assert.assertEquals(outEdgeMap.remove(e.getId()), e);
                         Assert.assertEquals(inEdgeMap.remove(e.getId()), e);
                     }
+                } else if (e.source == n) {
+                    Assert.assertEquals(outEdgeMap.remove(e.getId()), e);
                 } else {
-                    if (e.source == n) {
-                        Assert.assertEquals(outEdgeMap.remove(e.getId()), e);
-                    } else {
-                        Assert.assertEquals(inEdgeMap.remove(e.getId()), e);
-                    }
+                    Assert.assertEquals(inEdgeMap.remove(e.getId()), e);
                 }
             }
         }
@@ -993,12 +989,10 @@ public class EdgeStoreTest {
                         } else {
                             Assert.fail();
                         }
+                    } else if (e.source == n) {
+                        Assert.assertEquals(outEdgeMap.remove(e.getId()), e);
                     } else {
-                        if (e.source == n) {
-                            Assert.assertEquals(outEdgeMap.remove(e.getId()), e);
-                        } else {
-                            Assert.assertEquals(inEdgeMap.remove(e.getId()), e);
-                        }
+                        Assert.assertEquals(inEdgeMap.remove(e.getId()), e);
                     }
                     Assert.assertEquals(e.type, i);
                 }

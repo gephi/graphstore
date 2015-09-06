@@ -283,6 +283,9 @@ public class AttributeUtils {
 
     /**
      * Returns the standardized type for the given type class.
+     * <p>
+     * For instance, <code>getStandardizedType(int.class)</code> would return
+     * <code>Integer.class</code>.
      *
      * @param type the type to standardize
      * @return the standardized type
@@ -439,6 +442,21 @@ public class AttributeUtils {
     public static boolean isDynamicType(Class type) {
         return !type.equals(TimestampMap.class)
                 && TimestampMap.class.isAssignableFrom(type);
+    }
+
+    /**
+     * Returns true if <em>type</em> is a simple type.
+     * <p>
+     * Simple types are primitives, String and wrapper types (e.g. Integer).
+     *
+     * @param type the type to test
+     * @return true if <em>type</em> is a simple type, false otherwise
+     */
+    public static boolean isSimpleType(Class type) {
+        return (type.isPrimitive() && type != void.class)
+                || type == Double.class || type == Float.class || type == Long.class
+                || type == Integer.class || type == Short.class || type == Character.class
+                || type == Byte.class || type == Boolean.class || type == String.class;
     }
 
     /**

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Element;
@@ -38,6 +39,8 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     //Const
     protected final static int NULL_ID = -1;
     protected final static short NULL_SHORT = Short.MIN_VALUE;
+    //Configuration
+    protected final Configuration configuration;
     //Element
     protected final Class<T> elementType;
     //Columns
@@ -55,9 +58,14 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     protected int length;
 
     public ColumnStore(Class<T> elementType, boolean indexed) {
+        this(new Configuration(), elementType, indexed);
+    }
+
+    public ColumnStore(Configuration configuration, Class<T> elementType, boolean indexed) {
         if (MAX_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE + 1) {
             throw new RuntimeException("Column Store size can't exceed 65534");
         }
+        this.configuration = configuration;
         this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLock() : null;
         this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<String>(MAX_SIZE);

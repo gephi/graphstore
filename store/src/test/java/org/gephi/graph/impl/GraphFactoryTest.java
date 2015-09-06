@@ -15,37 +15,34 @@
  */
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class GraphFactoryTest {
 
     @Test
     public void testEmpty() {
-        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(new GraphStore());
         Assert.assertEquals(graphFactory.getNodeCounter(), 0);
         Assert.assertEquals(graphFactory.getEdgeCounter(), 0);
     }
 
     @Test
     public void testNewNode() {
-        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(new GraphStore());
         Node node = graphFactory.newNode();
 
-        Assert.assertEquals(node.getId(), 0);
+        Assert.assertEquals(node.getId(), "0");
         Assert.assertEquals(graphFactory.getNodeCounter(), 1);
     }
 
     @Test
     public void testNewNodeWithId() {
         String id = "Foo";
-        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(new GraphStore());
         Node node = graphFactory.newNode(id);
 
         Assert.assertEquals(node.getId(), id);
@@ -54,12 +51,12 @@ public class GraphFactoryTest {
 
     @Test
     public void testNewEdge() {
-        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(new GraphStore());
         Node source = graphFactory.newNode("source");
         Node target = graphFactory.newNode("target");
         Edge edge = graphFactory.newEdge(source, target);
 
-        Assert.assertEquals(edge.getId(), 0);
+        Assert.assertEquals(edge.getId(), "0");
         Assert.assertEquals(graphFactory.getEdgeCounter(), 1);
         Assert.assertSame(edge.getSource(), source);
         Assert.assertSame(edge.getTarget(), target);
@@ -70,12 +67,12 @@ public class GraphFactoryTest {
 
     @Test
     public void testNewEdgeWithDirected() {
-        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(new GraphStore());
         Node source = graphFactory.newNode("source");
         Node target = graphFactory.newNode("target");
         Edge edge = graphFactory.newEdge(source, target, false);
 
-        Assert.assertEquals(edge.getId(), 0);
+        Assert.assertEquals(edge.getId(), "0");
         Assert.assertEquals(graphFactory.getEdgeCounter(), 1);
         Assert.assertSame(edge.getSource(), source);
         Assert.assertSame(edge.getTarget(), target);
@@ -86,12 +83,12 @@ public class GraphFactoryTest {
 
     @Test
     public void testNewEdgeWithDirectedAndType() {
-        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(new GraphStore());
         Node source = graphFactory.newNode("source");
         Node target = graphFactory.newNode("target");
         Edge edge = graphFactory.newEdge(source, target, 9, false);
 
-        Assert.assertEquals(edge.getId(), 0);
+        Assert.assertEquals(edge.getId(), "0");
         Assert.assertEquals(graphFactory.getEdgeCounter(), 1);
         Assert.assertSame(edge.getSource(), source);
         Assert.assertSame(edge.getTarget(), target);
@@ -102,12 +99,12 @@ public class GraphFactoryTest {
 
     @Test
     public void testNewEdgeWithDirectedAndTypeAndWeight() {
-        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(new GraphStore());
         Node source = graphFactory.newNode("source");
         Node target = graphFactory.newNode("target");
         Edge edge = graphFactory.newEdge(source, target, 9, 7.0, false);
 
-        Assert.assertEquals(edge.getId(), 0);
+        Assert.assertEquals(edge.getId(), "0");
         Assert.assertEquals(graphFactory.getEdgeCounter(), 1);
         Assert.assertSame(edge.getSource(), source);
         Assert.assertSame(edge.getTarget(), target);
@@ -118,7 +115,7 @@ public class GraphFactoryTest {
 
     @Test
     public void testNewEdgeWithId() {
-        GraphFactoryImpl graphFactory = new GraphFactoryImpl(null);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(new GraphStore());
         Node source = graphFactory.newNode("source");
         Node target = graphFactory.newNode("target");
         String id = "foo";
@@ -134,38 +131,55 @@ public class GraphFactoryTest {
     }
 
     @Test
-    public void testEdgeFields() {
-        NodeImpl source = new NodeImpl("0");
-        NodeImpl target = new NodeImpl("1");
-        double weight = 2.0;
-        EdgeImpl edge = new EdgeImpl("0", source, target, 0, weight, true);
+    public void testIntegerNodeId() {
+        Configuration config = new Configuration();
+        config.setNodeIdType(Integer.class);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
+        Node node = graphFactory.newNode();
+        Assert.assertEquals(node.getId(), 0);
+    }
 
-        Assert.assertTrue(edge.isDirected());
-        Assert.assertFalse(edge.isSelfLoop());
-        Assert.assertFalse(edge.isMutual());
-        Assert.assertFalse(edge.isValid());
+    @Test
+    public void testIntegerEdgeId() {
+        Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
 
-        edge.setMutual(true);
+        Node source = graphFactory.newNode("source");
+        Node target = graphFactory.newNode("target");
 
-        Assert.assertTrue(edge.isMutual());
+        Edge edge = graphFactory.newEdge(source, target);
+        Assert.assertEquals(edge.getId(), 0);
+    }
 
-        edge = new EdgeImpl("0", source, source, 0, weight, true);
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testUnsupportedNodeId() {
+        Configuration config = new Configuration();
+        config.setNodeIdType(Float.class);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
+        graphFactory.newNode();
+    }
 
-        Assert.assertTrue(edge.isSelfLoop());
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testUnsupportedEdgeId() {
+        Configuration config = new Configuration();
+        config.setEdgeIdType(Float.class);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
 
-        edge = new EdgeImpl("0", source, target, 0, weight, false);
+        Node source = graphFactory.newNode("source");
+        Node target = graphFactory.newNode("target");
 
-        Assert.assertFalse(edge.isDirected());
-
-        edge.setMutual(true);
-
-        Assert.assertFalse(edge.isMutual());
+        graphFactory.newEdge(source, target);
     }
 
     @Test
     public void testDeepEquals() {
-        GraphFactoryImpl gf1 = new GraphFactoryImpl(null);
-        GraphFactoryImpl gf2 = new GraphFactoryImpl(null);
+        GraphFactoryImpl gf1 = new GraphFactoryImpl(new GraphStore());
+        GraphFactoryImpl gf2 = new GraphFactoryImpl(new GraphStore());
 
         Assert.assertTrue(gf1.deepEquals(gf2));
         Assert.assertTrue(gf1.deepEquals(gf1));
@@ -183,12 +197,12 @@ public class GraphFactoryTest {
 
     @Test
     public void testDeepHashCode() {
-        GraphFactoryImpl gf1 = new GraphFactoryImpl(null);
-        GraphFactoryImpl gf2 = new GraphFactoryImpl(null);
+        GraphFactoryImpl gf1 = new GraphFactoryImpl(new GraphStore());
+        GraphFactoryImpl gf2 = new GraphFactoryImpl(new GraphStore());
 
         Assert.assertEquals(gf1.deepHashCode(), gf2.deepHashCode());
         Assert.assertEquals(gf1.deepHashCode(), gf1.deepHashCode());
-        
+
         gf1.setNodeCounter(42);
         gf1.setEdgeCounter(12);
 

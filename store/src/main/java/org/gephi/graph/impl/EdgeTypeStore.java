@@ -22,6 +22,7 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortRBTreeSet;
 import it.unimi.dsi.fastutil.shorts.ShortSortedSet;
 import java.util.Arrays;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public class EdgeTypeStore {
@@ -33,15 +34,21 @@ public class EdgeTypeStore {
     //Config
     public final static int MAX_SIZE = 65534;
     //Data
+    protected final Configuration configuration;
     protected final Object2ShortMap labelMap;
     protected final Short2ObjectMap idMap;
     protected final ShortSortedSet garbageQueue;
     protected int length;
 
     public EdgeTypeStore() {
+        this(new Configuration());
+    }
+
+    public EdgeTypeStore(Configuration config) {
         if (MAX_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE + 1) {
             throw new RuntimeException("Edge Type Store size can't exceed 65534");
         }
+        this.configuration = config;
         this.garbageQueue = new ShortRBTreeSet();
         this.labelMap = new Object2ShortOpenHashMap(MAX_SIZE);
         this.idMap = new Short2ObjectOpenHashMap(MAX_SIZE);

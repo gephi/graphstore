@@ -273,7 +273,7 @@ public class GraphObserverTest {
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
         graphObserver.hasGraphChanged();
 
-        Node[] addedNodes = new Node[]{store.factory.newNode(), store.factory.newNode()};
+        Node[] addedNodes = new Node[]{store.factory.newNode("r1"), store.factory.newNode("r2")};
         store.addAllNodes(Arrays.asList(addedNodes));
 
         boolean a = graphObserver.hasGraphChanged();
@@ -292,11 +292,11 @@ public class GraphObserverTest {
     public void testDiffAddedEdges() {
         GraphStore store = GraphGenerator.generateSmallGraphStore();
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
-        Node[] addedNodes = new Node[]{store.factory.newNode(), store.factory.newNode()};
+        Node[] addedNodes = new Node[]{store.factory.newNode("r1"), store.factory.newNode("r2")};
         store.addAllNodes(Arrays.asList(addedNodes));
 
         graphObserver.hasGraphChanged();
-        Edge[] addedEdges = new Edge[]{store.factory.newEdge(addedNodes[0], addedNodes[1], 0, true)};
+        Edge[] addedEdges = new Edge[]{store.factory.newEdge("edge", addedNodes[0], addedNodes[1], 0, 1.0, true)};
         store.addEdge(addedEdges[0]);
 
         boolean a = graphObserver.hasGraphChanged();
@@ -316,7 +316,7 @@ public class GraphObserverTest {
         GraphStore store = GraphGenerator.generateSmallGraphStore();
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
 
-        Node[] removedNodes = new Node[]{store.factory.newNode(), store.factory.newNode()};
+        Node[] removedNodes = new Node[]{store.factory.newNode("r1"), store.factory.newNode("r2")};
         store.addAllNodes(Arrays.asList(removedNodes));
 
         graphObserver.hasGraphChanged();
@@ -339,9 +339,9 @@ public class GraphObserverTest {
         GraphStore store = GraphGenerator.generateSmallGraphStore();
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
 
-        Node[] addedNodes = new Node[]{store.factory.newNode(), store.factory.newNode()};
+        Node[] addedNodes = new Node[]{store.factory.newNode("r1"), store.factory.newNode("r2")};
         store.addAllNodes(Arrays.asList(addedNodes));
-        Edge[] addedEdges = new Edge[]{store.factory.newEdge(addedNodes[0], addedNodes[1], 0, true)};
+        Edge[] addedEdges = new Edge[]{store.factory.newEdge("edge", addedNodes[0], addedNodes[1], 0, 1.0, true)};
         store.addEdge(addedEdges[0]);
         graphObserver.hasGraphChanged();
         store.removeEdge(addedEdges[0]);
@@ -406,7 +406,7 @@ public class GraphObserverTest {
         store.version.nodeVersion = Integer.MAX_VALUE - 1;
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
         graphObserver.hasGraphChanged();
-        store.addNode(store.factory.newNode());
+        store.addNode(store.factory.newNode("node"));
 
         int nodeVersion = store.version.nodeVersion;
 
@@ -422,7 +422,7 @@ public class GraphObserverTest {
         store.version.edgeVersion = Integer.MAX_VALUE - 1;
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
         graphObserver.hasGraphChanged();
-        store.addEdge(store.factory.newEdge(n2, n1));
+        store.addEdge(store.factory.newEdge("edge", n2, n1, EdgeTypeStore.NULL_LABEL, 1.0, true));
 
         int edgeVersion = store.version.edgeVersion;
 

@@ -37,10 +37,6 @@ import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class AttributeUtilsTest {
 
     @Test
@@ -305,5 +301,23 @@ public class AttributeUtilsTest {
 
         Assert.assertTrue(AttributeUtils.isEdgeColumn(column));
         Assert.assertFalse(AttributeUtils.isEdgeColumn(tableNode.addColumn("0", Float.class)));
+    }
+
+    @Test
+    public void testIsSimpleType() {
+        Assert.assertTrue(AttributeUtils.isSimpleType(int.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(String.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(Double.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(Float.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(Integer.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(Short.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(Byte.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(Long.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(Character.class));
+        Assert.assertTrue(AttributeUtils.isSimpleType(Boolean.class));
+
+        Assert.assertFalse(AttributeUtils.isSimpleType(void.class));
+        Assert.assertFalse(AttributeUtils.isSimpleType(int[].class));
+        Assert.assertFalse(AttributeUtils.isSimpleType(TimestampBooleanMap.class));
     }
 }

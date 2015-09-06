@@ -84,7 +84,7 @@ public class ElementPropertiesTest {
 
         properties.x = 1;
 
-         Assert.assertFalse(properties.deepEquals(properties2));
+        Assert.assertFalse(properties.deepEquals(properties2));
     }
 
     @Test

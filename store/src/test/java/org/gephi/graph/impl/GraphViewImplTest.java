@@ -241,7 +241,7 @@ public class GraphViewImplTest {
         view.addNode(n2);
 
         Assert.assertNull(graphStore.getEdge(n1, n2));
-        EdgeImpl edge = (EdgeImpl) graphStore.factory.newEdge(n1, n2);
+        EdgeImpl edge = (EdgeImpl) graphStore.factory.newEdge("edge", n1, n2, 0, 1.0, true);
         graphStore.addEdge(edge);
 
         Assert.assertTrue(view.containsEdge(edge));

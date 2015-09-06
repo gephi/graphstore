@@ -48,14 +48,14 @@ public class TableObserverTest {
         Assert.assertTrue(tableObserver.hasTableChanged());
         Assert.assertFalse(tableObserver.hasTableChanged());
     }
-    
+
     @Test
     public void testObserverRemoveColumn() {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
         table.addColumn("0", Integer.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
         table.removeColumn("0");
-        
+
         Assert.assertTrue(tableObserver.hasTableChanged());
         Assert.assertFalse(tableObserver.hasTableChanged());
     }

@@ -66,7 +66,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1);
 
         Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
@@ -79,7 +79,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute("age", 1);
 
         Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
@@ -92,7 +92,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute("age", 1);
         node.setAttribute("age", 2);
 
@@ -103,7 +103,7 @@ public class ElementImplTest {
     public void testSetAttributeUnknownColumn() {
         GraphStore store = new GraphStore();
         ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false, false);
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(columnImpl, "0");
     }
 
@@ -113,7 +113,7 @@ public class ElementImplTest {
         Column column = generateBasicColumn(otherStore);
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, "0");
     }
 
@@ -122,7 +122,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, "a");
     }
 
@@ -131,7 +131,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, null);
 
         Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
@@ -144,7 +144,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 2.0);
         node.setAttribute(column, 2, 1.0);
 
@@ -159,7 +159,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute("age", 1, 2.0);
 
         Assert.assertEquals(node.getAttribute(column, 2.0), 1);
@@ -170,7 +170,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 2.0);
     }
 
@@ -179,7 +179,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 2.0);
         node.setAttribute(column, 2, 2.0);
 
@@ -191,7 +191,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, Double.NaN);
     }
 
@@ -200,7 +200,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, Double.POSITIVE_INFINITY);
     }
 
@@ -209,7 +209,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1);
         Object res = node.getAttribute(column);
 
@@ -225,7 +225,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1);
         Object res = node.getAttribute(column.getId());
         Assert.assertEquals(res, 1);
@@ -235,7 +235,7 @@ public class ElementImplTest {
     public void testGetAttributeUnknownColumn() {
         GraphStore store = new GraphStore();
         ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false, false);
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.getAttribute(columnImpl);
     }
 
@@ -245,7 +245,7 @@ public class ElementImplTest {
         Column column = generateBasicColumn(otherStore);
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.getAttribute(column);
     }
 
@@ -254,7 +254,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 1.0);
 
         Assert.assertEquals(node.getAttribute(column, 1.0), 1);
@@ -265,7 +265,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 1.0);
 
         Assert.assertEquals(node.getAttribute("age", 1.0), 1);
@@ -276,7 +276,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1);
 
         node.getAttribute(column, 1.0);
@@ -289,7 +289,7 @@ public class ElementImplTest {
         Column column = new ColumnImpl("age", Integer.class, "Age", defaultValue, Origin.DATA, true, false);
         store.nodeColumnStore.addColumn(column);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         Object res = node.getAttribute(column.getId());
         Assert.assertEquals(res, defaultValue);
 
@@ -305,7 +305,7 @@ public class ElementImplTest {
     @Test
     public void testGetAttributeKeysEmpty() {
         GraphStore store = new GraphStore();
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         Set<String> pk = node.getAttributeKeys();
         Assert.assertTrue(pk.size() == getElementPropertiesLength());
     }
@@ -315,7 +315,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         Set<String> pk = node.getAttributeKeys();
         Assert.assertTrue(pk.contains(column.getId()));
         Assert.assertEquals(pk.size(), 1 + getElementPropertiesLength());
@@ -324,7 +324,7 @@ public class ElementImplTest {
     @Test
     public void testGetAttributeColumnsEmpty() {
         GraphStore store = new GraphStore();
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         Iterable<Column> pk = node.getAttributeColumns();
         Assert.assertNotNull(pk);
         Iterator<Column> itr = pk.iterator();
@@ -343,7 +343,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         ColumnIterable ci = node.getAttributeColumns();
         Assert.assertTrue(ci.toList().contains(column));
         Assert.assertEquals(ci.toList().size(), 1 + getElementPropertiesLength());
@@ -353,7 +353,7 @@ public class ElementImplTest {
     public void testLabel() {
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
 
         Assert.assertNull(node.getLabel());
 
@@ -370,7 +370,7 @@ public class ElementImplTest {
     public void testAddTimestamp() {
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         Assert.assertTrue(node.addTimestamp(1.0));
 
         Assert.assertTrue(node.hasTimestamp(1.0));
@@ -380,7 +380,7 @@ public class ElementImplTest {
     public void testRemoveTimestamp() {
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.addTimestamp(1.0);
         Assert.assertTrue(node.removeTimestamp(1.0));
         Assert.assertFalse(node.hasTimestamp(1.0));
@@ -390,7 +390,7 @@ public class ElementImplTest {
     public void testHasTimestampEmpty() {
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         Assert.assertFalse(node.hasTimestamp(1.0));
     }
 
@@ -399,7 +399,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 14);
         store.addNode(node);
 
@@ -414,7 +414,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicBooleanColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, true);
         store.addNode(node);
 
@@ -429,7 +429,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 14);
         store.addNode(node);
 
@@ -443,7 +443,7 @@ public class ElementImplTest {
     public void testGetTimestampsEmpty() {
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         Assert.assertEquals(node.getTimestamps(), new double[0]);
     }
 
@@ -451,7 +451,7 @@ public class ElementImplTest {
     public void testGetTimestamps() {
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.addTimestamp(1.0);
         node.addTimestamp(2.0);
 
@@ -467,7 +467,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 12, 1.0);
         node.setAttribute(column, 14, 3.0);
         node.setAttribute(column, 13, 2.0);
@@ -493,7 +493,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
 
         Iterator<Map.Entry<Double, Object>> itr = node.getAttributes(column).iterator();
         Assert.assertFalse(itr.hasNext());
@@ -504,7 +504,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.getAttributes(column);
     }
 
@@ -513,7 +513,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1);
 
         GraphView view = store.viewStore.createView();
@@ -526,7 +526,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Column column = generateDynamicColumn(store);
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 10, 1.0);
 
         GraphView view = store.viewStore.createView();
@@ -546,7 +546,7 @@ public class ElementImplTest {
     public void testCheckType() {
         GraphStore store = new GraphStore();
 
-        NodeImpl node = new NodeImpl(0, store);
+        NodeImpl node = new NodeImpl("0", store);
         node.checkType(new ColumnImpl("0", TimestampIntegerMap.class, null, null, Origin.DATA, false, false), 1);
         node.checkType(new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false), 1.0);
         node.checkType(new ColumnImpl("0", TimestampFloatMap.class, null, null, Origin.DATA, false, false), 1f);

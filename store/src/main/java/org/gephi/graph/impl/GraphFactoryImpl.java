@@ -16,39 +16,51 @@
 package org.gephi.graph.impl;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.Node;
 
 public class GraphFactoryImpl implements GraphFactory {
 
+    protected enum AssignConfiguration {
+        STRING, INTEGER, DISABLED
+    }
+
     protected final AtomicInteger NODE_IDS = new AtomicInteger();
     protected final AtomicInteger EDGE_IDS = new AtomicInteger();
+    //Config
+    protected final AssignConfiguration nodeAssignConfiguration;
+    protected final AssignConfiguration edgeAssignConfiguration;
     //Store
     protected final GraphStore store;
 
     public GraphFactoryImpl(GraphStore store) {
         this.store = store;
+        this.nodeAssignConfiguration
+                = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getNodeIdType()));
+        this.edgeAssignConfiguration
+                = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getEdgeIdType()));
     }
 
     @Override
     public Edge newEdge(Node source, Node target) {
-        return new EdgeImpl(EDGE_IDS.getAndIncrement(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, 1.0, true);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, 1.0, true);
     }
 
     @Override
     public Edge newEdge(Node source, Node target, boolean directed) {
-        return new EdgeImpl(EDGE_IDS.getAndIncrement(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, 1.0, directed);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, 1.0, directed);
     }
 
     @Override
     public Edge newEdge(Node source, Node target, int type, boolean directed) {
-        return new EdgeImpl(EDGE_IDS.getAndIncrement(), store, (NodeImpl) source, (NodeImpl) target, type, 1.0, directed);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, type, 1.0, directed);
     }
 
     @Override
     public Edge newEdge(Node source, Node target, int type, double weight, boolean directed) {
-        return new EdgeImpl(EDGE_IDS.getAndIncrement(), store, (NodeImpl) source, (NodeImpl) target, type, weight, directed);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, type, weight, directed);
     }
 
     @Override
@@ -58,12 +70,38 @@ public class GraphFactoryImpl implements GraphFactory {
 
     @Override
     public Node newNode() {
-        return new NodeImpl(NODE_IDS.getAndIncrement(), store);
+        return new NodeImpl(nextNodeId(), store);
     }
 
     @Override
     public Node newNode(Object id) {
         return new NodeImpl(id, store);
+    }
+
+    private Object nextNodeId() {
+        switch (nodeAssignConfiguration) {
+            case INTEGER:
+                return NODE_IDS.getAndIncrement();
+            case STRING:
+                return String.valueOf(NODE_IDS.getAndIncrement());
+            case DISABLED:
+            default:
+                throw new UnsupportedOperationException(
+                        "Automatic node ids assignement isn't available for this type: '" + store.configuration.getNodeIdType().getName() + "'");
+        }
+    }
+
+    private Object nextEdgeId() {
+        switch (edgeAssignConfiguration) {
+            case INTEGER:
+                return EDGE_IDS.getAndIncrement();
+            case STRING:
+                return String.valueOf(EDGE_IDS.getAndIncrement());
+            case DISABLED:
+            default:
+                throw new UnsupportedOperationException(
+                        "Automatic edge ids assignement isn't available for this type: '" + store.configuration.getEdgeIdType().getName() + "'");
+        }
     }
 
     protected int getNodeCounter() {
@@ -106,5 +144,15 @@ public class GraphFactoryImpl implements GraphFactory {
             return false;
         }
         return true;
+    }
+
+    protected final AssignConfiguration getAssignConfiguration(Class type) {
+        if (type.equals(Integer.class)) {
+            return AssignConfiguration.INTEGER;
+        } else if (type.equals(String.class)) {
+            return AssignConfiguration.STRING;
+        } else {
+            return AssignConfiguration.DISABLED;
+        }
     }
 }

@@ -35,6 +35,7 @@ public class NodeImpl extends ElementImpl implements Node {
 
     public NodeImpl(Object id, GraphStore graphStore) {
         super(id, graphStore);
+        checkIdType(id);
         this.properties = GraphStoreConfiguration.ENABLE_NODE_PROPERTIES ? new NodePropertiesImpl() : null;
         this.attributes = new Object[GraphStoreConfiguration.ELEMENT_ID_INDEX + 1];
         this.attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = id;
@@ -238,6 +239,12 @@ public class NodeImpl extends ElementImpl implements Node {
     @Override
     public void setLayoutData(LayoutData layoutData) {
         properties.setLayoutData(layoutData);
+    }
+
+    final void checkIdType(Object id) {
+        if (graphStore != null && !id.getClass().equals(graphStore.configuration.getNodeIdType())) {
+            throw new IllegalArgumentException("The id class does not match with the expected type (" + graphStore.configuration.getNodeIdType().getName() + ")");
+        }
     }
 
     protected static class NodePropertiesImpl implements NodeProperties {

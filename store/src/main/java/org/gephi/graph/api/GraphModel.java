@@ -90,12 +90,22 @@ public interface GraphModel {
     public static class Factory {
 
         /**
-         * Returns a new instance.
+         * Returns a new instance with default configuration.
          *
          * @return new instance
          */
         public static GraphModel newInstance() {
             return new GraphModelImpl();
+        }
+
+        /**
+         * Returns a new instance with the given configuration.
+         *
+         * @param config configuration
+         * @return new instance
+         */
+        public static GraphModel newInstance(Configuration config) {
+            return new GraphModelImpl(config);
         }
     }
 

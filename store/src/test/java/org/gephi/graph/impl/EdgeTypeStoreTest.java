@@ -130,13 +130,13 @@ public class EdgeTypeStoreTest {
 
         edgeTypeStore.getLabel(-1);
     }
-    
+
     @Test
     public void testNullId() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
         Assert.assertNull(edgeTypeStore.getLabel(0));
     }
-    
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testUnknowdId() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
@@ -150,7 +150,7 @@ public class EdgeTypeStoreTest {
 
         Assert.assertTrue(edgeTypeStore.contains(type));
     }
-    
+
     @Test
     public void testClear() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
@@ -158,7 +158,7 @@ public class EdgeTypeStoreTest {
         edgeTypeStore.addType("1");
         edgeTypeStore.removeType("0");
         edgeTypeStore.clear();
-        
+
         Assert.assertEquals(edgeTypeStore.size(), 1);
         Assert.assertTrue(edgeTypeStore.contains(null));
         Assert.assertTrue(edgeTypeStore.garbageQueue.isEmpty());

@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeFormat;
@@ -35,11 +36,17 @@ import org.gephi.graph.api.UndirectedSubgraph;
 
 public class GraphModelImpl implements GraphModel {
 
+    protected final Configuration configuration;
     protected final GraphStore store;
     protected final TableImpl<Node> nodeTable;
     protected final TableImpl<Edge> edgeTable;
 
     public GraphModelImpl() {
+        this(new Configuration());
+    }
+
+    public GraphModelImpl(Configuration config) {
+        configuration = config.copy();
         store = new GraphStore(this);
         nodeTable = new TableImpl<Node>(store.nodeColumnStore);
         edgeTable = new TableImpl<Edge>(store.edgeColumnStore);

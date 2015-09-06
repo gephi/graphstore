@@ -897,7 +897,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     void checkIdDoesntExist(Object id) {
         if (dictionary.containsKey(id)) {
-            throw new IllegalArgumentException("The node id already exist");
+            throw new IllegalArgumentException("The edge id already exist");
         }
     }
 

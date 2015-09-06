@@ -23,6 +23,11 @@ import org.testng.annotations.Test;
 
 public class EdgeImplTest {
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testWrongIdType() {
+        new EdgeImpl(Boolean.TRUE, new GraphStore(), null, null, 0, 1.0, true);
+    }
+
     @Test
     public void testSetGetWeight() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
@@ -158,5 +163,34 @@ public class EdgeImplTest {
         EdgeImpl e = new EdgeImpl("0", graphStore, n1, n2, typeId, 1.0, true);
         Assert.assertEquals(e.getType(), 1);
         Assert.assertEquals(e.getTypeLabel(), "foo");
+    }
+
+    @Test
+    public void testEdgeFields() {
+        NodeImpl source = new NodeImpl("0");
+        NodeImpl target = new NodeImpl("1");
+        double weight = 2.0;
+        EdgeImpl edge = new EdgeImpl("0", source, target, 0, weight, true);
+
+        Assert.assertTrue(edge.isDirected());
+        Assert.assertFalse(edge.isSelfLoop());
+        Assert.assertFalse(edge.isMutual());
+        Assert.assertFalse(edge.isValid());
+
+        edge.setMutual(true);
+
+        Assert.assertTrue(edge.isMutual());
+
+        edge = new EdgeImpl("0", source, source, 0, weight, true);
+
+        Assert.assertTrue(edge.isSelfLoop());
+
+        edge = new EdgeImpl("0", source, target, 0, weight, false);
+
+        Assert.assertFalse(edge.isDirected());
+
+        edge.setMutual(true);
+
+        Assert.assertFalse(edge.isMutual());
     }
 }

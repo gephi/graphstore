@@ -694,7 +694,7 @@ public class GraphViewDecoratorTest {
     public void testIsSelfLoop() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         NodeImpl n1 = graphStore.getNode("1");
-        Edge edge = graphStore.factory.newEdge(n1, n1);
+        Edge edge = graphStore.factory.newEdge("edge", n1, n1, EdgeTypeStore.NULL_LABEL, 1.0, true);
         graphStore.addEdge(edge);
 
         GraphViewStore store = graphStore.viewStore;
@@ -727,7 +727,7 @@ public class GraphViewDecoratorTest {
         Node n1 = graph.getNode("1");
         Assert.assertTrue(graph.isIncident(n1, graph.getEdge("0")));
 
-        Edge edge = graphStore.factory.newEdge(n1, n1);
+        Edge edge = graphStore.factory.newEdge("edge", n1, n1, EdgeTypeStore.NULL_LABEL, 1.0, true);
         graphStore.addEdge(edge);
         Assert.assertTrue(graph.isIncident(edge, graph.getEdge("0")));
     }

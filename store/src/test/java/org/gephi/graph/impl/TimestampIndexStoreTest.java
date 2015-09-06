@@ -62,7 +62,7 @@ public class TimestampIndexStoreTest {
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
-        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
@@ -81,7 +81,7 @@ public class TimestampIndexStoreTest {
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
-        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
@@ -100,7 +100,7 @@ public class TimestampIndexStoreTest {
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
-        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
@@ -120,7 +120,7 @@ public class TimestampIndexStoreTest {
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
-        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
@@ -140,7 +140,7 @@ public class TimestampIndexStoreTest {
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
-        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
@@ -158,7 +158,7 @@ public class TimestampIndexStoreTest {
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
-        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
@@ -180,7 +180,7 @@ public class TimestampIndexStoreTest {
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
 
-        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode(0);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 

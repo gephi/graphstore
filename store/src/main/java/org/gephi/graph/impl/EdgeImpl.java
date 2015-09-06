@@ -47,6 +47,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     public EdgeImpl(Object id, GraphStore graphStore, NodeImpl source, NodeImpl target, int type, double weight, boolean directed) {
         super(id, graphStore);
+        checkIdType(id);
         this.source = source;
         this.target = target;
         this.flags = (byte) (directed ? 1 : 0);
@@ -320,6 +321,13 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     public void setColor(Color color) {
         properties.setColor(color);
+    }
+
+    final void checkIdType(Object id) {
+        if (graphStore != null && !id.getClass().equals(graphStore.configuration.getEdgeIdType())) {
+            throw new IllegalArgumentException("The id class does not match with the expected type (" + graphStore.configuration.getEdgeIdType().getName() + ")");
+
+        }
     }
 
     protected static class EdgePropertiesImpl implements EdgeProperties {

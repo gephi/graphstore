@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.Interval;
@@ -39,6 +40,7 @@ import org.gephi.graph.api.Subgraph;
 public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     protected final GraphModelImpl graphModel;
+    protected final Configuration configuration;
     //Stores
     protected final NodeStore nodeStore;
     protected final EdgeStore edgeStore;
@@ -67,6 +69,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     public GraphStore(GraphModelImpl model) {
+        configuration = model != null ? model.configuration : new Configuration();
         graphModel = model;
         lock = new GraphLock();
         edgeTypeStore = new EdgeTypeStore();
@@ -76,8 +79,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
         edgeStore = new EdgeStore(edgeTypeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
-        nodeColumnStore = new ColumnStore<Node>(Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
-        edgeColumnStore = new ColumnStore<Edge>(Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
+        nodeColumnStore = new ColumnStore<Node>(configuration, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
+        edgeColumnStore = new ColumnStore<Edge>(configuration, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
         timestampStore = new TimestampStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
@@ -86,8 +89,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         undirectedDecorator = new UndirectedDecorator(this);
 
         //Default cols
-        nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "id", Object.class, "Id", null, Origin.PROPERTY, false, true));
-        edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "id", Object.class, "Id", null, Origin.PROPERTY, false, true));
+        nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "id", configuration.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
+        edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "id", configuration.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
             nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
             edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
