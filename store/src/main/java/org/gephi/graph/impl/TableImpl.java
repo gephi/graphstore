@@ -111,12 +111,12 @@ public class TableImpl<T extends Element> implements Table {
 
     @Override
     public Column getColumn(String id) {
-        return store.getColumn(id);
+        return store.getColumn(id.toLowerCase());
     }
 
     @Override
     public boolean hasColumn(String id) {
-        return store.hasColumn(id);
+        return store.hasColumn(id.toLowerCase());
     }
 
     @Override
@@ -126,7 +126,7 @@ public class TableImpl<T extends Element> implements Table {
 
     @Override
     public void removeColumn(String id) {
-        store.removeColumn(id);
+        store.removeColumn(id.toLowerCase());
     }
 
     @Override
@@ -173,7 +173,7 @@ public class TableImpl<T extends Element> implements Table {
             throw new NullPointerException();
         }
         if (id.isEmpty()) {
-            throw new IllegalArgumentException("The column id can' be empty.");
+            throw new IllegalArgumentException("The column id can't be empty.");
         }
         if (store.hasColumn(id.toLowerCase())) {
             throw new IllegalArgumentException("The column already existing in the table");

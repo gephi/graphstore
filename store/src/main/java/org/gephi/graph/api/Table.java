@@ -17,6 +17,7 @@ package org.gephi.graph.api;
 
 /**
  * The table is the container for columns.
+ * Column ids in all methods are converted to lower case.
  */
 public interface Table extends ColumnIterable {
 

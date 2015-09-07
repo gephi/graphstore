@@ -51,7 +51,7 @@ public class ColumnImpl implements Column {
             throw new NullPointerException();
         }
         this.table = table;
-        this.id = id;
+        this.id = id.toLowerCase();//Make sure column has lowercase id from wherever it's created
         this.typeClass = typeClass;
         this.title = title;
         this.defaultValue = defaultValue;
