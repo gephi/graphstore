@@ -61,6 +61,7 @@ public class ColumnImpl implements Column {
         this.readOnly = readOnly;
         this.dynamic = TimestampMap.class.isAssignableFrom(typeClass);
         this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<ColumnObserverImpl>() : null;
+        this.estimator = this.dynamic ? Estimator.FIRST : null;
     }
 
     public ColumnImpl(String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed, boolean readOnly) {

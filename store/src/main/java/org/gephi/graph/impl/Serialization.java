@@ -436,7 +436,9 @@ public class Serialization {
 
         ColumnImpl column = new ColumnImpl(id, typeClass, title, defaultValue, origin, indexed, readOnly);
         column.storeId = storeId;
-        column.setEstimator(estimator);
+        if(estimator != null) {
+            column.setEstimator(estimator);
+        }
         return column;
     }
 
