@@ -50,6 +50,13 @@ public interface TableObserver {
     public Table getTable();
 
     /**
+     * Gets the table difference.
+     *
+     * @return the table diff
+     */
+    public TableDiff getDiff();
+
+    /**
      * Destroys this observer.
      */
     public void destroy();

@@ -15,23 +15,23 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.Arrays;
+import org.gephi.graph.api.Column;
+import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.TableDiff;
+import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class TableObserverTest {
 
     @Test
     public void testDefaultObserver() {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
-        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
 
-        Assert.assertSame(tableObserver.getTable(), table);
-        Assert.assertFalse(tableObserver.isDestroyed());
+        Assert.assertFalse(tableObserver.destroyed);
         Assert.assertEquals(table.deepHashCode(), tableObserver.tableHash);
         Assert.assertTrue(table.store.observers.contains(tableObserver));
 
@@ -41,7 +41,7 @@ public class TableObserverTest {
     @Test
     public void testObserverAddColumn() {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
-        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
 
         table.addColumn("0", Integer.class);
 
@@ -53,8 +53,19 @@ public class TableObserverTest {
     public void testObserverRemoveColumn() {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
         table.addColumn("0", Integer.class);
-        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
         table.removeColumn("0");
+
+        Assert.assertTrue(tableObserver.hasTableChanged());
+        Assert.assertFalse(tableObserver.hasTableChanged());
+    }
+
+    @Test
+    public void testObserverModifyColumn() {
+        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        Column col = table.addColumn("0", TimestampIntegerMap.class);
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
+        col.setEstimator(Estimator.SUM);
 
         Assert.assertTrue(tableObserver.hasTableChanged());
         Assert.assertFalse(tableObserver.hasTableChanged());
@@ -63,11 +74,74 @@ public class TableObserverTest {
     @Test
     public void testDestroyObserver() {
         TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
-        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver();
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
 
         tableObserver.destroy();
 
         Assert.assertTrue(tableObserver.destroyed);
         Assert.assertFalse(table.store.observers.contains(tableObserver));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testGetDiffWithoutSetting() {
+        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
+        tableObserver.getDiff();
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testGetDiffWithoutHasGraphChanged() {
+        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(true);
+        tableObserver.getDiff();
+    }
+
+    @Test
+    public void testDiffRemoveColumn() {
+        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        table.addColumn("0", Integer.class);
+        Column[] columns = table.toArray();
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(true);
+        table.removeColumn("0");
+
+        Assert.assertTrue(tableObserver.hasTableChanged());
+        final TableDiff tableDiff = tableObserver.getDiff();
+        Assert.assertNotNull(tableDiff);
+
+        Assert.assertEquals(Arrays.asList(columns), tableDiff.getRemovedColumns());
+        Assert.assertTrue(tableDiff.getAddedColumns().isEmpty());
+        Assert.assertTrue(tableDiff.getModifiedColumns().isEmpty());
+    }
+
+    @Test
+    public void testDiffAddColumn() {
+        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(true);
+        table.addColumn("0", Integer.class);
+        Column[] columns = table.toArray();
+
+        Assert.assertTrue(tableObserver.hasTableChanged());
+        final TableDiff tableDiff = tableObserver.getDiff();
+        Assert.assertNotNull(tableDiff);
+
+        Assert.assertEquals(Arrays.asList(columns), tableDiff.getAddedColumns());
+        Assert.assertTrue(tableDiff.getRemovedColumns().isEmpty());
+        Assert.assertTrue(tableDiff.getModifiedColumns().isEmpty());
+    }
+
+    @Test
+    public void testDiffModifyColumn() {
+        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        Column col = table.addColumn("0", TimestampIntegerMap.class);
+        TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(true);
+        col.setEstimator(Estimator.AVERAGE);
+
+        Assert.assertTrue(tableObserver.hasTableChanged());
+        final TableDiff tableDiff = tableObserver.getDiff();
+        Assert.assertNotNull(tableDiff);
+
+        Assert.assertEquals(Arrays.asList(new Column[]{col}), tableDiff.getModifiedColumns());
+        Assert.assertTrue(tableDiff.getRemovedColumns().isEmpty());
+        Assert.assertTrue(tableDiff.getAddedColumns().isEmpty());
     }
 }

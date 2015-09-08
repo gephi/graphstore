@@ -23,7 +23,6 @@ import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TableObserver;
-import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Element;
 
 public class TableImpl<T extends Element> implements Table {
@@ -130,8 +129,8 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
-    public TableObserver createTableObserver() {
-        return store.createTableObserver(this);
+    public TableObserver createTableObserver(boolean withDiff) {
+        return store.createTableObserver(this, withDiff);
     }
 
     @Override

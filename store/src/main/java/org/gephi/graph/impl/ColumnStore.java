@@ -28,8 +28,6 @@ import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Configuration;
-import org.gephi.graph.api.Estimator;
-import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Element;
 
 public class ColumnStore<T extends Element> implements ColumnIterable {
@@ -290,11 +288,11 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         }
     }
 
-    protected TableObserverImpl createTableObserver(TableImpl table) {
+    protected TableObserverImpl createTableObserver(TableImpl table, boolean withDiff) {
         if (observers != null) {
             lock();
             try {
-                TableObserverImpl observer = new TableObserverImpl(table);
+                TableObserverImpl observer = new TableObserverImpl(table, withDiff);
                 observers.add(observer);
 
                 return observer;
@@ -379,7 +377,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         }
 
         @Override
-        public Column next() {
+        public ColumnImpl next() {
             ColumnImpl c = pointer;
             pointer = null;
             return c;
@@ -424,9 +422,9 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     public int deepHashCode() {
         int hash = 3;
         hash = 11 * hash + (this.elementType != null ? this.elementType.hashCode() : 0);
-        Iterator<Column> itr = this.iterator();
+        ColumnStoreIterator itr = new ColumnStoreIterator();
         while (itr.hasNext()) {
-            hash = 11 * hash + itr.next().hashCode();
+            hash = 11 * hash + itr.next().deepHashCode();
         }
         //TODO what about timestampmap
         return hash;

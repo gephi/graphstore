@@ -208,4 +208,44 @@ public class ColumnImpl implements Column {
         hash = 53 * hash + (this.typeClass != null ? this.typeClass.hashCode() : 0);
         return hash;
     }
+
+    public int deepHashCode() {
+        int hash = 3;
+        hash = 31 * hash + (this.id != null ? this.id.hashCode() : 0);
+        hash = 31 * hash + (this.typeClass != null ? this.typeClass.hashCode() : 0);
+        hash = 31 * hash + (this.title != null ? this.title.hashCode() : 0);
+        hash = 31 * hash + (this.defaultValue != null ? this.defaultValue.hashCode() : 0);
+        hash = 31 * hash + (this.origin != null ? this.origin.hashCode() : 0);
+        hash = 31 * hash + (this.estimator != null ? this.estimator.hashCode() : 0);
+        return hash;
+    }
+
+    public boolean deepEquals(ColumnImpl col) {
+        if (this == col) {
+            return true;
+        }
+        if (col == null) {
+            return false;
+        }
+        if ((this.id == null) ? (col.id != null) : !this.id.equals(col.id)) {
+            return false;
+        }
+        if ((this.title == null) ? (col.title != null) : !this.title.equals(col.title)) {
+            return false;
+        }
+        if (this.typeClass != col.typeClass && (this.typeClass == null || !this.typeClass.equals(col.typeClass))) {
+            return false;
+        }
+        if (this.defaultValue != col.defaultValue && (this.defaultValue == null || !this.defaultValue.equals(col.defaultValue))) {
+            return false;
+        }
+        if (this.origin != col.origin) {
+            return false;
+        }
+        if (this.estimator != col.estimator) {
+            return false;
+        }
+        return true;
+    }
+
 }
