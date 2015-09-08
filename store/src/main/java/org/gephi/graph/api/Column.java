@@ -62,6 +62,13 @@ public interface Column {
     public Origin getOrigin();
 
     /**
+     * Returns the estimator for this column
+     *
+     * @return the estimator, or null if not set
+     */
+    public Estimator getEstimator();
+
+    /**
      * Returns the table this column belong to.
      *
      * @return the table
@@ -119,6 +126,13 @@ public interface Column {
      * @return the default value, or null
      */
     public Object getDefaultValue();
+
+    /**
+     * Sets the estimator for this column.
+     *
+     * @param estimator the estimator to set
+     */
+    public void setEstimator(Estimator estimator);
 
     /**
      * Create a new column observer.

@@ -25,6 +25,7 @@ import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -128,12 +129,22 @@ public class ColumnStoreTest {
 
             @Override
             public boolean isReadOnly() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                throw new UnsupportedOperationException("Not supported yet."); 
             }
 
             @Override
             public ColumnObserver createColumnObserver() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                throw new UnsupportedOperationException("Not supported yet."); 
+            }
+
+            @Override
+            public Estimator getEstimator() {
+                throw new UnsupportedOperationException("Not supported yet."); 
+            }
+
+            @Override
+            public void setEstimator(Estimator estimator) {
+                throw new UnsupportedOperationException("Not supported yet."); 
             }
         });
     }
@@ -368,34 +379,6 @@ public class ColumnStoreTest {
         store2.removeColumn(col21);
 
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testColumnNullId() {
-        new ColumnImpl(null, null, null, this, Origin.DATA, true, false);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testColumnEmptyId() {
-        new ColumnImpl("", null, null, this, Origin.DATA, true, false);
-    }
-
-    @Test
-    public void testColumnIsDynamic() {
-        ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
-        Assert.assertFalse(col1.isDynamic());
-
-        ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
-        Assert.assertTrue(col2.isDynamic());
-    }
-
-    @Test
-    public void testColumnIsArray() {
-        ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
-        Assert.assertFalse(col1.isArray());
-
-        ColumnImpl col2 = new ColumnImpl("0", int[].class, null, null, Origin.DATA, false, false);
-        Assert.assertTrue(col2.isArray());
     }
 
     @Test

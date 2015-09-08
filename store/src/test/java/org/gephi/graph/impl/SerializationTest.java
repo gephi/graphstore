@@ -221,6 +221,7 @@ public class SerializationTest {
         Assert.assertEquals(l.origin, col.getOrigin());
         Assert.assertEquals(l.title, col.getTitle());
         Assert.assertEquals(l.storeId, col.getStoreId());
+        Assert.assertEquals(l.estimator, col.getEstimator());
     }
 
     @Test

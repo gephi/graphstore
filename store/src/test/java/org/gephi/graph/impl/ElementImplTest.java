@@ -538,7 +538,7 @@ public class ElementImplTest {
         store.viewStore.setTimeInterval(view, new Interval(5.0, 5.0));
         Assert.assertEquals(node.getAttribute(column, view), 0);
         store.viewStore.setTimeInterval(view, new Interval(1.0, 2.0));
-        store.nodeColumnStore.setEstimator(column, Estimator.AVERAGE);
+        column.setEstimator(Estimator.AVERAGE);
         Assert.assertEquals(node.getAttribute(column, view), 15.0);
     }
 

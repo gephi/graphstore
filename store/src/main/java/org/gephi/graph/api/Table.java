@@ -81,22 +81,6 @@ public interface Table extends ColumnIterable {
     public Column getColumn(String id);
 
     /**
-     * Returns the estimator for the given column
-     *
-     * @param column the column to get the estimator
-     * @return the estimator, or null if not set
-     */
-    public Estimator getEstimator(Column column);
-
-    /**
-     * Sets the estimator for the given column.
-     *
-     * @param column the column to set the estimator
-     * @param estimator the estimator to set
-     */
-    public void setEstimator(Column column, Estimator estimator);
-
-    /**
      * Returns true if this table has the column.
      *
      * @param id the column's identifier

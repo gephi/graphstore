@@ -145,11 +145,27 @@ public class ColumnImpl implements Column {
         return title + " (" + typeClass.toString() + ")";
     }
 
+    @Override
     public Estimator getEstimator() {
         return estimator;
     }
 
+    @Override
     public void setEstimator(Estimator estimator) {
+        if (!dynamic) {
+            throw new IllegalStateException("The column must have a dynamic type");
+        }
+        TimestampMap vs = null;
+        try {
+            vs = (TimestampMap) typeClass.newInstance();
+        } catch (InstantiationException ex) {
+            throw new RuntimeException(ex);
+        } catch (IllegalAccessException ex) {
+            throw new RuntimeException(ex);
+        }
+        if (!vs.isSupported(estimator)) {
+            throw new IllegalArgumentException("The column doesnt't support this estimator");
+        }
         this.estimator = estimator;
     }
 

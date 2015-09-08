@@ -153,7 +153,7 @@ public abstract class ElementImpl implements Element {
                     }
                     if (dynamicValue != null && !dynamicValue.isEmpty()) {
                         int[] timestampIndices = timestampMap.getTimestampIndices(interval);
-                        Estimator estimator = columnStore.getEstimator(column);
+                        Estimator estimator = column.getEstimator();
                         if (estimator == null) {
                             estimator = Estimator.FIRST;
                         }

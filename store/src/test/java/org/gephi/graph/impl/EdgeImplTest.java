@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
@@ -125,7 +126,8 @@ public class EdgeImplTest {
     public void testGetWeightAverageEstimator() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         Edge e = graphStore.getEdge("0");
-        graphStore.edgeColumnStore.setEstimator(graphStore.edgeColumnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX), Estimator.AVERAGE);
+        Column col = graphStore.edgeColumnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        col.setEstimator(Estimator.AVERAGE);
         e.setWeight(10.0, 1.0);
         e.setWeight(20.0, 2.0);
         Assert.assertEquals(e.getWeight(graphStore.getView()), 15.0);

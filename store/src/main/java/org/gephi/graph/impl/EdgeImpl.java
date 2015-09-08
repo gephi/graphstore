@@ -140,7 +140,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 if (timestampMap != null) {
                     TimestampDoubleMap dynamicValue = (TimestampDoubleMap) attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
                     int[] timestampIndices = timestampMap.getTimestampIndices(interval);
-                    Estimator estimator = columnStore.getEstimator(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+                    Estimator estimator = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getEstimator();
                     if (estimator == null) {
                         estimator = Estimator.FIRST;
                     }

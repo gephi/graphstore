@@ -130,16 +130,6 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
-    public Estimator getEstimator(Column column) {
-        return store.getEstimator(column);
-    }
-
-    @Override
-    public void setEstimator(Column column, Estimator estimator) {
-        store.setEstimator(column, estimator);
-    }
-
-    @Override
     public TableObserver createTableObserver() {
         return store.createTableObserver(this);
     }

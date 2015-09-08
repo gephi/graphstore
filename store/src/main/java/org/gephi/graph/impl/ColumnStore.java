@@ -144,23 +144,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         }
     }
 
-    public void setEstimator(Column column, Estimator estimator) {
-        checkNonNullColumnObject(column);
-        checkDynamicColumn(column);
-        checkEstimator(column, estimator);
-
-        ((ColumnImpl) column).setEstimator(estimator);
-    }
-
-    public Estimator getEstimator(Column column) {
-        checkNonNullColumnObject(column);
-        return ((ColumnImpl) column).getEstimator();
-    }
-
-    protected Estimator getEstimator(int index) {
-        return ((ColumnImpl) columns[index]).getEstimator();
-    }
-
     public int getColumnIndex(final String key) {
         checkNonNullObject(key);
         lock();
@@ -372,24 +355,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     void checkIndexStatus(final Column column) {
         if (indexStore == null && column.isIndexed()) {
             throw new IllegalArgumentException("Can't add an indexed column to a non indexed store");
-        }
-    }
-
-    void checkDynamicColumn(final Column column) {
-        if (!column.isDynamic()) {
-            throw new IllegalArgumentException("The column must have a dynamic type");
-        }
-    }
-
-    void checkEstimator(final Column column, final Estimator estimator) {
-        Class<? extends TimestampMap> typeClass = column.getTypeClass();
-        try {
-            TimestampMap vs = typeClass.newInstance();
-            if (!vs.isSupported(estimator)) {
-                throw new IllegalArgumentException("The column doesnt't support this estimator");
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
         }
     }
 

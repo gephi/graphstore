@@ -115,24 +115,6 @@ public class TableImplTest {
         table.getColumn(0);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testSetEstimatorStaticType() {
-        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
-        Column col = table.addColumn("Id", Integer.class);
-        Estimator est = Estimator.AVERAGE;
-        table.setEstimator(col, est);
-    }
-
-    @Test
-    public void testSetEstimator() {
-        TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
-        Column col = table.addColumn("Id", TimestampByteMap.class);
-        Estimator est = Estimator.AVERAGE;
-        table.setEstimator(col, est);
-
-        Assert.assertEquals(table.getEstimator(col), est);
-    }
-
     @Test
     public void testTitleBackFill() {
         TableImpl<Node> table = new TableImpl<Node>(new ColumnStore<Node>(Node.class, false));
