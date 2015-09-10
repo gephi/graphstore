@@ -177,7 +177,7 @@ public class TableImplTest {
 
         table.removeColumn("Id");
         Assert.assertFalse(table.hasColumn("Id"));
-        
+
         //Test case insensitive
         table.addColumn("Id", Integer.class);
         table.removeColumn("id");

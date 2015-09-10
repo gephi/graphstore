@@ -178,7 +178,7 @@ public class Serialization {
     public Serialization() {
         this(null);
     }
-    
+
     public Serialization(GraphModelImpl graphModel) {
         model = graphModel;
         idMap = new Int2IntOpenHashMap();
