@@ -36,6 +36,7 @@ import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.impl.utils.DataInputOutput;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -868,5 +869,31 @@ public class SerializationTest {
         Assert.assertEquals(Locale.FRANCE, ser.deserialize(ser.serialize(Locale.FRANCE)));
         Assert.assertEquals(Locale.CANADA_FRENCH, ser.deserialize(ser.serialize(Locale.CANADA_FRENCH)));
         Assert.assertEquals(Locale.SIMPLIFIED_CHINESE, ser.deserialize(ser.serialize(Locale.SIMPLIFIED_CHINESE)));
+    }
+
+    @Test
+    public void testSmallGraphModel() throws Exception {
+        GraphModelImpl gm = GraphGenerator.generateSmallGraphStore().graphModel;
+        Serialization ser = new Serialization(gm);
+
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, gm);
+        byte[] bytes = dio.toByteArray();
+
+        GraphModelImpl read = ser.deserializeGraphModel(dio.reset(bytes));
+        Assert.assertTrue(read.deepEquals(gm));
+    }
+
+    @Test
+    public void testSmallUndirectedGraphModel() throws Exception {
+        GraphModelImpl gm = GraphGenerator.generateSmallUndirectedGraphStore().graphModel;
+        Serialization ser = new Serialization(gm);
+
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, gm);
+        byte[] bytes = dio.toByteArray();
+
+        GraphModelImpl read = ser.deserializeGraphModel(dio.reset(bytes));
+        Assert.assertTrue(read.deepEquals(gm));
     }
 }
