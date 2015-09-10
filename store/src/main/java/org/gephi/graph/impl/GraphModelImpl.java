@@ -359,6 +359,25 @@ public class GraphModelImpl implements GraphModel {
         return store;
     }
 
+    public boolean deepEquals(GraphModelImpl obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this.store != obj.store && (this.store == null || !this.store.deepEquals(obj.store))) {
+            return false;
+        }
+        if (this.configuration != obj.configuration && (this.configuration == null || !this.configuration.equals(obj.configuration))) {
+            return false;
+        }
+        if (this.nodeTable != obj.nodeTable && (this.nodeTable == null || !this.nodeTable.deepEquals(obj.nodeTable))) {
+            return false;
+        }
+        if (this.edgeTable != obj.edgeTable && (this.edgeTable == null || !this.edgeTable.deepEquals(obj.edgeTable))) {
+            return false;
+        }
+        return true;
+    }
+
     private void checkGraphObserver(GraphObserver observer) {
         if (observer == null) {
             throw new NullPointerException();

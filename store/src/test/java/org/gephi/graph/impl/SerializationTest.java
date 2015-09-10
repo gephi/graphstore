@@ -47,7 +47,8 @@ public class SerializationTest {
 
     @Test
     public void testEdgeStoreMixed() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
 
         NodeStore nodeStore = graphStore.nodeStore;
         EdgeStore edgeStore = graphStore.edgeStore;
@@ -56,7 +57,7 @@ public class SerializationTest {
         EdgeImpl[] edges = GraphGenerator.generateMixedEdgeList(nodeStore, 9000, 0, true);
         edgeStore.addAll(Arrays.asList(edges));
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphStore);
         graphStore.clear();
 
@@ -67,7 +68,8 @@ public class SerializationTest {
 
     @Test
     public void testEdgeStoreMultipleTypes() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
 
         NodeStore nodeStore = graphStore.nodeStore;
         EdgeStore edgeStore = graphStore.edgeStore;
@@ -76,7 +78,7 @@ public class SerializationTest {
         EdgeImpl[] edges = GraphGenerator.generateMultiTypeEdgeList(nodeStore, 9000, 3, true, true);
         edgeStore.addAll(Arrays.asList(edges));
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphStore);
         graphStore.clear();
 
@@ -87,7 +89,8 @@ public class SerializationTest {
 
     @Test
     public void testEdgeStore() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
 
         NodeStore nodeStore = graphStore.nodeStore;
         EdgeStore edgeStore = graphStore.edgeStore;
@@ -96,7 +99,7 @@ public class SerializationTest {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphStore);
         graphStore.clear();
 
@@ -107,18 +110,19 @@ public class SerializationTest {
 
     @Test
     public void testNodeStore() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
 
         NodeStore nodeStore = graphStore.nodeStore;
         EdgeStore edgeStore = graphStore.edgeStore;
         NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
         nodeStore.addAll(Arrays.asList(nodes));
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphStore);
 
-        graphStore = new GraphStore();
-        ser = new Serialization(graphStore);
+        graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
         GraphStore l = (GraphStore) ser.deserialize(buf);
         Assert.assertTrue(nodeStore.deepEquals(l.nodeStore));
         Assert.assertTrue(edgeStore.deepEquals(l.edgeStore));
@@ -126,7 +130,8 @@ public class SerializationTest {
 
     @Test
     public void testNode() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
         ColumnStore columnStore = graphStore.nodeColumnStore;
         ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false, false);
         ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false, false);
@@ -139,11 +144,11 @@ public class SerializationTest {
         node.setAttribute(col1, 1);
         node.setAttribute(col3, new int[]{1, 7, 3, 4});
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(node);
 
-        graphStore = new GraphStore();
-        ser = new Serialization(graphStore);
+        graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
         NodeImpl l = (NodeImpl) ser.deserialize(buf);
         Assert.assertTrue(node.equals(l));
         Assert.assertTrue(Arrays.deepEquals(l.attributes, node.attributes));
@@ -151,24 +156,26 @@ public class SerializationTest {
 
     @Test
     public void testGraphFactory() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
         GraphFactoryImpl factory = graphStore.factory;
 
         factory.setNodeCounter(100);
         factory.setEdgeCounter(50);
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(factory);
 
-        graphStore = new GraphStore();
-        ser = new Serialization(graphStore);
+        graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
         GraphFactoryImpl l = (GraphFactoryImpl) ser.deserialize(buf);
         Assert.assertTrue(factory.deepEquals(l));
     }
 
     @Test
     public void testEdgeTypeStore() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
 
         EdgeTypeStore edgeTypeStore = graphStore.edgeTypeStore;
         edgeTypeStore.addType("Foo");
@@ -176,18 +183,19 @@ public class SerializationTest {
         edgeTypeStore.addType("Bar");
 
         edgeTypeStore.removeType("Foo");
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(edgeTypeStore);
 
-        graphStore = new GraphStore();
-        ser = new Serialization(graphStore);
+        graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
         EdgeTypeStore l = (EdgeTypeStore) ser.deserialize(buf);
         Assert.assertTrue(edgeTypeStore.deepEquals(l));
     }
 
     @Test
     public void testColumnStore() throws IOException, ClassNotFoundException {
-        GraphStore graphStore = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
 
         ColumnStore columnStore = graphStore.nodeColumnStore;
         ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false, false);
@@ -198,11 +206,11 @@ public class SerializationTest {
         columnStore.addColumn(col3);
         columnStore.removeColumn(col1);
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(columnStore);
 
-        graphStore = new GraphStore();
-        ser = new Serialization(graphStore);
+        graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
         ColumnStore l = (ColumnStore) ser.deserialize(buf);
         Assert.assertTrue(columnStore.deepEquals(l));
     }
@@ -238,11 +246,11 @@ public class SerializationTest {
 
         viewStore.removeView(view);
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphStore.graphModel);
         byte[] buf = ser.serialize(viewStore);
 
-        graphStore = new GraphStore();
-        ser = new Serialization(graphStore);
+        GraphModelImpl graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
         GraphViewStore l = (GraphViewStore) ser.deserialize(buf);
         Assert.assertTrue(viewStore.deepEquals(l));
     }
@@ -257,11 +265,11 @@ public class SerializationTest {
         view.addNode(edge.getTarget());
         view.addEdge(edge);
 
-        Serialization ser = new Serialization(graphStore);
+        Serialization ser = new Serialization(graphStore.graphModel);
         byte[] buf = ser.serialize(view);
 
-        graphStore = new GraphStore();
-        ser = new Serialization(graphStore);
+        GraphModelImpl graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
         GraphViewImpl l = (GraphViewImpl) ser.deserialize(buf);
         Assert.assertTrue(view.deepEquals(l));
     }
@@ -280,12 +288,13 @@ public class SerializationTest {
 
     @Test
     public void testGraphVersion() throws IOException, ClassNotFoundException {
-        GraphStore store = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore store = graphModel.store;
         GraphVersion version = store.version;
         version.nodeVersion = 1;
         version.edgeVersion = 2;
 
-        Serialization ser = new Serialization(store);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(version);
         GraphVersion l = (GraphVersion) ser.deserialize(buf);
         Assert.assertTrue(version.deepEquals(l));
@@ -500,10 +509,11 @@ public class SerializationTest {
 
     @Test
     public void testTimeFormat() throws IOException, ClassNotFoundException {
-        GraphStore store = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore store = graphModel.store;
         store.timeFormat = TimeFormat.DATETIME;
 
-        Serialization ser = new Serialization(store);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(store.timeFormat);
         TimeFormat l = (TimeFormat) ser.deserialize(buf);
         Assert.assertEquals(TimeFormat.DATETIME, l);
@@ -511,18 +521,19 @@ public class SerializationTest {
 
     @Test
     public void testTimestampStore() throws IOException, ClassNotFoundException {
-        GraphStore store = new GraphStore();
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore store = graphModel.store;
         TimestampStore timestampStore = store.timestampStore;
         timestampStore.nodeMap.getTimestampIndex(1.0);
         timestampStore.nodeMap.getTimestampIndex(2.0);
         timestampStore.edgeMap.getTimestampIndex(3.0);
         timestampStore.edgeMap.getTimestampIndex(4.0);
 
-        Serialization ser = new Serialization(store);
+        Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(timestampStore);
 
-        store = new GraphStore();
-        ser = new Serialization(store);
+        graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
         TimestampStore l = (TimestampStore) ser.deserialize(buf);
         Assert.assertTrue(timestampStore.deepEquals(l));
     }

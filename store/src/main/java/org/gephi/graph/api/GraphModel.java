@@ -15,6 +15,9 @@
  */
 package org.gephi.graph.api;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import org.gephi.graph.impl.GraphModelImpl;
 
 /**
@@ -106,6 +109,40 @@ public interface GraphModel {
          */
         public static GraphModel newInstance(Configuration config) {
             return new GraphModelImpl(config);
+        }
+    }
+
+    /**
+     * Serialization utility to read/write graph models from/to input/output.
+     */
+    public static class Serialization {
+
+        /**
+         * Read the <code>input</code> and return the read graph model.
+         *
+         * @param input data input to read from
+         * @return new graph model
+         * @throws IOException if an io error occurs
+         */
+        public static GraphModel read(DataInput input) throws IOException {
+            try {
+                org.gephi.graph.impl.Serialization s = new org.gephi.graph.impl.Serialization();
+                return s.deserializeGraphModel(input);
+            } catch (ClassNotFoundException e) {
+                throw new IOException(e);
+            }
+        }
+
+        /**
+         * Write <code>graphModel</code> to <code>output</code>.
+         *
+         * @param output data output to write to
+         * @param graphModel graph model to write
+         * @throws IOException if an io error occurs
+         */
+        public static void write(DataOutput output, GraphModel graphModel) throws IOException {
+            org.gephi.graph.impl.Serialization s = new org.gephi.graph.impl.Serialization();
+            s.serializeGraphModel(output, (GraphModelImpl) graphModel);
         }
     }
 

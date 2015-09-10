@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.io.IOException;
 import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Index;
@@ -27,6 +28,7 @@ import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.impl.utils.DataInputOutput;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -389,5 +391,15 @@ public class GraphModelTest {
         TimestampIndex<Edge> index = graphModel.getEdgeTimestampIndex(view);
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 1.0);
+    }
+
+    @Test
+    public void testSerialization() throws IOException {
+        DataInputOutput dio = new DataInputOutput();
+        GraphModelImpl graphModelImpl = GraphGenerator.generateSmallGraphStore().graphModel;
+        GraphModel.Serialization.write(dio, graphModelImpl);
+        byte[] bytes = dio.toByteArray();
+        GraphModelImpl readModelImpl = (GraphModelImpl) GraphModel.Serialization.read(dio.reset(bytes));
+        Assert.assertTrue(readModelImpl.deepEquals(readModelImpl));
     }
 }

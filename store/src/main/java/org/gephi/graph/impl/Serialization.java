@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
@@ -167,19 +168,37 @@ public class Serialization {
     final static int TIMESTAMP_MAP = 228;
     final static int TIME_FORMAT = 229;
     final static int TIMESTAMP_STORE = 230;
+    final static int CONFIGURATION = 231;
     //Store
-    protected final GraphStore store;
     protected final Int2IntMap idMap;
+    protected GraphModelImpl model;
     //Deserialized configuration
     protected GraphStoreConfigurationVersion graphStoreConfigurationVersion;
 
-    public Serialization(GraphStore graphStore) {
-        store = graphStore;
+    public Serialization() {
+        this(null);
+    }
+    
+    public Serialization(GraphModelImpl graphModel) {
+        model = graphModel;
         idMap = new Int2IntOpenHashMap();
         idMap.defaultReturnValue(NULL_ID);
     }
 
-    public void serializeGraphStore(DataOutput out) throws IOException {
+    public void serializeGraphModel(DataOutput out, GraphModelImpl model) throws IOException {
+        this.model = model;
+        serialize(out, model.configuration);
+        serialize(out, model.store);
+    }
+
+    public GraphModelImpl deserializeGraphModel(DataInput is) throws IOException, ClassNotFoundException {
+        Configuration config = (Configuration) deserialize(is);
+        model = new GraphModelImpl(config);
+        deserialize(is);
+        return model;
+    }
+
+    public void serializeGraphStore(DataOutput out, GraphStore store) throws IOException {
         //Configuration
         serializeGraphStoreConfiguration(out);
 
@@ -222,7 +241,7 @@ public class Serialization {
     }
 
     public GraphStore deserializeGraphStore(DataInput is) throws IOException, ClassNotFoundException {
-        if (!store.nodeStore.isEmpty()) {   //TODO test other stores
+        if (!model.store.nodeStore.isEmpty()) {   //TODO test other stores
             throw new IOException("The store is not empty");
         }
 
@@ -231,8 +250,8 @@ public class Serialization {
 
         //Graph Version
         GraphVersion version = (GraphVersion) deserialize(is);
-        store.version.nodeVersion = version.nodeVersion;
-        store.version.edgeVersion = version.edgeVersion;
+        model.store.version.nodeVersion = version.nodeVersion;
+        model.store.version.edgeVersion = version.edgeVersion;
 
         //Edge types
         deserialize(is);
@@ -249,7 +268,7 @@ public class Serialization {
 
         //Atts
         GraphAttributesImpl attributes = (GraphAttributesImpl) deserialize(is);
-        store.attributes.setGraphAttributes(attributes);
+        model.store.attributes.setGraphAttributes(attributes);
 
         //TimeFormat
         deserialize(is);
@@ -263,7 +282,7 @@ public class Serialization {
         //ViewStore
         deserialize(is);
 
-        return store;
+        return model.store;
     }
 
     private void serializeNode(DataOutput out, NodeImpl node) throws IOException {
@@ -290,12 +309,12 @@ public class Serialization {
         Object[] attributes = (Object[]) deserialize(is);
         NodePropertiesImpl properties = (NodePropertiesImpl) deserialize(is);
 
-        NodeImpl node = (NodeImpl) store.factory.newNode(id);
+        NodeImpl node = (NodeImpl) model.store.factory.newNode(id);
         node.attributes = attributes;
         if (node.properties != null) {
             node.setNodeProperties(properties);
         }
-        store.nodeStore.add(node);
+        model.store.nodeStore.add(node);
 
         idMap.put(storeId, node.storeId);
 
@@ -319,22 +338,22 @@ public class Serialization {
             throw new IOException("The edge source of target can't be found");
         }
 
-        NodeImpl source = store.nodeStore.get(sourceNewId);
-        NodeImpl target = store.nodeStore.get(targetNewId);
+        NodeImpl source = model.store.nodeStore.get(sourceNewId);
+        NodeImpl target = model.store.nodeStore.get(targetNewId);
 
-        EdgeImpl edge = (EdgeImpl) store.factory.newEdge(id, source, target, type, weight, directed);
+        EdgeImpl edge = (EdgeImpl) model.store.factory.newEdge(id, source, target, type, weight, directed);
         edge.attributes = attributes;
         if (edge.properties != null) {
             edge.setEdgeProperties(properties);
         }
 
-        store.edgeStore.add(edge);
+        model.store.edgeStore.add(edge);
 
         return edge;
     }
 
     private void serializeEdgeTypeStore(final DataOutput out) throws IOException {
-        EdgeTypeStore edgeTypeStore = store.edgeTypeStore;
+        EdgeTypeStore edgeTypeStore = model.store.edgeTypeStore;
         int length = edgeTypeStore.length;
         serialize(out, length);
         short[] ids = edgeTypeStore.getIds();
@@ -351,7 +370,7 @@ public class Serialization {
         Object[] labels = (Object[]) deserialize(is);
         short[] garbage = (short[]) deserialize(is);
 
-        EdgeTypeStore edgeTypeStore = store.edgeTypeStore;
+        EdgeTypeStore edgeTypeStore = model.store.edgeTypeStore;
         edgeTypeStore.length = length;
         for (int i = 0; i < ids.length; i++) {
             short id = ids[i];
@@ -382,10 +401,14 @@ public class Serialization {
     private ColumnStore deserializeColumnStore(final DataInput is) throws IOException, ClassNotFoundException {
         Class elementType = (Class) deserialize(is);
         ColumnStore columnStore = null;
-        if (elementType.equals(Node.class)) {
-            columnStore = store.nodeColumnStore;
-        } else if (elementType.equals(Edge.class)) {
-            columnStore = store.edgeColumnStore;
+
+        if (elementType.equals(Node.class
+        )) {
+            columnStore = model.store.nodeColumnStore;
+
+        } else if (elementType.equals(Edge.class
+        )) {
+            columnStore = model.store.edgeColumnStore;
         } else {
             throw new RuntimeException("Not recognized column store");
         }
@@ -436,21 +459,21 @@ public class Serialization {
 
         ColumnImpl column = new ColumnImpl(id, typeClass, title, defaultValue, origin, indexed, readOnly);
         column.storeId = storeId;
-        if(estimator != null) {
+        if (estimator != null) {
             column.setEstimator(estimator);
         }
         return column;
     }
 
     private void serializeGraphFactory(final DataOutput out) throws IOException {
-        GraphFactoryImpl factory = store.factory;
+        GraphFactoryImpl factory = model.store.factory;
 
         serialize(out, factory.getNodeCounter());
         serialize(out, factory.getEdgeCounter());
     }
 
     private GraphFactoryImpl deserializeGraphFactory(final DataInput is) throws IOException, ClassNotFoundException {
-        GraphFactoryImpl graphFactory = store.factory;
+        GraphFactoryImpl graphFactory = model.store.factory;
 
         int nodeCounter = (Integer) deserialize(is);
         int edgeCounter = (Integer) deserialize(is);
@@ -462,7 +485,7 @@ public class Serialization {
     }
 
     private void serializeViewStore(final DataOutput out) throws IOException {
-        GraphViewStore viewStore = store.viewStore;
+        GraphViewStore viewStore = model.store.viewStore;
 
         serialize(out, viewStore.length);
         serialize(out, viewStore.views);
@@ -470,7 +493,7 @@ public class Serialization {
     }
 
     private GraphViewStore deserializeViewStore(final DataInput is) throws IOException, ClassNotFoundException {
-        GraphViewStore viewStore = store.viewStore;
+        GraphViewStore viewStore = model.store.viewStore;
 
         int length = (Integer) deserialize(is);
         Object[] views = (Object[]) deserialize(is);
@@ -507,7 +530,7 @@ public class Serialization {
     private GraphViewImpl deserializeGraphView(final DataInput is) throws IOException, ClassNotFoundException {
         boolean nodeView = (Boolean) deserialize(is);
         boolean edgeView = (Boolean) deserialize(is);
-        GraphViewImpl view = new GraphViewImpl(store, nodeView, edgeView);
+        GraphViewImpl view = new GraphViewImpl(model.store, nodeView, edgeView);
 
         int storeId = (Integer) deserialize(is);
         int nodeCount = (Integer) deserialize(is);
@@ -769,20 +792,20 @@ public class Serialization {
         String name = (String) deserialize(is);
 
         TimeFormat tf = TimeFormat.valueOf(name);
-        store.timeFormat = tf;
+        model.store.timeFormat = tf;
 
         return tf;
     }
 
     private void serializeTimestampStore(final DataOutput out) throws IOException {
-        TimestampStore timestampStore = store.timestampStore;
+        TimestampStore timestampStore = model.store.timestampStore;
 
         serialize(out, timestampStore.nodeMap);
         serialize(out, timestampStore.edgeMap);
     }
 
     private TimestampStore deserializeTimestampStore(final DataInput is) throws IOException, ClassNotFoundException {
-        TimestampStore timestampStore = store.timestampStore;
+        TimestampStore timestampStore = model.store.timestampStore;
 
         TimestampInternalMap nodeMap = (TimestampInternalMap) deserialize(is);
         TimestampInternalMap edgeMap = (TimestampInternalMap) deserialize(is);
@@ -791,6 +814,25 @@ public class Serialization {
         timestampStore.edgeMap.setTimestampMap(edgeMap);
 
         return timestampStore;
+    }
+
+    private void serializeConfiguration(final DataOutput out) throws IOException {
+        Configuration config = model.store.configuration;
+
+        serialize(out, config.getNodeIdType());
+        serialize(out, config.getEdgeIdType());
+    }
+
+    private Configuration deserializeConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
+        Configuration config = new Configuration();
+
+        Class nodeIdType = (Class) deserialize(is);
+        Class edgeIdType = (Class) deserialize(is);
+
+        config.setNodeIdType(nodeIdType);
+        config.setEdgeIdType(edgeIdType);
+
+        return config;
     }
 
     //SERIALIZE PRIMITIVES
@@ -807,15 +849,18 @@ public class Serialization {
 
         if (obj == null) {
             out.write(NULL);
+
         } else if (clazz == Boolean.class) {
             if (((Boolean) obj).booleanValue()) {
                 out.write(BOOLEAN_TRUE);
             } else {
                 out.write(BOOLEAN_FALSE);
+
             }
         } else if (clazz == Integer.class) {
             final int val = (Integer) obj;
             writeInteger(out, val);
+
         } else if (clazz == Double.class) {
             double v = (Double) obj;
             if (v == -1d) {
@@ -833,6 +878,7 @@ public class Serialization {
             } else {
                 out.write(DOUBLE_FULL);
                 out.writeDouble(v);
+
             }
         } else if (clazz == Float.class) {
             float v = (Float) obj;
@@ -852,19 +898,23 @@ public class Serialization {
             } else {
                 out.write(FLOAT_FULL);
                 out.writeFloat(v);
+
             }
         } else if (clazz == Long.class) {
             final long val = (Long) obj;
             writeLong(out, val);
+
         } else if (clazz == BigInteger.class) {
             out.write(BIGINTEGER);
             byte[] buf = ((BigInteger) obj).toByteArray();
             serializeByteArrayInt(out, buf);
+
         } else if (clazz == BigDecimal.class) {
             out.write(BIGDECIMAL);
             BigDecimal d = (BigDecimal) obj;
             serializeByteArrayInt(out, d.unscaledValue().toByteArray());
             LongPacker.packInt(out, d.scale());
+
         } else if (clazz == Short.class) {
             short val = (Short) obj;
             if (val == -1) {
@@ -879,6 +929,7 @@ public class Serialization {
             } else {
                 out.write(SHORT_FULL);
                 out.writeShort(val);
+
             }
         } else if (clazz == Byte.class) {
             byte val = (Byte) obj;
@@ -891,10 +942,12 @@ public class Serialization {
             } else {
                 out.write(BYTE_FULL);
                 out.writeByte(val);
+
             }
         } else if (clazz == Character.class) {
             out.write(CHAR);
             out.writeChar((Character) obj);
+
         } else if (clazz == String.class) {
             String s = (String) obj;
             if (s.length() == 0) {
@@ -949,9 +1002,11 @@ public class Serialization {
             byte[] b = (byte[]) obj;
             out.write(ARRAY_BYTE_INT);
             serializeByteArrayInt(out, b);
+
         } else if (clazz == Date.class) {
             out.write(DATE);
             out.writeLong(((Date) obj).getTime());
+
         } else if (clazz == Locale.class) {
             out.write(LOCALE);
             Locale l = (Locale) obj;
@@ -996,7 +1051,7 @@ public class Serialization {
         } else if (obj instanceof GraphStore) {
             GraphStore b = (GraphStore) obj;
             out.write(GRAPH_STORE);
-            serializeGraphStore(out);
+            serializeGraphStore(out, b);
         } else if (obj instanceof GraphFactoryImpl) {
             GraphFactoryImpl b = (GraphFactoryImpl) obj;
             out.write(GRAPH_FACTORY);
@@ -1085,6 +1140,10 @@ public class Serialization {
             TimestampStore b = (TimestampStore) obj;
             out.write(TIMESTAMP_STORE);
             serializeTimestampStore(out);
+        } else if (obj instanceof Configuration) {
+            Configuration b = (Configuration) obj;
+            out.write(CONFIGURATION);
+            serializeConfiguration(out);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1620,6 +1679,9 @@ public class Serialization {
             case TIMESTAMP_STORE:
                 ret = deserializeTimestampStore(is);
                 break;
+            case CONFIGURATION:
+                ret = deserializeConfiguration(is);
+                break;
             case -1:
                 throw new EOFException();
 
@@ -1769,6 +1831,7 @@ public class Serialization {
             s[i] = deserialize(is);
         }
         return s;
+
     }
 
     protected static class GraphStoreConfigurationVersion {
