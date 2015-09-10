@@ -361,6 +361,13 @@ public interface Graph {
     public Set<String> getAttributeKeys();
 
     /**
+     * Returns the model this graph belongs to.
+     *
+     * @return graph model
+     */
+    public GraphModel getModel();
+
+    /**
      * Returns true if this graph is directed.
      *
      * @return true if directed, false otherwise

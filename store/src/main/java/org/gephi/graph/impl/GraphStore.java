@@ -600,6 +600,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public GraphModel getModel() {
+        return graphModel;
+    }
+
+    @Override
     public boolean isDirected() {
         autoReadLock();
         try {

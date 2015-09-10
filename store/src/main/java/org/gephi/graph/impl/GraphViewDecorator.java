@@ -22,6 +22,7 @@ import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
@@ -524,6 +525,11 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     @Override
     public void setAttribute(String key, Object value, double timestamp) {
         view.attributes.setValue(key, value, timestamp);
+    }
+
+    @Override
+    public GraphModel getModel() {
+        return graphStore.graphModel;
     }
 
     @Override

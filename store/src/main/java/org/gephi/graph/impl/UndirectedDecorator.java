@@ -20,6 +20,7 @@ import java.util.Set;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
@@ -284,6 +285,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     @Override
     public void writeUnlock() {
         store.writeUnlock();
+    }
+
+    @Override
+    public GraphModel getModel() {
+        return store.graphModel;
     }
 
     @Override

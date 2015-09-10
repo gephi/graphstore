@@ -40,6 +40,7 @@ import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
@@ -288,6 +289,11 @@ public class BasicGraphStore implements DirectedGraph {
     @Override
     public boolean isIncident(Node node, Edge edge) {
         return edge.getSource() == node || edge.getTarget() == node;
+    }
+
+    @Override
+    public GraphModel getModel() {
+        return null;
     }
 
     @Override
