@@ -108,7 +108,7 @@ public class EdgeImplTest {
         e.setWeight(4.0);
         Assert.assertEquals(e.getWeight(graphStore.getView()), 4.0);
         e.setWeight(5.0, 2.0);
-        TimestampInternalMap timestampMap = graphStore.edgeColumnStore.getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        TimestampInternalMap timestampMap = graphStore.edgeTable.store.getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
         Assert.assertEquals(timestampMap.size(), 1);
         Assert.assertFalse(timestampMap.contains(1.0));
     }
@@ -126,7 +126,7 @@ public class EdgeImplTest {
     public void testGetWeightAverageEstimator() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         Edge e = graphStore.getEdge("0");
-        Column col = graphStore.edgeColumnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        Column col = graphStore.edgeTable.store.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
         col.setEstimator(Estimator.AVERAGE);
         e.setWeight(10.0, 1.0);
         e.setWeight(20.0, 2.0);

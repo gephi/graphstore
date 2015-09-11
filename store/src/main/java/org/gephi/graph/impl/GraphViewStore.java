@@ -110,12 +110,12 @@ public class GraphViewStore {
                 edgeTimestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
             }
 
-            IndexStore<Node> nodeIndexStore = graphStore.nodeColumnStore.indexStore;
+            IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
             if (nodeIndexStore != null) {
                 nodeIndexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
             }
 
-            IndexStore<Edge> edgeIndexStore = graphStore.edgeColumnStore.indexStore;
+            IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
             if (edgeIndexStore != null) {
                 edgeIndexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
             }

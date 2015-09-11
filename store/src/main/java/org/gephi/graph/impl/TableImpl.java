@@ -29,11 +29,13 @@ public class TableImpl<T extends Element> implements Table {
 
     //Store
     protected final ColumnStore<T> store;
-    protected final Configuration configuration;
 
-    public TableImpl(ColumnStore<T> store) {
-        this.store = store;
-        this.configuration = store.configuration;
+    public TableImpl(Class<T> elementType, boolean indexed) {
+        this(new Configuration(), elementType, indexed);
+    }
+
+    public TableImpl(Configuration configuration, Class<T> elementType, boolean indexed) {
+        store = new ColumnStore<T>(configuration, elementType, indexed);
     }
 
     @Override

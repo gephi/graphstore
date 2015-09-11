@@ -142,8 +142,8 @@ public class Serialization {
     final static int TIMESTAMP_SET = 202;
     final static int EDGETYPE_STORE = 203;
     final static int COLUMN_ORIGIN = 204;
-    final static int COLUMN = 205;
-    final static int COLUMN_STORE = 206;
+    final static int TABLE = 205;
+    final static int CONFIGURATION = 206;
     final static int GRAPH_STORE = 207;
     final static int GRAPH_FACTORY = 208;
     final static int GRAPH_VIEW_STORE = 209;
@@ -168,7 +168,6 @@ public class Serialization {
     final static int TIMESTAMP_MAP = 228;
     final static int TIME_FORMAT = 229;
     final static int TIMESTAMP_STORE = 230;
-    final static int CONFIGURATION = 231;
     //Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
@@ -210,8 +209,8 @@ public class Serialization {
         serialize(out, edgeTypeStore);
 
         //Column
-        serialize(out, store.nodeColumnStore);
-        serialize(out, store.edgeColumnStore);
+        serialize(out, store.nodeTable);
+        serialize(out, store.edgeTable);
 
         //Timestamp
         serialize(out, store.timestampStore);
@@ -384,40 +383,49 @@ public class Serialization {
         return edgeTypeStore;
     }
 
-    private void serializeColumnStore(final DataOutput out, final ColumnStore columnStore) throws IOException {
-        serialize(out, columnStore.elementType);
+    private void serializeTable(final DataOutput out, final TableImpl table) throws IOException {
+        serialize(out, table.store.elementType);
 
+        serializeColumnStore(out, table.store);
+    }
+
+    private TableImpl deserializeTable(final DataInput is) throws IOException, ClassNotFoundException {
+        Class elementType = (Class) deserialize(is);
+
+        TableImpl table = null;
+
+        if (elementType.equals(Node.class)) {
+            table = model.store.nodeTable;
+        } else if (elementType.equals(Edge.class)) {
+            table = model.store.edgeTable;
+        } else {
+            throw new RuntimeException("Not recognized column store");
+        }
+
+        deserializeColumnStore(is, table);
+
+        return table;
+    }
+
+    private void serializeColumnStore(final DataOutput out, final ColumnStore columnStore) throws IOException {
         int length = columnStore.length;
         serialize(out, length);
 
         for (int i = 0; i < length; i++) {
             ColumnImpl col = columnStore.columns[i];
-            serialize(out, col);
+            serializeColumn(out, col);
         }
 
         serialize(out, columnStore.garbageQueue.toShortArray());
     }
 
-    private ColumnStore deserializeColumnStore(final DataInput is) throws IOException, ClassNotFoundException {
-        Class elementType = (Class) deserialize(is);
-        ColumnStore columnStore = null;
-
-        if (elementType.equals(Node.class
-        )) {
-            columnStore = model.store.nodeColumnStore;
-
-        } else if (elementType.equals(Edge.class
-        )) {
-            columnStore = model.store.edgeColumnStore;
-        } else {
-            throw new RuntimeException("Not recognized column store");
-        }
-
+    private ColumnStore deserializeColumnStore(final DataInput is, final TableImpl table) throws IOException, ClassNotFoundException {
+        ColumnStore columnStore = table.store;
         int length = (Integer) deserialize(is);
         columnStore.length = length;
 
         for (int i = 0; i < length; i++) {
-            ColumnImpl col = (ColumnImpl) deserialize(is);
+            ColumnImpl col = (ColumnImpl) deserializeColumn(is, table);
             if (col != null) {
                 columnStore.columns[col.storeId] = col;
                 columnStore.idMap.put(col.id, columnStore.intToShort(col.storeId));
@@ -435,6 +443,10 @@ public class Serialization {
     }
 
     private void serializeColumn(final DataOutput out, final ColumnImpl column) throws IOException {
+        if (column == null) {
+            serialize(out, null);
+            return;
+        }
         serialize(out, column.id);
         serialize(out, column.title);
         serialize(out, column.origin);
@@ -446,8 +458,11 @@ public class Serialization {
         serialize(out, column.estimator);
     }
 
-    private ColumnImpl deserializeColumn(final DataInput is) throws IOException, ClassNotFoundException {
+    private ColumnImpl deserializeColumn(final DataInput is, TableImpl table) throws IOException, ClassNotFoundException {
         String id = (String) deserialize(is);
+        if (id == null) {
+            return null;
+        }
         String title = (String) deserialize(is);
         Origin origin = (Origin) deserialize(is);
         int storeId = (Integer) deserialize(is);
@@ -457,7 +472,7 @@ public class Serialization {
         boolean readOnly = (Boolean) deserialize(is);
         Estimator estimator = (Estimator) deserialize(is);
 
-        ColumnImpl column = new ColumnImpl(id, typeClass, title, defaultValue, origin, indexed, readOnly);
+        ColumnImpl column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed, readOnly);
         column.storeId = storeId;
         if (estimator != null) {
             column.setEstimator(estimator);
@@ -1040,14 +1055,10 @@ public class Serialization {
             Origin b = (Origin) obj;
             out.write(COLUMN_ORIGIN);
             serialize(out, b.name());
-        } else if (obj instanceof ColumnImpl) {
-            ColumnImpl b = (ColumnImpl) obj;
-            out.write(COLUMN);
-            serializeColumn(out, b);
-        } else if (obj instanceof ColumnStore) {
-            ColumnStore b = (ColumnStore) obj;
-            out.write(COLUMN_STORE);
-            serializeColumnStore(out, b);
+        } else if (obj instanceof TableImpl) {
+            TableImpl b = (TableImpl) obj;
+            out.write(TABLE);
+            serializeTable(out, b);
         } else if (obj instanceof GraphStore) {
             GraphStore b = (GraphStore) obj;
             out.write(GRAPH_STORE);
@@ -1601,11 +1612,8 @@ public class Serialization {
             case COLUMN_ORIGIN:
                 ret = Origin.valueOf((String) deserialize(is));
                 break;
-            case COLUMN:
-                ret = deserializeColumn(is);
-                break;
-            case COLUMN_STORE:
-                ret = deserializeColumnStore(is);
+            case TABLE:
+                ret = deserializeTable(is);
                 break;
             case GRAPH_STORE:
                 ret = deserializeGraphStore(is);

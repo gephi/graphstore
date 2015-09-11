@@ -230,7 +230,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     ColumnStore getColumnStore() {
         if (graphStore != null) {
-            return graphStore.edgeColumnStore;
+            return graphStore.edgeTable.store;
         }
         return null;
     }

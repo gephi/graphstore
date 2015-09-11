@@ -285,8 +285,8 @@ public class AttributeUtilsTest {
 
     @Test
     public void testIsNodeColumn() {
-        TableImpl tableNode = new TableImpl(new ColumnStore(Node.class, false));
-        TableImpl tableEdge = new TableImpl(new ColumnStore(Edge.class, false));
+        TableImpl tableNode = new TableImpl(Node.class, false);
+        TableImpl tableEdge = new TableImpl(Edge.class, false);
         Column column = tableNode.addColumn("0", Integer.class);
 
         Assert.assertTrue(AttributeUtils.isNodeColumn(column));
@@ -295,8 +295,8 @@ public class AttributeUtilsTest {
 
     @Test
     public void testIsEdgeColumn() {
-        TableImpl tableNode = new TableImpl(new ColumnStore(Node.class, false));
-        TableImpl tableEdge = new TableImpl(new ColumnStore(Edge.class, false));
+        TableImpl tableNode = new TableImpl(Node.class, false);
+        TableImpl tableEdge = new TableImpl(Edge.class, false);
         Column column = tableEdge.addColumn("0", Integer.class);
 
         Assert.assertTrue(AttributeUtils.isEdgeColumn(column));

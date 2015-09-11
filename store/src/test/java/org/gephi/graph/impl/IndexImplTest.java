@@ -710,7 +710,7 @@ public class IndexImplTest {
 
     private ColumnStore<Node> generateEmptyNodeStore() {
         GraphStore graphStore = new GraphStore();
-        ColumnStore<Node> columnStore = graphStore.nodeColumnStore;
+        ColumnStore<Node> columnStore = graphStore.nodeTable.store;
         return columnStore;
     }
 

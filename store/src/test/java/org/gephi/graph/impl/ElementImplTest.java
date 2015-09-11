@@ -287,7 +287,7 @@ public class ElementImplTest {
         GraphStore store = new GraphStore();
         Integer defaultValue = 25;
         Column column = new ColumnImpl("age", Integer.class, "Age", defaultValue, Origin.DATA, true, false);
-        store.nodeColumnStore.addColumn(column);
+        store.nodeTable.store.addColumn(column);
 
         NodeImpl node = new NodeImpl("0", store);
         Object res = node.getAttribute(column.getId());
@@ -560,18 +560,18 @@ public class ElementImplTest {
 
     //Utility
     private Column generateBasicColumn(GraphStore graphStore) {
-        graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
-        return graphStore.nodeColumnStore.getColumn("age");
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
+        return graphStore.nodeTable.store.getColumn("age");
     }
 
     private Column generateBasicBooleanColumn(GraphStore graphStore) {
-        graphStore.nodeColumnStore.addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA, true, false));
-        return graphStore.nodeColumnStore.getColumn("visible");
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA, true, false));
+        return graphStore.nodeTable.store.getColumn("visible");
     }
 
     private Column generateDynamicColumn(GraphStore graphStore) {
-        graphStore.nodeColumnStore.addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA, false, false));
-        return graphStore.nodeColumnStore.getColumn("age");
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA, false, false));
+        return graphStore.nodeTable.store.getColumn("age");
     }
 
     //Properties size

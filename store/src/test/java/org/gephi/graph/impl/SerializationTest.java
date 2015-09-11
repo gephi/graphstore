@@ -133,7 +133,7 @@ public class SerializationTest {
     public void testNode() throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore graphStore = graphModel.store;
-        ColumnStore columnStore = graphStore.nodeColumnStore;
+        ColumnStore columnStore = graphStore.nodeTable.store;
         ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false, false);
         ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false, false);
         ColumnImpl col3 = new ColumnImpl("2", int[].class, null, null, Origin.PROPERTY, false, false);
@@ -194,11 +194,11 @@ public class SerializationTest {
     }
 
     @Test
-    public void testColumnStore() throws IOException, ClassNotFoundException {
+    public void testTable() throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore graphStore = graphModel.store;
 
-        ColumnStore columnStore = graphStore.nodeColumnStore;
+        ColumnStore columnStore = graphStore.nodeTable.store;
         ColumnImpl col1 = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false, false);
         ColumnImpl col2 = new ColumnImpl("1", String.class, null, "default", Origin.PROPERTY, false, false);
         ColumnImpl col3 = new ColumnImpl("2", int[].class, null, null, Origin.PROPERTY, false, false);
@@ -208,29 +208,20 @@ public class SerializationTest {
         columnStore.removeColumn(col1);
 
         Serialization ser = new Serialization(graphModel);
-        byte[] buf = ser.serialize(columnStore);
+        byte[] buf = ser.serialize(graphStore.nodeTable);
 
         graphModel = new GraphModelImpl();
         ser = new Serialization(graphModel);
-        ColumnStore l = (ColumnStore) ser.deserialize(buf);
-        Assert.assertTrue(columnStore.deepEquals(l));
-    }
+        TableImpl l = (TableImpl) ser.deserialize(buf);
+        Assert.assertTrue(graphStore.nodeTable.deepEquals(l));
 
-    @Test
-    public void testColumn() throws IOException, ClassNotFoundException {
-        ColumnImpl col = new ColumnImpl("0", Integer.class, "title", 8, Origin.DATA, false, false);
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(col);
-        ColumnImpl l = (ColumnImpl) ser.deserialize(buf);
-        Assert.assertEquals(col, l);
-
-        Assert.assertEquals(l.defaultValue, col.getDefaultValue());
-        Assert.assertEquals(l.indexed, col.isIndexed());
-        Assert.assertEquals(l.origin, col.getOrigin());
-        Assert.assertEquals(l.title, col.getTitle());
-        Assert.assertEquals(l.storeId, col.getStoreId());
-        Assert.assertEquals(l.estimator, col.getEstimator());
+        ColumnImpl c = (ColumnImpl) l.getColumn("1");
+        Assert.assertEquals(c.defaultValue, col2.getDefaultValue());
+        Assert.assertEquals(c.indexed, col2.isIndexed());
+        Assert.assertEquals(c.origin, col2.getOrigin());
+        Assert.assertEquals(c.title, col2.getTitle());
+        Assert.assertEquals(c.storeId, col2.getStoreId());
+        Assert.assertEquals(c.estimator, col2.getEstimator());
     }
 
     @Test

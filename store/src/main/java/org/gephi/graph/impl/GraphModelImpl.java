@@ -38,8 +38,6 @@ public class GraphModelImpl implements GraphModel {
 
     protected final Configuration configuration;
     protected final GraphStore store;
-    protected final TableImpl<Node> nodeTable;
-    protected final TableImpl<Edge> edgeTable;
 
     public GraphModelImpl() {
         this(new Configuration());
@@ -48,8 +46,6 @@ public class GraphModelImpl implements GraphModel {
     public GraphModelImpl(Configuration config) {
         configuration = config.copy();
         store = new GraphStore(this);
-        nodeTable = new TableImpl<Node>(store.nodeColumnStore);
-        edgeTable = new TableImpl<Edge>(store.edgeColumnStore);
     }
 
     @Override
@@ -217,12 +213,12 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Table getNodeTable() {
-        return nodeTable;
+        return store.nodeTable;
     }
 
     @Override
     public Table getEdgeTable() {
-        return edgeTable;
+        return store.edgeTable;
     }
 
     @Override
@@ -232,7 +228,7 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Index getNodeIndex(GraphView view) {
-        IndexStore<Node> indexStore = store.nodeColumnStore.indexStore;
+        IndexStore<Node> indexStore = store.nodeTable.store.indexStore;
         if (indexStore != null) {
             if (view.isMainView()) {
                 return indexStore.getIndex(store);
@@ -249,7 +245,7 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Index getEdgeIndex(GraphView view) {
-        IndexStore<Edge> indexStore = store.edgeColumnStore.indexStore;
+        IndexStore<Edge> indexStore = store.edgeTable.store.indexStore;
         if (indexStore != null) {
             if (view.isMainView()) {
                 return indexStore.getIndex(store);
@@ -367,12 +363,6 @@ public class GraphModelImpl implements GraphModel {
             return false;
         }
         if (this.configuration != obj.configuration && (this.configuration == null || !this.configuration.equals(obj.configuration))) {
-            return false;
-        }
-        if (this.nodeTable != obj.nodeTable && (this.nodeTable == null || !this.nodeTable.deepEquals(obj.nodeTable))) {
-            return false;
-        }
-        if (this.edgeTable != obj.edgeTable && (this.edgeTable == null || !this.edgeTable.deepEquals(obj.edgeTable))) {
             return false;
         }
         return true;

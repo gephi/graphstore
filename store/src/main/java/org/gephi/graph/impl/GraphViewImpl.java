@@ -121,7 +121,7 @@ public class GraphViewImpl implements GraphView {
             nodeCount++;
             incrementNodeVersion();
 
-            IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+            IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
             if (indexStore != null) {
                 indexStore.indexInView(nodeImpl, this);
             }
@@ -221,7 +221,7 @@ public class GraphViewImpl implements GraphView {
             nodeCount--;
             incrementNodeVersion();
 
-            IndexStore<Node> indexStore = graphStore.nodeColumnStore.indexStore;
+            IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
             if (indexStore != null) {
                 indexStore.clearInView(nodeImpl, this);
             }
@@ -314,7 +314,7 @@ public class GraphViewImpl implements GraphView {
         mutualEdgesCount = 0;
 
         if (nodeView) {
-            IndexStore<Node> nodeIndexStore = graphStore.nodeColumnStore.indexStore;
+            IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
             if (nodeIndexStore != null) {
                 nodeIndexStore.clear(this);
             }
@@ -323,7 +323,7 @@ public class GraphViewImpl implements GraphView {
                 nodeTimestampIndexStore.clear(this);
             }
         }
-        IndexStore<Edge> edgeIndexStore = graphStore.edgeColumnStore.indexStore;
+        IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
         if (edgeIndexStore != null) {
             edgeIndexStore.clear(this);
         }
@@ -343,7 +343,7 @@ public class GraphViewImpl implements GraphView {
         mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         mutualEdgesCount = 0;
 
-        IndexStore<Edge> edgeIndexStore = graphStore.edgeColumnStore.indexStore;
+        IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
         if (edgeIndexStore != null) {
             edgeIndexStore.clear(this);
         }
@@ -385,7 +385,7 @@ public class GraphViewImpl implements GraphView {
         }
 
         if (nodeView) {
-            IndexStore<Node> nodeIndexStore = graphStore.nodeColumnStore.indexStore;
+            IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
             if (nodeIndexStore != null) {
                 nodeIndexStore.indexView(directedDecorator);
             }
@@ -394,7 +394,7 @@ public class GraphViewImpl implements GraphView {
                 nodeTimestampIndexStore.indexView(directedDecorator);
             }
         }
-        IndexStore<Edge> edgeIndexStore = graphStore.edgeColumnStore.indexStore;
+        IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
         if (edgeIndexStore != null) {
             edgeIndexStore.indexView(directedDecorator);
         }
@@ -600,7 +600,7 @@ public class GraphViewImpl implements GraphView {
             mutualEdgesCount++;
         }
 
-        IndexStore<Edge> indexStore = graphStore.edgeColumnStore.indexStore;
+        IndexStore<Edge> indexStore = graphStore.edgeTable.store.indexStore;
         if (indexStore != null) {
             indexStore.indexInView(edgeImpl, this);
         }
@@ -622,7 +622,7 @@ public class GraphViewImpl implements GraphView {
             mutualEdgesCount--;
         }
 
-        IndexStore<Edge> indexStore = graphStore.edgeColumnStore.indexStore;
+        IndexStore<Edge> indexStore = graphStore.edgeTable.store.indexStore;
         if (indexStore != null) {
             indexStore.clearInView(edgeImpl, this);
         }

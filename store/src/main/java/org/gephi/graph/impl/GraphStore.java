@@ -45,8 +45,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected final NodeStore nodeStore;
     protected final EdgeStore edgeStore;
     protected final EdgeTypeStore edgeTypeStore;
-    protected final ColumnStore<Node> nodeColumnStore;
-    protected final ColumnStore<Edge> edgeColumnStore;
+    protected final TableImpl<Node> nodeTable;
+    protected final TableImpl<Edge> edgeTable;
     protected final GraphViewStore viewStore;
     protected final TimestampStore timestampStore;
     protected final GraphAttributesImpl attributes;
@@ -79,8 +79,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
         edgeStore = new EdgeStore(edgeTypeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
-        nodeColumnStore = new ColumnStore<Node>(configuration, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
-        edgeColumnStore = new ColumnStore<Edge>(configuration, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
+        nodeTable = new TableImpl<Node>(configuration, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
+        edgeTable = new TableImpl<Edge>(configuration, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
         timestampStore = new TimestampStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
@@ -89,17 +89,17 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         undirectedDecorator = new UndirectedDecorator(this);
 
         //Default cols
-        nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "id", configuration.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
-        edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "id", configuration.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
+        nodeTable.store.addColumn(new ColumnImpl(nodeTable, "id", configuration.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
+        edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", configuration.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
-            nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
-            edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
+            nodeTable.store.addColumn(new ColumnImpl(nodeTable, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
+            edgeTable.store.addColumn(new ColumnImpl(edgeTable, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
         }
         if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET) {
-            nodeColumnStore.addColumn(new ColumnImpl(model != null ? model.nodeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
-            edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+            nodeTable.store.addColumn(new ColumnImpl(nodeTable, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+            edgeTable.store.addColumn(new ColumnImpl(edgeTable, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
         }
-        edgeColumnStore.addColumn(new ColumnImpl(model != null ? model.edgeTable : null, "weight", TimestampDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
+        edgeTable.store.addColumn(new ColumnImpl(edgeTable, "weight", TimestampDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
     }
 
     @Override
@@ -499,8 +499,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             edgeStore.clear();
             nodeStore.clear();
             edgeTypeStore.clear();
-            edgeColumnStore.indexStore.clear();
-            nodeColumnStore.indexStore.clear();
+            edgeTable.store.indexStore.clear();
+            nodeTable.store.indexStore.clear();
             timestampStore.clear();
         } finally {
             autoWriteUnlock();
@@ -513,7 +513,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         try {
             edgeStore.clear();
             edgeTypeStore.clear();
-            edgeColumnStore.indexStore.clear();
+            edgeTable.store.indexStore.clear();
             timestampStore.clearEdges();
         } finally {
             autoWriteUnlock();
@@ -699,6 +699,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         hash = 29 * hash + (this.nodeStore != null ? this.nodeStore.deepHashCode() : 0);
         hash = 29 * hash + (this.edgeStore != null ? this.edgeStore.deepHashCode() : 0);
         hash = 29 * hash + (this.edgeTypeStore != null ? this.edgeTypeStore.deepHashCode() : 0);
+        hash = 29 * hash + (this.nodeTable != null ? this.nodeTable.deepHashCode() : 0);
+        hash = 29 * hash + (this.edgeTable != null ? this.edgeTable.deepHashCode() : 0);
         return hash;
     }
 
@@ -713,6 +715,12 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             return false;
         }
         if (this.edgeTypeStore != obj.edgeTypeStore && (this.edgeTypeStore == null || !this.edgeTypeStore.deepEquals(obj.edgeTypeStore))) {
+            return false;
+        }
+        if (this.nodeTable != obj.nodeTable && (this.nodeTable == null || !this.nodeTable.deepEquals(obj.nodeTable))) {
+            return false;
+        }
+        if (this.edgeTable != obj.edgeTable && (this.edgeTable == null || !this.edgeTable.deepEquals(obj.edgeTable))) {
             return false;
         }
         return true;

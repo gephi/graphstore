@@ -73,7 +73,7 @@ public class NodeImpl extends ElementImpl implements Node {
     @Override
     ColumnStore getColumnStore() {
         if (graphStore != null) {
-            return graphStore.nodeColumnStore;
+            return graphStore.nodeTable.store;
         }
         return null;
     }

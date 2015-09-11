@@ -30,7 +30,7 @@ public class ColumnObserverTest {
 
     @Test
     public void testDefaultObserver() {
-        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        TableImpl table = new TableImpl(Node.class, false);
         Column column = table.addColumn("0", Integer.class);
 
         ColumnObserver observer = column.createColumnObserver();
@@ -43,7 +43,7 @@ public class ColumnObserverTest {
     @Test
     public void testSetAttribute() {
         GraphStore store = new GraphStore();
-        TableImpl table = new TableImpl(store.nodeColumnStore);
+        TableImpl table = store.nodeTable;
         Column column = table.addColumn("0", Integer.class);
 
         Node node = store.factory.newNode();
@@ -59,7 +59,7 @@ public class ColumnObserverTest {
     @Test
     public void testRemoveAttribute() {
         GraphStore store = new GraphStore();
-        TableImpl table = new TableImpl(store.nodeColumnStore);
+        TableImpl table = store.nodeTable;
         Column column = table.addColumn("0", Integer.class);
 
         Node node = store.factory.newNode();
@@ -76,7 +76,7 @@ public class ColumnObserverTest {
     @Test
     public void testSetDynamicAttribute() {
         GraphStore store = new GraphStore();
-        TableImpl table = new TableImpl(store.nodeColumnStore);
+        TableImpl table = store.nodeTable;
         Column column = table.addColumn("0", TimestampIntegerMap.class);
 
         Node node = store.factory.newNode();
@@ -99,7 +99,7 @@ public class ColumnObserverTest {
 
     @Test
     public void testDestroyObserver() {
-        TableImpl table = new TableImpl(new ColumnStore(Node.class, false));
+        TableImpl table = new TableImpl(Node.class, false);
         Column column = table.addColumn("0", Integer.class);
 
         ColumnObserver observer = column.createColumnObserver();
