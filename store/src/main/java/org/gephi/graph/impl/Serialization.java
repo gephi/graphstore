@@ -674,6 +674,8 @@ public class Serialization {
         serialize(out, textProperties.rgba);
         serialize(out, textProperties.visible);
         serialize(out, textProperties.text);
+        serialize(out, textProperties.width);
+        serialize(out, textProperties.height);
     }
 
     private TextPropertiesImpl deserializeTextProperties(final DataInput is) throws IOException, ClassNotFoundException {
@@ -681,12 +683,16 @@ public class Serialization {
         int rgba = (Integer) deserialize(is);
         boolean visible = (Boolean) deserialize(is);
         String text = (String) deserialize(is);
+        float width = (Float) deserialize(is);
+        float height = (Float) deserialize(is);
 
         TextPropertiesImpl props = new TextPropertiesImpl();
         props.size = size;
         props.rgba = rgba;
         props.visible = visible;
         props.text = text;
+        props.width = width;
+        props.height = height;
 
         return props;
     }

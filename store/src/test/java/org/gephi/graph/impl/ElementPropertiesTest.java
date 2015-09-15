@@ -214,6 +214,7 @@ public class ElementPropertiesTest {
         p.setSize(5f);
         p.setText("foo");
         p.setVisible(false);
+        p.setDimensions(4f, 8f);
 
         Assert.assertEquals(p.getR(), 0.2f);
         Assert.assertEquals(p.getG(), 0.4f);
@@ -222,6 +223,8 @@ public class ElementPropertiesTest {
         Assert.assertEquals(p.getSize(), 5f);
         Assert.assertEquals(p.getText(), "foo");
         Assert.assertFalse(p.isVisible());
+        Assert.assertEquals(p.getWidth(), 4f);
+        Assert.assertEquals(p.getHeight(), 8f);
     }
 
     @Test

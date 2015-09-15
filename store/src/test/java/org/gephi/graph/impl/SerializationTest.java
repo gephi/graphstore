@@ -299,6 +299,8 @@ public class SerializationTest {
         textProperties.size = 3f;
         textProperties.text = "foo";
         textProperties.visible = true;
+        textProperties.width = 5;
+        textProperties.height = 8;
 
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(textProperties);

@@ -86,6 +86,20 @@ public interface TextProperties {
     public String getText();
 
     /**
+     * Returns the text's width.
+     *
+     * @return the width
+     */
+    public float getWidth();
+
+    /**
+     * Returns the text's height.
+     *
+     * @return the height
+     */
+    public float getHeight();
+
+    /**
      * Sets the red color component.
      *
      * @param r the color component, between zero and one
@@ -140,4 +154,12 @@ public interface TextProperties {
      * @param text the text
      */
     public void setText(String text);
+
+    /**
+     * Sets the text's dimensions.
+     *
+     * @param width width
+     * @param height height
+     */
+    public void setDimensions(float width, float height);
 }

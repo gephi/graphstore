@@ -24,6 +24,8 @@ public class TextPropertiesImpl implements TextProperties {
     protected int rgba;
     protected float size;
     protected String text;
+    protected float width;
+    protected float height;
 
     public TextPropertiesImpl() {
         this.rgba = 255 << 24;  //Alpha set to 1
@@ -77,6 +79,16 @@ public class TextPropertiesImpl implements TextProperties {
     }
 
     @Override
+    public float getWidth() {
+        return width;
+    }
+
+    @Override
+    public float getHeight() {
+        return height;
+    }
+
+    @Override
     public void setR(float r) {
         rgba = (rgba & 0xFF00FFFF) | (((int) (r * 255f)) << 16);
     }
@@ -116,11 +128,19 @@ public class TextPropertiesImpl implements TextProperties {
         this.text = text;
     }
 
+    @Override
+    public void setDimensions(float width, float height) {
+        this.width = width;
+        this.height = height;
+    }
+
     public int deepHashCode() {
         int hash = 7;
         hash = 97 * hash + (this.visible ? 1 : 0);
         hash = 97 * hash + this.rgba;
         hash = 97 * hash + Float.floatToIntBits(this.size);
+        hash = 97 * hash + Float.floatToIntBits(this.width);
+        hash = 97 * hash + Float.floatToIntBits(this.height);
         hash = 97 * hash + (this.text != null ? this.text.hashCode() : 0);
         return hash;
     }
@@ -136,6 +156,12 @@ public class TextPropertiesImpl implements TextProperties {
             return false;
         }
         if (Float.floatToIntBits(this.size) != Float.floatToIntBits(obj.size)) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.width) != Float.floatToIntBits(obj.width)) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.height) != Float.floatToIntBits(obj.height)) {
             return false;
         }
         if ((this.text == null) ? (obj.text != null) : !this.text.equals(obj.text)) {
