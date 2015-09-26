@@ -65,7 +65,25 @@ public class GraphFactoryImpl implements GraphFactory {
 
     @Override
     public Edge newEdge(Object id, Node source, Node target, int type, double weight, boolean directed) {
-        return new EdgeImpl(id, store, (NodeImpl) source, (NodeImpl) target, type, weight, directed);
+        EdgeImpl res = new EdgeImpl(id, store, (NodeImpl) source, (NodeImpl) target, type, weight, directed);
+        switch (edgeAssignConfiguration) {
+            case INTEGER:
+                Integer idInt = (Integer) id;
+                if (idInt > EDGE_IDS.get()) {
+                    EDGE_IDS.set(idInt + 1);
+                }
+                break;
+            case STRING:
+                String idStr = (String) id;
+                if (isNumeric(idStr)) {
+                    Integer idStrParsed = Integer.parseInt(idStr);
+                    if (idStrParsed > EDGE_IDS.get()) {
+                        EDGE_IDS.set(idStrParsed + 1);
+                    }
+                }
+                break;
+        }
+        return res;
     }
 
     @Override
@@ -75,7 +93,25 @@ public class GraphFactoryImpl implements GraphFactory {
 
     @Override
     public Node newNode(Object id) {
-        return new NodeImpl(id, store);
+        NodeImpl res = new NodeImpl(id, store);
+        switch (nodeAssignConfiguration) {
+            case INTEGER:
+                Integer idInt = (Integer) id;
+                if (idInt > NODE_IDS.get()) {
+                    NODE_IDS.set(idInt + 1);
+                }
+                break;
+            case STRING:
+                String idStr = (String) id;
+                if (isNumeric(idStr)) {
+                    Integer idStrParsed = Integer.parseInt(idStr);
+                    if (idStrParsed > NODE_IDS.get()) {
+                        NODE_IDS.set(idStrParsed + 1);
+                    }
+                }
+                break;
+        }
+        return res;
     }
 
     private Object nextNodeId() {
@@ -118,6 +154,26 @@ public class GraphFactoryImpl implements GraphFactory {
 
     protected void setEdgeCounter(int count) {
         EDGE_IDS.set(count);
+    }
+
+    private static boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        char[] data = str.toCharArray();
+        if (data.length <= 0) {
+            return false;
+        }
+        int index = 0;
+        if (data[0] == '-' && data.length > 1) {
+            index = 1;
+        }
+        for (; index < data.length; index++) {
+            if (data[index] < '0' || data[index] > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 
     public int deepHashCode() {

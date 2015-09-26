@@ -177,6 +177,62 @@ public class GraphFactoryTest {
     }
 
     @Test
+    public void testAutoIncrementNodeInt() {
+        Configuration config = new Configuration();
+        config.setNodeIdType(Integer.class);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
+        graphFactory.newNode(10);
+        Assert.assertEquals(graphFactory.newNode().getId(), 11);
+        graphFactory.newNode(5);
+        Assert.assertEquals(graphFactory.newNode().getId(), 12);
+    }
+
+    @Test
+    public void testAutoIncrementEdgeInt() {
+        Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
+        Node n1 = graphFactory.newNode();
+        Node n2 = graphFactory.newNode();
+        Node n3 = graphFactory.newNode();
+
+        graphFactory.newEdge(10, n1, n2, 9, 7.0, false);
+        Assert.assertEquals(graphFactory.newEdge(n2, n3).getId(), 11);
+        graphFactory.newEdge(5, n1, n2, 9, 7.0, false);
+        Assert.assertEquals(graphFactory.newEdge(n1, n3).getId(), 12);
+    }
+
+    @Test
+    public void testAutoIncrementNodeString() {
+        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
+        graphFactory.newNode("10");
+        Assert.assertEquals(graphFactory.newNode().getId(), "11");
+        graphFactory.newNode("s15");
+        Assert.assertEquals(graphFactory.newNode().getId(), "12");
+        graphFactory.newNode("5");
+        Assert.assertEquals(graphFactory.newNode().getId(), "13");
+    }
+
+    @Test
+    public void testAutoIncrementEdgeString() {
+        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
+        Node n1 = graphFactory.newNode();
+        Node n2 = graphFactory.newNode();
+        Node n3 = graphFactory.newNode();
+
+        graphFactory.newEdge("10", n1, n2, 9, 7.0, false);
+        Assert.assertEquals(graphFactory.newEdge(n2, n3).getId(), "11");
+        graphFactory.newEdge("e15", n3, n2, 9, 7.0, false);
+        Assert.assertEquals(graphFactory.newEdge(n1, n3).getId(), "12");
+        graphFactory.newEdge("5", n1, n3, 9, 7.0, false);
+        Assert.assertEquals(graphFactory.newEdge(n1, n3).getId(), "13");
+    }
+
+    @Test
     public void testDeepEquals() {
         GraphFactoryImpl gf1 = new GraphFactoryImpl(new GraphStore());
         GraphFactoryImpl gf2 = new GraphFactoryImpl(new GraphStore());
