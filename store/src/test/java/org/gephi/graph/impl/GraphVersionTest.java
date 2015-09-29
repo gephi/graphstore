@@ -20,10 +20,6 @@ import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class GraphVersionTest {
 
     @Test
@@ -149,6 +145,22 @@ public class GraphVersionTest {
         Assert.assertNotSame(view.version, graphStore.version);
         Assert.assertEquals(view.version.nodeVersion, Integer.MIN_VALUE + 1);
         Assert.assertEquals(view.version.edgeVersion, Integer.MIN_VALUE + 1);
+    }
+
+    @Test
+    public void testViewInfiniteLoop() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+
+        GraphVersion graphVersion = view.version;
+        graphVersion.nodeVersion = Integer.MAX_VALUE - 1;
+        graphVersion.edgeVersion = Integer.MAX_VALUE - 1;
+
+        int nv = graphVersion.incrementAndGetNodeVersion();
+        int ev = graphVersion.incrementAndGetEdgeVersion();
+
+        Assert.assertEquals(nv, Integer.MIN_VALUE + 1);
+        Assert.assertEquals(ev, Integer.MIN_VALUE + 1);
     }
 
     @Test
@@ -309,6 +321,7 @@ public class GraphVersionTest {
         GraphVersion g4 = new GraphVersion(null);
         g4.nodeVersion = 0;
         g4.edgeVersion = 10;
+        Assert.assertFalse(g1.deepEquals(null));
         Assert.assertTrue(g1.deepEquals(g2));
         Assert.assertFalse(g1.deepEquals(g3));
         Assert.assertFalse(g1.deepEquals(g4));

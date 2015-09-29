@@ -180,7 +180,7 @@ public abstract class TimestampMap<T> {
     }
 
     protected int getIndex(double timestamp) {
-        return Arrays.binarySearch(array, timestamp);
+        return Arrays.binarySearch(array, 0, size, timestamp);
     }
 
     /**

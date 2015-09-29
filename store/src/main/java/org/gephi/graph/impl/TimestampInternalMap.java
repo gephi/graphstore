@@ -122,12 +122,6 @@ public class TimestampInternalMap {
         }
     }
 
-    void checkIndex(int index) {
-        if (index < 0 || index >= length) {
-            throw new IllegalArgumentException("The timestamp store index is out of bounds");
-        }
-    }
-
     public int deepHashCode() {
         int hash = 3;
         for (Double2IntMap.Entry entry : timestampSortedMap.double2IntEntrySet()) {

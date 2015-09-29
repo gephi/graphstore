@@ -22,10 +22,6 @@ import org.gephi.graph.api.Interval;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class TimestampMapTest {
 
     @Test
@@ -121,6 +117,18 @@ public class TimestampMapTest {
             Assert.assertFalse(set.remove(3.0));
             Assert.assertFalse(set.remove(0.0));
             testValues(set, new double[]{1.0, 2.0}, defaultValues);
+        }
+    }
+
+    @Test
+    public void testContains() {
+        for (TimestampMap set : getAllInstances()) {
+            Object[] defaultValues = getTestValues(set);
+
+            Assert.assertFalse(set.contains(1.0));
+            set.put(1.0, defaultValues[0]);
+            set.remove(1.0);
+            Assert.assertFalse(set.contains(1.0));
         }
     }
 

@@ -191,6 +191,7 @@ public class TimestampInternalMapTest {
     @Test
     public void testDeepEqualsEmpty() {
         TimestampInternalMap store1 = new TimestampInternalMap();
+        Assert.assertFalse(store1.deepEquals(null));
         Assert.assertTrue(store1.deepEquals(store1));
 
         TimestampInternalMap store2 = new TimestampInternalMap();

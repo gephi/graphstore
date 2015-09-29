@@ -34,6 +34,11 @@ public class ColumnImplTest {
         new ColumnImpl("", null, null, this, Origin.DATA, true, false);
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testColumnNullType() {
+        new ColumnImpl("foo", null, null, this, Origin.DATA, true, false);
+    }
+
     @Test
     public void testColumnIsDynamic() {
         ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);

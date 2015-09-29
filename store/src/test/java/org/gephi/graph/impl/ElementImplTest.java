@@ -258,6 +258,16 @@ public class ElementImplTest {
         node.setAttribute(column, 1, 1.0);
 
         Assert.assertEquals(node.getAttribute(column, 1.0), 1);
+        Assert.assertNull(node.getAttribute(column, 2.0));
+    }
+
+    @Test
+    public void testGetAttributeDynamicColumnNull() {
+        GraphStore store = new GraphStore();
+        Column column = generateDynamicColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        Assert.assertNull(node.getAttribute(column, 1.0));
     }
 
     @Test
@@ -440,6 +450,45 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testRemoveDynamicAttribute() {
+        GraphStore store = new GraphStore();
+        Column column = generateDynamicColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 15, 1.0);
+        store.addNode(node);
+
+        Assert.assertNotNull(node.removeAttribute(column));
+        Assert.assertNull(node.getAttribute(column, 1.0));
+    }
+
+    @Test
+    public void testRemoveAttributeWithTimestamp() {
+        GraphStore store = new GraphStore();
+        Column column = generateDynamicColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 15, 1.0);
+        store.addNode(node);
+
+        Assert.assertEquals(node.removeAttribute(column, 1.0), 15);
+        Assert.assertNull(node.getAttribute(column, 1.0));
+    }
+
+    @Test
+    public void testRemoveAttributeWithTimestampByString() {
+        GraphStore store = new GraphStore();
+        Column column = generateDynamicColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 15, 1.0);
+        store.addNode(node);
+
+        Assert.assertEquals(node.removeAttribute("age", 1.0), 15);
+        Assert.assertNull(node.getAttribute(column, 1.0));
+    }
+
+    @Test
     public void testGetTimestampsEmpty() {
         GraphStore store = new GraphStore();
 
@@ -519,6 +568,7 @@ public class ElementImplTest {
         GraphView view = store.viewStore.createView();
 
         Assert.assertEquals(node.getAttribute(column, view), 1);
+        Assert.assertEquals(node.getAttribute("age", view), 1);
     }
 
     @Test
@@ -527,10 +577,10 @@ public class ElementImplTest {
         Column column = generateDynamicColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
-        node.setAttribute(column, 10, 1.0);
-
         GraphView view = store.viewStore.createView();
 
+        Assert.assertNull(node.getAttribute(column, view));
+        node.setAttribute(column, 10, 1.0);
         Assert.assertEquals(node.getAttribute(column, view), 10);
         node.setAttribute(column, 0, 5.0);
         node.setAttribute(column, 20, 2.0);
@@ -538,8 +588,10 @@ public class ElementImplTest {
         store.viewStore.setTimeInterval(view, new Interval(5.0, 5.0));
         Assert.assertEquals(node.getAttribute(column, view), 0);
         store.viewStore.setTimeInterval(view, new Interval(1.0, 2.0));
+        Assert.assertEquals(node.getAttribute(column, view), 10);
         column.setEstimator(Estimator.AVERAGE);
         Assert.assertEquals(node.getAttribute(column, view), 15.0);
+        Assert.assertEquals(node.getAttribute("age", view), 15.0);
     }
 
     @Test
