@@ -15,8 +15,10 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnObserver;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
@@ -72,6 +74,79 @@ public class ColumnObserverTest {
 
         node.removeAttribute(column);
         Assert.assertTrue(observer.hasColumnChanged());
+        Assert.assertFalse(observer.hasColumnChanged());
+    }
+
+    @Test
+    public void testSetLabel() {
+        GraphStore store = new GraphStore();
+        TableImpl table = store.nodeTable;
+
+        Node node = store.factory.newNode();
+        store.addNode(node);
+
+        Column labelColumn = table.getColumn("label");
+        ColumnObserver observer = labelColumn.createColumnObserver();
+        Assert.assertFalse(observer.hasColumnChanged());
+
+        node.setLabel("foo");
+        Assert.assertTrue(observer.hasColumnChanged());
+    }
+
+    @Test
+    public void testAddTimestamp() {
+        GraphStore store = new GraphStore();
+        TableImpl table = store.nodeTable;
+
+        Node node = store.factory.newNode();
+        store.addNode(node);
+
+        Column timestampColumn = table.getColumn("timestamp");
+        ColumnObserver observer = timestampColumn.createColumnObserver();
+        Assert.assertFalse(observer.hasColumnChanged());
+
+        node.addTimestamp(1.0);
+        Assert.assertTrue(observer.hasColumnChanged());
+    }
+
+    @Test
+    public void testRemoveTimestamp() {
+        GraphStore store = new GraphStore();
+        TableImpl table = store.nodeTable;
+
+        Node node = store.factory.newNode();
+        node.addTimestamp(1.0);
+        store.addNode(node);
+
+        Column timestampColumn = table.getColumn("timestamp");
+        ColumnObserver observer = timestampColumn.createColumnObserver();
+        Assert.assertFalse(observer.hasColumnChanged());
+
+        node.removeTimestamp(1.0);
+        Assert.assertTrue(observer.hasColumnChanged());
+    }
+
+    @Test
+    public void testSetEdgeWeight() {
+        GraphStore store = new GraphStore();
+        TableImpl table = store.edgeTable;
+
+        Node n1 = store.factory.newNode();
+        Node n2 = store.factory.newNode();
+        store.addAllNodes(Arrays.asList(new Node[]{n1, n2}));
+        Edge edge = store.factory.newEdge(n1, n2);
+        edge.setWeight(2.0);
+        store.addEdge(edge);
+
+        Column weightColumn = table.getColumn("weight");
+        ColumnObserver observer = weightColumn.createColumnObserver();
+        Assert.assertFalse(observer.hasColumnChanged());
+
+        edge.setWeight(3.0);
+        Assert.assertTrue(observer.hasColumnChanged());
+        edge.setWeight(1.0, 1.0);
+        Assert.assertTrue(observer.hasColumnChanged());
+        edge.setWeight(1.0, 1.0);
         Assert.assertFalse(observer.hasColumnChanged());
     }
 

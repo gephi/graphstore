@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import java.awt.Color;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.types.TimestampDoubleMap;
@@ -92,6 +93,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public void setWeight(double weight, double timestamp) {
+        boolean res;
         synchronized (this) {
             Object oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
             TimestampDoubleMap dynamicValue;
@@ -101,13 +103,17 @@ public class EdgeImpl extends ElementImpl implements Edge {
             } else {
                 dynamicValue = (TimestampDoubleMap) oldValue;
             }
-            dynamicValue.put(timestamp, weight);
+            res = dynamicValue.put(timestamp, weight);
         }
         TimestampInternalMap timestampMap = getTimestampMap();
-        if (timestampMap != null && isValid()) {
+        if (res && timestampMap != null && isValid()) {
             timestampMap.addTimestamp(timestamp);
         }
-        //TODO: Increment column version
+        ColumnStore columnStore = getColumnStore();
+        if (res && columnStore != null) {
+            Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+            ((ColumnImpl) column).incrementVersion();
+        }
     }
 
     @Override
@@ -160,7 +166,14 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public void setWeight(double weight) {
-        attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
+        synchronized (this) {
+            attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
+        }
+        ColumnStore columnStore = getColumnStore();
+        if (columnStore != null) {
+            Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+            ((ColumnImpl) column).incrementVersion();
+        }
     }
 
     public int getNextOutEdge() {

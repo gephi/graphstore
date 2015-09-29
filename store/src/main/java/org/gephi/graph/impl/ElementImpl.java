@@ -251,7 +251,11 @@ public abstract class ElementImpl implements Element {
                 }
                 attributes[index] = label;
             }
-            //TODO: Increment column version
+            ColumnStore columnStore = getColumnStore();
+            if (columnStore != null && isValid()) {
+                Column col = columnStore.getColumnByIndex(index);
+                ((ColumnImpl) col).incrementVersion();
+            }
         }
     }
 
@@ -371,6 +375,11 @@ public abstract class ElementImpl implements Element {
             if (timestampStore != null) {
                 timestampStore.add(timestamp, this);
             }
+            ColumnStore columnStore = getColumnStore();
+            if (columnStore != null) {
+                Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESTAMP_INDEX);
+                ((ColumnImpl) column).incrementVersion();
+            }
         }
 
         return res;
@@ -397,6 +406,11 @@ public abstract class ElementImpl implements Element {
             TimestampInternalMap timestampMap = getTimestampMap();
             if (timestampMap != null) {
                 timestampMap.removeTimestamp(timestamp);
+            }
+            ColumnStore columnStore = getColumnStore();
+            if (columnStore != null) {
+                Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESTAMP_INDEX);
+                ((ColumnImpl) column).incrementVersion();
             }
         }
 
