@@ -15,10 +15,12 @@
  */
 package org.gephi.graph.api.types;
 
+import java.util.Arrays;
 import org.gephi.graph.api.Estimator;
+import org.gephi.graph.api.Interval;
 
 /**
- * Sorted map where keys are timestamp indices and values character values.
+ * Sorted map where keys are timestamp and values character values.
  */
 public final class TimestampCharMap extends TimestampMap<Character> {
 
@@ -48,22 +50,23 @@ public final class TimestampCharMap extends TimestampMap<Character> {
     }
 
     @Override
-    public void put(int timestampIndex, Character value) {
+    public boolean put(double timestamp, Character value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putCharacter(timestampIndex, value);
+        return putCharacter(timestamp, value);
     }
 
     /**
      * Put the <code>value</code> in this map at the given
-     * <code>timestampIndex</code> key.
+     * <code>timestamp</code> key.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param value value
+     * @return true if timestamp is a new key, false otherwise
      */
-    public void putCharacter(int timestampIndex, char value) {
-        final int index = putInner(timestampIndex);
+    public boolean putCharacter(double timestamp, char value) {
+        final int index = putInner(timestamp);
         if (index < 0) {
             int insertIndex = -index - 1;
 
@@ -79,22 +82,28 @@ public final class TimestampCharMap extends TimestampMap<Character> {
                 newArray[insertIndex] = value;
                 values = newArray;
             }
+            return true;
         } else {
             values[index] = value;
         }
+        return false;
     }
 
     @Override
-    public void remove(int timestampIndex) {
-        final int removeIndex = removeInner(timestampIndex);
-        if (removeIndex >= 0 && removeIndex != size) {
-            System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+    public boolean remove(double timestamp) {
+        final int removeIndex = removeInner(timestamp);
+        if (removeIndex >= 0) {
+            if (removeIndex != size) {
+                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+            }
+            return true;
         }
+        return false;
     }
 
     @Override
-    public Character get(int timestampIndex, Character defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public Character get(double timestamp, Character defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -102,14 +111,14 @@ public final class TimestampCharMap extends TimestampMap<Character> {
     }
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @return found value or the default value if not found
      * @throws IllegalArgumentException if the element doesn't exist
      */
-    public char getCharacter(int timestampIndex) {
-        final int index = getIndex(timestampIndex);
+    public char getCharacter(double timestamp) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -117,16 +126,16 @@ public final class TimestampCharMap extends TimestampMap<Character> {
     }
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      * <p>
      * Return <code>defaultValue</code> if the value is not found.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param defaultValue default value
      * @return found value or the default value if not found
      */
-    public char getCharacter(int timestampIndex, char defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public char getCharacter(double timestamp, char defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -134,33 +143,39 @@ public final class TimestampCharMap extends TimestampMap<Character> {
     }
 
     @Override
-    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+    public Object get(Interval interval, Estimator estimator) {
         switch (estimator) {
             case MIN:
-                return getMin(timestampIndices);
+                return getMin(interval);
             case MAX:
-                return getMax(timestampIndices);
+                return getMax(interval);
             case FIRST:
-                return getFirst(timestampIndices);
+                return getFirst(interval);
             case LAST:
-                return getLast(timestampIndices);
+                return getLast(interval);
             default:
                 throw new UnsupportedOperationException("Unknown estimator.");
         }
     }
 
     @Override
-    protected Object getMin(int[] timestampIndices) {
+    protected Object getMin(Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
         char min = Character.MAX_VALUE;
         boolean found = false;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                char val = values[index];
-                min = (char) Math.min(min, val);
-                found = true;
-            }
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            char val = values[i];
+            min = (char) Math.min(min, val);
+            found = true;
         }
         if (!found) {
             return null;
@@ -169,17 +184,23 @@ public final class TimestampCharMap extends TimestampMap<Character> {
     }
 
     @Override
-    protected Object getMax(int[] timestampIndices) {
+    protected Object getMax(Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
         char max = Character.MIN_VALUE;
         boolean found = false;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                char val = values[index];
-                max = (char) Math.max(max, val);
-                found = true;
-            }
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            char val = values[i];
+            max = (char) Math.max(max, val);
+            found = true;
         }
         if (!found) {
             return null;

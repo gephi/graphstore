@@ -23,9 +23,10 @@ import static org.gephi.graph.api.Estimator.LAST;
 import static org.gephi.graph.api.Estimator.MAX;
 import static org.gephi.graph.api.Estimator.MIN;
 import static org.gephi.graph.api.Estimator.SUM;
+import org.gephi.graph.api.Interval;
 
 /**
- * Sorted map where keys are timestamp indices and values double values.
+ * Sorted map where keys are timestamp and values double values.
  */
 public final class TimestampDoubleMap extends TimestampMap<Double> {
 
@@ -55,22 +56,23 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
     }
 
     @Override
-    public void put(int timestampIndex, Double value) {
+    public boolean put(double timestamp, Double value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putDouble(timestampIndex, value);
+        return putDouble(timestamp, value);
     }
 
     /**
      * Put the <code>value</code> in this map at the given
-     * <code>timestampIndex</code> key.
+     * <code>timestamp</code> key.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp index
      * @param value value
+     * @return true if timestamp is a new key, false otherwise
      */
-    public void putDouble(int timestampIndex, double value) {
-        final int index = putInner(timestampIndex);
+    public boolean putDouble(double timestamp, double value) {
+        final int index = putInner(timestamp);
         if (index < 0) {
             int insertIndex = -index - 1;
 
@@ -86,22 +88,28 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
                 newArray[insertIndex] = value;
                 values = newArray;
             }
+            return true;
         } else {
             values[index] = value;
         }
+        return false;
     }
 
     @Override
-    public void remove(int timestampIndex) {
-        final int removeIndex = removeInner(timestampIndex);
-        if (removeIndex >= 0 && removeIndex != size) {
-            System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+    public boolean remove(double timestamp) {
+        final int removeIndex = removeInner(timestamp);
+        if (removeIndex >= 0) {
+            if (removeIndex != size) {
+                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+            }
+            return true;
         }
+        return false;
     }
 
     @Override
-    public Double get(int timestampIndex, Double defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public Double get(double timestamp, Double defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -111,12 +119,12 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
     /**
      * Get the value for the given timestamp index.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp index
      * @return found value or the default value if not found
      * @throws IllegalArgumentException if the element doesn't exist
      */
-    public double getDouble(int timestampIndex) {
-        final int index = getIndex(timestampIndex);
+    public double getDouble(double timestamp) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -128,12 +136,12 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
      * <p>
      * Return <code>defaultValue</code> if the value is not found.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp index
      * @param defaultValue default value
      * @return found value or the default value if not found
      */
-    public double getDouble(int timestampIndex, double defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public double getDouble(double timestamp, double defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -141,26 +149,26 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
     }
 
     @Override
-    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+    public Object get(Interval interval, Estimator estimator) {
         switch (estimator) {
             case AVERAGE:
-                BigDecimal ra = getAverageBigDecimal(timestampIndices);
+                BigDecimal ra = getAverageBigDecimal(interval);
                 if (ra != null) {
                     return ra.doubleValue();
                 }
             case SUM:
-                BigDecimal rs = getSumBigDecimal(timestampIndices);
+                BigDecimal rs = getSumBigDecimal(interval);
                 if (rs != null) {
                     return rs.doubleValue();
                 }
             case MIN:
-                return getMin(timestampIndices);
+                return getMin(interval);
             case MAX:
-                return getMax(timestampIndices);
+                return getMax(interval);
             case FIRST:
-                return getFirst(timestampIndices);
+                return getFirst(interval);
             case LAST:
-                return getLast(timestampIndices);
+                return getLast(interval);
             default:
                 throw new UnsupportedOperationException("Unknown estimator.");
         }

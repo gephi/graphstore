@@ -15,17 +15,13 @@
  */
 package org.gephi.graph.api.types;
 
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
+import it.unimi.dsi.fastutil.doubles.DoubleSet;
 import java.util.Random;
 import org.gephi.graph.impl.NumberGenerator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class TimestampSetTest {
 
     @Test
@@ -39,7 +35,7 @@ public class TimestampSetTest {
     public void testAddOne() {
         TimestampSet set = new TimestampSet();
 
-        int t = 1;
+        double t = 1.0;
         Assert.assertTrue(set.add(t));
         Assert.assertEquals(1, set.size());
         Assert.assertFalse(set.isEmpty());
@@ -50,7 +46,7 @@ public class TimestampSetTest {
     public void testAddDuplicate() {
         TimestampSet set = new TimestampSet();
 
-        int t = 1;
+        double t = 1.0;
         Assert.assertTrue(set.add(t));
         Assert.assertFalse(set.add(t));
         Assert.assertTrue(set.contains(t));
@@ -61,12 +57,12 @@ public class TimestampSetTest {
         TimestampSet set = new TimestampSet();
 
         int count = 1000;
-        int[] array = NumberGenerator.generateRandomInt(count, false);
-        for (int d : array) {
+        double[] array = NumberGenerator.generateRandomDouble(count, false);
+        for (double d : array) {
             set.add(d);
         }
-        int[] tms = set.getTimestamps();
-        int[] sdr = NumberGenerator.sortAndRemoveDuplicates(array);
+        double[] tms = set.getTimestamps();
+        double[] sdr = NumberGenerator.sortAndRemoveDuplicates(array);
 
         Assert.assertEquals(tms.length, sdr.length);
         for (int i = 0; i < tms.length; i++) {
@@ -75,16 +71,16 @@ public class TimestampSetTest {
     }
 
     @Test
-    public void testAddMultiplesithDuplicated() {
+    public void testAddMultiplesWithDuplicated() {
         TimestampSet set = new TimestampSet();
 
         int count = 1000;
-        int[] array = NumberGenerator.generateRandomInt(count, true);
-        for (int d : array) {
+        double[] array = NumberGenerator.generateRandomDouble(count, true);
+        for (double d : array) {
             set.add(d);
         }
 
-        testIntArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(array));
+        testDoubleArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(array));
     }
 
     @Test
@@ -94,13 +90,13 @@ public class TimestampSetTest {
         Assert.assertTrue(set.isEmpty());
         Assert.assertEquals(0, set.size());
 
-        Assert.assertTrue(set.add(1));
+        Assert.assertTrue(set.add(1.0));
         Assert.assertEquals(1, set.size());
 
-        Assert.assertTrue(set.add(6));
+        Assert.assertTrue(set.add(6.0));
 
-        Assert.assertTrue(set.add(4));
-        Assert.assertTrue(set.add(2));
+        Assert.assertTrue(set.add(4.0));
+        Assert.assertTrue(set.add(2.0));
 
         Assert.assertEquals(4, set.size());
     }
@@ -109,7 +105,7 @@ public class TimestampSetTest {
     public void testRemove() {
         TimestampSet set = new TimestampSet();
 
-        int t = 1;
+        double t = 1.0;
         set.add(t);
 
         Assert.assertTrue(set.remove(t));
@@ -121,78 +117,78 @@ public class TimestampSetTest {
     public void testRemoveAdd() {
         TimestampSet set = new TimestampSet();
 
-        set.add(1);
-        set.add(2);
+        set.add(1.0);
+        set.add(2.0);
 
-        Assert.assertTrue(set.remove(1));
-        Assert.assertTrue(set.add(1));
+        Assert.assertTrue(set.remove(1.0));
+        Assert.assertTrue(set.add(1.0));
 
         Assert.assertEquals(2, set.size());
-        Assert.assertEquals(1, set.getTimestamps()[0]);
-        Assert.assertEquals(2, set.getTimestamps()[1]);
+        Assert.assertEquals(1.0, set.getTimestamps()[0]);
+        Assert.assertEquals(2.0, set.getTimestamps()[1]);
     }
 
     @Test
     public void testRemoveAddLoop() {
         TimestampSet set = new TimestampSet();
-        IntSet intSet = new IntOpenHashSet();
+        DoubleSet doubleSet = new DoubleOpenHashSet();
 
         int count = 1000;
-        int[] array = NumberGenerator.generateRandomInt(count, true);
-        for (int d : array) {
+        double[] array = NumberGenerator.generateRandomDouble(count, true);
+        for (double d : array) {
             set.add(d);
-            intSet.add(d);
+            doubleSet.add(d);
         }
         Random r = new Random(129);
         for (int i = 0; i < count / 2; i++) {
             int pos = r.nextInt(count);
-            int number = array[pos];
+            double number = array[pos];
             if (number > 0) {
                 set.remove(number);
-                intSet.remove(number);
+                doubleSet.remove(number);
                 array[pos] = -1;
             } else {
                 i--;
             }
         }
 
-        testIntArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(intSet.toIntArray()));
+        testDoubleArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(doubleSet.toDoubleArray()));
 
-        int[] newArray = NumberGenerator.generateRandomInt(count / 2, true);
+        double[] newArray = NumberGenerator.generateRandomDouble(count / 2, true);
         for (int i = 0; i < count / 2; i++) {
-            int number = newArray[i];
+            double number = newArray[i];
             set.add(number);
-            intSet.add(number);
+            doubleSet.add(number);
         }
 
-        testIntArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(intSet.toIntArray()));
+        testDoubleArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(doubleSet.toDoubleArray()));
     }
 
     @Test
     public void testClear() {
         TimestampSet set = new TimestampSet();
 
-        set.add(1);
+        set.add(1.0);
 
         set.clear();
 
         Assert.assertTrue(set.isEmpty());
-        Assert.assertFalse(set.contains(1));
+        Assert.assertFalse(set.contains(1.0));
     }
 
     @Test
     public void testEquals() {
         TimestampSet set1 = new TimestampSet();
-        set1.add(6);
-        set1.add(1);
+        set1.add(6.0);
+        set1.add(1.0);
 
         TimestampSet set2 = new TimestampSet();
-        set2.add(6);
-        set2.add(1);
+        set2.add(6.0);
+        set2.add(1.0);
 
         TimestampSet set3 = new TimestampSet();
-        set3.add(6);
-        set3.add(2);
+        set3.add(6.0);
+        set3.add(2.0);
 
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
@@ -206,12 +202,12 @@ public class TimestampSetTest {
     @Test
     public void testEqualsWithCapacity() {
         TimestampSet set1 = new TimestampSet(10);
-        set1.add(6);
-        set1.add(1);
+        set1.add(6.0);
+        set1.add(1.0);
 
         TimestampSet set2 = new TimestampSet();
-        set2.add(6);
-        set2.add(1);
+        set2.add(6.0);
+        set2.add(1.0);
 
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
@@ -222,11 +218,11 @@ public class TimestampSetTest {
     @Test
     public void testEqualsDifferentSize() {
         TimestampSet set1 = new TimestampSet();
-        set1.add(6);
-        set1.add(1);
+        set1.add(6.0);
+        set1.add(1.0);
 
         TimestampSet set2 = new TimestampSet();
-        set2.add(6);
+        set2.add(6.0);
 
         Assert.assertFalse(set1.equals(set2));
         Assert.assertFalse(set2.equals(set1));
@@ -235,15 +231,15 @@ public class TimestampSetTest {
     @Test
     public void tesGetTimestamps() {
         TimestampSet set = new TimestampSet();
-        set.add(0);
-        set.add(1);
-        set.remove(0);
+        set.add(0.0);
+        set.add(1.0);
+        set.remove(0.0);
 
-        Assert.assertEquals(set.getTimestamps(), new int[]{1});
+        Assert.assertEquals(set.getTimestamps(), new double[]{1.0});
     }
 
     //UTILITY
-    private void testIntArrayEquals(int[] a, int[] b) {
+    private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);
         for (int i = 0; i < a.length; i++) {
             Assert.assertEquals(a[i], b[i]);

@@ -479,12 +479,12 @@ public class ElementImplTest {
         Assert.assertEquals(entry1.getValue(), 12);
         Assert.assertTrue(itr.hasNext());
         Map.Entry<Double, Object> entry2 = itr.next();
-        Assert.assertEquals(entry2.getKey(), 3.0);
-        Assert.assertEquals(entry2.getValue(), 14);
+        Assert.assertEquals(entry2.getKey(), 2.0);
+        Assert.assertEquals(entry2.getValue(), 13);
         Assert.assertTrue(itr.hasNext());
         Map.Entry<Double, Object> entry3 = itr.next();
-        Assert.assertEquals(entry3.getKey(), 2.0);
-        Assert.assertEquals(entry3.getValue(), 13);
+        Assert.assertEquals(entry3.getKey(), 3.0);
+        Assert.assertEquals(entry3.getValue(), 14);
         Assert.assertFalse(itr.hasNext());
     }
 

@@ -19,10 +19,11 @@ import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
+import org.gephi.graph.api.Interval;
 
 /**
- * Abstract class that implement a sorted map between timestamp indices and
- * attribute values.
+ * Abstract class that implement a sorted map between timestamp and attribute
+ * values.
  * <p>
  * Implementations which extend this class customize the map for a unique type,
  * which is represented by the <code>T</code> parameter.
@@ -31,7 +32,7 @@ import java.util.Arrays;
  */
 public abstract class TimestampMap<T> {
 
-    protected int[] array;
+    protected double[] array;
     protected int size = 0;
 
     /**
@@ -40,7 +41,7 @@ public abstract class TimestampMap<T> {
      * The map is empty with zero capacity.
      */
     public TimestampMap() {
-        array = new int[0];
+        array = new double[0];
     }
 
     /**
@@ -52,49 +53,49 @@ public abstract class TimestampMap<T> {
      * @param capacity timestamp capacity
      */
     public TimestampMap(int capacity) {
-        array = new int[capacity];
-        Arrays.fill(array, Integer.MAX_VALUE);
+        array = new double[capacity];
+        Arrays.fill(array, Double.MAX_VALUE);
     }
 
     /**
-     * Put the value at the given timestamp index.
+     * Put the value at the given timestamp.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param value value
+     * @return true if timestamp is a new key, false otherwise
      */
-    public abstract void put(int timestampIndex, T value);
+    public abstract boolean put(double timestamp, T value);
 
     /**
-     * Remove the value at the given timestamp index.
+     * Remove the value at the given timestamp.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
+     * @return true if the key existed, false otherwise
      */
-    public abstract void remove(int timestampIndex);
+    public abstract boolean remove(double timestamp);
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      * <p>
      * Return <code>defaultValue</code> if the value is not found.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param defaultValue default value
      * @return found value or the default value if not found
      */
-    public abstract T get(int timestampIndex, T defaultValue);
+    public abstract T get(double timestamp, T defaultValue);
 
     /**
      * Get the estimated value for the given array of timestamps.
      * <p>
      * The estimator is used to determine the way multiple timestamp values are
-     * merged together (e.g average).
+     * merged together (e.g average, first, median).
      *
-     * @param timestamps the timestamp values
-     * @param timestampIndices the timestamp indices for the given
-     * <code>timestamps</code>
-     * @param estimator the estimator used
-     * @return the estimated value
+     * @param interval interval query
+     * @param estimator estimator used
+     * @return estimated value
      */
-    public abstract Object get(double[] timestamps, int[] timestampIndices, Estimator estimator);
+    public abstract Object get(Interval interval, Estimator estimator);
 
     /**
      * Returns all the values as an array.
@@ -120,8 +121,8 @@ public abstract class TimestampMap<T> {
 
     protected abstract Object getValue(int index);
 
-    protected int putInner(int timestampIndex) {
-        int index = Arrays.binarySearch(array, 0, size, timestampIndex);
+    protected int putInner(double timestamp) {
+        int index = Arrays.binarySearch(array, 0, size, timestamp);
         if (index < 0) {
             int insertIndex = -index - 1;
 
@@ -129,12 +130,12 @@ public abstract class TimestampMap<T> {
                 if (insertIndex < size) {
                     System.arraycopy(array, insertIndex, array, insertIndex + 1, size - insertIndex);
                 }
-                array[insertIndex] = timestampIndex;
+                array[insertIndex] = timestamp;
             } else {
-                int[] newArray = new int[array.length + 1];
+                double[] newArray = new double[array.length + 1];
                 System.arraycopy(array, 0, newArray, 0, insertIndex);
                 System.arraycopy(array, insertIndex, newArray, insertIndex + 1, array.length - insertIndex);
-                newArray[insertIndex] = timestampIndex;
+                newArray[insertIndex] = timestamp;
                 array = newArray;
             }
 
@@ -143,8 +144,8 @@ public abstract class TimestampMap<T> {
         return index;
     }
 
-    protected int removeInner(int timestampIndex) {
-        int index = Arrays.binarySearch(array, 0, size, timestampIndex);
+    protected int removeInner(double timestamp) {
+        int index = Arrays.binarySearch(array, 0, size, timestamp);
         if (index >= 0) {
             int removeIndex = index;
 
@@ -178,18 +179,18 @@ public abstract class TimestampMap<T> {
         return size == 0;
     }
 
-    protected int getIndex(int timestampIndex) {
-        return Arrays.binarySearch(array, timestampIndex);
+    protected int getIndex(double timestamp) {
+        return Arrays.binarySearch(array, timestamp);
     }
 
     /**
-     * Returns true if this map contains <code>timestampIndex</code>.
+     * Returns true if this map contains <code>timestamp</code>.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @return true if contains, false otherwise
      */
-    public boolean contains(int timestampIndex) {
-        int index = Arrays.binarySearch(array, timestampIndex);
+    public boolean contains(double timestamp) {
+        int index = Arrays.binarySearch(array, timestamp);
         return index >= 0 && index < size;
     }
 
@@ -201,9 +202,9 @@ public abstract class TimestampMap<T> {
      *
      * @return array of all timestamps
      */
-    public int[] getTimestamps() {
+    public double[] getTimestamps() {
         if (size < array.length) {
-            int[] res = new int[size];
+            double[] res = new double[size];
             System.arraycopy(array, 0, res, 0, size);
             return res;
         } else {
@@ -216,7 +217,7 @@ public abstract class TimestampMap<T> {
      */
     public void clear() {
         size = 0;
-        array = new int[0];
+        array = new double[0];
     }
 
     @Override
@@ -224,8 +225,8 @@ public abstract class TimestampMap<T> {
         int hash = 7;
         hash = 29 * hash + this.size;
         for (int i = 0; i < size; i++) {
-            int index = this.array[i];
-            hash = 29 * hash + index;
+            double t = this.array[i];
+            hash = 29 * hash + (int) (Double.doubleToLongBits(t) ^ (Double.doubleToLongBits(t) >>> 32));
             Object obj = this.getValue(i);
             hash = 29 * hash + obj.hashCode();
         }
@@ -245,8 +246,8 @@ public abstract class TimestampMap<T> {
             return false;
         }
         for (int i = 0; i < this.array.length && i < other.array.length; i++) {
-            int i1 = this.array[i];
-            int i2 = other.array[i];
+            double i1 = this.array[i];
+            double i2 = other.array[i];
             if (i1 != i2) {
                 return false;
             }
@@ -260,41 +261,57 @@ public abstract class TimestampMap<T> {
     }
 
     //Estimators
-    protected Object getFirst(final int[] timestampIndices) {
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                Object val = getValue(index);
-                return val;
+    protected Object getFirst(final Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index >= 0) {
+            return getValue(index);
+        } else {
+            index = -index - 1;
+            if (index < size && array[index] <= interval.getHigh()) {
+                return getValue(index);
             }
         }
         return null;
     }
 
-    protected Object getLast(final int[] timestampIndices) {
-        for (int i = timestampIndices.length - 1; i > 0; i--) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                Object val = getValue(index);
-                return val;
+    protected Object getLast(final Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, highBound);
+        if (index >= 0) {
+            return getValue(index);
+        } else {
+            index = -index - 1;
+            if (index < size && array[index] >= interval.getLow()) {
+                return getValue(index);
             }
         }
         return null;
     }
 
-    protected Object getMin(final int[] timestampIndices) {
+    protected Object getMin(final Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
         double min = Double.POSITIVE_INFINITY;
         boolean found = false;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                double val = ((Number) getValue(index)).doubleValue();
-                min = (double) Math.min(min, val);
-                found = true;
-            }
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            double val = ((Number) getValue(i)).doubleValue();
+            min = (double) Math.min(min, val);
+            found = true;
         }
         if (!found) {
             return null;
@@ -302,17 +319,23 @@ public abstract class TimestampMap<T> {
         return min;
     }
 
-    protected Object getMax(final int[] timestampIndices) {
+    protected Object getMax(final Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
         double max = Double.NEGATIVE_INFINITY;
         boolean found = false;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                double val = ((Number) getValue(index)).doubleValue();
-                max = (double) Math.max(max, val);
-                found = true;
-            }
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            double val = ((Number) getValue(i)).doubleValue();
+            max = (double) Math.max(max, val);
+            found = true;
         }
         if (!found) {
             return null;
@@ -320,18 +343,23 @@ public abstract class TimestampMap<T> {
         return max;
     }
 
-    protected BigDecimal getAverageBigDecimal(final int[] timestampIndices) {
+    protected BigDecimal getAverageBigDecimal(final Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
         BigDecimal total = new BigDecimal(0);
         int count = 0;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                double val = ((Number) getValue(index)).doubleValue();
-                total = total.add(BigDecimal.valueOf(val));
-                count++;
-            }
-
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            double val = ((Number) getValue(i)).doubleValue();
+            total = total.add(BigDecimal.valueOf(val));
+            count++;
         }
         if (count == 0) {
             return null;
@@ -339,17 +367,71 @@ public abstract class TimestampMap<T> {
         return total.divide(BigDecimal.valueOf(count), 10, RoundingMode.HALF_EVEN);
     }
 
-    protected BigDecimal getSumBigDecimal(final int[] timestampIndices) {
+    protected BigDecimal getSumBigDecimal(final Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
         BigDecimal total = new BigDecimal(0);
         int count = 0;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                double val = ((Number) getValue(index)).doubleValue();
-                total = total.add(BigDecimal.valueOf(val));
-                count++;
-            }
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            double val = ((Number) getValue(i)).doubleValue();
+            total = total.add(BigDecimal.valueOf(val));
+            count++;
+        }
+        if (count == 0) {
+            return null;
+        }
+        return total;
+    }
+
+    protected Double getAverageDouble(final Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
+        double total = 0.0;
+        int count = 0;
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            double val = ((Number) getValue(i)).doubleValue();
+            total += val;
+            count++;
+        }
+        if (count == 0) {
+            return null;
+        }
+        return total / count;
+    }
+
+    protected Double getSumDouble(final Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
+        double total = 0.0;
+        int count = 0;
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            double val = ((Number) getValue(i)).doubleValue();
+            total += val;
+            count++;
         }
         if (count == 0) {
             return null;

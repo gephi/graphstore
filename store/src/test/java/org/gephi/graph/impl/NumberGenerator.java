@@ -15,15 +15,13 @@
  */
 package org.gephi.graph.impl;
 
+import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
+import it.unimi.dsi.fastutil.doubles.DoubleSet;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.Arrays;
 import java.util.Random;
 
-/**
- *
- * @author mbastian
- */
 public class NumberGenerator {
 
     public static int[] sortAndRemoveDuplicates(int[] array) {
@@ -35,6 +33,27 @@ public class NumberGenerator {
         }
         int[] res = set.toIntArray();
         Arrays.sort(res);
+        return res;
+    }
+
+    public static double[] sortAndRemoveDuplicates(double[] array) {
+        DoubleSet set = new DoubleOpenHashSet();
+        for (double d : array) {
+            if (!set.contains(d)) {
+                set.add(d);
+            }
+        }
+        double[] res = set.toDoubleArray();
+        Arrays.sort(res);
+        return res;
+    }
+
+    public static double[] generateRandomDouble(int count, boolean duplicates) {
+        int[] randomInts = generateRandomInt(count, duplicates);
+        double[] res = new double[randomInts.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = (double) randomInts[i];
+        }
         return res;
     }
 

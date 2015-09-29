@@ -482,6 +482,16 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
+        public Object removeAttribute(Column column, double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Object removeAttribute(String key, double timestamp) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
         public boolean addTimestamp(double timestamp) {
             throw new UnsupportedOperationException("Not supported yet.");
         }

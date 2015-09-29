@@ -15,7 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.api.Interval;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -42,6 +41,18 @@ public class TimestampInternalMapTest {
         Assert.assertEquals(map.getTimestampIndex(1.0), 0);
     }
 
+    @Test
+    public void testAddTwiceSame() {
+        TimestampInternalMap map = new TimestampInternalMap();
+        int a = map.addTimestamp(1.0);
+        int b = map.addTimestamp(1.0);
+
+        Assert.assertEquals(a, b);
+        Assert.assertTrue(map.contains(1.0));
+        Assert.assertEquals(map.size(), 1);
+        Assert.assertEquals(map.getTimestampIndex(1.0), 0);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddInfinityTimestamp() {
         TimestampInternalMap store = new TimestampInternalMap();
@@ -52,30 +63,6 @@ public class TimestampInternalMapTest {
     public void testAddNaNTimestamp() {
         TimestampInternalMap store = new TimestampInternalMap();
         store.addTimestamp(Double.NaN);
-    }
-
-    @Test
-    public void testAddOnGet() {
-        TimestampInternalMap map = new TimestampInternalMap();
-        int a = map.getTimestampIndex(1.0);
-
-        Assert.assertEquals(a, 0);
-        Assert.assertTrue(map.contains(1.0));
-        Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.getTimestampIndex(1.0), 0);
-    }
-
-    @Test
-    public void testMultipleGet() {
-        TimestampInternalMap map = new TimestampInternalMap();
-        int a = map.getTimestampIndex(1.0);
-        int b = map.getTimestampIndex(1.0);
-
-        Assert.assertEquals(a, 0);
-        Assert.assertEquals(b, 0);
-        Assert.assertTrue(map.contains(1.0));
-        Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.getTimestampIndex(1.0), 0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -94,6 +81,31 @@ public class TimestampInternalMapTest {
     public void testRemove() {
         TimestampInternalMap map = new TimestampInternalMap();
         map.addTimestamp(1.0);
+        map.removeTimestamp(1.0);
+
+        Assert.assertTrue(map.size() == 0);
+        Assert.assertFalse(map.contains(1.0));
+    }
+
+    @Test
+    public void testRemoveWithCount() {
+        TimestampInternalMap map = new TimestampInternalMap();
+        map.addTimestamp(1.0);
+        map.addTimestamp(1.0);
+        map.removeTimestamp(1.0);
+
+        Assert.assertTrue(map.size() == 1);
+        Assert.assertTrue(map.contains(1.0));
+
+        map.removeTimestamp(1.0);
+
+        Assert.assertTrue(map.size() == 0);
+        Assert.assertFalse(map.contains(1.0));
+    }
+
+    @Test
+    public void testRemoveUnknown() {
+        TimestampInternalMap map = new TimestampInternalMap();
         map.removeTimestamp(1.0);
 
         Assert.assertTrue(map.size() == 0);
@@ -127,44 +139,6 @@ public class TimestampInternalMapTest {
 
         Assert.assertEquals(a, 0);
         Assert.assertTrue(map.contains(2.0));
-    }
-
-    @Test
-    public void testGetIndicies() {
-        TimestampInternalMap map = new TimestampInternalMap();
-        map.addTimestamp(1.0);
-        map.addTimestamp(2.0);
-
-        int[] indicies = map.getTimestampIndices(new Interval(1.0, 2.0));
-        Assert.assertEquals(indicies, new int[]{0, 1});
-
-        int[] indicies2 = map.getTimestampIndices(new Interval(1.0, 1.0));
-        Assert.assertEquals(indicies2, new int[]{0});
-    }
-
-    @Test
-    public void testGetIndiciesOpen() {
-        TimestampInternalMap map = new TimestampInternalMap();
-        map.addTimestamp(1.0);
-        map.addTimestamp(2.0);
-
-        int[] indicies = map.getTimestampIndices(new Interval(1.0, 2.0, true, true));
-        Assert.assertEquals(indicies, new int[]{});
-
-        int[] indicies2 = map.getTimestampIndices(new Interval(1.0, 2.0, false, true));
-        Assert.assertEquals(indicies2, new int[]{0});
-
-        int[] indicies3 = map.getTimestampIndices(new Interval(1.0, 2.0, true, false));
-        Assert.assertEquals(indicies3, new int[]{1});
-    }
-
-    @Test
-    public void testGetIndiciesUnique() {
-        TimestampInternalMap map = new TimestampInternalMap();
-        map.addTimestamp(1.0);
-
-        int[] indicies = map.getTimestampIndices(new Interval(1.0, 2.0));
-        Assert.assertEquals(indicies, new int[]{0});
     }
 
     @Test
@@ -249,8 +223,13 @@ public class TimestampInternalMapTest {
         TimestampInternalMap store3 = new TimestampInternalMap();
         store3.addTimestamp(1.0);
 
+        TimestampInternalMap store4 = new TimestampInternalMap();
+        store4.addTimestamp(1.0);
+        store4.addTimestamp(1.0);
+
         Assert.assertTrue(store1.deepEquals(store2));
         Assert.assertFalse(store1.deepEquals(store3));
+        Assert.assertFalse(store3.deepEquals(store4));
     }
 
     @Test
@@ -270,7 +249,12 @@ public class TimestampInternalMapTest {
         TimestampInternalMap store3 = new TimestampInternalMap();
         store3.addTimestamp(1.0);
 
+        TimestampInternalMap store4 = new TimestampInternalMap();
+        store4.addTimestamp(1.0);
+        store4.addTimestamp(1.0);
+
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
         Assert.assertNotEquals(store1.deepHashCode(), store3.deepHashCode());
+        Assert.assertNotEquals(store3.deepHashCode(), store4.deepHashCode());
     }
 }

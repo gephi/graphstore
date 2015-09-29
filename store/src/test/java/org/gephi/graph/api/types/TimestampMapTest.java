@@ -18,6 +18,7 @@ package org.gephi.graph.api.types;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.gephi.graph.api.Estimator;
+import org.gephi.graph.api.Interval;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -40,8 +41,8 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
-            set.put(1, defaultValues[0]);
-            testValues(set, new int[]{1}, new Object[]{defaultValues[0]});
+            Assert.assertTrue(set.put(1.0, defaultValues[0]));
+            testValues(set, new double[]{1.0}, new Object[]{defaultValues[0]});
         }
     }
 
@@ -50,9 +51,9 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
-            set.put(1, defaultValues[0]);
-            set.put(1, defaultValues[1]);
-            testValues(set, new int[]{1}, new Object[]{defaultValues[1]});
+            Assert.assertTrue(set.put(1.0, defaultValues[0]));
+            Assert.assertFalse(set.put(1.0, defaultValues[1]));
+            testValues(set, new double[]{1.0}, new Object[]{defaultValues[1]});
         }
     }
 
@@ -61,9 +62,9 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
-            set.put(1, defaultValues[0]);
-            set.put(6, defaultValues[1]);
-            testValues(set, new int[]{1, 6}, defaultValues);
+            Assert.assertTrue(set.put(1.0, defaultValues[0]));
+            Assert.assertTrue(set.put(6.0, defaultValues[1]));
+            testValues(set, new double[]{1.0, 6.0}, defaultValues);
         }
     }
 
@@ -72,9 +73,9 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances(10)) {
             Object[] defaultValues = getTestValues(set);
 
-            set.put(1, defaultValues[0]);
-            set.put(6, defaultValues[1]);
-            testValues(set, new int[]{1, 6}, defaultValues);
+            Assert.assertTrue(set.put(1.0, defaultValues[0]));
+            Assert.assertTrue(set.put(6.0, defaultValues[1]));
+            testValues(set, new double[]{1.0, 6.0}, defaultValues);
         }
     }
 
@@ -83,14 +84,14 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
-            set.put(1, defaultValues[0]);
-            set.put(2, defaultValues[1]);
-            set.remove(1);
-            Assert.assertFalse(set.contains(1));
-            Assert.assertEquals(set.get(2, null), defaultValues[1]);
-            set.remove(2);
+            set.put(1.0, defaultValues[0]);
+            set.put(2.0, defaultValues[1]);
+            Assert.assertTrue(set.remove(1.0));
+            Assert.assertFalse(set.contains(1.0));
+            Assert.assertEquals(set.get(2.0, null), defaultValues[1]);
+            Assert.assertTrue(set.remove(2.0));
             Assert.assertTrue(set.isEmpty());
-            Assert.assertFalse(set.contains(1));
+            Assert.assertFalse(set.contains(1.0));
         }
     }
 
@@ -99,14 +100,14 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
-            set.put(1, defaultValues[0]);
-            set.put(2, defaultValues[1]);
-            set.remove(1);
-            set.put(1, defaultValues[0]);
-            testValues(set, new int[]{1, 2}, defaultValues);
-            set.remove(2);
-            set.put(2, defaultValues[1]);
-            testValues(set, new int[]{1, 2}, defaultValues);
+            set.put(1.0, defaultValues[0]);
+            set.put(2.0, defaultValues[1]);
+            Assert.assertTrue(set.remove(1.0));
+            Assert.assertTrue(set.put(1.0, defaultValues[0]));
+            testValues(set, new double[]{1.0, 2.0}, defaultValues);
+            Assert.assertTrue(set.remove(2.0));
+            Assert.assertTrue(set.put(2.0, defaultValues[1]));
+            testValues(set, new double[]{1.0, 2.0}, defaultValues);
         }
     }
 
@@ -115,11 +116,11 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
 
-            set.put(1, defaultValues[0]);
-            set.put(2, defaultValues[1]);
-            set.remove(3);
-            set.remove(0);
-            testValues(set, new int[]{1, 2}, defaultValues);
+            set.put(1.0, defaultValues[0]);
+            set.put(2.0, defaultValues[1]);
+            Assert.assertFalse(set.remove(3.0));
+            Assert.assertFalse(set.remove(0.0));
+            testValues(set, new double[]{1.0, 2.0}, defaultValues);
         }
     }
 
@@ -127,7 +128,7 @@ public class TimestampMapTest {
     public void testClear() {
         for (TimestampMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            set.put(1, defaultValues[0]);
+            set.put(1.0, defaultValues[0]);
             set.clear();
 
             Assert.assertEquals(set.size(), 0);
@@ -139,12 +140,12 @@ public class TimestampMapTest {
     public void testClearAdd() {
         for (TimestampMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            set.put(1, defaultValues[0]);
+            set.put(1.0, defaultValues[0]);
             set.clear();
-            set.put(1, defaultValues[0]);
-            set.put(2, defaultValues[1]);
+            Assert.assertTrue(set.put(1.0, defaultValues[0]));
+            Assert.assertTrue(set.put(2.0, defaultValues[1]));
 
-            testValues(set, new int[]{1, 2}, defaultValues);
+            testValues(set, new double[]{1.0, 2.0}, defaultValues);
         }
     }
 
@@ -153,7 +154,7 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances()) {
             boolean thrown = false;
             try {
-                set.put(1, null);
+                set.put(1.0, null);
             } catch (NullPointerException e) {
                 thrown = true;
             }
@@ -167,21 +168,21 @@ public class TimestampMapTest {
     public void testGetTimestamps() {
         TimestampDoubleMap set = new TimestampDoubleMap();
 
-        set.put(1, 1.0);
-        set.put(2, 2.0);
+        set.put(1.0, 1.0);
+        set.put(2.0, 2.0);
 
-        testIntArrayEquals(new int[]{1, 2}, set.getTimestamps());
+        testDoubleArrayEquals(new double[]{1.0, 2.0}, set.getTimestamps());
     }
 
     @Test
     public void testGetTimestampsTrim() {
         TimestampDoubleMap set = new TimestampDoubleMap();
 
-        set.put(1, 1.0);
-        set.put(2, 2.0);
-        set.remove(2);
+        set.put(1.0, 1.0);
+        set.put(2.0, 2.0);
+        set.remove(2.0);
 
-        testIntArrayEquals(new int[]{1}, set.getTimestamps());
+        testDoubleArrayEquals(new double[]{1.0}, set.getTimestamps());
     }
 
     @Test
@@ -197,7 +198,7 @@ public class TimestampMapTest {
         for (TimestampMap set : getAllInstances()) {
             for (Estimator e : Estimator.values()) {
                 if (set.isSupported(e)) {
-                    Assert.assertNull(set.get(null, new int[]{99}, e));
+                    Assert.assertNull(set.get(new Interval(1.0, 2.0), e));
                 }
             }
         }
@@ -206,30 +207,30 @@ public class TimestampMapTest {
     @Test
     public void testBooleanEstimators() {
         TimestampBooleanMap set = new TimestampBooleanMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
 
         set.put(indices[0], Boolean.TRUE);
         set.put(indices[1], Boolean.FALSE);
         set.put(indices[2], Boolean.FALSE);
         set.put(indices[3], Boolean.TRUE);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, Boolean.TRUE);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, Boolean.TRUE);
 
-        Object min = set.get(null, indices, Estimator.MIN);
+        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, Boolean.FALSE);
 
-        Object max = set.get(null, indices, Estimator.MAX);
+        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, Boolean.TRUE);
     }
 
     @Test
     public void testByteEstimators() {
         TimestampByteMap set = new TimestampByteMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         byte[] values = new byte[]{12, 45, -31, 64};
 
         set.put(indices[0], values[0]);
@@ -237,23 +238,23 @@ public class TimestampMapTest {
         set.put(indices[2], values[2]);
         set.put(indices[3], values[3]);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, values[0]);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
 
-        Object min = set.get(null, indices, Estimator.MIN);
+        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, values[2]);
 
-        Object max = set.get(null, indices, Estimator.MAX);
+        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, values[3]);
 
-        Object avg = set.get(null, indices, Estimator.AVERAGE);
+        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
         Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
 
-        Object sum = set.get(null, indices, Estimator.SUM);
+        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
         Assert.assertTrue(sum instanceof Integer);
         Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
     }
@@ -261,7 +262,7 @@ public class TimestampMapTest {
     @Test
     public void testCharEstimators() {
         TimestampCharMap set = new TimestampCharMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         char[] values = new char[]{'a', 'z', 'e', 'c'};
 
         set.put(indices[0], values[0]);
@@ -269,23 +270,23 @@ public class TimestampMapTest {
         set.put(indices[2], values[2]);
         set.put(indices[3], values[3]);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, values[0]);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
 
-        Object min = set.get(null, indices, Estimator.MIN);
+        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, values[0]);
 
-        Object max = set.get(null, indices, Estimator.MAX);
+        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, values[1]);
     }
 
     @Test
     public void testDoubleEstimators() {
         TimestampDoubleMap set = new TimestampDoubleMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         double[] values = new double[]{12.0, 45.3, -31.3, 64.4};
 
         set.put(indices[0], values[0]);
@@ -293,23 +294,23 @@ public class TimestampMapTest {
         set.put(indices[2], values[2]);
         set.put(indices[3], values[3]);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, values[0]);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
 
-        Object min = set.get(null, indices, Estimator.MIN);
+        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, values[2]);
 
-        Object max = set.get(null, indices, Estimator.MAX);
+        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, values[3]);
 
-        Object avg = set.get(null, indices, Estimator.AVERAGE);
+        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
         Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
 
-        Object sum = set.get(null, indices, Estimator.SUM);
+        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
         Assert.assertTrue(sum instanceof Double);
         Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
     }
@@ -317,7 +318,7 @@ public class TimestampMapTest {
     @Test
     public void testFloatEstimators() {
         TimestampFloatMap set = new TimestampFloatMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         float[] values = new float[]{12f, 45.3f, -31.3f, 64.4f};
 
         set.put(indices[0], values[0]);
@@ -325,23 +326,23 @@ public class TimestampMapTest {
         set.put(indices[2], values[2]);
         set.put(indices[3], values[3]);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, values[0]);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
 
-        Object min = set.get(null, indices, Estimator.MIN);
+        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, values[2]);
 
-        Object max = set.get(null, indices, Estimator.MAX);
+        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, values[3]);
 
-        Object avg = set.get(null, indices, Estimator.AVERAGE);
+        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Float);
         Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (float) values.length));
 
-        Object sum = set.get(null, indices, Estimator.SUM);
+        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
         Assert.assertTrue(sum instanceof Float);
         Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
     }
@@ -349,7 +350,7 @@ public class TimestampMapTest {
     @Test
     public void testIntegerEstimators() {
         TimestampIntegerMap set = new TimestampIntegerMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         int[] values = new int[]{120, 450, -3100, 6400};
 
         set.put(indices[0], values[0]);
@@ -357,23 +358,23 @@ public class TimestampMapTest {
         set.put(indices[2], values[2]);
         set.put(indices[3], values[3]);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, values[0]);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
 
-        Object min = set.get(null, indices, Estimator.MIN);
+        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, values[2]);
 
-        Object max = set.get(null, indices, Estimator.MAX);
+        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, values[3]);
 
-        Object avg = set.get(null, indices, Estimator.AVERAGE);
+        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
         Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
 
-        Object sum = set.get(null, indices, Estimator.SUM);
+        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
         Assert.assertTrue(sum instanceof Long);
         Assert.assertEquals(sum, (long) (values[0] + values[1] + values[2] + values[3]));
     }
@@ -381,7 +382,7 @@ public class TimestampMapTest {
     @Test
     public void testLongEstimators() {
         TimestampLongMap set = new TimestampLongMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         long[] values = new long[]{120l, 450000l, -31000002343l, 640000000001232l};
 
         set.put(indices[0], values[0]);
@@ -389,23 +390,23 @@ public class TimestampMapTest {
         set.put(indices[2], values[2]);
         set.put(indices[3], values[3]);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, values[0]);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
 
-        Object min = set.get(null, indices, Estimator.MIN);
+        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, values[2]);
 
-        Object max = set.get(null, indices, Estimator.MAX);
+        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, values[3]);
 
-        Object avg = set.get(null, indices, Estimator.AVERAGE);
+        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
         Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
 
-        Object sum = set.get(null, indices, Estimator.SUM);
+        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
         Assert.assertTrue(sum instanceof Long);
         Assert.assertEquals(sum, (long) (values[0] + values[1] + values[2] + values[3]));
     }
@@ -413,7 +414,7 @@ public class TimestampMapTest {
     @Test
     public void testShortEstimators() {
         TimestampShortMap set = new TimestampShortMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         short[] values = new short[]{12, 45, -31, 64};
 
         set.put(indices[0], values[0]);
@@ -421,23 +422,23 @@ public class TimestampMapTest {
         set.put(indices[2], values[2]);
         set.put(indices[3], values[3]);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, values[0]);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
 
-        Object min = set.get(null, indices, Estimator.MIN);
+        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, values[2]);
 
-        Object max = set.get(null, indices, Estimator.MAX);
+        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, values[3]);
 
-        Object avg = set.get(null, indices, Estimator.AVERAGE);
+        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
         Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
 
-        Object sum = set.get(null, indices, Estimator.SUM);
+        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
         Assert.assertTrue(sum instanceof Integer);
         Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
     }
@@ -445,7 +446,7 @@ public class TimestampMapTest {
     @Test
     public void testStringEstimators() {
         TimestampStringMap set = new TimestampStringMap();
-        int[] indices = new int[]{1, 2, 6, 7};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         String[] values = new String[]{"a", "z", "e", "ch"};
 
         set.put(indices[0], values[0]);
@@ -453,16 +454,16 @@ public class TimestampMapTest {
         set.put(indices[2], values[2]);
         set.put(indices[3], values[3]);
 
-        Object first = set.get(null, indices, Estimator.FIRST);
+        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
         Assert.assertEquals(first, values[0]);
 
-        Object last = set.get(null, indices, Estimator.LAST);
+        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
     }
 
     @Test
     public void testEquals() {
-        int[] indices = new int[]{1, 2, 6};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringMap set1 = new TimestampStringMap();
         TimestampStringMap set2 = new TimestampStringMap();
@@ -500,7 +501,7 @@ public class TimestampMapTest {
 
     @Test
     public void testEqualsWithCapacity() {
-        int[] indices = new int[]{1, 2, 6};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringMap set1 = new TimestampStringMap(10);
         TimestampStringMap set2 = new TimestampStringMap();
@@ -521,7 +522,7 @@ public class TimestampMapTest {
 
     @Test
     public void testEqualsWithRemove() {
-        int[] indices = new int[]{1, 2, 6};
+        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringMap set1 = new TimestampStringMap();
         TimestampStringMap set2 = new TimestampStringMap();
@@ -541,7 +542,7 @@ public class TimestampMapTest {
     }
 
     //UTILITY
-    private void testIntArrayEquals(int[] a, int[] b) {
+    private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);
         for (int i = 0; i < a.length; i++) {
             Assert.assertEquals(a[i], b[i]);
@@ -624,28 +625,28 @@ public class TimestampMapTest {
         }
     }
 
-    private void testValues(TimestampMap set, int[] expectedTimestamp, Object[] expectedValues) {
+    private void testValues(TimestampMap set, double[] expectedTimestamp, Object[] expectedValues) {
         Class typeClass = set.getTypeClass();
 
         Assert.assertEquals(expectedTimestamp.length, expectedValues.length);
         Assert.assertEquals(set.size(), expectedTimestamp.length);
         for (int i = 0; i < expectedTimestamp.length; i++) {
             Assert.assertEquals(set.get(expectedTimestamp[i], null), expectedValues[i]);
-            Assert.assertEquals(set.get(99, getDefaultValue(set)), getDefaultValue(set));
+            Assert.assertEquals(set.get(999999.0, getDefaultValue(set)), getDefaultValue(set));
             Assert.assertTrue(set.contains(expectedTimestamp[i]));
 
             if (typeClass != String.class) {
                 try {
-                    Method getMethod = set.getClass().getMethod("get" + typeClass.getSimpleName(), int.class);
-                    Method getMethodWithDefault = set.getClass().getMethod("get" + typeClass.getSimpleName(), int.class, getMethod.getReturnType());
+                    Method getMethod = set.getClass().getMethod("get" + typeClass.getSimpleName(), double.class);
+                    Method getMethodWithDefault = set.getClass().getMethod("get" + typeClass.getSimpleName(), double.class, getMethod.getReturnType());
 
                     Assert.assertEquals(getMethod.invoke(set, expectedTimestamp[i]), expectedValues[i]);
                     Assert.assertEquals(getMethodWithDefault.invoke(set, expectedTimestamp[i], getDefaultValue(set)), expectedValues[i]);
-                    Assert.assertEquals(getMethodWithDefault.invoke(set, 99, getDefaultValue(set)), getDefaultValue(set));
+                    Assert.assertEquals(getMethodWithDefault.invoke(set, 999999.0, getDefaultValue(set)), getDefaultValue(set));
 
                     boolean thrown = false;
                     try {
-                        getMethod.invoke(set, 99);
+                        getMethod.invoke(set, 99.0);
                     } catch (InvocationTargetException e) {
                         thrown = e.getTargetException().getClass().equals(IllegalArgumentException.class);
                     }

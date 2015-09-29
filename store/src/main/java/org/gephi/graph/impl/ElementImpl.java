@@ -106,25 +106,17 @@ public abstract class ElementImpl implements Element {
         checkColumn(column);
         checkColumnDynamic(column);
 
-        Object res = null;
-        final TimestampInternalMap timestampMap = getTimestampMap();
-        if (timestampMap != null) {
-
-            int index = column.getIndex();
+        int index = column.getIndex();
+        synchronized (this) {
             TimestampMap dynamicValue = null;
-            synchronized (this) {
-                if (index < attributes.length) {
-                    dynamicValue = (TimestampMap) attributes[index];
-                }
-                if (dynamicValue != null) {
-                    int timestampIndex = timestampMap.getTimestampIndex(timestamp);
-                    res = dynamicValue.get(timestampIndex, column.getDefaultValue());
-                }
+            if (index < attributes.length) {
+                dynamicValue = (TimestampMap) attributes[index];
             }
-        } else {
-            throw new RuntimeException("The timestamp store is not available");
+            if (dynamicValue != null) {
+                return dynamicValue.get(timestamp, column.getDefaultValue());
+            }
         }
-        return res;
+        return null;
     }
 
     @Override
@@ -142,28 +134,23 @@ public abstract class ElementImpl implements Element {
             Interval interval = view.getTimeInterval();
             checkEnabledTimestampSet();
             checkViewExist((GraphView) view);
-            final ColumnStore columnStore = getColumnStore();
-            final TimestampInternalMap timestampMap = columnStore.getTimestampMap(column);
-            if (timestampMap != null) {
-                int index = column.getIndex();
+
+            int index = column.getIndex();
+            synchronized (this) {
                 TimestampMap dynamicValue = null;
-                synchronized (this) {
-                    if (index < attributes.length) {
-                        dynamicValue = (TimestampMap) attributes[index];
-                    }
-                    if (dynamicValue != null && !dynamicValue.isEmpty()) {
-                        int[] timestampIndices = timestampMap.getTimestampIndices(interval);
-                        Estimator estimator = column.getEstimator();
-                        if (estimator == null) {
-                            estimator = Estimator.FIRST;
-                        }
-                        return dynamicValue.get(null, timestampIndices, estimator);
-                    }
+                if (index < attributes.length) {
+                    dynamicValue = (TimestampMap) attributes[index];
                 }
-            } else {
-                throw new RuntimeException("The timestamp store is not available");
+                if (dynamicValue != null && !dynamicValue.isEmpty()) {
+                    Estimator estimator = column.getEstimator();
+                    if (estimator == null) {
+                        estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
+                    }
+                    return dynamicValue.get(interval, estimator);
+                }
             }
         }
+
         return null;
     }
 
@@ -192,20 +179,64 @@ public abstract class ElementImpl implements Element {
         checkColumn(column);
         checkReadOnlyColumn(column);
 
-        ColumnStore columnStore = getColumnStore();
         int index = column.getIndex();
+        Object oldValue;
         synchronized (this) {
-            if (index < attributes.length) {
-                Object oldValue = attributes[index];
-                attributes[index] = null;
-                if (column.isIndexed() && columnStore != null && isValid()) {
-                    columnStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
+            oldValue = attributes[index];
+            attributes[index] = null;
+        }
+
+        if (isValid()) {
+            ColumnStore columnStore = getColumnStore();
+            ColumnImpl columnImpl = (ColumnImpl) column;
+            if (columnImpl.isDynamic() && oldValue != null) {
+                TimestampMap dynamicValue = (TimestampMap) oldValue;
+                TimestampInternalMap timestampMap = getTimestampMap();
+                if (timestampMap != null) {
+                    for (double timestamp : dynamicValue.getTimestamps()) {
+                        timestampMap.removeTimestamp(timestamp);
+                    }
                 }
-                ((ColumnImpl) column).incrementVersion();
-                return oldValue;
+            } else if (column.isIndexed() && columnStore != null && isValid()) {
+                columnStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
+            }
+            columnImpl.incrementVersion();
+        }
+        return oldValue;
+    }
+
+    @Override
+    public Object removeAttribute(Column column, double timestamp) {
+        checkColumn(column);
+        checkColumnDynamic(column);
+        checkReadOnlyColumn(column);
+        checkDouble(timestamp);
+
+        int index = column.getIndex();
+        Object oldValue = null;
+        boolean res = false;
+        synchronized (this) {
+            TimestampMap dynamicValue = (TimestampMap) attributes[index];
+            if (dynamicValue != null) {
+                oldValue = dynamicValue.get(timestamp, null);
+
+                res = dynamicValue.remove(timestamp);
             }
         }
-        return null;
+
+        if (res && isValid()) {
+            TimestampInternalMap timestampMap = getTimestampMap();
+            if (timestampMap != null) {
+                timestampMap.removeTimestamp(timestamp);
+            }
+            ((ColumnImpl) column).incrementVersion();
+        }
+        return oldValue;
+    }
+
+    @Override
+    public Object removeAttribute(String key, double timestamp) {
+        return removeAttribute(getColumnStore().getColumn(key), timestamp);
     }
 
     @Override
@@ -220,6 +251,7 @@ public abstract class ElementImpl implements Element {
                 }
                 attributes[index] = label;
             }
+            //TODO: Increment column version
         }
     }
 
@@ -251,6 +283,8 @@ public abstract class ElementImpl implements Element {
                 value = columnStore.indexStore.set(column, oldValue, value, this);
             }
             attributes[index] = value;
+        }
+        if (isValid()) {
             ((ColumnImpl) column).incrementVersion();
         }
     }
@@ -262,43 +296,48 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public void setAttribute(Column column, Object value, double timestamp) {
-        checkEnabledTimestampSet();
         checkColumn(column);
         checkColumnDynamic(column);
         checkReadOnlyColumn(column);
         checkType(column, value);
         checkDouble(timestamp);
 
-        final TimestampInternalMap timestampMap = getColumnStore().getTimestampMap(column);
-        if (timestampMap != null) {
-            int index = column.getIndex();
-            Object oldValue = null;
-            synchronized (this) {
-                if (index >= attributes.length) {
-                    Object[] newArray = new Object[index + 1];
-                    System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-                    attributes = newArray;
-                } else {
-                    oldValue = attributes[index];
-                }
-
-                TimestampMap dynamicValue = null;
-                if (oldValue == null) {
-                    try {
-                        attributes[index] = dynamicValue = (TimestampMap) column.getTypeClass().newInstance();
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                } else {
-                    dynamicValue = (TimestampMap) oldValue;
-                }
-
-                int timestampIndex = timestampMap.getTimestampIndex(timestamp);
-                dynamicValue.put(timestampIndex, value);
-                ((ColumnImpl) column).incrementVersion();
+        int index = column.getIndex();
+        Object oldValue = null;
+        boolean res;
+        synchronized (this) {
+            if (index >= attributes.length) {
+                Object[] newArray = new Object[index + 1];
+                System.arraycopy(attributes, 0, newArray, 0, attributes.length);
+                attributes = newArray;
+            } else {
+                oldValue = attributes[index];
             }
-        } else {
-            throw new RuntimeException("The timestamp store is not available");
+
+            TimestampMap dynamicValue = null;
+            if (oldValue == null) {
+                try {
+                    attributes[index] = dynamicValue = (TimestampMap) column.getTypeClass().newInstance();
+                } catch (InstantiationException ex) {
+                    throw new RuntimeException(ex);
+                } catch (IllegalAccessException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } else {
+                dynamicValue = (TimestampMap) oldValue;
+            }
+
+            res = dynamicValue.put(timestamp, value);
+        }
+
+        if (res && isValid()) {
+            TimestampInternalMap timestampMap = getTimestampMap();
+            if (timestampMap != null) {
+                timestampMap.addTimestamp(timestamp);
+            }
+        }
+        if (isValid()) {
+            ((ColumnImpl) column).incrementVersion();
         }
     }
 
@@ -307,25 +346,34 @@ public abstract class ElementImpl implements Element {
         checkEnabledTimestampSet();
         checkDouble(timestamp);
 
-        final TimestampIndexStore timestampStore = getTimestampIndexStore();
-        if (timestampStore != null) {
-            synchronized (this) {
-                TimestampSet timestampSet = getTimestampSet();
-                if (timestampSet == null) {
-                    timestampSet = new TimestampSet();
-                    int index = GraphStoreConfiguration.ELEMENT_TIMESTAMP_INDEX;
-                    if (index >= attributes.length) {
-                        Object[] newArray = new Object[index + 1];
-                        System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-                        attributes = newArray;
-                    }
-                    attributes[index] = timestampSet;
+        boolean res;
+        synchronized (this) {
+            TimestampSet timestampSet = getTimestampSet();
+            if (timestampSet == null) {
+                timestampSet = new TimestampSet();
+                int index = GraphStoreConfiguration.ELEMENT_TIMESTAMP_INDEX;
+                if (index >= attributes.length) {
+                    Object[] newArray = new Object[index + 1];
+                    System.arraycopy(attributes, 0, newArray, 0, attributes.length);
+                    attributes = newArray;
                 }
-                final int timestampIndex = timestampStore.add(timestamp, this);
-                return timestampSet.add(timestampIndex);
+                attributes[index] = timestampSet;
+            }
+            res = timestampSet.add(timestamp);
+        }
+
+        if (res && isValid()) {
+            TimestampInternalMap timestampMap = getTimestampMap();
+            if (timestampMap != null) {
+                timestampMap.addTimestamp(timestamp);
+            }
+            TimestampIndexStore timestampStore = getTimestampIndexStore();
+            if (timestampStore != null) {
+                timestampStore.add(timestamp, this);
             }
         }
-        return false;
+
+        return res;
     }
 
     @Override
@@ -333,17 +381,26 @@ public abstract class ElementImpl implements Element {
         checkEnabledTimestampSet();
         checkDouble(timestamp);
 
+        boolean res = false;
         synchronized (this) {
             TimestampSet timestampSet = getTimestampSet();
             if (timestampSet != null) {
-                final TimestampIndexStore timestampStore = getTimestampIndexStore();
-                if (timestampStore != null) {
-                    final int timestampIndex = timestampStore.remove(timestamp, this);
-                    return timestampSet.remove(timestampIndex);
-                }
+                res = timestampSet.remove(timestamp);
             }
         }
-        return false;
+
+        if (res && isValid()) {
+            TimestampIndexStore timestampStore = getTimestampIndexStore();
+            if (timestampStore != null) {
+                timestampStore.remove(timestamp, this);
+            }
+            TimestampInternalMap timestampMap = getTimestampMap();
+            if (timestampMap != null) {
+                timestampMap.removeTimestamp(timestamp);
+            }
+        }
+
+        return res;
     }
 
     @Override
@@ -353,11 +410,7 @@ public abstract class ElementImpl implements Element {
         synchronized (this) {
             TimestampSet timestampSet = getTimestampSet();
             if (timestampSet != null) {
-                final TimestampInternalMap timestampMap = getTimestampMap();
-                if (timestampMap != null) {
-                    final int[] indices = timestampSet.getTimestamps();
-                    return timestampMap.getTimestamps(indices);
-                }
+                return timestampSet.getTimestamps();
             }
         }
         return new double[0];
@@ -370,38 +423,30 @@ public abstract class ElementImpl implements Element {
         synchronized (this) {
             TimestampSet timestampSet = getTimestampSet();
             if (timestampSet != null) {
-                final TimestampInternalMap timestampMap = getTimestampMap();
-                if (timestampMap != null) {
-                    if (timestampMap.hasTimestampIndex(timestamp)) {
-                        return timestampSet.contains(timestampMap.getTimestampIndex(timestamp));
-                    }
-                }
+                return timestampSet.contains(timestamp);
             }
         }
         return false;
     }
 
+    //TODO: Make this part of API?
     public Iterable<Map.Entry<Double, Object>> getAttributes(Column column) {
         checkEnabledTimestampSet();
         checkColumn(column);
         checkColumnDynamic(column);
 
-        Object res = null;
-        final TimestampInternalMap timestampMap = getColumnStore().getTimestampMap(column);
-        if (timestampMap != null) {
-
-            int index = column.getIndex();
-            TimestampMap dynamicValue = null;
-            synchronized (this) {
-                if (index < attributes.length) {
-                    dynamicValue = (TimestampMap) attributes[index];
-                }
-                if (dynamicValue != null) {
-                    Object[] values = dynamicValue.toArray();
-                    double[] timestamps = timestampMap.getTimestamps(dynamicValue.getTimestamps());
-                    return new DynamicValueIterable(timestamps, values);
-                }
+        int index = column.getIndex();
+        TimestampMap dynamicValue = null;
+        synchronized (this) {
+            if (index < attributes.length) {
+                dynamicValue = (TimestampMap) attributes[index];
             }
+            if (dynamicValue != null) {
+                Object[] values = dynamicValue.toArray();
+                double[] timestamps = dynamicValue.getTimestamps();
+                return new DynamicValueIterable(timestamps, values);
+            }
+
         }
         return DynamicValueIterable.EMPTY_ITERABLE;
     }
@@ -419,6 +464,26 @@ public abstract class ElementImpl implements Element {
             if (columnStore != null) {
                 columnStore.indexStore.index(this);
             }
+
+            TimestampInternalMap timestampInternalMap = getTimestampMap();
+            TimestampSet timestampSet = getTimestampSet();
+            if (timestampInternalMap != null) {
+                if (timestampSet != null) {
+                    for (double timestamp : timestampSet.getTimestamps()) {
+                        timestampInternalMap.addTimestamp(timestamp);
+                    }
+                }
+
+                for (Object val : attributes) {
+                    if (val != null && val instanceof TimestampMap) {
+                        TimestampMap dynamicValue = (TimestampMap) val;
+                        for (double timestamp : dynamicValue.getTimestamps()) {
+                            timestampInternalMap.addTimestamp(timestamp);
+                        }
+                    }
+                }
+            }
+
             final TimestampIndexStore timestampStore = getTimestampIndexStore();
             if (timestampStore != null) {
                 timestampStore.index(this);
@@ -429,6 +494,7 @@ public abstract class ElementImpl implements Element {
     @Override
     public void clearAttributes() {
         synchronized (this) {
+            TimestampSet timestampSet = getTimestampSet();
             if (isValid()) {
                 ColumnStore columnStore = getColumnStore();
                 if (columnStore != null) {
@@ -438,9 +504,24 @@ public abstract class ElementImpl implements Element {
                 if (timestampStore != null) {
                     timestampStore.clear(this);
                 }
-            }
 
-            TimestampSet timestampSet = getTimestampSet();
+                TimestampInternalMap timestampInternalMap = getTimestampMap();
+                if (timestampInternalMap != null) {
+                    if (timestampSet != null) {
+                        for (double timestamp : timestampSet.getTimestamps()) {
+                            timestampInternalMap.removeTimestamp(timestamp);
+                        }
+                    }
+                    for (Object val : attributes) {
+                        if (val != null && val instanceof TimestampMap) {
+                            TimestampMap dynamicValue = (TimestampMap) val;
+                            for (double timestamp : dynamicValue.getTimestamps()) {
+                                timestampInternalMap.removeTimestamp(timestamp);
+                            }
+                        }
+                    }
+                }
+            }
             if (timestampSet != null) {
                 timestampSet.clear();
             }

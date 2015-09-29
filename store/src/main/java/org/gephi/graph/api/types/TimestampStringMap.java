@@ -16,9 +16,10 @@
 package org.gephi.graph.api.types;
 
 import org.gephi.graph.api.Estimator;
+import org.gephi.graph.api.Interval;
 
 /**
- * Sorted map where keys are timestamp indices and values string values.
+ * Sorted map where keys are timestamp and values string values.
  */
 public final class TimestampStringMap extends TimestampMap<String> {
 
@@ -48,11 +49,11 @@ public final class TimestampStringMap extends TimestampMap<String> {
     }
 
     @Override
-    public void put(int timestampIndex, String value) {
+    public boolean put(double timestamp, String value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        final int index = putInner(timestampIndex);
+        final int index = putInner(timestamp);
         if (index < 0) {
             int insertIndex = -index - 1;
 
@@ -68,22 +69,28 @@ public final class TimestampStringMap extends TimestampMap<String> {
                 newArray[insertIndex] = value;
                 values = newArray;
             }
+            return true;
         } else {
             values[index] = value;
         }
+        return false;
     }
 
     @Override
-    public void remove(int timestampIndex) {
-        final int removeIndex = removeInner(timestampIndex);
-        if (removeIndex >= 0 && removeIndex != size) {
-            System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+    public boolean remove(double timestamp) {
+        final int removeIndex = removeInner(timestamp);
+        if (removeIndex >= 0) {
+            if (removeIndex != size) {
+                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+            }
+            return true;
         }
+        return false;
     }
 
     @Override
-    public String get(int timestampIndex, String defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public String get(double timestamp, String defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -91,12 +98,12 @@ public final class TimestampStringMap extends TimestampMap<String> {
     }
 
     @Override
-    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+    public Object get(Interval interval, Estimator estimator) {
         switch (estimator) {
             case FIRST:
-                return getFirst(timestampIndices);
+                return getFirst(interval);
             case LAST:
-                return getLast(timestampIndices);
+                return getLast(interval);
             default:
                 throw new IllegalArgumentException("Unknown estimator.");
         }

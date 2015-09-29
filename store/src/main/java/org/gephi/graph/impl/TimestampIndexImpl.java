@@ -28,12 +28,13 @@ import java.util.List;
 import org.gephi.graph.api.TimestampIndex;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
+import org.gephi.graph.api.Interval;
 
 public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> {
-    //Const
 
+    // Const
     protected static final int NULL_INDEX = -1;
-    //Data
+    // Data
     protected final GraphLock lock;
     protected final TimestampIndexStore timestampIndexStore;
     protected final TimestampInternalMap timestampMap;
@@ -108,7 +109,7 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
         checkDouble(timestamp);
 
         readLock();
-        int index = timestampMap.timestampMap.get(timestamp);
+        int index = timestampMap.getTimestampIndex(timestamp);
         if (index != NULL_INDEX) {
             TimestampIndexEntry ts = timestamps[index];
             if (ts != null) {
@@ -120,18 +121,18 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
     }
 
     @Override
-    public ElementIterable get(double from, double to) {
-        checkDouble(from);
-        checkDouble(to);
+    public ElementIterable get(Interval interval) {
+        checkDouble(interval.getLow());
+        checkDouble(interval.getHigh());
 
         readLock();
         ObjectSet<ElementImpl> elements = new ObjectOpenHashSet<ElementImpl>();
         Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
         if (!sortedMap.isEmpty()) {
-            for (Double2IntMap.Entry entry : sortedMap.tailMap(from).double2IntEntrySet()) {
+            for (Double2IntMap.Entry entry : sortedMap.tailMap(interval.getLow()).double2IntEntrySet()) {
                 double timestamp = entry.getDoubleKey();
                 int index = entry.getIntValue();
-                if (timestamp <= to) {
+                if (timestamp <= interval.getHigh()) {
                     TimestampIndexEntry ts = timestamps[index];
                     if (ts != null) {
                         elements.addAll(ts.elementSet);

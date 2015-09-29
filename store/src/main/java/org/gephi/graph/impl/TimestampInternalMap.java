@@ -16,14 +16,11 @@
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.doubles.Double2IntMap;
-import it.unimi.dsi.fastutil.doubles.Double2IntOpenHashMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntRBTreeMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntSortedMap;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
-import org.gephi.graph.api.Interval;
+import static org.gephi.graph.impl.TimestampInternalMap.NULL_INDEX;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public class TimestampInternalMap {
@@ -31,128 +28,97 @@ public class TimestampInternalMap {
     //Const
     public static final int NULL_INDEX = -1;
     //Timestamp index managament
-    protected final Double2IntMap timestampMap;
     protected final Double2IntSortedMap timestampSortedMap;
     protected final IntSortedSet garbageQueue;
-    protected double[] indexMap;
+    protected int[] countMap;
     protected int length;
 
     public TimestampInternalMap() {
-        timestampMap = new Double2IntOpenHashMap();
-        timestampMap.defaultReturnValue(NULL_INDEX);
         garbageQueue = new IntRBTreeSet();
         timestampSortedMap = new Double2IntRBTreeMap();
-        indexMap = new double[0];
+        timestampSortedMap.defaultReturnValue(NULL_INDEX);
+        countMap = new int[0];
     }
 
     public int getTimestampIndex(double timestamp) {
-        int index = timestampMap.get(timestamp);
-        if (index == NULL_INDEX) {
-            index = addTimestamp(timestamp);
-        }
-        return index;
+        return timestampSortedMap.get(timestamp);
     }
 
     public boolean hasTimestampIndex(double timestamp) {
-        return timestampMap.containsKey(timestamp);
-    }
-
-    public int[] getTimestampIndices(Interval interval) {
-        IntList res = new IntArrayList();
-        double low = interval.getLow();
-        double high = interval.getHigh();
-        for (Double2IntMap.Entry entry : timestampSortedMap.subMap(low, high).double2IntEntrySet()) {
-            double val = entry.getDoubleKey();
-            if (!interval.isLowExcluded() || (interval.isLowExcluded() && val != low)) {
-                res.add(entry.getIntValue());
-            }
-        }
-        if (!interval.isHighExcluded()) {
-            if (timestampMap.containsKey(high)) {
-                res.add(timestampMap.get(high));
-            }
-        }
-        return res.toIntArray();
+        return timestampSortedMap.containsKey(timestamp);
     }
 
     public boolean contains(double timestamp) {
         checkDouble(timestamp);
 
-        return timestampMap.containsKey(timestamp);
-    }
-
-    public double[] getTimestamps(int[] indices) {
-        int indicesLength = indices.length;
-        double[] res = new double[indicesLength];
-        for (int i = 0; i < indicesLength; i++) {
-            int index = indices[i];
-            checkIndex(index);
-            res[i] = indexMap[index];
-        }
-        return res;
+        return timestampSortedMap.containsKey(timestamp);
     }
 
     public void clear() {
-        timestampMap.clear();
         timestampSortedMap.clear();
         garbageQueue.clear();
-        indexMap = new double[0];
+        countMap = new int[0];
         length = 0;
     }
 
     public int size() {
-        return timestampMap.size();
+        return timestampSortedMap.size();
     }
 
-    protected int addTimestamp(final double timestamp) {
+    protected int addTimestamp(double timestamp) {
         checkDouble(timestamp);
 
-        int id;
-        if (!garbageQueue.isEmpty()) {
-            id = garbageQueue.firstInt();
-            garbageQueue.remove(id);
+        int id = timestampSortedMap.get(timestamp);
+        if (id == NULL_INDEX) {
+            if (!garbageQueue.isEmpty()) {
+                id = garbageQueue.firstInt();
+                garbageQueue.remove(id);
+            } else {
+                id = length++;
+            }
+            timestampSortedMap.put(timestamp, id);
+            ensureArraySize(id);
+            countMap[id] = 1;
         } else {
-            id = length++;
+            countMap[id]++;
         }
-        timestampMap.put(timestamp, id);
-        timestampSortedMap.put(timestamp, id);
-        ensureArraySize(id);
-        indexMap[id] = timestamp;
 
         return id;
     }
 
-    protected void removeTimestamp(final double timestamp) {
+    protected void removeTimestamp(double timestamp) {
         checkDouble(timestamp);
 
-        int id = timestampMap.get(timestamp);
-        garbageQueue.add(id);
-        timestampMap.remove(timestamp);
-        timestampSortedMap.remove(timestamp);
-        indexMap[id] = Double.NaN;
+        int id = timestampSortedMap.get(timestamp);
+        if (id != NULL_INDEX) {
+            if (--countMap[id] == 0) {
+                garbageQueue.add(id);
+                timestampSortedMap.remove(timestamp);
+            }
+        }
     }
 
     protected void ensureArraySize(int index) {
-        if (index >= indexMap.length) {
-            double[] newArray = new double[index + 1];
-            System.arraycopy(indexMap, 0, newArray, 0, indexMap.length);
-            indexMap = newArray;
+        if (index >= countMap.length) {
+            int newSize = Math.min(Math.max(index + 1, (int) (index * GraphStoreConfiguration.TIMESTAMP_INTERNAL_MAP_GROWING_FACTOR)), Integer.MAX_VALUE);
+            int[] newArray = new int[newSize];
+            System.arraycopy(countMap, 0, newArray, 0, countMap.length);
+            countMap = newArray;
         }
     }
 
     protected void setTimestampMap(TimestampInternalMap map) {
         clear();
-        timestampMap.putAll(map.timestampMap);
         timestampSortedMap.putAll(map.timestampSortedMap);
         garbageQueue.addAll(map.garbageQueue);
-        indexMap = new double[map.indexMap.length];
-        System.arraycopy(map.indexMap, 0, indexMap, 0, map.indexMap.length);
+        countMap = new int[map.countMap.length];
+        System.arraycopy(map.countMap, 0, countMap, 0, map.countMap.length);
         length = map.length;
     }
 
     void checkDouble(double timestamp) {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
-            throw new IllegalArgumentException("Timestamp can' be NaN or infinity");
+            throw new IllegalArgumentException("Timestamp can't be NaN or infinity");
         }
     }
 
@@ -167,6 +133,7 @@ public class TimestampInternalMap {
         for (Double2IntMap.Entry entry : timestampSortedMap.double2IntEntrySet()) {
             hash = 29 * hash + entry.getKey().hashCode();
             hash = 29 * hash + entry.getValue().hashCode();
+            hash = 29 * hash + countMap[entry.getValue()];
         }
         return hash;
     }
@@ -177,6 +144,12 @@ public class TimestampInternalMap {
         }
         if (!MapDeepEquals.mapDeepEquals(timestampSortedMap, obj.timestampSortedMap)) {
             return false;
+        }
+        int[] otherCountMap = obj.countMap;
+        for (Integer k : timestampSortedMap.values()) {
+            if (otherCountMap[k] != countMap[k]) {
+                return false;
+            }
         }
         return true;
     }

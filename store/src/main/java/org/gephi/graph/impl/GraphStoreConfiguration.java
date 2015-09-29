@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
 
 public final class GraphStoreConfiguration {
@@ -52,4 +53,8 @@ public final class GraphStoreConfiguration {
     public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIMESTAMP_SET ? ELEMENT_TIMESTAMP_INDEX + 1 : ELEMENT_TIMESTAMP_INDEX;
     //TimeFormat
     public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
+    //Dynamics
+    public static final Estimator DEFAULT_ESTIMATOR = Estimator.FIRST;
+    //Miscellaneous
+    public static final double TIMESTAMP_INTERNAL_MAP_GROWING_FACTOR = 1.1;
 }

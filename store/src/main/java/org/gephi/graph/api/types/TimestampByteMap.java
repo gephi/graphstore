@@ -16,9 +16,10 @@
 package org.gephi.graph.api.types;
 
 import org.gephi.graph.api.Estimator;
+import org.gephi.graph.api.Interval;
 
 /**
- * Sorted map where keys are timestamp indices and values byte values.
+ * Sorted map where keys are timestamp and values byte values.
  */
 public final class TimestampByteMap extends TimestampMap<Byte> {
 
@@ -48,22 +49,23 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
     }
 
     @Override
-    public void put(int timestampIndex, Byte value) {
+    public boolean put(double timestamp, Byte value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putByte(timestampIndex, value);
+        return putByte(timestamp, value);
     }
 
     /**
      * Put the <code>value</code> in this map at the given
-     * <code>timestampIndex</code> key.
+     * <code>timestamp</code> key.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param value value
+     * @return true if timestamp is a new key, false otherwise
      */
-    public void putByte(int timestampIndex, byte value) {
-        final int index = putInner(timestampIndex);
+    public boolean putByte(double timestamp, byte value) {
+        final int index = putInner(timestamp);
         if (index < 0) {
             int insertIndex = -index - 1;
 
@@ -79,22 +81,28 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
                 newArray[insertIndex] = value;
                 values = newArray;
             }
+            return true;
         } else {
             values[index] = value;
         }
+        return false;
     }
 
     @Override
-    public void remove(int timestampIndex) {
-        final int removeIndex = removeInner(timestampIndex);
-        if (removeIndex >= 0 && removeIndex != size) {
-            System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+    public boolean remove(double timestamp) {
+        final int removeIndex = removeInner(timestamp);
+        if (removeIndex >= 0) {
+            if (removeIndex != size) {
+                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+            }
+            return true;
         }
+        return false;
     }
 
     @Override
-    public Byte get(int timestampIndex, Byte defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public Byte get(double timestamp, Byte defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -102,14 +110,14 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
     }
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @return found value or the default value if not found
      * @throws IllegalArgumentException if the element doesn't exist
      */
-    public byte getByte(int timestampIndex) {
-        final int index = getIndex(timestampIndex);
+    public byte getByte(double timestamp) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -117,16 +125,16 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
     }
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      * <p>
      * Return <code>defaultValue</code> if the value is not found.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param defaultValue default value
      * @return found value or the default value if not found
      */
-    public byte getByte(int timestampIndex, byte defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public byte getByte(double timestamp, byte defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -134,68 +142,35 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
     }
 
     @Override
-    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+    public Object get(final Interval interval, Estimator estimator) {
         switch (estimator) {
             case AVERAGE:
-                return getAverage(timestampIndices);
+                return getAverageDouble(interval);
             case SUM:
-                return getSum(timestampIndices);
+                Double rSum = getSumDouble(interval);
+                if (rSum != null) {
+                    return rSum.intValue();
+                }
+                return null;
             case MIN:
-                Object rmin = getMin(timestampIndices);
+                Object rmin = getMin(interval);
                 if (rmin != null) {
                     return ((Double) rmin).byteValue();
                 }
                 return null;
             case MAX:
-                Object rmax = getMax(timestampIndices);
+                Object rmax = getMax(interval);
                 if (rmax != null) {
                     return ((Double) rmax).byteValue();
                 }
                 return null;
             case FIRST:
-                return getFirst(timestampIndices);
+                return getFirst(interval);
             case LAST:
-                return getLast(timestampIndices);
+                return getLast(interval);
             default:
                 throw new UnsupportedOperationException("Unknown estimator.");
         }
-    }
-
-    private Object getAverage(final int[] timestampIndices) {
-        double sum = 0;
-        int count = 0;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                byte val = values[index];
-                sum += val;
-                count++;
-            }
-        }
-        if (count == 0) {
-            return null;
-        }
-        sum /= count;
-        return sum;
-    }
-
-    private Object getSum(final int[] timestampIndices) {
-        int sum = 0;
-        int count = 0;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                byte val = values[index];
-                sum += val;
-                count++;
-            }
-        }
-        if (count == 0) {
-            return null;
-        }
-        return sum;
     }
 
     @Override

@@ -44,7 +44,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     //Columns
     protected final Object2ShortMap<String> idMap;
     protected final ColumnImpl[] columns;
-    protected final TimestampInternalMap[] timestampMaps;
     protected final ShortSortedSet garbageQueue;
     //Index
     protected final IndexStore<T> indexStore;
@@ -68,7 +67,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<String>(MAX_SIZE);
         this.columns = new ColumnImpl[MAX_SIZE];
-        this.timestampMaps = new TimestampInternalMap[MAX_SIZE];
         this.elementType = elementType;
         this.indexStore = indexed ? new IndexStore<T>(this) : null;
         idMap.defaultReturnValue(NULL_SHORT);
@@ -257,7 +255,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
             idMap.clear();
             length = 0;
             Arrays.fill(columns, null);
-            Arrays.fill(timestampMaps, null);
             if (indexStore != null) {
                 indexStore.clear();
             }
@@ -268,24 +265,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
 
     public int size() {
         return length - garbageQueue.size();
-    }
-
-    public TimestampInternalMap getTimestampMap(Column column) {
-        return getTimestampMap(column.getIndex());
-    }
-
-    protected TimestampInternalMap getTimestampMap(int index) {
-        lock();
-        try {
-            TimestampInternalMap timestampStore = timestampMaps[index];
-            if (timestampStore == null) {
-                timestampStore = new TimestampInternalMap();
-                timestampMaps[index] = timestampStore;
-            }
-            return timestampStore;
-        } finally {
-            unlock();
-        }
     }
 
     protected TableObserverImpl createTableObserver(TableImpl table, boolean withDiff) {
@@ -405,14 +384,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
             Column c1 = itr1.next();
             Column c2 = itr2.next();
             if (!c1.equals(c2)) {
-                return false;
-            }
-            TimestampInternalMap s1 = timestampMaps[c1.getIndex()];
-            TimestampInternalMap s2 = timestampMaps[c2.getIndex()];
-            if ((s1 == null && s2 != null) || (s1 != null && s2 == null)) {
-                return false;
-            }
-            if (s1 != null && !s1.equals(s2)) {
                 return false;
             }
         }

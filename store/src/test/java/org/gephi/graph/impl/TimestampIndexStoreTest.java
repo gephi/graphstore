@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -35,6 +36,7 @@ public class TimestampIndexStoreTest {
     public void testAddElement() {
         TimestampStore timestampStore = new TimestampStore(null, null, true);
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        store.timestampMap.addTimestamp(1.0);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 
@@ -47,6 +49,7 @@ public class TimestampIndexStoreTest {
     public void testRemoveElement() {
         TimestampStore timestampStore = new TimestampStore(null, null, true);
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        store.timestampMap.addTimestamp(1.0);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 
@@ -61,6 +64,8 @@ public class TimestampIndexStoreTest {
         GraphStore graphStore = new GraphStore();
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        store.timestampMap.addTimestamp(1.0);
+        store.timestampMap.addTimestamp(2.0);
 
         NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
@@ -70,7 +75,7 @@ public class TimestampIndexStoreTest {
 
         store.index(nodeImpl);
 
-        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(1.0, 2.0)));
+        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(1.0, 2.0))));
         Assert.assertTrue(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 1);
     }
@@ -85,11 +90,9 @@ public class TimestampIndexStoreTest {
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
-        Assert.assertEquals(store.timestampMap.size(), 2);
-
         graphStore.addNode(nodeImpl);
 
-        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(1.0, 2.0)));
+        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(1.0, 2.0))));
         Assert.assertTrue(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 1);
     }
@@ -99,17 +102,17 @@ public class TimestampIndexStoreTest {
         GraphStore graphStore = new GraphStore();
         TimestampStore timestampStore = graphStore.timestampStore;
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        store.timestampMap.addTimestamp(1.0);
+        store.timestampMap.addTimestamp(2.0);
 
         NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
-        Assert.assertEquals(store.timestampMap.size(), 2);
-
         store.index(nodeImpl);
         store.clear(nodeImpl);
 
-        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(1.0, 2.0)));
+        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(1.0, 2.0))));
         Assert.assertFalse(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 0);
     }
@@ -124,12 +127,10 @@ public class TimestampIndexStoreTest {
         nodeImpl.addTimestamp(1.0);
         nodeImpl.addTimestamp(2.0);
 
-        Assert.assertEquals(store.timestampMap.size(), 2);
-
         graphStore.addNode(nodeImpl);
         graphStore.removeNode(nodeImpl);
 
-        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(1.0, 2.0)));
+        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(1.0, 2.0))));
         Assert.assertFalse(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 0);
     }
@@ -147,7 +148,7 @@ public class TimestampIndexStoreTest {
         graphStore.addNode(nodeImpl);
         nodeImpl.addTimestamp(3.0);
 
-        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(3.0, 3.0)));
+        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(3.0, 3.0))));
         Assert.assertTrue(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 1);
     }
@@ -165,11 +166,11 @@ public class TimestampIndexStoreTest {
         graphStore.addNode(nodeImpl);
         nodeImpl.removeTimestamp(1.0);
 
-        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(1.0, 1.0)));
+        ObjectSet r = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(1.0, 1.0))));
         Assert.assertFalse(r.contains(nodeImpl));
         Assert.assertEquals(r.size(), 0);
 
-        ObjectSet r2 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(2.0, 2.0)));
+        ObjectSet r2 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(2.0, 2.0))));
         Assert.assertTrue(r2.contains(nodeImpl));
         Assert.assertEquals(r2.size(), 1);
     }

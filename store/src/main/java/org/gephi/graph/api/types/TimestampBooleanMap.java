@@ -15,7 +15,9 @@
  */
 package org.gephi.graph.api.types;
 
+import java.util.Arrays;
 import org.gephi.graph.api.Estimator;
+import org.gephi.graph.api.Interval;
 
 /**
  * Sorted map where keys are timestamp indices and values boolean values.
@@ -48,22 +50,23 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     @Override
-    public void put(int timestampIndex, Boolean value) {
+    public boolean put(double timestamp, Boolean value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putBoolean(timestampIndex, value);
+        return putBoolean(timestamp, value);
     }
 
     /**
      * Put the <code>value</code> in this map at the given
-     * <code>timestampIndex</code> key.
+     * <code>timestamp</code> key.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param value value
+     * @return true if timestamp is a new key, false otherwise
      */
-    public void putBoolean(int timestampIndex, boolean value) {
-        final int index = putInner(timestampIndex);
+    public boolean putBoolean(double timestamp, boolean value) {
+        final int index = putInner(timestamp);
         if (index < 0) {
             int insertIndex = -index - 1;
 
@@ -79,22 +82,28 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
                 newArray[insertIndex] = value;
                 values = newArray;
             }
+            return true;
         } else {
             values[index] = value;
         }
+        return false;
     }
 
     @Override
-    public void remove(int timestampIndex) {
-        final int removeIndex = removeInner(timestampIndex);
-        if (removeIndex >= 0 && removeIndex != size) {
-            System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+    public boolean remove(double timestamp) {
+        final int removeIndex = removeInner(timestamp);
+        if (removeIndex >= 0) {
+            if (removeIndex != size) {
+                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+            }
+            return true;
         }
+        return false;
     }
 
     @Override
-    public Boolean get(int timestampIndex, Boolean defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public Boolean get(double timestamp, Boolean defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -102,14 +111,14 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @return found value or the default value if not found
      * @throws IllegalArgumentException if the element doesn't exist
      */
-    public boolean getBoolean(int timestampIndex) {
-        final int index = getIndex(timestampIndex);
+    public boolean getBoolean(double timestamp) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -117,16 +126,16 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      * <p>
      * Return <code>defaultValue</code> if the value is not found.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param defaultValue default value
      * @return found value or the default value if not found
      */
-    public boolean getBoolean(int timestampIndex, boolean defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public boolean getBoolean(double timestamp, boolean defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -134,34 +143,40 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     @Override
-    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+    public Object get(Interval interval, Estimator estimator) {
         switch (estimator) {
             case MIN:
-                return getMin(timestampIndices);
+                return getMin(interval);
             case MAX:
-                return getMax(timestampIndices);
+                return getMax(interval);
             case FIRST:
-                return getFirst(timestampIndices);
+                return getFirst(interval);
             case LAST:
-                return getLast(timestampIndices);
+                return getLast(interval);
             default:
                 throw new UnsupportedOperationException("Not supported estimator.");
         }
     }
 
     @Override
-    protected Object getMin(final int[] timestampIndices) {
+    protected Object getMin(Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
         boolean t = false;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                boolean val = values[index];
-                if (!val) {
-                    return Boolean.FALSE;
-                } else {
-                    t = true;
-                }
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            boolean val = values[i];
+            if (!val) {
+                return Boolean.FALSE;
+            } else {
+                t = true;
             }
         }
         if (t) {
@@ -171,18 +186,24 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     @Override
-    protected Object getMax(final int[] timestampIndices) {
+    protected Object getMax(Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        double lowBound = interval.getLow();
+        double highBound = interval.getHigh();
+        int index = Arrays.binarySearch(array, lowBound);
+        if (index < 0) {
+            index = -index - 1;
+        }
+
         boolean f = false;
-        for (int i = 0; i < timestampIndices.length; i++) {
-            int timestampIndex = timestampIndices[i];
-            int index = getIndex(timestampIndex);
-            if (index >= 0) {
-                boolean val = values[index];
-                if (val) {
-                    return Boolean.TRUE;
-                } else {
-                    f = true;
-                }
+        for (int i = index; i < size && array[i] <= highBound; i++) {
+            boolean val = values[i];
+            if (val) {
+                return Boolean.TRUE;
+            } else {
+                f = true;
             }
         }
         if (f) {

@@ -27,8 +27,6 @@ public final class Interval {
 
     private final double low;   // the left endpoint
     private final double high;  // the right endpoint
-    private final boolean lopen; // indicates if the left endpoint is excluded
-    private final boolean ropen; // indicates if the right endpoint is excluded
 
     /**
      * Copy constructor.
@@ -38,8 +36,6 @@ public final class Interval {
     public Interval(Interval interval) {
         this.low = interval.low;
         this.high = interval.high;
-        this.lopen = interval.lopen;
-        this.ropen = interval.ropen;
     }
 
     /**
@@ -47,10 +43,8 @@ public final class Interval {
      *
      * @param low interval's low bound
      * @param high interval's high bound
-     * @param lopen whether the low bound is excluded
-     * @param ropen whether the high bound is excluded
      */
-    public Interval(double low, double high, boolean lopen, boolean ropen) {
+    public Interval(double low, double high) {
         if (low > high) {
             throw new IllegalArgumentException(
                     "The left endpoint of the interval must be less than "
@@ -59,18 +53,6 @@ public final class Interval {
 
         this.low = low;
         this.high = high;
-        this.lopen = lopen;
-        this.ropen = ropen;
-    }
-
-    /**
-     * Constructor with low and high bounds, both included.
-     *
-     * @param low interval's low bound
-     * @param high interval's high bound
-     */
-    public Interval(double low, double high) {
-        this(low, high, false, false);
     }
 
     /**
@@ -89,8 +71,7 @@ public final class Interval {
      * Note that if two intervals are equal ({@code i.low = i'.low} and
      * {@code i.high = i'.high}), they overlap as well. But if they simply
      * overlap (for instance {@code i.low < i'.low} and {@code i.high >
-     * i'.high}) they aren't equal. Remember that if two intervals are equal,
-     * they have got the same bounds excluded or included.
+     * i'.high}) they aren't equal.
      *
      * @param interval the interval to be compared
      *
@@ -105,10 +86,10 @@ public final class Interval {
             throw new NullPointerException("Interval cannot be null.");
         }
 
-        if (high < interval.low || high <= interval.low && (ropen || interval.lopen)) {
+        if (high < interval.low) {
             return -1;
         }
-        if (interval.high < low || interval.high <= low && (interval.ropen || lopen)) {
+        if (interval.high < low) {
             return 1;
         }
         return 0;
@@ -133,31 +114,11 @@ public final class Interval {
     }
 
     /**
-     * Indicates if the left endpoint is excluded.
-     *
-     * @return {@code true} if the left endpoint is excluded, {@code false}
-     * otherwise.
-     */
-    public boolean isLowExcluded() {
-        return lopen;
-    }
-
-    /**
-     * Indicates if the right endpoint is excluded.
-     *
-     * @return {@code true} if the right endpoint is excluded, {@code false}
-     * otherwise.
-     */
-    public boolean isHighExcluded() {
-        return ropen;
-    }
-
-    /**
      * Compares this interval with the specified object for equality.
      *
      * <p>
      * Note that two intervals are equal if {@code i.low = i'.low} and
-     * {@code i.high = i'.high} and they have got the bounds excluded/included.
+     * {@code i.high = i'.high}.
      *
      * @param obj object to which this interval is to be compared
      *
@@ -169,8 +130,7 @@ public final class Interval {
     public boolean equals(Object obj) {
         if (obj != null && obj.getClass().equals(this.getClass())) {
             Interval interval = (Interval) obj;
-            if (low == interval.low && high == interval.high
-                    && lopen == interval.lopen && ropen == interval.ropen) {
+            if (low == interval.low && high == interval.high) {
                 return true;
             }
         }
@@ -182,20 +142,18 @@ public final class Interval {
         int hash = 7;
         hash = 97 * hash + (int) (Double.doubleToLongBits(this.low) ^ (Double.doubleToLongBits(this.low) >>> 32));
         hash = 97 * hash + (int) (Double.doubleToLongBits(this.high) ^ (Double.doubleToLongBits(this.high) >>> 32));
-        hash = 97 * hash + (this.lopen ? 1 : 0);
-        hash = 97 * hash + (this.ropen ? 1 : 0);
         return hash;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(lopen ? '(' : '[');
+        sb.append('[');
         sb.append(low);
         sb.append(", ");
         sb.append(high);
 
-        sb.append(ropen ? ')' : ']');
+        sb.append(']');
 
         return sb.toString();
     }

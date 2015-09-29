@@ -101,19 +101,6 @@ public class EdgeImplTest {
     }
 
     @Test
-    public void testGetWeightMainGraphViewReset() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
-        Edge e = graphStore.getEdge("0");
-        e.setWeight(42.0, 1.0);
-        e.setWeight(4.0);
-        Assert.assertEquals(e.getWeight(graphStore.getView()), 4.0);
-        e.setWeight(5.0, 2.0);
-        TimestampInternalMap timestampMap = graphStore.edgeTable.store.getTimestampMap(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
-        Assert.assertEquals(timestampMap.size(), 1);
-        Assert.assertFalse(timestampMap.contains(1.0));
-    }
-
-    @Test
     public void testGetWeightDefaultEstimator() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         Edge e = graphStore.getEdge("0");

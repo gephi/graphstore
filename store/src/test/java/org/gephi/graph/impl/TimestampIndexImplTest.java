@@ -20,6 +20,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -87,6 +88,9 @@ public class TimestampIndexImplTest {
     public void testGetElements() {
         TimestampStore timestampStore = new TimestampStore(null, null, true);
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        store.timestampMap.addTimestamp(1.0);
+        store.timestampMap.addTimestamp(2.0);
+        store.timestampMap.addTimestamp(3.0);
 
         NodeImpl n0 = new NodeImpl(0);
         NodeImpl n1 = new NodeImpl(1);
@@ -98,27 +102,27 @@ public class TimestampIndexImplTest {
         store.add(2.0, n2);
         store.add(3.0, n3);
 
-        ObjectSet r1 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(1.0, 1.0)));
+        ObjectSet r1 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(1.0, 1.0))));
         Assert.assertTrue(r1.contains(n0));
         Assert.assertTrue(r1.contains(n1));
         Assert.assertEquals(r1.size(), 2);
 
-        ObjectSet r2 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(-1, 1.9)));
+        ObjectSet r2 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(-1, 1.9))));
         Assert.assertTrue(r2.contains(n0));
         Assert.assertTrue(r2.contains(n1));
         Assert.assertEquals(r2.size(), 2);
 
-        ObjectSet r3 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(-1, 2.0)));
+        ObjectSet r3 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(-1, 2.0))));
         Assert.assertTrue(r3.contains(n0));
         Assert.assertTrue(r3.contains(n1));
         Assert.assertTrue(r3.contains(n2));
         Assert.assertEquals(r3.size(), 3);
 
-        ObjectSet r4 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(2.0, 2.0)));
+        ObjectSet r4 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(2.0, 2.0))));
         Assert.assertTrue(r4.contains(n2));
         Assert.assertEquals(r4.size(), 1);
 
-        ObjectSet r5 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(2.0, 3.5)));
+        ObjectSet r5 = new ObjectOpenHashSet(getArrayFromIterable(store.mainIndex.get(new Interval(2.0, 3.5))));
         Assert.assertTrue(r5.contains(n2));
         Assert.assertTrue(r5.contains(n3));
         Assert.assertEquals(r5.size(), 2);
@@ -137,6 +141,9 @@ public class TimestampIndexImplTest {
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
         Assert.assertFalse(store.mainIndex.hasElements());
 
+        store.timestampMap.addTimestamp(1.0);
+        store.timestampMap.addTimestamp(2.0);
+
         NodeImpl nodeImpl = new NodeImpl(0);
 
         store.add(1.0, nodeImpl);
@@ -153,6 +160,7 @@ public class TimestampIndexImplTest {
     public void testHasNodesClear() {
         TimestampStore timestampStore = new TimestampStore(null, null, true);
         TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        store.timestampMap.addTimestamp(1.0);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 

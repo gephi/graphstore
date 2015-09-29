@@ -20,10 +20,6 @@ import java.util.Set;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class GraphAttributesTest {
 
     @Test

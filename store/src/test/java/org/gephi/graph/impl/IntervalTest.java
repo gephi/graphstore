@@ -26,8 +26,6 @@ public class IntervalTest {
         Interval i = new Interval(1.0, 5.0);
         Assert.assertEquals(i.getLow(), 1.0);
         Assert.assertEquals(i.getHigh(), 5.0);
-        Assert.assertFalse(i.isLowExcluded());
-        Assert.assertFalse(i.isHighExcluded());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -37,94 +35,64 @@ public class IntervalTest {
 
     @Test
     public void testIntervalCopyConstructor() {
-        Interval i = new Interval(1.0, 5.0, true, true);
+        Interval i = new Interval(1.0, 5.0);
         Interval j = new Interval(i);
         Assert.assertEquals(j.getLow(), 1.0);
         Assert.assertEquals(j.getHigh(), 5.0);
-        Assert.assertTrue(j.isLowExcluded());
-        Assert.assertTrue(j.isHighExcluded());
     }
 
     @Test
     public void testEquals() {
-        Interval i = new Interval(1.0, 5.0, true, true);
-        Interval j = new Interval(2.0, 5.0, true, true);
-        Interval k = new Interval(1.0, 3.0, true, true);
-        Interval l = new Interval(1.0, 5.0, false, true);
-        Interval m = new Interval(1.0, 5.0, true, false);
-        Interval n = new Interval(1.0, 5.0, true, true);
+        Interval i = new Interval(1.0, 5.0);
+        Interval j = new Interval(2.0, 5.0);
+        Interval k = new Interval(1.0, 3.0);
+        Interval l = new Interval(1.0, 5.0);
 
         Assert.assertFalse(i.equals(j));
         Assert.assertFalse(i.equals(k));
-        Assert.assertFalse(i.equals(l));
-        Assert.assertFalse(i.equals(m));
-        Assert.assertTrue(i.equals(n));
+        Assert.assertTrue(i.equals(l));
     }
 
     @Test
     public void testHashCode() {
-        Interval i = new Interval(1.0, 5.0, true, true);
-        Interval j = new Interval(2.0, 5.0, true, true);
-        Interval k = new Interval(1.0, 3.0, true, true);
-        Interval l = new Interval(1.0, 5.0, false, true);
-        Interval m = new Interval(1.0, 5.0, true, false);
-        Interval n = new Interval(1.0, 5.0, true, true);
+        Interval i = new Interval(1.0, 5.0);
+        Interval j = new Interval(2.0, 5.0);
+        Interval k = new Interval(1.0, 3.0);
+        Interval l = new Interval(1.0, 5.0);
 
         Assert.assertNotEquals(i.hashCode(), j.hashCode());
         Assert.assertNotEquals(i.hashCode(), k.hashCode());
-        Assert.assertNotEquals(i.hashCode(), l.hashCode());
-        Assert.assertNotEquals(i.hashCode(), m.hashCode());
-        Assert.assertEquals(i.hashCode(), n.hashCode());
+        Assert.assertEquals(i.hashCode(), l.hashCode());
     }
 
     @Test
     public void testToString() {
-        Interval i = new Interval(1.0, 5.0, true, true);
-        Interval j = new Interval(1.0, 5.0, false, false);
-        Assert.assertEquals(i.toString(), "(1.0, 5.0)");
-        Assert.assertEquals(j.toString(), "[1.0, 5.0]");
+        Interval i = new Interval(1.0, 5.0);
+        Assert.assertEquals(i.toString(), "[1.0, 5.0]");
     }
 
     @Test
-    public void testCompareLeftIncluded() {
-        Interval i = new Interval(1.0, 2.0, false, false);
-        Interval j = new Interval(3.0, 4.0, false, false);
-        Interval k = new Interval(2.0, 4.0, false, false);
+    public void testCompareLeft() {
+        Interval i = new Interval(1.0, 2.0);
+        Interval j = new Interval(3.0, 4.0);
+        Interval k = new Interval(2.0, 4.0);
         Assert.assertEquals(i.compareTo(j), -1);
         Assert.assertEquals(i.compareTo(k), 0);
     }
 
     @Test
-    public void testCompareLeftExcluded() {
-        Interval i = new Interval(1.0, 2.0, false, false);
-        Interval j = new Interval(1.0, 2.0, false, true);
-        Interval k = new Interval(2.0, 4.0, true, true);
-        Assert.assertEquals(i.compareTo(k), -1);
-        Assert.assertEquals(j.compareTo(k), -1);
-    }
-
-    @Test
     public void testCompareRightIncluded() {
-        Interval i = new Interval(4.0, 5.0, false, false);
-        Interval j = new Interval(1.0, 2.0, false, false);
-        Interval k = new Interval(2.0, 4.0, false, false);
+        Interval i = new Interval(4.0, 5.0);
+        Interval j = new Interval(1.0, 2.0);
+        Interval k = new Interval(2.0, 4.0);
         Assert.assertEquals(i.compareTo(j), 1);
         Assert.assertEquals(i.compareTo(k), 0);
     }
 
     @Test
-    public void testCompareRightExcluded() {
-        Interval i = new Interval(4.0, 5.0, false, false);
-        Interval j = new Interval(4.0, 5.0, true, false);
-        Interval k = new Interval(2.0, 4.0, true, true);
-        Assert.assertEquals(i.compareTo(k), 1);
-        Assert.assertEquals(j.compareTo(k), 1);
-    }
-
-    @Test
     public void testCompareOverlap() {
-        Interval i = new Interval(1.0, 10.0, false, false);
-        Interval j = new Interval(4.0, 5.0, false, false);
+        Interval i = new Interval(1.0, 10.0);
+        Interval j = new Interval(4.0, 5.0);
         Assert.assertEquals(i.compareTo(j), 0);
         Assert.assertEquals(j.compareTo(i), 0);
     }

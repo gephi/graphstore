@@ -82,7 +82,6 @@ public class TimestampIndexStore<T extends Element> {
         if (index != null) {
             index.clear();
         }
-
     }
 
     public void clear() {
@@ -93,17 +92,16 @@ public class TimestampIndexStore<T extends Element> {
                 index.clear();
             }
         }
-
     }
 
     protected void index(ElementImpl element) {
         TimestampSet set = element.getTimestampSet();
         if (set != null) {
-            int[] ts = set.getTimestamps();
+            double[] ts = set.getTimestamps();
             int tsLength = ts.length;
             for (int i = 0; i < tsLength; i++) {
-                int timestamp = ts[i];
-                mainIndex.add(timestamp, element);
+                int timestampIndex = timestampMap.getTimestampIndex(ts[i]);
+                mainIndex.add(timestampIndex, element);
             }
         }
     }
@@ -111,15 +109,11 @@ public class TimestampIndexStore<T extends Element> {
     protected void clear(ElementImpl element) {
         TimestampSet set = element.getTimestampSet();
         if (set != null) {
-            int[] ts = set.getTimestamps();
+            double[] ts = set.getTimestamps();
             int tsLength = ts.length;
             for (int i = 0; i < tsLength; i++) {
-                int timestamp = ts[i];
-                mainIndex.remove(timestamp, element);
-
-                if (mainIndex.timestamps[i] == null) {
-                    timestampMap.removeTimestamp(timestampMap.indexMap[i]);
-                }
+                int timestampIndex = timestampMap.getTimestampIndex(ts[i]);
+                mainIndex.remove(timestampIndex, element);
             }
 
             if (!viewIndexes.isEmpty()) {
@@ -129,8 +123,8 @@ public class TimestampIndexStore<T extends Element> {
                     boolean node = element instanceof Node;
                     if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
                         for (int i = 0; i < tsLength; i++) {
-                            int timestamp = ts[i];
-                            entry.getValue().remove(timestamp, element);
+                            int timestampIndex = timestampMap.getTimestampIndex(ts[i]);
+                            entry.getValue().remove(timestampIndex, element);
                         }
                     }
                 }
@@ -140,6 +134,7 @@ public class TimestampIndexStore<T extends Element> {
 
     public int add(double timestamp, ElementImpl element) {
         int timestampIndex = timestampMap.getTimestampIndex(timestamp);
+        checkTimestampIndex(timestampIndex);
 
         mainIndex.add(timestampIndex, element);
 
@@ -160,6 +155,8 @@ public class TimestampIndexStore<T extends Element> {
 
     public int remove(double timestamp, ElementImpl element) {
         int timestampIndex = timestampMap.getTimestampIndex(timestamp);
+        checkTimestampIndex(timestampIndex);
+
         mainIndex.remove(timestampIndex, element);
 
         if (!viewIndexes.isEmpty()) {
@@ -201,10 +198,10 @@ public class TimestampIndexStore<T extends Element> {
                         ElementImpl element = (ElementImpl) iterator.next();
                         TimestampSet set = element.getTimestampSet();
                         if (set != null) {
-                            int[] ts = set.getTimestamps();
+                            double[] ts = set.getTimestamps();
                             int tsLength = ts.length;
                             for (int i = 0; i < tsLength; i++) {
-                                int timestamp = ts[i];
+                                int timestamp = timestampMap.getTimestampIndex(ts[i]);
                                 viewIndex.add(timestamp, element);
                             }
                         }
@@ -222,11 +219,11 @@ public class TimestampIndexStore<T extends Element> {
         if (viewIndex != null) {
             TimestampSet set = elementImpl.getTimestampSet();
             if (set != null) {
-                int[] ts = set.getTimestamps();
+                double[] ts = set.getTimestamps();
                 int tsLength = ts.length;
                 for (int i = 0; i < tsLength; i++) {
-                    int timestamp = ts[i];
-                    viewIndex.add(timestamp, elementImpl);
+                    int timestampIndex = timestampMap.getTimestampIndex(ts[i]);
+                    viewIndex.add(timestampIndex, elementImpl);
                 }
             }
         }
@@ -238,11 +235,11 @@ public class TimestampIndexStore<T extends Element> {
         if (viewIndex != null) {
             TimestampSet set = elementImpl.getTimestampSet();
             if (set != null) {
-                int[] ts = set.getTimestamps();
+                double[] ts = set.getTimestamps();
                 int tsLength = ts.length;
                 for (int i = 0; i < tsLength; i++) {
-                    int timestamp = ts[i];
-                    viewIndex.remove(timestamp, elementImpl);
+                    int timestampIndex = timestampMap.getTimestampIndex(ts[i]);
+                    viewIndex.remove(timestampIndex, elementImpl);
                 }
             }
         }
@@ -252,6 +249,12 @@ public class TimestampIndexStore<T extends Element> {
         TimestampIndexImpl viewIndex = viewIndexes.get(view);
         if (viewIndex != null) {
             viewIndex.clear();
+        }
+    }
+
+    private void checkTimestampIndex(int timestampIndex) {
+        if (timestampIndex == TimestampInternalMap.NULL_INDEX) {
+            throw new IllegalArgumentException("Unknown timestamp index");
         }
     }
 }

@@ -379,7 +379,17 @@ public class GraphStoreTest {
 
             @Override
             public boolean hasTimestamp(double timestamp) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object removeAttribute(String key, double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object removeAttribute(Column column, double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet.");
             }
         });
     }

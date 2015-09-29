@@ -39,17 +39,16 @@ public interface TimestampIndex<T extends Element> {
     /**
      * Returns all elements at the given timestamp.
      *
-     * @param timestamp a timestamp
+     * @param timestamp timestamp
      * @return elements at this timestamp
      */
     public ElementIterable<T> get(double timestamp);
 
     /**
-     * Returns all elements between the given [from, to] interval.
+     * Returns all elements between the given interval (bounds included).
      *
-     * @param from the interval start (included)
-     * @param to the interval end (included)
+     * @param interval interval
      * @return elements at this interval
      */
-    public ElementIterable<T> get(double from, double to);
+    public ElementIterable<T> get(Interval interval);
 }

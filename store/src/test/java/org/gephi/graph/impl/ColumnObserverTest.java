@@ -47,6 +47,7 @@ public class ColumnObserverTest {
         Column column = table.addColumn("0", Integer.class);
 
         Node node = store.factory.newNode();
+        store.addNode(node);
 
         ColumnObserver observer = column.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());
@@ -64,6 +65,7 @@ public class ColumnObserverTest {
 
         Node node = store.factory.newNode();
         node.setAttribute(column, 1);
+        store.addNode(node);
 
         ColumnObserver observer = column.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());
@@ -80,6 +82,7 @@ public class ColumnObserverTest {
         Column column = table.addColumn("0", TimestampIntegerMap.class);
 
         Node node = store.factory.newNode();
+        store.addNode(node);
 
         ColumnObserver observer = column.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());

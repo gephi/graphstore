@@ -702,18 +702,18 @@ public class Serialization {
     }
 
     private TimestampSet deserializeTimestampSet(DataInput is) throws IOException, ClassNotFoundException {
-        int[] r = (int[]) deserialize(is);
+        double[] r = (double[]) deserialize(is);
 
         return new TimestampSet(r);
     }
 
-    private void serializeTimestampValueSet(final DataOutput out, final TimestampMap timestampValueSet) throws IOException {
-        serialize(out, timestampValueSet.size());
-        serialize(out, timestampValueSet.getTimestamps());
-        serialize(out, timestampValueSet.toArray());
+    private void serializeTimestampMap(final DataOutput out, final TimestampMap timestampMap) throws IOException {
+        serialize(out, timestampMap.size());
+        serialize(out, timestampMap.getTimestamps());
+        serialize(out, timestampMap.toArray());
     }
 
-    private TimestampMap deserializeTimestampValueSet(final DataInput is, int head) throws IOException, ClassNotFoundException {
+    private TimestampMap deserializeTimestampMap(final DataInput is, int head) throws IOException, ClassNotFoundException {
         int size = (Integer) deserialize(is);
         TimestampMap valueSet;
         switch (head) {
@@ -747,7 +747,7 @@ public class Serialization {
             default:
                 throw new RuntimeException("Not recognized Timestamp value set type");
         }
-        int[] timeStamps = (int[]) deserialize(is);
+        double[] timeStamps = (double[]) deserialize(is);
         Object[] values = (Object[]) deserialize(is);
 
         for (int i = 0; i < timeStamps.length; i++) {
@@ -757,35 +757,34 @@ public class Serialization {
         return valueSet;
     }
 
-    private void serializeTimestampMap(final DataOutput out, final TimestampInternalMap timestampMap) throws IOException {
+    private void serializeTimestampInternalMap(final DataOutput out, final TimestampInternalMap timestampMap) throws IOException {
         serialize(out, timestampMap.length);
         serialize(out, timestampMap.timestampSortedMap.keySet().toDoubleArray());
         serialize(out, timestampMap.timestampSortedMap.values().toIntArray());
         serialize(out, timestampMap.garbageQueue.toIntArray());
+        serialize(out, timestampMap.countMap);
     }
 
-    private TimestampInternalMap deserializeTimestampMap(final DataInput is) throws IOException, ClassNotFoundException {
+    private TimestampInternalMap deserializeTimestampInternalMap(final DataInput is) throws IOException, ClassNotFoundException {
         TimestampInternalMap timestampMap = new TimestampInternalMap();
         int length = (Integer) deserialize(is);
         double[] doubles = (double[]) deserialize(is);
         int[] ints = (int[]) deserialize(is);
         int[] garbage = (int[]) deserialize(is);
+        int[] counts = (int[]) deserialize(is);
 
         timestampMap.length = length;
         for (int i : garbage) {
             timestampMap.garbageQueue.add(i);
         }
         for (int i = 0; i < ints.length; i++) {
-            timestampMap.timestampMap.put(doubles[i], ints[i]);
             timestampMap.timestampSortedMap.put(doubles[i], ints[i]);
-            timestampMap.ensureArraySize(ints[i]);
-            timestampMap.indexMap[ints[i]] = doubles[i];
         }
+        timestampMap.countMap = counts;
         return timestampMap;
     }
 
     private void serializeGraphAttributes(final DataOutput out, final GraphAttributesImpl graphAttributes) throws IOException {
-        serialize(out, graphAttributes.timestampMap);
         serialize(out, graphAttributes.attributes.size());
         for (Map.Entry<String, Object> entry : graphAttributes.attributes.entrySet()) {
             serialize(out, entry.getKey());
@@ -795,7 +794,6 @@ public class Serialization {
 
     private GraphAttributesImpl deserializeGraphAttributes(final DataInput is) throws IOException, ClassNotFoundException {
         GraphAttributesImpl attributes = new GraphAttributesImpl();
-        attributes.timestampMap.setTimestampMap((TimestampInternalMap) deserialize(is));
         int size = (Integer) deserialize(is);
         for (int i = 0; i < size; i++) {
             String key = (String) deserialize(is);
@@ -1108,43 +1106,43 @@ public class Serialization {
         } else if (obj instanceof TimestampBooleanMap) {
             TimestampBooleanMap b = (TimestampBooleanMap) obj;
             out.write(TIMESTAMP_BOOLEAN_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampByteMap) {
             TimestampByteMap b = (TimestampByteMap) obj;
             out.write(TIMESTAMP_BYTE_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampCharMap) {
             TimestampCharMap b = (TimestampCharMap) obj;
             out.write(TIMESTAMP_CHAR_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampDoubleMap) {
             TimestampDoubleMap b = (TimestampDoubleMap) obj;
             out.write(TIMESTAMP_DOUBLE_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampFloatMap) {
             TimestampFloatMap b = (TimestampFloatMap) obj;
             out.write(TIMESTAMP_FLOAT_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampIntegerMap) {
             TimestampIntegerMap b = (TimestampIntegerMap) obj;
             out.write(TIMESTAMP_INTEGER_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampLongMap) {
             TimestampLongMap b = (TimestampLongMap) obj;
             out.write(TIMESTAMP_LONG_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampShortMap) {
             TimestampShortMap b = (TimestampShortMap) obj;
             out.write(TIMESTAMP_SHORT_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampStringMap) {
             TimestampStringMap b = (TimestampStringMap) obj;
             out.write(TIMESTAMP_STRING_SET);
-            serializeTimestampValueSet(out, b);
+            serializeTimestampMap(out, b);
         } else if (obj instanceof TimestampInternalMap) {
             TimestampInternalMap b = (TimestampInternalMap) obj;
             out.write(TIMESTAMP_MAP);
-            serializeTimestampMap(out, b);
+            Serialization.this.serializeTimestampInternalMap(out, b);
         } else if (obj instanceof GraphAttributesImpl) {
             GraphAttributesImpl b = (GraphAttributesImpl) obj;
             out.write(GRAPH_ATTRIBUTES);
@@ -1655,34 +1653,34 @@ public class Serialization {
                 ret = Estimator.valueOf(deserializeString(is));
                 break;
             case TIMESTAMP_BOOLEAN_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_BYTE_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_CHAR_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_DOUBLE_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_FLOAT_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_INTEGER_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_LONG_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_SHORT_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_STRING_SET:
-                ret = deserializeTimestampValueSet(is, head);
+                ret = deserializeTimestampMap(is, head);
                 break;
             case TIMESTAMP_MAP:
-                ret = deserializeTimestampMap(is);
+                ret = Serialization.this.deserializeTimestampInternalMap(is);
                 break;
             case GRAPH_ATTRIBUTES:
                 ret = deserializeGraphAttributes(is);

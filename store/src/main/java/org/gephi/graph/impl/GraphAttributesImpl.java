@@ -24,7 +24,6 @@ import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public class GraphAttributesImpl {
 
-    protected final TimestampInternalMap timestampMap = new TimestampInternalMap();
     protected final Map<String, Object> attributes = new HashMap<String, Object>();
 
     public synchronized Set<String> getKeys() {
@@ -44,9 +43,8 @@ public class GraphAttributesImpl {
 
     public synchronized Object getValue(String key, double timestamp) {
         TimestampMap valueSet = (TimestampMap) attributes.get(key);
-        if (valueSet != null && timestampMap.hasTimestampIndex(timestamp)) {
-            int index = timestampMap.getTimestampIndex(timestamp);
-            return valueSet.get(index, null);
+        if (valueSet != null) {
+            return valueSet.get(timestamp, null);
         }
         return null;
     }
@@ -56,9 +54,6 @@ public class GraphAttributesImpl {
             throw new NullPointerException("The value can't be null for the key '" + key + "'");
         }
         checkSupportedDynamicTypes(value.getClass());
-
-        AttributeUtils.getDynamicType(value.getClass());
-        int index = timestampMap.getTimestampIndex(timestamp);
 
         TimestampMap valueSet = null;
         if (attributes.containsKey(key)) {
@@ -75,11 +70,10 @@ public class GraphAttributesImpl {
             throw new IllegalArgumentException("The value type " + value.getClass().getName() + " doesn't match with the expected type " + valueSet.getTypeClass().getName());
         }
 
-        valueSet.put(index, value);
+        valueSet.put(timestamp, value);
     }
 
     protected void setGraphAttributes(GraphAttributesImpl graphAttributes) {
-        timestampMap.setTimestampMap(graphAttributes.timestampMap);
         attributes.putAll(graphAttributes.attributes);
     }
 
@@ -100,7 +94,6 @@ public class GraphAttributesImpl {
     public int deepHashCode() {
         int hash = 3;
         hash = 47 * hash + (this.attributes != null ? this.attributes.hashCode() : 0);
-        hash = 47 * hash + (this.timestampMap != null ? this.timestampMap.deepHashCode() : 0);
         return hash;
     }
 
@@ -109,9 +102,6 @@ public class GraphAttributesImpl {
             return false;
         }
         if (!MapDeepEquals.mapDeepEquals(attributes, obj.attributes)) {
-            return false;
-        }
-        if (!timestampMap.deepEquals(obj.timestampMap)) {
             return false;
         }
         return true;

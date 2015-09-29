@@ -475,10 +475,11 @@ public class SerializationTest {
     }
 
     @Test
-    public void testTimestampMap() throws IOException, ClassNotFoundException {
+    public void testTimestampInternalMap() throws IOException, ClassNotFoundException {
         TimestampInternalMap timestampMap = new TimestampInternalMap();
         timestampMap.addTimestamp(6.0);
         timestampMap.addTimestamp(2.0);
+        timestampMap.addTimestamp(4.0);
         timestampMap.addTimestamp(4.0);
         timestampMap.removeTimestamp(2.0);
 

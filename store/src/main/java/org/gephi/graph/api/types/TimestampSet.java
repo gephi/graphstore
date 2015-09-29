@@ -22,7 +22,7 @@ import java.util.Arrays;
  */
 public final class TimestampSet {
 
-    private int[] array;
+    private double[] array;
     private int size = 0;
 
     /**
@@ -31,7 +31,7 @@ public final class TimestampSet {
      * The set is empty with zero capacity.
      */
     public TimestampSet() {
-        array = new int[0];
+        array = new double[0];
     }
 
     /**
@@ -43,8 +43,8 @@ public final class TimestampSet {
      * @param capacity timestamp capacity
      */
     public TimestampSet(int capacity) {
-        array = new int[capacity];
-        Arrays.fill(array, Integer.MAX_VALUE);
+        array = new double[capacity];
+        Arrays.fill(array, Double.MAX_VALUE);
     }
 
     /**
@@ -54,30 +54,30 @@ public final class TimestampSet {
      *
      * @param arr initial set content
      */
-    public TimestampSet(int[] arr) {
-        array = new int[arr.length];
+    public TimestampSet(double[] arr) {
+        array = new double[arr.length];
         System.arraycopy(arr, 0, array, 0, arr.length);
         size = arr.length;
     }
 
     /**
-     * Adds timestamp index to this set.
+     * Adds timestamp to this set.
      *
-     * @param timestampIndex timestamp index
-     * @return true of added, false otherwise
+     * @param timestamp timestamp
+     * @return true if added, false otherwise
      */
-    public boolean add(int timestampIndex) {
-        return addInner(timestampIndex, false) >= 0;
+    public boolean add(double timestamp) {
+        return addInner(timestamp) >= 0;
     }
 
     /**
-     * Removes timestamp index from this set.
+     * Removes timestamp from this set.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @return true if removed, false otherwise
      */
-    public boolean remove(int timestampIndex) {
-        return removeInner(timestampIndex) >= 0;
+    public boolean remove(double timestamp) {
+        return removeInner(timestamp) >= 0;
     }
 
     /**
@@ -99,13 +99,13 @@ public final class TimestampSet {
     }
 
     /**
-     * Returns true if this set contains <code>timestampIndex</code>.
+     * Returns true if this set contains <code>timestamp</code>.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @return true if contains, false otherwise
      */
-    public boolean contains(int timestampIndex) {
-        int index = Arrays.binarySearch(array, timestampIndex);
+    public boolean contains(double timestamp) {
+        int index = Arrays.binarySearch(array, timestamp);
         return index >= 0 && index < size;
     }
 
@@ -117,9 +117,9 @@ public final class TimestampSet {
      *
      * @return array of all timestamps
      */
-    public int[] getTimestamps() {
+    public double[] getTimestamps() {
         if (size < array.length) {
-            int[] res = new int[size];
+            double[] res = new double[size];
             System.arraycopy(array, 0, res, 0, size);
             return res;
         } else {
@@ -132,11 +132,11 @@ public final class TimestampSet {
      */
     public void clear() {
         size = 0;
-        array = new int[0];
+        array = new double[0];
     }
 
-    private int addInner(int timestampIndex, boolean allowSet) {
-        int index = Arrays.binarySearch(array, 0, size, timestampIndex);
+    private int addInner(double timestamp) {
+        int index = Arrays.binarySearch(array, 0, size, timestamp);
         if (index < 0) {
             int insertIndex = -index - 1;
 
@@ -144,23 +144,23 @@ public final class TimestampSet {
                 if (insertIndex < size) {
                     System.arraycopy(array, insertIndex, array, insertIndex + 1, size - insertIndex);
                 }
-                array[insertIndex] = timestampIndex;
+                array[insertIndex] = timestamp;
             } else {
-                int[] newArray = new int[array.length + 1];
+                double[] newArray = new double[array.length + 1];
                 System.arraycopy(array, 0, newArray, 0, insertIndex);
                 System.arraycopy(array, insertIndex, newArray, insertIndex + 1, array.length - insertIndex);
-                newArray[insertIndex] = timestampIndex;
+                newArray[insertIndex] = timestamp;
                 array = newArray;
             }
 
             size++;
             return insertIndex;
         }
-        return allowSet ? index : -1;
+        return -1;
     }
 
-    private int removeInner(int timestampIndex) {
-        int index = Arrays.binarySearch(array, 0, size, timestampIndex);
+    private int removeInner(double timestamp) {
+        int index = Arrays.binarySearch(array, 0, size, timestamp);
         if (index >= 0) {
             int removeIndex = index;
 
@@ -181,8 +181,8 @@ public final class TimestampSet {
         int hash = 7;
         hash = 37 * hash + this.size;
         for (int i = 0; i < size; i++) {
-            int index = this.array[i];
-            hash = 37 * hash + index;
+            double t = this.array[i];
+            hash = 37 * hash + (int) (Double.doubleToLongBits(t) ^ (Double.doubleToLongBits(t) >>> 32));
         }
         return hash;
     }
@@ -200,8 +200,8 @@ public final class TimestampSet {
             return false;
         }
         for (int i = 0; i < size; i++) {
-            int i1 = this.array[i];
-            int i2 = other.array[i];
+            double i1 = this.array[i];
+            double i2 = other.array[i];
             if (i1 != i2) {
                 return false;
             }

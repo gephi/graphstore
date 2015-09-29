@@ -23,9 +23,10 @@ import static org.gephi.graph.api.Estimator.LAST;
 import static org.gephi.graph.api.Estimator.MAX;
 import static org.gephi.graph.api.Estimator.MIN;
 import static org.gephi.graph.api.Estimator.SUM;
+import org.gephi.graph.api.Interval;
 
 /**
- * Sorted map where keys are timestamp indices and values long values.
+ * Sorted map where keys are timestamp and values long values.
  */
 public final class TimestampLongMap extends TimestampMap<Long> {
 
@@ -55,22 +56,22 @@ public final class TimestampLongMap extends TimestampMap<Long> {
     }
 
     @Override
-    public void put(int timestampIndex, Long value) {
+    public boolean put(double timestamp, Long value) {
         if (value == null) {
             throw new NullPointerException();
         }
-        putLong(timestampIndex, value);
+        return putLong(timestamp, value);
     }
 
     /**
      * Put the <code>value</code> in this map at the given
-     * <code>timestampIndex</code> key.
+     * <code>timestamp</code> key.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param value value
      */
-    public void putLong(int timestampIndex, long value) {
-        final int index = putInner(timestampIndex);
+    public boolean putLong(double timestamp, long value) {
+        final int index = putInner(timestamp);
         if (index < 0) {
             int insertIndex = -index - 1;
 
@@ -86,22 +87,28 @@ public final class TimestampLongMap extends TimestampMap<Long> {
                 newArray[insertIndex] = value;
                 values = newArray;
             }
+            return true;
         } else {
             values[index] = value;
         }
+        return false;
     }
 
     @Override
-    public void remove(int timestampIndex) {
-        final int removeIndex = removeInner(timestampIndex);
-        if (removeIndex >= 0 && removeIndex != size) {
-            System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+    public boolean remove(double timestamp) {
+        final int removeIndex = removeInner(timestamp);
+        if (removeIndex >= 0) {
+            if (removeIndex != size) {
+                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+            }
+            return true;
         }
+        return false;
     }
 
     @Override
-    public Long get(int timestampIndex, Long defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public Long get(double timestamp, Long defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -109,14 +116,14 @@ public final class TimestampLongMap extends TimestampMap<Long> {
     }
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @return found value or the default value if not found
      * @throws IllegalArgumentException if the element doesn't exist
      */
-    public long getLong(int timestampIndex) {
-        final int index = getIndex(timestampIndex);
+    public long getLong(double timestamp) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -124,16 +131,16 @@ public final class TimestampLongMap extends TimestampMap<Long> {
     }
 
     /**
-     * Get the value for the given timestamp index.
+     * Get the value for the given timestamp.
      * <p>
      * Return <code>defaultValue</code> if the value is not found.
      *
-     * @param timestampIndex timestamp index
+     * @param timestamp timestamp
      * @param defaultValue default value
      * @return found value or the default value if not found
      */
-    public long getLong(int timestampIndex, long defaultValue) {
-        final int index = getIndex(timestampIndex);
+    public long getLong(double timestamp, long defaultValue) {
+        final int index = getIndex(timestamp);
         if (index >= 0) {
             return values[index];
         }
@@ -141,36 +148,36 @@ public final class TimestampLongMap extends TimestampMap<Long> {
     }
 
     @Override
-    public Object get(double[] timestamps, int[] timestampIndices, Estimator estimator) {
+    public Object get(Interval interval, Estimator estimator) {
         switch (estimator) {
             case AVERAGE:
-                BigDecimal ra = getAverageBigDecimal(timestampIndices);
+                BigDecimal ra = getAverageBigDecimal(interval);
                 if (ra != null) {
                     return ra.doubleValue();
                 }
                 return null;
             case SUM:
-                BigDecimal rs = getSumBigDecimal(timestampIndices);
+                BigDecimal rs = getSumBigDecimal(interval);
                 if (rs != null) {
                     return rs.longValue();
                 }
                 return null;
             case MIN:
-                Double min = (Double) getMin(timestampIndices);
+                Double min = (Double) getMin(interval);
                 if (min != null) {
                     return min.longValue();
                 }
                 return null;
             case MAX:
-                Double max = (Double) getMax(timestampIndices);
+                Double max = (Double) getMax(interval);
                 if (max != null) {
                     return max.longValue();
                 }
                 return null;
             case FIRST:
-                return getFirst(timestampIndices);
+                return getFirst(interval);
             case LAST:
-                return getLast(timestampIndices);
+                return getLast(interval);
             default:
                 throw new IllegalArgumentException("Unknown estimator.");
         }
