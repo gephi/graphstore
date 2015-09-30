@@ -272,8 +272,7 @@ public abstract class TimestampMap<T> {
      * @return true if contains, false otherwise
      */
     public boolean contains(double timestamp) {
-        int index = Arrays.binarySearch(array, timestamp);
-        return index >= 0 && index < size;
+        return getIndex(timestamp) >= 0;
     }
 
     /**
