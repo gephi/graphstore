@@ -49,67 +49,6 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
         values = new boolean[capacity];
     }
 
-    @Override
-    public boolean put(double timestamp, Boolean value) {
-        if (value == null) {
-            throw new NullPointerException();
-        }
-        return putBoolean(timestamp, value);
-    }
-
-    /**
-     * Put the <code>value</code> in this map at the given
-     * <code>timestamp</code> key.
-     *
-     * @param timestamp timestamp
-     * @param value value
-     * @return true if timestamp is a new key, false otherwise
-     */
-    public boolean putBoolean(double timestamp, boolean value) {
-        final int index = putInner(timestamp);
-        if (index < 0) {
-            int insertIndex = -index - 1;
-
-            if (size - 1 < values.length) {
-                if (insertIndex < size - 1) {
-                    System.arraycopy(values, insertIndex, values, insertIndex + 1, size - insertIndex - 1);
-                }
-                values[insertIndex] = value;
-            } else {
-                boolean[] newArray = new boolean[values.length + 1];
-                System.arraycopy(values, 0, newArray, 0, insertIndex);
-                System.arraycopy(values, insertIndex, newArray, insertIndex + 1, values.length - insertIndex);
-                newArray[insertIndex] = value;
-                values = newArray;
-            }
-            return true;
-        } else {
-            values[index] = value;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean remove(double timestamp) {
-        final int removeIndex = removeInner(timestamp);
-        if (removeIndex >= 0) {
-            if (removeIndex != size) {
-                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean get(double timestamp, Boolean defaultValue) {
-        final int index = getIndex(timestamp);
-        if (index >= 0) {
-            return values[index];
-        }
-        return defaultValue;
-    }
-
     /**
      * Get the value for the given timestamp.
      *
@@ -140,22 +79,6 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
             return values[index];
         }
         return defaultValue;
-    }
-
-    @Override
-    public Object get(Interval interval, Estimator estimator) {
-        switch (estimator) {
-            case MIN:
-                return getMin(interval);
-            case MAX:
-                return getMax(interval);
-            case FIRST:
-                return getFirst(interval);
-            case LAST:
-                return getLast(interval);
-            default:
-                throw new UnsupportedOperationException("Not supported estimator.");
-        }
     }
 
     @Override
@@ -213,15 +136,6 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     @Override
-    public Boolean[] toArray() {
-        final Boolean[] res = new Boolean[size];
-        for (int i = 0; i < size; i++) {
-            res[i] = values[i];
-        }
-        return res;
-    }
-
-    @Override
     public Class<Boolean> getTypeClass() {
         return Boolean.class;
     }
@@ -245,18 +159,22 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     @Override
-    public void clear() {
-        super.clear();
-        values = new boolean[0];
-    }
-
-    @Override
     public boolean isSupported(Estimator estimator) {
         return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST);
     }
 
     @Override
-    protected Object getValue(int index) {
+    protected Boolean getValue(int index) {
         return values[index];
+    }
+
+    @Override
+    protected Object getValuesArray() {
+        return values;
+    }
+
+    @Override
+    protected void setValuesArray(Object array) {
+        values = (boolean[]) array;
     }
 }

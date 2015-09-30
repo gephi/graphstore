@@ -18,7 +18,7 @@ package org.gephi.graph.api.types;
 import java.util.Arrays;
 
 /**
- * Sorted set for timestamp indices.
+ * Sorted set for timestamps.
  */
 public final class TimestampSet {
 

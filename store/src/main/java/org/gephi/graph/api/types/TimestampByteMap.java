@@ -48,67 +48,6 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
         values = new byte[capacity];
     }
 
-    @Override
-    public boolean put(double timestamp, Byte value) {
-        if (value == null) {
-            throw new NullPointerException();
-        }
-        return putByte(timestamp, value);
-    }
-
-    /**
-     * Put the <code>value</code> in this map at the given
-     * <code>timestamp</code> key.
-     *
-     * @param timestamp timestamp
-     * @param value value
-     * @return true if timestamp is a new key, false otherwise
-     */
-    public boolean putByte(double timestamp, byte value) {
-        final int index = putInner(timestamp);
-        if (index < 0) {
-            int insertIndex = -index - 1;
-
-            if (size - 1 < values.length) {
-                if (insertIndex < size - 1) {
-                    System.arraycopy(values, insertIndex, values, insertIndex + 1, size - insertIndex - 1);
-                }
-                values[insertIndex] = value;
-            } else {
-                byte[] newArray = new byte[values.length + 1];
-                System.arraycopy(values, 0, newArray, 0, insertIndex);
-                System.arraycopy(values, insertIndex, newArray, insertIndex + 1, values.length - insertIndex);
-                newArray[insertIndex] = value;
-                values = newArray;
-            }
-            return true;
-        } else {
-            values[index] = value;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean remove(double timestamp) {
-        final int removeIndex = removeInner(timestamp);
-        if (removeIndex >= 0) {
-            if (removeIndex != size) {
-                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Byte get(double timestamp, Byte defaultValue) {
-        final int index = getIndex(timestamp);
-        if (index >= 0) {
-            return values[index];
-        }
-        return defaultValue;
-    }
-
     /**
      * Get the value for the given timestamp.
      *
@@ -142,44 +81,27 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
     }
 
     @Override
-    public Object get(final Interval interval, Estimator estimator) {
-        switch (estimator) {
-            case AVERAGE:
-                return getAverageDouble(interval);
-            case SUM:
-                Double rSum = getSumDouble(interval);
-                if (rSum != null) {
-                    return rSum.intValue();
-                }
-                return null;
-            case MIN:
-                Object rmin = getMin(interval);
-                if (rmin != null) {
-                    return ((Double) rmin).byteValue();
-                }
-                return null;
-            case MAX:
-                Object rmax = getMax(interval);
-                if (rmax != null) {
-                    return ((Double) rmax).byteValue();
-                }
-                return null;
-            case FIRST:
-                return getFirst(interval);
-            case LAST:
-                return getLast(interval);
-            default:
-                throw new UnsupportedOperationException("Unknown estimator.");
-        }
+    protected Object getAverage(Interval interval) {
+        Double average = getAverageDouble(interval);
+        return average != null ? average : null;
     }
 
     @Override
-    public Byte[] toArray() {
-        final Byte[] res = new Byte[size];
-        for (int i = 0; i < size; i++) {
-            res[i] = values[i];
-        }
-        return res;
+    protected Object getSum(Interval interval) {
+        Double sum = getSumDouble(interval);
+        return sum != null ? sum.intValue() : null;
+    }
+
+    @Override
+    protected Object getMax(Interval interval) {
+        Double max = getMaxDouble(interval);
+        return max != null ? max.byteValue() : null;
+    }
+
+    @Override
+    protected Object getMin(Interval interval) {
+        Double min = getMinDouble(interval);
+        return min != null ? min.byteValue() : null;
     }
 
     @Override
@@ -206,18 +128,22 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
     }
 
     @Override
-    public void clear() {
-        super.clear();
-        values = new byte[0];
-    }
-
-    @Override
     public boolean isSupported(Estimator estimator) {
         return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE, Estimator.SUM);
     }
 
     @Override
-    protected Object getValue(int index) {
+    protected Byte getValue(int index) {
         return values[index];
+    }
+
+    @Override
+    protected Object getValuesArray() {
+        return values;
+    }
+
+    @Override
+    protected void setValuesArray(Object array) {
+        values = (byte[]) array;
     }
 }

@@ -17,12 +17,6 @@ package org.gephi.graph.api.types;
 
 import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
-import static org.gephi.graph.api.Estimator.AVERAGE;
-import static org.gephi.graph.api.Estimator.FIRST;
-import static org.gephi.graph.api.Estimator.LAST;
-import static org.gephi.graph.api.Estimator.MAX;
-import static org.gephi.graph.api.Estimator.MIN;
-import static org.gephi.graph.api.Estimator.SUM;
 import org.gephi.graph.api.Interval;
 
 /**
@@ -53,67 +47,6 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
     public TimestampFloatMap(int capacity) {
         super(capacity);
         values = new float[capacity];
-    }
-
-    @Override
-    public boolean put(double timestamp, Float value) {
-        if (value == null) {
-            throw new NullPointerException();
-        }
-        return putFloat(timestamp, value);
-    }
-
-    /**
-     * Put the <code>value</code> in this map at the given
-     * <code>timestamp</code> key.
-     *
-     * @param timestamp timestamp
-     * @param value value
-     * @return true if timestamp is a new key, false otherwise
-     */
-    public boolean putFloat(double timestamp, float value) {
-        final int index = putInner(timestamp);
-        if (index < 0) {
-            int insertIndex = -index - 1;
-
-            if (size - 1 < values.length) {
-                if (insertIndex < size - 1) {
-                    System.arraycopy(values, insertIndex, values, insertIndex + 1, size - insertIndex - 1);
-                }
-                values[insertIndex] = value;
-            } else {
-                float[] newArray = new float[values.length + 1];
-                System.arraycopy(values, 0, newArray, 0, insertIndex);
-                System.arraycopy(values, insertIndex, newArray, insertIndex + 1, values.length - insertIndex);
-                newArray[insertIndex] = value;
-                values = newArray;
-            }
-            return true;
-        } else {
-            values[index] = value;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean remove(double timestamp) {
-        final int removeIndex = removeInner(timestamp);
-        if (removeIndex >= 0) {
-            if (removeIndex != size) {
-                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Float get(double timestamp, Float defaultValue) {
-        final int index = getIndex(timestamp);
-        if (index >= 0) {
-            return values[index];
-        }
-        return defaultValue;
     }
 
     /**
@@ -149,48 +82,27 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
     }
 
     @Override
-    public Object get(Interval interval, Estimator estimator) {
-        switch (estimator) {
-            case AVERAGE:
-                BigDecimal ra = getAverageBigDecimal(interval);
-                if (ra != null) {
-                    return ra.floatValue();
-                }
-                return null;
-            case SUM:
-                BigDecimal rs = getSumBigDecimal(interval);
-                if (rs != null) {
-                    return rs.floatValue();
-                }
-                return null;
-            case MIN:
-                Double min = (Double) getMin(interval);
-                if (min != null) {
-                    return min.floatValue();
-                }
-                return null;
-            case MAX:
-                Double max = (Double) getMax(interval);
-                if (max != null) {
-                    return max.floatValue();
-                }
-                return null;
-            case FIRST:
-                return getFirst(interval);
-            case LAST:
-                return getLast(interval);
-            default:
-                throw new UnsupportedOperationException("Unknown estimator.");
-        }
+    protected Object getAverage(Interval interval) {
+        BigDecimal average = getAverageBigDecimal(interval);
+        return average != null ? average.floatValue() : null;
     }
 
     @Override
-    public Float[] toArray() {
-        final Float[] res = new Float[size];
-        for (int i = 0; i < size; i++) {
-            res[i] = values[i];
-        }
-        return res;
+    protected Object getSum(Interval interval) {
+        BigDecimal sum = getSumBigDecimal(interval);
+        return sum != null ? sum.floatValue() : null;
+    }
+
+    @Override
+    protected Object getMax(Interval interval) {
+        Double max = getMaxDouble(interval);
+        return max != null ? max.floatValue() : null;
+    }
+
+    @Override
+    protected Object getMin(Interval interval) {
+        Double min = getMinDouble(interval);
+        return min != null ? min.floatValue() : null;
     }
 
     @Override
@@ -217,18 +129,22 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
     }
 
     @Override
-    public void clear() {
-        super.clear();
-        values = new float[0];
-    }
-
-    @Override
     public boolean isSupported(Estimator estimator) {
         return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE, Estimator.SUM);
     }
 
     @Override
-    protected Object getValue(int index) {
+    protected Float getValue(int index) {
         return values[index];
+    }
+
+    @Override
+    protected Object getValuesArray() {
+        return values;
+    }
+
+    @Override
+    protected void setValuesArray(Object array) {
+        values = (float[]) array;
     }
 }

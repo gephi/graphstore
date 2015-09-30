@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.api.types;
 
+import java.lang.reflect.Array;
 import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -64,7 +65,35 @@ public abstract class TimestampMap<T> {
      * @param value value
      * @return true if timestamp is a new key, false otherwise
      */
-    public abstract boolean put(double timestamp, T value);
+    public boolean put(double timestamp, T value) {
+        if (value == null) {
+            throw new NullPointerException();
+        }
+        Object values = getValuesArray();
+        int valuesLength = Array.getLength(values);
+
+        final int index = putInner(timestamp);
+        if (index < 0) {
+            int insertIndex = -index - 1;
+
+            if (size - 1 < valuesLength) {
+                if (insertIndex < size - 1) {
+                    System.arraycopy(values, insertIndex, values, insertIndex + 1, size - insertIndex - 1);
+                }
+                Array.set(values, insertIndex, value);
+            } else {
+                Object newArray = Array.newInstance(values.getClass().getComponentType(), valuesLength + 1);
+                System.arraycopy(values, 0, newArray, 0, insertIndex);
+                System.arraycopy(values, insertIndex, newArray, insertIndex + 1, valuesLength - insertIndex);
+                Array.set(newArray, insertIndex, value);
+                setValuesArray(newArray);
+            }
+            return true;
+        } else {
+            Array.set(values, index, value);
+        }
+        return false;
+    }
 
     /**
      * Remove the value at the given timestamp.
@@ -72,7 +101,18 @@ public abstract class TimestampMap<T> {
      * @param timestamp timestamp
      * @return true if the key existed, false otherwise
      */
-    public abstract boolean remove(double timestamp);
+    public boolean remove(double timestamp) {
+        Object values = getValuesArray();
+
+        final int removeIndex = removeInner(timestamp);
+        if (removeIndex >= 0) {
+            if (removeIndex != size) {
+                System.arraycopy(values, removeIndex + 1, values, removeIndex, size - removeIndex);
+            }
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Get the value for the given timestamp.
@@ -83,10 +123,16 @@ public abstract class TimestampMap<T> {
      * @param defaultValue default value
      * @return found value or the default value if not found
      */
-    public abstract T get(double timestamp, T defaultValue);
+    public T get(double timestamp, T defaultValue) {
+        final int index = getIndex(timestamp);
+        if (index >= 0) {
+            return getValue(index);
+        }
+        return defaultValue;
+    }
 
     /**
-     * Get the estimated value for the given array of timestamps.
+     * Get the estimated value for the given interval.
      * <p>
      * The estimator is used to determine the way multiple timestamp values are
      * merged together (e.g average, first, median).
@@ -95,14 +141,46 @@ public abstract class TimestampMap<T> {
      * @param estimator estimator used
      * @return estimated value
      */
-    public abstract Object get(Interval interval, Estimator estimator);
+    public Object get(Interval interval, Estimator estimator) {
+        if (!isSupported(estimator)) {
+            throw new UnsupportedOperationException("Not supported estimator.");
+        }
+        switch (estimator) {
+            case AVERAGE:
+                return getAverage(interval);
+            case SUM:
+                return getSum(interval);
+            case MIN:
+                return getMin(interval);
+            case MAX:
+                return getMax(interval);
+            case FIRST:
+                return getFirst(interval);
+            case LAST:
+                return getLast(interval);
+            default:
+                throw new UnsupportedOperationException("Not supported estimator.");
+        }
+    }
 
     /**
      * Returns all the values as an array.
      *
      * @return values array
      */
-    public abstract T[] toArray();
+    public T[] toArray() {
+        Object values = getValuesArray();
+        int length = Array.getLength(values);
+        if (values.getClass().getComponentType().isPrimitive() || size < length) {
+            T[] res = (T[]) Array.newInstance(getTypeClass(), size);
+            for (int i = 0; i < size; i++) {
+                res[i] = (T) Array.get(values, i);
+            }
+            return res;
+        } else {
+            return (T[]) values;
+        }
+    }
 
     /**
      * Returns the value type class.
@@ -119,7 +197,11 @@ public abstract class TimestampMap<T> {
      */
     public abstract boolean isSupported(Estimator estimator);
 
-    protected abstract Object getValue(int index);
+    protected abstract T getValue(int index);
+
+    protected abstract Object getValuesArray();
+
+    protected abstract void setValuesArray(Object array);
 
     protected int putInner(double timestamp) {
         int index = Arrays.binarySearch(array, 0, size, timestamp);
@@ -218,6 +300,7 @@ public abstract class TimestampMap<T> {
     public void clear() {
         size = 0;
         array = new double[0];
+        setValuesArray(Array.newInstance(getValuesArray().getClass().getComponentType(), 0));
     }
 
     @Override
@@ -296,6 +379,11 @@ public abstract class TimestampMap<T> {
     }
 
     protected Object getMin(final Interval interval) {
+        Double min = getMinDouble(interval);
+        return min != null ? min.doubleValue() : null;
+    }
+
+    protected Double getMinDouble(final Interval interval) {
         if (size == 0) {
             return null;
         }
@@ -320,6 +408,11 @@ public abstract class TimestampMap<T> {
     }
 
     protected Object getMax(final Interval interval) {
+        Double max = getMaxDouble(interval);
+        return max != null ? max.doubleValue() : null;
+    }
+
+    protected Double getMaxDouble(final Interval interval) {
         if (size == 0) {
             return null;
         }
@@ -341,6 +434,11 @@ public abstract class TimestampMap<T> {
             return null;
         }
         return max;
+    }
+
+    protected Object getAverage(final Interval interval) {
+        BigDecimal average = getAverageBigDecimal(interval);
+        return average != null ? average.doubleValue() : null;
     }
 
     protected BigDecimal getAverageBigDecimal(final Interval interval) {
@@ -365,6 +463,11 @@ public abstract class TimestampMap<T> {
             return null;
         }
         return total.divide(BigDecimal.valueOf(count), 10, RoundingMode.HALF_EVEN);
+    }
+
+    protected Object getSum(final Interval interval) {
+        BigDecimal sum = getSumBigDecimal(interval);
+        return sum != null ? sum.doubleValue() : null;
     }
 
     protected BigDecimal getSumBigDecimal(final Interval interval) {
