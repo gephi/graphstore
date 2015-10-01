@@ -113,13 +113,7 @@ public final class TimestampLongMap extends TimestampMap<Long> {
      * @return array of all values
      */
     public long[] toLongArray() {
-        if (size < values.length - 1) {
-            final long[] res = new long[size];
-            System.arraycopy(values, 0, res, 0, size);
-            return res;
-        } else {
-            return values;
-        }
+        return (long[]) toNativeArray();
     }
 
     @Override

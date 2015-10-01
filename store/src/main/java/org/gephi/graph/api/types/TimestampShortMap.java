@@ -113,13 +113,7 @@ public final class TimestampShortMap extends TimestampMap<Short> {
      * @return array of all values
      */
     public short[] toShortArray() {
-        if (size < values.length - 1) {
-            final short[] res = new short[size];
-            System.arraycopy(values, 0, res, 0, size);
-            return res;
-        } else {
-            return values;
-        }
+        return (short[]) toNativeArray();
     }
 
     @Override

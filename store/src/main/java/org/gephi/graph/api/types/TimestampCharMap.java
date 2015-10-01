@@ -145,13 +145,7 @@ public final class TimestampCharMap extends TimestampMap<Character> {
      * @return array of all values
      */
     public char[] toCharacterArray() {
-        if (size < values.length - 1) {
-            final char[] res = new char[size];
-            System.arraycopy(values, 0, res, 0, size);
-            return res;
-        } else {
-            return values;
-        }
+        return (char[]) toNativeArray();
     }
 
     @Override

@@ -93,13 +93,7 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
      * @return array of all values
      */
     public double[] toDoubleArray() {
-        if (size < values.length - 1) {
-            final double[] res = new double[size];
-            System.arraycopy(values, 0, res, 0, size);
-            return res;
-        } else {
-            return values;
-        }
+        return (double[]) toNativeArray();
     }
 
     @Override

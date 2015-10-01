@@ -118,13 +118,7 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
      * @return array of all values
      */
     public byte[] toByteArray() {
-        if (size < values.length - 1) {
-            final byte[] res = new byte[size];
-            System.arraycopy(values, 0, res, 0, size);
-            return res;
-        } else {
-            return values;
-        }
+        return (byte[]) toNativeArray();
     }
 
     @Override

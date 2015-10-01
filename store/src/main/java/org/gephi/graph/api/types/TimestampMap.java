@@ -182,6 +182,17 @@ public abstract class TimestampMap<T> {
         }
     }
 
+    protected Object toNativeArray() {
+        Object values = getValuesArray();
+        int length = Array.getLength(values);
+        if (size < length - 1) {
+            Object res = Array.newInstance(values.getClass().getComponentType(), size);
+            System.arraycopy(values, 0, res, 0, size);
+            return res;
+        }
+        return values;
+    }
+
     /**
      * Returns the value type class.
      *

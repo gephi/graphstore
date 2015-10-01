@@ -113,13 +113,7 @@ public final class TimestampIntegerMap extends TimestampMap<Integer> {
      * @return array of all values
      */
     public int[] toIntegerArray() {
-        if (size < values.length - 1) {
-            final int[] res = new int[size];
-            System.arraycopy(values, 0, res, 0, size);
-            return res;
-        } else {
-            return values;
-        }
+        return (int[]) toNativeArray();
     }
 
     @Override

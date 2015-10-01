@@ -119,13 +119,7 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
      * @return array of all values
      */
     public float[] toFloatArray() {
-        if (size < values.length - 1) {
-            final float[] res = new float[size];
-            System.arraycopy(values, 0, res, 0, size);
-            return res;
-        } else {
-            return values;
-        }
+        return (float[]) toNativeArray();
     }
 
     @Override

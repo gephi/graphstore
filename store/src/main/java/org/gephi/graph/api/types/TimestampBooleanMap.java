@@ -149,13 +149,7 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
      * @return array of all values
      */
     public boolean[] toBooleanArray() {
-        if (size < values.length - 1) {
-            final boolean[] res = new boolean[size];
-            System.arraycopy(values, 0, res, 0, size);
-            return res;
-        } else {
-            return values;
-        }
+        return (boolean[]) toNativeArray();
     }
 
     @Override
