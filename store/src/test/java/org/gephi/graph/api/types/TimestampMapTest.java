@@ -231,8 +231,20 @@ public class TimestampMapTest {
         Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, Boolean.FALSE);
 
+        Object minTrue = set.get(new Interval(1.0, 1.0), Estimator.MIN);
+        Assert.assertEquals(minTrue, Boolean.TRUE);
+
+        Object minNoMatch = set.get(new Interval(0.0, 2.0), Estimator.MIN);
+        Assert.assertEquals(minNoMatch, Boolean.FALSE);
+
         Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, Boolean.TRUE);
+
+        Object maxFalse = set.get(new Interval(2.0, 6.0), Estimator.MAX);
+        Assert.assertEquals(maxFalse, Boolean.FALSE);
+
+        Object maxNoMatch = set.get(new Interval(5.0, 7.0), Estimator.MAX);
+        Assert.assertEquals(maxNoMatch, Boolean.TRUE);
     }
 
     @Test
@@ -436,11 +448,20 @@ public class TimestampMapTest {
         Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
 
+        Assert.assertNull(set.get(new Interval(0.1, 0.2), Estimator.MIN));
+        Assert.assertNull(set.get(new Interval(0.1, 0.2), Estimator.MAX));
+
         Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
         Assert.assertEquals(min, values[2]);
 
+        Object minNoMatch = set.get(new Interval(0.0, 5.0), Estimator.MIN);
+        Assert.assertEquals(minNoMatch, values[0]);
+
         Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
         Assert.assertEquals(max, values[3]);
+
+        Object maxNoMatch = set.get(new Interval(0.0, 5.0), Estimator.MAX);
+        Assert.assertEquals(maxNoMatch, values[1]);
 
         Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
