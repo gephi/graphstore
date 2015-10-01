@@ -50,6 +50,20 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
     }
 
     /**
+     * Constructor with an initial timestamp map.
+     * <p>
+     * The <code>keys</code> array must be sorted and contain no duplicates.
+     *
+     * @param keys initial keys content
+     * @param vals initial values content
+     */
+    public TimestampFloatMap(double[] keys, float[] vals) {
+        super(keys);
+        values = new float[vals.length];
+        System.arraycopy(vals, 0, values, 0, vals.length);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp

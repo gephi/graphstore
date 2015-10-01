@@ -48,6 +48,20 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
     }
 
     /**
+     * Constructor with an initial timestamp map.
+     * <p>
+     * The <code>keys</code> array must be sorted and contain no duplicates.
+     *
+     * @param keys initial keys content
+     * @param vals initial values content
+     */
+    public TimestampDoubleMap(double[] keys, double[] vals) {
+        super(keys);
+        values = new double[vals.length];
+        System.arraycopy(vals, 0, values, 0, vals.length);
+    }
+
+    /**
      * Get the value for the given timestamp index.
      *
      * @param timestamp timestamp index

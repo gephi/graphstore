@@ -59,6 +59,19 @@ public abstract class TimestampMap<T> {
     }
 
     /**
+     * Constructor with an initial timestamp map.
+     * <p>
+     * The given array must be sorted and contain no duplicates.
+     *
+     * @param keys initial set content
+     */
+    protected TimestampMap(double[] keys) {
+        array = new double[keys.length];
+        System.arraycopy(keys, 0, array, 0, keys.length);
+        size = keys.length;
+    }
+
+    /**
      * Put the value at the given timestamp.
      *
      * @param timestamp timestamp

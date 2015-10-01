@@ -47,6 +47,20 @@ public final class TimestampStringMap extends TimestampMap<String> {
         values = new String[capacity];
     }
 
+    /**
+     * Constructor with an initial timestamp map.
+     * <p>
+     * The <code>keys</code> array must be sorted and contain no duplicates.
+     *
+     * @param keys initial keys content
+     * @param vals initial values content
+     */
+    public TimestampStringMap(double[] keys, String[] vals) {
+        super(keys);
+        values = new String[vals.length];
+        System.arraycopy(vals, 0, values, 0, vals.length);
+    }
+
     @Override
     public Class<String> getTypeClass() {
         return String.class;

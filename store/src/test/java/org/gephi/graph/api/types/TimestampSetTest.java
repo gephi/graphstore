@@ -238,6 +238,18 @@ public class TimestampSetTest {
         Assert.assertEquals(set.getTimestamps(), new double[]{1.0});
     }
 
+    @Test
+    public void testCopyConstructor() {
+        TimestampSet set1 = new TimestampSet();
+        set1.add(1.0);
+        set1.add(4.0);
+
+        TimestampSet set2 = new TimestampSet(set1.getTimestamps());
+        Assert.assertTrue(set1.equals(set2));
+        set1.clear();
+        Assert.assertEquals(set2.size(), 2);
+    }
+
     //UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);

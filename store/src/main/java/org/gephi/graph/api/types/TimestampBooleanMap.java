@@ -50,6 +50,20 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     /**
+     * Constructor with an initial timestamp map.
+     * <p>
+     * The <code>keys</code> array must be sorted and contain no duplicates.
+     *
+     * @param keys initial keys content
+     * @param vals initial values content
+     */
+    public TimestampBooleanMap(double[] keys, boolean[] vals) {
+        super(keys);
+        values = new boolean[vals.length];
+        System.arraycopy(vals, 0, values, 0, vals.length);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp

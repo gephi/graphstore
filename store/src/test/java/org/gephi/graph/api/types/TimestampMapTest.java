@@ -549,6 +549,18 @@ public class TimestampMapTest {
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
     }
 
+    @Test
+    public void testCopyConstructor() {
+        TimestampStringMap set1 = new TimestampStringMap();
+        set1.put(1.0, "foo");
+        set1.put(2.0, "bar");
+
+        TimestampStringMap set2 = new TimestampStringMap(set1.getTimestamps(), set1.toArray());
+        Assert.assertTrue(set1.equals(set2));
+        set1.clear();
+        Assert.assertEquals(set2.size(), 2);
+    }
+
     //UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);
