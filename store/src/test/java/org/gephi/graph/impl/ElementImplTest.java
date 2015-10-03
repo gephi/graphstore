@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
@@ -33,15 +34,21 @@ import org.gephi.graph.api.types.TimestampLongMap;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalBooleanMap;
+import org.gephi.graph.api.types.IntervalByteMap;
+import org.gephi.graph.api.types.IntervalCharMap;
+import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.IntervalFloatMap;
+import org.gephi.graph.api.types.IntervalIntegerMap;
+import org.gephi.graph.api.types.IntervalLongMap;
+import org.gephi.graph.api.types.IntervalShortMap;
+import org.gephi.graph.api.types.IntervalStringMap;
 import static org.gephi.graph.impl.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
-import static org.gephi.graph.impl.GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import static org.gephi.graph.impl.GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET;
 
-/**
- *
- * @author mbastian
- */
 public class ElementImplTest {
 
     @Test
@@ -140,9 +147,9 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testSetAttributeDynamicColumn() {
+    public void testSetAttributeTimestampColumn() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 2.0);
@@ -155,9 +162,24 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testSetAttributeDynamicString() {
+    public void testSetAttributeIntervalColumn() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 1, new Interval(3.0, 4.0));
+        node.setAttribute(column, 2, new Interval(1.0, 2.0));
+
+        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()].getClass(), IntervalIntegerMap.class);
+        Assert.assertEquals(node.getAttribute(column, new Interval(3.0, 4.0)), 1);
+        Assert.assertEquals(node.getAttribute(column, new Interval(1.0, 2.0)), 2);
+    }
+
+    @Test
+    public void testSetAttributeTimestampString() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute("age", 1, 2.0);
@@ -165,8 +187,19 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute(column, 2.0), 1);
     }
 
+    @Test
+    public void testSetAttributeIntervalString() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute("age", 1, new Interval(1.0, 2.0));
+
+        Assert.assertEquals(node.getAttribute(column, new Interval(1.0, 2.0)), 1);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testSetAttributeNonDynamic() {
+    public void testSetAttributeNonTimestamp() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
@@ -174,10 +207,19 @@ public class ElementImplTest {
         node.setAttribute(column, 1, 2.0);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetAttributeNonInterval() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 1, new Interval(1.0, 2.0));
+    }
+
     @Test
-    public void testReplaceDynamicAttribute() {
+    public void testReplaceTimestampAttribute() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 2.0);
@@ -186,10 +228,22 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute(column, 2.0), 2);
     }
 
+    @Test
+    public void testReplaceIntervalAttribute() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 1, new Interval(1.0, 2.0));
+        node.setAttribute(column, 2, new Interval(1.0, 2.0));
+
+        Assert.assertEquals(node.getAttribute(column, new Interval(1.0, 2.0)), 2);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testNaNTimestamp() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, Double.NaN);
@@ -198,7 +252,7 @@ public class ElementImplTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInfiniteTimestamp() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, Double.POSITIVE_INFINITY);
@@ -250,9 +304,9 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testGetAttributeDynamicColumn() {
+    public void testGetAttributeTimestampColumn() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 1.0);
@@ -262,18 +316,39 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testGetAttributeDynamicColumnNull() {
+    public void testGetAttributeIntervalColumn() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 1, new Interval(1.0, 2.0));
+
+        Assert.assertEquals(node.getAttribute(column, new Interval(1.0, 2.0)), 1);
+        Assert.assertNull(node.getAttribute(column, new Interval(2.0, 3.0)));
+    }
+
+    @Test
+    public void testGetAttributeTimestampColumnNull() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         Assert.assertNull(node.getAttribute(column, 1.0));
     }
 
     @Test
-    public void testGetAttributeDynamicString() {
+    public void testGetAttributeIntervalColumnNull() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        Assert.assertNull(node.getAttribute(column, new Interval(1.0, 2.0)));
+    }
+
+    @Test
+    public void testGetAttributeTimestampString() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, 1.0);
@@ -281,8 +356,19 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute("age", 1.0), 1);
     }
 
+    @Test
+    public void testGetAttributeIntervalString() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 1, new Interval(1.0, 2.0));
+
+        Assert.assertEquals(node.getAttribute("age", new Interval(1.0, 2.0)), 1);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testGetAttributeNonDynamic() {
+    public void testGetAttributeNonTimestamp() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
 
@@ -405,6 +491,34 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testAddInterval() {
+        GraphStore store = getIntervalGraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        Assert.assertTrue(node.addInterval(new Interval(1.0, 2.0)));
+
+        Assert.assertTrue(node.hasInterval(new Interval(1.0, 2.0)));
+    }
+
+    @Test
+    public void testRemoveInterval() {
+        GraphStore store = getIntervalGraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.addInterval(new Interval(1.0, 2.0));
+        Assert.assertTrue(node.removeInterval(new Interval(1.0, 2.0)));
+        Assert.assertFalse(node.hasInterval(new Interval(1.0, 2.0)));
+    }
+
+    @Test
+    public void testHasIntervalEmpty() {
+        GraphStore store = getIntervalGraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        Assert.assertFalse(node.hasInterval(new Interval(1.0, 2.0)));
+    }
+
+    @Test
     public void testRemoveAttribute() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);
@@ -450,9 +564,9 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testRemoveDynamicAttribute() {
+    public void testRemoveTimestampAttribute() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 15, 1.0);
@@ -463,9 +577,22 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testRemoveIntervalAttribute() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 15, new Interval(1.0, 2.0));
+        store.addNode(node);
+
+        Assert.assertNotNull(node.removeAttribute(column));
+        Assert.assertNull(node.getAttribute(column, new Interval(1.0, 2.0)));
+    }
+
+    @Test
     public void testRemoveAttributeWithTimestamp() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 15, 1.0);
@@ -476,9 +603,22 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testRemoveAttributeWithInterval() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 15, new Interval(1.0, 2.0));
+        store.addNode(node);
+
+        Assert.assertEquals(node.removeAttribute(column, new Interval(1.0, 2.0)), 15);
+        Assert.assertNull(node.getAttribute(column, new Interval(1.0, 2.0)));
+    }
+
+    @Test
     public void testRemoveAttributeWithTimestampByString() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 15, 1.0);
@@ -489,11 +629,32 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testRemoveAttributeWithIntervalByString() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 15, new Interval(1.0, 2.0));
+        store.addNode(node);
+
+        Assert.assertEquals(node.removeAttribute("age", new Interval(1.0, 2.0)), 15);
+        Assert.assertNull(node.getAttribute(column, new Interval(1.0, 2.0)));
+    }
+
+    @Test
     public void testGetTimestampsEmpty() {
         GraphStore store = new GraphStore();
 
         NodeImpl node = new NodeImpl("0", store);
         Assert.assertEquals(node.getTimestamps(), new double[0]);
+    }
+
+    @Test
+    public void testGetIntervalsEmpty() {
+        GraphStore store = getIntervalGraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        Assert.assertEquals(node.getIntervals(), new Interval[0]);
     }
 
     @Test
@@ -512,9 +673,27 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testGetIntervals() {
+        GraphStore store = getIntervalGraphStore();
+
+        Interval i1 = new Interval(1.0, 2.0);
+        Interval i2 = new Interval(3.0, 4.0);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.addInterval(i1);
+        node.addInterval(i2);
+
+        Assert.assertEquals(node.getIntervals(), new Interval[]{i1, i2});
+
+        node.removeInterval(i1);
+
+        Assert.assertEquals(node.getIntervals(), new Interval[]{i2});
+    }
+
+    @Test
     public void testGetDynamicAttributes() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 12, 1.0);
@@ -540,7 +719,7 @@ public class ElementImplTest {
     @Test
     public void testGetDynamicAttributesEmpty() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
 
@@ -572,9 +751,9 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testGetDynamicAttributeInView() {
+    public void testGetTimestampAttributeInView() {
         GraphStore store = new GraphStore();
-        Column column = generateDynamicColumn(store);
+        Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
         GraphView view = store.viewStore.createView();
@@ -608,9 +787,26 @@ public class ElementImplTest {
         node.checkType(new ColumnImpl("0", TimestampCharMap.class, null, null, Origin.DATA, false, false), 'a');
         node.checkType(new ColumnImpl("0", TimestampBooleanMap.class, null, null, Origin.DATA, false, false), true);
         node.checkType(new ColumnImpl("0", TimestampStringMap.class, null, null, Origin.DATA, false, false), "foo");
+        node.checkType(new ColumnImpl("0", IntervalIntegerMap.class, null, null, Origin.DATA, false, false), 1);
+        node.checkType(new ColumnImpl("0", IntervalDoubleMap.class, null, null, Origin.DATA, false, false), 1.0);
+        node.checkType(new ColumnImpl("0", IntervalFloatMap.class, null, null, Origin.DATA, false, false), 1f);
+        node.checkType(new ColumnImpl("0", IntervalByteMap.class, null, null, Origin.DATA, false, false), (byte) 1);
+        node.checkType(new ColumnImpl("0", IntervalShortMap.class, null, null, Origin.DATA, false, false), (short) 1);
+        node.checkType(new ColumnImpl("0", IntervalLongMap.class, null, null, Origin.DATA, false, false), 1l);
+        node.checkType(new ColumnImpl("0", IntervalCharMap.class, null, null, Origin.DATA, false, false), 'a');
+        node.checkType(new ColumnImpl("0", IntervalBooleanMap.class, null, null, Origin.DATA, false, false), true);
+        node.checkType(new ColumnImpl("0", IntervalStringMap.class, null, null, Origin.DATA, false, false), "foo");
     }
 
     //Utility
+    private GraphStore getIntervalGraphStore() {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        GraphStore store = graphModel.store;
+        return store;
+    }
+
     private Column generateBasicColumn(GraphStore graphStore) {
         graphStore.nodeTable.store.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("age");
@@ -621,14 +817,19 @@ public class ElementImplTest {
         return graphStore.nodeTable.store.getColumn("visible");
     }
 
-    private Column generateDynamicColumn(GraphStore graphStore) {
+    private Column generateTimestampColumn(GraphStore graphStore) {
         graphStore.nodeTable.store.addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA, false, false));
+        return graphStore.nodeTable.store.getColumn("age");
+    }
+
+    private Column generateIntervalColumn(GraphStore graphStore) {
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", IntervalIntegerMap.class, "Age", null, Origin.DATA, false, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 
     //Properties size
     public int getElementPropertiesLength() {
-        return 1 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIMESTAMP_SET ? 1 : 0);
+        return 1 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIME_SET ? 1 : 0);
     }
 
     public int getFirstNonPropertyIndex() {

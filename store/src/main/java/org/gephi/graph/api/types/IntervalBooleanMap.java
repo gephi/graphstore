@@ -16,24 +16,23 @@
 package org.gephi.graph.api.types;
 
 import org.gephi.graph.api.Estimator;
-import java.math.BigDecimal;
 import org.gephi.graph.api.Interval;
 
 /**
- * Sorted map where keys are timestamp and values integer values.
+ * Sorted map where keys are intervals and values boolean values.
  */
-public final class TimestampIntegerMap extends TimestampMap<Integer> {
+public final class IntervalBooleanMap extends IntervalMap<Boolean> {
 
-    private int[] values;
+    private boolean[] values;
 
     /**
      * Default constructor.
      * <p>
      * The map is empty with zero capacity.
      */
-    public TimestampIntegerMap() {
+    public IntervalBooleanMap() {
         super();
-        values = new int[0];
+        values = new boolean[0];
     }
 
     /**
@@ -44,78 +43,56 @@ public final class TimestampIntegerMap extends TimestampMap<Integer> {
      *
      * @param capacity timestamp capacity
      */
-    public TimestampIntegerMap(int capacity) {
+    public IntervalBooleanMap(int capacity) {
         super(capacity);
-        values = new int[capacity];
+        values = new boolean[capacity];
     }
 
     /**
-     * Constructor with an initial timestamp map.
+     * Constructor with an initial interval map.
      * <p>
-     * The <code>keys</code> array must be sorted and contain no duplicates.
+     * The <code>keys</code> array must be in the same format returned by
+     * {@link #getIntervals() }.
      *
      * @param keys initial keys content
      * @param vals initial values content
      */
-    public TimestampIntegerMap(double[] keys, int[] vals) {
+    public IntervalBooleanMap(double[] keys, boolean[] vals) {
         super(keys);
-        values = new int[vals.length];
+        values = new boolean[vals.length];
         System.arraycopy(vals, 0, values, 0, vals.length);
     }
 
     /**
-     * Get the value for the given timestamp.
+     * Get the value for the given interval.
      *
-     * @param timestamp timestamp
+     * @param interval interval
      * @return found value or the default value if not found
      * @throws IllegalArgumentException if the element doesn't exist
      */
-    public int getInteger(double timestamp) {
-        final int index = getIndex(timestamp);
+    public boolean getBoolean(Interval interval) {
+        final int index = getIndex(interval.getLow(), interval.getHigh());
         if (index >= 0) {
-            return values[index];
+            return values[index / 2];
         }
         throw new IllegalArgumentException("The element doesn't exist");
     }
 
     /**
-     * Get the value for the given timestamp.
+     * Get the value for the given interval.
      * <p>
      * Return <code>defaultValue</code> if the value is not found.
      *
-     * @param timestamp timestamp
+     * @param interval interval
      * @param defaultValue default value
      * @return found value or the default value if not found
      */
-    public int getInteger(double timestamp, int defaultValue) {
-        final int index = getIndex(timestamp);
+    public boolean getBoolean(Interval interval, boolean defaultValue) {
+        final int index = getIndex(interval.getLow(), interval.getHigh());
         if (index >= 0) {
-            return values[index];
+            return values[index / 2];
         }
         return defaultValue;
-    }
-
-    @Override
-    protected Object getSum(Interval interval) {
-        BigDecimal sum = getSumBigDecimal(interval);
-        return sum != null ? sum.longValue() : null;
-    }
-
-    @Override
-    protected Object getMax(Interval interval) {
-        Double max = getMaxDouble(interval);
-        return max != null ? max.intValue() : null;
-    }
-
-    @Override
-    protected Object getMin(Interval interval) {
-        Double min = getMinDouble(interval);
-        return min != null ? min.intValue() : null;
-    }
-
-    @Override
-    public Class<Integer> getTypeClass() {
-        return Integer.class;
     }
 
     /**
@@ -126,17 +103,22 @@ public final class TimestampIntegerMap extends TimestampMap<Integer> {
      *
      * @return array of all values
      */
-    public int[] toIntegerArray() {
-        return (int[]) toPrimitiveArray();
+    public boolean[] toBooleanArray() {
+        return (boolean[]) toNativeArray();
+    }
+
+    @Override
+    public Class<Boolean> getTypeClass() {
+        return Boolean.class;
     }
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE, Estimator.SUM);
+        return estimator.is(Estimator.FIRST, Estimator.LAST);
     }
 
     @Override
-    protected Integer getValue(int index) {
+    protected Boolean getValue(int index) {
         return values[index];
     }
 
@@ -147,6 +129,6 @@ public final class TimestampIntegerMap extends TimestampMap<Integer> {
 
     @Override
     protected void setValuesArray(Object array) {
-        values = (int[]) array;
+        values = (boolean[]) array;
     }
 }

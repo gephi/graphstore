@@ -34,6 +34,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.gephi.graph.api.types.IntervalBooleanMap;
+import org.gephi.graph.api.types.IntervalByteMap;
+import org.gephi.graph.api.types.IntervalCharMap;
+import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.IntervalFloatMap;
+import org.gephi.graph.api.types.IntervalIntegerMap;
+import org.gephi.graph.api.types.IntervalLongMap;
+import org.gephi.graph.api.types.IntervalMap;
+import org.gephi.graph.api.types.IntervalSet;
+import org.gephi.graph.api.types.IntervalShortMap;
+import org.gephi.graph.api.types.IntervalStringMap;
+import org.gephi.graph.api.types.TimeMap;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -102,7 +114,7 @@ public class AttributeUtils {
         //Objects array
         supportedTypes.add(String[].class);
 
-        //Dynamic
+        //Dynamic (timestamps)
         supportedTypes.add(TimestampSet.class);
         supportedTypes.add(TimestampBooleanMap.class);
         supportedTypes.add(TimestampIntegerMap.class);
@@ -113,6 +125,18 @@ public class AttributeUtils {
         supportedTypes.add(TimestampDoubleMap.class);
         supportedTypes.add(TimestampCharMap.class);
         supportedTypes.add(TimestampStringMap.class);
+
+        //Dynamic (intervals)
+        supportedTypes.add(IntervalSet.class);
+        supportedTypes.add(IntervalBooleanMap.class);
+        supportedTypes.add(IntervalIntegerMap.class);
+        supportedTypes.add(IntervalShortMap.class);
+        supportedTypes.add(IntervalLongMap.class);
+        supportedTypes.add(IntervalByteMap.class);
+        supportedTypes.add(IntervalFloatMap.class);
+        supportedTypes.add(IntervalDoubleMap.class);
+        supportedTypes.add(IntervalCharMap.class);
+        supportedTypes.add(IntervalStringMap.class);
 
         //Assign
         SUPPORTED_TYPES = Collections.unmodifiableSet(supportedTypes);
@@ -318,12 +342,12 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the dynamic value type for the given type.
+     * Returns the dynamic timestamp map value type for the given type.
      *
      * @param type the static type
-     * @return the dynamic type
+     * @return the timestamp map type
      */
-    public static Class<? extends TimestampMap> getDynamicType(Class type) {
+    public static Class<? extends TimestampMap> getTimestampMapType(Class type) {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
@@ -351,32 +375,65 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the static type for the given dynamic type.
+     * Returns the dynamic timestamp map value type for the given type.
      *
-     * @param type the dynamic type
-     * @return the static type
+     * @param type the static type
+     * @return the timestamp map type
      */
-    public static Class getStaticType(Class<? extends TimestampMap> type) {
+    public static Class<? extends IntervalMap> getIntervalMapType(Class type) {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
-        if (type.equals(TimestampBooleanMap.class)) {
+        type = getStandardizedType(type);
+        if (type.equals(Boolean.class)) {
+            return IntervalBooleanMap.class;
+        } else if (type.equals(Integer.class)) {
+            return IntervalIntegerMap.class;
+        } else if (type.equals(Short.class)) {
+            return IntervalShortMap.class;
+        } else if (type.equals(Long.class)) {
+            return IntervalLongMap.class;
+        } else if (type.equals(Byte.class)) {
+            return IntervalByteMap.class;
+        } else if (type.equals(Float.class)) {
+            return IntervalFloatMap.class;
+        } else if (type.equals(Double.class)) {
+            return IntervalDoubleMap.class;
+        } else if (type.equals(Character.class)) {
+            return IntervalCharMap.class;
+        } else if (type.equals(String.class)) {
+            return IntervalStringMap.class;
+        }
+        throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
+    }
+
+    /**
+     * Returns the static type for the given time map type.
+     *
+     * @param type the time map type
+     * @return the static type
+     */
+    public static Class getStaticType(Class<? extends TimeMap> type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
+        }
+        if (type.equals(TimestampBooleanMap.class) || type.equals(IntervalBooleanMap.class)) {
             return Boolean.class;
-        } else if (type.equals(TimestampIntegerMap.class)) {
+        } else if (type.equals(TimestampIntegerMap.class) || type.equals(IntervalIntegerMap.class)) {
             return Integer.class;
-        } else if (type.equals(TimestampShortMap.class)) {
+        } else if (type.equals(TimestampShortMap.class) || type.equals(IntervalShortMap.class)) {
             return Short.class;
-        } else if (type.equals(TimestampLongMap.class)) {
+        } else if (type.equals(TimestampLongMap.class) || type.equals(IntervalLongMap.class)) {
             return Long.class;
-        } else if (type.equals(TimestampByteMap.class)) {
+        } else if (type.equals(TimestampByteMap.class) || type.equals(IntervalByteMap.class)) {
             return Byte.class;
-        } else if (type.equals(TimestampFloatMap.class)) {
+        } else if (type.equals(TimestampFloatMap.class) || type.equals(IntervalFloatMap.class)) {
             return Float.class;
-        } else if (type.equals(TimestampDoubleMap.class)) {
+        } else if (type.equals(TimestampDoubleMap.class) || type.equals(IntervalDoubleMap.class)) {
             return Double.class;
-        } else if (type.equals(TimestampCharMap.class)) {
+        } else if (type.equals(TimestampCharMap.class) || type.equals(IntervalCharMap.class)) {
             return Character.class;
-        } else if (type.equals(TimestampStringMap.class)) {
+        } else if (type.equals(TimestampStringMap.class) || type.equals(IntervalStringMap.class)) {
             return String.class;
         }
         throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
@@ -430,7 +487,13 @@ public class AttributeUtils {
                 || type.equals(TimestampDoubleMap.class)
                 || type.equals(TimestampLongMap.class)
                 || type.equals(TimestampShortMap.class)
-                || type.equals(TimestampByteMap.class);
+                || type.equals(TimestampByteMap.class)
+                || type.equals(IntervalIntegerMap.class)
+                || type.equals(IntervalFloatMap.class)
+                || type.equals(IntervalDoubleMap.class)
+                || type.equals(IntervalLongMap.class)
+                || type.equals(IntervalShortMap.class)
+                || type.equals(IntervalByteMap.class);
     }
 
     /**
@@ -440,8 +503,11 @@ public class AttributeUtils {
      * @return true if <em>type</em> is a dynamic type, false otherwise
      */
     public static boolean isDynamicType(Class type) {
-        return !type.equals(TimestampMap.class)
-                && TimestampMap.class.isAssignableFrom(type);
+        return (!type.equals(TimestampMap.class)
+                && TimestampMap.class.isAssignableFrom(type))
+                || type.equals(TimestampSet.class)
+                || (!type.equals(IntervalMap.class)
+                && IntervalMap.class.isAssignableFrom(type));
     }
 
     /**

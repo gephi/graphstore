@@ -411,34 +411,34 @@ public interface GraphModel {
     public Index<Edge> getEdgeIndex(GraphView view);
 
     /**
-     * Gets the node timestamp index.
+     * Gets the node time index.
      *
-     * @return the node timestamp index
+     * @return the node time index
      */
-    public TimestampIndex<Node> getNodeTimestampIndex();
+    public TimeIndex<Node> getNodeTimeIndex();
 
     /**
-     * Gets the node timestamp index for the given view.
+     * Gets the node time index for the given view.
      *
      * @param view the view to get the index from
-     * @return the node timestamp index
+     * @return the node time index
      */
-    public TimestampIndex<Node> getNodeTimestampIndex(GraphView view);
+    public TimeIndex<Node> getNodeTimeIndex(GraphView view);
 
     /**
-     * Gets the edge timestamp index.
+     * Gets the edge time index.
      *
      * @return the edge timestamp index
      */
-    public TimestampIndex<Edge> getEdgeTimestampIndex();
+    public TimeIndex<Edge> getEdgeTimeIndex();
 
     /**
-     * Gets the edge timestamp index for the given view.
+     * Gets the edge time index for the given view.
      *
      * @param view the view to get the index from
      * @return the edge timestamp index
      */
-    public TimestampIndex<Edge> getEdgeTimestampIndex(GraphView view);
+    public TimeIndex<Edge> getEdgeTimeIndex(GraphView view);
 
     /**
      * Gets the time bounds.

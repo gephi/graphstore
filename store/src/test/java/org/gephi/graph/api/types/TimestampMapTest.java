@@ -512,9 +512,9 @@ public class TimestampMapTest {
         set3.put(indices[1], "o");
         set3.put(indices[2], "o");
 
-        set4.put(7, values[0]);
-        set4.put(8, values[1]);
-        set4.put(9, values[2]);
+        set4.put(7.0, values[0]);
+        set4.put(8.0, values[1]);
+        set4.put(9.0, values[2]);
 
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
@@ -576,7 +576,7 @@ public class TimestampMapTest {
         set1.put(1.0, "foo");
         set1.put(2.0, "bar");
 
-        TimestampStringMap set2 = new TimestampStringMap(set1.getTimestamps(), set1.toArray());
+        TimestampStringMap set2 = new TimestampStringMap(set1.getTimestamps(), set1.toValuesArray());
         Assert.assertTrue(set1.equals(set2));
         set1.clear();
         Assert.assertEquals(set2.size(), 2);
@@ -671,10 +671,12 @@ public class TimestampMapTest {
 
         Assert.assertEquals(expectedTimestamp.length, expectedValues.length);
         Assert.assertEquals(set.size(), expectedTimestamp.length);
+        Double[] keysArray = set.toKeysArray();
         for (int i = 0; i < expectedTimestamp.length; i++) {
             Assert.assertEquals(set.get(expectedTimestamp[i], null), expectedValues[i]);
             Assert.assertEquals(set.get(999999.0, getDefaultValue(set)), getDefaultValue(set));
             Assert.assertTrue(set.contains(expectedTimestamp[i]));
+            Assert.assertEquals(keysArray[i], expectedTimestamp[i]);
 
             if (typeClass != String.class) {
                 try {
@@ -699,7 +701,7 @@ public class TimestampMapTest {
                 }
             }
         }
-        Assert.assertEquals(set.toArray(), expectedValues);
+        Assert.assertEquals(set.toValuesArray(), expectedValues);
         if (typeClass != String.class) {
             try {
                 Method toArrayMethod = set.getClass().getMethod("to" + typeClass.getSimpleName() + "Array");

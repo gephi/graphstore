@@ -29,17 +29,17 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testGetMin() {
-        TimestampStore timestampStore = new TimestampStore(null, null, true);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         Assert.assertEquals(store.mainIndex.getMinTimestamp(), Double.NEGATIVE_INFINITY);
 
-        store.timestampMap.addTimestamp(1.0);
+        store.add(1.0);
         Assert.assertEquals(store.mainIndex.getMinTimestamp(), 1.0);
 
-        store.timestampMap.addTimestamp(2.0);
+        store.add(2.0);
         Assert.assertEquals(store.mainIndex.getMinTimestamp(), 1.0);
 
-        store.timestampMap.removeTimestamp(1.0);
+        store.remove(1.0);
         Assert.assertEquals(store.mainIndex.getMinTimestamp(), 2.0);
     }
 
@@ -53,8 +53,8 @@ public class TimestampIndexImplTest {
         n2.addTimestamp(2.0);
         n2.addTimestamp(3.0);
 
-        TimestampStore timestampStore = graphStore.timestampStore;
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        TimeStore timestampStore = graphStore.timeStore;
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
 
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
@@ -70,27 +70,27 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testGetMax() {
-        TimestampStore timestampStore = new TimestampStore(null, null, true);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         Assert.assertEquals(store.mainIndex.getMaxTimestamp(), Double.POSITIVE_INFINITY);
 
-        store.timestampMap.addTimestamp(1.0);
+        store.add(1.0);
         Assert.assertEquals(store.mainIndex.getMaxTimestamp(), 1.0);
 
-        store.timestampMap.addTimestamp(2.0);
+        store.add(2.0);
         Assert.assertEquals(store.mainIndex.getMaxTimestamp(), 2.0);
 
-        store.timestampMap.removeTimestamp(2.0);
+        store.remove(2.0);
         Assert.assertEquals(store.mainIndex.getMaxTimestamp(), 1.0);
     }
 
     @Test
     public void testGetElements() {
-        TimestampStore timestampStore = new TimestampStore(null, null, true);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
-        store.timestampMap.addTimestamp(1.0);
-        store.timestampMap.addTimestamp(2.0);
-        store.timestampMap.addTimestamp(3.0);
+        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
+        store.add(1.0);
+        store.add(2.0);
+        store.add(3.0);
 
         NodeImpl n0 = new NodeImpl(0);
         NodeImpl n1 = new NodeImpl(1);
@@ -130,19 +130,19 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testHasNodesEdgesEmpty() {
-        TimestampStore timestampStore = new TimestampStore(null, null, true);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         Assert.assertFalse(store.mainIndex.hasElements());
     }
 
     @Test
     public void testHasNodes() {
-        TimestampStore timestampStore = new TimestampStore(null, null, true);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
+        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         Assert.assertFalse(store.mainIndex.hasElements());
 
-        store.timestampMap.addTimestamp(1.0);
-        store.timestampMap.addTimestamp(2.0);
+        store.add(1.0);
+        store.add(2.0);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 
@@ -158,9 +158,9 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testHasNodesClear() {
-        TimestampStore timestampStore = new TimestampStore(null, null, true);
-        TimestampIndexStore<Node> store = timestampStore.nodeIndexStore;
-        store.timestampMap.addTimestamp(1.0);
+        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
+        store.add(1.0);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 

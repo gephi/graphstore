@@ -71,6 +71,24 @@ public interface Element extends ElementProperties {
     public Object getAttribute(Column column, double timestamp);
 
     /**
+     * Gets the attribute for the given key and interval.
+     *
+     * @param key column's key
+     * @param interval interval
+     * @return attribute value, or null
+     */
+    public Object getAttribute(String key, Interval interval);
+
+    /**
+     * Gets the attribute for the given column and interval.
+     *
+     * @param column column
+     * @param interval interval
+     * @return attribute value, or null
+     */
+    public Object getAttribute(Column column, Interval interval);
+
+    /**
      * Gets the attribute for the given key and graph view.
      *
      * @param key column's key
@@ -153,6 +171,24 @@ public interface Element extends ElementProperties {
     public Object removeAttribute(Column column, double timestamp);
 
     /**
+     * Removes the attribute at the given key and interval.
+     *
+     * @param key key
+     * @param interval interval
+     * @return value being removed, or null
+     */
+    public Object removeAttribute(String key, Interval interval);
+
+    /**
+     * Removes the attribute at the given column and interval.
+     *
+     * @param column column
+     * @param interval interval
+     * @return value being removed, or null
+     */
+    public Object removeAttribute(Column column, Interval interval);
+
+    /**
      * Sets the label.
      *
      * @param label label
@@ -194,6 +230,24 @@ public interface Element extends ElementProperties {
     public void setAttribute(Column column, Object value, double timestamp);
 
     /**
+     * Sets the attribute at the given key and interval.
+     *
+     * @param key column's key
+     * @param value value to set
+     * @param interval interval
+     */
+    public void setAttribute(String key, Object value, Interval interval);
+
+    /**
+     * Sets the attribute at the given column and interval.
+     *
+     * @param column column
+     * @param value value to set
+     * @param interval interval
+     */
+    public void setAttribute(Column column, Object value, Interval interval);
+
+    /**
      * Adds a timestamp.
      *
      * @param timestamp timestamp to add
@@ -223,6 +277,37 @@ public interface Element extends ElementProperties {
      * @return timestamp array
      */
     public double[] getTimestamps();
+
+    /**
+     * Adds an interval.
+     *
+     * @param interval interval to add
+     * @return true if the interval has been added, false if it existed already
+     */
+    public boolean addInterval(Interval interval);
+
+    /**
+     * Removes a interval.
+     *
+     * @param interval interval to remove
+     * @return true if the interval has been removed, false if it didn't exist
+     */
+    public boolean removeInterval(Interval interval);
+
+    /**
+     * Returns true if this element has the given interval.
+     *
+     * @param interval interval
+     * @return true if this element has the interval, false otherwise
+     */
+    public boolean hasInterval(Interval interval);
+
+    /**
+     * Returns all the intervals this element belong to.
+     *
+     * @return interval array
+     */
+    public Interval[] getIntervals();
 
     /**
      * Clears all attribute values.

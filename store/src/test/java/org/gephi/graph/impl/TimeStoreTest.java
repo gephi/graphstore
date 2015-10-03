@@ -22,18 +22,18 @@ import org.testng.annotations.Test;
  *
  * @author mbastian
  */
-public class TimestsampStoreTest {
+public class TimeStoreTest {
 
     @Test
     public void testEmpty() {
-        TimestampStore store = new TimestampStore(null, null, false);
+        TimeStore store = new TimeStore(null, null, false);
         Assert.assertTrue(store.isEmpty());
     }
 
     @Test
     public void testDeepEqualsEmpty() {
-        TimestampStore store1 = new TimestampStore(null, null, false);
-        TimestampStore store2 = new TimestampStore(null, null, false);
+        TimeStore store1 = new TimeStore(null, null, false);
+        TimeStore store2 = new TimeStore(null, null, false);
 
         Assert.assertTrue(store1.deepEquals(store2));
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
@@ -42,65 +42,65 @@ public class TimestsampStoreTest {
     @Test
     public void testGetMinNull() {
         GraphStore graphStore = new GraphStore();
-        TimestampStore store = new TimestampStore(graphStore, null, true);
+        TimeStore store = new TimeStore(graphStore, null, true);
         Assert.assertEquals(store.getMin(graphStore), Double.NEGATIVE_INFINITY);
     }
 
     @Test
     public void testGetMaxNull() {
         GraphStore graphStore = new GraphStore();
-        TimestampStore store = new TimestampStore(graphStore, null, true);
+        TimeStore store = new TimeStore(graphStore, null, true);
         Assert.assertEquals(store.getMax(graphStore), Double.POSITIVE_INFINITY);
     }
 
     @Test
     public void testGetMin() {
         GraphStore graphStore = new GraphStore();
-        TimestampStore store = new TimestampStore(graphStore, null, true);
-        store.nodeMap.addTimestamp(1.0);
-        store.nodeMap.addTimestamp(2.0);
+        TimeStore store = new TimeStore(graphStore, null, true);
+        store.nodeIndexStore.add(1.0);
+        store.nodeIndexStore.add(2.0);
         Assert.assertEquals(store.getMin(graphStore), 1.0);
     }
 
     @Test
     public void testGetMax() {
         GraphStore graphStore = new GraphStore();
-        TimestampStore store = new TimestampStore(graphStore, null, true);
-        store.nodeMap.addTimestamp(1.0);
-        store.nodeMap.addTimestamp(2.0);
+        TimeStore store = new TimeStore(graphStore, null, true);
+        store.nodeIndexStore.add(1.0);
+        store.nodeIndexStore.add(2.0);
         Assert.assertEquals(store.getMax(graphStore), 2.0);
     }
 
     @Test
     public void testClearEdges() {
-        TimestampStore store = new TimestampStore(null, null, true);
-        store.nodeMap.addTimestamp(1.0);
-        store.edgeMap.addTimestamp(2.0);
+        TimeStore store = new TimeStore(null, null, true);
+        store.nodeIndexStore.add(1.0);
+        store.edgeIndexStore.add(2.0);
         store.clearEdges();
-        Assert.assertEquals(store.edgeMap.size(), 0);
-        Assert.assertEquals(store.nodeMap.size(), 1);
+        Assert.assertEquals(store.edgeIndexStore.size(), 0);
+        Assert.assertEquals(store.nodeIndexStore.size(), 1);
         Assert.assertFalse(store.isEmpty());
     }
 
     @Test
     public void testClear() {
-        TimestampStore store = new TimestampStore(null, null, true);
-        store.nodeMap.addTimestamp(1.0);
-        store.edgeMap.addTimestamp(2.0);
+        TimeStore store = new TimeStore(null, null, true);
+        store.nodeIndexStore.add(1.0);
+        store.edgeIndexStore.add(2.0);
         store.clear();
-        Assert.assertEquals(store.edgeMap.size(), 0);
-        Assert.assertEquals(store.nodeMap.size(), 0);
+        Assert.assertEquals(store.edgeIndexStore.size(), 0);
+        Assert.assertEquals(store.nodeIndexStore.size(), 0);
         Assert.assertTrue(store.isEmpty());
     }
 
     @Test
     public void testDeepEquals() {
-        TimestampStore store1 = new TimestampStore(null, null, true);
-        TimestampStore store2 = new TimestampStore(null, null, true);
-        store1.nodeMap.addTimestamp(1.0);
-        store1.edgeMap.addTimestamp(2.0);
-        store2.nodeMap.addTimestamp(1.0);
-        store2.edgeMap.addTimestamp(2.0);
+        TimeStore store1 = new TimeStore(null, null, true);
+        TimeStore store2 = new TimeStore(null, null, true);
+        store1.nodeIndexStore.add(1.0);
+        store1.edgeIndexStore.add(2.0);
+        store2.nodeIndexStore.add(1.0);
+        store2.edgeIndexStore.add(2.0);
 
         Assert.assertTrue(store1.deepEquals(store2));
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());

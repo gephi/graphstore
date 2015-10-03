@@ -21,7 +21,6 @@ import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeFormat;
-import org.gephi.graph.api.TimestampIndex;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphModel;
@@ -31,6 +30,7 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.impl.utils.DataInputOutput;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.gephi.graph.api.TimeIndex;
 
 public class GraphModelTest {
 
@@ -344,7 +344,7 @@ public class GraphModelTest {
         graphModel.getStore().addNode(n);
         n.addTimestamp(1.0);
 
-        TimestampIndex<Node> index = graphModel.getNodeTimestampIndex();
+        TimeIndex<Node> index = graphModel.getNodeTimeIndex();
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 1.0);
     }
@@ -358,7 +358,7 @@ public class GraphModelTest {
         graphModel.getStore().addEdge(e);
         e.addTimestamp(1.0);
 
-        TimestampIndex<Edge> index = graphModel.getEdgeTimestampIndex();
+        TimeIndex<Edge> index = graphModel.getEdgeTimeIndex();
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 1.0);
     }
@@ -372,7 +372,7 @@ public class GraphModelTest {
         n.addTimestamp(1.0);
         graphModel.getGraph(view).fill();
 
-        TimestampIndex<Node> index = graphModel.getNodeTimestampIndex(view);
+        TimeIndex<Node> index = graphModel.getNodeTimeIndex(view);
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 1.0);
     }
@@ -388,7 +388,7 @@ public class GraphModelTest {
         e.addTimestamp(1.0);
         graphModel.getGraph(view).fill();
 
-        TimestampIndex<Edge> index = graphModel.getEdgeTimestampIndex(view);
+        TimeIndex<Edge> index = graphModel.getEdgeTimeIndex(view);
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 1.0);
     }

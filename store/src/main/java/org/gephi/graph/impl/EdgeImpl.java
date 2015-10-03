@@ -20,11 +20,13 @@ import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.TextProperties;
+import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.TimeMap;
 
 public class EdgeImpl extends ElementImpl implements Edge {
 
@@ -93,21 +95,40 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public void setWeight(double weight, double timestamp) {
+        checkTimeRepresentationTimestamp();
+        setTimeWeight(weight, timestamp);
+    }
+
+    @Override
+    public void setWeight(double weight, Interval interval) {
+        checkTimeRepresentationInterval();
+        setTimeWeight(weight, interval);
+    }
+
+    private void setTimeWeight(double weight, Object timeObject) {
         boolean res;
         synchronized (this) {
             Object oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-            TimestampDoubleMap dynamicValue;
-            if (!(oldValue instanceof TimestampMap)) {
-                dynamicValue = new TimestampDoubleMap();
+            TimeMap dynamicValue = null;
+            if (!(oldValue instanceof TimeMap)) {
+                TimeRepresentation timeRepresentation = getTimeRepresentation();
+                switch (timeRepresentation) {
+                    case TIMESTAMP:
+                        dynamicValue = new TimestampDoubleMap();
+                        break;
+                    case INTERVAL:
+                        dynamicValue = new IntervalDoubleMap();
+                        break;
+                }
                 attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue;
             } else {
-                dynamicValue = (TimestampDoubleMap) oldValue;
+                dynamicValue = (TimeMap) oldValue;
             }
-            res = dynamicValue.put(timestamp, weight);
+            res = dynamicValue.put(timeObject, weight);
         }
-        TimestampInternalMap timestampMap = getTimestampMap();
-        if (res && timestampMap != null && isValid()) {
-            timestampMap.addTimestamp(timestamp);
+        TimeIndexStore timeIndexStore = getTimeIndexStore();
+        if (res && timeIndexStore != null && isValid()) {
+            timeIndexStore.add(timeObject);
         }
         ColumnStore columnStore = getColumnStore();
         if (res && columnStore != null) {
@@ -118,6 +139,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public double getWeight(double timestamp) {
+        checkTimeRepresentationTimestamp();
         synchronized (this) {
             Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
             if (weightValue instanceof Double) {
@@ -129,15 +151,27 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     @Override
+    public double getWeight(Interval interval) {
+        checkTimeRepresentationInterval();
+        synchronized (this) {
+            Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+            if (weightValue instanceof Double) {
+                throw new IllegalStateException("The weight is static, call getWeight() instead");
+            }
+            IntervalDoubleMap dynamicValue = (IntervalDoubleMap) weightValue;
+            return dynamicValue.getDouble(interval, 0.0);
+        }
+    }
+
+    @Override
     public double getWeight(GraphView view) {
         synchronized (this) {
             Object value = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-            if (value instanceof TimestampDoubleMap) {
+            if (value instanceof TimeMap) {
                 Interval interval = view.getTimeInterval();
-                checkEnabledTimestampSet();
                 checkViewExist((GraphView) view);
 
-                TimestampDoubleMap dynamicValue = (TimestampDoubleMap) value;
+                TimeMap dynamicValue = (TimeMap) value;
                 Estimator estimator = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getEstimator();
                 if (estimator == null) {
                     estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
@@ -238,17 +272,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     @Override
-    TimestampInternalMap getTimestampMap() {
+    TimeIndexStore getTimeIndexStore() {
         if (graphStore != null) {
-            return graphStore.timestampStore.edgeMap;
-        }
-        return null;
-    }
-
-    @Override
-    TimestampIndexStore<Edge> getTimestampIndexStore() {
-        if (graphStore != null) {
-            return graphStore.timestampStore.edgeIndexStore;
+            return graphStore.timeStore.edgeIndexStore;
         }
         return null;
     }

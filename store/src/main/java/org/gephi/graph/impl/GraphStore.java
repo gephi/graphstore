@@ -48,7 +48,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected final TableImpl<Node> nodeTable;
     protected final TableImpl<Edge> edgeTable;
     protected final GraphViewStore viewStore;
-    protected final TimestampStore timestampStore;
+    protected final TimeStore timeStore;
     protected final GraphAttributesImpl attributes;
     //Factory
     protected final GraphFactoryImpl factory;
@@ -81,7 +81,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeTable = new TableImpl<Node>(configuration, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
         edgeTable = new TableImpl<Edge>(configuration, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
-        timestampStore = new TimestampStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
+        timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
         timeFormat = GraphStoreConfiguration.DEFAULT_TIME_FORMAT;
@@ -95,7 +95,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             nodeTable.store.addColumn(new ColumnImpl(nodeTable, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
             edgeTable.store.addColumn(new ColumnImpl(edgeTable, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
         }
-        if (GraphStoreConfiguration.ENABLE_ELEMENT_TIMESTAMP_SET) {
+        if (GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET) {
             nodeTable.store.addColumn(new ColumnImpl(nodeTable, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
             edgeTable.store.addColumn(new ColumnImpl(edgeTable, "timestamp", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
         }
@@ -501,7 +501,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             edgeTypeStore.clear();
             edgeTable.store.indexStore.clear();
             nodeTable.store.indexStore.clear();
-            timestampStore.clear();
+            timeStore.clear();
         } finally {
             autoWriteUnlock();
         }
@@ -514,7 +514,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             edgeStore.clear();
             edgeTypeStore.clear();
             edgeTable.store.indexStore.clear();
-            timestampStore.clearEdges();
+            timeStore.clearEdges();
         } finally {
             autoWriteUnlock();
         }

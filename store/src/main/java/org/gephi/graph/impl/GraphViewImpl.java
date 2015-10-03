@@ -125,9 +125,9 @@ public class GraphViewImpl implements GraphView {
             if (indexStore != null) {
                 indexStore.indexInView(nodeImpl, this);
             }
-            TimestampIndexStore<Node> timestampIndexStore = graphStore.timestampStore.nodeIndexStore;
-            if (timestampIndexStore != null) {
-                timestampIndexStore.indexInView(nodeImpl, this);
+            TimeIndexStore timeIndexStore = graphStore.timeStore.nodeIndexStore;
+            if (timeIndexStore != null) {
+                timeIndexStore.indexInView(nodeImpl, this);
             }
 
             if (nodeView && !edgeView) {
@@ -225,9 +225,9 @@ public class GraphViewImpl implements GraphView {
             if (indexStore != null) {
                 indexStore.clearInView(nodeImpl, this);
             }
-            TimestampIndexStore<Node> timestampIndexStore = graphStore.timestampStore.nodeIndexStore;
-            if (timestampIndexStore != null) {
-                timestampIndexStore.clearInView(nodeImpl, this);
+            TimeIndexStore timeIndexStore = graphStore.timeStore.nodeIndexStore;
+            if (timeIndexStore != null) {
+                timeIndexStore.clearInView(nodeImpl, this);
             }
 
             //Remove edges
@@ -318,18 +318,18 @@ public class GraphViewImpl implements GraphView {
             if (nodeIndexStore != null) {
                 nodeIndexStore.clear(this);
             }
-            TimestampIndexStore<Node> nodeTimestampIndexStore = graphStore.timestampStore.nodeIndexStore;
-            if (nodeTimestampIndexStore != null) {
-                nodeTimestampIndexStore.clear(this);
+            TimeIndexStore nodeTimeIndexStore = graphStore.timeStore.nodeIndexStore;
+            if (nodeTimeIndexStore != null) {
+                nodeTimeIndexStore.clear(this);
             }
         }
         IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
         if (edgeIndexStore != null) {
             edgeIndexStore.clear(this);
         }
-        TimestampIndexStore<Edge> edgeTimestampIndexStore = graphStore.timestampStore.edgeIndexStore;
-        if (edgeTimestampIndexStore != null) {
-            edgeTimestampIndexStore.clear(this);
+        TimeIndexStore edgeTimeIndexStore = graphStore.timeStore.edgeIndexStore;
+        if (edgeTimeIndexStore != null) {
+            edgeTimeIndexStore.clear(this);
         }
     }
 
@@ -347,9 +347,9 @@ public class GraphViewImpl implements GraphView {
         if (edgeIndexStore != null) {
             edgeIndexStore.clear(this);
         }
-        TimestampIndexStore<Edge> edgeTimestampIndexStore = graphStore.timestampStore.edgeIndexStore;
-        if (edgeTimestampIndexStore != null) {
-            edgeTimestampIndexStore.clear(this);
+        TimeIndexStore edgeTimeIndexStore = graphStore.timeStore.edgeIndexStore;
+        if (edgeTimeIndexStore != null) {
+            edgeTimeIndexStore.clear(this);
         }
     }
 
@@ -389,18 +389,18 @@ public class GraphViewImpl implements GraphView {
             if (nodeIndexStore != null) {
                 nodeIndexStore.indexView(directedDecorator);
             }
-            TimestampIndexStore<Node> nodeTimestampIndexStore = graphStore.timestampStore.nodeIndexStore;
-            if (nodeTimestampIndexStore != null) {
-                nodeTimestampIndexStore.indexView(directedDecorator);
+            TimeIndexStore nodeTimeIndexStore = graphStore.timeStore.nodeIndexStore;
+            if (nodeTimeIndexStore != null) {
+                nodeTimeIndexStore.indexView(directedDecorator);
             }
         }
         IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
         if (edgeIndexStore != null) {
             edgeIndexStore.indexView(directedDecorator);
         }
-        TimestampIndexStore<Edge> edgeTimestampIndexStore = graphStore.timestampStore.edgeIndexStore;
-        if (edgeTimestampIndexStore != null) {
-            edgeTimestampIndexStore.indexView(directedDecorator);
+        TimeIndexStore edgeTimeIndexStore = graphStore.timeStore.edgeIndexStore;
+        if (edgeTimeIndexStore != null) {
+            edgeTimeIndexStore.indexView(directedDecorator);
         }
     }
 
@@ -604,9 +604,9 @@ public class GraphViewImpl implements GraphView {
         if (indexStore != null) {
             indexStore.indexInView(edgeImpl, this);
         }
-        TimestampIndexStore<Edge> timestampIndexStore = graphStore.timestampStore.edgeIndexStore;
-        if (timestampIndexStore != null) {
-            timestampIndexStore.indexInView(edgeImpl, this);
+        TimeIndexStore timeIndexStore = graphStore.timeStore.edgeIndexStore;
+        if (timeIndexStore != null) {
+            timeIndexStore.indexInView(edgeImpl, this);
         }
     }
 

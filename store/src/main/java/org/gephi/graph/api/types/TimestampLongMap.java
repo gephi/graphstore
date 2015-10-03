@@ -127,7 +127,7 @@ public final class TimestampLongMap extends TimestampMap<Long> {
      * @return array of all values
      */
     public long[] toLongArray() {
-        return (long[]) toNativeArray();
+        return (long[]) toPrimitiveArray();
     }
 
     @Override

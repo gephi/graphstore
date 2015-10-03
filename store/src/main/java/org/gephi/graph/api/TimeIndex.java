@@ -16,11 +16,11 @@
 package org.gephi.graph.api;
 
 /**
- * Holds an index for timestamps.
+ * Holds an index based on time attributes.
  *
  * @param <T> Element
  */
-public interface TimestampIndex<T extends Element> {
+public interface TimeIndex<T extends Element> {
 
     /**
      * Returns the minimum timestamp in this index.

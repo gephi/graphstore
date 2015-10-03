@@ -159,7 +159,7 @@ public final class TimestampCharMap extends TimestampMap<Character> {
      * @return array of all values
      */
     public char[] toCharacterArray() {
-        return (char[]) toNativeArray();
+        return (char[]) toPrimitiveArray();
     }
 
     @Override

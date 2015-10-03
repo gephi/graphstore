@@ -42,6 +42,7 @@ import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.TextProperties;
@@ -384,27 +385,27 @@ public class BasicGraphStore implements DirectedGraph {
 
     @Override
     public Object getAttribute(String key) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object getAttribute(String key, double timestamp) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void setAttribute(String key, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void setAttribute(String key, Object value, double timestamp) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Set<String> getAttributeKeys() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public static class BasicElement implements Element {
@@ -603,7 +604,57 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public boolean hasTimestamp(double timestamp) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean addInterval(Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean removeInterval(Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean hasInterval(Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Object getAttribute(Column column, Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Object getAttribute(String key, Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Interval[] getIntervals() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setAttribute(Column column, Object value, Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setAttribute(String key, Object value, Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Object removeAttribute(String key, Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Object removeAttribute(Column column, Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 
@@ -921,6 +972,16 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public boolean hasDynamicWeight() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public double getWeight(Interval interval) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void setWeight(double weight, Interval interval) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }

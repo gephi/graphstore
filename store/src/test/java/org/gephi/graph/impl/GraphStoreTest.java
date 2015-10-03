@@ -30,6 +30,7 @@ import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.TextProperties;
@@ -389,6 +390,56 @@ public class GraphStoreTest {
 
             @Override
             public Object removeAttribute(Column column, double timestamp) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object getAttribute(String key, Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object getAttribute(Column column, Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object removeAttribute(String key, Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Object removeAttribute(Column column, Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setAttribute(String key, Object value, Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setAttribute(Column column, Object value, Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean addInterval(Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean removeInterval(Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean hasInterval(Interval interval) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Interval[] getIntervals() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });

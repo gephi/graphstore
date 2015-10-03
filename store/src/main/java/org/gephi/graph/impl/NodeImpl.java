@@ -79,17 +79,9 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
-    TimestampInternalMap getTimestampMap() {
+    TimeIndexStore getTimeIndexStore() {
         if (graphStore != null) {
-            return graphStore.timestampStore.nodeMap;
-        }
-        return null;
-    }
-
-    @Override
-    TimestampIndexStore<Node> getTimestampIndexStore() {
-        if (graphStore != null) {
-            return graphStore.timestampStore.nodeIndexStore;
+            return graphStore.timeStore.nodeIndexStore;
         }
         return null;
     }

@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Origin;
+import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.testng.Assert;
@@ -46,6 +47,9 @@ public class ColumnImplTest {
 
         ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col2.isDynamic());
+
+        ColumnImpl col3 = new ColumnImpl("0", IntervalDoubleMap.class, null, null, Origin.DATA, false, false);
+        Assert.assertTrue(col3.isDynamic());
     }
 
     @Test

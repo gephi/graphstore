@@ -31,7 +31,7 @@ import org.gephi.graph.api.Interval;
  *
  * @param <T> Value type
  */
-public abstract class TimestampMap<T> {
+public abstract class TimestampMap<T> implements TimeMap<Double, T> {
 
     protected double[] array;
     protected int size = 0;
@@ -71,14 +71,8 @@ public abstract class TimestampMap<T> {
         size = keys.length;
     }
 
-    /**
-     * Put the value at the given timestamp.
-     *
-     * @param timestamp timestamp
-     * @param value value
-     * @return true if timestamp is a new key, false otherwise
-     */
-    public boolean put(double timestamp, T value) {
+    @Override
+    public boolean put(Double timestamp, T value) {
         if (value == null) {
             throw new NullPointerException();
         }
@@ -108,13 +102,8 @@ public abstract class TimestampMap<T> {
         return false;
     }
 
-    /**
-     * Remove the value at the given timestamp.
-     *
-     * @param timestamp timestamp
-     * @return true if the key existed, false otherwise
-     */
-    public boolean remove(double timestamp) {
+    @Override
+    public boolean remove(Double timestamp) {
         Object values = getValuesArray();
 
         final int removeIndex = removeInner(timestamp);
@@ -127,16 +116,8 @@ public abstract class TimestampMap<T> {
         return false;
     }
 
-    /**
-     * Get the value for the given timestamp.
-     * <p>
-     * Return <code>defaultValue</code> if the value is not found.
-     *
-     * @param timestamp timestamp
-     * @param defaultValue default value
-     * @return found value or the default value if not found
-     */
-    public T get(double timestamp, T defaultValue) {
+    @Override
+    public T get(Double timestamp, T defaultValue) {
         final int index = getIndex(timestamp);
         if (index >= 0) {
             return getValue(index);
@@ -144,16 +125,7 @@ public abstract class TimestampMap<T> {
         return defaultValue;
     }
 
-    /**
-     * Get the estimated value for the given interval.
-     * <p>
-     * The estimator is used to determine the way multiple timestamp values are
-     * merged together (e.g average, first, median).
-     *
-     * @param interval interval query
-     * @param estimator estimator used
-     * @return estimated value
-     */
+    @Override
     public Object get(Interval interval, Estimator estimator) {
         if (!isSupported(estimator)) {
             throw new UnsupportedOperationException("Not supported estimator.");
@@ -176,12 +148,8 @@ public abstract class TimestampMap<T> {
         }
     }
 
-    /**
-     * Returns all the values as an array.
-     *
-     * @return values array
-     */
-    public T[] toArray() {
+    @Override
+    public T[] toValuesArray() {
         Object values = getValuesArray();
         int length = Array.getLength(values);
         if (values.getClass().getComponentType().isPrimitive() || size < length) {
@@ -195,7 +163,7 @@ public abstract class TimestampMap<T> {
         }
     }
 
-    protected Object toNativeArray() {
+    protected Object toPrimitiveArray() {
         Object values = getValuesArray();
         int length = Array.getLength(values);
         if (size < length - 1) {
@@ -206,19 +174,10 @@ public abstract class TimestampMap<T> {
         return values;
     }
 
-    /**
-     * Returns the value type class.
-     *
-     * @return type class
-     */
+    @Override
     public abstract Class<T> getTypeClass();
 
-    /**
-     * Returns whether <code>estimator</code> is supported.
-     *
-     * @param estimator estimator
-     * @return true if this map supports <code>estimator</code>
-     */
+    @Override
     public abstract boolean isSupported(Estimator estimator);
 
     protected abstract T getValue(int index);
@@ -267,20 +226,12 @@ public abstract class TimestampMap<T> {
         return -1;
     }
 
-    /**
-     * Returns the size.
-     *
-     * @return the number of elements in this map
-     */
+    @Override
     public int size() {
         return size;
     }
 
-    /**
-     * Returns true if this map is empty.
-     *
-     * @return true if empty, false otherwise
-     */
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }
@@ -289,13 +240,8 @@ public abstract class TimestampMap<T> {
         return Arrays.binarySearch(array, 0, size, timestamp);
     }
 
-    /**
-     * Returns true if this map contains <code>timestamp</code>.
-     *
-     * @param timestamp timestamp
-     * @return true if contains, false otherwise
-     */
-    public boolean contains(double timestamp) {
+    @Override
+    public boolean contains(Double timestamp) {
         return getIndex(timestamp) >= 0;
     }
 
@@ -317,9 +263,16 @@ public abstract class TimestampMap<T> {
         }
     }
 
-    /**
-     * Empties this map.
-     */
+    @Override
+    public Double[] toKeysArray() {
+        Double[] res = new Double[size];
+        for (int i = 0; i < size; i++) {
+            res[i] = array[i];
+        }
+        return res;
+    }
+
+    @Override
     public void clear() {
         size = 0;
         array = new double[0];

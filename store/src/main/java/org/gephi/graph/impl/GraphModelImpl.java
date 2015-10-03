@@ -19,7 +19,6 @@ import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeFormat;
-import org.gephi.graph.api.TimestampIndex;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -33,6 +32,7 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
+import org.gephi.graph.api.TimeIndex;
 
 public class GraphModelImpl implements GraphModel {
 
@@ -160,7 +160,7 @@ public class GraphModelImpl implements GraphModel {
     public boolean isDynamic() {
         store.autoReadLock();
         try {
-            return !store.timestampStore.isEmpty();
+            return !store.timeStore.isEmpty();
         } finally {
             store.autoReadUnlock();
         }
@@ -256,35 +256,35 @@ public class GraphModelImpl implements GraphModel {
     }
 
     @Override
-    public TimestampIndex<Node> getNodeTimestampIndex() {
-        return getNodeTimestampIndex(store.mainGraphView);
+    public TimeIndex<Node> getNodeTimeIndex() {
+        return getNodeTimeIndex(store.mainGraphView);
     }
 
     @Override
-    public TimestampIndex<Node> getNodeTimestampIndex(GraphView view) {
-        TimestampIndexStore timestampStore = store.timestampStore.nodeIndexStore;
-        if (timestampStore != null) {
+    public TimeIndex<Node> getNodeTimeIndex(GraphView view) {
+        TimeIndexStore timeIndexStore = store.timeStore.nodeIndexStore;
+        if (timeIndexStore != null) {
             if (view.isMainView()) {
-                return timestampStore.getIndex(store);
+                return timeIndexStore.getIndex(store);
             }
-            return timestampStore.getIndex(((GraphViewImpl) view).directedDecorator);
+            return timeIndexStore.getIndex(((GraphViewImpl) view).directedDecorator);
         }
         return null;
     }
 
     @Override
-    public TimestampIndex<Edge> getEdgeTimestampIndex() {
-        return getEdgeTimestampIndex(store.mainGraphView);
+    public TimeIndex<Edge> getEdgeTimeIndex() {
+        return getEdgeTimeIndex(store.mainGraphView);
     }
 
     @Override
-    public TimestampIndex<Edge> getEdgeTimestampIndex(GraphView view) {
-        TimestampIndexStore timestampStore = store.timestampStore.edgeIndexStore;
-        if (timestampStore != null) {
+    public TimeIndex<Edge> getEdgeTimeIndex(GraphView view) {
+        TimeIndexStore timeIndexStore = store.timeStore.edgeIndexStore;
+        if (timeIndexStore != null) {
             if (view.isMainView()) {
-                return timestampStore.getIndex(store);
+                return timeIndexStore.getIndex(store);
             }
-            return timestampStore.getIndex(((GraphViewImpl) view).directedDecorator);
+            return timeIndexStore.getIndex(((GraphViewImpl) view).directedDecorator);
         }
         return null;
     }
@@ -325,11 +325,11 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Interval getTimeBounds(GraphView view) {
-        TimestampStore timestampStore = store.timestampStore;
+        TimeStore timeStore = store.timeStore;
         store.autoReadLock();
         try {
-            double min = timestampStore.getMin(getGraph(view));
-            double max = timestampStore.getMax(getGraph(view));
+            double min = timeStore.getMin(getGraph(view));
+            double max = timeStore.getMax(getGraph(view));
             return new Interval(min, max);
         } finally {
             store.autoReadUnlock();

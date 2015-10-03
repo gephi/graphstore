@@ -132,7 +132,7 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
      * @return array of all values
      */
     public byte[] toByteArray() {
-        return (byte[]) toNativeArray();
+        return (byte[]) toPrimitiveArray();
     }
 
     @Override

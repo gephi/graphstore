@@ -60,7 +60,7 @@ public class GraphAttributesImpl {
             valueSet = (TimestampMap) attributes.get(key);
         } else {
             try {
-                valueSet = AttributeUtils.getDynamicType(value.getClass()).newInstance();
+                valueSet = AttributeUtils.getTimestampMapType(value.getClass()).newInstance();
                 attributes.put(key, valueSet);
             } catch (Exception ex) {
                 throw new RuntimeException("The dynamic type can't be created", ex);
@@ -85,7 +85,7 @@ public class GraphAttributesImpl {
 
     private void checkSupportedDynamicTypes(Class type) {
         try {
-            AttributeUtils.getDynamicType(type);
+            AttributeUtils.getTimestampMapType(type);
         } catch (Exception e) {
             throw new IllegalArgumentException("Unsupported dynamic type " + type.getName());
         }

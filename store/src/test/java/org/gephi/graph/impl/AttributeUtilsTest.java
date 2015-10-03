@@ -34,6 +34,18 @@ import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.types.IntervalBooleanMap;
+import org.gephi.graph.api.types.IntervalByteMap;
+import org.gephi.graph.api.types.IntervalCharMap;
+import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.IntervalFloatMap;
+import org.gephi.graph.api.types.IntervalIntegerMap;
+import org.gephi.graph.api.types.IntervalLongMap;
+import org.gephi.graph.api.types.IntervalMap;
+import org.gephi.graph.api.types.IntervalSet;
+import org.gephi.graph.api.types.IntervalShortMap;
+import org.gephi.graph.api.types.IntervalStringMap;
+import org.gephi.graph.api.types.TimestampSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -148,6 +160,9 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isSupported(int.class));
         Assert.assertTrue(AttributeUtils.isSupported(int[].class));
         Assert.assertTrue(AttributeUtils.isSupported(TimestampDoubleMap.class));
+        Assert.assertTrue(AttributeUtils.isSupported(TimestampSet.class));
+        Assert.assertTrue(AttributeUtils.isSupported(IntervalDoubleMap.class));
+        Assert.assertTrue(AttributeUtils.isSupported(IntervalSet.class));
 
         Assert.assertFalse(AttributeUtils.isSupported(Color.class));
     }
@@ -158,24 +173,41 @@ public class AttributeUtilsTest {
     }
 
     @Test
-    public void testGetDynamicType() {
-        Assert.assertEquals(AttributeUtils.getDynamicType(Integer.class), TimestampIntegerMap.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Float.class), TimestampFloatMap.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Double.class), TimestampDoubleMap.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Long.class), TimestampLongMap.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Character.class), TimestampCharMap.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Short.class), TimestampShortMap.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Byte.class), TimestampByteMap.class);
-        Assert.assertEquals(AttributeUtils.getDynamicType(Boolean.class), TimestampBooleanMap.class);
+    public void testGetTimestampMapType() {
+        Assert.assertEquals(AttributeUtils.getTimestampMapType(Integer.class), TimestampIntegerMap.class);
+        Assert.assertEquals(AttributeUtils.getTimestampMapType(Float.class), TimestampFloatMap.class);
+        Assert.assertEquals(AttributeUtils.getTimestampMapType(Double.class), TimestampDoubleMap.class);
+        Assert.assertEquals(AttributeUtils.getTimestampMapType(Long.class), TimestampLongMap.class);
+        Assert.assertEquals(AttributeUtils.getTimestampMapType(Character.class), TimestampCharMap.class);
+        Assert.assertEquals(AttributeUtils.getTimestampMapType(Short.class), TimestampShortMap.class);
+        Assert.assertEquals(AttributeUtils.getTimestampMapType(Byte.class), TimestampByteMap.class);
+        Assert.assertEquals(AttributeUtils.getTimestampMapType(Boolean.class), TimestampBooleanMap.class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testGetDynamicTypeUnsupportedType() {
-        AttributeUtils.getDynamicType(Color.class);
+    public void testGetTimestampMapTypeUnsupportedType() {
+        AttributeUtils.getTimestampMapType(Color.class);
     }
 
     @Test
-    public void testGetStaticType() {
+    public void testGetIntervalMapType() {
+        Assert.assertEquals(AttributeUtils.getIntervalMapType(Integer.class), IntervalIntegerMap.class);
+        Assert.assertEquals(AttributeUtils.getIntervalMapType(Float.class), IntervalFloatMap.class);
+        Assert.assertEquals(AttributeUtils.getIntervalMapType(Double.class), IntervalDoubleMap.class);
+        Assert.assertEquals(AttributeUtils.getIntervalMapType(Long.class), IntervalLongMap.class);
+        Assert.assertEquals(AttributeUtils.getIntervalMapType(Character.class), IntervalCharMap.class);
+        Assert.assertEquals(AttributeUtils.getIntervalMapType(Short.class), IntervalShortMap.class);
+        Assert.assertEquals(AttributeUtils.getIntervalMapType(Byte.class), IntervalByteMap.class);
+        Assert.assertEquals(AttributeUtils.getIntervalMapType(Boolean.class), IntervalBooleanMap.class);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetIntervalMapTypeUnsupportedType() {
+        AttributeUtils.getIntervalMapType(Color.class);
+    }
+
+    @Test
+    public void testGetStaticTypeTimestampMap() {
         Assert.assertEquals(AttributeUtils.getStaticType(TimestampIntegerMap.class), Integer.class);
         Assert.assertEquals(AttributeUtils.getStaticType(TimestampFloatMap.class), Float.class);
         Assert.assertEquals(AttributeUtils.getStaticType(TimestampDoubleMap.class), Double.class);
@@ -187,9 +219,27 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.getStaticType(TimestampStringMap.class), String.class);
     }
 
+    @Test
+    public void testGetStaticTypeIntervalMap() {
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalIntegerMap.class), Integer.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalFloatMap.class), Float.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalDoubleMap.class), Double.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalLongMap.class), Long.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalCharMap.class), Character.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalShortMap.class), Short.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalByteMap.class), Byte.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalBooleanMap.class), Boolean.class);
+        Assert.assertEquals(AttributeUtils.getStaticType(IntervalStringMap.class), String.class);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testGetStaticTypeUnsupportedType() {
+    public void testGetStaticTypeUnsupportedTypeTimestampMap() {
         AttributeUtils.getStaticType(TimestampMap.class);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetStaticTypeUnsupportedTypeIntervalMap() {
+        AttributeUtils.getStaticType(IntervalMap.class);
     }
 
     @Test
@@ -252,6 +302,12 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isNumberType(TimestampIntegerMap.class));
         Assert.assertTrue(AttributeUtils.isNumberType(TimestampLongMap.class));
         Assert.assertTrue(AttributeUtils.isNumberType(TimestampShortMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(IntervalByteMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(IntervalDoubleMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(IntervalFloatMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(IntervalIntegerMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(IntervalLongMap.class));
+        Assert.assertTrue(AttributeUtils.isNumberType(IntervalShortMap.class));
         Assert.assertFalse(AttributeUtils.isNumberType(String.class));
         Assert.assertFalse(AttributeUtils.isNumberType(String[].class));
         Assert.assertTrue(AttributeUtils.isNumberType(BigDecimal.class));
@@ -267,8 +323,11 @@ public class AttributeUtilsTest {
     public void testIsDynamicType() {
         Assert.assertTrue(AttributeUtils.isDynamicType(TimestampFloatMap.class));
         Assert.assertFalse(AttributeUtils.isDynamicType(TimestampFloatMap[].class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalFloatMap.class));
+        Assert.assertFalse(AttributeUtils.isDynamicType(IntervalFloatMap[].class));
         Assert.assertFalse(AttributeUtils.isDynamicType(Integer.class));
         Assert.assertFalse(AttributeUtils.isDynamicType(TimestampMap.class));
+        Assert.assertFalse(AttributeUtils.isDynamicType(IntervalMap.class));
     }
 
     @Test
@@ -319,5 +378,6 @@ public class AttributeUtilsTest {
         Assert.assertFalse(AttributeUtils.isSimpleType(void.class));
         Assert.assertFalse(AttributeUtils.isSimpleType(int[].class));
         Assert.assertFalse(AttributeUtils.isSimpleType(TimestampBooleanMap.class));
+        Assert.assertFalse(AttributeUtils.isSimpleType(IntervalBooleanMap.class));
     }
 }

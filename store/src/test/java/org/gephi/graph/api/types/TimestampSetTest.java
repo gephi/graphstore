@@ -61,7 +61,7 @@ public class TimestampSetTest {
         for (double d : array) {
             set.add(d);
         }
-        double[] tms = set.getTimestamps();
+        double[] tms = set.toPrimitiveArray();
         double[] sdr = NumberGenerator.sortAndRemoveDuplicates(array);
 
         Assert.assertEquals(tms.length, sdr.length);
@@ -80,7 +80,7 @@ public class TimestampSetTest {
             set.add(d);
         }
 
-        testDoubleArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(array));
+        testDoubleArrayEquals(set.toPrimitiveArray(), NumberGenerator.sortAndRemoveDuplicates(array));
     }
 
     @Test
@@ -124,8 +124,8 @@ public class TimestampSetTest {
         Assert.assertTrue(set.add(1.0));
 
         Assert.assertEquals(2, set.size());
-        Assert.assertEquals(1.0, set.getTimestamps()[0]);
-        Assert.assertEquals(2.0, set.getTimestamps()[1]);
+        Assert.assertEquals(1.0, set.toPrimitiveArray()[0]);
+        Assert.assertEquals(2.0, set.toPrimitiveArray()[1]);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class TimestampSetTest {
             }
         }
 
-        testDoubleArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(doubleSet.toDoubleArray()));
+        testDoubleArrayEquals(set.toPrimitiveArray(), NumberGenerator.sortAndRemoveDuplicates(doubleSet.toDoubleArray()));
 
         double[] newArray = NumberGenerator.generateRandomDouble(count / 2, true);
         for (int i = 0; i < count / 2; i++) {
@@ -161,7 +161,7 @@ public class TimestampSetTest {
             doubleSet.add(number);
         }
 
-        testDoubleArrayEquals(set.getTimestamps(), NumberGenerator.sortAndRemoveDuplicates(doubleSet.toDoubleArray()));
+        testDoubleArrayEquals(set.toPrimitiveArray(), NumberGenerator.sortAndRemoveDuplicates(doubleSet.toDoubleArray()));
     }
 
     @Test
@@ -229,13 +229,23 @@ public class TimestampSetTest {
     }
 
     @Test
-    public void tesGetTimestamps() {
+    public void testGetTimestamps() {
         TimestampSet set = new TimestampSet();
         set.add(0.0);
         set.add(1.0);
         set.remove(0.0);
 
-        Assert.assertEquals(set.getTimestamps(), new double[]{1.0});
+        Assert.assertEquals(set.toPrimitiveArray(), new double[]{1.0});
+    }
+
+    @Test
+    public void testToArray() {
+        TimestampSet set = new TimestampSet();
+        set.add(0.0);
+        set.add(1.0);
+        set.remove(0.0);
+
+        Assert.assertEquals(set.toArray(), new Double[]{1.0});
     }
 
     @Test
@@ -244,7 +254,7 @@ public class TimestampSetTest {
         set1.add(1.0);
         set1.add(4.0);
 
-        TimestampSet set2 = new TimestampSet(set1.getTimestamps());
+        TimestampSet set2 = new TimestampSet(set1.toPrimitiveArray());
         Assert.assertTrue(set1.equals(set2));
         set1.clear();
         Assert.assertEquals(set2.size(), 2);

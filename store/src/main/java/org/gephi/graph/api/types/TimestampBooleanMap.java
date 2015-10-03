@@ -163,7 +163,7 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
      * @return array of all values
      */
     public boolean[] toBooleanArray() {
-        return (boolean[]) toNativeArray();
+        return (boolean[]) toPrimitiveArray();
     }
 
     @Override

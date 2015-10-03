@@ -107,7 +107,7 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
      * @return array of all values
      */
     public double[] toDoubleArray() {
-        return (double[]) toNativeArray();
+        return (double[]) toPrimitiveArray();
     }
 
     @Override

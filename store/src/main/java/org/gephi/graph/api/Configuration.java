@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.api;
 
+import org.gephi.graph.impl.GraphStoreConfiguration;
+
 /**
  * Global configuration set at initialization.
  * <p>
@@ -25,24 +27,24 @@ package org.gephi.graph.api;
  * Note that setting configurations after the <em>GraphModel</em> has been
  * created won't have any effect.
  * <p>
- * By default, both node and edge id types are <code>String.class</code>.
+ * By default, both node and edge id types are <code>String.class</code> and the
+ * time representation is <code>TIMESTAMP</code>.
  *
  * @see GraphModel
  */
 public class Configuration {
 
-    private static final Class DEFAULT_NODE_ID_TYPE = String.class;
-    private static final Class DEFAULT_EDGE_ID_TYPE = String.class;
-
     private Class nodeIdType;
     private Class edgeIdType;
+    private TimeRepresentation timeRepresentation;
 
     /**
      * Default constructor.
      */
     public Configuration() {
-        nodeIdType = DEFAULT_NODE_ID_TYPE;
-        edgeIdType = DEFAULT_EDGE_ID_TYPE;
+        nodeIdType = GraphStoreConfiguration.DEFAULT_NODE_ID_TYPE;
+        edgeIdType = GraphStoreConfiguration.DEFAULT_EDGE_ID_TYPE;
+        timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
     }
 
     /**
@@ -94,6 +96,24 @@ public class Configuration {
     }
 
     /**
+     * Returns the time representation.
+     *
+     * @return time representation
+     */
+    public TimeRepresentation getTimeRepresentation() {
+        return timeRepresentation;
+    }
+
+    /**
+     * Sets the time representation.
+     *
+     * @param timeRepresentation time representation
+     */
+    public void setTimeRepresentation(TimeRepresentation timeRepresentation) {
+        this.timeRepresentation = timeRepresentation;
+    }
+
+    /**
      * Copy this configuration.
      *
      * @return a copy of this configuration
@@ -102,6 +122,7 @@ public class Configuration {
         Configuration copy = new Configuration();
         copy.nodeIdType = nodeIdType;
         copy.edgeIdType = edgeIdType;
+        copy.timeRepresentation = timeRepresentation;
         return copy;
     }
 
@@ -110,6 +131,7 @@ public class Configuration {
         int hash = 7;
         hash = 19 * hash + (this.nodeIdType != null ? this.nodeIdType.hashCode() : 0);
         hash = 19 * hash + (this.edgeIdType != null ? this.edgeIdType.hashCode() : 0);
+        hash = 19 * hash + (this.timeRepresentation != null ? this.timeRepresentation.hashCode() : 0);
         return hash;
     }
 
@@ -129,6 +151,9 @@ public class Configuration {
             return false;
         }
         if (this.edgeIdType != other.edgeIdType && (this.edgeIdType == null || !this.edgeIdType.equals(other.edgeIdType))) {
+            return false;
+        }
+        if (this.timeRepresentation != other.timeRepresentation && (this.timeRepresentation == null || !this.timeRepresentation.equals(other.timeRepresentation))) {
             return false;
         }
         return true;

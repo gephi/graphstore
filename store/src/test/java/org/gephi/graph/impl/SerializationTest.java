@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
@@ -36,6 +37,18 @@ import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalBooleanMap;
+import org.gephi.graph.api.types.IntervalByteMap;
+import org.gephi.graph.api.types.IntervalCharMap;
+import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.IntervalFloatMap;
+import org.gephi.graph.api.types.IntervalIntegerMap;
+import org.gephi.graph.api.types.IntervalLongMap;
+import org.gephi.graph.api.types.IntervalSet;
+import org.gephi.graph.api.types.IntervalShortMap;
+import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.impl.utils.DataInputOutput;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -354,11 +367,21 @@ public class SerializationTest {
     }
 
     @Test
+    public void testTimestampRepresentation() throws IOException, ClassNotFoundException {
+        TimeRepresentation timeRepresentation = TimeRepresentation.INTERVAL;
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timeRepresentation);
+        TimeRepresentation l = (TimeRepresentation) ser.deserialize(buf);
+        Assert.assertEquals(timeRepresentation, l);
+    }
+
+    @Test
     public void testTimestampSet() throws IOException, ClassNotFoundException {
         TimestampSet timestampSet = new TimestampSet();
-        timestampSet.add(6);
-        timestampSet.add(1);
-        timestampSet.add(2);
+        timestampSet.add(6.0);
+        timestampSet.add(1.0);
+        timestampSet.add(2.0);
 
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(timestampSet);
@@ -367,126 +390,232 @@ public class SerializationTest {
     }
 
     @Test
-    public void testTimestampBooleanSet() throws IOException, ClassNotFoundException {
-        TimestampBooleanMap timestampSet = new TimestampBooleanMap();
-        timestampSet.put(6, true);
-        timestampSet.put(1, false);
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampBooleanMap l = (TimestampBooleanMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampByteSet() throws IOException, ClassNotFoundException {
-        TimestampByteMap timestampSet = new TimestampByteMap();
-        timestampSet.put(6, (byte) 2);
-        timestampSet.put(1, (byte) 1);
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampByteMap l = (TimestampByteMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampCharSet() throws IOException, ClassNotFoundException {
-        TimestampCharMap timestampSet = new TimestampCharMap();
-        timestampSet.put(6, 'a');
-        timestampSet.put(1, 'b');
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampCharMap l = (TimestampCharMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampFloatSet() throws IOException, ClassNotFoundException {
-        TimestampFloatMap timestampSet = new TimestampFloatMap();
-        timestampSet.put(6, 2f);
-        timestampSet.put(1, 1f);
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampFloatMap l = (TimestampFloatMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampDoubleSet() throws IOException, ClassNotFoundException {
-        TimestampDoubleMap timestampSet = new TimestampDoubleMap();
-        timestampSet.put(6, 2.0);
-        timestampSet.put(1, 1.0);
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampDoubleMap l = (TimestampDoubleMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampIntegerSet() throws IOException, ClassNotFoundException {
-        TimestampIntegerMap timestampSet = new TimestampIntegerMap();
-        timestampSet.put(6, 2);
-        timestampSet.put(1, 1);
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampIntegerMap l = (TimestampIntegerMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampLongSet() throws IOException, ClassNotFoundException {
-        TimestampLongMap timestampSet = new TimestampLongMap();
-        timestampSet.put(6, 2l);
-        timestampSet.put(1, 1l);
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampLongMap l = (TimestampLongMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampShortSet() throws IOException, ClassNotFoundException {
-        TimestampShortMap timestampSet = new TimestampShortMap();
-        timestampSet.put(6, (short) 2);
-        timestampSet.put(1, (short) 1);
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampShortMap l = (TimestampShortMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampStringSet() throws IOException, ClassNotFoundException {
-        TimestampStringMap timestampSet = new TimestampStringMap();
-        timestampSet.put(6, "foo");
-        timestampSet.put(1, "bar");
-
-        Serialization ser = new Serialization(null);
-        byte[] buf = ser.serialize(timestampSet);
-        TimestampStringMap l = (TimestampStringMap) ser.deserialize(buf);
-        Assert.assertEquals(timestampSet, l);
-    }
-
-    @Test
-    public void testTimestampInternalMap() throws IOException, ClassNotFoundException {
-        TimestampInternalMap timestampMap = new TimestampInternalMap();
-        timestampMap.addTimestamp(6.0);
-        timestampMap.addTimestamp(2.0);
-        timestampMap.addTimestamp(4.0);
-        timestampMap.addTimestamp(4.0);
-        timestampMap.removeTimestamp(2.0);
+    public void testTimestampBooleanMap() throws IOException, ClassNotFoundException {
+        TimestampBooleanMap timestampMap = new TimestampBooleanMap();
+        timestampMap.put(6.0, true);
+        timestampMap.put(1.0, false);
 
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(timestampMap);
-        TimestampInternalMap l = (TimestampInternalMap) ser.deserialize(buf);
-        Assert.assertTrue(timestampMap.deepEquals(l));
+        TimestampBooleanMap l = (TimestampBooleanMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testTimestampByteMap() throws IOException, ClassNotFoundException {
+        TimestampByteMap timestampMap = new TimestampByteMap();
+        timestampMap.put(6.0, (byte) 2);
+        timestampMap.put(1.0, (byte) 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampByteMap l = (TimestampByteMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testTimestampCharMap() throws IOException, ClassNotFoundException {
+        TimestampCharMap timestampMap = new TimestampCharMap();
+        timestampMap.put(6.0, 'a');
+        timestampMap.put(1.0, 'b');
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampCharMap l = (TimestampCharMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testTimestampFloatMap() throws IOException, ClassNotFoundException {
+        TimestampFloatMap timestampMap = new TimestampFloatMap();
+        timestampMap.put(6.0, 2f);
+        timestampMap.put(1.0, 1f);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampFloatMap l = (TimestampFloatMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testTimestampDoubleMap() throws IOException, ClassNotFoundException {
+        TimestampDoubleMap timestampMap = new TimestampDoubleMap();
+        timestampMap.put(6.0, 2.0);
+        timestampMap.put(1.0, 1.0);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampDoubleMap l = (TimestampDoubleMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testTimestampIntegerMap() throws IOException, ClassNotFoundException {
+        TimestampIntegerMap timestampMap = new TimestampIntegerMap();
+        timestampMap.put(6.0, 2);
+        timestampMap.put(1.0, 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampIntegerMap l = (TimestampIntegerMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testTimestampLongMap() throws IOException, ClassNotFoundException {
+        TimestampLongMap timestampMap = new TimestampLongMap();
+        timestampMap.put(6.0, 2l);
+        timestampMap.put(1.0, 1l);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampLongMap l = (TimestampLongMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testTimestampShortMap() throws IOException, ClassNotFoundException {
+        TimestampShortMap timestampMap = new TimestampShortMap();
+        timestampMap.put(6.0, (short) 2);
+        timestampMap.put(1.0, (short) 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampShortMap l = (TimestampShortMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testTimestampStringMap() throws IOException, ClassNotFoundException {
+        TimestampStringMap timestampMap = new TimestampStringMap();
+        timestampMap.put(6.0, "foo");
+        timestampMap.put(1.0, "bar");
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        TimestampStringMap l = (TimestampStringMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalSet() throws IOException, ClassNotFoundException {
+        IntervalSet intervalSet = new IntervalSet();
+        intervalSet.add(new Interval(1.0, 2.0));
+        intervalSet.add(new Interval(4.0, 6.0));
+        intervalSet.add(new Interval(3.0, 4.0));
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(intervalSet);
+        IntervalSet l = (IntervalSet) ser.deserialize(buf);
+        Assert.assertEquals(intervalSet, l);
+    }
+
+    @Test
+    public void testIntervalBooleanMap() throws IOException, ClassNotFoundException {
+        IntervalBooleanMap timestampMap = new IntervalBooleanMap();
+        timestampMap.put(new Interval(6, 7), true);
+        timestampMap.put(new Interval(1, 2), false);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalBooleanMap l = (IntervalBooleanMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalByteMap() throws IOException, ClassNotFoundException {
+        IntervalByteMap timestampMap = new IntervalByteMap();
+        timestampMap.put(new Interval(6, 7), (byte) 2);
+        timestampMap.put(new Interval(1, 2), (byte) 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalByteMap l = (IntervalByteMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalCharMap() throws IOException, ClassNotFoundException {
+        IntervalCharMap timestampMap = new IntervalCharMap();
+        timestampMap.put(new Interval(6, 7), 'a');
+        timestampMap.put(new Interval(1, 2), 'b');
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalCharMap l = (IntervalCharMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalFloatMap() throws IOException, ClassNotFoundException {
+        IntervalFloatMap timestampMap = new IntervalFloatMap();
+        timestampMap.put(new Interval(6, 7), 2f);
+        timestampMap.put(new Interval(1, 2), 1f);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalFloatMap l = (IntervalFloatMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalDoubleMap() throws IOException, ClassNotFoundException {
+        IntervalDoubleMap timestampMap = new IntervalDoubleMap();
+        timestampMap.put(new Interval(6, 7), 2.0);
+        timestampMap.put(new Interval(1, 2), 1.0);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalDoubleMap l = (IntervalDoubleMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalIntegerMap() throws IOException, ClassNotFoundException {
+        IntervalIntegerMap timestampMap = new IntervalIntegerMap();
+        timestampMap.put(new Interval(6, 7), 2);
+        timestampMap.put(new Interval(1, 2), 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalIntegerMap l = (IntervalIntegerMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalLongMap() throws IOException, ClassNotFoundException {
+        IntervalLongMap timestampMap = new IntervalLongMap();
+        timestampMap.put(new Interval(6, 7), 2l);
+        timestampMap.put(new Interval(1, 2), 1l);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalLongMap l = (IntervalLongMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalShortMap() throws IOException, ClassNotFoundException {
+        IntervalShortMap timestampMap = new IntervalShortMap();
+        timestampMap.put(new Interval(6, 7), (short) 2);
+        timestampMap.put(new Interval(1, 2), (short) 1);
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalShortMap l = (IntervalShortMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testIntervalStringMap() throws IOException, ClassNotFoundException {
+        IntervalStringMap timestampMap = new IntervalStringMap();
+        timestampMap.put(new Interval(6, 7), "foo");
+        timestampMap.put(new Interval(1, 2), "bar");
+
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(timestampMap);
+        IntervalStringMap l = (IntervalStringMap) ser.deserialize(buf);
+        Assert.assertEquals(timestampMap, l);
     }
 
     @Test
@@ -518,19 +647,40 @@ public class SerializationTest {
     public void testTimestampStore() throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore store = graphModel.store;
-        TimestampStore timestampStore = store.timestampStore;
-        timestampStore.nodeMap.getTimestampIndex(1.0);
-        timestampStore.nodeMap.getTimestampIndex(2.0);
-        timestampStore.edgeMap.getTimestampIndex(3.0);
-        timestampStore.edgeMap.getTimestampIndex(4.0);
+        TimeStore timestampStore = store.timeStore;
+        timestampStore.nodeIndexStore.add(6.0);
+        timestampStore.nodeIndexStore.add(2.0);
+        timestampStore.nodeIndexStore.add(4.0);
+        timestampStore.nodeIndexStore.add(4.0);
+        timestampStore.nodeIndexStore.remove(2.0);
+        timestampStore.edgeIndexStore.add(3.0);
+        timestampStore.edgeIndexStore.add(4.0);
 
         Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(timestampStore);
 
         graphModel = new GraphModelImpl();
         ser = new Serialization(graphModel);
-        TimestampStore l = (TimestampStore) ser.deserialize(buf);
+        TimeStore l = (TimeStore) ser.deserialize(buf);
         Assert.assertTrue(timestampStore.deepEquals(l));
+    }
+
+    @Test
+    public void testConfiguration() throws IOException, ClassNotFoundException {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Configuration configuration = graphModel.configuration;
+
+        configuration.setNodeIdType(Float.class);
+        configuration.setEdgeIdType(Long.class);
+        configuration.setTimeRepresentation(TimeRepresentation.INTERVAL);
+
+        Serialization ser = new Serialization(graphModel);
+        byte[] buf = ser.serialize(configuration);
+
+        graphModel = new GraphModelImpl();
+        ser = new Serialization(graphModel);
+        Configuration l = (Configuration) ser.deserialize(buf);
+        Assert.assertTrue(configuration.equals(l));
     }
 
     @Test
@@ -737,12 +887,6 @@ public class SerializationTest {
         byte[] buf = ser.serialize("Abcd");
         String l2 = (String) ser.deserialize(buf);
         Assert.assertEquals(l2, "Abcd");
-
-        String[] array = new String[]{"foo", "bar"};
-        byte[] bufArray = ser.serialize(array);
-        Object l2Array = ser.deserialize(bufArray);
-        Assert.assertTrue(l2Array.getClass() == Object[].class);
-        Assert.assertTrue(Arrays.equals(array, (Object[]) l2Array));
     }
 
     @Test
@@ -828,6 +972,14 @@ public class SerializationTest {
         char[] l = new char[]{'1', 'a', '&'};
         Object deserialize = ser.deserialize(ser.serialize(l));
         Assert.assertTrue(Arrays.equals(l, (char[]) deserialize));
+    }
+
+    @Test
+    public void testStringArray() throws ClassNotFoundException, IOException {
+        Serialization ser = new Serialization(null);
+        String[] l = new String[]{"foo", "bar", ""};
+        Object deserialize = ser.deserialize(ser.serialize(l));
+        Assert.assertTrue(Arrays.equals(l, (String[]) deserialize));
     }
 
     @Test

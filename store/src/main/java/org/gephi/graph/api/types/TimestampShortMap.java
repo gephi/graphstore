@@ -127,7 +127,7 @@ public final class TimestampShortMap extends TimestampMap<Short> {
      * @return array of all values
      */
     public short[] toShortArray() {
-        return (short[]) toNativeArray();
+        return (short[]) toPrimitiveArray();
     }
 
     @Override

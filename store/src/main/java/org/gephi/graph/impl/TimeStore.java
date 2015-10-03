@@ -18,25 +18,32 @@ package org.gephi.graph.impl;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.TimeRepresentation;
 
-public class TimestampStore {
+public class TimeStore {
 
     protected final GraphStore graphStore;
     //Lock (optional
     protected final GraphLock lock;
     //Store
-    protected final TimestampInternalMap nodeMap;
-    protected final TimestampInternalMap edgeMap;
-    protected final TimestampIndexStore<Node> nodeIndexStore;
-    protected final TimestampIndexStore<Edge> edgeIndexStore;
+    protected final TimeIndexStore nodeIndexStore;
+    protected final TimeIndexStore edgeIndexStore;
 
-    public TimestampStore(GraphStore store, GraphLock graphLock, boolean indexed) {
+    public TimeStore(GraphStore store, GraphLock graphLock, boolean indexed) {
         lock = graphLock;
         graphStore = store;
-        nodeMap = new TimestampInternalMap();
-        edgeMap = new TimestampInternalMap();
-        nodeIndexStore = indexed ? new TimestampIndexStore<Node>(this, Node.class, nodeMap) : null;
-        edgeIndexStore = indexed ? new TimestampIndexStore<Edge>(this, Edge.class, edgeMap) : null;
+
+        TimeRepresentation timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
+        if (store != null) {
+            timeRepresentation = store.configuration.getTimeRepresentation();
+        }
+        if (timeRepresentation.equals(TimeRepresentation.INTERVAL)) {
+            nodeIndexStore = new IntervalIndexStore<Node>(Node.class, lock, indexed);
+            edgeIndexStore = new IntervalIndexStore<Edge>(Edge.class, lock, indexed);
+        } else {
+            nodeIndexStore = new TimestampIndexStore<Node>(Node.class, lock, indexed);
+            edgeIndexStore = new TimestampIndexStore<Edge>(Edge.class, lock, indexed);
+        }
     }
 
     public double getMin(Graph graph) {
@@ -72,33 +79,33 @@ public class TimestampStore {
     }
 
     public boolean isEmpty() {
-        return nodeMap.size() == 0 && edgeMap.size() == 0;
+        return nodeIndexStore.size() == 0 && edgeIndexStore.size() == 0;
     }
 
     public void clear() {
-        nodeMap.clear();
-        edgeMap.clear();
+        nodeIndexStore.clear();
+        edgeIndexStore.clear();
     }
 
     public void clearEdges() {
-        edgeMap.clear();
+        edgeIndexStore.clear();
     }
 
     public int deepHashCode() {
         int hash = 3;
-        hash = 79 * hash + (this.nodeMap != null ? this.nodeMap.deepHashCode() : 0);
-        hash = 79 * hash + (this.edgeMap != null ? this.edgeMap.deepHashCode() : 0);
+        hash = 79 * hash + (this.nodeIndexStore != null ? this.nodeIndexStore.deepHashCode() : 0);
+        hash = 79 * hash + (this.edgeIndexStore != null ? this.edgeIndexStore.deepHashCode() : 0);
         return hash;
     }
 
-    public boolean deepEquals(TimestampStore obj) {
+    public boolean deepEquals(TimeStore obj) {
         if (obj == null) {
             return false;
         }
-        if (this.nodeMap != obj.nodeMap && (this.nodeMap == null || !this.nodeMap.deepEquals(obj.nodeMap))) {
+        if (this.nodeIndexStore != obj.nodeIndexStore && (this.nodeIndexStore == null || !this.nodeIndexStore.deepEquals(obj.nodeIndexStore))) {
             return false;
         }
-        if (this.edgeMap != obj.edgeMap && (this.edgeMap == null || !this.edgeMap.deepEquals(obj.edgeMap))) {
+        if (this.edgeIndexStore != obj.edgeIndexStore && (this.edgeIndexStore == null || !this.edgeIndexStore.deepEquals(obj.edgeIndexStore))) {
             return false;
         }
         return true;

@@ -20,7 +20,7 @@ import java.util.Arrays;
 /**
  * Sorted set for timestamps.
  */
-public final class TimestampSet {
+public final class TimestampSet implements TimeSet<Double> {
 
     private double[] array;
     private int size = 0;
@@ -60,64 +60,43 @@ public final class TimestampSet {
         size = arr.length;
     }
 
-    /**
-     * Adds timestamp to this set.
-     *
-     * @param timestamp timestamp
-     * @return true if added, false otherwise
-     */
-    public boolean add(double timestamp) {
+    @Override
+    public boolean add(Double timestamp) {
         return addInner(timestamp) >= 0;
     }
 
-    /**
-     * Removes timestamp from this set.
-     *
-     * @param timestamp timestamp
-     * @return true if removed, false otherwise
-     */
-    public boolean remove(double timestamp) {
+    @Override
+    public boolean remove(Double timestamp) {
         return removeInner(timestamp) >= 0;
     }
 
-    /**
-     * Returns the size of this set.
-     *
-     * @return the number of elements in this set
-     */
+    @Override
     public int size() {
         return size;
     }
 
-    /**
-     * Returns true if this set is empty.
-     *
-     * @return true if empty, false otherwise
-     */
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }
 
-    /**
-     * Returns true if this set contains <code>timestamp</code>.
-     *
-     * @param timestamp timestamp
-     * @return true if contains, false otherwise
-     */
-    public boolean contains(double timestamp) {
+    @Override
+    public boolean contains(Double timestamp) {
         int index = Arrays.binarySearch(array, timestamp);
         return index >= 0 && index < size;
     }
 
-    /**
-     * Returns an array of all timestamps in this set.
-     * <p>
-     * This method may return a reference to the underlying array so clients
-     * should make a copy if the array is written to.
-     *
-     * @return array of all timestamps
-     */
-    public double[] getTimestamps() {
+    @Override
+    public Double[] toArray() {
+        Double[] res = new Double[size];
+        for (int i = 0; i < size; i++) {
+            res[i] = array[i];
+        }
+        return res;
+    }
+
+    @Override
+    public double[] toPrimitiveArray() {
         if (size < array.length) {
             double[] res = new double[size];
             System.arraycopy(array, 0, res, 0, size);
@@ -127,9 +106,7 @@ public final class TimestampSet {
         }
     }
 
-    /**
-     * Empties this set.
-     */
+    @Override
     public void clear() {
         size = 0;
         array = new double[0];

@@ -133,7 +133,7 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
      * @return array of all values
      */
     public float[] toFloatArray() {
-        return (float[]) toNativeArray();
+        return (float[]) toPrimitiveArray();
     }
 
     @Override

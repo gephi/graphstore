@@ -100,14 +100,14 @@ public class GraphViewStore {
         try {
             checkNonNullViewObject(view);
 
-            TimestampIndexStore nodeTimestampStore = graphStore.timestampStore.nodeIndexStore;
-            if (nodeTimestampStore != null) {
-                nodeTimestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            TimeIndexStore nodeTimeStore = graphStore.timeStore.nodeIndexStore;
+            if (nodeTimeStore != null) {
+                nodeTimeStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
             }
 
-            TimestampIndexStore edgeTimestampStore = graphStore.timestampStore.edgeIndexStore;
-            if (edgeTimestampStore != null) {
-                edgeTimestampStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+            TimeIndexStore edgeTimeStore = graphStore.timeStore.edgeIndexStore;
+            if (edgeTimeStore != null) {
+                edgeTimeStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
             }
 
             IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;

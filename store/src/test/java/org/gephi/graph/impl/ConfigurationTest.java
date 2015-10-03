@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.TimeRepresentation;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -40,6 +41,13 @@ public class ConfigurationTest {
         Configuration c = new Configuration();
         c.setEdgeIdType(Float.class);
         Assert.assertEquals(c.getEdgeIdType(), Float.class);
+    }
+
+    @Test
+    public void testSetTimeRepresentation() {
+        Configuration c = new Configuration();
+        c.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Assert.assertEquals(c.getTimeRepresentation(), TimeRepresentation.INTERVAL);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

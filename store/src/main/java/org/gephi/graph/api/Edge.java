@@ -23,31 +23,39 @@ public interface Edge extends Element, EdgeProperties {
     /**
      * Returns the egde's source.
      *
-     * @return the source node
+     * @return source node
      */
     public Node getSource();
 
     /**
      * Returns the edge's target.
      *
-     * @return the target node
+     * @return target node
      */
     public Node getTarget();
 
     /**
      * Returns the edge's weight.
      *
-     * @return the weight
+     * @return weight
      */
     public double getWeight();
 
     /**
      * Returns the edge's weight at the given timestamp.
      *
-     * @param timestamp the timestamp
-     * @return the weight
+     * @param timestamp timestamp
+     * @return weight
      */
     public double getWeight(double timestamp);
+
+    /**
+     * Returns the edge's weight at the given interval.
+     *
+     * @param interval interval
+     * @return weight
+     */
+    public double getWeight(Interval interval);
 
     /**
      * Returns the edge's weight in the given graph view.
@@ -55,25 +63,33 @@ public interface Edge extends Element, EdgeProperties {
      * Views can configure a time interval and therefore the edge weight over
      * time may vary.
      *
-     * @param view the graph view
-     * @return the weight
+     * @param view graph view
+     * @return weight
      */
     public double getWeight(GraphView view);
 
     /**
      * Sets the edge's weight.
      *
-     * @param weight the weight
+     * @param weight weight
      */
     public void setWeight(double weight);
 
     /**
      * Sets the edge's weight at the given timestamp.
      *
-     * @param weight the weight
-     * @param timestamp the timestamp
+     * @param weight weight
+     * @param timestamp timestamp
      */
     public void setWeight(double weight, double timestamp);
+
+    /**
+     * Sets the edge's weight at the given interval.
+     *
+     * @param weight weight
+     * @param interval interval
+     */
+    public void setWeight(double weight, Interval interval);
 
     /**
      * Returns true if this edge has a dynamic weight.
@@ -85,14 +101,14 @@ public interface Edge extends Element, EdgeProperties {
     /**
      * Returns the edge's type.
      *
-     * @return the type
+     * @return type
      */
     public int getType();
 
     /**
      * Returns the edge's type label.
      *
-     * @return the type label.
+     * @return type label.
      */
     public Object getTypeLabel();
 

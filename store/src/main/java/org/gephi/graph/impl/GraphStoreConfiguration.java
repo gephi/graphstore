@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
+import org.gephi.graph.api.TimeRepresentation;
 
 public final class GraphStoreConfiguration {
 
@@ -45,16 +46,19 @@ public final class GraphStoreConfiguration {
     public static final double VIEW_GROWING_FACTOR = 1.1;
     //Properties
     public static final boolean ENABLE_ELEMENT_LABEL = true;
-    public static final boolean ENABLE_ELEMENT_TIMESTAMP_SET = true;
+    public static final boolean ENABLE_ELEMENT_TIME_SET = true;
+    public static final Class DEFAULT_NODE_ID_TYPE = String.class;
+    public static final Class DEFAULT_EDGE_ID_TYPE = String.class;
     //Properties index
     public static final int ELEMENT_ID_INDEX = 0;
     public static final int ELEMENT_LABEL_INDEX = 1;
-    public static final int ELEMENT_TIMESTAMP_INDEX = ENABLE_ELEMENT_LABEL ? 2 : 1;
-    public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIMESTAMP_SET ? ELEMENT_TIMESTAMP_INDEX + 1 : ELEMENT_TIMESTAMP_INDEX;
+    public static final int ELEMENT_TIMESET_INDEX = ENABLE_ELEMENT_LABEL ? 2 : 1;
+    public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIME_SET ? ELEMENT_TIMESET_INDEX + 1 : ELEMENT_TIMESET_INDEX;
     //TimeFormat
     public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
     //Dynamics
     public static final Estimator DEFAULT_ESTIMATOR = Estimator.FIRST;
+    public static final TimeRepresentation DEFAULT_TIME_REPRESENTATION = TimeRepresentation.TIMESTAMP;
     //Miscellaneous
-    public static final double TIMESTAMP_INTERNAL_MAP_GROWING_FACTOR = 1.1;
+    public static final double TIMESTAMP_STORE_GROWING_FACTOR = 1.1;
 }

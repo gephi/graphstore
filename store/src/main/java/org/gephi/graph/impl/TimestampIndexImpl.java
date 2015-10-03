@@ -25,40 +25,38 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.gephi.graph.api.TimestampIndex;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeIndex;
 
-public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> {
+public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
 
     // Const
     protected static final int NULL_INDEX = -1;
     // Data
     protected final GraphLock lock;
     protected final TimestampIndexStore timestampIndexStore;
-    protected final TimestampInternalMap timestampMap;
     protected final boolean mainIndex;
     protected TimestampIndexEntry[] timestamps;
     protected int elementCount;
 
     public TimestampIndexImpl(TimestampIndexStore store, boolean main) {
         timestampIndexStore = store;
-        timestampMap = store.timestampMap;
         mainIndex = main;
         timestamps = new TimestampIndexEntry[0];
-        lock = store.timestampStore.lock;
+        lock = store.graphLock;
     }
 
     @Override
     public double getMinTimestamp() {
         if (mainIndex) {
-            Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
+            Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
             if (!sortedMap.isEmpty()) {
                 return sortedMap.firstDoubleKey();
             }
         } else {
-            Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
+            Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
             if (!sortedMap.isEmpty()) {
                 ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator();
                 while (bi.hasNext()) {
@@ -80,12 +78,12 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
     @Override
     public double getMaxTimestamp() {
         if (mainIndex) {
-            Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
+            Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
             if (!sortedMap.isEmpty()) {
                 return sortedMap.lastDoubleKey();
             }
         } else {
-            Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
+            Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
             if (!sortedMap.isEmpty()) {
                 ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator(sortedMap.double2IntEntrySet().last());
                 while (bi.hasPrevious()) {
@@ -109,7 +107,7 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
         checkDouble(timestamp);
 
         readLock();
-        int index = timestampMap.getTimestampIndex(timestamp);
+        int index = timestampIndexStore.getTimestampIndex(timestamp);
         if (index != NULL_INDEX) {
             TimestampIndexEntry ts = timestamps[index];
             if (ts != null) {
@@ -126,8 +124,8 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
         checkDouble(interval.getHigh());
 
         readLock();
-        ObjectSet<ElementImpl> elements = new ObjectOpenHashSet<ElementImpl>();
-        Double2IntSortedMap sortedMap = timestampMap.timestampSortedMap;
+        ObjectSet<Element> elements = new ObjectOpenHashSet<Element>();
+        Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
         if (!sortedMap.isEmpty()) {
             for (Double2IntMap.Entry entry : sortedMap.tailMap(interval.getLow()).double2IntEntrySet()) {
                 double timestamp = entry.getDoubleKey();
@@ -158,7 +156,7 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
         elementCount = 0;
     }
 
-    protected void add(int timestampIndex, ElementImpl element) {
+    protected void add(int timestampIndex, Element element) {
         ensureArraySize(timestampIndex);
         TimestampIndexEntry entry = timestamps[timestampIndex];
         if (entry == null) {
@@ -169,7 +167,7 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
         }
     }
 
-    protected void remove(int timestampIndex, ElementImpl element) {
+    protected void remove(int timestampIndex, Element element) {
         TimestampIndexEntry entry = timestamps[timestampIndex];
         if (entry.remove(element)) {
             elementCount--;
@@ -234,17 +232,17 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
 
     protected static class TimestampIndexEntry {
 
-        protected final ObjectSet<ElementImpl> elementSet;
+        protected final ObjectSet<Element> elementSet;
 
         public TimestampIndexEntry() {
-            elementSet = new ObjectOpenHashSet<ElementImpl>();
+            elementSet = new ObjectOpenHashSet<Element>();
         }
 
-        public boolean add(ElementImpl element) {
+        public boolean add(Element element) {
             return elementSet.add(element);
         }
 
-        public boolean remove(ElementImpl element) {
+        public boolean remove(Element element) {
             return elementSet.remove(element);
         }
 
@@ -255,9 +253,9 @@ public class TimestampIndexImpl<T extends Element> implements TimestampIndex<T> 
 
     protected class ElementIteratorImpl implements Iterator<Element> {
 
-        private final ObjectIterator<ElementImpl> itr;
+        private final ObjectIterator<Element> itr;
 
-        public ElementIteratorImpl(ObjectIterator<ElementImpl> itr) {
+        public ElementIteratorImpl(ObjectIterator<Element> itr) {
             this.itr = itr;
         }
 

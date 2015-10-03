@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.impl.BasicGraphStore.BasicEdgeStore;
 
 /**
@@ -353,7 +355,14 @@ public class GraphGenerator {
     }
 
     public static GraphStore generateTinyGraphStore() {
-        GraphStore graphStore = new GraphStore(null);
+        return generateTinyGraphStore(GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION);
+    }
+
+    public static GraphStore generateTinyGraphStore(TimeRepresentation timeRepresentation) {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(timeRepresentation);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        GraphStore graphStore = graphModel.store;
         NodeImpl n1 = new NodeImpl("1", graphStore);
         NodeImpl n2 = new NodeImpl("2", graphStore);
         EdgeImpl e = new EdgeImpl("0", graphStore, n1, n2, EdgeTypeStore.NULL_LABEL, 1.0, true);
