@@ -553,26 +553,28 @@ public abstract class ElementImpl implements Element {
         return false;
     }
 
-    //TODO: Make this part of API?
-    public Iterable<Map.Entry<Double, Object>> getAttributes(Column column) {
-        checkEnabledTimeSet();
+    @Override
+    public Iterable<Map.Entry> getAttributes(Column column) {
         checkColumn(column);
         checkColumnDynamic(column);
 
         int index = column.getIndex();
-        TimestampMap dynamicValue = null;
+        TimeMap dynamicValue = null;
         synchronized (this) {
             if (index < attributes.length) {
-                dynamicValue = (TimestampMap) attributes[index];
+                dynamicValue = (TimeMap) attributes[index];
             }
             if (dynamicValue != null) {
                 Object[] values = dynamicValue.toValuesArray();
-                double[] timestamps = dynamicValue.getTimestamps();
-                return new DynamicValueIterable(timestamps, values);
+                if (dynamicValue instanceof TimestampMap) {
+                    return new TimeAttributeIterable(((TimestampMap) dynamicValue).getTimestamps(), values);
+                } else if (dynamicValue instanceof IntervalMap) {
+                    return new TimeAttributeIterable(((IntervalMap) dynamicValue).toKeysArray(), values);
+                }
             }
 
         }
-        return DynamicValueIterable.EMPTY_ITERABLE;
+        return TimeAttributeIterable.EMPTY_ITERABLE;
     }
 
     private TimeSet getTimeSet() {
@@ -737,99 +739,5 @@ public abstract class ElementImpl implements Element {
             return graphStore.configuration.getTimeRepresentation();
         }
         return GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
-    }
-
-    private static class DynamicValueIterable implements Iterable<Map.Entry<Double, Object>> {
-
-        private static Iterator<Map.Entry<Double, Object>> EMPTY_ITERATOR = new EmptyIterator<Map.Entry<Double, Object>>();
-        private static Iterable<Map.Entry<Double, Object>> EMPTY_ITERABLE = new Iterable<Map.Entry<Double, Object>>() {
-
-            @Override
-            public Iterator<Map.Entry<Double, Object>> iterator() {
-                return EMPTY_ITERATOR;
-            }
-        };
-        private final double[] timestamps;
-        private final Object[] values;
-
-        public DynamicValueIterable(double[] timestamps, Object[] values) {
-            this.timestamps = timestamps;
-            this.values = values;
-        }
-
-        @Override
-        public Iterator<Map.Entry<Double, Object>> iterator() {
-            return new DynamicValueIterator(timestamps, values);
-        }
-
-        private static class EmptyIterator<T> implements Iterator<T> {
-
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
-
-            @Override
-            public T next() {
-                throw new UnsupportedOperationException("Not supposed to call this for empty iterator.");
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException("Not supposed to call this for empty iterator.");
-            }
-        }
-    }
-
-    private static class DynamicValueIterator implements Iterator<Map.Entry<Double, Object>> {
-
-        private final Entry entry = new Entry();
-        private final double[] timestamps;
-        private final Object[] values;
-        private int index;
-
-        public DynamicValueIterator(double[] timestamps, Object[] values) {
-            this.timestamps = timestamps;
-            this.values = values;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return index < timestamps.length;
-        }
-
-        @Override
-        public Map.Entry<Double, Object> next() {
-            entry.timestamp = timestamps[index];
-            entry.value = values[index++];
-            return entry;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
-
-        private static class Entry implements Map.Entry<Double, Object> {
-
-            private double timestamp;
-            private Object value;
-
-            @Override
-            public Double getKey() {
-                return timestamp;
-            }
-
-            @Override
-            public Object getValue() {
-                return value;
-            }
-
-            @Override
-            public Object setValue(Object value) {
-                throw new UnsupportedOperationException("Not supported");
-            }
-
-        }
     }
 }

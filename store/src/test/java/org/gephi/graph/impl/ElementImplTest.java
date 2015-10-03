@@ -691,7 +691,7 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testGetDynamicAttributes() {
+    public void testGetAttributesTimestamp() {
         GraphStore store = new GraphStore();
         Column column = generateTimestampColumn(store);
 
@@ -700,7 +700,7 @@ public class ElementImplTest {
         node.setAttribute(column, 14, 3.0);
         node.setAttribute(column, 13, 2.0);
 
-        Iterator<Map.Entry<Double, Object>> itr = node.getAttributes(column).iterator();
+        Iterator<Map.Entry> itr = node.getAttributes(column).iterator();
         Assert.assertTrue(itr.hasNext());
         Map.Entry<Double, Object> entry1 = itr.next();
         Assert.assertEquals(entry1.getKey(), 1.0);
@@ -717,13 +717,45 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testGetDynamicAttributesEmpty() {
+    public void testGetAttributesInterval() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 12, new Interval(3.0, 4.0));
+        node.setAttribute(column, 14, new Interval(1.0, 2.0));
+
+        Iterator<Map.Entry> itr = node.getAttributes(column).iterator();
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Double, Object> entry1 = itr.next();
+        Assert.assertEquals(entry1.getKey(), new Interval(1.0, 2.0));
+        Assert.assertEquals(entry1.getValue(), 14);
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Double, Object> entry2 = itr.next();
+        Assert.assertEquals(entry2.getKey(), new Interval(3.0, 4.0));
+        Assert.assertEquals(entry2.getValue(), 12);
+        Assert.assertFalse(itr.hasNext());
+    }
+
+    @Test
+    public void testGetAttributesTimestampEmpty() {
         GraphStore store = new GraphStore();
         Column column = generateTimestampColumn(store);
 
         NodeImpl node = new NodeImpl("0", store);
 
-        Iterator<Map.Entry<Double, Object>> itr = node.getAttributes(column).iterator();
+        Iterator<Map.Entry> itr = node.getAttributes(column).iterator();
+        Assert.assertFalse(itr.hasNext());
+    }
+
+    @Test
+    public void testGetAttributesIntervalEmpty() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+
+        Iterator<Map.Entry> itr = node.getAttributes(column).iterator();
         Assert.assertFalse(itr.hasNext());
     }
 

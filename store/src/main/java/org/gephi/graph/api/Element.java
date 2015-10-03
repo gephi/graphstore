@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.api;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -105,6 +106,15 @@ public interface Element extends ElementProperties {
      * @return attribute value, or null
      */
     public Object getAttribute(Column column, GraphView view);
+
+    /**
+     * Returns an iterable over all the keys and values over time for the given
+     * column.
+     *
+     * @param column column
+     * @return time attribute iterable
+     */
+    public Iterable<Map.Entry> getAttributes(Column column);
 
     /**
      * Returns all the attribute values in an array.

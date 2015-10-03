@@ -656,6 +656,11 @@ public class BasicGraphStore implements DirectedGraph {
         public Object removeAttribute(Column column, Interval interval) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public Iterable<Map.Entry> getAttributes(Column column) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     public static class BasicNode extends BasicElement implements Node {
