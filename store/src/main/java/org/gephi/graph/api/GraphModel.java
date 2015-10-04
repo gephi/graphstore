@@ -154,6 +154,13 @@ public interface GraphModel {
     public GraphFactory factory();
 
     /**
+     * Returns the graph bridge.
+     *
+     * @return graph bridge
+     */
+    public GraphBridge bridge();
+
+    /**
      * Gets the full graph.
      *
      * @return the graph

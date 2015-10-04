@@ -76,7 +76,7 @@ public interface Table extends ColumnIterable {
      * Returns the column with the given identifier.
      *
      * @param id the column's id
-     * @return the found column
+     * @return the found column or null if not found
      */
     public Column getColumn(String id);
 

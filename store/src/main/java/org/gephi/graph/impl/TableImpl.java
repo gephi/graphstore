@@ -167,7 +167,7 @@ public class TableImpl<T extends Element> implements Table {
             throw new IllegalArgumentException("The column id can't be empty.");
         }
         if (store.hasColumn(id.toLowerCase())) {
-            throw new IllegalArgumentException("The column already existing in the table");
+            throw new IllegalArgumentException("The column '" + id + "' already existing in the table");
         }
     }
 

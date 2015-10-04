@@ -24,6 +24,7 @@ import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphBridge;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphObserver;
@@ -38,6 +39,7 @@ public class GraphModelImpl implements GraphModel {
 
     protected final Configuration configuration;
     protected final GraphStore store;
+    protected final GraphBridgeImpl graphBridge;
 
     public GraphModelImpl() {
         this(new Configuration());
@@ -46,11 +48,17 @@ public class GraphModelImpl implements GraphModel {
     public GraphModelImpl(Configuration config) {
         configuration = config.copy();
         store = new GraphStore(this);
+        graphBridge = new GraphBridgeImpl(store);
     }
 
     @Override
     public GraphFactory factory() {
         return store.factory;
+    }
+
+    @Override
+    public GraphBridge bridge() {
+        return graphBridge;
     }
 
     @Override

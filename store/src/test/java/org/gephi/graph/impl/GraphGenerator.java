@@ -325,11 +325,19 @@ public class GraphGenerator {
     }
 
     public static NodeImpl[] generateSmallNodeList() {
-        return generateNodeList(100);
+        return generateSmallNodeList(null);
+    }
+
+    public static NodeImpl[] generateSmallNodeList(GraphStore graphStore) {
+        return generateNodeList(100, graphStore);
     }
 
     public static NodeImpl[] generateLargeNodeList() {
-        return generateNodeList(GraphStoreConfiguration.NODESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.NODESTORE_BLOCK_SIZE / 3.0));
+        return generateLargeNodeList(null);
+    }
+
+    public static NodeImpl[] generateLargeNodeList(GraphStore graphStore) {
+        return generateNodeList(GraphStoreConfiguration.NODESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.NODESTORE_BLOCK_SIZE / 3.0), graphStore);
     }
 
     public static BasicGraphStore.BasicNode[] generateLargeBasicNodeList() {
@@ -337,9 +345,13 @@ public class GraphGenerator {
     }
 
     public static NodeImpl[] generateNodeList(int nodeCount) {
+        return generateNodeList(nodeCount, null);
+    }
+
+    public static NodeImpl[] generateNodeList(int nodeCount, GraphStore graphStore) {
         NodeImpl[] nodes = new NodeImpl[nodeCount];
         for (int i = 0; i < nodeCount; i++) {
-            NodeImpl node = new NodeImpl(String.valueOf(i));
+            NodeImpl node = new NodeImpl(String.valueOf(i), graphStore);
             nodes[i] = node;
         }
         return nodes;
@@ -375,7 +387,7 @@ public class GraphGenerator {
     public static GraphStore generateSmallGraphStore() {
         int edgeCount = 100;
         GraphStore graphStore = new GraphModelImpl().store;
-        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)));
+        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)), graphStore);
         graphStore.addAllNodes(Arrays.asList(nodes));
         EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, true, true);
         graphStore.addAllEdges(Arrays.asList(edges));
@@ -385,7 +397,7 @@ public class GraphGenerator {
     public static GraphStore generateSmallMultiTypeGraphStore() {
         int edgeCount = 100;
         GraphStore graphStore = new GraphModelImpl().store;
-        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)));
+        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)), graphStore);
         graphStore.addAllNodes(Arrays.asList(nodes));
         EdgeImpl[] edges = generateMultiTypeEdgeList(graphStore.nodeStore, edgeCount, 3, true, true);
         graphStore.addAllEdges(Arrays.asList(edges));
@@ -395,7 +407,7 @@ public class GraphGenerator {
     public static GraphStore generateSmallUndirectedGraphStore() {
         int edgeCount = 100;
         GraphStore graphStore = new GraphModelImpl().store;
-        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)));
+        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)), graphStore);
         graphStore.addAllNodes(Arrays.asList(nodes));
         EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, false, true);
         graphStore.addAllEdges(Arrays.asList(edges));

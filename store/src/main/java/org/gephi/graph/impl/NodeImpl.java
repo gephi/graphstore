@@ -152,7 +152,7 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
-    public TextProperties getTextProperties() {
+    public TextPropertiesImpl getTextProperties() {
         return properties.getTextProperties();
     }
 
@@ -316,7 +316,7 @@ public class NodeImpl extends ElementImpl implements Node {
         }
 
         @Override
-        public TextProperties getTextProperties() {
+        public TextPropertiesImpl getTextProperties() {
             return textProperties;
         }
 
