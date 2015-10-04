@@ -186,6 +186,8 @@ public class GraphFactoryTest {
         Assert.assertEquals(graphFactory.newNode().getId(), 11);
         graphFactory.newNode(5);
         Assert.assertEquals(graphFactory.newNode().getId(), 12);
+        graphFactory.newNode(13);
+        Assert.assertEquals(graphFactory.newNode().getId(), 14);
     }
 
     @Test
@@ -202,6 +204,8 @@ public class GraphFactoryTest {
         Assert.assertEquals(graphFactory.newEdge(n2, n3).getId(), 11);
         graphFactory.newEdge(5, n1, n2, 9, 7.0, false);
         Assert.assertEquals(graphFactory.newEdge(n1, n3).getId(), 12);
+        graphFactory.newEdge(13, n1, n2, 9, 7.0, false);
+        Assert.assertEquals(graphFactory.newEdge(n1, n3).getId(), 14);
     }
 
     @Test
@@ -214,6 +218,8 @@ public class GraphFactoryTest {
         Assert.assertEquals(graphFactory.newNode().getId(), "12");
         graphFactory.newNode("5");
         Assert.assertEquals(graphFactory.newNode().getId(), "13");
+        graphFactory.newNode("14");
+        Assert.assertEquals(graphFactory.newNode().getId(), "15");
     }
 
     @Test
@@ -230,6 +236,8 @@ public class GraphFactoryTest {
         Assert.assertEquals(graphFactory.newEdge(n1, n3).getId(), "12");
         graphFactory.newEdge("5", n1, n3, 9, 7.0, false);
         Assert.assertEquals(graphFactory.newEdge(n1, n3).getId(), "13");
+        graphFactory.newEdge("14", n1, n2, 9, 7.0, false);
+        Assert.assertEquals(graphFactory.newEdge(n1, n3).getId(), "15");
     }
 
     @Test

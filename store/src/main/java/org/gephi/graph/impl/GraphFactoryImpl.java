@@ -69,7 +69,7 @@ public class GraphFactoryImpl implements GraphFactory {
         switch (edgeAssignConfiguration) {
             case INTEGER:
                 Integer idInt = (Integer) id;
-                if (idInt > EDGE_IDS.get()) {
+                if (idInt >= EDGE_IDS.get()) {
                     EDGE_IDS.set(idInt + 1);
                 }
                 break;
@@ -77,7 +77,7 @@ public class GraphFactoryImpl implements GraphFactory {
                 String idStr = (String) id;
                 if (isNumeric(idStr)) {
                     Integer idStrParsed = Integer.parseInt(idStr);
-                    if (idStrParsed > EDGE_IDS.get()) {
+                    if (idStrParsed >= EDGE_IDS.get()) {
                         EDGE_IDS.set(idStrParsed + 1);
                     }
                 }
@@ -97,7 +97,7 @@ public class GraphFactoryImpl implements GraphFactory {
         switch (nodeAssignConfiguration) {
             case INTEGER:
                 Integer idInt = (Integer) id;
-                if (idInt > NODE_IDS.get()) {
+                if (idInt >= NODE_IDS.get()) {
                     NODE_IDS.set(idInt + 1);
                 }
                 break;
@@ -105,7 +105,7 @@ public class GraphFactoryImpl implements GraphFactory {
                 String idStr = (String) id;
                 if (isNumeric(idStr)) {
                     Integer idStrParsed = Integer.parseInt(idStr);
-                    if (idStrParsed > NODE_IDS.get()) {
+                    if (idStrParsed >= NODE_IDS.get()) {
                         NODE_IDS.set(idStrParsed + 1);
                     }
                 }
