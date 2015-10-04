@@ -18,10 +18,6 @@ package org.gephi.graph.impl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class EdgeTypeStoreTest {
 
     @Test
@@ -204,6 +200,67 @@ public class EdgeTypeStoreTest {
         Assert.assertEquals(edgeTypeStore.garbageQueue.size(), 0);
         Assert.assertEquals(edgeTypeStore.size(), 3);
         Assert.assertEquals(edgeTypeStore.length, 3);
+    }
+
+    @Test
+    public void testAddDirectTypeNull() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertFalse(edgeTypeStore.addType(null, EdgeTypeStore.NULL_LABEL));
+        Assert.assertEquals(edgeTypeStore.size(), 1);
+    }
+
+    @Test
+    public void testAddDirectTypeSameId() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertEquals(edgeTypeStore.addType("foo"), 1);
+        Assert.assertFalse(edgeTypeStore.addType("foo", 1));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testAddDirectTypeDifferentId() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertEquals(edgeTypeStore.addType("foo"), 1);
+        edgeTypeStore.addType("foo", 2);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testAddDirectTypeDifferentLabel() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertEquals(edgeTypeStore.addType("foo"), 1);
+        edgeTypeStore.addType("bar", 1);
+    }
+
+    @Test
+    public void testAddDirectTypeFromGarbage() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertEquals(edgeTypeStore.addType("foo"), 1);
+        Assert.assertEquals(edgeTypeStore.removeType(1), "foo");
+        Assert.assertTrue(edgeTypeStore.addType("bar", 1));
+        Assert.assertEquals(edgeTypeStore.getId("bar"), 1);
+        Assert.assertEquals(edgeTypeStore.getLabel(1), "bar");
+    }
+
+    @Test
+    public void testAddDirectType() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertTrue(edgeTypeStore.addType("foo", 3));
+        Assert.assertEquals(edgeTypeStore.getId("foo"), 3);
+        Assert.assertEquals(edgeTypeStore.getLabel(3), "foo");
+        Assert.assertEquals(edgeTypeStore.garbageQueue.size(), 2);
+        Assert.assertEquals(edgeTypeStore.getId(null), EdgeTypeStore.NULL_LABEL);
+        Assert.assertNull(edgeTypeStore.getLabel(EdgeTypeStore.NULL_LABEL));
+        Assert.assertEquals(edgeTypeStore.addType("bar"), 1);
+        Assert.assertEquals(edgeTypeStore.addType("bar2"), 2);
+    }
+
+    @Test
+    public void testAddDirectTypeNoGarbage() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertTrue(edgeTypeStore.addType("foo", 1));
+        Assert.assertEquals(edgeTypeStore.getId("foo"), 1);
+        Assert.assertEquals(edgeTypeStore.getLabel(1), "foo");
+        Assert.assertEquals(edgeTypeStore.garbageQueue.size(), 0);
+        Assert.assertEquals(edgeTypeStore.addType("bar"), 2);
     }
 
     @Test

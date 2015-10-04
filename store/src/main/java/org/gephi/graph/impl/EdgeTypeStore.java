@@ -97,6 +97,37 @@ public class EdgeTypeStore {
         return shortToInt(id);
     }
 
+    public boolean addType(final Object label, final int id) {
+        short givenId = intToShort(id);
+        short foundId = labelMap.getShort(label);
+        if (foundId != NULL_SHORT && foundId != givenId) {
+            throw new RuntimeException("This label '" + label + "' is already assigned to a different id");
+        } else if (idMap.containsKey(givenId)) {
+            if ((label == null && idMap.get(givenId) == null) || idMap.get(givenId).equals(label)) {
+                return false;
+            } else {
+                throw new RuntimeException("This id '" + id + "' is already assigned to a different label");
+            }
+        }
+        if (garbageQueue.contains(givenId)) {
+            garbageQueue.remove(givenId);
+            labelMap.put(label, givenId);
+            idMap.put(givenId, label);
+        } else {
+            short insertId = intToShort(length++);
+            while (insertId < givenId) {
+                garbageQueue.add(insertId);
+                insertId = intToShort(length++);
+                if (length >= MAX_SIZE) {
+                    throw new RuntimeException("Maximum number of edge types reached at " + MAX_SIZE);
+                }
+            }
+            labelMap.put(label, givenId);
+            idMap.put(givenId, label);
+        }
+        return true;
+    }
+
     public int removeType(final Object label) {
         short id = labelMap.removeShort(label);
         if (id == NULL_SHORT) {
