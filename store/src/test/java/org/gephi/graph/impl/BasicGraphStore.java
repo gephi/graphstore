@@ -989,6 +989,11 @@ public class BasicGraphStore implements DirectedGraph {
         public void setWeight(double weight, Interval interval) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public Iterable<Map.Entry> getWeights() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     public static class BasicNodeStore implements Collection<Node>, NodeIterable {

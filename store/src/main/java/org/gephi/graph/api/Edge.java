@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.api;
 
+import java.util.Map;
+
 /**
  * An edge.
  */
@@ -67,6 +69,13 @@ public interface Edge extends Element, EdgeProperties {
      * @return weight
      */
     public double getWeight(GraphView view);
+
+    /**
+     * Returns an iterable of all weights over time.
+     *
+     * @return weights iterable
+     */
+    public Iterable<Map.Entry> getWeights();
 
     /**
      * Sets the edge's weight.

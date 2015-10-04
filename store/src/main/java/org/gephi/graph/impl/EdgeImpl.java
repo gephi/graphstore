@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import java.awt.Color;
+import java.util.Map;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
@@ -26,7 +27,9 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.TextProperties;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.TimeMap;
+import org.gephi.graph.api.types.TimestampMap;
 
 public class EdgeImpl extends ElementImpl implements Edge {
 
@@ -181,6 +184,24 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 return (Double) value;
             }
         }
+    }
+
+    @Override
+    public Iterable<Map.Entry> getWeights() {
+        synchronized (this) {
+            Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+            if (weightValue instanceof Double) {
+                throw new IllegalStateException("The weight is static, call getWeight() instead");
+            }
+            TimeMap dynamicValue = (TimeMap) weightValue;
+            Object[] values = dynamicValue.toValuesArray();
+            if (dynamicValue instanceof TimestampMap) {
+                return new TimeAttributeIterable(((TimestampMap) dynamicValue).getTimestamps(), values);
+            } else if (dynamicValue instanceof IntervalMap) {
+                return new TimeAttributeIterable(((IntervalMap) dynamicValue).toKeysArray(), values);
+            }
+        }
+        return TimeAttributeIterable.EMPTY_ITERABLE;
     }
 
     @Override

@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.Iterator;
+import java.util.Map;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
@@ -181,6 +183,54 @@ public class EdgeImplTest {
         view.setTimeInterval(new Interval(2.0, 2.0));
 
         Assert.assertEquals(e.getWeight(view), 20.0);
+    }
+
+    @Test
+    public void testGetWeightsTimestamp() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Edge e = graphStore.getEdge("0");
+        e.setWeight(10.0, 3.0);
+        e.setWeight(20.0, 1.0);
+
+        Iterator<Map.Entry> itr = e.getWeights().iterator();
+        Assert.assertNotNull(itr);
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Double, Double> n1 = itr.next();
+        Assert.assertEquals(n1.getKey(), 1.0);
+        Assert.assertEquals(n1.getValue(), 20.0);
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Double, Double> n2 = itr.next();
+        Assert.assertEquals(n2.getKey(), 3.0);
+        Assert.assertEquals(n2.getValue(), 10.0);
+        Assert.assertFalse(itr.hasNext());
+    }
+
+    @Test
+    public void testGetWeightsInterval() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        Edge e = graphStore.getEdge("0");
+        e.setWeight(10.0, new Interval(3.0, 4.0));
+        e.setWeight(20.0, new Interval(1.0, 2.0));
+
+        Iterator<Map.Entry> itr = e.getWeights().iterator();
+        Assert.assertNotNull(itr);
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Interval, Double> n1 = itr.next();
+        Assert.assertEquals(n1.getKey(), new Interval(1.0, 2.0));
+        Assert.assertEquals(n1.getValue(), 20.0);
+        Assert.assertTrue(itr.hasNext());
+        Map.Entry<Interval, Double> n2 = itr.next();
+        Assert.assertEquals(n2.getKey(), new Interval(3.0, 4.0));
+        Assert.assertEquals(n2.getValue(), 10.0);
+        Assert.assertFalse(itr.hasNext());
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testGetWeightsStatic() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        Edge e = graphStore.getEdge("0");
+        e.setWeight(42.0);
+        e.getWeights();
     }
 
     @Test
