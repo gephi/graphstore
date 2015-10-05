@@ -19,10 +19,12 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.List;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.types.TimestampStringMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -343,6 +345,22 @@ public class TimestampIndexStoreTest {
     }
 
     @Test
+    public void testClearNodeWithAttributes() {
+        GraphStore graphStore = new GraphStore();
+        TimeStore timestampStore = graphStore.timeStore;
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
+
+        Column col = graphStore.nodeTable.addColumn("foo", TimestampStringMap.class);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
+        nodeImpl.setAttribute(col, "bar", 1.0);
+
+        store.index(nodeImpl);
+        store.clear(nodeImpl);
+
+        Assert.assertEquals(store.size(), 0);
+    }
+
+    @Test
     public void testClearRemove() {
         GraphStore graphStore = new GraphStore();
         TimeStore timestampStore = graphStore.timeStore;
@@ -508,6 +526,23 @@ public class TimestampIndexStoreTest {
         view.fill();
         TimestampIndexImpl index = store.createViewIndex(graph);
         store.clear();
+        Assert.assertFalse(index.hasElements());
+    }
+
+    @Test
+    public void testRemoveWithView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+
+        TimeStore timestampStore = graphStore.timeStore;
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        view.fill();
+        TimestampIndexImpl index = store.createViewIndex(graph);
+        n1.removeTimestamp(1.0);
         Assert.assertFalse(index.hasElements());
     }
 

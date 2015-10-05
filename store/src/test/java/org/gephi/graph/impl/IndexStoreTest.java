@@ -22,13 +22,10 @@ import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Subgraph;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class IndexStoreTest {
 
     @Test
@@ -338,6 +335,32 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testClearWithView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        NodeImpl n2 = graphStore.getNode("2");
+        graphStore.addNode(n1);
+
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeTable.store.addColumn(column);
+        n1.setAttribute(column, "bar");
+
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+
+        GraphView view = graphStore.viewStore.createView();
+        Subgraph graph = graphStore.viewStore.getGraph(view);
+        graph.fill();
+
+        IndexImpl index = indexStore.createViewIndex(graphStore.viewStore.getGraph(view));
+
+        indexStore.clear();
+
+        Assert.assertEquals(index.countElements(column), 0);
+        Assert.assertEquals(index.countValues(column), 0);
+        Assert.assertEquals(index.count(column, null), 0);
+    }
+
+    @Test
     public void testSetWithView() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         NodeImpl n1 = graphStore.getNode("1");
@@ -388,7 +411,7 @@ public class IndexStoreTest {
     }
 
     @Test
-    public void testClearWithView() {
+    public void testClearElementWithView() {
         GraphStore graphStore = generateBasicGraphStoreWithColumns();
         GraphView view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
@@ -402,7 +425,7 @@ public class IndexStoreTest {
         IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
         IndexImpl index = indexStore.createViewIndex(graphStore.viewStore.getGraph(view));
 
-        graphStore.removeNode(n1);
+        n1.clearAttributes();
 
         Assert.assertEquals(index.countElements(column), 0);
         Assert.assertEquals(index.countValues(column), 0);

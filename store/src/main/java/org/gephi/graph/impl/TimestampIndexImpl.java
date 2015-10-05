@@ -184,10 +184,6 @@ public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
         return entry;
     }
 
-    protected void removeTimestamp(final int index) {
-        timestamps[index] = null;
-    }
-
     private void ensureArraySize(int index) {
         if (index >= timestamps.length) {
             TimestampIndexEntry[] newArray = new TimestampIndexEntry[index + 1];

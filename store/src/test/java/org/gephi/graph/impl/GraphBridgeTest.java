@@ -25,6 +25,7 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalIntegerMap;
 import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -262,7 +263,7 @@ public class GraphBridgeTest {
     }
 
     @Test
-    public void testCopyNodeAttributes() {
+    public void testCopyNodeAttributesTimestamp() {
         GraphStore source = GraphGenerator.generateTinyGraphStore();
         Column c1 = source.nodeTable.addColumn("foo", String.class);
         Column c2 = source.nodeTable.addColumn("bar", TimestampIntegerMap.class);
@@ -279,6 +280,29 @@ public class GraphBridgeTest {
         Assert.assertEquals(n1Copy.getAttribute(c1Copy), "test");
         Assert.assertEquals(n1Copy.getAttribute(c2Copy, 1.0), 10);
         Assert.assertEquals(n1Copy.getAttribute(c2Copy, 2.0), 20);
+    }
+
+    @Test
+    public void testCopyNodeAttributesInterval() {
+        GraphStore source = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        Column c1 = source.nodeTable.addColumn("foo", String.class);
+        Column c2 = source.nodeTable.addColumn("bar", IntervalIntegerMap.class);
+        Node n1 = source.getNode("1");
+        n1.setAttribute(c1, "test");
+        n1.setAttribute(c2, 10, new Interval(1.0, 2.0));
+        n1.setAttribute(c2, 20, new Interval(3.0, 4.0));
+
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphModelImpl model = new GraphModelImpl(config);
+        GraphStore dest = model.store;
+        new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
+        Column c1Copy = dest.nodeTable.getColumn("foo");
+        Column c2Copy = dest.nodeTable.getColumn("bar");
+        Node n1Copy = dest.getNode("1");
+        Assert.assertEquals(n1Copy.getAttribute(c1Copy), "test");
+        Assert.assertEquals(n1Copy.getAttribute(c2Copy, new Interval(1.0, 2.0)), 10);
+        Assert.assertEquals(n1Copy.getAttribute(c2Copy, new Interval(3.0, 4.0)), 20);
     }
 
     @Test

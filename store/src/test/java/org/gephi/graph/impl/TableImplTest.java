@@ -22,10 +22,6 @@ import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author mbastian
- */
 public class TableImplTest {
 
     @Test
@@ -42,6 +38,22 @@ public class TableImplTest {
         Assert.assertEquals(table.countColumns(), 1);
         Assert.assertEquals(table.getColumn("Id"), col);
         Assert.assertEquals(table.getColumn("id"), col);
+    }
+
+    @Test
+    public void testAddColumnWithOrigin() {
+        TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
+        Column col = table.addColumn("Id", Integer.class, Origin.PROPERTY);
+        Assert.assertEquals(col.getOrigin(), Origin.PROPERTY);
+        Assert.assertTrue(col.isProperty());
+    }
+
+    @Test
+    public void testAddColumnWithTitleAndDefaultValue() {
+        TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
+        Column col = table.addColumn("Id", "Foo", Integer.class, 42);
+        Assert.assertEquals(col.getTitle(), "Foo");
+        Assert.assertEquals(col.getDefaultValue(), 42);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

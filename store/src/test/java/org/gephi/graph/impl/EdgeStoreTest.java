@@ -67,6 +67,7 @@ public class EdgeStoreTest {
         edgeStore.add(e2);
         Assert.assertEquals(edgeStore.size(), 2);
         Assert.assertEquals(edgeStore.size(0), 2);
+        Assert.assertEquals(edgeStore.size(99), 0);
         edgeStore.remove(e1);
         Assert.assertEquals(edgeStore.size(), 1);
         edgeStore.remove(e2);

@@ -828,6 +828,7 @@ public class ElementImplTest {
         node.checkType(new ColumnImpl("0", IntervalCharMap.class, null, null, Origin.DATA, false, false), 'a');
         node.checkType(new ColumnImpl("0", IntervalBooleanMap.class, null, null, Origin.DATA, false, false), true);
         node.checkType(new ColumnImpl("0", IntervalStringMap.class, null, null, Origin.DATA, false, false), "foo");
+
     }
 
     //Utility
