@@ -149,7 +149,7 @@ public interface GraphModel {
     /**
      * Returns the graph factory.
      *
-     * @return the graph factory
+     * @return graph factory
      */
     public GraphFactory factory();
 
@@ -163,7 +163,7 @@ public interface GraphModel {
     /**
      * Gets the full graph.
      *
-     * @return the graph
+     * @return graph
      */
     public Graph getGraph();
 
@@ -172,66 +172,66 @@ public interface GraphModel {
      * <p>
      * The visible graph may be the full graph (default) or a graph view.
      *
-     * @return the visible graph
+     * @return visible graph
      */
     public Graph getGraphVisible();
 
     /**
      * Gets the graph for the given graph view.
      *
-     * @param view the graph view
-     * @return the graph for this view
+     * @param view graph view
+     * @return graph for this view
      */
     public Subgraph getGraph(GraphView view);
 
     /**
      * Gets the full graph with the directed interface.
      *
-     * @return the directed graph
+     * @return directed graph
      */
     public DirectedGraph getDirectedGraph();
 
     /**
      * Gets the visible graph with the directed interface.
      *
-     * @return the visible graph
+     * @return visible graph
      */
     public DirectedGraph getDirectedGraphVisible();
 
     /**
      * Gets the full graph with the undirected interface.
      *
-     * @return the undirected graph
+     * @return undirected graph
      */
     public UndirectedGraph getUndirectedGraph();
 
     /**
      * Gets the visible graph with the undirected interface.
      *
-     * @return the visible graph
+     * @return visible graph
      */
     public UndirectedGraph getUndirectedGraphVisible();
 
     /**
      * Gets the directed graph for the given graph view.
      *
-     * @param view the graph view
-     * @return the directed graph for this view
+     * @param view graph view
+     * @return directed graph for this view
      */
     public DirectedSubgraph getDirectedGraph(GraphView view);
 
     /**
      * Gets the undirected graph for the given graph view.
      *
-     * @param view the graph view
-     * @return the undirected graph for this view
+     * @param view graph view
+     * @return undirected graph for this view
      */
     public UndirectedSubgraph getUndirectedGraph(GraphView view);
 
     /**
      * Gets the visible view.
      *
-     * @return the visible view
+     * @return visible view
      */
     public GraphView getVisibleView();
 
@@ -240,7 +240,7 @@ public interface GraphModel {
      * <p>
      * If <em>view</em> is null, it restores the main view.
      *
-     * @param view the view
+     * @param view view
      */
     public void setVisibleView(GraphView view);
 
@@ -249,24 +249,24 @@ public interface GraphModel {
      * <p>
      * If the type already exists, it returns the existing identifier.
      *
-     * @param label the edge type label
-     * @return the newly created edge type identifier.
+     * @param label edge type label
+     * @return newly created edge type identifier.
      */
     public int addEdgeType(Object label);
 
     /**
      * Gets the edge type for the given label.
      *
-     * @param label the edge label
-     * @return the edge type identifier, or -1 if not found
+     * @param label edge label
+     * @return edge type identifier, or -1 if not found
      */
     public int getEdgeType(Object label);
 
     /**
      * Gets the edge label associated with the given type.
      *
-     * @param id the edge type
-     * @return the edge label
+     * @param id edge type
+     * @return edge label
      */
     public Object getEdgeLabel(int id);
 
@@ -308,7 +308,7 @@ public interface GraphModel {
     /**
      * Creates a new graph view.
      *
-     * @return the newly created graph view
+     * @return newly created graph view
      */
     public GraphView createView();
 
@@ -321,15 +321,15 @@ public interface GraphModel {
      *
      * @param node true to enable node view, false otherwise
      * @param edge true to enable edge view, false otherwise
-     * @return the newly created graph view
+     * @return newly created graph view
      */
     public GraphView createView(boolean node, boolean edge);
 
     /**
      * Creates a new graph view based on an existing view.
      *
-     * @param view the view to copy
-     * @return the newly created graph view
+     * @param view view to copy
+     * @return newly created graph view
      */
     public GraphView copyView(GraphView view);
 
@@ -340,17 +340,17 @@ public interface GraphModel {
      * only nodes or only edges. By default, the view applies to both nodes and
      * edges.
      *
-     * @param view the view to copy
+     * @param view view to copy
      * @param node true to enable node view, false otherwise
      * @param edge true to enable edge view, false otherwise
-     * @return the newly created graph view
+     * @return newly created graph view
      */
     public GraphView copyView(GraphView view, boolean node, boolean edge);
 
     /**
      * Destroys the given view.
      *
-     * @param view the view to destryo
+     * @param view view to destroy
      */
     public void destroyView(GraphView view);
 
@@ -372,7 +372,7 @@ public interface GraphModel {
      * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b>
      * tables by default.
      *
-     * @return the node table, contains node columns
+     * @return node table, contains node columns
      */
     public Table getNodeTable();
 
@@ -383,14 +383,14 @@ public interface GraphModel {
      * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b>
      * tables by default.
      *
-     * @return the edge table, contains edge columns
+     * @return edge table, contains edge columns
      */
     public Table getEdgeTable();
 
     /**
      * Gets the node index.
      *
-     * @return the node index
+     * @return node index
      */
     public Index<Node> getNodeIndex();
 
@@ -398,14 +398,14 @@ public interface GraphModel {
      * Gets the node index for the given graph view.
      *
      * @param view the view to get the index from
-     * @return the node index
+     * @return node index
      */
     public Index<Node> getNodeIndex(GraphView view);
 
     /**
      * Gets the edge index.
      *
-     * @return the edge index
+     * @return edge index
      */
     public Index<Edge> getEdgeIndex();
 
@@ -413,14 +413,14 @@ public interface GraphModel {
      * Gets the edge index for the given graph view.
      *
      * @param view the view to get the index from
-     * @return the edge index
+     * @return edge index
      */
     public Index<Edge> getEdgeIndex(GraphView view);
 
     /**
      * Gets the node time index.
      *
-     * @return the node time index
+     * @return node time index
      */
     public TimeIndex<Node> getNodeTimeIndex();
 
@@ -428,22 +428,22 @@ public interface GraphModel {
      * Gets the node time index for the given view.
      *
      * @param view the view to get the index from
-     * @return the node time index
+     * @return node time index
      */
     public TimeIndex<Node> getNodeTimeIndex(GraphView view);
 
     /**
      * Gets the edge time index.
      *
-     * @return the edge timestamp index
+     * @return edge timestamp index
      */
     public TimeIndex<Edge> getEdgeTimeIndex();
 
     /**
      * Gets the edge time index for the given view.
      *
-     * @param view the view to get the index from
-     * @return the edge timestamp index
+     * @param view view to get the index from
+     * @return edge timestamp index
      */
     public TimeIndex<Edge> getEdgeTimeIndex(GraphView view);
 
@@ -453,7 +453,7 @@ public interface GraphModel {
      * The time bounds is an interval made of the minimum and maximum time
      * observed in the entire graph.
      *
-     * @return the time bounds
+     * @return time bounds
      */
     public Interval getTimeBounds();
 
@@ -463,7 +463,7 @@ public interface GraphModel {
      * The time bounds is an interval made of the minimum and maximum time
      * observed in the entire graph.
      *
-     * @return the time bounds
+     * @return time bounds
      */
     public Interval getTimeBoundsVisible();
 
@@ -474,7 +474,7 @@ public interface GraphModel {
      * observed in the entire graph.
      *
      * @param view the graph view
-     * @return the time bounds
+     * @return time bounds
      */
     public Interval getTimeBounds(GraphView view);
 
@@ -484,21 +484,38 @@ public interface GraphModel {
      * @param graph the graph to observe
      * @param withGraphDiff true to include graph difference feature, false
      * otherwise
-     * @return the newly created graph observer
+     * @return newly created graph observer
      */
     public GraphObserver createGraphObserver(Graph graph, boolean withGraphDiff);
 
     /**
      * Returns the time format used to display time.
      *
-     * @return the time format
+     * @return time format
      */
     public TimeFormat getTimeFormat();
 
     /**
      * Sets the time format used to display time.
      *
-     * @param timeFormat the time format
+     * @param timeFormat time format
      */
     public void setTimeFormat(TimeFormat timeFormat);
+
+    /**
+     * Returns the current configuration.
+     *
+     * @return configuration
+     */
+    public Configuration getConfiguration();
+
+    /**
+     * Sets a new configuration for this graph model.
+     * <p>
+     * Note that this method only works if the graph model is empty.
+     *
+     * @param configuration new configuration
+     * @throws IllegalStateException if the graph model isn't empty
+     */
+    public void setConfiguration(Configuration configuration);
 }

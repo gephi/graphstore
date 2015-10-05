@@ -91,6 +91,10 @@ public class GraphAttributesImpl {
         }
     }
 
+    public boolean isEmpty() {
+        return attributes.isEmpty();
+    }
+
     public int deepHashCode() {
         int hash = 3;
         hash = 47 * hash + (this.attributes != null ? this.attributes.hashCode() : 0);

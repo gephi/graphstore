@@ -30,8 +30,8 @@ public class GraphFactoryImpl implements GraphFactory {
     protected final AtomicInteger NODE_IDS = new AtomicInteger();
     protected final AtomicInteger EDGE_IDS = new AtomicInteger();
     //Config
-    protected final AssignConfiguration nodeAssignConfiguration;
-    protected final AssignConfiguration edgeAssignConfiguration;
+    protected AssignConfiguration nodeAssignConfiguration;
+    protected AssignConfiguration edgeAssignConfiguration;
     //Store
     protected final GraphStore store;
 
@@ -200,6 +200,13 @@ public class GraphFactoryImpl implements GraphFactory {
             return false;
         }
         return true;
+    }
+
+    public void resetConfiguration() {
+        this.nodeAssignConfiguration
+                = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getNodeIdType()));
+        this.edgeAssignConfiguration
+                = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getEdgeIdType()));
     }
 
     protected final AssignConfiguration getAssignConfiguration(Class type) {

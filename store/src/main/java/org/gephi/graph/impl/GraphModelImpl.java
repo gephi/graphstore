@@ -30,6 +30,7 @@ import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
@@ -341,6 +342,38 @@ public class GraphModelImpl implements GraphModel {
             return new Interval(min, max);
         } finally {
             store.autoReadUnlock();
+        }
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return configuration.copy();
+    }
+
+    @Override
+    public void setConfiguration(Configuration config) {
+        store.autoWriteLock();
+        try {
+            if (store.getNodeCount() > 0 || !store.attributes.isEmpty() || store.nodeTable.countColumns()
+                    != GraphStoreConfiguration.NODE_DEFAULT_COLUMNS || store.edgeTable.countColumns() != GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS) {
+                throw new IllegalStateException("The store should be empty when modifying the configuration");
+            }
+            if (!config.getNodeIdType().equals(configuration.getNodeIdType())) {
+                TableImpl<Node> nodeTable = store.nodeTable;
+                nodeTable.store.removeColumn("id");
+                nodeTable.store.addColumn(new ColumnImpl(nodeTable, "id", config.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
+                configuration.setNodeIdType(config.getNodeIdType());
+            }
+            if (!config.getEdgeIdType().equals(configuration.getEdgeIdType())) {
+                TableImpl<Edge> edgeTable = store.edgeTable;
+                edgeTable.store.removeColumn("id");
+                edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", config.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
+                configuration.setEdgeIdType(config.getEdgeIdType());
+            }
+            configuration.setTimeRepresentation(config.getTimeRepresentation());
+            store.factory.resetConfiguration();
+        } finally {
+            store.autoWriteUnlock();
         }
     }
 

@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 import java.io.IOException;
 import java.util.Arrays;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeFormat;
@@ -401,5 +402,65 @@ public class GraphModelTest {
         byte[] bytes = dio.toByteArray();
         GraphModelImpl readModelImpl = (GraphModelImpl) GraphModel.Serialization.read(dio.reset(bytes));
         Assert.assertTrue(readModelImpl.deepEquals(readModelImpl));
+    }
+
+    @Test
+    public void testGetConfiguration() {
+        Configuration config = new Configuration();
+        config.setNodeIdType(Long.class);
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
+        Assert.assertEquals(graphModelImpl.getConfiguration(), config);
+    }
+
+    @Test
+    public void testGetConfigurationCopy() {
+        Configuration config = new Configuration();
+        config.setNodeIdType(Long.class);
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
+        Assert.assertEquals(graphModelImpl.getConfiguration(), config);
+        config.setNodeIdType(Float.class);
+        Assert.assertEquals(graphModelImpl.getConfiguration().getNodeIdType(), Long.class);
+    }
+
+    @Test
+    public void testSetConfiguration() {
+        Configuration config = new Configuration();
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
+        config.setNodeIdType(Integer.class);
+        config.setEdgeIdType(Byte.class);
+        graphModelImpl.setConfiguration(config);
+        Assert.assertEquals(graphModelImpl.getConfiguration(), config);
+        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn("id").getTypeClass(), Integer.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("id").getTypeClass(), Byte.class);
+        Assert.assertEquals(graphModelImpl.store.factory.nodeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.INTEGER);
+        Assert.assertEquals(graphModelImpl.store.factory.edgeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.DISABLED);
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testSetConfigurationWithNodes() {
+        GraphModelImpl graphModelImpl = new GraphModelImpl();
+        graphModelImpl.store.addNode(graphModelImpl.factory().newNode());
+        graphModelImpl.setConfiguration(new Configuration());
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testSetConfigurationWithGraphAttributes() {
+        GraphModelImpl graphModelImpl = new GraphModelImpl();
+        graphModelImpl.getGraph().setAttribute("foo", "bar");
+        graphModelImpl.setConfiguration(new Configuration());
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testSetConfigurationWithNodeColumns() {
+        GraphModelImpl graphModelImpl = new GraphModelImpl();
+        graphModelImpl.store.nodeTable.addColumn("foo", Integer.class);
+        graphModelImpl.setConfiguration(new Configuration());
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testSetConfigurationWithEdgeColumns() {
+        GraphModelImpl graphModelImpl = new GraphModelImpl();
+        graphModelImpl.store.edgeTable.addColumn("foo", Integer.class);
+        graphModelImpl.setConfiguration(new Configuration());
     }
 }

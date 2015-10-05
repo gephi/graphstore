@@ -24,7 +24,6 @@ import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
-import org.gephi.graph.api.TextProperties;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.IntervalMap;
