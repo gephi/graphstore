@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import java.awt.Color;
+import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Node;
@@ -206,6 +207,20 @@ public class TableImplTest {
     public void testGetElementClass() {
         TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
         Assert.assertEquals(table.getElementClass(), Node.class);
+    }
+
+    @Test
+    public void testToArray() {
+        TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
+        Column col = table.addColumn("Id", Integer.class);
+        Assert.assertEquals(table.toArray(), new Column[]{col});
+    }
+
+    @Test
+    public void testToList() {
+        TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
+        Column col = table.addColumn("Id", Integer.class);
+        Assert.assertEquals(table.toList(), Arrays.asList(new Column[]{col}));
     }
 
     @Test
