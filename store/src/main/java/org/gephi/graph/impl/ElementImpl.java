@@ -216,10 +216,13 @@ public abstract class ElementImpl implements Element {
             ColumnStore columnStore = getColumnStore();
             ColumnImpl columnImpl = (ColumnImpl) column;
             if (columnImpl.isDynamic() && oldValue != null) {
-                TimeMap dynamicValue = (TimeMap) oldValue;
                 TimeIndexStore timeIndexStore = getTimeIndexStore();
                 if (timeIndexStore != null) {
-                    timeIndexStore.remove(dynamicValue);
+                    if (TimeMap.class.isAssignableFrom(columnImpl.getTypeClass())) {
+                        timeIndexStore.remove((TimeMap) oldValue);
+                    } else if (TimeSet.class.isAssignableFrom(columnImpl.getTypeClass())) {
+                        timeIndexStore.remove((TimeSet) oldValue);
+                    }
                 }
             } else if (column.isIndexed() && columnStore != null && isValid()) {
                 columnStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
@@ -323,13 +326,21 @@ public abstract class ElementImpl implements Element {
                 oldValue = attributes[index];
             }
 
-            if (column.isDynamic()) {
+            if (column.isDynamic() && isValid()) {
                 TimeIndexStore timeIndexStore = getTimeIndexStore();
                 if (timeIndexStore != null) {
-                    if (oldValue != null) {
-                        timeIndexStore.remove((TimeMap) oldValue);
+                    if (TimeMap.class.isAssignableFrom(column.getTypeClass())) {
+                        if (oldValue != null && oldValue instanceof TimeMap) {
+                            timeIndexStore.remove((TimeMap) oldValue);
+                        }
+                        timeIndexStore.add((TimeMap) value);
+                    } else if (TimeSet.class.isAssignableFrom(column.getTypeClass())
+                            && column.getIndex() == GraphStoreConfiguration.ELEMENT_TIMESET_INDEX) {
+                        if (oldValue != null) {
+                            timeIndexStore.remove((TimeSet) oldValue);
+                        }
+                        timeIndexStore.add((TimeSet) value);
                     }
-                    timeIndexStore.add((TimeMap) value);
                 }
             } else if (column.isIndexed() && columnStore != null && isValid()) {
                 value = columnStore.indexStore.set(column, oldValue, value, this);

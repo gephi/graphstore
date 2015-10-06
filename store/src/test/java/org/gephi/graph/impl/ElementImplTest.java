@@ -607,6 +607,32 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testRemoveTimestampSet() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.addTimestamp(1.0);
+
+        Column col = store.nodeTable.getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
+        Assert.assertNotNull(node.removeAttribute(col));
+        Assert.assertNull(node.getAttribute(col));
+        Assert.assertEquals(node.getTimestamps(), new double[0]);
+    }
+
+    @Test
+    public void testRemoveIntervalSet() {
+        GraphStore store = getIntervalGraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.addInterval(new Interval(1.0, 2.0));
+
+        Column col = store.nodeTable.getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
+        Assert.assertNotNull(node.removeAttribute(col));
+        Assert.assertNull(node.getAttribute(col));
+        Assert.assertEquals(node.getIntervals(), new Interval[0]);
+    }
+
+    @Test
     public void testRemoveAttributeWithTimestamp() {
         GraphStore store = new GraphStore();
         Column column = generateTimestampColumn(store);

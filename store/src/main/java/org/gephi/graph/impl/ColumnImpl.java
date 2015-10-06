@@ -23,6 +23,7 @@ import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.types.TimeMap;
+import org.gephi.graph.api.types.TimeSet;
 import org.gephi.graph.api.types.TimestampMap;
 
 public class ColumnImpl implements Column {
@@ -60,7 +61,7 @@ public class ColumnImpl implements Column {
         this.origin = origin;
         this.indexed = indexed;
         this.readOnly = readOnly;
-        this.dynamic = TimeMap.class.isAssignableFrom(typeClass);
+        this.dynamic = TimeMap.class.isAssignableFrom(typeClass) || TimeSet.class.isAssignableFrom(typeClass);
         this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<ColumnObserverImpl>() : null;
         this.estimator = this.dynamic ? Estimator.FIRST : null;
     }
@@ -157,18 +158,20 @@ public class ColumnImpl implements Column {
         if (!dynamic) {
             throw new IllegalStateException("The column must have a dynamic type");
         }
-        TimestampMap vs = null;
-        try {
-            vs = (TimestampMap) typeClass.newInstance();
-        } catch (InstantiationException ex) {
-            throw new RuntimeException(ex);
-        } catch (IllegalAccessException ex) {
-            throw new RuntimeException(ex);
+        if (TimeMap.class.isAssignableFrom(typeClass)) {
+            TimeMap vs = null;
+            try {
+                vs = (TimeMap) typeClass.newInstance();
+            } catch (InstantiationException ex) {
+                throw new RuntimeException(ex);
+            } catch (IllegalAccessException ex) {
+                throw new RuntimeException(ex);
+            }
+            if (!vs.isSupported(estimator)) {
+                throw new IllegalArgumentException("The column doesnt't support this estimator");
+            }
+            this.estimator = estimator;
         }
-        if (!vs.isSupported(estimator)) {
-            throw new IllegalArgumentException("The column doesnt't support this estimator");
-        }
-        this.estimator = estimator;
     }
 
     @Override
