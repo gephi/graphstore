@@ -570,6 +570,21 @@ public class IntervalMapTest {
         map1.clear();
         Assert.assertEquals(map2.size(), 2);
     }
+    
+    @Test
+    public void testToString() {
+        IntervalStringMap map1 = new IntervalStringMap();
+        Assert.assertEquals(map1.toString(), "<empty>");
+        
+        map1.put(new Interval(1.0, 2.0), "foo");
+        Assert.assertEquals(map1.toString(), "<[1.0, 2.0, foo]>");
+        
+        map1.put(new Interval(4.0, 5.5), "bar");
+        Assert.assertEquals(map1.toString(), "<[1.0, 2.0, foo]; [4.0, 5.5, bar]>");
+        
+        map1.put(new Interval(6.0, 9.0), " 'test' ");
+        Assert.assertEquals(map1.toString(), "<[1.0, 2.0, foo]; [4.0, 5.5, bar]; [6.0, 9.0, \" 'test' \"]>");
+    }
 
     //UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {

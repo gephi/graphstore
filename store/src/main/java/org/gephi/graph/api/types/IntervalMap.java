@@ -513,4 +513,57 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         //TODO
         return null;
     }
+
+    @Override
+    public String toString() {
+        //TODO: add a toString that shows bounds as datetimes?
+        if(size == 0){
+            return "<empty>";
+        }
+        
+        T[] values = toValuesArray();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("<");
+        for (int i = 0; i < size; i++) {
+            sb.append('[');
+            sb.append(array[i * 2]);
+            sb.append(", ");
+            sb.append(array[i * 2 + 1]);
+            
+            sb.append(", ");
+            String stringValue = values[i].toString();
+            if (containsSpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
+                sb.append('"');
+                sb.append(stringValue.replace("\\", "\\\\").replace("\"", "\\\""));
+                sb.append('"');
+            } else {
+                sb.append(stringValue);
+            }
+
+            sb.append(']');
+            
+            if(i < size- 1){
+                sb.append("; ");
+            }
+        }
+        sb.append(">");
+        
+        return sb.toString();
+    }
+    
+    
+    private static final char[] SPECIAL_CHARACTERS = ";,()[]\"'".toCharArray();
+    /**
+     * @param value String value
+     * @return True if the string contains special characters for dynamic intervals syntax
+     */
+    public static boolean containsSpecialCharacters(String value) {
+        for (char c : SPECIAL_CHARACTERS) {
+            if (value.indexOf(c) != -1) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

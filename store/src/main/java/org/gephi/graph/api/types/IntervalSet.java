@@ -311,4 +311,28 @@ public final class IntervalSet implements TimeSet<Interval> {
         return true;
     }
 
+    @Override
+    public String toString() {
+        //TODO: add a toString that shows bounds as datetimes?
+        if(size == 0){
+            return "<empty>";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("<");
+        for (int i = 0; i < size; i++) {
+            sb.append('[');
+            sb.append(array[i * 2]);
+            sb.append(", ");
+            sb.append(array[i * 2 + 1]);
+            sb.append(']');
+            
+            if(i < size- 1){
+                sb.append("; ");
+            }
+        }
+        sb.append(">");
+        
+        return sb.toString();
+    }
 }

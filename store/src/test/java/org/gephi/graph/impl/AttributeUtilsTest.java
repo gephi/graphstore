@@ -33,6 +33,7 @@ import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
@@ -60,7 +61,7 @@ public class AttributeUtilsTest {
     }
 
     @Test
-    public void testParse() {
+    public void testParseSimpleTypes() {
         Assert.assertEquals(AttributeUtils.parse("foo", String.class), "foo");
         Assert.assertEquals(AttributeUtils.parse("0", Integer.class), 0);
         Assert.assertEquals(AttributeUtils.parse("0", Float.class), 0f);
@@ -72,6 +73,50 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("true", Boolean.class), true);
         Assert.assertEquals(AttributeUtils.parse("1", Boolean.class), true);
         Assert.assertEquals(AttributeUtils.parse("0", Boolean.class), false);
+    }
+    
+    @Test
+    public void testParseDynamicIntervalTypes() {
+        IntervalSet set = new IntervalSet();
+        set.add(new Interval(1, 2));
+        set.add(new Interval(21, 124));
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2]; [21.0, 124.0]>", IntervalSet.class), set);
+        
+        IntervalStringMap mString = new IntervalStringMap();
+        mString.put(new Interval(1, 2), "value");
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, value]>", IntervalStringMap.class), mString);
+        
+        IntervalIntegerMap mInteger = new IntervalIntegerMap();
+        mInteger.put(new Interval(1, 2), 25);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, 25]>", IntervalIntegerMap.class), mInteger);
+        
+        IntervalFloatMap mFloat = new IntervalFloatMap();
+        mFloat.put(new Interval(1, 2), 25f);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, 25]>", IntervalFloatMap.class), mFloat);
+        
+        IntervalDoubleMap mDouble = new IntervalDoubleMap();
+        mDouble.put(new Interval(1, 2), 25d);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, 25]>", IntervalDoubleMap.class), mDouble);
+        
+        IntervalLongMap mLong = new IntervalLongMap();
+        mLong.put(new Interval(1, 2), 25l);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, 25]>", IntervalLongMap.class), mLong);
+        
+        IntervalShortMap mShort = new IntervalShortMap();
+        mShort.put(new Interval(1, 2), (short) 25);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, 25]>", IntervalShortMap.class), mShort);
+        
+        IntervalByteMap mByte = new IntervalByteMap();
+        mByte.put(new Interval(1, 2), (byte) 6);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, 6]>", IntervalByteMap.class), mByte);
+        
+        IntervalCharMap mChar = new IntervalCharMap();
+        mChar.put(new Interval(1, 2), 'z');
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, z]>", IntervalCharMap.class), mChar);
+        
+        IntervalBooleanMap mBool = new IntervalBooleanMap();
+        mBool.put(new Interval(1, 2), true);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, true]>", IntervalBooleanMap.class), mBool);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
