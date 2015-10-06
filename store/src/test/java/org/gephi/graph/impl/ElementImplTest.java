@@ -95,6 +95,23 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testSetAttributeTimestamp() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimestampColumn(store);
+
+        TimestampIntegerMap ti = new TimestampIntegerMap();
+        ti.put(1.0, 42);
+        ti.put(2.0, 10);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, ti);
+
+        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], ti);
+        Assert.assertEquals(node.getAttribute(column), ti);
+    }
+
+    @Test
     public void testReplaceAttribute() {
         GraphStore store = new GraphStore();
         Column column = generateBasicColumn(store);

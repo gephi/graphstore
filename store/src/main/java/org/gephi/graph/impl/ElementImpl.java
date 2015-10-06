@@ -323,7 +323,15 @@ public abstract class ElementImpl implements Element {
                 oldValue = attributes[index];
             }
 
-            if (column.isIndexed() && columnStore != null && isValid()) {
+            if (column.isDynamic()) {
+                TimeIndexStore timeIndexStore = getTimeIndexStore();
+                if (timeIndexStore != null) {
+                    if (oldValue != null) {
+                        timeIndexStore.remove((TimeMap) oldValue);
+                    }
+                    timeIndexStore.add((TimeMap) value);
+                }
+            } else if (column.isIndexed() && columnStore != null && isValid()) {
                 value = columnStore.indexStore.set(column, oldValue, value, this);
             }
             attributes[index] = value;
@@ -591,9 +599,9 @@ public abstract class ElementImpl implements Element {
                 columnStore.indexStore.index(this);
             }
 
-            TimeIndexStore timeInternalMap = getTimeIndexStore();
-            if (timeInternalMap != null) {
-                timeInternalMap.index(this);
+            TimeIndexStore timeIndexStore = getTimeIndexStore();
+            if (timeIndexStore != null) {
+                timeIndexStore.index(this);
             }
         }
     }
