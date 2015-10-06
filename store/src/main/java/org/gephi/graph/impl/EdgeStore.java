@@ -15,7 +15,8 @@
  */
 package org.gephi.graph.impl;
 
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenCustomHashMap;
+import it.unimi.dsi.fastutil.longs.LongHash;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
@@ -40,7 +41,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected EdgeBlock blocks[];
     protected EdgeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
-    protected Long2IntOpenHashMap[] longDictionary;
+    protected Long2IntOpenCustomHashMap[] longDictionary;
     //Stats
     protected int undirectedSize;
     protected int mutualEdgesSize;
@@ -80,8 +81,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.currentBlock = blocks[currentBlockIndex];
         this.dictionary = new Object2IntOpenHashMap(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE);
         this.dictionary.defaultReturnValue(NULL_ID);
-        this.longDictionary = new Long2IntOpenHashMap[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
-        this.longDictionary[0] = new Long2IntOpenHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR);
+        this.longDictionary = new Long2IntOpenCustomHashMap[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        this.longDictionary[0] = new Long2IntOpenCustomHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
         this.longDictionary[0].defaultReturnValue(NULL_ID);
         this.mutualEdgesTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
     }
@@ -166,11 +167,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     private void ensureLongDictionaryCapacity(int type) {
         int length = longDictionary.length;
         if (type >= length) {
-            Long2IntOpenHashMap[] newArray = new Long2IntOpenHashMap[type + 1];
+            Long2IntOpenCustomHashMap[] newArray = new Long2IntOpenCustomHashMap[type + 1];
             System.arraycopy(longDictionary, 0, newArray, 0, length);
             longDictionary = newArray;
             for (int i = length; i <= type; i++) {
-                Long2IntOpenHashMap newMap = new Long2IntOpenHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR);
+                Long2IntOpenCustomHashMap newMap = new Long2IntOpenCustomHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
                 newMap.defaultReturnValue(NULL_ID);
                 longDictionary[i] = newMap;
             }
@@ -474,7 +475,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             NodeImpl target = edge.target;
 
             ensureLongDictionaryCapacity(type);
-            Long2IntOpenHashMap dico = longDictionary[type];
+            Long2IntOpenCustomHashMap dico = longDictionary[type];
             long longId = getLongId(source, target, directed);
             if (dico.containsKey(longId)) {
                 return false;
@@ -1608,6 +1609,19 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 throw new UnsupportedOperationException("Removing directed edges from undirected iterator is not supported");
             }
             EdgeStore.this.remove(pointer);
+        }
+    }
+
+    private static class DictionaryHashStrategy implements LongHash.Strategy {
+
+        @Override
+        public int hashCode(long l) {
+            return (int) (l ^ (l >>> 32));
+        }
+
+        @Override
+        public boolean equals(long l1, long l2) {
+            return l1 == l2;
         }
     }
 }

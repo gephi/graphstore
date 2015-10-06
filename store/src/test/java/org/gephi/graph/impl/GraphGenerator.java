@@ -413,4 +413,14 @@ public class GraphGenerator {
         graphStore.addAllEdges(Arrays.asList(edges));
         return graphStore;
     }
+
+    public static GraphStore generateLargeGraphStore() {
+        GraphStore graphStore = new GraphModelImpl().store;
+
+        NodeImpl[] nodes = generateLargeNodeList();
+        graphStore.addAllNodes(Arrays.asList(nodes));
+        EdgeImpl[] edges = generateLargeEdgeList();
+        graphStore.addAllEdges(Arrays.asList(edges));
+        return graphStore;
+    }
 }
