@@ -425,6 +425,48 @@ public class TimestampIndexStoreTest {
     }
 
     @Test
+    public void testSetAttribute() {
+        GraphStore graphStore = new GraphStore();
+        TimeStore timestampStore = graphStore.timeStore;
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
+
+        Column col = graphStore.nodeTable.addColumn("col", TimestampStringMap.class);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
+        graphStore.addNode(nodeImpl);
+
+        TimestampStringMap s1 = new TimestampStringMap();
+        s1.put(1.0, "foo");
+        s1.put(2.0, "bar");
+
+        nodeImpl.setAttribute(col, s1);
+
+        Assert.assertEquals(store.size(), 2);
+        Assert.assertTrue(store.contains(1.0));
+        Assert.assertTrue(store.contains(2.0));
+
+        nodeImpl.setAttribute(col, new TimestampStringMap());
+        Assert.assertEquals(store.size(), 0);
+        Assert.assertFalse(store.contains(1.0));
+        Assert.assertFalse(store.contains(2.0));
+    }
+
+    @Test
+    public void testRemoveAttributeTimestamp() {
+        GraphStore graphStore = new GraphStore();
+        TimeStore timestampStore = graphStore.timeStore;
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
+
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
+        graphStore.addNode(nodeImpl);
+        nodeImpl.addTimestamp(3.0);
+        Assert.assertTrue(store.contains(3.0));
+
+        nodeImpl.removeAttribute(graphStore.nodeTable.getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX));
+        Assert.assertEquals(store.size(), 0);
+        Assert.assertFalse(store.contains(3.0));
+    }
+
+    @Test
     public void testCreateView() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         NodeImpl n1 = graphStore.getNode("1");

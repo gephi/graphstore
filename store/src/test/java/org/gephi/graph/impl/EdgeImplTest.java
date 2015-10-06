@@ -22,6 +22,7 @@ import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -231,6 +232,21 @@ public class EdgeImplTest {
         Edge e = graphStore.getEdge("0");
         e.setWeight(42.0);
         e.getWeights();
+    }
+
+    @Test
+    public void testSetAttributeWeightTimestamp() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Edge e = graphStore.getEdge("0");
+        Column col = graphStore.edgeTable.getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+
+        TimestampDoubleMap wm = new TimestampDoubleMap();
+        wm.put(1.0, 10.0);
+        wm.put(2.0, 20.0);
+        e.setAttribute(col, wm);
+
+        Assert.assertEquals(e.getWeight(1.0), 10.0);
+        Assert.assertEquals(e.getWeight(2.0), 20.0);
     }
 
     @Test
