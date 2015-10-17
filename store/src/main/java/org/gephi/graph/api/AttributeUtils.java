@@ -217,7 +217,27 @@ public class AttributeUtils {
             if (str.length() > 1) {
                 throw new IllegalArgumentException("The string has a length > 1");
             }
-            return new Character(str.charAt(0));
+            return str.charAt(0);
+        } else if (typeClass.equals(IntervalSet.class)) {
+            return IntervalsParser.parseIntervalSet(str);
+        } else if (typeClass.equals(IntervalStringMap.class)) {
+            return IntervalsParser.parseIntervalMap(String.class, str);
+        } else if (typeClass.equals(IntervalByteMap.class)) {
+            return IntervalsParser.parseIntervalMap(Byte.class, str);
+        } else if (typeClass.equals(IntervalShortMap.class)) {
+            return IntervalsParser.parseIntervalMap(Short.class, str);
+        } else if (typeClass.equals(IntervalIntegerMap.class)) {
+            return IntervalsParser.parseIntervalMap(Integer.class, str);
+        } else if (typeClass.equals(IntervalLongMap.class)) {
+            return IntervalsParser.parseIntervalMap(Long.class, str);
+        } else if (typeClass.equals(IntervalFloatMap.class)) {
+            return IntervalsParser.parseIntervalMap(Float.class, str);
+        } else if (typeClass.equals(IntervalDoubleMap.class)) {
+            return IntervalsParser.parseIntervalMap(Double.class, str);
+        } else if (typeClass.equals(IntervalBooleanMap.class)) {
+            return IntervalsParser.parseIntervalMap(Boolean.class, str);
+        } else if (typeClass.equals(IntervalCharMap.class)) {
+            return IntervalsParser.parseIntervalMap(Character.class, str);
         }
         throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
     }

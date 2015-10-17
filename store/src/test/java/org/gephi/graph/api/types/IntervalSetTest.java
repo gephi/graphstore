@@ -309,4 +309,16 @@ public class IntervalSetTest {
         set1.clear();
         Assert.assertEquals(set2.size(), 2);
     }
+    
+    @Test
+    public void testToString() {
+        IntervalSet set1 = new IntervalSet();
+        Assert.assertEquals(set1.toString(), "<empty>");
+        
+        set1.add(new Interval(1.0, 2.0));
+        Assert.assertEquals(set1.toString(), "<[1.0, 2.0]>");
+        
+        set1.add(new Interval(4.0, 5.21));
+        Assert.assertEquals(set1.toString(), "<[1.0, 2.0]; [4.0, 5.21]>");
+    }
 }
