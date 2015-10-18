@@ -118,6 +118,52 @@ public class AttributeUtilsTest {
         mBool.put(new Interval(1, 2), true);
         Assert.assertEquals(AttributeUtils.parse("<[1, 2, true]>", IntervalBooleanMap.class), mBool);
     }
+    
+    @Test
+    public void testParseDynamicTimestampTypes() {
+        TimestampSet set = new TimestampSet();
+        set.add(1.0);
+        set.add(2.0);
+        set.add(21.0);
+        set.add(124.0);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 2, 21.0, 124.0]>", TimestampSet.class), set);
+        
+        TimestampStringMap mString = new TimestampStringMap();
+        mString.put(1.0, "value");
+        Assert.assertEquals(AttributeUtils.parse("<[1, value]>", TimestampStringMap.class), mString);
+        
+        TimestampIntegerMap mInteger = new TimestampIntegerMap();
+        mInteger.put(1.0, 25);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 25]>", TimestampIntegerMap.class), mInteger);
+        
+        TimestampFloatMap mFloat = new TimestampFloatMap();
+        mFloat.put(1.0, 25f);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 25]>", TimestampFloatMap.class), mFloat);
+        
+        TimestampDoubleMap mDouble = new TimestampDoubleMap();
+        mDouble.put(1.0, 25d);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 25]>", TimestampDoubleMap.class), mDouble);
+        
+        TimestampLongMap mLong = new TimestampLongMap();
+        mLong.put(1.0, 25l);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 25]>", TimestampLongMap.class), mLong);
+        
+        TimestampShortMap mShort = new TimestampShortMap();
+        mShort.put(1.0, (short) 25);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 25]>", TimestampShortMap.class), mShort);
+        
+        TimestampByteMap mByte = new TimestampByteMap();
+        mByte.put(1.0, (byte) 6);
+        Assert.assertEquals(AttributeUtils.parse("<[1, 6]>", TimestampByteMap.class), mByte);
+        
+        TimestampCharMap mChar = new TimestampCharMap();
+        mChar.put(1.0, 'z');
+        Assert.assertEquals(AttributeUtils.parse("<[1, z]>", TimestampCharMap.class), mChar);
+        
+        TimestampBooleanMap mBool = new TimestampBooleanMap();
+        mBool.put(1.0, true);
+        Assert.assertEquals(AttributeUtils.parse("<[1, true]>", TimestampBooleanMap.class), mBool);
+    }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseCharInvalid() {

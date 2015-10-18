@@ -15,7 +15,10 @@
  */
 package org.gephi.graph.api.types;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
+import org.gephi.graph.api.AttributeUtils;
+import org.gephi.graph.api.TimeFormat;
 
 /**
  * Sorted set for timestamps.
@@ -185,5 +188,30 @@ public final class TimestampSet implements TimeSet<Double> {
         }
         return true;
     }
-
+    
+    public String toString(TimeFormat timeFormat) {
+        if(size == 0){
+            return "<empty>";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("<");
+        sb.append('[');
+        for (int i = 0; i < size; i++) {
+            sb.append(AttributeUtils.printTimestampInFormat(array[i], timeFormat));
+            
+            if(i < size - 1){
+                sb.append(", ");
+            }
+        }
+        sb.append(']');
+        sb.append(">");
+        
+        return sb.toString();
+    }
+    
+    @Override
+    public String toString() {
+        return toString(TimeFormat.DOUBLE);
+    }
 }

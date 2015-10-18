@@ -18,6 +18,7 @@ package org.gephi.graph.api;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
 import org.gephi.graph.api.types.IntervalCharMap;
@@ -47,9 +48,20 @@ public class IntervalsParserTest {
         return set;
     }
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final SimpleDateFormat dateTimeFormatMillis = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final SimpleDateFormat dateFormat;
+    private static final SimpleDateFormat dateTimeFormat;
+    private static final SimpleDateFormat dateTimeFormatMillis;
+    
+    static {
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        
+        dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        
+        dateTimeFormatMillis = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        dateTimeFormatMillis.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     private long parseDateFormatIntoTimestamp(String str, SimpleDateFormat sdf) throws ParseException {
         return sdf.parse(str).getTime();

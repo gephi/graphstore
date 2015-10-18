@@ -19,7 +19,9 @@ import java.lang.reflect.Array;
 import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeFormat;
 
 /**
  * Abstract class that implement a sorted map between intervals and attribute
@@ -514,9 +516,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         return null;
     }
 
-    @Override
-    public String toString() {
-        //TODO: add a toString that shows bounds as datetimes?
+    public String toString(TimeFormat timeFormat) {
         if(size == 0){
             return "<empty>";
         }
@@ -527,9 +527,9 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         sb.append("<");
         for (int i = 0; i < size; i++) {
             sb.append('[');
-            sb.append(array[i * 2]);
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2], timeFormat));
             sb.append(", ");
-            sb.append(array[i * 2 + 1]);
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2 + 1], timeFormat));
             
             sb.append(", ");
             String stringValue = values[i].toString();
@@ -543,7 +543,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
 
             sb.append(']');
             
-            if(i < size- 1){
+            if(i < size - 1){
                 sb.append("; ");
             }
         }
@@ -551,7 +551,11 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         
         return sb.toString();
     }
-    
+
+    @Override
+    public String toString() {
+        return toString(TimeFormat.DOUBLE);
+    }
     
     private static final char[] SPECIAL_CHARACTERS = ";,()[]\"'".toCharArray();
     /**

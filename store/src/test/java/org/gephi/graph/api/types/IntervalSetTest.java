@@ -15,7 +15,9 @@
  */
 package org.gephi.graph.api.types;
 
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeFormat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -311,7 +313,7 @@ public class IntervalSetTest {
     }
     
     @Test
-    public void testToString() {
+    public void testToStringDouble() {
         IntervalSet set1 = new IntervalSet();
         Assert.assertEquals(set1.toString(), "<empty>");
         
@@ -319,6 +321,43 @@ public class IntervalSetTest {
         Assert.assertEquals(set1.toString(), "<[1.0, 2.0]>");
         
         set1.add(new Interval(4.0, 5.21));
-        Assert.assertEquals(set1.toString(), "<[1.0, 2.0]; [4.0, 5.21]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1.0, 2.0]; [4.0, 5.21]>");
+    }
+    
+    @Test
+    public void testToStringDate() {
+        IntervalSet set1 = new IntervalSet();
+        Assert.assertEquals(set1.toString(TimeFormat.DATE), "<empty>");
+
+        set1.add(new Interval(AttributeUtils.parseDateTime("2012-02-29"), AttributeUtils.parseDateTime("2012-03-01")));
+        Assert.assertEquals(set1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01]>");
+
+        set1.add(new Interval(AttributeUtils.parseDateTime("2012-07-17T00:02:21"), AttributeUtils.parseDateTime("2012-07-17T00:03:00")));
+        Assert.assertEquals(set1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01]; [2012-07-17, 2012-07-17]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0]; [1342483341000.0, 1342483380000.0]>");//These timestamps are in default timezone UTC+0
+    }
+
+    @Test
+    public void testToStringDatetime() {
+        IntervalSet set1 = new IntervalSet();
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<empty>");
+
+        
+        //Test with default timezone UTC+0
+        set1.add(new Interval(AttributeUtils.parseDateTime("2012-02-29"), AttributeUtils.parseDateTime("2012-03-01")));
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z]>");
+
+        set1.add(new Interval(AttributeUtils.parseDateTime("2012-07-17T01:10:44"), AttributeUtils.parseDateTime("2012-07-17T01:10:45")));
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0]; [1342487444000.0, 1342487445000.0]>");//These timestamps are in default timezone UTC+0
+        
+        //Test with specific timezone
+        IntervalSet set2 = new IntervalSet();
+        set2.add(new Interval(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), AttributeUtils.parseDateTime("2012-02-29T02:30:00+02:30")));
+        Assert.assertEquals(set2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z]>");
+
+        set2.add(new Interval(AttributeUtils.parseDateTime("2012-02-29T01:10:44+00:00"), AttributeUtils.parseDateTime("2012-02-29T01:10:45+00:00")));
+        Assert.assertEquals(set2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z]; [2012-02-29T01:10:44.000Z, 2012-02-29T01:10:45.000Z]>");
+        Assert.assertEquals(set2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330473600000.0]; [1330477844000.0, 1330477845000.0]>");//These timestamps are in default timezone UTC+0
     }
 }

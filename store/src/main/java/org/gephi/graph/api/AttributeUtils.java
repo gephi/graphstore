@@ -29,9 +29,12 @@ import org.gephi.graph.api.types.TimestampIntegerMap;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.types.IntervalBooleanMap;
@@ -64,6 +67,7 @@ public class AttributeUtils {
     private static final DateTimeFormatter DATE_TIME_FORMATTER;
     private static final DateTimeFormatter DATE_PRINTER;
     private static final DateTimeFormatter DATE_TIME_PRINTER;
+    private static final DecimalFormat TIMESTAMP_PRINTER; 
 
     static {
         final Set<Class> supportedTypes = new HashSet<Class>();
@@ -166,9 +170,13 @@ public class AttributeUtils {
         TYPES_STANDARDIZATION = Collections.unmodifiableMap(typesStandardization);
 
         //Datetime
-        DATE_TIME_FORMATTER = ISODateTimeFormat.dateOptionalTimeParser();
-        DATE_PRINTER = ISODateTimeFormat.date();
-        DATE_TIME_PRINTER = ISODateTimeFormat.dateTime();
+        DATE_TIME_FORMATTER = ISODateTimeFormat.dateOptionalTimeParser()
+                .withZoneUTC();//Make sure UTC+0 timezone is used by default
+        DATE_PRINTER = ISODateTimeFormat.date()
+                .withZoneUTC();
+        DATE_TIME_PRINTER = ISODateTimeFormat.dateTime()
+                .withZoneUTC();
+        TIMESTAMP_PRINTER = new DecimalFormat("#.0###", DecimalFormatSymbols.getInstance(Locale.ENGLISH));//1 to 4 decimals
     }
 
     private AttributeUtils() {
@@ -190,6 +198,7 @@ public class AttributeUtils {
         }
         typeClass = getStandardizedType(typeClass);
 
+        //Simple types:
         if (typeClass.equals(String.class)) {
             return str;
         } else if (typeClass.equals(Byte.class)) {
@@ -218,7 +227,10 @@ public class AttributeUtils {
                 throw new IllegalArgumentException("The string has a length > 1");
             }
             return str.charAt(0);
-        } else if (typeClass.equals(IntervalSet.class)) {
+        }
+        
+        //Interval types:
+        if (typeClass.equals(IntervalSet.class)) {
             return IntervalsParser.parseIntervalSet(str);
         } else if (typeClass.equals(IntervalStringMap.class)) {
             return IntervalsParser.parseIntervalMap(String.class, str);
@@ -239,6 +251,30 @@ public class AttributeUtils {
         } else if (typeClass.equals(IntervalCharMap.class)) {
             return IntervalsParser.parseIntervalMap(Character.class, str);
         }
+        
+        //Timestamp types:
+        if (typeClass.equals(TimestampSet.class)) {
+            return TimestampsParser.parseTimestampSet(str);
+        } else if (typeClass.equals(TimestampStringMap.class)) {
+            return TimestampsParser.parseTimestampMap(String.class, str);
+        } else if (typeClass.equals(TimestampByteMap.class)) {
+            return TimestampsParser.parseTimestampMap(Byte.class, str);
+        } else if (typeClass.equals(TimestampShortMap.class)) {
+            return TimestampsParser.parseTimestampMap(Short.class, str);
+        } else if (typeClass.equals(TimestampIntegerMap.class)) {
+            return TimestampsParser.parseTimestampMap(Integer.class, str);
+        } else if (typeClass.equals(TimestampLongMap.class)) {
+            return TimestampsParser.parseTimestampMap(Long.class, str);
+        } else if (typeClass.equals(TimestampFloatMap.class)) {
+            return TimestampsParser.parseTimestampMap(Float.class, str);
+        } else if (typeClass.equals(TimestampDoubleMap.class)) {
+            return TimestampsParser.parseTimestampMap(Double.class, str);
+        } else if (typeClass.equals(TimestampBooleanMap.class)) {
+            return TimestampsParser.parseTimestampMap(Boolean.class, str);
+        } else if (typeClass.equals(TimestampCharMap.class)) {
+            return TimestampsParser.parseTimestampMap(Character.class, str);
+        }
+        
         throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
     }
 
@@ -570,6 +606,16 @@ public class AttributeUtils {
     }
 
     /**
+     * Returns the string representation of the given timestamp.
+     *
+     * @param timestamp the time, in milliseconds
+     * @return the formatted timestamp
+     */
+    public static String printTimestamp(double timestamp) {
+        return TIMESTAMP_PRINTER.format(timestamp);
+    }
+    
+    /**
      * Returns the date's string representation of the given timestamp.
      *
      * @param timestamp the time, in milliseconds
@@ -589,6 +635,26 @@ public class AttributeUtils {
         return DATE_TIME_PRINTER.print((long) timestamp);
     }
 
+    /**
+     * Returns the representation of the given timestamp in the given format.
+     *
+     * @param timestamp the time, in milliseconds
+     * @param timeFormat the time format
+     * @return the formatted timestamp
+     */
+    public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat) {
+        switch (timeFormat) {
+            case DATE:
+                return AttributeUtils.printDate(timestamp);
+            case DATETIME:
+                return AttributeUtils.printDateTime(timestamp);
+            case DOUBLE:
+                return AttributeUtils.printTimestamp(timestamp);
+        }
+        
+        throw new UnsupportedOperationException("Unknown TimeFormat");
+    }
+    
     /**
      * Returns true if the given column is a node column.
      *

@@ -16,7 +16,9 @@
 package org.gephi.graph.api.types;
 
 import java.util.Arrays;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeFormat;
 
 /**
  * Sorted set for intervals.
@@ -311,9 +313,7 @@ public final class IntervalSet implements TimeSet<Interval> {
         return true;
     }
 
-    @Override
-    public String toString() {
-        //TODO: add a toString that shows bounds as datetimes?
+    public String toString(TimeFormat timeFormat) {
         if(size == 0){
             return "<empty>";
         }
@@ -322,17 +322,22 @@ public final class IntervalSet implements TimeSet<Interval> {
         sb.append("<");
         for (int i = 0; i < size; i++) {
             sb.append('[');
-            sb.append(array[i * 2]);
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2], timeFormat));
             sb.append(", ");
-            sb.append(array[i * 2 + 1]);
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2 + 1], timeFormat));
             sb.append(']');
             
-            if(i < size- 1){
+            if(i < size - 1){
                 sb.append("; ");
             }
         }
         sb.append(">");
         
         return sb.toString();
+    }
+    
+    @Override
+    public String toString() {
+        return toString(TimeFormat.DOUBLE);
     }
 }

@@ -17,8 +17,10 @@ package org.gephi.graph.api.types;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeFormat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -572,7 +574,7 @@ public class IntervalMapTest {
     }
     
     @Test
-    public void testToString() {
+    public void testToStringDouble() {
         IntervalStringMap map1 = new IntervalStringMap();
         Assert.assertEquals(map1.toString(), "<empty>");
         
@@ -583,7 +585,44 @@ public class IntervalMapTest {
         Assert.assertEquals(map1.toString(), "<[1.0, 2.0, foo]; [4.0, 5.5, bar]>");
         
         map1.put(new Interval(6.0, 9.0), " 'test' ");
-        Assert.assertEquals(map1.toString(), "<[1.0, 2.0, foo]; [4.0, 5.5, bar]; [6.0, 9.0, \" 'test' \"]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1.0, 2.0, foo]; [4.0, 5.5, bar]; [6.0, 9.0, \" 'test' \"]>");
+    }
+    
+    @Test
+    public void testToStringDate() {
+        IntervalStringMap map1 = new IntervalStringMap();
+        Assert.assertEquals(map1.toString(TimeFormat.DATE), "<empty>");
+
+        map1.put(new Interval(AttributeUtils.parseDateTime("2012-02-29"), AttributeUtils.parseDateTime("2012-03-01")), "foo");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01, foo]>");
+
+        map1.put(new Interval(AttributeUtils.parseDateTime("2012-07-17T00:02:21"), AttributeUtils.parseDateTime("2012-07-17T00:03:00")), "bar");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342483341000.0, 1342483380000.0, bar]>");//These timestamps are in default timezone UTC+0
+    }
+
+    @Test
+    public void testToStringDatetime() {
+        IntervalStringMap map1 = new IntervalStringMap();
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<empty>");
+
+        
+        //Test with default timezone UTC+0
+        map1.put(new Interval(AttributeUtils.parseDateTime("2012-02-29"), AttributeUtils.parseDateTime("2012-03-01")), "foo");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]>");
+
+        map1.put(new Interval(AttributeUtils.parseDateTime("2012-07-17T01:10:44"), AttributeUtils.parseDateTime("2012-07-17T01:10:45")), "bar");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342487444000.0, 1342487445000.0, bar]>");//These timestamps are in default timezone UTC+0
+        
+        //Test with specific timezone
+        IntervalStringMap map2 = new IntervalStringMap();
+        map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), AttributeUtils.parseDateTime("2012-02-29T02:30:00+02:30")), "foo");
+        Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z, foo]>");
+
+        map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T01:10:44+00:00"), AttributeUtils.parseDateTime("2012-02-29T01:10:45+00:00")), "bar");
+        Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, 2012-02-29T01:10:45.000Z, bar]>");
+        Assert.assertEquals(map2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330473600000.0, foo]; [1330477844000.0, 1330477845000.0, bar]>");//These timestamps are in default timezone UTC+0
     }
 
     //UTILITY
