@@ -61,6 +61,7 @@ import org.gephi.graph.impl.EdgeImpl.EdgePropertiesImpl;
 import org.gephi.graph.impl.NodeImpl.NodePropertiesImpl;
 import org.gephi.graph.impl.utils.DataInputOutput;
 import org.gephi.graph.impl.utils.LongPacker;
+import org.joda.time.DateTimeZone;
 
 // Greatly inspired from JDBM https://github.com/jankotek/JDBM3
 public class Serialization {
@@ -176,6 +177,7 @@ public class Serialization {
     final static int INTERVAL_SET = 223;
     final static int TIMESTAMP_MAP = 224;
     final static int INTERVAL_MAP = 225;
+    final static int TIME_ZONE = 226;
     //Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
@@ -231,6 +233,9 @@ public class Serialization {
 
         //TimeFormat
         serialize(out, store.timeFormat);
+        
+        //Time zone
+        serialize(out, store.timeZone);
 
         //Nodes + Edges
         int nodesAndEdges = store.nodeStore.size() + store.edgeStore.size();
@@ -278,6 +283,9 @@ public class Serialization {
         model.store.attributes.setGraphAttributes(attributes);
 
         //TimeFormat
+        deserialize(is);
+        
+        //Time zone
         deserialize(is);
 
         //Nodes and edges
@@ -905,6 +913,19 @@ public class Serialization {
 
         return tf;
     }
+    
+    private void serializeTimeZone(final DataOutput out, final DateTimeZone timeZone) throws IOException {
+        serialize(out, timeZone.getID());
+    }
+
+    private DateTimeZone deserializeTimeZone(final DataInput is) throws IOException, ClassNotFoundException {
+        String id = (String) deserialize(is);
+
+        DateTimeZone tz = DateTimeZone.forID(id);
+        model.store.timeZone = tz;
+
+        return tz;
+    }
 
     private void serializeTimeStore(final DataOutput out) throws IOException {
         TimeStore timeStore = model.store.timeStore;
@@ -1228,6 +1249,10 @@ public class Serialization {
             TimeFormat b = (TimeFormat) obj;
             out.write(TIME_FORMAT);
             serializeTimeFormat(out, b);
+        } else if (obj instanceof DateTimeZone) {
+            DateTimeZone b = (DateTimeZone) obj;
+            out.write(TIME_ZONE);
+            serializeTimeZone(out, b);
         } else if (obj instanceof TimeStore) {
             TimeStore b = (TimeStore) obj;
             out.write(TIME_STORE);
@@ -1752,6 +1777,9 @@ public class Serialization {
                 break;
             case TIME_FORMAT:
                 ret = deserializeTimeFormat(is);
+                break;
+            case TIME_ZONE:
+                ret = deserializeTimeZone(is);
                 break;
             case TIME_STORE:
                 ret = deserializeTimeStore(is);

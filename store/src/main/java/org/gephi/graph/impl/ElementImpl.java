@@ -15,7 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;

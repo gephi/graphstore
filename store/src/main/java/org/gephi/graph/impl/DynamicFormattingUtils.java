@@ -20,6 +20,7 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import org.gephi.graph.api.AttributeUtils;
+import org.joda.time.DateTimeZone;
 
 /**
  * Utils for parsing dynamic intervals and timestamps.
@@ -40,6 +41,39 @@ public final class DynamicFormattingUtils {
     public static final String INFINITY = "Infinity";
     
     /**
+     * Parses an ISO date with or without time or a timestamp (in milliseconds).
+     * Returns the date or timestamp converted to a timestamp in milliseconds.
+     * @param timeStr Date or timestamp string
+     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @return Timestamp
+     */
+    public static double parseDateTimeOrTimestamp(String timeStr, DateTimeZone timeZone) {
+        double value;
+        try {
+            //Try first to parse as a single double:
+            value = Double.parseDouble(infinityIgnoreCase(timeStr));
+            if (Double.isNaN(value)) {
+                throw new IllegalArgumentException("NaN is not allowed as an interval bound");
+            }
+        } catch (Exception ex) {
+            value = AttributeUtils.parseDateTime(timeStr, timeZone);
+        }
+        
+        return value;
+    }
+    
+    /**
+     * Parses an ISO date with or without time or a timestamp (in milliseconds).
+     * Returns the date or timestamp converted to a timestamp in milliseconds.
+     * Default time zone is used (UTC).
+     * @param timeStr Date or timestamp string
+     * @return Timestamp
+     */
+    public static double parseDateTimeOrTimestamp(String timeStr) {
+        return parseDateTimeOrTimestamp(timeStr, null);
+    }
+    
+    /**
      * Parse literal value until detecting the end of it (quote can be ' or ")
      *
      * @param reader Input reader
@@ -47,7 +81,7 @@ public final class DynamicFormattingUtils {
      * @return Parsed value
      * @throws IOException Unexpected read error
      */
-    public static String parseLiteral(StringReader reader, char quote) throws IOException {
+    protected static String parseLiteral(StringReader reader, char quote) throws IOException {
         StringBuilder sb = new StringBuilder();
         boolean escapeEnabled = false;
 
@@ -92,7 +126,7 @@ public final class DynamicFormattingUtils {
      * @return Parsed value
      * @throws IOException Unexpected read error
      */
-    public static String parseValue(StringReader reader) throws IOException {
+    protected static String parseValue(StringReader reader) throws IOException {
         StringBuilder sb = new StringBuilder();
         int r;
         char c;
@@ -120,7 +154,7 @@ public final class DynamicFormattingUtils {
      * @param valString String to parse
      * @return Converted value
      */
-    public static <T> T convertValue(Class<T> typeClass, String valString){
+    protected static <T> T convertValue(Class<T> typeClass, String valString){
         Object value;
         if (typeClass.equals(Byte.class)
                 || typeClass.equals(byte.class)
@@ -149,27 +183,6 @@ public final class DynamicFormattingUtils {
         return (T) value;
     }
 
-    /**
-     * Parses an ISO date with or without time or a timestamp (in milliseconds).
-     * Returns the date or timestamp converted to a timestamp in milliseconds.
-     * @param timeStr Date or timestamp string
-     * @return Timestamp
-     */
-    public static double parseDateTimeOrTimestamp(String timeStr) {
-        double value;
-        try {
-            //Try first to parse as a single double:
-            value = Double.parseDouble(infinityIgnoreCase(timeStr));
-            if (Double.isNaN(value)) {
-                throw new IllegalArgumentException("NaN is not allowed as an interval bound");
-            }
-        } catch (Exception ex) {
-            value = AttributeUtils.parseDateTime(timeStr);
-        }
-        
-        return value;
-    }
-    
     /**
      * Method for allowing inputs such as "infinity" when parsing decimal numbers
      *

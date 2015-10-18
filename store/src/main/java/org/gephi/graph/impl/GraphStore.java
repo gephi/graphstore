@@ -36,6 +36,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Subgraph;
+import org.joda.time.DateTimeZone;
 
 public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
@@ -63,6 +64,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected final GraphView mainGraphView;
     //TimeFormat
     protected TimeFormat timeFormat;
+    //Time zone
+    protected DateTimeZone timeZone;
 
     public GraphStore() {
         this(null);
@@ -85,6 +88,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
         timeFormat = GraphStoreConfiguration.DEFAULT_TIME_FORMAT;
+        timeZone = GraphStoreConfiguration.DEFAULT_TIME_ZONE;
 
         undirectedDecorator = new UndirectedDecorator(this);
 
