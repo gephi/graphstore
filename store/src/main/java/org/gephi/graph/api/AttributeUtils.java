@@ -15,6 +15,9 @@
  */
 package org.gephi.graph.api;
 
+import org.gephi.graph.impl.TimestampsParser;
+import org.gephi.graph.impl.IntervalsParser;
+import org.gephi.graph.impl.DynamicFormattingUtils;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampLongMap;

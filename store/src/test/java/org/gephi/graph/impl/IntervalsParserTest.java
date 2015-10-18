@@ -13,12 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.gephi.graph.api;
+package org.gephi.graph.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
 import org.gephi.graph.api.types.IntervalCharMap;

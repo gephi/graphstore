@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.gephi.graph.api;
+package org.gephi.graph.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

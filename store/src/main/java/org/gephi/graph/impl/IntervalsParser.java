@@ -13,18 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.gephi.graph.api;
+package org.gephi.graph.impl;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import static org.gephi.graph.api.DynamicFormattingUtils.COMMA;
-import static org.gephi.graph.api.DynamicFormattingUtils.EMPTY_DYNAMIC_VALUE;
-import static org.gephi.graph.api.DynamicFormattingUtils.LEFT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.api.DynamicFormattingUtils.LEFT_BOUND_BRACKET;
-import static org.gephi.graph.api.DynamicFormattingUtils.RIGHT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.api.DynamicFormattingUtils.RIGHT_BOUND_BRACKET;
+import org.gephi.graph.api.AttributeUtils;
+import org.gephi.graph.api.Interval;
+import static org.gephi.graph.impl.DynamicFormattingUtils.COMMA;
+import static org.gephi.graph.impl.DynamicFormattingUtils.EMPTY_DYNAMIC_VALUE;
+import static org.gephi.graph.impl.DynamicFormattingUtils.LEFT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.DynamicFormattingUtils.LEFT_BOUND_BRACKET;
+import static org.gephi.graph.impl.DynamicFormattingUtils.RIGHT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.DynamicFormattingUtils.RIGHT_BOUND_BRACKET;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
 import org.gephi.graph.api.types.IntervalCharMap;

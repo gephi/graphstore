@@ -13,21 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.gephi.graph.api;
+package org.gephi.graph.impl;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import static org.gephi.graph.api.DynamicFormattingUtils.COMMA;
-import static org.gephi.graph.api.DynamicFormattingUtils.DYNAMIC_TYPE_LEFT_BOUND;
-import static org.gephi.graph.api.DynamicFormattingUtils.DYNAMIC_TYPE_RIGHT_BOUND;
-import static org.gephi.graph.api.DynamicFormattingUtils.EMPTY_DYNAMIC_VALUE;
-import static org.gephi.graph.api.DynamicFormattingUtils.LEFT_BOUND_BRACKET;
-import static org.gephi.graph.api.DynamicFormattingUtils.LEFT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.api.DynamicFormattingUtils.RIGHT_BOUND_BRACKET;
-import static org.gephi.graph.api.DynamicFormattingUtils.RIGHT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.api.DynamicFormattingUtils.parseLiteral;
-import static org.gephi.graph.api.DynamicFormattingUtils.parseValue;
+import org.gephi.graph.api.AttributeUtils;
+import static org.gephi.graph.impl.DynamicFormattingUtils.COMMA;
+import static org.gephi.graph.impl.DynamicFormattingUtils.DYNAMIC_TYPE_LEFT_BOUND;
+import static org.gephi.graph.impl.DynamicFormattingUtils.DYNAMIC_TYPE_RIGHT_BOUND;
+import static org.gephi.graph.impl.DynamicFormattingUtils.EMPTY_DYNAMIC_VALUE;
+import static org.gephi.graph.impl.DynamicFormattingUtils.LEFT_BOUND_BRACKET;
+import static org.gephi.graph.impl.DynamicFormattingUtils.LEFT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.DynamicFormattingUtils.RIGHT_BOUND_BRACKET;
+import static org.gephi.graph.impl.DynamicFormattingUtils.RIGHT_BOUND_SQUARE_BRACKET;
 import org.gephi.graph.api.types.TimestampBooleanMap;
 import org.gephi.graph.api.types.TimestampByteMap;
 import org.gephi.graph.api.types.TimestampCharMap;
@@ -230,11 +229,11 @@ public final class TimestampsParser {
                     break;
                 case '"':
                 case '\'':
-                    values.add(parseLiteral(reader, c));
+                    values.add(DynamicFormattingUtils.parseLiteral(reader, c));
                     break;
                 default:
                     reader.skip(-1);//Go backwards 1 position, for reading start of value
-                    values.add(parseValue(reader));
+                    values.add(DynamicFormattingUtils.parseValue(reader));
             }
         }
 

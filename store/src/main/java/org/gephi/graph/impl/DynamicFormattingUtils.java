@@ -13,12 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.gephi.graph.api;
+package org.gephi.graph.impl;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import org.gephi.graph.api.AttributeUtils;
 
 /**
  * Utils for parsing dynamic intervals and timestamps.
