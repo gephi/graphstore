@@ -37,6 +37,7 @@ public final class DynamicFormattingUtils {
     public static final char COMMA = ',';
     
     public static final String EMPTY_DYNAMIC_VALUE = "<empty>";
+    public static final String INFINITY = "Infinity";
     
     /**
      * Parse literal value until detecting the end of it (quote can be ' or ")
@@ -170,11 +171,12 @@ public final class DynamicFormattingUtils {
      * @return Input String with fixed "Infinity" syntax if necessary.
      */
     private static String infinityIgnoreCase(String value) {
-        if (value.equalsIgnoreCase("Infinity")) {
-            return "Infinity";
+        value = value.trim();
+        if (value.equalsIgnoreCase(INFINITY)) {
+            return INFINITY;
         }
-        if (value.equalsIgnoreCase("-Infinity")) {
-            return "-Infinity";
+        if (value.equalsIgnoreCase("-" + INFINITY)) {
+            return "-" + INFINITY;
         }
 
         return value;

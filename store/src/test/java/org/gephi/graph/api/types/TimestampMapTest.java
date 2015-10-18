@@ -611,7 +611,13 @@ public class TimestampMapTest {
 
         map1.put(AttributeUtils.parseDateTime("2012-02-29T00:02:21"), "bar");
         Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, foo]; [2012-02-29, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330473741000.0, bar]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330473741000.0, bar]>");
+        
+        //Test infinity:
+        TimestampStringMap mapInf = new TimestampStringMap();
+        mapInf.put(Double.NEGATIVE_INFINITY, "value");
+        mapInf.put(Double.POSITIVE_INFINITY, "value");
+        Assert.assertEquals(mapInf.toString(TimeFormat.DATE), "<[-Infinity, value]; [Infinity, value]>");
     }
 
     @Test
@@ -626,7 +632,7 @@ public class TimestampMapTest {
 
         map1.put(AttributeUtils.parseDateTime("2012-02-29T01:10:44"), "bar");
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330477844000.0, bar]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330477844000.0, bar]>");
         
         //Test with specific timezone
         TimestampStringMap map2 = new TimestampStringMap();
@@ -635,7 +641,13 @@ public class TimestampMapTest {
 
         map2.put(AttributeUtils.parseDateTime("2012-02-29T01:10:44-01:00"), "bar");
         Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, foo]; [2012-02-29T02:10:44.000Z, bar]>");
-        Assert.assertEquals(map2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, foo]; [1330481444000.0, bar]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(map2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, foo]; [1330481444000.0, bar]>");
+        
+        //Test infinity:
+        TimestampStringMap mapInf = new TimestampStringMap();
+        mapInf.put(Double.NEGATIVE_INFINITY, "value");
+        mapInf.put(Double.POSITIVE_INFINITY, "value");
+        Assert.assertEquals(mapInf.toString(TimeFormat.DATETIME), "<[-Infinity, value]; [Infinity, value]>");
     }
 
     //UTILITY

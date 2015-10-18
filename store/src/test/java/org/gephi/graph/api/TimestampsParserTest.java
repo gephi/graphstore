@@ -339,5 +339,56 @@ public class TimestampsParserTest {
                 "<[1.25, 1.55]>",
                 parseTimestampSetToString("[1.25,1.55]")
         );
+        
+        assertEquals(
+                "<[1.25, 1.55]>",
+                parseTimestampSetToString(" 1.25,1.55")//We don't require bounds for timestamp sets, since only one array is necessary
+        );
+    }
+    
+    @Test
+    public void testParseInfinityTimestampsAndDefaultStringRepresentation() {
+        assertEquals(
+                "<[-Infinity, 1.55]>",
+                parseTimestampSetToString("[-Infinity,1.55]")
+        );
+        
+        assertEquals(
+                "<[0.0, Infinity]>",
+                parseTimestampSetToString("[0.0,Infinity]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, Infinity]>",
+                parseTimestampSetToString("[-Infinity,Infinity]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, 0.0, 1.0, 2.0]>",
+                parseTimestampSetToString("[-INFINITY, 0.0, 1.0, 2.0]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, 0.0, 1.0, 2.0, Infinity]>",
+                parseTimestampSetToString("[-infinity, 0.0, 1.0, 2.0, infinity]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, 1.0E12]; [1.0, 2.0]; [Infinity, 3.0]>",
+                parseTimestampMapToString("[-Infinity, 1e12]; [1.0, 2.]; [Infinity, 3]", Double.class)
+        );
+    }
+    
+    @Test
+    public void testParseUnordered() {
+        assertEquals(
+                "<[-Infinity, -3.0, 0.0, 1.0]>",
+                parseTimestampSetToString("[-Infinity, 0.0, -3.0, 1.0]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, 1.0]; [-3.0, 3.0]; [0.0, 2.0]; [1.0, 4.0]>",
+                parseTimestampMapToString("[-Infinity, 1] [0.0, 2] [-3.0, 3] [1.0, 4]", Double.class)
+        );
     }
 }

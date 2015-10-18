@@ -334,7 +334,12 @@ public class IntervalSetTest {
 
         set1.add(new Interval(AttributeUtils.parseDateTime("2012-07-17T00:02:21"), AttributeUtils.parseDateTime("2012-07-17T00:03:00")));
         Assert.assertEquals(set1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01]; [2012-07-17, 2012-07-17]>");
-        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0]; [1342483341000.0, 1342483380000.0]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0]; [1342483341000.0, 1342483380000.0]>");
+        
+        //Test infinity:
+        IntervalSet setInf = new IntervalSet();
+        setInf.add(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+        Assert.assertEquals(setInf.toString(TimeFormat.DATE), "<[-Infinity, Infinity]>");
     }
 
     @Test
@@ -349,7 +354,7 @@ public class IntervalSetTest {
 
         set1.add(new Interval(AttributeUtils.parseDateTime("2012-07-17T01:10:44"), AttributeUtils.parseDateTime("2012-07-17T01:10:45")));
         Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z]>");
-        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0]; [1342487444000.0, 1342487445000.0]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0]; [1342487444000.0, 1342487445000.0]>");
         
         //Test with specific timezone
         IntervalSet set2 = new IntervalSet();
@@ -358,6 +363,11 @@ public class IntervalSetTest {
 
         set2.add(new Interval(AttributeUtils.parseDateTime("2012-02-29T01:10:44+00:00"), AttributeUtils.parseDateTime("2012-02-29T01:10:45+00:00")));
         Assert.assertEquals(set2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z]; [2012-02-29T01:10:44.000Z, 2012-02-29T01:10:45.000Z]>");
-        Assert.assertEquals(set2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330473600000.0]; [1330477844000.0, 1330477845000.0]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(set2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330473600000.0]; [1330477844000.0, 1330477845000.0]>");
+        
+        //Test infinity:
+        IntervalSet setInf = new IntervalSet();
+        setInf.add(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+        Assert.assertEquals(setInf.toString(TimeFormat.DATETIME), "<[-Infinity, Infinity]>");
     }
 }

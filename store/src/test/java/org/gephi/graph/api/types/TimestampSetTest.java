@@ -288,7 +288,13 @@ public class TimestampSetTest {
 
         set1.add(AttributeUtils.parseDateTime("2012-02-29T00:02:21"));
         Assert.assertEquals(set1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-02-29]>");
-        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330473741000.0]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330473741000.0]>");
+        
+        //Test infinity:
+        TimestampSet setInf = new TimestampSet();
+        setInf.add(Double.NEGATIVE_INFINITY);
+        setInf.add(Double.POSITIVE_INFINITY);
+        Assert.assertEquals(setInf.toString(TimeFormat.DATE), "<[-Infinity, Infinity]>");
     }
 
     @Test
@@ -303,7 +309,7 @@ public class TimestampSetTest {
 
         set1.add(AttributeUtils.parseDateTime("2012-02-29T01:10:44"));
         Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-02-29T01:10:44.000Z]>");
-        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330477844000.0]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330477844000.0]>");
         
         //Test with specific timezone
         TimestampSet set2 = new TimestampSet();
@@ -312,7 +318,13 @@ public class TimestampSetTest {
 
         set2.add(AttributeUtils.parseDateTime("2012-02-29T01:10:44-01:00"));
         Assert.assertEquals(set2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T02:10:44.000Z]>");
-        Assert.assertEquals(set2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330481444000.0]>");//These timestamps are in default timezone UTC+0
+        Assert.assertEquals(set2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330481444000.0]>");
+        
+        //Test infinity:
+        TimestampSet setInf = new TimestampSet();
+        setInf.add(Double.NEGATIVE_INFINITY);
+        setInf.add(Double.POSITIVE_INFINITY);
+        Assert.assertEquals(setInf.toString(TimeFormat.DATETIME), "<[-Infinity, Infinity]>");
     }
 
     //UTILITY

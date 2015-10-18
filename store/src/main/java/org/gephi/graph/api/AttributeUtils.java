@@ -176,7 +176,10 @@ public class AttributeUtils {
                 .withZoneUTC();
         DATE_TIME_PRINTER = ISODateTimeFormat.dateTime()
                 .withZoneUTC();
-        TIMESTAMP_PRINTER = new DecimalFormat("#.0###", DecimalFormatSymbols.getInstance(Locale.ENGLISH));//1 to 4 decimals
+        
+        DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
+        decimalFormatSymbols.setInfinity(DynamicFormattingUtils.INFINITY);
+        TIMESTAMP_PRINTER = new DecimalFormat("0.0###", decimalFormatSymbols);//1 to 4 decimals
     }
 
     private AttributeUtils() {
@@ -622,6 +625,9 @@ public class AttributeUtils {
      * @return the formatted date
      */
     public static String printDate(double timestamp) {
+        if(Double.isInfinite(timestamp)){
+            return printTimestamp(timestamp);
+        }
         return DATE_PRINTER.print((long) timestamp);
     }
 
@@ -632,6 +638,9 @@ public class AttributeUtils {
      * @return the formatted time
      */
     public static String printDateTime(double timestamp) {
+        if(Double.isInfinite(timestamp)){
+            return printTimestamp(timestamp);
+        }
         return DATE_TIME_PRINTER.print((long) timestamp);
     }
 

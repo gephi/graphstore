@@ -363,4 +363,42 @@ public class IntervalsParserTest {
                 parseIntervalSetToString("[1.25,1.55]")
         );
     }
+    
+    @Test
+    public void testParseInfinityIntervalsAndDefaultStringRepresentation() {
+        assertEquals(
+                "<[-Infinity, 1.55]>",
+                parseIntervalSetToString("[-Infinity,1.55]")
+        );
+        
+        assertEquals(
+                "<[0.0, Infinity]>",
+                parseIntervalSetToString("[0.0,Infinity]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, Infinity]>",
+                parseIntervalSetToString("[-Infinity,Infinity]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, 0.0]; [1.0, 2.0]>",
+                parseIntervalSetToString("[-infinity, 0.0]; [1.0, 2.0]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, 0.0]; [1.0, 2.0]; [2.0, Infinity]>",
+                parseIntervalSetToString("[-infinity, 0.0]; [1.0, 2.0]; [2.0, infinity]")
+        );
+        
+        assertEquals(
+                "<[-Infinity, 0.0, 1.0E12]; [1.0, 2.0, 2.0]; [2.0, Infinity, 3.0]>",
+                parseIntervalMapToString("[-Infinity, 0.0, 1e12]; [1.0, 2.0, 2.]; [2.0, Infinity, 3]", Double.class)
+        );
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseInfinityBadIntervalsOverlapping() {
+        IntervalsParser.parseIntervalSet("[-Infinity, 0.0]; [-3.0, 1.0]");//Overlapping
+    }
 }
