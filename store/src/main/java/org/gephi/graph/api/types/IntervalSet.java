@@ -19,6 +19,7 @@ import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
+import org.joda.time.DateTimeZone;
 
 /**
  * Sorted set for intervals.
@@ -313,7 +314,7 @@ public final class IntervalSet implements TimeSet<Interval> {
         return true;
     }
 
-    public String toString(TimeFormat timeFormat) {
+    public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
         if(size == 0){
             return "<empty>";
         }
@@ -322,9 +323,9 @@ public final class IntervalSet implements TimeSet<Interval> {
         sb.append("<");
         for (int i = 0; i < size; i++) {
             sb.append('[');
-            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2], timeFormat));
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2], timeFormat, timeZone));
             sb.append(", ");
-            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2 + 1], timeFormat));
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2 + 1], timeFormat, timeZone));
             sb.append(']');
             
             if(i < size - 1){
@@ -336,8 +337,12 @@ public final class IntervalSet implements TimeSet<Interval> {
         return sb.toString();
     }
     
+    public String toString(TimeFormat timeFormat) {
+        return toString(timeFormat, null);
+    }
+    
     @Override
     public String toString() {
-        return toString(TimeFormat.DOUBLE);
+        return toString(TimeFormat.DOUBLE, null);
     }
 }

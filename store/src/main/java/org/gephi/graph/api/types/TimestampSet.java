@@ -15,10 +15,10 @@
  */
 package org.gephi.graph.api.types;
 
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.TimeFormat;
+import org.joda.time.DateTimeZone;
 
 /**
  * Sorted set for timestamps.
@@ -189,7 +189,7 @@ public final class TimestampSet implements TimeSet<Double> {
         return true;
     }
     
-    public String toString(TimeFormat timeFormat) {
+    public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
         if(size == 0){
             return "<empty>";
         }
@@ -198,7 +198,7 @@ public final class TimestampSet implements TimeSet<Double> {
         sb.append("<");
         sb.append('[');
         for (int i = 0; i < size; i++) {
-            sb.append(AttributeUtils.printTimestampInFormat(array[i], timeFormat));
+            sb.append(AttributeUtils.printTimestampInFormat(array[i], timeFormat, timeZone));
             
             if(i < size - 1){
                 sb.append(", ");
@@ -210,8 +210,12 @@ public final class TimestampSet implements TimeSet<Double> {
         return sb.toString();
     }
     
+    public String toString(TimeFormat timeFormat) {
+        return toString(timeFormat, null);
+    }
+    
     @Override
     public String toString() {
-        return toString(TimeFormat.DOUBLE);
+        return toString(TimeFormat.DOUBLE, null);
     }
 }
