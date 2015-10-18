@@ -44,7 +44,7 @@ public final class DynamicFormattingUtils {
      * @param reader Input reader
      * @param quote Quote mode that started this literal (' or ")
      * @return Parsed value
-     * @throws IOException
+     * @throws IOException Unexpected read error
      */
     public static String parseLiteral(StringReader reader, char quote) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -89,7 +89,7 @@ public final class DynamicFormattingUtils {
      *
      * @param reader Input reader
      * @return Parsed value
-     * @throws IOException
+     * @throws IOException Unexpected read error
      */
     public static String parseValue(StringReader reader) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -145,7 +145,7 @@ public final class DynamicFormattingUtils {
     /**
      * Parses an ISO date with or without time or a timestamp (in milliseconds).
      * Returns the date or timestamp converted to a timestamp in milliseconds.
-     * @param timeStr
+     * @param timeStr Date or timestamp string
      * @return Timestamp
      */
     public static double parseDateTimeOrTimestamp(String timeStr) {
