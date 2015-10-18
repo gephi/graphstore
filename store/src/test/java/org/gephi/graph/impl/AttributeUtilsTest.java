@@ -47,6 +47,7 @@ import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimestampSet;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -351,12 +352,21 @@ public class AttributeUtilsTest {
 
     @Test
     public void testParseDate() {
-        double d = AttributeUtils.parseDateTime("1970-01-01T00:00:00+00:00");
-        Assert.assertEquals(d, 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00", DateTimeZone.UTC), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T01:30:00", DateTimeZone.forID("+01:30")), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00+00:00"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00Z"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00.000+00:00"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00.000Z"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1969-12-31T22:00:00-02:00"), 0.0);
 
         AttributeUtils.parseDateTime("2003-01-01");
         AttributeUtils.parseDateTime("2012-09-12T15:04:01");
         AttributeUtils.parseDateTime("20040401");
+        
+        Assert.assertEquals(AttributeUtils.parseDateTime("2012-09-12T15:04:01"), AttributeUtils.parseDateTime("2012-09-12T15:04:01", DateTimeZone.forID("+00:00")));
+        Assert.assertEquals(AttributeUtils.parseDateTime("2012-09-12T15:04:01+03:30"), AttributeUtils.parseDateTime("2012-09-12T15:04:01", DateTimeZone.forID("+03:30")));
     }
 
     @Test
@@ -365,6 +375,11 @@ public class AttributeUtilsTest {
         double d = AttributeUtils.parseDateTime(date);
 
         Assert.assertEquals(AttributeUtils.printDate(d), date);
+        
+        Assert.assertEquals(AttributeUtils.printDate(d, DateTimeZone.UTC), date);
+        Assert.assertEquals(AttributeUtils.printDate(d, DateTimeZone.forID("+00:30")), "2003-01-01");//Still same day
+        Assert.assertEquals(AttributeUtils.printDate(d, DateTimeZone.forID("+12:00")), "2003-01-01");//Still same day
+        Assert.assertEquals(AttributeUtils.printDate(d, DateTimeZone.forID("-00:30")), "2002-12-31");//Previous day
     }
 
     @Test
@@ -372,8 +387,19 @@ public class AttributeUtilsTest {
         String date = "2003-01-01T00:00:00.000-08:00";
         double d = AttributeUtils.parseDateTime(date);
 
-        String pr = AttributeUtils.printDateTime(d);
-        Assert.assertEquals(AttributeUtils.parseDateTime(pr), d);
+        String dateInUTC = AttributeUtils.printDateTime(d);
+        Assert.assertEquals(AttributeUtils.parseDateTime(dateInUTC), d);
+        
+        Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.UTC), dateInUTC);
+        Assert.assertEquals(AttributeUtils.printDateTime(d), "2003-01-01T08:00:00.000Z");
+        Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.forID("+00:30")), "2003-01-01T08:30:00.000+00:30");
+        Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.forID("+12:00")), "2003-01-01T20:00:00.000+12:00");
+        Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.forID("-12:00")), "2002-12-31T20:00:00.000-12:00");
+        
+        Assert.assertEquals(
+            AttributeUtils.printDateTime(AttributeUtils.parseDateTime("2003-01-01T16:00:00", DateTimeZone.forID("+00:00")), DateTimeZone.forID("+12:00")), 
+            "2003-01-02T04:00:00.000+12:00"
+        );
     }
 
     @Test
