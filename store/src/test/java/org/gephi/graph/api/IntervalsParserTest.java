@@ -183,8 +183,8 @@ public class IntervalsParserTest {
         expected.put(new Interval(5, 6), (short) 3);
         expected.put(new Interval(6, 7), (short) 4);
         
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Short.class, "[1, 2, 1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(short.class, "[1, 2, 1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Short.class, "[1, 2, 1.1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(short.class, "[1, 2, 1.1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
     }
     
     @Test
@@ -195,8 +195,8 @@ public class IntervalsParserTest {
         expected.put(new Interval(5, 6), 3);
         expected.put(new Interval(6, 7), 4);
         
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Integer.class, "[1, 2, 1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(int.class, "[1, 2, 1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Integer.class, "[1, 2, 1.]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(int.class, "[1, 2, 1.]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
     }
     
     @Test
@@ -207,8 +207,8 @@ public class IntervalsParserTest {
         expected.put(new Interval(5, 6), 3l);
         expected.put(new Interval(6, 7), 4l);
         
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Long.class, "[1, 2, 1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(long.class, "[1, 2, 1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Long.class, "[1, 2, 1.0]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(long.class, "[1, 2, 1.0]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
     }
     
     @Test

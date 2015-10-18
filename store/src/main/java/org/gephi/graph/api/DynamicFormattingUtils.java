@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.regex.Pattern;
 
 /**
  * Utils for parsing dynamic intervals and timestamps.
@@ -123,15 +122,21 @@ public final class DynamicFormattingUtils {
     public static <T> T convertValue(Class<T> typeClass, String valString){
         Object value;
         if (typeClass.equals(Byte.class)
+                || typeClass.equals(byte.class)
                 || typeClass.equals(Short.class)
+                || typeClass.equals(short.class)
                 || typeClass.equals(Integer.class)
+                || typeClass.equals(int.class)
                 || typeClass.equals(Long.class)
+                || typeClass.equals(long.class)
                 || typeClass.equals(BigInteger.class)) {
-            value = DynamicFormattingUtils.parseNumberWithoutDecimals((Class<? extends Number>) typeClass, valString);
+            value = parseNumberWithoutDecimals((Class<? extends Number>) typeClass, valString);
         } else if (typeClass.equals(Float.class)
+                || typeClass.equals(float.class)
                 || typeClass.equals(Double.class)
+                || typeClass.equals(double.class)
                 || typeClass.equals(BigDecimal.class)) {
-            value = DynamicFormattingUtils.parseNumberWithDecimals((Class<? extends Number>) typeClass, valString);
+            value = parseNumberWithDecimals((Class<? extends Number>) typeClass, valString);
         } else {
             value = AttributeUtils.parse(valString, typeClass);
         }
@@ -183,26 +188,30 @@ public final class DynamicFormattingUtils {
     }
     
     private static <T extends Number> T parseNumberWithoutDecimals(Class<T> typeClass, String valString){
-        valString = DynamicFormattingUtils.removeDecimalDigitsFromString(valString);
+        valString = removeDecimalDigitsFromString(valString);
         
         return (T) AttributeUtils.parse(valString, typeClass);
     }
     
     private static <T extends Number> T parseNumberWithDecimals(Class<T> typeClass, String valString){
-        valString = DynamicFormattingUtils.infinityIgnoreCase(valString);
+        valString = infinityIgnoreCase(valString);
         
         return (T) AttributeUtils.parse(valString, typeClass);
     }
     
     /**
-     * Removes the decimal digits and point of the numbers of string when necessary. Used for trying to parse decimal numbers as not decimal. For example BigDecimal to BigInteger.
+     * Removes anything after the dot of decimal numbers in a string when necessary. 
+     * Used for trying to parse decimal numbers as not decimal. For example BigDecimal to BigInteger.
      *
      * @param s String to remove decimal digits
      * @return String without dot and decimal digits.
      */
     private static String removeDecimalDigitsFromString(String s) {
-        return removeDecimalDigitsFromStringPattern.matcher(s).replaceAll("");
+        int firstDotIndex = s.indexOf('.');
+        if(firstDotIndex > 0){
+            return s.substring(0, firstDotIndex);
+        }else{
+            return s;
+        }
     }
-    private static final Pattern removeDecimalDigitsFromStringPattern = Pattern.compile("\\.[0-9]*");
-    
 }
