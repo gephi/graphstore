@@ -54,7 +54,7 @@ import org.gephi.graph.api.types.TimestampStringMap;
  * </p>
  *
  * <p>
- * Start and end values can be boht numbers and ISO dates or datetimes. Dates and datetimes will be converted to their millisecond-precision timestamp.
+ * Timestamps values can be both numbers and ISO dates or datetimes. Dates and datetimes will be converted to their millisecond-precision timestamp.
  * </p>
  *
  * Examples of valid timestamp maps are:
@@ -73,10 +73,6 @@ import org.gephi.graph.api.types.TimestampStringMap;
  *
  * <p>
  * The most correct examples are those that include &lt; &gt; and proper commas and semicolons for separation, but the parser will be indulgent when possible.
- * </p>
- *
- * <p>
- * See https://gephi.org/users/supported-graph-formats/spreadsheet for more examples
  * </p>
  *
  * @author Eduardo Ramos
