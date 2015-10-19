@@ -353,6 +353,7 @@ public class AttributeUtilsTest {
     @Test
     public void testParseDate() {
         Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00", null), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00", DateTimeZone.UTC), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T01:30:00", DateTimeZone.forID("+01:30")), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTime("1970-01-01T00:00:00+00:00"), 0.0);
@@ -377,6 +378,7 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.printDate(d), date);
         
         Assert.assertEquals(AttributeUtils.printDate(d, DateTimeZone.UTC), date);
+        Assert.assertEquals(AttributeUtils.printDate(d, null), date);
         Assert.assertEquals(AttributeUtils.printDate(d, DateTimeZone.forID("+00:30")), "2003-01-01");//Still same day
         Assert.assertEquals(AttributeUtils.printDate(d, DateTimeZone.forID("+12:00")), "2003-01-01");//Still same day
         Assert.assertEquals(AttributeUtils.printDate(d, DateTimeZone.forID("-00:30")), "2002-12-31");//Previous day
@@ -391,6 +393,7 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parseDateTime(dateInUTC), d);
         
         Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.UTC), dateInUTC);
+        Assert.assertEquals(AttributeUtils.printDateTime(d, null), dateInUTC);
         Assert.assertEquals(AttributeUtils.printDateTime(d), "2003-01-01T08:00:00.000Z");
         Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.forID("+00:30")), "2003-01-01T08:30:00.000+00:30");
         Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.forID("+12:00")), "2003-01-01T20:00:00.000+12:00");

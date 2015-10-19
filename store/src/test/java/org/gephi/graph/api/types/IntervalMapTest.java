@@ -21,6 +21,7 @@ import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -600,6 +601,11 @@ public class IntervalMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342483341000.0, 1342483380000.0, bar]>");
         
+        //Test with time zone printing:
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("+03:00")), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("-03:00")), "<[2012-02-28, 2012-02-29, foo]; [2012-07-16, 2012-07-16, bar]>");
+        
         //Test infinity:
         IntervalStringMap mapInf = new IntervalStringMap();
         mapInf.put(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), "value");
@@ -620,7 +626,11 @@ public class IntervalMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342487444000.0, 1342487445000.0, bar]>");
         
-        //Test with specific timezone
+        //Test with time zone printing:
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.forID("+12:30")), "<[2012-02-29T12:30:00.000+12:30, 2012-03-01T12:30:00.000+12:30, foo]; [2012-07-17T13:40:44.000+12:30, 2012-07-17T13:40:45.000+12:30, bar]>");
+        
+        //Test with timezone parsing and UTC printing:
         IntervalStringMap map2 = new IntervalStringMap();
         map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), AttributeUtils.parseDateTime("2012-02-29T02:30:00+02:30")), "foo");
         Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z, foo]>");
