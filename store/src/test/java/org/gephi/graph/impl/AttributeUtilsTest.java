@@ -165,6 +165,68 @@ public class AttributeUtilsTest {
         mBool.put(1.0, true);
         Assert.assertEquals(AttributeUtils.parse("<[1, true]>", TimestampBooleanMap.class), mBool);
     }
+    
+    @Test
+    public void testParseDynamicTimestampTypesWithTimeZone() {
+        //Sets
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00]>", TimestampSet.class), 
+                AttributeUtils.parse("<[2015-01-01T00:00:00]>", TimestampSet.class, null)
+        );
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00]>", TimestampSet.class),
+                AttributeUtils.parse("<[2015-01-01T00:00:00]>", TimestampSet.class, DateTimeZone.UTC)
+        );
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00]>", TimestampSet.class), 
+                AttributeUtils.parse("<[2015-01-01T01:30:00]>", TimestampSet.class, DateTimeZone.forID("+01:30"))
+        );
+        
+        //Maps
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class), 
+                AttributeUtils.parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class, null)
+        );
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class),
+                AttributeUtils.parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class, DateTimeZone.UTC)
+        );
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class), 
+                AttributeUtils.parse("<[2015-01-01T01:30:00, val]>", TimestampStringMap.class, DateTimeZone.forID("+01:30"))
+        );
+    }
+    
+    @Test
+    public void testParseDynamicIntervalTypesWithTimeZone() {
+        //Sets
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class), 
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class, null)
+        );
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class),
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class, DateTimeZone.UTC)
+        );
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class), 
+                AttributeUtils.parse("<[2014-12-31T22:00:00, 2015-01-01T00:00:00]>", IntervalSet.class, DateTimeZone.forID("-02:00"))
+        );
+        
+        //Maps
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class), 
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class, null)
+        );
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class),
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class, DateTimeZone.UTC)
+        );
+        Assert.assertEquals(
+                AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class), 
+                AttributeUtils.parse("<[2014-12-31T22:00:00, 2015-01-01T00:00:00, val]>", IntervalStringMap.class, DateTimeZone.forID("-02:00"))
+        );
+    }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseCharInvalid() {
