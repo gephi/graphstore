@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimeRepresentation;
+import org.joda.time.DateTimeZone;
 
 public final class GraphStoreConfiguration {
 
@@ -56,6 +57,8 @@ public final class GraphStoreConfiguration {
     public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIME_SET ? ELEMENT_TIMESET_INDEX + 1 : ELEMENT_TIMESET_INDEX;
     //TimeFormat
     public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
+    //Time zone
+    public static final DateTimeZone DEFAULT_TIME_ZONE = DateTimeZone.UTC;
     //Dynamics
     public static final Estimator DEFAULT_ESTIMATOR = Estimator.FIRST;
     public static final TimeRepresentation DEFAULT_TIME_REPRESENTATION = TimeRepresentation.TIMESTAMP;

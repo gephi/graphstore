@@ -19,6 +19,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import org.gephi.graph.impl.GraphModelImpl;
+import org.joda.time.DateTimeZone;
 
 /**
  * Graph API's entry point.
@@ -501,6 +502,20 @@ public interface GraphModel {
      * @param timeFormat time format
      */
     public void setTimeFormat(TimeFormat timeFormat);
+    
+    /**
+     * Returns the time zone used to display time.
+     *
+     * @return time zone
+     */
+    public DateTimeZone getTimeZone();
+
+    /**
+     * Sets the time zone used to display time.
+     *
+     * @param timeZone time zone
+     */
+    public void setTimeZone(DateTimeZone timeZone);
 
     /**
      * Returns the current configuration.

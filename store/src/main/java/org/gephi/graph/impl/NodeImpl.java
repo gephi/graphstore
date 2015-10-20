@@ -18,7 +18,6 @@ package org.gephi.graph.impl;
 import java.awt.Color;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeProperties;
-import org.gephi.graph.api.TextProperties;
 import org.gephi.graph.spi.LayoutData;
 
 public class NodeImpl extends ElementImpl implements Node {

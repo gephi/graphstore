@@ -17,8 +17,11 @@ package org.gephi.graph.api.types;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeFormat;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -580,6 +583,80 @@ public class TimestampMapTest {
         Assert.assertTrue(set1.equals(set2));
         set1.clear();
         Assert.assertEquals(set2.size(), 2);
+    }
+
+    @Test
+    public void testToStringDouble() {
+        TimestampStringMap map1 = new TimestampStringMap();
+        Assert.assertEquals(map1.toString(), "<empty>");
+
+        map1.put(1.0, "foo");
+        Assert.assertEquals(map1.toString(), "<[1.0, foo]>");
+
+        map1.put(5.5, "bar");
+        Assert.assertEquals(map1.toString(), "<[1.0, foo]; [5.5, bar]>");
+
+        map1.put(6.0, " 'test' ");
+        map1.put(9.0, " 'test' ");
+        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1.0, foo]; [5.5, bar]; [6.0, \" 'test' \"]; [9.0, \" 'test' \"]>");
+    }
+
+    @Test
+    public void testToStringDate() {
+        TimestampStringMap map1 = new TimestampStringMap();
+        Assert.assertEquals(map1.toString(TimeFormat.DATE), "<empty>");
+
+        map1.put(AttributeUtils.parseDateTime("2012-02-29"), "foo");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, foo]>");
+
+        map1.put(AttributeUtils.parseDateTime("2012-02-29T00:02:21"), "bar");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, foo]; [2012-02-29, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330473741000.0, bar]>");
+        
+        //Test with time zone printing:
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, foo]; [2012-02-29, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("+03:00")), "<[2012-02-29, foo]; [2012-02-29, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("-03:00")), "<[2012-02-28, foo]; [2012-02-28, bar]>");
+        
+        //Test infinity:
+        TimestampStringMap mapInf = new TimestampStringMap();
+        mapInf.put(Double.NEGATIVE_INFINITY, "value");
+        mapInf.put(Double.POSITIVE_INFINITY, "value");
+        Assert.assertEquals(mapInf.toString(TimeFormat.DATE), "<[-Infinity, value]; [Infinity, value]>");
+    }
+
+    @Test
+    public void testToStringDatetime() {
+        TimestampStringMap map1 = new TimestampStringMap();
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<empty>");
+
+        
+        //Test with default timezone UTC+0
+        map1.put(AttributeUtils.parseDateTime("2012-02-29"), "foo");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, foo]>");
+
+        map1.put(AttributeUtils.parseDateTime("2012-02-29T01:10:44"), "bar");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330477844000.0, bar]>");
+        
+        //Test with time zone printing:
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.forID("-01:30")), "<[2012-02-28T22:30:00.000-01:30, foo]; [2012-02-28T23:40:44.000-01:30, bar]>");
+        
+        //Test with timezone parsing and UTC printing:
+        TimestampStringMap map2 = new TimestampStringMap();
+        map2.put(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), "foo");
+        Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, foo]>");
+
+        map2.put(AttributeUtils.parseDateTime("2012-02-29T01:10:44-01:00"), "bar");
+        Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, foo]; [2012-02-29T02:10:44.000Z, bar]>");
+        Assert.assertEquals(map2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, foo]; [1330481444000.0, bar]>");
+        
+        //Test infinity:
+        TimestampStringMap mapInf = new TimestampStringMap();
+        mapInf.put(Double.NEGATIVE_INFINITY, "value");
+        mapInf.put(Double.POSITIVE_INFINITY, "value");
+        Assert.assertEquals(mapInf.toString(TimeFormat.DATETIME), "<[-Infinity, value]; [Infinity, value]>");
     }
 
     //UTILITY

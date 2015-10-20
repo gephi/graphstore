@@ -18,7 +18,11 @@ package org.gephi.graph.api.types;
 import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
 import it.unimi.dsi.fastutil.doubles.DoubleSet;
 import java.util.Random;
+import org.gephi.graph.api.AttributeUtils;
+import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.NumberGenerator;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -258,6 +262,83 @@ public class TimestampSetTest {
         Assert.assertTrue(set1.equals(set2));
         set1.clear();
         Assert.assertEquals(set2.size(), 2);
+    }
+    
+    @Test
+    public void testToStringDouble() {
+        TimestampSet set1 = new TimestampSet();
+        Assert.assertEquals(set1.toString(), "<empty>");
+        
+        set1.add(1.0);
+        Assert.assertEquals(set1.toString(), "<[1.0]>");
+        
+        set1.add(2.0);
+        Assert.assertEquals(set1.toString(), "<[1.0, 2.0]>");
+        
+        set1.add(4.0);
+        set1.add(5.21);
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1.0, 2.0, 4.0, 5.21]>");
+    }
+    
+    @Test
+    public void testToStringDate() {
+        TimestampSet set1 = new TimestampSet();
+        Assert.assertEquals(set1.toString(TimeFormat.DATE), "<empty>");
+
+        set1.add(AttributeUtils.parseDateTime("2012-02-29"));
+        Assert.assertEquals(set1.toString(TimeFormat.DATE), "<[2012-02-29]>");
+
+        set1.add(AttributeUtils.parseDateTime("2012-02-29T00:02:21"));
+        Assert.assertEquals(set1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-02-29]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330473741000.0]>");
+        
+        //Test with time zone printing:
+        Assert.assertEquals(set1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, 2012-02-29]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DATE, DateTimeZone.forID("+12:00")), "<[2012-02-29, 2012-02-29]>");
+        set1.add(AttributeUtils.parseDateTime("2012-07-18T18:30:00"));
+        Assert.assertEquals(set1.toString(TimeFormat.DATE, DateTimeZone.forID("+08:00")), "<[2012-02-29, 2012-02-29, 2012-07-19]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DATE, DateTimeZone.forID("-10:00")), "<[2012-02-28, 2012-02-28, 2012-07-18]>");
+        
+        
+        //Test infinity:
+        TimestampSet setInf = new TimestampSet();
+        setInf.add(Double.NEGATIVE_INFINITY);
+        setInf.add(Double.POSITIVE_INFINITY);
+        Assert.assertEquals(setInf.toString(TimeFormat.DATE), "<[-Infinity, Infinity]>");
+    }
+
+    @Test
+    public void testToStringDatetime() {
+        TimestampSet set1 = new TimestampSet();
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<empty>");
+
+        
+        //Test with default timezone UTC+0
+        set1.add(AttributeUtils.parseDateTime("2012-02-29"));
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z]>");
+
+        set1.add(AttributeUtils.parseDateTime("2012-02-29T01:10:44"));
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-02-29T01:10:44.000Z]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330477844000.0]>");
+        
+        //Test with time zone printing:
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, 2012-02-29T01:10:44.000Z]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME, DateTimeZone.forID("+12:15")), "<[2012-02-29T12:15:00.000+12:15, 2012-02-29T13:25:44.000+12:15]>");
+        
+        //Test with timezone parsing and UTC printing:
+        TimestampSet set2 = new TimestampSet();
+        set2.add(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"));
+        Assert.assertEquals(set2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z]>");
+
+        set2.add(AttributeUtils.parseDateTime("2012-02-29T01:10:44-01:00"));
+        Assert.assertEquals(set2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T02:10:44.000Z]>");
+        Assert.assertEquals(set2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330481444000.0]>");
+        
+        //Test infinity:
+        TimestampSet setInf = new TimestampSet();
+        setInf.add(Double.NEGATIVE_INFINITY);
+        setInf.add(Double.POSITIVE_INFINITY);
+        Assert.assertEquals(setInf.toString(TimeFormat.DATETIME), "<[-Infinity, Infinity]>");
     }
 
     //UTILITY

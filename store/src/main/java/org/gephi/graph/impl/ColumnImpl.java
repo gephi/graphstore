@@ -24,7 +24,6 @@ import org.gephi.graph.api.Table;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimeSet;
-import org.gephi.graph.api.types.TimestampMap;
 
 public class ColumnImpl implements Column {
 

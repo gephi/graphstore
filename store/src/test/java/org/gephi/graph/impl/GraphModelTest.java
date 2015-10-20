@@ -32,6 +32,7 @@ import org.gephi.graph.impl.utils.DataInputOutput;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.gephi.graph.api.TimeIndex;
+import org.joda.time.DateTimeZone;
 
 public class GraphModelTest {
 
@@ -195,6 +196,16 @@ public class GraphModelTest {
         Assert.assertEquals(graphModel.getTimeFormat(), TimeFormat.DATETIME);
         graphModel.setTimeFormat(TimeFormat.DOUBLE);
         Assert.assertEquals(graphModel.getTimeFormat(), TimeFormat.DOUBLE);
+    }
+    
+    @Test
+    public void testSetTimeZone() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.UTC);//Default
+        graphModel.setTimeZone(DateTimeZone.forID("-02:00"));
+        Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.forID("-02:00"));
+        graphModel.setTimeZone(DateTimeZone.UTC);
+        Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.UTC);
     }
 
     @Test

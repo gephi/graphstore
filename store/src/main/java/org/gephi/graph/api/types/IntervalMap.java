@@ -19,7 +19,10 @@ import java.lang.reflect.Array;
 import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeFormat;
+import org.joda.time.DateTimeZone;
 
 /**
  * Abstract class that implement a sorted map between intervals and attribute
@@ -512,5 +515,64 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         }
         //TODO
         return null;
+    }
+
+    public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
+        if(size == 0){
+            return "<empty>";
+        }
+        
+        T[] values = toValuesArray();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("<");
+        for (int i = 0; i < size; i++) {
+            sb.append('[');
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2], timeFormat, timeZone));
+            sb.append(", ");
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2 + 1], timeFormat, timeZone));
+            
+            sb.append(", ");
+            String stringValue = values[i].toString();
+            if (containsSpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
+                sb.append('"');
+                sb.append(stringValue.replace("\\", "\\\\").replace("\"", "\\\""));
+                sb.append('"');
+            } else {
+                sb.append(stringValue);
+            }
+
+            sb.append(']');
+            
+            if(i < size - 1){
+                sb.append("; ");
+            }
+        }
+        sb.append(">");
+        
+        return sb.toString();
+    }
+
+    public String toString(TimeFormat timeFormat) {
+        return toString(timeFormat, null);
+    }
+    
+    @Override
+    public String toString() {
+        return toString(TimeFormat.DOUBLE, null);
+    }
+    
+    private static final char[] SPECIAL_CHARACTERS = ";,()[]\"'".toCharArray();
+    /**
+     * @param value String value
+     * @return True if the string contains special characters for dynamic intervals syntax
+     */
+    public static boolean containsSpecialCharacters(String value) {
+        for (char c : SPECIAL_CHARACTERS) {
+            if (value.indexOf(c) != -1) {
+                return true;
+            }
+        }
+        return false;
     }
 }

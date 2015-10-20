@@ -35,6 +35,7 @@ import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.gephi.graph.api.TimeIndex;
+import org.joda.time.DateTimeZone;
 
 public class GraphModelImpl implements GraphModel {
 
@@ -320,6 +321,16 @@ public class GraphModelImpl implements GraphModel {
     @Override
     public void setTimeFormat(TimeFormat timeFormat) {
         store.timeFormat = timeFormat;
+    }
+    
+    @Override
+    public DateTimeZone getTimeZone() {
+        return store.timeZone;
+    }
+
+    @Override
+    public void setTimeZone(DateTimeZone timeZone) {
+        store.timeZone = timeZone;
     }
 
     @Override
