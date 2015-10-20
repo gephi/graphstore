@@ -33,6 +33,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.gephi.graph.api.TimeIndex;
 import org.joda.time.DateTimeZone;
+import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalSet;
 
 public class GraphModelTest {
 
@@ -439,12 +441,15 @@ public class GraphModelTest {
         GraphModelImpl graphModelImpl = new GraphModelImpl(config);
         config.setNodeIdType(Integer.class);
         config.setEdgeIdType(Byte.class);
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
         graphModelImpl.setConfiguration(config);
         Assert.assertEquals(graphModelImpl.getConfiguration(), config);
         Assert.assertEquals(graphModelImpl.getNodeTable().getColumn("id").getTypeClass(), Integer.class);
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("id").getTypeClass(), Byte.class);
         Assert.assertEquals(graphModelImpl.store.factory.nodeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.INTEGER);
         Assert.assertEquals(graphModelImpl.store.factory.edgeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.DISABLED);
+        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn("timeset").getTypeClass(), IntervalSet.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("timeset").getTypeClass(), IntervalSet.class);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)

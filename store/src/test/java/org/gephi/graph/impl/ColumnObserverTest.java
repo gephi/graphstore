@@ -101,7 +101,7 @@ public class ColumnObserverTest {
         Node node = store.factory.newNode();
         store.addNode(node);
 
-        Column timestampColumn = table.getColumn("timestamp");
+        Column timestampColumn = table.getColumn("timeset");
         ColumnObserver observer = timestampColumn.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());
 
@@ -118,7 +118,7 @@ public class ColumnObserverTest {
         node.addTimestamp(1.0);
         store.addNode(node);
 
-        Column timestampColumn = table.getColumn("timestamp");
+        Column timestampColumn = table.getColumn("timeset");
         ColumnObserver observer = timestampColumn.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());
 

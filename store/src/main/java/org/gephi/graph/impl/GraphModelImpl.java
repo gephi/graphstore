@@ -36,6 +36,11 @@ import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.gephi.graph.api.TimeIndex;
 import org.joda.time.DateTimeZone;
+import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.IntervalSet;
+import org.gephi.graph.api.types.TimestampDoubleMap;
+import org.gephi.graph.api.types.TimestampSet;
 
 public class GraphModelImpl implements GraphModel {
 
@@ -380,6 +385,22 @@ public class GraphModelImpl implements GraphModel {
                 edgeTable.store.removeColumn("id");
                 edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", config.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
                 configuration.setEdgeIdType(config.getEdgeIdType());
+            }
+            if (!config.getTimeRepresentation().equals(configuration.getTimeRepresentation())) {
+                TableImpl<Node> nodeTable = store.nodeTable;
+                nodeTable.removeColumn("timeset");
+                TableImpl<Edge> edgeTable = store.edgeTable;
+                edgeTable.removeColumn("timeset");
+                edgeTable.removeColumn("weight");
+                if (config.getTimeRepresentation().equals(TimeRepresentation.TIMESTAMP)) {
+                    nodeTable.store.addColumn(new ColumnImpl(nodeTable, "timeset", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+                    edgeTable.store.addColumn(new ColumnImpl(nodeTable, "timeset", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+                    edgeTable.store.addColumn(new ColumnImpl(edgeTable, "weight", TimestampDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
+                } else {
+                    nodeTable.store.addColumn(new ColumnImpl(nodeTable, "timeset", IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
+                    edgeTable.store.addColumn(new ColumnImpl(nodeTable, "timeset", IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
+                    edgeTable.store.addColumn(new ColumnImpl(edgeTable, "weight", IntervalDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
+                }
             }
             configuration.setTimeRepresentation(config.getTimeRepresentation());
             store.factory.resetConfiguration();
