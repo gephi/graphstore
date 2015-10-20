@@ -448,8 +448,8 @@ public class GraphModelTest {
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("id").getTypeClass(), Byte.class);
         Assert.assertEquals(graphModelImpl.store.factory.nodeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.INTEGER);
         Assert.assertEquals(graphModelImpl.store.factory.edgeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.DISABLED);
-        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn("timeset").getTypeClass(), IntervalSet.class);
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("timeset").getTypeClass(), IntervalSet.class);
+        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), IntervalSet.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), IntervalSet.class);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)

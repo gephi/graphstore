@@ -50,6 +50,10 @@ public final class GraphStoreConfiguration {
     public static final boolean ENABLE_ELEMENT_TIME_SET = true;
     public static final Class DEFAULT_NODE_ID_TYPE = String.class;
     public static final Class DEFAULT_EDGE_ID_TYPE = String.class;
+    //Properties name
+    public static final String ELEMENT_LABEL_COLUMN_ID = "label";
+    public static final String ELEMENT_TIMESET_COLUMN_ID = "timeset";
+    public static final String EDGE_WEIGHT_COLUMN_ID = "weight";
     //Properties index
     public static final int ELEMENT_ID_INDEX = 0;
     public static final int ELEMENT_LABEL_INDEX = 1;

@@ -99,22 +99,22 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         nodeTable.store.addColumn(new ColumnImpl(nodeTable, "id", configuration.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
         edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", configuration.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
-            nodeTable.store.addColumn(new ColumnImpl(nodeTable, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
-            edgeTable.store.addColumn(new ColumnImpl(edgeTable, "label", String.class, "Label", null, Origin.PROPERTY, false, false));
+            nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID, String.class, "Label", null, Origin.PROPERTY, false, false));
+            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID, String.class, "Label", null, Origin.PROPERTY, false, false));
         }
         if (GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET) {
             if (configuration.getTimeRepresentation().equals(TimeRepresentation.TIMESTAMP)) {
-                nodeTable.store.addColumn(new ColumnImpl(nodeTable, "timeset", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
-                edgeTable.store.addColumn(new ColumnImpl(edgeTable, "timeset", TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+                nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
             } else {
-                nodeTable.store.addColumn(new ColumnImpl(nodeTable, "timeset", IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
-                edgeTable.store.addColumn(new ColumnImpl(edgeTable, "timeset", IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
+                nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
+                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
             }
         }
         if (configuration.getTimeRepresentation().equals(TimeRepresentation.TIMESTAMP)) {
-            edgeTable.store.addColumn(new ColumnImpl(edgeTable, "weight", TimestampDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
+            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, TimestampDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
         } else {
-            edgeTable.store.addColumn(new ColumnImpl(edgeTable, "weight", IntervalDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
+            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, IntervalDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
         }
     }
 

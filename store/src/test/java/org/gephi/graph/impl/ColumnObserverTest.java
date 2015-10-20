@@ -85,7 +85,7 @@ public class ColumnObserverTest {
         Node node = store.factory.newNode();
         store.addNode(node);
 
-        Column labelColumn = table.getColumn("label");
+        Column labelColumn = table.getColumn(GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID);
         ColumnObserver observer = labelColumn.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());
 
@@ -101,7 +101,7 @@ public class ColumnObserverTest {
         Node node = store.factory.newNode();
         store.addNode(node);
 
-        Column timestampColumn = table.getColumn("timeset");
+        Column timestampColumn = table.getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID);
         ColumnObserver observer = timestampColumn.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());
 
@@ -118,7 +118,7 @@ public class ColumnObserverTest {
         node.addTimestamp(1.0);
         store.addNode(node);
 
-        Column timestampColumn = table.getColumn("timeset");
+        Column timestampColumn = table.getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID);
         ColumnObserver observer = timestampColumn.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());
 
@@ -138,7 +138,7 @@ public class ColumnObserverTest {
         edge.setWeight(2.0);
         store.addEdge(edge);
 
-        Column weightColumn = table.getColumn("weight");
+        Column weightColumn = table.getColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
         ColumnObserver observer = weightColumn.createColumnObserver();
         Assert.assertFalse(observer.hasColumnChanged());
 
