@@ -199,7 +199,7 @@ public class GraphModelTest {
         graphModel.setTimeFormat(TimeFormat.DOUBLE);
         Assert.assertEquals(graphModel.getTimeFormat(), TimeFormat.DOUBLE);
     }
-    
+
     @Test
     public void testSetTimeZone() {
         GraphModelImpl graphModel = new GraphModelImpl();

@@ -520,20 +520,20 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         }
         return total;
     }
-    
+
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
-        if(size == 0){
+        if (size == 0) {
             return "<empty>";
         }
-        
+
         T[] values = toValuesArray();
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("<");
         for (int i = 0; i < size; i++) {
             sb.append('[');
             sb.append(AttributeUtils.printTimestampInFormat(array[i], timeFormat, timeZone));
-            
+
             sb.append(", ");
             String stringValue = values[i].toString();
             if (containsSpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
@@ -545,29 +545,31 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
             }
 
             sb.append(']');
-            
-            if(i < size - 1){
+
+            if (i < size - 1) {
                 sb.append("; ");
             }
         }
         sb.append(">");
-        
+
         return sb.toString();
     }
-    
+
     public String toString(TimeFormat timeFormat) {
         return toString(timeFormat, null);
     }
-    
+
     @Override
     public String toString() {
         return toString(TimeFormat.DOUBLE, null);
     }
-    
+
     private static final char[] SPECIAL_CHARACTERS = ";,()[]\"'".toCharArray();
+
     /**
      * @param value String value
-     * @return True if the string contains special characters for dynamic intervals syntax
+     * @return True if the string contains special characters for dynamic
+     * intervals syntax
      */
     public static boolean containsSpecialCharacters(String value) {
         for (char c : SPECIAL_CHARACTERS) {

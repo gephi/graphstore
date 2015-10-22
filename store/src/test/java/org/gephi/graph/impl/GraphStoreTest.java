@@ -445,7 +445,7 @@ public class GraphStoreTest {
             }
 
             @Override
-            public Iterable<Map.Entry>  getAttributes(Column column) {
+            public Iterable<Map.Entry> getAttributes(Column column) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });

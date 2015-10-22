@@ -233,7 +233,7 @@ public class Serialization {
 
         //TimeFormat
         serialize(out, store.timeFormat);
-        
+
         //Time zone
         serialize(out, store.timeZone);
 
@@ -284,7 +284,7 @@ public class Serialization {
 
         //TimeFormat
         deserialize(is);
-        
+
         //Time zone
         deserialize(is);
 
@@ -913,7 +913,7 @@ public class Serialization {
 
         return tf;
     }
-    
+
     private void serializeTimeZone(final DataOutput out, final DateTimeZone timeZone) throws IOException {
         serialize(out, timeZone.getID());
     }

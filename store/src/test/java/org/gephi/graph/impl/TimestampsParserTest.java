@@ -51,14 +51,14 @@ public class TimestampsParserTest {
     private static final SimpleDateFormat dateFormat;
     private static final SimpleDateFormat dateTimeFormat;
     private static final SimpleDateFormat dateTimeFormatMillis;
-    
+
     static {
         dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        
+
         dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        
+
         dateTimeFormatMillis = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         dateTimeFormatMillis.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -83,7 +83,7 @@ public class TimestampsParserTest {
     public void testParseTimestampSet() throws ParseException {
         assertNull(TimestampsParser.parseTimestampSet(null));
         assertEquals(new TimestampSet(), TimestampsParser.parseTimestampSet("[]"));
-        
+
         //Doubles:
         assertEquals(buildTimestampSet(1), TimestampsParser.parseTimestampSet("[1]"));
         assertEquals(buildTimestampSet(1, 2), TimestampsParser.parseTimestampSet("[1, 2]"));
@@ -102,7 +102,7 @@ public class TimestampsParserTest {
                 buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")),
                 TimestampsParser.parseTimestampSet("[2015-01, 2015-01-31]")
         );
-        
+
         //Date times:
         assertEquals(
                 buildTimestampSet(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"), parseDateTimeIntoTimestamp("2015-01-02 00:00:00")),
@@ -118,12 +118,12 @@ public class TimestampsParserTest {
     public void testParseTimestampSetBadDateFormat1() {
         TimestampsParser.parseTimestampSet("[2015-13-01, 2015-01-31]");
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampSetBadDateFormat2() {
         TimestampsParser.parseTimestampSet("[2015-01-35, 2015-01-31]");
     }
-    
+
     private <T> void assertEqualTimestampMaps(TimestampMap<T> expected, TimestampMap<T> result) {
         assertEquals(expected, result);
         assertEquals(expected.toString(), result.toString());
@@ -136,10 +136,10 @@ public class TimestampsParserTest {
         expected.put(3.0, "Value2");
         expected.put(5.0, "Value 3");
         expected.put(6.0, " Value 4 ");
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(String.class, "[1, Value1]; [3, 'Value2']; [5, Value 3]; [6, \" Value 4 \"]"));
     }
-    
+
     @Test
     public void testParseTimestampMapByte() {
         TimestampByteMap expected = new TimestampByteMap();
@@ -147,11 +147,11 @@ public class TimestampsParserTest {
         expected.put(3.0, (byte) 2);
         expected.put(6.0, (byte) 3);
         expected.put(7.0, (byte) 4);
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Byte.class, "[1, 1]; [3, 2]; [6, '3']; [7, \"4\"]"));
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(byte.class, "[1, 1]; [3, 2]; [6, '3']; [7, \"4\"]"));
     }
-    
+
     @Test
     public void testParseTimestampMapShort() {
         TimestampShortMap expected = new TimestampShortMap();
@@ -159,11 +159,11 @@ public class TimestampsParserTest {
         expected.put(3.0, (short) 2);
         expected.put(5.0, (short) 3);
         expected.put(6.0, (short) 4);
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Short.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(short.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
-    
+
     @Test
     public void testParseTimestampMapInteger() {
         TimestampIntegerMap expected = new TimestampIntegerMap();
@@ -171,11 +171,11 @@ public class TimestampsParserTest {
         expected.put(3.0, 2);
         expected.put(5.0, 3);
         expected.put(6.0, 4);
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Integer.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(int.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
-    
+
     @Test
     public void testParseTimestampMapLong() {
         TimestampLongMap expected = new TimestampLongMap();
@@ -183,11 +183,11 @@ public class TimestampsParserTest {
         expected.put(3.0, 2l);
         expected.put(5.0, 3l);
         expected.put(6.0, 4l);
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Long.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(long.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
-    
+
     @Test
     public void testParseTimestampMapFloat() {
         TimestampFloatMap expected = new TimestampFloatMap();
@@ -195,11 +195,11 @@ public class TimestampsParserTest {
         expected.put(3.0, 2f);
         expected.put(5.0, 3f);
         expected.put(6.0, 4f);
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Float.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(float.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
-    
+
     @Test
     public void testParseTimestampMapDouble() {
         TimestampDoubleMap expected = new TimestampDoubleMap();
@@ -207,11 +207,11 @@ public class TimestampsParserTest {
         expected.put(3.0, 2d);
         expected.put(5.0, 3d);
         expected.put(6.0, 4d);
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Double.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(double.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
-    
+
     @Test
     public void testParseTimestampMapBoolean() {
         TimestampBooleanMap expected = new TimestampBooleanMap();
@@ -219,11 +219,11 @@ public class TimestampsParserTest {
         expected.put(3.0, false);
         expected.put(5.0, false);
         expected.put(6.0, true);
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Boolean.class, "[1, true]; [3, false]; [5, '0']; [6, \"1\"]"));
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(boolean.class, "[1, true]; [3, false]; [5, '0']; [6, \"1\"]"));
     }
-    
+
     @Test
     public void testParseTimestampMapChar() {
         TimestampCharMap expected = new TimestampCharMap();
@@ -231,47 +231,46 @@ public class TimestampsParserTest {
         expected.put(3.0, 'b');
         expected.put(5.0, 'c');
         expected.put(6.0, 'd');
-        
+
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Character.class, "[1, a]; [3, b]; [5, 'c']; [6, \"d\"]"));
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(char.class, "[1, a]; [3, b]; [5, 'c']; [6, \"d\"]"));
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampMapByteBadFormat() {
         TimestampsParser.parseTimestampMap(Byte.class, "[1, a]");
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampMapShortBadFormat() {
         TimestampsParser.parseTimestampMap(Short.class, "[1, a]");
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampMapIntegerBadFormat() {
         TimestampsParser.parseTimestampMap(Integer.class, "[1, a]");
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampMapLongBadFormat() {
         TimestampsParser.parseTimestampMap(Long.class, "[1, a]");
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampMapFloatBadFormat() {
         TimestampsParser.parseTimestampMap(Float.class, "[1, 1..4]");
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampMapDoubleBadFormat() {
         TimestampsParser.parseTimestampMap(Double.class, "[1, 4oe]");
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampMapCharBadFormat() {
         TimestampsParser.parseTimestampMap(Character.class, "[1, abc]");
     }
-    
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampUnsupportedType() {
         TimestampsParser.parseTimestampMap(Date.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]");
@@ -305,12 +304,12 @@ public class TimestampsParserTest {
                 "<[1.0, xy]; [4.0, \"['a;b']\"]>",
                 parseTimestampMapToString(" (  1,  xy)  (4, '[\\'a;b\\']']")
         );
-        
+
         assertEquals(
                 "<[1.0, xy]; [4.0, \"['a;b\\\"']\"]>",
                 parseTimestampMapToString(" (  1,  xy)  (4, '[\\'a;b\\\"\\']']")//Playing with double quote literals
         );
-        
+
         assertEquals(
                 "<[1.0, xy]; [4.0, \"[\\\"a;b'\\\"]\"]>",
                 parseTimestampMapToString(" (  1,   xy)  (4, '[\"a;b\\\'\"]']")//Playing with single quote literals
@@ -339,53 +338,53 @@ public class TimestampsParserTest {
                 "<[1.25, 1.55]>",
                 parseTimestampSetToString("[1.25,1.55]")
         );
-        
+
         assertEquals(
                 "<[1.25, 1.55]>",
                 parseTimestampSetToString(" 1.25,1.55")//We don't require bounds for timestamp sets, since only one array is necessary
         );
     }
-    
+
     @Test
     public void testParseInfinityTimestampsAndDefaultStringRepresentation() {
         assertEquals(
                 "<[-Infinity, 1.55]>",
                 parseTimestampSetToString("[-Infinity,1.55]")
         );
-        
+
         assertEquals(
                 "<[0.0, Infinity]>",
                 parseTimestampSetToString("[0.0,Infinity]")
         );
-        
+
         assertEquals(
                 "<[-Infinity, Infinity]>",
                 parseTimestampSetToString("[-Infinity,Infinity]")
         );
-        
+
         assertEquals(
                 "<[-Infinity, 0.0, 1.0, 2.0]>",
                 parseTimestampSetToString("[-INFINITY, 0.0, 1.0, 2.0]")
         );
-        
+
         assertEquals(
                 "<[-Infinity, 0.0, 1.0, 2.0, Infinity]>",
                 parseTimestampSetToString("[-infinity, 0.0, 1.0, 2.0, infinity]")
         );
-        
+
         assertEquals(
                 "<[-Infinity, 1.0E12]; [1.0, 2.0]; [Infinity, 3.0]>",
                 parseTimestampMapToString("[-Infinity, 1e12]; [1.0, 2.]; [Infinity, 3]", Double.class)
         );
     }
-    
+
     @Test
     public void testParseUnordered() {
         assertEquals(
                 "<[-Infinity, -3.0, 0.0, 1.0]>",
                 parseTimestampSetToString("[-Infinity, 0.0, -3.0, 1.0]")
         );
-        
+
         assertEquals(
                 "<[-Infinity, 1.0]; [-3.0, 3.0]; [0.0, 2.0]; [1.0, 4.0]>",
                 parseTimestampMapToString("[-Infinity, 1] [0.0, 2] [-3.0, 3] [1.0, 4]", Double.class)

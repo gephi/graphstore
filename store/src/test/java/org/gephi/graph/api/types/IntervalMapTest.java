@@ -26,7 +26,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class IntervalMapTest {
-    
+
     @Test
     public void testEmpty() {
         for (IntervalMap set : getAllInstances()) {
@@ -34,55 +34,55 @@ public class IntervalMapTest {
             Assert.assertEquals(set.size(), 0);
         }
     }
-    
+
     @Test
     public void testPutOne() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            
+
             Assert.assertTrue(set.put(new Interval(1.0, 2.0), defaultValues[0]));
             testValues(set, new Interval[]{new Interval(1.0, 2.0)}, new Object[]{defaultValues[0]});
         }
     }
-    
+
     @Test
     public void testPutTwice() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            
+
             Assert.assertTrue(set.put(new Interval(1.0, 2.0), defaultValues[0]));
             Assert.assertFalse(set.put(new Interval(1.0, 2.0), defaultValues[1]));
             testValues(set, new Interval[]{new Interval(1.0, 2.0)}, new Object[]{defaultValues[1]});
         }
     }
-    
+
     @Test
     public void testMultiplePut() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            
+
             Assert.assertTrue(set.put(new Interval(1.0, 2.0), defaultValues[0]));
             Assert.assertTrue(set.put(new Interval(6.0, 8.0), defaultValues[1]));
             testValues(set, new Interval[]{new Interval(1.0, 2.0), new Interval(6.0, 8.0)}, defaultValues);
         }
     }
-    
+
     @Test
     public void testMultiplePutWithCapacity() {
         for (IntervalMap set : getAllInstances(10)) {
             Object[] defaultValues = getTestValues(set);
-            
+
             Assert.assertTrue(set.put(new Interval(1.0, 2.0), defaultValues[0]));
             Assert.assertTrue(set.put(new Interval(6.0, 8.0), defaultValues[1]));
             testValues(set, new Interval[]{new Interval(1.0, 2.0), new Interval(6.0, 8.0)}, defaultValues);
         }
     }
-    
+
     @Test
     public void testMultiplePutWithOverlap() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            
+
             Assert.assertTrue(set.put(new Interval(1.0, 2.0), defaultValues[0]));
             Assert.assertTrue(set.put(new Interval(3.0, 4.0), defaultValues[1]));
             Assert.assertTrue(set.put(new Interval(2.0, 2.0), defaultValues[0]));
@@ -91,12 +91,12 @@ public class IntervalMapTest {
             testValues(set, new Interval[]{new Interval(1.0, 2.0), new Interval(2.0, 2.0), new Interval(2.0, 3.0), new Interval(3.0, 4.0)}, defaultValues);
         }
     }
-    
+
     @Test
     public void testRemove() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            
+
             set.put(new Interval(1.0, 2.0), defaultValues[0]);
             set.put(new Interval(3.0, 4.0), defaultValues[1]);
             Assert.assertTrue(set.remove(new Interval(1.0, 2.0)));
@@ -107,12 +107,12 @@ public class IntervalMapTest {
             Assert.assertFalse(set.contains(new Interval(1.0, 2.0)));
         }
     }
-    
+
     @Test
     public void testRemoveAdd() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            
+
             set.put(new Interval(1.0, 2.0), defaultValues[0]);
             set.put(new Interval(3.0, 4.0), defaultValues[1]);
             Assert.assertTrue(set.remove(new Interval(1.0, 2.0)));
@@ -123,12 +123,12 @@ public class IntervalMapTest {
             testValues(set, new Interval[]{new Interval(1.0, 2.0), new Interval(3.0, 4.0)}, defaultValues);
         }
     }
-    
+
     @Test
     public void testRemoveUnknown() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            
+
             set.put(new Interval(1.0, 2.0), defaultValues[0]);
             set.put(new Interval(3.0, 4.0), defaultValues[1]);
             Assert.assertFalse(set.remove(new Interval(5.0, 6.0)));
@@ -137,31 +137,31 @@ public class IntervalMapTest {
             testValues(set, new Interval[]{new Interval(1.0, 2.0), new Interval(3.0, 4.0)}, defaultValues);
         }
     }
-    
+
     @Test
     public void testContains() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
-            
+
             Assert.assertFalse(set.contains(new Interval(1.0, 2.0)));
             set.put(new Interval(1.0, 2.0), defaultValues[0]);
             set.remove(new Interval(1.0, 2.0));
             Assert.assertFalse(set.contains(new Interval(1.0, 2.0)));
         }
     }
-    
+
     @Test
     public void testClear() {
         for (IntervalMap set : getAllInstances()) {
             Object[] defaultValues = getTestValues(set);
             set.put(new Interval(1.0, 2.0), defaultValues[0]);
             set.clear();
-            
+
             Assert.assertEquals(set.size(), 0);
             Assert.assertTrue(set.isEmpty());
         }
     }
-    
+
     @Test
     public void testClearAdd() {
         for (IntervalMap set : getAllInstances()) {
@@ -170,11 +170,11 @@ public class IntervalMapTest {
             set.clear();
             Assert.assertTrue(set.put(new Interval(1.0, 2.0), defaultValues[0]));
             Assert.assertTrue(set.put(new Interval(3.0, 4.0), defaultValues[1]));
-            
+
             testValues(set, new Interval[]{new Interval(1.0, 2.0), new Interval(3.0, 4.0)}, defaultValues);
         }
     }
-    
+
     @Test
     public void testPutNull() {
         for (IntervalMap set : getAllInstances()) {
@@ -189,7 +189,7 @@ public class IntervalMapTest {
             }
         }
     }
-    
+
     @Test
     public void testGetTimestamps() {
 //        TimestampDoubleMap set = new TimestampDoubleMap();
@@ -199,7 +199,7 @@ public class IntervalMapTest {
 //
 //        testDoubleArrayEquals(new double[]{1.0, 2.0}, set.getTimestamps());
     }
-    
+
     @Test
     public void testGetTimestampsTrim() {
 //        TimestampDoubleMap set = new TimestampDoubleMap();
@@ -210,7 +210,7 @@ public class IntervalMapTest {
 //
 //        testDoubleArrayEquals(new double[]{1.0}, set.getTimestamps());
     }
-    
+
     @Test
     public void testIsSupported() {
         for (IntervalMap set : getAllInstances()) {
@@ -218,7 +218,7 @@ public class IntervalMapTest {
             Assert.assertTrue(set.isSupported(Estimator.LAST));
         }
     }
-    
+
     @Test
     public void testEstimatorDefault() {
         for (IntervalMap set : getAllInstances()) {
@@ -495,100 +495,100 @@ public class IntervalMapTest {
         IntervalStringMap set3 = new IntervalStringMap();
         IntervalStringMap set4 = new IntervalStringMap();
         IntervalStringMap set5 = new IntervalStringMap();
-        
+
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
         set1.put(indices[2], values[2]);
-        
+
         set2.put(indices[2], values[2]);
         set2.put(indices[1], values[1]);
         set2.put(indices[0], values[0]);
-        
+
         set3.put(indices[0], "f");
         set3.put(indices[1], "o");
         set3.put(indices[2], "o");
-        
+
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
-        
+
         Assert.assertFalse(set1.equals(set3));
         Assert.assertFalse(set1.equals(set4));
         Assert.assertFalse(set1.equals(set5));
-        
+
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
         Assert.assertFalse(set1.hashCode() == set3.hashCode());
         Assert.assertFalse(set1.hashCode() == set4.hashCode());
     }
-    
+
     @Test
     public void testEqualsWithCapacity() {
         double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringMap set1 = new TimestampStringMap(10);
         TimestampStringMap set2 = new TimestampStringMap();
-        
+
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
         set1.put(indices[2], values[2]);
-        
+
         set2.put(indices[2], values[2]);
         set2.put(indices[1], values[1]);
         set2.put(indices[0], values[0]);
-        
+
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
-        
+
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
     }
-    
+
     @Test
     public void testEqualsWithRemove() {
         double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
         String[] values = new String[]{"a", "z", "e"};
         TimestampStringMap set1 = new TimestampStringMap();
         TimestampStringMap set2 = new TimestampStringMap();
-        
+
         set1.put(indices[0], values[0]);
         set1.put(indices[1], values[1]);
         set1.put(indices[2], values[2]);
         set1.remove(indices[1]);
-        
+
         set2.put(indices[0], values[0]);
         set2.put(indices[2], values[2]);
-        
+
         Assert.assertTrue(set1.equals(set2));
         Assert.assertTrue(set2.equals(set1));
-        
+
         Assert.assertTrue(set1.hashCode() == set2.hashCode());
     }
-    
+
     @Test
     public void testCopyConstructor() {
         IntervalStringMap map1 = new IntervalStringMap();
         map1.put(new Interval(1.0, 2.0), "foo");
         map1.put(new Interval(4.0, 5.0), "bar");
-        
+
         IntervalStringMap map2 = new IntervalStringMap(map1.getIntervals(), map1.toValuesArray());
         Assert.assertTrue(map1.equals(map2));
         map1.clear();
         Assert.assertEquals(map2.size(), 2);
     }
-    
+
     @Test
     public void testToStringDouble() {
         IntervalStringMap map1 = new IntervalStringMap();
         Assert.assertEquals(map1.toString(), "<empty>");
-        
+
         map1.put(new Interval(1.0, 2.0), "foo");
         Assert.assertEquals(map1.toString(), "<[1.0, 2.0, foo]>");
-        
+
         map1.put(new Interval(4.0, 5.5), "bar");
         Assert.assertEquals(map1.toString(), "<[1.0, 2.0, foo]; [4.0, 5.5, bar]>");
-        
+
         map1.put(new Interval(6.0, 9.0), " 'test' ");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1.0, 2.0, foo]; [4.0, 5.5, bar]; [6.0, 9.0, \" 'test' \"]>");
     }
-    
+
     @Test
     public void testToStringDate() {
         IntervalStringMap map1 = new IntervalStringMap();
@@ -600,12 +600,12 @@ public class IntervalMapTest {
         map1.put(new Interval(AttributeUtils.parseDateTime("2012-07-17T00:02:21"), AttributeUtils.parseDateTime("2012-07-17T00:03:00")), "bar");
         Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342483341000.0, 1342483380000.0, bar]>");
-        
+
         //Test with time zone printing:
         Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("+03:00")), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("-03:00")), "<[2012-02-28, 2012-02-29, foo]; [2012-07-16, 2012-07-16, bar]>");
-        
+
         //Test infinity:
         IntervalStringMap mapInf = new IntervalStringMap();
         mapInf.put(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), "value");
@@ -617,7 +617,6 @@ public class IntervalMapTest {
         IntervalStringMap map1 = new IntervalStringMap();
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<empty>");
 
-        
         //Test with default timezone UTC+0
         map1.put(new Interval(AttributeUtils.parseDateTime("2012-02-29"), AttributeUtils.parseDateTime("2012-03-01")), "foo");
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]>");
@@ -625,11 +624,11 @@ public class IntervalMapTest {
         map1.put(new Interval(AttributeUtils.parseDateTime("2012-07-17T01:10:44"), AttributeUtils.parseDateTime("2012-07-17T01:10:45")), "bar");
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342487444000.0, 1342487445000.0, bar]>");
-        
+
         //Test with time zone printing:
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.forID("+12:30")), "<[2012-02-29T12:30:00.000+12:30, 2012-03-01T12:30:00.000+12:30, foo]; [2012-07-17T13:40:44.000+12:30, 2012-07-17T13:40:45.000+12:30, bar]>");
-        
+
         //Test with timezone parsing and UTC printing:
         IntervalStringMap map2 = new IntervalStringMap();
         map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), AttributeUtils.parseDateTime("2012-02-29T02:30:00+02:30")), "foo");
@@ -638,7 +637,7 @@ public class IntervalMapTest {
         map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T01:10:44+00:00"), AttributeUtils.parseDateTime("2012-02-29T01:10:45+00:00")), "bar");
         Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, 2012-02-29T01:10:45.000Z, bar]>");
         Assert.assertEquals(map2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330473600000.0, foo]; [1330477844000.0, 1330477845000.0, bar]>");
-        
+
         //Test infinity:
         IntervalStringMap mapInf = new IntervalStringMap();
         mapInf.put(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), "value");
@@ -652,7 +651,7 @@ public class IntervalMapTest {
             Assert.assertEquals(a[i], b[i]);
         }
     }
-    
+
     private IntervalMap[] getAllInstances() {
         return new IntervalMap[]{
             new IntervalStringMap(),
@@ -666,7 +665,7 @@ public class IntervalMapTest {
             new IntervalCharMap()
         };
     }
-    
+
     private IntervalMap[] getAllInstances(int capacity) {
         return new IntervalMap[]{
             new IntervalStringMap(capacity),
@@ -680,7 +679,7 @@ public class IntervalMapTest {
             new IntervalCharMap(capacity)
         };
     }
-    
+
     private Object[] getTestValues(IntervalMap set) {
         if (set.getTypeClass().equals(String.class)) {
             return new String[]{"foo", "bar"};
@@ -704,7 +703,7 @@ public class IntervalMapTest {
             throw new RuntimeException("Unrecognized type");
         }
     }
-    
+
     private Object getDefaultValue(IntervalMap set) {
         if (set.getTypeClass().equals(Boolean.class)) {
             return Boolean.FALSE;
@@ -728,26 +727,26 @@ public class IntervalMapTest {
             throw new RuntimeException("Unrecognized type " + set.getTypeClass());
         }
     }
-    
+
     private void testValues(IntervalMap set, Interval[] expectedIntervals, Object[] expectedValues) {
         Class typeClass = set.getTypeClass();
-        
+
         Assert.assertEquals(expectedIntervals.length, expectedValues.length);
         Assert.assertEquals(set.size(), expectedIntervals.length);
         for (int i = 0; i < expectedIntervals.length; i++) {
             Assert.assertEquals(set.get(expectedIntervals[i], getDefaultValue(set)), expectedValues[i]);
             Assert.assertEquals(set.get(new Interval(99999.0, 999999.0), getDefaultValue(set)), getDefaultValue(set));
             Assert.assertTrue(set.contains(expectedIntervals[i]));
-            
+
             if (typeClass != String.class) {
                 try {
                     Method getMethod = set.getClass().getMethod("get" + typeClass.getSimpleName(), Interval.class);
                     Method getMethodWithDefault = set.getClass().getMethod("get" + typeClass.getSimpleName(), Interval.class, getMethod.getReturnType());
-                    
+
                     Assert.assertEquals(getMethod.invoke(set, expectedIntervals[i]), expectedValues[i]);
                     Assert.assertEquals(getMethodWithDefault.invoke(set, expectedIntervals[i], getDefaultValue(set)), expectedValues[i]);
                     Assert.assertEquals(getMethodWithDefault.invoke(set, new Interval(99999.0, 999999.0), getDefaultValue(set)), getDefaultValue(set));
-                    
+
                     boolean thrown = false;
                     try {
                         getMethod.invoke(set, new Interval(99999.0, 999999.0));

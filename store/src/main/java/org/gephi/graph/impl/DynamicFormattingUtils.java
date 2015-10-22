@@ -24,6 +24,7 @@ import org.joda.time.DateTimeZone;
 
 /**
  * Utils for parsing dynamic intervals and timestamps.
+ *
  * @author Eduardo Ramos
  */
 public final class DynamicFormattingUtils {
@@ -36,13 +37,14 @@ public final class DynamicFormattingUtils {
     public static final char RIGHT_BOUND_BRACKET = ')';
     public static final char RIGHT_BOUND_SQUARE_BRACKET = ']';
     public static final char COMMA = ',';
-    
+
     public static final String EMPTY_DYNAMIC_VALUE = "<empty>";
     public static final String INFINITY = "Infinity";
-    
+
     /**
      * Parses an ISO date with or without time or a timestamp (in milliseconds).
      * Returns the date or timestamp converted to a timestamp in milliseconds.
+     *
      * @param timeStr Date or timestamp string
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Timestamp
@@ -58,21 +60,22 @@ public final class DynamicFormattingUtils {
         } catch (Exception ex) {
             value = AttributeUtils.parseDateTime(timeStr, timeZone);
         }
-        
+
         return value;
     }
-    
+
     /**
      * Parses an ISO date with or without time or a timestamp (in milliseconds).
      * Returns the date or timestamp converted to a timestamp in milliseconds.
      * Default time zone is used (UTC).
+     *
      * @param timeStr Date or timestamp string
      * @return Timestamp
      */
     public static double parseDateTimeOrTimestamp(String timeStr) {
         return parseDateTimeOrTimestamp(timeStr, null);
     }
-    
+
     /**
      * Parse literal value until detecting the end of it (quote can be ' or ")
      *
@@ -120,7 +123,8 @@ public final class DynamicFormattingUtils {
     }
 
     /**
-     * Parses a value until end is detected either by a comma or a bounds closing character.
+     * Parses a value until end is detected either by a comma or a bounds
+     * closing character.
      *
      * @param reader Input reader
      * @return Parsed value
@@ -145,16 +149,18 @@ public final class DynamicFormattingUtils {
 
         return sb.toString().trim();
     }
-    
+
     /**
-     * Converts a string parsed with {@link #parseValue(java.io.StringReader)} to the target type,
-     * taking into account dynamic parsing quirks such as numbers with/without decimals and infinity values.
+     * Converts a string parsed with {@link #parseValue(java.io.StringReader)}
+     * to the target type, taking into account dynamic parsing quirks such as
+     * numbers with/without decimals and infinity values.
+     *
      * @param <T> Target type
      * @param typeClass Target type class
      * @param valString String to parse
      * @return Converted value
      */
-    protected static <T> T convertValue(Class<T> typeClass, String valString){
+    protected static <T> T convertValue(Class<T> typeClass, String valString) {
         Object value;
         if (typeClass.equals(Byte.class)
                 || typeClass.equals(byte.class)
@@ -176,15 +182,16 @@ public final class DynamicFormattingUtils {
             value = AttributeUtils.parse(valString, typeClass);
         }
 
-        if(value == null){
+        if (value == null) {
             throw new IllegalArgumentException("Invalid value for type: " + valString);
         }
-        
+
         return (T) value;
     }
 
     /**
-     * Method for allowing inputs such as "infinity" when parsing decimal numbers
+     * Method for allowing inputs such as "infinity" when parsing decimal
+     * numbers
      *
      * @param value Input String
      * @return Input String with fixed "Infinity" syntax if necessary.
@@ -200,31 +207,32 @@ public final class DynamicFormattingUtils {
 
         return value;
     }
-    
-    private static <T extends Number> T parseNumberWithoutDecimals(Class<T> typeClass, String valString){
+
+    private static <T extends Number> T parseNumberWithoutDecimals(Class<T> typeClass, String valString) {
         valString = removeDecimalDigitsFromString(valString);
-        
+
         return (T) AttributeUtils.parse(valString, typeClass);
     }
-    
-    private static <T extends Number> T parseNumberWithDecimals(Class<T> typeClass, String valString){
+
+    private static <T extends Number> T parseNumberWithDecimals(Class<T> typeClass, String valString) {
         valString = infinityIgnoreCase(valString);
-        
+
         return (T) AttributeUtils.parse(valString, typeClass);
     }
-    
+
     /**
-     * Removes anything after the dot of decimal numbers in a string when necessary. 
-     * Used for trying to parse decimal numbers as not decimal. For example BigDecimal to BigInteger.
+     * Removes anything after the dot of decimal numbers in a string when
+     * necessary. Used for trying to parse decimal numbers as not decimal. For
+     * example BigDecimal to BigInteger.
      *
      * @param s String to remove decimal digits
      * @return String without dot and decimal digits.
      */
     private static String removeDecimalDigitsFromString(String s) {
         int firstDotIndex = s.indexOf('.');
-        if(firstDotIndex > 0){
+        if (firstDotIndex > 0) {
             return s.substring(0, firstDotIndex);
-        }else{
+        } else {
             return s;
         }
     }

@@ -643,7 +643,7 @@ public class SerializationTest {
         TimeFormat l = (TimeFormat) ser.deserialize(buf);
         Assert.assertEquals(TimeFormat.DATETIME, l);
     }
-    
+
     @Test
     public void testTimeZone() throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl();

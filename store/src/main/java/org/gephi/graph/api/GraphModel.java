@@ -502,7 +502,7 @@ public interface GraphModel {
      * @param timeFormat time format
      */
     public void setTimeFormat(TimeFormat timeFormat);
-    
+
     /**
      * Returns the time zone used to display time.
      *

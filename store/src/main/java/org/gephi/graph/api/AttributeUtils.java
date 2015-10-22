@@ -58,16 +58,12 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 /**
- * <p>
  * Set of utility methods to manipulate supported attribute types.
- * </p>
- * 
  * <p>
  * The attribute system is built with a set of supported column types. This
  * class contains utilities to parse and convert supported types. It also
  * contains utilities to manipulate primitive arrays (the preferred array type)
  * and date/time types. Default time zone for parsing/printing dates is UTC.
- * </p>
  */
 public class AttributeUtils {
 
@@ -76,8 +72,8 @@ public class AttributeUtils {
     private static final DateTimeFormatter DATE_TIME_PARSER;
     private static final DateTimeFormatter DATE_PRINTER;
     private static final DateTimeFormatter DATE_TIME_PRINTER;
-    private static final DecimalFormat TIMESTAMP_PRINTER; 
-    
+    private static final DecimalFormat TIMESTAMP_PRINTER;
+
     //These are used to avoid creating a lot of new instances of DateTimeFormatter
     private static final Map<DateTimeZone, DateTimeFormatter> datePrintersByTimeZone;
     private static final Map<DateTimeZone, DateTimeFormatter> dateTimePrintersByTimeZone;
@@ -190,15 +186,15 @@ public class AttributeUtils {
                 .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);//Make sure UTC timezone is used by default
         DATE_TIME_PRINTER = ISODateTimeFormat.dateTime()
                 .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);//Make sure UTC timezone is used by default
-        
+
         datePrintersByTimeZone = new HashMap<DateTimeZone, DateTimeFormatter>();
         dateTimePrintersByTimeZone = new HashMap<DateTimeZone, DateTimeFormatter>();
         dateTimeParsersByTimeZone = new HashMap<DateTimeZone, DateTimeFormatter>();
-        
+
         datePrintersByTimeZone.put(DATE_PRINTER.getZone(), DATE_PRINTER);
         dateTimePrintersByTimeZone.put(DATE_TIME_PRINTER.getZone(), DATE_TIME_PRINTER);
         dateTimeParsersByTimeZone.put(DATE_TIME_PARSER.getZone(), DATE_TIME_PARSER);
-        
+
         DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
         decimalFormatSymbols.setInfinity(DynamicFormattingUtils.INFINITY);
         TIMESTAMP_PRINTER = new DecimalFormat("0.0###", decimalFormatSymbols);//1 to 4 decimals
@@ -207,30 +203,30 @@ public class AttributeUtils {
     private AttributeUtils() {
         // Only static methods
     }
-    
-    private static DateTimeFormatter getDateTimeFormatterByTimeZone(Map<DateTimeZone, DateTimeFormatter> cache, DateTimeFormatter baseFormatter, DateTimeZone timeZone){
-        if(timeZone == null){
+
+    private static DateTimeFormatter getDateTimeFormatterByTimeZone(Map<DateTimeZone, DateTimeFormatter> cache, DateTimeFormatter baseFormatter, DateTimeZone timeZone) {
+        if (timeZone == null) {
             return baseFormatter;
         }
-        
+
         DateTimeFormatter formatter = cache.get(timeZone);
-        if(formatter == null){
+        if (formatter == null) {
             formatter = baseFormatter.withZone(timeZone);
             cache.put(timeZone, formatter);
         }
-        
+
         return formatter;
     }
-    
-    private static DateTimeFormatter getDateTimeParserByTimeZone(DateTimeZone timeZone){
+
+    private static DateTimeFormatter getDateTimeParserByTimeZone(DateTimeZone timeZone) {
         return getDateTimeFormatterByTimeZone(dateTimeParsersByTimeZone, DATE_TIME_PARSER, timeZone);
     }
-    
-    private static DateTimeFormatter getDateTimePrinterByTimeZone(DateTimeZone timeZone){
+
+    private static DateTimeFormatter getDateTimePrinterByTimeZone(DateTimeZone timeZone) {
         return getDateTimeFormatterByTimeZone(dateTimePrintersByTimeZone, DATE_TIME_PRINTER, timeZone);
     }
-    
-    private static DateTimeFormatter getDatePrinterByTimeZone(DateTimeZone timeZone){
+
+    private static DateTimeFormatter getDatePrinterByTimeZone(DateTimeZone timeZone) {
         return getDateTimeFormatterByTimeZone(datePrintersByTimeZone, DATE_PRINTER, timeZone);
     }
 
@@ -238,9 +234,10 @@ public class AttributeUtils {
      * Parses the given string using the type class provided and returns an
      * instance.
      *
-     * @param str the string to parse
-     * @param typeClass the class of the desired type
-     * @param timeZone Time zone to use or null to use default time zone (UTC). For dynamic types (timestamps/intervals).
+     * @param str string to parse
+     * @param typeClass class of the desired type
+     * @param timeZone time zone to use or null to use default time zone (UTC),
+     * for dynamic types only
      * @return an instance of the type class, or null if <em>str</em> is null or
      * empty
      */
@@ -280,7 +277,7 @@ public class AttributeUtils {
             }
             return str.charAt(0);
         }
-        
+
         //Interval types:
         if (typeClass.equals(IntervalSet.class)) {
             return IntervalsParser.parseIntervalSet(str, timeZone);
@@ -303,7 +300,7 @@ public class AttributeUtils {
         } else if (typeClass.equals(IntervalCharMap.class)) {
             return IntervalsParser.parseIntervalMap(Character.class, str, timeZone);
         }
-        
+
         //Timestamp types:
         if (typeClass.equals(TimestampSet.class)) {
             return TimestampsParser.parseTimestampSet(str, timeZone);
@@ -326,18 +323,18 @@ public class AttributeUtils {
         } else if (typeClass.equals(TimestampCharMap.class)) {
             return TimestampsParser.parseTimestampMap(Character.class, str, timeZone);
         }
-        
+
         throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
     }
-    
+
     /**
      * Parses the given string using the type class provided and returns an
      * instance.
-     * 
+     *
      * Default time zone is used (UTC) for dynamic types (timestamps/intervals).
      *
-     * @param str the string to parse
-     * @param typeClass the class of the desired type
+     * @param str string to parse
+     * @param typeClass class of the desired type
      * @return an instance of the type class, or null if <em>str</em> is null or
      * empty
      */
@@ -350,8 +347,8 @@ public class AttributeUtils {
      * <p>
      * Example: Returns <em>int.class</em> given <em>Integer.class</em>
      *
-     * @param type the type to get the primitive type from
-     * @return the primitive type
+     * @param type type to get the primitive type from
+     * @return primitive type
      */
     public static Class getPrimitiveType(Class type) {
         if (!type.isPrimitive()) {
@@ -381,8 +378,8 @@ public class AttributeUtils {
      * <p>
      * Example: Returns <em>int[]</em> array given an <em>Integer[]</em> array
      *
-     * @param array a wrapped primitive array instance
-     * @return a primitive array instance
+     * @param array wrapped primitive array instance
+     * @return primitive array instance
      */
     public static Object getPrimitiveArray(Object[] array) {
         if (!isSupported(array.getClass())) {
@@ -409,7 +406,7 @@ public class AttributeUtils {
     /**
      * Returns the set of types supported.
      *
-     * @return the set of supported types
+     * @return set of supported types
      */
     public static Set<Class> getSupportedTypes() {
         return SUPPORTED_TYPES;
@@ -418,7 +415,7 @@ public class AttributeUtils {
     /**
      * Returns true if <em>type</em> is a supported type.
      *
-     * @param type the type to test support
+     * @param type type to test support
      * @return true if supported, false otherwise
      */
     public static boolean isSupported(Class type) {
@@ -434,8 +431,8 @@ public class AttributeUtils {
      * For instance, <code>getStandardizedType(int.class)</code> would return
      * <code>Integer.class</code>.
      *
-     * @param type the type to standardize
-     * @return the standardized type
+     * @param type type to standardize
+     * @return standardized type
      */
     public static Class getStandardizedType(Class type) {
         if (!isSupported(type)) {
@@ -467,8 +464,8 @@ public class AttributeUtils {
     /**
      * Returns the dynamic timestamp map value type for the given type.
      *
-     * @param type the static type
-     * @return the timestamp map type
+     * @param type static type
+     * @return timestamp map type
      */
     public static Class<? extends TimestampMap> getTimestampMapType(Class type) {
         if (!isSupported(type)) {
@@ -500,8 +497,8 @@ public class AttributeUtils {
     /**
      * Returns the dynamic timestamp map value type for the given type.
      *
-     * @param type the static type
-     * @return the timestamp map type
+     * @param type static type
+     * @return timestamp map type
      */
     public static Class<? extends IntervalMap> getIntervalMapType(Class type) {
         if (!isSupported(type)) {
@@ -533,8 +530,8 @@ public class AttributeUtils {
     /**
      * Returns the static type for the given time map type.
      *
-     * @param type the time map type
-     * @return the static type
+     * @param type time map type
+     * @return static type
      */
     public static Class getStaticType(Class<? extends TimeMap> type) {
         if (!isSupported(type)) {
@@ -568,8 +565,8 @@ public class AttributeUtils {
      * <p>
      * This function transforms wrapped primitive arrays in primitive arrays.
      *
-     * @param value the value to standardize
-     * @return the standardized value, or <em>value</em> if already standardized
+     * @param value value to standardize
+     * @return standardized value, or <em>value</em> if already standardized
      */
     public static Object standardizeValue(Object value) {
         if (value == null) {
@@ -590,7 +587,7 @@ public class AttributeUtils {
      * <p>
      * This can be true for static, arrays and dynamic types.
      *
-     * @param type the type to test
+     * @param type type to test
      * @return true if <em>type</em> is a number type, false otherwise
      */
     public static boolean isNumberType(Class type) {
@@ -622,7 +619,7 @@ public class AttributeUtils {
     /**
      * Returns true if <em>type</em> is a dynamic type.
      *
-     * @param type the type to test
+     * @param type type to test
      * @return true if <em>type</em> is a dynamic type, false otherwise
      */
     public static boolean isDynamicType(Class type) {
@@ -638,7 +635,7 @@ public class AttributeUtils {
      * <p>
      * Simple types are primitives, String and wrapper types (e.g. Integer).
      *
-     * @param type the type to test
+     * @param type type to test
      * @return true if <em>type</em> is a simple type, false otherwise
      */
     public static boolean isSimpleType(Class type) {
@@ -651,8 +648,8 @@ public class AttributeUtils {
     /**
      * Returns the type name for the given type.
      *
-     * @param type the type to get its name
-     * @return the type name
+     * @param type type to get its name
+     * @return type name
      */
     public static String getTypeName(Class type) {
         if (!isSupported(type)) {
@@ -665,20 +662,20 @@ public class AttributeUtils {
     /**
      * Parses the given time and returns its milliseconds representation.
      *
-     * @param dateTime the type to parse
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
-     * @return the milliseconds representation
+     * @param dateTime type to parse
+     * @param timeZone time zone to use or null to use default time zone (UTC)
+     * @return milliseconds representation
      */
     public static double parseDateTime(String dateTime, DateTimeZone timeZone) {
         return getDateTimeParserByTimeZone(timeZone).parseDateTime(dateTime).getMillis();
     }
-    
+
     /**
      * Parses the given time and returns its milliseconds representation.
      * Default time zone is used (UTC).
      *
      * @param dateTime the type to parse
-     * @return the milliseconds representation
+     * @return milliseconds representation
      */
     public static double parseDateTime(String dateTime) {
         return parseDateTime(dateTime, null);
@@ -688,32 +685,32 @@ public class AttributeUtils {
      * Returns the string representation of the given timestamp.
      *
      * @param timestamp the time, in milliseconds
-     * @return the formatted timestamp
+     * @return formatted timestamp
      */
     public static String printTimestamp(double timestamp) {
         return TIMESTAMP_PRINTER.format(timestamp);
     }
-    
+
     /**
      * Returns the date's string representation of the given timestamp.
      *
-     * @param timestamp the time, in milliseconds
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
-     * @return the formatted date
+     * @param timestamp time, in milliseconds
+     * @param timeZone time zone to use or null to use default time zone (UTC)
+     * @return formatted date
      */
     public static String printDate(double timestamp, DateTimeZone timeZone) {
-        if(Double.isInfinite(timestamp) || Double.isNaN(timestamp)){
+        if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
         return getDatePrinterByTimeZone(timeZone).print((long) timestamp);
     }
-    
+
     /**
-     * Returns the date's string representation of the given timestamp.
-     * Default time zone is used (UTC).
+     * Returns the date's string representation of the given timestamp. Default
+     * time zone is used (UTC).
      *
-     * @param timestamp the time, in milliseconds
-     * @return the formatted date
+     * @param timestamp time, in milliseconds
+     * @return formatted date
      */
     public static String printDate(double timestamp) {
         return printDate(timestamp, null);
@@ -722,23 +719,23 @@ public class AttributeUtils {
     /**
      * Returns the time's string representation of the given timestamp.
      *
-     * @param timestamp the time, in milliseconds
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
-     * @return the formatted time
+     * @param timestamp time, in milliseconds
+     * @param timeZone time zone to use or null to use default time zone (UTC)
+     * @return formatted time
      */
     public static String printDateTime(double timestamp, DateTimeZone timeZone) {
-        if(Double.isInfinite(timestamp) || Double.isNaN(timestamp)){
+        if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
         return getDateTimePrinterByTimeZone(timeZone).print((long) timestamp);
     }
-    
+
     /**
-     * Returns the time's string representation of the given timestamp.
-     * Default time zone is used (UTC).
+     * Returns the time's string representation of the given timestamp. Default
+     * time zone is used (UTC).
      *
-     * @param timestamp the time, in milliseconds
-     * @return the formatted time
+     * @param timestamp time, in milliseconds
+     * @return formatted time
      */
     public static String printDateTime(double timestamp) {
         return printDateTime(timestamp, null);
@@ -747,10 +744,10 @@ public class AttributeUtils {
     /**
      * Returns the representation of the given timestamp in the given format.
      *
-     * @param timestamp the time, in milliseconds
-     * @param timeFormat the time format
-     * @param timeZone Time zone to use or null to use default time zone (UTC).
-     * @return the formatted timestamp
+     * @param timestamp time, in milliseconds
+     * @param timeFormat time format
+     * @param timeZone time zone to use or null to use default time zone (UTC).
+     * @return formatted timestamp
      */
     public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat, DateTimeZone timeZone) {
         switch (timeFormat) {
@@ -761,26 +758,26 @@ public class AttributeUtils {
             case DOUBLE:
                 return AttributeUtils.printTimestamp(timestamp);
         }
-        
+
         throw new UnsupportedOperationException("Unknown TimeFormat");
     }
-    
+
     /**
      * Returns the representation of the given timestamp in the given format.
      * Default time zone is used (UTC).
      *
-     * @param timestamp the time, in milliseconds
-     * @param timeFormat the time format
-     * @return the formatted timestamp
+     * @param timestamp time, in milliseconds
+     * @param timeFormat time format
+     * @return formatted timestamp
      */
     public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat) {
         return printTimestampInFormat(timestamp, timeFormat, null);
     }
-    
+
     /**
      * Returns true if the given column is a node column.
      *
-     * @param colum the column to test
+     * @param colum column to test
      * @return true if the column is a node column, false otherwise
      */
     public static boolean isNodeColumn(Column colum) {
@@ -790,7 +787,7 @@ public class AttributeUtils {
     /**
      * Returns true if the given column is an edge column.
      *
-     * @param colum the column to test
+     * @param colum column to test
      * @return true if the column is an edge column, false otherwise
      */
     public static boolean isEdgeColumn(Column colum) {

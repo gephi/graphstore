@@ -327,7 +327,7 @@ public class GraphModelImpl implements GraphModel {
     public void setTimeFormat(TimeFormat timeFormat) {
         store.timeFormat = timeFormat;
     }
-    
+
     @Override
     public DateTimeZone getTimeZone() {
         return store.timeZone;

@@ -188,32 +188,32 @@ public final class TimestampSet implements TimeSet<Double> {
         }
         return true;
     }
-    
+
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
-        if(size == 0){
+        if (size == 0) {
             return "<empty>";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("<");
         sb.append('[');
         for (int i = 0; i < size; i++) {
             sb.append(AttributeUtils.printTimestampInFormat(array[i], timeFormat, timeZone));
-            
-            if(i < size - 1){
+
+            if (i < size - 1) {
                 sb.append(", ");
             }
         }
         sb.append(']');
         sb.append(">");
-        
+
         return sb.toString();
     }
-    
+
     public String toString(TimeFormat timeFormat) {
         return toString(timeFormat, null);
     }
-    
+
     @Override
     public String toString() {
         return toString(TimeFormat.DOUBLE, null);

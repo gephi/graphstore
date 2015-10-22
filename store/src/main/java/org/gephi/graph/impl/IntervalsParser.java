@@ -44,17 +44,20 @@ import org.joda.time.DateTimeZone;
  * <p>
  * Class for parsing interval types.
  * </p>
- * 
+ *
  * <p>
- * The standard format for {@link IntervalMap} is &lt;[start, end, value1]; [start, end, value2]&gt;.
+ * The standard format for {@link IntervalMap} is &lt;[start, end, value1];
+ * [start, end, value2]&gt;.
  * </p>
- * 
+ *
  * <p>
- * The standard format for {@link IntervalSet} is &lt;[start, end]; [start, end]&gt;.
+ * The standard format for {@link IntervalSet} is &lt;[start, end]; [start,
+ * end]&gt;.
  * </p>
- * 
+ *
  * <p>
- * Start and end values can be both numbers and ISO dates or datetimes. Dates and datetimes will be converted to their millisecond-precision timestamp.
+ * Start and end values can be both numbers and ISO dates or datetimes. Dates
+ * and datetimes will be converted to their millisecond-precision timestamp.
  * </p>
  *
  * Examples of valid interval maps are:
@@ -63,20 +66,23 @@ import org.joda.time.DateTimeZone;
  * <li>[1.15,2.21, "literal value ' \" ,[]()"]</li>
  * <li>[1.15,2.21, 'literal value " \' ,[]()']</li>
  * </ul>
- * 
+ *
  * Examples of valid interval sets are:
  * <ul>
  * <li>&lt;[1,2]; [3, 4]&gt;</li>
  * <li>[1,2]</li>
  * <li>[1,2] (5,6)</li>
  * </ul>
- * 
+ *
  * <p>
- * <b>All open intervals will be converted to closed intervals</b>, as only closed intervals are supported.
+ * <b>All open intervals will be converted to closed intervals</b>, as only
+ * closed intervals are supported.
  * </p>
  *
  * <p>
- * The most correct examples are those that include &lt; &gt; and proper commas and semicolons for separation, but the parser will be indulgent when possible.
+ * The most correct examples are those that include &lt; &gt; and proper commas
+ * and semicolons for separation, but the parser will be indulgent when
+ * possible.
  * </p>
  *
  * @author Eduardo Ramos
@@ -88,8 +94,10 @@ public final class IntervalsParser {
      *
      * @param input Input string to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
-     * @return Resulting {@link IntervalSet}, or null if the input equals '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if there are no intervals in the input string or bounds cannot be parsed into doubles or dates/datetimes.
+     * @return Resulting {@link IntervalSet}, or null if the input equals
+     * '&lt;empty&gt;' or is null
+     * @throws IllegalArgumentException Thrown if there are no intervals in the
+     * input string or bounds cannot be parsed into doubles or dates/datetimes.
      */
     public static IntervalSet parseIntervalSet(String input, DateTimeZone timeZone) throws IllegalArgumentException {
         if (input == null) {
@@ -110,28 +118,36 @@ public final class IntervalsParser {
 
         return result;
     }
-    
+
     /**
-     * Parses a {@link IntervalSet} type with one or more intervals.
-     * Default time zone is used (UTC).
+     * Parses a {@link IntervalSet} type with one or more intervals. Default
+     * time zone is used (UTC).
      *
      * @param input Input string to parse
-     * @return Resulting {@link IntervalSet}, or null if the input equals '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if there are no intervals in the input string or bounds cannot be parsed into doubles or dates/datetimes.
+     * @return Resulting {@link IntervalSet}, or null if the input equals
+     * '&lt;empty&gt;' or is null
+     * @throws IllegalArgumentException Thrown if there are no intervals in the
+     * input string or bounds cannot be parsed into doubles or dates/datetimes.
      */
     public static IntervalSet parseIntervalSet(String input) throws IllegalArgumentException {
         return parseIntervalSet(input, null);
     }
 
     /**
-     * Parses a {@link IntervalMap} type with one or more intervals, and their associated values.
+     * Parses a {@link IntervalMap} type with one or more intervals, and their
+     * associated values.
      *
      * @param <T> Underlying type of the {@link IntervalMap} values
-     * @param typeClass Simple type or {@link IntervalMap} subtype for the result intervals' values.
+     * @param typeClass Simple type or {@link IntervalMap} subtype for the
+     * result intervals' values.
      * @param input Input string to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
-     * @return Resulting {@link IntervalMap}, or null if the input equals '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if type class is not supported, any of the intervals don't have a value or have an invalid value, there are no intervals in the input string or bounds cannot be parsed into doubles or dates/datetimes.
+     * @return Resulting {@link IntervalMap}, or null if the input equals
+     * '&lt;empty&gt;' or is null
+     * @throws IllegalArgumentException Thrown if type class is not supported,
+     * any of the intervals don't have a value or have an invalid value, there
+     * are no intervals in the input string or bounds cannot be parsed into
+     * doubles or dates/datetimes.
      */
     public static <T> IntervalMap<T> parseIntervalMap(Class<T> typeClass, String input, DateTimeZone timeZone) throws IllegalArgumentException {
         if (typeClass == null) {
@@ -176,7 +192,7 @@ public final class IntervalsParser {
 
         for (IntervalWithValue<T> interval : intervals) {
             T value = interval.getValue();
-            if(value == null){
+            if (value == null) {
                 throw new IllegalArgumentException("A value must be provided for each interval");
             }
             result.put(interval.getInterval(), interval.getValue());
@@ -184,26 +200,33 @@ public final class IntervalsParser {
 
         return result;
     }
-    
+
     /**
-     * Parses a {@link IntervalMap} type with one or more intervals, and their associated values.
-     * Default time zone is used (UTC).
+     * Parses a {@link IntervalMap} type with one or more intervals, and their
+     * associated values. Default time zone is used (UTC).
      *
      * @param <T> Underlying type of the {@link IntervalMap} values
-     * @param typeClass Simple type or {@link IntervalMap} subtype for the result intervals' values.
+     * @param typeClass Simple type or {@link IntervalMap} subtype for the
+     * result intervals' values.
      * @param input Input string to parse
-     * @return Resulting {@link IntervalMap}, or null if the input equals '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if type class is not supported, any of the intervals don't have a value or have an invalid value, there are no intervals in the input string or bounds cannot be parsed into doubles or dates/datetimes.
+     * @return Resulting {@link IntervalMap}, or null if the input equals
+     * '&lt;empty&gt;' or is null
+     * @throws IllegalArgumentException Thrown if type class is not supported,
+     * any of the intervals don't have a value or have an invalid value, there
+     * are no intervals in the input string or bounds cannot be parsed into
+     * doubles or dates/datetimes.
      */
     public static <T> IntervalMap<T> parseIntervalMap(Class<T> typeClass, String input) throws IllegalArgumentException {
         return parseIntervalMap(typeClass, input, null);
     }
 
     /**
-     * Parses intervals with values (of {@code typeClass} Class) or without values (null {@code typeClass} Class)
+     * Parses intervals with values (of {@code typeClass} Class) or without
+     * values (null {@code typeClass} Class)
      *
      * @param <T> Type of the interval value
-     * @param typeClass Class of the intervals' values or null to parse intervals without values
+     * @param typeClass Class of the intervals' values or null to parse
+     * intervals without values
      * @param input Input to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return List of Interval
@@ -275,9 +298,9 @@ public final class IntervalsParser {
     }
 
     private static <T> IntervalWithValue<T> buildInterval(Class<T> typeClass, ArrayList<String> values, DateTimeZone timeZone) {
-        if(typeClass == null && values.size() != 2){
+        if (typeClass == null && values.size() != 2) {
             throw new IllegalArgumentException("Each interval must have 2 values");
-        }else if(typeClass != null && values.size() != 3){
+        } else if (typeClass != null && values.size() != 3) {
             throw new IllegalArgumentException("Each interval must have 3 values");
         }
 
@@ -289,13 +312,14 @@ public final class IntervalsParser {
         } else {
             String valString = values.get(2);
             Object value = DynamicFormattingUtils.convertValue(typeClass, valString);
-            
+
             return new IntervalWithValue(low, high, value);
         }
     }
 
     /**
-     * Represents an Interval with an associated value for it. Only for internal usage in this class.
+     * Represents an Interval with an associated value for it. Only for internal
+     * usage in this class.
      *
      * @author Eduardo Ramos
      * @param <T> Type of the value

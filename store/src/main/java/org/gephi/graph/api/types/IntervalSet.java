@@ -315,10 +315,10 @@ public final class IntervalSet implements TimeSet<Interval> {
     }
 
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
-        if(size == 0){
+        if (size == 0) {
             return "<empty>";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("<");
         for (int i = 0; i < size; i++) {
@@ -327,20 +327,20 @@ public final class IntervalSet implements TimeSet<Interval> {
             sb.append(", ");
             sb.append(AttributeUtils.printTimestampInFormat(array[i * 2 + 1], timeFormat, timeZone));
             sb.append(']');
-            
-            if(i < size - 1){
+
+            if (i < size - 1) {
                 sb.append("; ");
             }
         }
         sb.append(">");
-        
+
         return sb.toString();
     }
-    
+
     public String toString(TimeFormat timeFormat) {
         return toString(timeFormat, null);
     }
-    
+
     @Override
     public String toString() {
         return toString(TimeFormat.DOUBLE, null);
