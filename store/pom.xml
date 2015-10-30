@@ -35,6 +35,11 @@
             <name>Mathieu Bastian</name>
             <email>mathieu.bastian@gephi.org</email>
         </developer>
+        <developer>
+            <id>eduramiba</id>
+            <name>Eduardo Ramos</name>
+            <email>eduardo.ramos@gephi.org</email>
+        </developer>
     </developers>
     
     <!-- Properties -->
