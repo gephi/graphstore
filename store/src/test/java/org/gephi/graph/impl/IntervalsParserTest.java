@@ -114,27 +114,27 @@ public class IntervalsParserTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testParseIntervalSetEmpty1() {
+    public void testParseIntervalSetBadEmpty1() {
         IntervalsParser.parseIntervalSet("[]");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testParseIntervalSetEmpty2() {
+    public void testParseIntervalSetBadEmpty2() {
         IntervalsParser.parseIntervalSet("[1]");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testParseIntervalSetEmpty3() {
+    public void testParseIntervalSetBadEmpty3() {
         IntervalsParser.parseIntervalSet("[1,]");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testParseIntervalSetEmpty4() {
+    public void testParseIntervalSetBadEmpty4() {
         IntervalsParser.parseIntervalSet("");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testParseIntervalSetEmpty5() {
+    public void testParseIntervalSetBadEmpty5() {
         IntervalsParser.parseIntervalSet("<>");
     }
 
@@ -153,6 +153,17 @@ public class IntervalsParserTest {
         assertEquals(expected.toString(), result.toString());
     }
 
+    @Test
+    public void testParseIntervalsEmpty() {
+        IntervalStringMap expectedMap = new IntervalStringMap();
+        assertEqualIntervalMaps(expectedMap, IntervalsParser.parseIntervalMap(String.class, "<empty>"));
+        assertEqualIntervalMaps(expectedMap, IntervalsParser.parseIntervalMap(String.class, "<EMPTY>"));
+        
+        IntervalSet expectedSet = new IntervalSet();
+        assertEquals(expectedSet, IntervalsParser.parseIntervalSet("<empty>"));
+        assertEquals(expectedSet, IntervalsParser.parseIntervalSet("<EMPTY>"));
+    }
+    
     @Test
     public void testParseIntervalMapString() {
         IntervalStringMap expected = new IntervalStringMap();
