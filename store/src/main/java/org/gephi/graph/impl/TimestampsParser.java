@@ -100,7 +100,7 @@ public final class TimestampsParser {
         }
 
         if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
-            return null;
+            return new TimestampSet();
         }
 
         ArrayList<String> values = new ArrayList<String>();
@@ -185,10 +185,6 @@ public final class TimestampsParser {
             return null;
         }
 
-        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
-            return null;
-        }
-
         TimestampMap result;
 
         typeClass = AttributeUtils.getStandardizedType(typeClass);
@@ -212,6 +208,10 @@ public final class TimestampsParser {
             result = new TimestampCharMap();
         } else {
             throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
+        }
+        
+        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
+            return result;
         }
 
         StringReader reader = new StringReader(input + ' ');//Add 1 space so reader.skip function always works when necessary (end of string not reached).

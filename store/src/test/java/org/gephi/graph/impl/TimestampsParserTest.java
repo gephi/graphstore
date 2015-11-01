@@ -19,6 +19,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import org.gephi.graph.api.types.IntervalSet;
+import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimestampBooleanMap;
 import org.gephi.graph.api.types.TimestampByteMap;
 import org.gephi.graph.api.types.TimestampCharMap;
@@ -127,6 +129,17 @@ public class TimestampsParserTest {
     private <T> void assertEqualTimestampMaps(TimestampMap<T> expected, TimestampMap<T> result) {
         assertEquals(expected, result);
         assertEquals(expected.toString(), result.toString());
+    }
+    
+    @Test
+    public void testParseTimestampsEmpty() {
+        TimestampStringMap expectedMap = new TimestampStringMap();
+        assertEqualTimestampMaps(expectedMap, TimestampsParser.parseTimestampMap(String.class, "<empty>"));
+        assertEqualTimestampMaps(expectedMap, TimestampsParser.parseTimestampMap(String.class, "<EMPTY>"));
+        
+        TimestampSet expectedSet = new TimestampSet();
+        assertEquals(expectedSet, TimestampsParser.parseTimestampSet("<empty>"));
+        assertEquals(expectedSet, TimestampsParser.parseTimestampSet("<EMPTY>"));
     }
 
     @Test

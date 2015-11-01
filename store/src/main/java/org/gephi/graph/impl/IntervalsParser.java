@@ -103,6 +103,10 @@ public final class IntervalsParser {
         if (input == null) {
             return null;
         }
+        
+        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
+            return new IntervalSet();
+        }
 
         List<IntervalWithValue<Object>> intervals;
         try {
@@ -157,7 +161,7 @@ public final class IntervalsParser {
         if (input == null) {
             return null;
         }
-
+        
         List<IntervalWithValue<T>> intervals;
         try {
             intervals = parseIntervals(typeClass, input, timeZone);
@@ -237,11 +241,12 @@ public final class IntervalsParser {
         }
 
         input = input.trim();
-        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
-            return null;
-        }
 
         List<IntervalWithValue<T>> intervals = new ArrayList<IntervalWithValue<T>>();
+        
+        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
+            return intervals;
+        }
 
         StringReader reader = new StringReader(input + ' ');//Add 1 space so reader.skip function always works when necessary (end of string not reached).
 
