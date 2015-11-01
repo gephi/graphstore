@@ -35,6 +35,7 @@ import org.gephi.graph.api.TimeIndex;
 import org.joda.time.DateTimeZone;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalSet;
+import org.gephi.graph.api.types.TimestampSet;
 
 public class GraphModelTest {
 
@@ -436,7 +437,7 @@ public class GraphModelTest {
     }
 
     @Test
-    public void testSetConfiguration() {
+    public void testSetConfigurationIntervals() {
         Configuration config = new Configuration();
         GraphModelImpl graphModelImpl = new GraphModelImpl(config);
         config.setNodeIdType(Integer.class);
@@ -450,6 +451,27 @@ public class GraphModelTest {
         Assert.assertEquals(graphModelImpl.store.factory.edgeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.DISABLED);
         Assert.assertEquals(graphModelImpl.getNodeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), IntervalSet.class);
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), IntervalSet.class);
+        Assert.assertEquals(graphModelImpl.store.timeStore.nodeIndexStore.getClass(), IntervalIndexStore.class);
+        Assert.assertEquals(graphModelImpl.store.timeStore.edgeIndexStore.getClass(), IntervalIndexStore.class);
+    }
+    
+    @Test
+    public void testSetConfigurationTimestamps() {
+        Configuration config = new Configuration();
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
+        config.setNodeIdType(Integer.class);
+        config.setEdgeIdType(Byte.class);
+        config.setTimeRepresentation(TimeRepresentation.TIMESTAMP);
+        graphModelImpl.setConfiguration(config);
+        Assert.assertEquals(graphModelImpl.getConfiguration(), config);
+        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn("id").getTypeClass(), Integer.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("id").getTypeClass(), Byte.class);
+        Assert.assertEquals(graphModelImpl.store.factory.nodeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.INTEGER);
+        Assert.assertEquals(graphModelImpl.store.factory.edgeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.DISABLED);
+        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), TimestampSet.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), TimestampSet.class);
+        Assert.assertEquals(graphModelImpl.store.timeStore.nodeIndexStore.getClass(), TimestampIndexStore.class);
+        Assert.assertEquals(graphModelImpl.store.timeStore.edgeIndexStore.getClass(), TimestampIndexStore.class);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
