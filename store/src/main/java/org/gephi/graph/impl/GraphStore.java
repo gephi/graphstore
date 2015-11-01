@@ -52,7 +52,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected final TableImpl<Node> nodeTable;
     protected final TableImpl<Edge> edgeTable;
     protected final GraphViewStore viewStore;
-    protected final TimeStore timeStore;
+    protected TimeStore timeStore;
     protected final GraphAttributesImpl attributes;
     //Factory
     protected final GraphFactoryImpl factory;
@@ -87,7 +87,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeTable = new TableImpl<Node>(configuration, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
         edgeTable = new TableImpl<Edge>(configuration, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
-        timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
+        initializeTimeStore();
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
         timeFormat = GraphStoreConfiguration.DEFAULT_TIME_FORMAT;
@@ -116,6 +116,13 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         } else {
             edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, IntervalDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
         }
+    }
+    
+    public final void initializeTimeStore(){
+        if(timeStore != null && !timeStore.isEmpty()){
+            throw new IllegalStateException("TimeStore is not empty, cannot initialize again");
+        }
+        timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
     }
 
     @Override
