@@ -503,9 +503,32 @@ public class AttributeUtilsTest {
 
     @Test
     public void testIsDynamicType() {
-        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampFloatMap.class));
-        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampFloatMap[].class));
+        //Interval types:
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalSet.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalStringMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalByteMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalShortMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalIntegerMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalLongMap.class));
         Assert.assertTrue(AttributeUtils.isDynamicType(IntervalFloatMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalDoubleMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalBooleanMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(IntervalCharMap.class));
+
+        //Timestamp types:
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampSet.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampStringMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampByteMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampShortMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampIntegerMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampLongMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampFloatMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampDoubleMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampBooleanMap.class));
+        Assert.assertTrue(AttributeUtils.isDynamicType(TimestampCharMap.class));
+        
+        //Some types that should not be dynamic
+        Assert.assertFalse(AttributeUtils.isDynamicType(TimestampFloatMap[].class));
         Assert.assertFalse(AttributeUtils.isDynamicType(IntervalFloatMap[].class));
         Assert.assertFalse(AttributeUtils.isDynamicType(Integer.class));
         Assert.assertFalse(AttributeUtils.isDynamicType(TimestampMap.class));
