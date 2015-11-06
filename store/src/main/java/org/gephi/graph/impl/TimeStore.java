@@ -26,8 +26,8 @@ public class TimeStore {
     //Lock (optional
     protected final GraphLock lock;
     //Store
-    protected final TimeIndexStore nodeIndexStore;
-    protected final TimeIndexStore edgeIndexStore;
+    protected TimeIndexStore nodeIndexStore;
+    protected TimeIndexStore edgeIndexStore;
 
     public TimeStore(GraphStore store, GraphLock graphLock, boolean indexed) {
         lock = graphLock;
@@ -43,6 +43,18 @@ public class TimeStore {
         } else {
             nodeIndexStore = new TimestampIndexStore<Node>(Node.class, lock, indexed);
             edgeIndexStore = new TimestampIndexStore<Edge>(Edge.class, lock, indexed);
+        }
+    }
+
+    protected void resetConfiguration() {
+        if (graphStore != null) {
+            if (graphStore.configuration.getTimeRepresentation().equals(TimeRepresentation.INTERVAL)) {
+                nodeIndexStore = new IntervalIndexStore<Node>(Node.class, lock, nodeIndexStore.hasIndex());
+                edgeIndexStore = new IntervalIndexStore<Edge>(Edge.class, lock, edgeIndexStore.hasIndex());
+            } else {
+                nodeIndexStore = new TimestampIndexStore<Node>(Node.class, lock, nodeIndexStore.hasIndex());
+                edgeIndexStore = new TimestampIndexStore<Edge>(Edge.class, lock, edgeIndexStore.hasIndex());
+            }
         }
     }
 

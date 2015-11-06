@@ -391,6 +391,11 @@ public class TimestampIndexStore<T extends Element> implements TimeIndexStore<Do
         }
     }
 
+    @Override
+    public boolean hasIndex() {
+        return mainIndex != null;
+    }
+
     private TimestampSet getTimeSet(Element element) {
         Object[] attributes = element.getAttributes();
         if (GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET && GraphStoreConfiguration.ELEMENT_TIMESET_INDEX < attributes.length) {

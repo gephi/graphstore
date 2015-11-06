@@ -62,6 +62,8 @@ public interface TimeIndexStore<K, S extends TimeSet, M extends TimeMap> {
 
     public void deleteViewIndex(Graph graph);
 
+    public boolean hasIndex();
+
     public boolean deepEquals(TimeIndexStore obj);
 
     public int deepHashCode();

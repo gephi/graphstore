@@ -401,8 +401,9 @@ public class GraphModelImpl implements GraphModel {
                     edgeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
                     edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, IntervalDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
                 }
+                configuration.setTimeRepresentation(config.getTimeRepresentation());
+                store.timeStore.resetConfiguration();
             }
-            configuration.setTimeRepresentation(config.getTimeRepresentation());
             store.factory.resetConfiguration();
         } finally {
             store.autoWriteUnlock();

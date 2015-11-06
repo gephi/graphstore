@@ -138,6 +138,11 @@ public class IntervalIndexStore<T extends Element> implements TimeIndexStore<Int
     }
 
     @Override
+    public boolean hasIndex() {
+        return false;
+    }
+
+    @Override
     public boolean deepEquals(TimeIndexStore obj) {
         //TODO
         return false;
