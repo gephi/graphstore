@@ -627,7 +627,9 @@ public class AttributeUtils {
                 && TimestampMap.class.isAssignableFrom(type))
                 || type.equals(TimestampSet.class)
                 || (!type.equals(IntervalMap.class)
-                && IntervalMap.class.isAssignableFrom(type));
+                && IntervalMap.class.isAssignableFrom(type))
+                || type.equals(IntervalSet.class)
+                ;
     }
 
     /**
