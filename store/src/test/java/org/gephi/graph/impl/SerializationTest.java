@@ -194,7 +194,6 @@ public class SerializationTest {
 
         EdgeTypeStore edgeTypeStore = graphStore.edgeTypeStore;
         edgeTypeStore.addType("Foo");
-        edgeTypeStore.addType(8);
         edgeTypeStore.addType("Bar");
 
         edgeTypeStore.removeType("Foo");

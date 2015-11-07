@@ -27,6 +27,7 @@ public class ConfigurationTest {
         Configuration c = new Configuration();
         Assert.assertNotNull(c.getNodeIdType());
         Assert.assertNotNull(c.getEdgeIdType());
+        Assert.assertNotNull(c.getEdgeLabelType());
     }
 
     @Test
@@ -41,6 +42,13 @@ public class ConfigurationTest {
         Configuration c = new Configuration();
         c.setEdgeIdType(Float.class);
         Assert.assertEquals(c.getEdgeIdType(), Float.class);
+    }
+
+    @Test
+    public void testSetEdgeLabelType() {
+        Configuration c = new Configuration();
+        c.setEdgeLabelType(Float.class);
+        Assert.assertEquals(c.getEdgeLabelType(), Float.class);
     }
 
     @Test

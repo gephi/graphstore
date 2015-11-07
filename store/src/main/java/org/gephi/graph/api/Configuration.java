@@ -36,6 +36,7 @@ public class Configuration {
 
     private Class nodeIdType;
     private Class edgeIdType;
+    private Class edgeLabelType;
     private TimeRepresentation timeRepresentation;
 
     /**
@@ -44,6 +45,7 @@ public class Configuration {
     public Configuration() {
         nodeIdType = GraphStoreConfiguration.DEFAULT_NODE_ID_TYPE;
         edgeIdType = GraphStoreConfiguration.DEFAULT_EDGE_ID_TYPE;
+        edgeLabelType = GraphStoreConfiguration.DEFAULT_EDGE_LABEL_TYPE;
         timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
     }
 
@@ -96,6 +98,28 @@ public class Configuration {
     }
 
     /**
+     * Returns the edge label type.
+     *
+     * @return edge label type
+     */
+    public Class getEdgeLabelType() {
+        return edgeLabelType;
+    }
+
+    /**
+     * Sets the edge label type.
+     *
+     * @param edgeLabelType edge label type
+     * @throws IllegalArgumentException if the type isn't supported
+     */
+    public void setEdgeLabelType(Class edgeLabelType) {
+        if (!AttributeUtils.isSimpleType(edgeLabelType)) {
+            throw new IllegalArgumentException("Unsupported type " + edgeLabelType.getClass().getCanonicalName());
+        }
+        this.edgeLabelType = edgeLabelType;
+    }
+
+    /**
      * Returns the time representation.
      *
      * @return time representation
@@ -122,6 +146,7 @@ public class Configuration {
         Configuration copy = new Configuration();
         copy.nodeIdType = nodeIdType;
         copy.edgeIdType = edgeIdType;
+        copy.edgeLabelType = edgeLabelType;
         copy.timeRepresentation = timeRepresentation;
         return copy;
     }
@@ -131,6 +156,7 @@ public class Configuration {
         int hash = 7;
         hash = 19 * hash + (this.nodeIdType != null ? this.nodeIdType.hashCode() : 0);
         hash = 19 * hash + (this.edgeIdType != null ? this.edgeIdType.hashCode() : 0);
+        hash = 19 * hash + (this.edgeLabelType != null ? this.edgeLabelType.hashCode() : 0);
         hash = 19 * hash + (this.timeRepresentation != null ? this.timeRepresentation.hashCode() : 0);
         return hash;
     }
@@ -151,6 +177,9 @@ public class Configuration {
             return false;
         }
         if (this.edgeIdType != other.edgeIdType && (this.edgeIdType == null || !this.edgeIdType.equals(other.edgeIdType))) {
+            return false;
+        }
+        if (this.edgeLabelType != other.edgeLabelType && (this.edgeLabelType == null || !this.edgeLabelType.equals(other.edgeLabelType))) {
             return false;
         }
         if (this.timeRepresentation != other.timeRepresentation && (this.timeRepresentation == null || !this.timeRepresentation.equals(other.timeRepresentation))) {

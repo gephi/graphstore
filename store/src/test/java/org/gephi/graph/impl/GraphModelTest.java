@@ -501,4 +501,11 @@ public class GraphModelTest {
         graphModelImpl.store.edgeTable.addColumn("foo", Integer.class);
         graphModelImpl.setConfiguration(new Configuration());
     }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testSetConfigurationWithEdgeType() {
+        GraphModelImpl graphModelImpl = new GraphModelImpl();
+        graphModelImpl.store.edgeTypeStore.addType("foo");
+        graphModelImpl.setConfiguration(new Configuration());
+    }
 }

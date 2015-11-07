@@ -264,6 +264,21 @@ public class EdgeTypeStoreTest {
     }
 
     @Test
+    public void testAddDifferentType() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        edgeTypeStore.configuration.setEdgeLabelType(Integer.class);
+        int id = edgeTypeStore.addType(42);
+        Assert.assertEquals(id, 1);
+        Assert.assertEquals(edgeTypeStore.getLabel(1), 42);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testAddWrongType() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        edgeTypeStore.addType(42);
+    }
+
+    @Test
     public void testDeepEqualsEmpty() {
         EdgeTypeStore edgeTypeStore1 = new EdgeTypeStore();
         Assert.assertTrue(edgeTypeStore1.deepEquals(edgeTypeStore1));
@@ -286,13 +301,11 @@ public class EdgeTypeStoreTest {
         EdgeTypeStore edgeTypeStore1 = new EdgeTypeStore();
         edgeTypeStore1.addType("Foo");
         edgeTypeStore1.addType("Bar");
-        edgeTypeStore1.addType(9);
         edgeTypeStore1.removeType("Foo");
 
         EdgeTypeStore edgeTypeStore2 = new EdgeTypeStore();
         edgeTypeStore2.addType("Foo");
         edgeTypeStore2.addType("Bar");
-        edgeTypeStore2.addType(9);
         edgeTypeStore2.removeType("Foo");
 
         EdgeTypeStore edgeTypeStore3 = new EdgeTypeStore();
@@ -307,13 +320,11 @@ public class EdgeTypeStoreTest {
         EdgeTypeStore edgeTypeStore1 = new EdgeTypeStore();
         edgeTypeStore1.addType("Foo");
         edgeTypeStore1.addType("Bar");
-        edgeTypeStore1.addType(9);
         edgeTypeStore1.removeType("Foo");
 
         EdgeTypeStore edgeTypeStore2 = new EdgeTypeStore();
         edgeTypeStore2.addType("Foo");
         edgeTypeStore2.addType("Bar");
-        edgeTypeStore2.addType(9);
         edgeTypeStore2.removeType("Foo");
 
         EdgeTypeStore edgeTypeStore3 = new EdgeTypeStore();

@@ -371,7 +371,8 @@ public class GraphModelImpl implements GraphModel {
         store.autoWriteLock();
         try {
             if (store.getNodeCount() > 0 || !store.attributes.isEmpty() || store.nodeTable.countColumns()
-                    != GraphStoreConfiguration.NODE_DEFAULT_COLUMNS || store.edgeTable.countColumns() != GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS) {
+                    != GraphStoreConfiguration.NODE_DEFAULT_COLUMNS || store.edgeTable.countColumns() != GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS
+                    || store.edgeTypeStore.size() > 1) {
                 throw new IllegalStateException("The store should be empty when modifying the configuration");
             }
             if (!config.getNodeIdType().equals(configuration.getNodeIdType())) {
@@ -385,6 +386,9 @@ public class GraphModelImpl implements GraphModel {
                 edgeTable.store.removeColumn("id");
                 edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", config.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
                 configuration.setEdgeIdType(config.getEdgeIdType());
+            }
+            if (!config.getEdgeLabelType().equals(configuration.getEdgeLabelType())) {
+                configuration.setEdgeLabelType(config.getEdgeLabelType());
             }
             if (!config.getTimeRepresentation().equals(configuration.getTimeRepresentation())) {
                 TableImpl<Node> nodeTable = store.nodeTable;

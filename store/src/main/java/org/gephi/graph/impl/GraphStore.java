@@ -145,7 +145,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             int type = edge.getType();
             if (edgeTypeStore != null && !edgeTypeStore.contains(type)) {
                 if (GraphStoreConfiguration.ENABLE_AUTO_TYPE_REGISTRATION) {
-                    edgeTypeStore.addType(type);
+                    edgeTypeStore.addType(String.valueOf(type), type);
                 } else {
                     throw new RuntimeException("The type doesn't exist");
                 }

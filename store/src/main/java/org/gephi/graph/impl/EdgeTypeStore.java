@@ -220,6 +220,9 @@ public class EdgeTypeStore {
                     || cl.equals(Boolean.class))) {
                 throw new IllegalArgumentException("The type id is " + cl.getCanonicalName() + " but must be a primitive type (int, string, long...)");
             }
+            if (!configuration.getEdgeLabelType().equals(o.getClass())) {
+                throw new IllegalArgumentException("The expected type was " + configuration.getEdgeLabelType().getCanonicalName() + " and " + o.getClass().getCanonicalName() + " was found");
+            }
         }
     }
 
