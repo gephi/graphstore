@@ -617,6 +617,43 @@ public class AttributeUtils {
     }
 
     /**
+     * Returns true if <em>type</em> is a string type
+     * <p>
+     * This can be true for static, arrays and dynamic types.
+     *
+     * @param type type to test
+     * @return true if <em>type</em> is a string type, false otherwise
+     */
+    public static boolean isStringType(Class type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
+        }
+        return type.equals(String.class)
+                || type.equals(String[].class)
+                || type.equals(TimestampStringMap.class)
+                || type.equals(IntervalStringMap.class);
+    }
+
+    /**
+     * Returns true if <em>type</em> is a boolean type
+     * <p>
+     * This can be true for static, arrays and dynamic types.
+     *
+     * @param type type to test
+     * @return true if <em>type</em> is a boolean type, false otherwise
+     */
+    public static boolean isBooleanType(Class type) {
+        if (!isSupported(type)) {
+            throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
+        }
+        type = getStandardizedType(type);
+        return type.equals(Boolean.class)
+                || type.equals(boolean[].class)
+                || type.equals(TimestampBooleanMap.class)
+                || type.equals(IntervalBooleanMap.class);
+    }
+
+    /**
      * Returns true if <em>type</em> is a dynamic type.
      *
      * @param type type to test
@@ -628,8 +665,7 @@ public class AttributeUtils {
                 || type.equals(TimestampSet.class)
                 || (!type.equals(IntervalMap.class)
                 && IntervalMap.class.isAssignableFrom(type))
-                || type.equals(IntervalSet.class)
-                ;
+                || type.equals(IntervalSet.class);
     }
 
     /**

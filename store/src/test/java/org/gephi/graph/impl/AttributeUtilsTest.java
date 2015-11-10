@@ -502,6 +502,36 @@ public class AttributeUtilsTest {
     }
 
     @Test
+    public void testIsBooleanType() {
+        Assert.assertTrue(AttributeUtils.isBooleanType(Boolean.class));
+        Assert.assertTrue(AttributeUtils.isBooleanType(Boolean[].class));
+        Assert.assertTrue(AttributeUtils.isBooleanType(boolean[].class));
+        Assert.assertTrue(AttributeUtils.isBooleanType(boolean.class));
+        Assert.assertTrue(AttributeUtils.isBooleanType(IntervalBooleanMap.class));
+        Assert.assertTrue(AttributeUtils.isBooleanType(TimestampBooleanMap.class));
+        Assert.assertFalse(AttributeUtils.isBooleanType(String.class));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testIsBooleanTypeUnsupportedType() {
+        AttributeUtils.isBooleanType(Color.class);
+    }
+
+    @Test
+    public void testIsStringType() {
+        Assert.assertTrue(AttributeUtils.isStringType(String.class));
+        Assert.assertTrue(AttributeUtils.isStringType(String[].class));
+        Assert.assertTrue(AttributeUtils.isStringType(IntervalStringMap.class));
+        Assert.assertTrue(AttributeUtils.isStringType(TimestampStringMap.class));
+        Assert.assertFalse(AttributeUtils.isStringType(Integer.class));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testIsStringTypeUnsupportedType() {
+        AttributeUtils.isStringType(Color.class);
+    }
+
+    @Test
     public void testIsDynamicType() {
         //Interval types:
         Assert.assertTrue(AttributeUtils.isDynamicType(IntervalSet.class));
@@ -526,7 +556,7 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isDynamicType(TimestampDoubleMap.class));
         Assert.assertTrue(AttributeUtils.isDynamicType(TimestampBooleanMap.class));
         Assert.assertTrue(AttributeUtils.isDynamicType(TimestampCharMap.class));
-        
+
         //Some types that should not be dynamic
         Assert.assertFalse(AttributeUtils.isDynamicType(TimestampFloatMap[].class));
         Assert.assertFalse(AttributeUtils.isDynamicType(IntervalFloatMap[].class));
