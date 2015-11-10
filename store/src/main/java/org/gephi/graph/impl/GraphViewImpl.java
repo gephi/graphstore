@@ -419,21 +419,25 @@ public class GraphViewImpl implements GraphView {
         BitVector nodeOtherBitVector = otherView.nodeBitVector;
         BitVector edgeOtherBitVector = otherView.edgeBitVector;
 
-        int nodeSize = nodeBitVector.size();
-        for (int i = 0; i < nodeSize; i++) {
-            boolean t = nodeBitVector.get(i);
-            boolean o = nodeOtherBitVector.get(i);
-            if (t && !o) {
-                removeNode(getNode(i));
+        if (nodeView) {
+            int nodeSize = nodeBitVector.size();
+            for (int i = 0; i < nodeSize; i++) {
+                boolean t = nodeBitVector.get(i);
+                boolean o = nodeOtherBitVector.get(i);
+                if (t && !o) {
+                    removeNode(getNode(i));
+                }
             }
         }
 
-        int edgeSize = edgeBitVector.size();
-        for (int i = 0; i < edgeSize; i++) {
-            boolean t = edgeBitVector.get(i);
-            boolean o = edgeOtherBitVector.get(i);
-            if (t && !o) {
-                removeEdge(getEdge(i));
+        if (edgeView) {
+            int edgeSize = edgeBitVector.size();
+            for (int i = 0; i < edgeSize; i++) {
+                boolean t = edgeBitVector.get(i);
+                boolean o = edgeOtherBitVector.get(i);
+                if (t && !o) {
+                    removeEdge(getEdge(i));
+                }
             }
         }
     }
@@ -442,21 +446,25 @@ public class GraphViewImpl implements GraphView {
         BitVector nodeOtherBitVector = otherView.nodeBitVector;
         BitVector edgeOtherBitVector = otherView.edgeBitVector;
 
-        int nodeSize = nodeBitVector.size();
-        for (int i = 0; i < nodeSize; i++) {
-            boolean t = nodeBitVector.get(i);
-            boolean o = nodeOtherBitVector.get(i);
-            if (!t && o) {
-                addNode(getNode(i));
+        if (nodeView) {
+            int nodeSize = nodeBitVector.size();
+            for (int i = 0; i < nodeSize; i++) {
+                boolean t = nodeBitVector.get(i);
+                boolean o = nodeOtherBitVector.get(i);
+                if (!t && o) {
+                    addNode(getNode(i));
+                }
             }
         }
 
-        int edgeSize = edgeBitVector.size();
-        for (int i = 0; i < edgeSize; i++) {
-            boolean t = edgeBitVector.get(i);
-            boolean o = edgeOtherBitVector.get(i);
-            if (!t && o) {
-                addEdge(getEdge(i));
+        if (edgeView) {
+            int edgeSize = edgeBitVector.size();
+            for (int i = 0; i < edgeSize; i++) {
+                boolean t = edgeBitVector.get(i);
+                boolean o = edgeOtherBitVector.get(i);
+                if (!t && o) {
+                    addEdge(getEdge(i));
+                }
             }
         }
     }

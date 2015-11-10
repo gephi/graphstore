@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.Arrays;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphView;
@@ -178,6 +179,52 @@ public class GraphViewImplTest {
     }
 
     @Test
+    public void testViewIntersectionEdgeView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true);
+        GraphViewImpl view2 = store.createView(false, true);
+
+        view.fill();
+        view2.fill();
+
+        EdgeImpl e1 = graphStore.getEdge("0");
+        EdgeImpl e2 = graphStore.getEdge("5");
+
+        view.removeEdge(e1);
+        view2.removeEdge(e2);
+
+        view.intersection(view2);
+
+        Assert.assertFalse(view.containsEdge(e1));
+        Assert.assertFalse(view.containsEdge(e2));
+    }
+
+    @Test
+    public void testViewIntersectionNodeView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(true, false);
+        GraphViewImpl view2 = store.createView();
+
+        view.fill();
+        view2.fill();
+
+        EdgeImpl e1 = graphStore.getEdge("0");
+        EdgeImpl e2 = graphStore.getEdge("5");
+        NodeImpl s1 = e1.getSource();
+
+        view2.removeNode(s1);
+        view2.removeEdge(e2);
+
+        view.intersection(view2);
+
+        Assert.assertFalse(view.containsEdge(e1));
+        Assert.assertFalse(view.containsNode(s1));
+        Assert.assertTrue(view.containsEdge(e2));
+    }
+
+    @Test
     public void testViewUnion() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
         GraphViewStore store = graphStore.viewStore;
@@ -210,6 +257,47 @@ public class GraphViewImplTest {
     }
 
     @Test
+    public void testViewUnionEdgeView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true);
+        GraphViewImpl view2 = store.createView(false, true);
+
+        EdgeImpl e1 = graphStore.getEdge("0");
+        EdgeImpl e2 = graphStore.getEdge("5");
+
+        view.addEdge(e1);
+        view2.addEdge(e2);
+
+        view.union(view2);
+
+        Assert.assertTrue(view.containsEdge(e1));
+        Assert.assertTrue(view.containsEdge(e2));
+    }
+
+    @Test
+    public void testViewUnionNodeView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(true, false);
+        GraphViewImpl view2 = store.createView(true, true);
+
+        EdgeImpl e1 = graphStore.getEdge("0");
+        EdgeImpl e2 = graphStore.getEdge("5");
+        NodeImpl n1 = e1.getSource();
+        NodeImpl n2 = e1.getTarget();
+        NodeImpl n3 = e2.getSource();
+        NodeImpl n4 = e2.getTarget();
+
+        view2.addAllNodes(Arrays.asList(new NodeImpl[]{n1, n2, n3, n4}));
+        view2.addEdge(e1);
+        Assert.assertFalse(view.containsEdge(e2));
+
+        view.union(view2);
+
+        Assert.assertTrue(view.containsEdge(e1));
+        Assert.assertTrue(view.containsEdge(e2));
+    }
     public void testNodeView() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
         GraphViewStore store = graphStore.viewStore;
