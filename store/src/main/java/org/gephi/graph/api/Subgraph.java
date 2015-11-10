@@ -154,4 +154,10 @@ public interface Subgraph extends Graph {
      * @param subGraph the subgraph to do the intersection with
      */
     public void intersection(Subgraph subGraph);
+
+    /**
+     * Inverse this subgraph so all elements in the graph are removed and all
+     * elements not in the graph are added.
+     */
+    public void not();
 }

@@ -323,6 +323,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public void not() {
+        throw new UnsupportedOperationException("Not supported yet for the main view.");
+    }
+
+    @Override
     public Graph getRootGraph() {
         return this;
     }

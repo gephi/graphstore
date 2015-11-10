@@ -612,6 +612,16 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     }
 
     @Override
+    public void not() {
+        graphStore.autoWriteLock();
+        try {
+            view.not();
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
+    @Override
     public Graph getRootGraph() {
         return graphStore;
     }

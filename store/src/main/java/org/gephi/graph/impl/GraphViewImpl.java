@@ -469,6 +469,51 @@ public class GraphViewImpl implements GraphView {
         }
     }
 
+    public void not() {
+        if (nodeView) {
+            nodeBitVector.not();
+            this.nodeCount = graphStore.nodeStore.size() - this.nodeCount;
+        }
+        edgeBitVector.not();
+
+        this.edgeCount = graphStore.edgeStore.size() - this.edgeCount;
+        for (int i = 0; i < typeCounts.length; i++) {
+            this.typeCounts[i] = graphStore.edgeStore.longDictionary[i].size() - this.typeCounts[i];
+        }
+        for (int i = 0; i < mutualEdgeTypeCounts.length; i++) {
+            this.mutualEdgeTypeCounts[i] = graphStore.edgeStore.mutualEdgesTypeSize[i] - this.mutualEdgeTypeCounts[i];
+        }
+        this.mutualEdgesCount = graphStore.edgeStore.mutualEdgesSize - this.mutualEdgesCount;
+
+        if (nodeView) {
+            incrementNodeVersion();
+        }
+        incrementEdgeVersion();
+
+        if (nodeView) {
+            IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
+            if (nodeIndexStore != null) {
+                nodeIndexStore.clear(directedDecorator.view);
+                nodeIndexStore.indexView(directedDecorator);
+            }
+            TimeIndexStore nodeTimeIndexStore = graphStore.timeStore.nodeIndexStore;
+            if (nodeTimeIndexStore != null) {
+                nodeTimeIndexStore.clear(directedDecorator.view);
+                nodeTimeIndexStore.indexView(directedDecorator);
+            }
+        }
+        IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
+        if (edgeIndexStore != null) {
+            edgeIndexStore.clear(directedDecorator.view);
+            edgeIndexStore.indexView(directedDecorator);
+        }
+        TimeIndexStore edgeTimeIndexStore = graphStore.timeStore.edgeIndexStore;
+        if (edgeTimeIndexStore != null) {
+            edgeTimeIndexStore.clear(directedDecorator.view);
+            edgeTimeIndexStore.indexView(directedDecorator);
+        }
+    }
+
     public void addEdgeInNodeView(EdgeImpl edge) {
         if (nodeBitVector.get(edge.source.getStoreId()) && nodeBitVector.get(edge.target.getStoreId())) {
             incrementEdgeVersion();

@@ -666,6 +666,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public void not() {
+        throw new UnsupportedOperationException("Not supported for the main view.");
+    }
+
+    @Override
     public Graph getRootGraph() {
         return this;
     }

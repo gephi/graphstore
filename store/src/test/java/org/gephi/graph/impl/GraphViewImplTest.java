@@ -298,6 +298,71 @@ public class GraphViewImplTest {
         Assert.assertTrue(view.containsEdge(e1));
         Assert.assertTrue(view.containsEdge(e2));
     }
+
+    @Test
+    public void testViewNot() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        view.not();
+
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertTrue(view.containsNode((NodeImpl) n));
+        }
+        for (Edge e : graphStore.getEdges()) {
+            Assert.assertTrue(view.containsEdge((EdgeImpl) e));
+        }
+        Assert.assertEquals(view.getNodeCount(), graphStore.getNodeCount());
+        Assert.assertEquals(view.getEdgeCount(), graphStore.getEdgeCount());
+
+        view.not();
+
+        Assert.assertEquals(view.getNodeCount(), 0);
+        Assert.assertEquals(view.getEdgeCount(), 0);
+
+        EdgeImpl e1 = graphStore.getEdge("0");
+        NodeImpl n1 = e1.getSource();
+        NodeImpl n2 = e1.getTarget();
+
+        view.addNode(n1);
+        view.addNode(n2);
+        view.addEdge(e1);
+
+        view.not();
+
+        Assert.assertFalse(view.containsNode(n1));
+        Assert.assertFalse(view.containsNode(n2));
+        Assert.assertFalse(view.containsEdge(e1));
+    }
+
+    @Test
+    public void testViewNotNodeView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(true, false);
+
+        EdgeImpl e1 = graphStore.getEdge("0");
+        NodeImpl n1 = e1.getSource();
+        NodeImpl n2 = e1.getTarget();
+
+        view.addNode(n1);
+        view.addNode(n2);
+
+        view.not();
+
+        Assert.assertFalse(view.containsNode(n1));
+        Assert.assertFalse(view.containsNode(n1));
+        Assert.assertFalse(view.containsEdge(e1));
+
+        view.not();
+
+        Assert.assertTrue(view.containsNode(n1));
+        Assert.assertTrue(view.containsNode(n2));
+        Assert.assertTrue(view.containsEdge(e1));
+    }
+
+    @Test
     public void testNodeView() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
         GraphViewStore store = graphStore.viewStore;
