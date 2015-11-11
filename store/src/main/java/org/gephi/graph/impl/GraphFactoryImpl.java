@@ -45,17 +45,17 @@ public class GraphFactoryImpl implements GraphFactory {
 
     @Override
     public Edge newEdge(Node source, Node target) {
-        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, 1.0, true);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, true);
     }
 
     @Override
     public Edge newEdge(Node source, Node target, boolean directed) {
-        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, 1.0, directed);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, directed);
     }
 
     @Override
     public Edge newEdge(Node source, Node target, int type, boolean directed) {
-        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, type, 1.0, directed);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, type, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, directed);
     }
 
     @Override

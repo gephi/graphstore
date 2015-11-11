@@ -51,6 +51,7 @@ public final class GraphStoreConfiguration {
     public static final Class DEFAULT_NODE_ID_TYPE = String.class;
     public static final Class DEFAULT_EDGE_ID_TYPE = String.class;
     public static final Class DEFAULT_EDGE_LABEL_TYPE = String.class;
+    public static final Double DEFAULT_EDGE_WEIGHT = 1.0;
     //Properties name
     public static final String ELEMENT_LABEL_COLUMN_ID = "label";
     public static final String ELEMENT_TIMESET_COLUMN_ID = "timeset";
