@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.api;
 
+import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.impl.GraphStoreConfiguration;
 
 /**
@@ -37,6 +39,7 @@ public class Configuration {
     private Class nodeIdType;
     private Class edgeIdType;
     private Class edgeLabelType;
+    private Class edgeWeightType;
     private TimeRepresentation timeRepresentation;
 
     /**
@@ -46,6 +49,7 @@ public class Configuration {
         nodeIdType = GraphStoreConfiguration.DEFAULT_NODE_ID_TYPE;
         edgeIdType = GraphStoreConfiguration.DEFAULT_EDGE_ID_TYPE;
         edgeLabelType = GraphStoreConfiguration.DEFAULT_EDGE_LABEL_TYPE;
+        edgeWeightType = GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT_TYPE;
         timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
     }
 
@@ -120,6 +124,29 @@ public class Configuration {
     }
 
     /**
+     * Returns the edge weight type.
+     *
+     * @return edge weight type
+     */
+    public Class getEdgeWeightType() {
+        return edgeWeightType;
+    }
+
+    /**
+     * Sets the edge weight type.
+     *
+     * @param edgeWeightType edge weight type
+     * @throws IllegalArgumentException if the type isn't supported
+     */
+    public void setEdgeWeightType(Class edgeWeightType) {
+        if (edgeWeightType.equals(Double.class) || edgeWeightType.equals(TimestampDoubleMap.class) || edgeWeightType.equals(IntervalDoubleMap.class)) {
+            this.edgeWeightType = edgeWeightType;
+        } else {
+            throw new IllegalArgumentException("Unsupported type " + edgeWeightType.getClass().getCanonicalName());
+        }
+    }
+
+    /**
      * Returns the time representation.
      *
      * @return time representation
@@ -147,6 +174,7 @@ public class Configuration {
         copy.nodeIdType = nodeIdType;
         copy.edgeIdType = edgeIdType;
         copy.edgeLabelType = edgeLabelType;
+        copy.edgeWeightType = edgeWeightType;
         copy.timeRepresentation = timeRepresentation;
         return copy;
     }
@@ -157,6 +185,7 @@ public class Configuration {
         hash = 19 * hash + (this.nodeIdType != null ? this.nodeIdType.hashCode() : 0);
         hash = 19 * hash + (this.edgeIdType != null ? this.edgeIdType.hashCode() : 0);
         hash = 19 * hash + (this.edgeLabelType != null ? this.edgeLabelType.hashCode() : 0);
+        hash = 19 * hash + (this.edgeWeightType != null ? this.edgeWeightType.hashCode() : 0);
         hash = 19 * hash + (this.timeRepresentation != null ? this.timeRepresentation.hashCode() : 0);
         return hash;
     }
@@ -180,6 +209,9 @@ public class Configuration {
             return false;
         }
         if (this.edgeLabelType != other.edgeLabelType && (this.edgeLabelType == null || !this.edgeLabelType.equals(other.edgeLabelType))) {
+            return false;
+        }
+        if (this.edgeWeightType != other.edgeWeightType && (this.edgeWeightType == null || !this.edgeWeightType.equals(other.edgeWeightType))) {
             return false;
         }
         if (this.timeRepresentation != other.timeRepresentation && (this.timeRepresentation == null || !this.timeRepresentation.equals(other.timeRepresentation))) {

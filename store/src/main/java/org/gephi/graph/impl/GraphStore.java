@@ -24,7 +24,6 @@ import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.Interval;
-import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -38,7 +37,6 @@ import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Subgraph;
 import org.joda.time.DateTimeZone;
 import org.gephi.graph.api.TimeRepresentation;
-import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.IntervalSet;
 
 public class GraphStore implements DirectedGraph, DirectedSubgraph {
@@ -111,11 +109,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
                 edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
             }
         }
-        if (configuration.getTimeRepresentation().equals(TimeRepresentation.TIMESTAMP)) {
-            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, TimestampDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
-        } else {
-            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, IntervalDoubleMap.class, "Weight", null, Origin.PROPERTY, false, false));
-        }
+        edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
     }
 
     @Override

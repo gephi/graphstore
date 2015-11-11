@@ -144,10 +144,8 @@ public class ColumnObserverTest {
 
         edge.setWeight(3.0);
         Assert.assertTrue(observer.hasColumnChanged());
-        edge.setWeight(1.0, 1.0);
+        edge.setWeight(1.0);
         Assert.assertTrue(observer.hasColumnChanged());
-        edge.setWeight(1.0, 1.0);
-        Assert.assertFalse(observer.hasColumnChanged());
     }
 
     @Test

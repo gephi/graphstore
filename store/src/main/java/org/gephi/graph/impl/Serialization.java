@@ -948,6 +948,8 @@ public class Serialization {
 
         serialize(out, config.getNodeIdType());
         serialize(out, config.getEdgeIdType());
+        serialize(out, config.getEdgeLabelType());
+        serialize(out, config.getEdgeWeightType());
         serialize(out, config.getTimeRepresentation());
     }
 
@@ -956,10 +958,14 @@ public class Serialization {
 
         Class nodeIdType = (Class) deserialize(is);
         Class edgeIdType = (Class) deserialize(is);
+        Class edgeLabelType = (Class) deserialize(is);
+        Class edgeWeightType = (Class) deserialize(is);
         TimeRepresentation timeRepresentation = (TimeRepresentation) deserialize(is);
 
         config.setNodeIdType(nodeIdType);
         config.setEdgeIdType(edgeIdType);
+        config.setEdgeLabelType(edgeLabelType);
+        config.setEdgeWeightType(edgeWeightType);
         config.setTimeRepresentation(timeRepresentation);
 
         return config;

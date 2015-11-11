@@ -25,7 +25,9 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.IntervalIntegerMap;
+import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -180,12 +182,15 @@ public class GraphBridgeTest {
 
     @Test
     public void testCopyEdgeWeightTimestamp() {
-        GraphStore source = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore source = GraphGenerator.generateTinyGraphStore(config);
         EdgeImpl e0 = source.getEdge("0");
         e0.setWeight(42.0, 1.0);
         e0.setWeight(5.0, 2.0);
 
-        GraphStore dest = new GraphStore();
+        GraphModelImpl gm = new GraphModelImpl(config);
+        GraphStore dest = gm.store;
         new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
 
         EdgeImpl edgeCopy = dest.getEdge("0");
@@ -195,12 +200,14 @@ public class GraphBridgeTest {
 
     @Test
     public void testCopyEdgeWeightInterval() {
-        GraphStore source = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphStore source = GraphGenerator.generateTinyGraphStore(config);
         EdgeImpl e0 = source.getEdge("0");
         e0.setWeight(42.0, new Interval(1.0, 2.0));
         e0.setWeight(5.0, new Interval(3.0, 4.0));
 
-        Configuration config = new Configuration();
         config.setTimeRepresentation(TimeRepresentation.INTERVAL);
         GraphModelImpl gm = new GraphModelImpl(config);
         GraphStore dest = gm.store;
@@ -216,7 +223,8 @@ public class GraphBridgeTest {
         GraphStore source = GraphGenerator.generateSmallMultiTypeGraphStore();
         Node[] nodes = Arrays.copyOf(source.getNodes().toArray(), 10);
 
-        GraphStore dest = new GraphStore();
+        GraphModelImpl gm = new GraphModelImpl();
+        GraphStore dest = gm.store;
         for (Node n : nodes) {
             Node nodeCopy = dest.factory.newNode(n.getId());
             dest.addNode(nodeCopy);

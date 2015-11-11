@@ -60,7 +60,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
         this.properties = GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES ? new EdgePropertiesImpl() : null;
         this.attributes = new Object[GraphStoreConfiguration.EDGE_WEIGHT_INDEX + 1];
         this.attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = id;
-        this.attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
+        if (graphStore == null || graphStore.configuration.getEdgeWeightType().equals(Double.class)) {
+            this.attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
+        }
     }
 
     public EdgeImpl(Object id, NodeImpl source, NodeImpl target, int type, double weight, boolean directed) {
@@ -84,15 +86,13 @@ public class EdgeImpl extends ElementImpl implements Edge {
             if (weightObject instanceof Double) {
                 return (Double) weightObject;
             }
-            throw new IllegalStateException("The weight is dynamic, call getWeight(timestamp) instead");
+            throw new IllegalStateException("The weight is dynamic, call getWeight(timestamp) or getWeight(interval) instead");
         }
     }
 
     @Override
     public boolean hasDynamicWeight() {
-        synchronized (this) {
-            return !(attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] instanceof Double);
-        }
+        return !Double.class.equals(graphStore.configuration.getEdgeWeightType());
     }
 
     @Override
@@ -108,21 +108,20 @@ public class EdgeImpl extends ElementImpl implements Edge {
     }
 
     private void setTimeWeight(double weight, Object timeObject) {
+        checkWeightDynamicType();
+
         boolean res;
         synchronized (this) {
             Object oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
             TimeMap dynamicValue = null;
-            if (!(oldValue instanceof TimeMap)) {
-                TimeRepresentation timeRepresentation = getTimeRepresentation();
-                switch (timeRepresentation) {
-                    case TIMESTAMP:
-                        dynamicValue = new TimestampDoubleMap();
-                        break;
-                    case INTERVAL:
-                        dynamicValue = new IntervalDoubleMap();
-                        break;
+            if (oldValue == null) {
+                try {
+                    attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue = (TimeMap) graphStore.configuration.getEdgeWeightType().newInstance();
+                } catch (InstantiationException ex) {
+                    throw new RuntimeException(ex);
+                } catch (IllegalAccessException ex) {
+                    throw new RuntimeException(ex);
                 }
-                attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue;
             } else {
                 dynamicValue = (TimeMap) oldValue;
             }
@@ -133,7 +132,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
             timeIndexStore.add(timeObject);
         }
         ColumnStore columnStore = getColumnStore();
-        if (res && columnStore != null) {
+        if (res && columnStore != null && isValid()) {
             Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
             ((ColumnImpl) column).incrementVersion();
         }
@@ -147,8 +146,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
             if (weightValue instanceof Double) {
                 throw new IllegalStateException("The weight is static, call getWeight() instead");
             }
-            TimestampDoubleMap dynamicValue = (TimestampDoubleMap) weightValue;
-            return dynamicValue.getDouble(timestamp, 0.0);
+            TimestampMap dynamicValue = (TimestampMap) weightValue;
+            return (Double) dynamicValue.get(timestamp, 0.0);
         }
     }
 
@@ -160,8 +159,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
             if (weightValue instanceof Double) {
                 throw new IllegalStateException("The weight is static, call getWeight() instead");
             }
-            IntervalDoubleMap dynamicValue = (IntervalDoubleMap) weightValue;
-            return dynamicValue.getDouble(interval, 0.0);
+            IntervalMap dynamicValue = (IntervalMap) weightValue;
+            return (Double) dynamicValue.get(interval, 0.0);
         }
     }
 
@@ -179,6 +178,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
                     estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
                 }
                 return (Double) dynamicValue.get(interval, estimator);
+            } else if (value == null) {
+                return GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT;
             } else {
                 return (Double) value;
             }
@@ -220,11 +221,13 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public void setWeight(double weight) {
+        checkWeightStaticType();
+
         synchronized (this) {
             attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
         }
         ColumnStore columnStore = getColumnStore();
-        if (columnStore != null) {
+        if (columnStore != null && isValid()) {
             Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
             ((ColumnImpl) column).incrementVersion();
         }
@@ -374,7 +377,18 @@ public class EdgeImpl extends ElementImpl implements Edge {
     final void checkIdType(Object id) {
         if (graphStore != null && !id.getClass().equals(graphStore.configuration.getEdgeIdType())) {
             throw new IllegalArgumentException("The id class does not match with the expected type (" + graphStore.configuration.getEdgeIdType().getName() + ")");
+        }
+    }
 
+    final void checkWeightStaticType() {
+        if (graphStore != null && !Double.class.equals(graphStore.configuration.getEdgeWeightType())) {
+            throw new IllegalArgumentException("The weight class does not match with the expected type (" + graphStore.configuration.getEdgeWeightType().getName() + ")");
+        }
+    }
+
+    final void checkWeightDynamicType() {
+        if (graphStore != null && Double.class.equals(graphStore.configuration.getEdgeWeightType())) {
+            throw new IllegalArgumentException("The weight class does not match with the expected type (" + graphStore.configuration.getEdgeWeightType().getName() + ")");
         }
     }
 

@@ -18,10 +18,12 @@ package org.gephi.graph.impl;
 import java.util.Iterator;
 import java.util.Map;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -44,7 +46,9 @@ public class EdgeImplTest {
 
     @Test
     public void testGetDefaultTimestampWeight() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(42.0, 1.0);
         Assert.assertEquals(e.getWeight(2.0), 0.0);
@@ -52,7 +56,10 @@ public class EdgeImplTest {
 
     @Test
     public void testGetDefaultIntervalWeight() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(42.0, new Interval(1.0, 2.0));
         Assert.assertEquals(e.getWeight(new Interval(2.0, 4.0)), 0.0);
@@ -60,7 +67,9 @@ public class EdgeImplTest {
 
     @Test
     public void testSetTimestampWeight() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(42.0, 1.0);
         Assert.assertEquals(e.getWeight(1.0), 42.0);
@@ -71,7 +80,10 @@ public class EdgeImplTest {
 
     @Test
     public void testSetIntervalWeight() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         Interval i1 = new Interval(1.0, 2.0);
         Interval i2 = new Interval(3.0, 4.0);
@@ -98,43 +110,60 @@ public class EdgeImplTest {
 
     @Test(expectedExceptions = IllegalStateException.class)
     public void testGetWeightStaticError() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(1.0, 1.0);
         e.getWeight();
     }
 
     @Test
-    public void testHasDynamicWeightTimestap() {
+    public void testHasDynamicWeightDouble() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         Edge e = graphStore.getEdge("0");
         Assert.assertFalse(e.hasDynamicWeight());
+        e.setWeight(3.0);
+        Assert.assertFalse(e.hasDynamicWeight());
+    }
+
+    @Test
+    public void testHasDynamicWeightTimestamp() {
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
+        Edge e = graphStore.getEdge("0");
+        Assert.assertTrue(e.hasDynamicWeight());
         e.setWeight(1.0, 1.0);
         Assert.assertTrue(e.hasDynamicWeight());
-        e.setWeight(1.0);
-        Assert.assertFalse(e.hasDynamicWeight());
     }
 
     @Test
     public void testHasDynamicWeightInterval() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
+        Assert.assertTrue(e.hasDynamicWeight());
         e.setWeight(1.0, new Interval(1.0, 2.0));
         Assert.assertTrue(e.hasDynamicWeight());
-        e.setWeight(1.0);
-        Assert.assertFalse(e.hasDynamicWeight());
     }
 
     @Test
     public void testGetDefaultWeightByGraphView() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         Assert.assertEquals(e.getWeight(graphStore.mainGraphView), 1.0);
     }
 
     @Test
     public void testGetTimestampWeightMainGraphView() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(42.0, 1.0);
         Assert.assertEquals(e.getWeight(graphStore.getView()), 42.0);
@@ -155,7 +184,9 @@ public class EdgeImplTest {
 //    }
     @Test
     public void testGetWeightDefaultEstimator() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(10.0, 1.0);
         e.setWeight(20.0, 2.0);
@@ -164,7 +195,9 @@ public class EdgeImplTest {
 
     @Test
     public void testGetWeightAverageEstimator() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         Column col = graphStore.edgeTable.store.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
         col.setEstimator(Estimator.AVERAGE);
@@ -175,7 +208,9 @@ public class EdgeImplTest {
 
     @Test
     public void testGetWeightWithView() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(10.0, 1.0);
         e.setWeight(20.0, 2.0);
@@ -188,7 +223,9 @@ public class EdgeImplTest {
 
     @Test
     public void testGetWeightsTimestamp() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(10.0, 3.0);
         e.setWeight(20.0, 1.0);
@@ -208,7 +245,10 @@ public class EdgeImplTest {
 
     @Test
     public void testGetWeightsInterval() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(10.0, new Interval(3.0, 4.0));
         e.setWeight(20.0, new Interval(1.0, 2.0));
@@ -236,7 +276,9 @@ public class EdgeImplTest {
 
     @Test
     public void testSetAttributeWeightTimestamp() {
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         Column col = graphStore.edgeTable.getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
 

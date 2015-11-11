@@ -17,6 +17,8 @@ package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalDoubleMap;
+import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -52,6 +54,17 @@ public class ConfigurationTest {
     }
 
     @Test
+    public void testSetEdgeWeightType() {
+        Configuration c = new Configuration();
+        c.setEdgeWeightType(IntervalDoubleMap.class);
+        Assert.assertEquals(c.getEdgeWeightType(), IntervalDoubleMap.class);
+        c.setEdgeWeightType(TimestampDoubleMap.class);
+        Assert.assertEquals(c.getEdgeWeightType(), TimestampDoubleMap.class);
+        c.setEdgeWeightType(Double.class);
+        Assert.assertEquals(c.getEdgeWeightType(), Double.class);
+    }
+
+    @Test
     public void testSetTimeRepresentation() {
         Configuration c = new Configuration();
         c.setTimeRepresentation(TimeRepresentation.INTERVAL);
@@ -68,6 +81,18 @@ public class ConfigurationTest {
     public void testSetEdgeIdTypeUnsupported() {
         Configuration c = new Configuration();
         c.setEdgeIdType(int[].class);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetEdgeWeightTypeFloatUnsupported() {
+        Configuration c = new Configuration();
+        c.setEdgeWeightType(Float.class);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetEdgeWeightTypeNotNumberUnsupported() {
+        Configuration c = new Configuration();
+        c.setEdgeWeightType(String.class);
     }
 
     @Test

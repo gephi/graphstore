@@ -126,13 +126,18 @@ public class GraphGenerator {
             }
         }
 
+        GraphStore graphStore = null;
+        if (nodeStore.viewStore != null) {
+            graphStore = nodeStore.viewStore.graphStore;
+        }
+
         int c = 0;
         while (idSet.size() < edgeCount) {
             int sourceId = r.nextInt(nodeCount);
             int targetId = r.nextInt(nodeCount);
             NodeImpl source = nodeStore.get(sourceId);
             NodeImpl target = nodeStore.get(targetId);
-            EdgeImpl edge = new EdgeImpl(String.valueOf(c), source, target, type, 1.0, directed);
+            EdgeImpl edge = new EdgeImpl(String.valueOf(c), graphStore, source, target, type, 1.0, directed);
             if (!leafs.contains(sourceId) && !leafs.contains(targetId) && (allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(edge.getLongId())) {
                 edgeList.add(edge);
                 c++;
@@ -370,10 +375,8 @@ public class GraphGenerator {
         return generateTinyGraphStore(GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION);
     }
 
-    public static GraphStore generateTinyGraphStore(TimeRepresentation timeRepresentation) {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(timeRepresentation);
-        GraphModelImpl graphModel = new GraphModelImpl(config);
+    public static GraphStore generateTinyGraphStore(Configuration configuration) {
+        GraphModelImpl graphModel = new GraphModelImpl(configuration);
         GraphStore graphStore = graphModel.store;
         NodeImpl n1 = new NodeImpl("1", graphStore);
         NodeImpl n2 = new NodeImpl("2", graphStore);
@@ -382,6 +385,12 @@ public class GraphGenerator {
         graphStore.addNode(n2);
         graphStore.addEdge(e);
         return graphStore;
+    }
+
+    public static GraphStore generateTinyGraphStore(TimeRepresentation timeRepresentation) {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(timeRepresentation);
+        return generateTinyGraphStore(config);
     }
 
     public static GraphStore generateSmallGraphStore() {
