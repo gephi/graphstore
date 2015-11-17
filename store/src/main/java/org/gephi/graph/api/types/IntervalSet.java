@@ -19,6 +19,7 @@ import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
+import org.gephi.graph.impl.FormattingAndParsingUtils;
 import org.joda.time.DateTimeZone;
 
 /**
@@ -316,11 +317,11 @@ public final class IntervalSet implements TimeSet<Interval> {
 
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
         if (size == 0) {
-            return "<empty>";
+            return FormattingAndParsingUtils.EMPTY_VALUE;
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("<");
+        sb.append('<');
         for (int i = 0; i < size; i++) {
             sb.append('[');
             sb.append(AttributeUtils.printTimestampInFormat(array[i * 2], timeFormat, timeZone));
@@ -332,7 +333,7 @@ public final class IntervalSet implements TimeSet<Interval> {
                 sb.append("; ");
             }
         }
-        sb.append(">");
+        sb.append('>');
 
         return sb.toString();
     }

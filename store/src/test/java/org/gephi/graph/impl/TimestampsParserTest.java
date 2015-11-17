@@ -19,8 +19,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import org.gephi.graph.api.types.IntervalSet;
-import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimestampBooleanMap;
 import org.gephi.graph.api.types.TimestampByteMap;
 import org.gephi.graph.api.types.TimestampCharMap;
@@ -311,6 +309,11 @@ public class TimestampsParserTest {
         assertEquals(
                 "<[2.0, \";a b c\"]>",
                 parseTimestampMapToString("<[' 2.0', ';a b c')")
+        );
+        
+        assertEquals(
+                "<[2.0, \" d\"]>",
+                parseTimestampMapToString("<[' 2.0', ' d')")
         );
 
         assertEquals(

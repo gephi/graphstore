@@ -17,7 +17,7 @@ package org.gephi.graph.api;
 
 import org.gephi.graph.impl.TimestampsParser;
 import org.gephi.graph.impl.IntervalsParser;
-import org.gephi.graph.impl.DynamicFormattingUtils;
+import org.gephi.graph.impl.FormattingAndParsingUtils;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampLongMap;
@@ -52,6 +52,7 @@ import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimeMap;
+import org.gephi.graph.impl.ArraysParser;
 import org.gephi.graph.impl.GraphStoreConfiguration;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
@@ -75,9 +76,9 @@ public class AttributeUtils {
     private static final DecimalFormat TIMESTAMP_PRINTER;
 
     //These are used to avoid creating a lot of new instances of DateTimeFormatter
-    private static final Map<DateTimeZone, DateTimeFormatter> datePrintersByTimeZone;
-    private static final Map<DateTimeZone, DateTimeFormatter> dateTimePrintersByTimeZone;
-    private static final Map<DateTimeZone, DateTimeFormatter> dateTimeParsersByTimeZone;
+    private static final Map<DateTimeZone, DateTimeFormatter> DATE_PRINTERS_BY_TIMEZONE;
+    private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PRINTERS_BY_TIMEZONE;
+    private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PARSERS_BY_TIMEZONE;
 
     static {
         final Set<Class> supportedTypes = new HashSet<Class>();
@@ -105,7 +106,7 @@ public class AttributeUtils {
         //Objects
         supportedTypes.add(String.class);
 
-        //Prinitives Array
+        //Primitives Array
         supportedTypes.add(Boolean[].class);
         supportedTypes.add(boolean[].class);
         supportedTypes.add(Integer[].class);
@@ -167,14 +168,14 @@ public class AttributeUtils {
         typesStandardization.put(char.class, Character.class);
 
         //Array standardization
-        typesStandardization.put(Boolean[].class, boolean[].class);
-        typesStandardization.put(Integer[].class, int[].class);
-        typesStandardization.put(Short[].class, short[].class);
-        typesStandardization.put(Long[].class, long[].class);
-        typesStandardization.put(Byte[].class, byte[].class);
-        typesStandardization.put(Float[].class, float[].class);
-        typesStandardization.put(Double[].class, double[].class);
-        typesStandardization.put(Character[].class, char[].class);
+        typesStandardization.put(boolean[].class, Boolean[].class);
+        typesStandardization.put(int[].class, Integer[].class);
+        typesStandardization.put(short[].class, Short[].class);
+        typesStandardization.put(long[].class, Long[].class);
+        typesStandardization.put(byte[].class, Byte[].class);
+        typesStandardization.put(float[].class, Float[].class);
+        typesStandardization.put(double[].class, Double[].class);
+        typesStandardization.put(char[].class, Character[].class);
 
         //Assign
         TYPES_STANDARDIZATION = Collections.unmodifiableMap(typesStandardization);
@@ -187,16 +188,16 @@ public class AttributeUtils {
         DATE_TIME_PRINTER = ISODateTimeFormat.dateTime()
                 .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);//Make sure UTC timezone is used by default
 
-        datePrintersByTimeZone = new HashMap<DateTimeZone, DateTimeFormatter>();
-        dateTimePrintersByTimeZone = new HashMap<DateTimeZone, DateTimeFormatter>();
-        dateTimeParsersByTimeZone = new HashMap<DateTimeZone, DateTimeFormatter>();
+        DATE_PRINTERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
+        DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
+        DATE_TIME_PARSERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
 
-        datePrintersByTimeZone.put(DATE_PRINTER.getZone(), DATE_PRINTER);
-        dateTimePrintersByTimeZone.put(DATE_TIME_PRINTER.getZone(), DATE_TIME_PRINTER);
-        dateTimeParsersByTimeZone.put(DATE_TIME_PARSER.getZone(), DATE_TIME_PARSER);
+        DATE_PRINTERS_BY_TIMEZONE.put(DATE_PRINTER.getZone(), DATE_PRINTER);
+        DATE_TIME_PRINTERS_BY_TIMEZONE.put(DATE_TIME_PRINTER.getZone(), DATE_TIME_PRINTER);
+        DATE_TIME_PARSERS_BY_TIMEZONE.put(DATE_TIME_PARSER.getZone(), DATE_TIME_PARSER);
 
         DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
-        decimalFormatSymbols.setInfinity(DynamicFormattingUtils.INFINITY);
+        decimalFormatSymbols.setInfinity(FormattingAndParsingUtils.INFINITY);
         TIMESTAMP_PRINTER = new DecimalFormat("0.0###", decimalFormatSymbols);//1 to 4 decimals
     }
 
@@ -219,15 +220,15 @@ public class AttributeUtils {
     }
 
     private static DateTimeFormatter getDateTimeParserByTimeZone(DateTimeZone timeZone) {
-        return getDateTimeFormatterByTimeZone(dateTimeParsersByTimeZone, DATE_TIME_PARSER, timeZone);
+        return getDateTimeFormatterByTimeZone(DATE_TIME_PARSERS_BY_TIMEZONE, DATE_TIME_PARSER, timeZone);
     }
 
     private static DateTimeFormatter getDateTimePrinterByTimeZone(DateTimeZone timeZone) {
-        return getDateTimeFormatterByTimeZone(dateTimePrintersByTimeZone, DATE_TIME_PRINTER, timeZone);
+        return getDateTimeFormatterByTimeZone(DATE_TIME_PRINTERS_BY_TIMEZONE, DATE_TIME_PRINTER, timeZone);
     }
 
     private static DateTimeFormatter getDatePrinterByTimeZone(DateTimeZone timeZone) {
-        return getDateTimeFormatterByTimeZone(datePrintersByTimeZone, DATE_PRINTER, timeZone);
+        return getDateTimeFormatterByTimeZone(DATE_PRINTERS_BY_TIMEZONE, DATE_PRINTER, timeZone);
     }
 
     /**
@@ -245,9 +246,12 @@ public class AttributeUtils {
         if (str == null || str.isEmpty()) {
             return null;
         }
-        typeClass = getStandardizedType(typeClass);
+        
+        if(typeClass.isPrimitive()){
+            typeClass = getStandardizedType(typeClass);//For primitives we can use auto-unboxing
+        }
 
-        //Simple types:
+        //Simple and primitive types:
         if (typeClass.equals(String.class)) {
             return str;
         } else if (typeClass.equals(Byte.class)) {
@@ -262,6 +266,10 @@ public class AttributeUtils {
             return new Float(str);
         } else if (typeClass.equals(Double.class)) {
             return new Double(str);
+        } else if (typeClass.equals(BigInteger.class)) {
+            return new BigInteger(str);
+        } else if (typeClass.equals(BigDecimal.class)) {
+            return new BigDecimal(str);
         } else if (typeClass.equals(Boolean.class)) {
             if (str.length() == 1) {
                 if (str.charAt(0) == '1') {
@@ -322,6 +330,38 @@ public class AttributeUtils {
             return TimestampsParser.parseTimestampMap(Boolean.class, str, timeZone);
         } else if (typeClass.equals(TimestampCharMap.class)) {
             return TimestampsParser.parseTimestampMap(Character.class, str, timeZone);
+        }
+        
+        //Array types:
+        if (typeClass.equals(boolean[].class)) {
+            return ArraysParser.parseArrayPrimititveBoolean(str);
+        } else if (typeClass.equals(char[].class)) {
+            return ArraysParser.parseArrayPrimititveChar(str);
+        } else if (typeClass.equals(byte[].class)) {
+            return ArraysParser.parseArrayPrimititveByte(str);
+        } else if (typeClass.equals(short[].class)) {
+            return ArraysParser.parseArrayPrimititveShort(str);
+        } else if (typeClass.equals(int[].class)) {
+            return ArraysParser.parseArrayPrimititveInt(str);
+        } else if (typeClass.equals(long[].class)) {
+            return ArraysParser.parseArrayPrimititveLong(str);
+        } else if (typeClass.equals(float[].class)) {
+            return ArraysParser.parseArrayPrimititveFloat(str);
+        } else if (typeClass.equals(double[].class)) {
+            return ArraysParser.parseArrayPrimititveDouble(str);
+        } else if (typeClass.equals(Boolean[].class)
+                || typeClass.equals(String[].class)
+                || typeClass.equals(Character[].class)
+                || typeClass.equals(Byte[].class)
+                || typeClass.equals(Short[].class)
+                || typeClass.equals(Integer[].class)
+                || typeClass.equals(Long[].class)
+                || typeClass.equals(Float[].class)
+                || typeClass.equals(Double[].class)
+                || typeClass.equals(BigInteger[].class)
+                || typeClass.equals(BigDecimal[].class)
+                ) {
+            return ArraysParser.parseArray(typeClass, str);
         }
 
         throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
@@ -537,6 +577,7 @@ public class AttributeUtils {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
+        
         if (type.equals(TimestampBooleanMap.class) || type.equals(IntervalBooleanMap.class)) {
             return Boolean.class;
         } else if (type.equals(TimestampIntegerMap.class) || type.equals(IntervalIntegerMap.class)) {
@@ -596,12 +637,12 @@ public class AttributeUtils {
         }
         type = getStandardizedType(type);
         return Number.class.isAssignableFrom(type)
-                || int[].class.isAssignableFrom(type)
-                || float[].class.isAssignableFrom(type)
-                || double[].class.isAssignableFrom(type)
-                || byte[].class.isAssignableFrom(type)
-                || short[].class.isAssignableFrom(type)
-                || long[].class.isAssignableFrom(type)
+                || Integer[].class.isAssignableFrom(type)
+                || Float[].class.isAssignableFrom(type)
+                || Double[].class.isAssignableFrom(type)
+                || Byte[].class.isAssignableFrom(type)
+                || Short[].class.isAssignableFrom(type)
+                || Long[].class.isAssignableFrom(type)
                 || type.equals(TimestampIntegerMap.class)
                 || type.equals(TimestampFloatMap.class)
                 || type.equals(TimestampDoubleMap.class)
@@ -648,7 +689,7 @@ public class AttributeUtils {
         }
         type = getStandardizedType(type);
         return type.equals(Boolean.class)
-                || type.equals(boolean[].class)
+                || type.equals(Boolean[].class)
                 || type.equals(TimestampBooleanMap.class)
                 || type.equals(IntervalBooleanMap.class);
     }
@@ -769,7 +810,7 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the time's string representation of the given timestamp. Default
+     * Returns the time's tring representation of the given timestamp. Default
      * time zone is used (UTC).
      *
      * @param timestamp time, in milliseconds
@@ -780,7 +821,7 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the representation of the given timestamp in the given format.
+     * Returns the string representation of the given timestamp in the given format.
      *
      * @param timestamp time, in milliseconds
      * @param timeFormat time format
@@ -801,7 +842,7 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the representation of the given timestamp in the given format.
+     * Returns the string representation of the given timestamp in the given format.
      * Default time zone is used (UTC).
      *
      * @param timestamp time, in milliseconds
@@ -811,7 +852,17 @@ public class AttributeUtils {
     public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat) {
         return printTimestampInFormat(timestamp, timeFormat, null);
     }
-
+    
+    /**
+     * Returns the string representation of the given array.
+     * The used format is the same format supported by {@link #parse(java.lang.String, java.lang.Class)} method
+     * @param arr Input array. Can be an array of objects or primitives.
+     * @return formatted array
+     */
+    public static String printArray(Object arr){
+        return FormattingAndParsingUtils.printArray(arr);
+    }
+    
     /**
      * Returns true if the given column is a node column.
      *
