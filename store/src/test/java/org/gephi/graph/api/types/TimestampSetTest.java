@@ -19,7 +19,6 @@ import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
 import it.unimi.dsi.fastutil.doubles.DoubleSet;
 import java.util.Random;
 import org.gephi.graph.api.AttributeUtils;
-import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.NumberGenerator;
 import org.joda.time.DateTimeZone;

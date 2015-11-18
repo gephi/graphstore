@@ -21,12 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
-import static org.gephi.graph.impl.DynamicFormattingUtils.COMMA;
-import static org.gephi.graph.impl.DynamicFormattingUtils.EMPTY_DYNAMIC_VALUE;
-import static org.gephi.graph.impl.DynamicFormattingUtils.LEFT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.impl.DynamicFormattingUtils.LEFT_BOUND_BRACKET;
-import static org.gephi.graph.impl.DynamicFormattingUtils.RIGHT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.impl.DynamicFormattingUtils.RIGHT_BOUND_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_BRACKET;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
 import org.gephi.graph.api.types.IntervalCharMap;
@@ -39,6 +38,7 @@ import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.joda.time.DateTimeZone;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
 
 /**
  * <p>
@@ -104,7 +104,7 @@ public final class IntervalsParser {
             return null;
         }
         
-        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
+        if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             return new IntervalSet();
         }
 
@@ -244,7 +244,7 @@ public final class IntervalsParser {
 
         List<IntervalWithValue<T>> intervals = new ArrayList<IntervalWithValue<T>>();
         
-        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
+        if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             return intervals;
         }
 
@@ -291,11 +291,11 @@ public final class IntervalsParser {
                     break;
                 case '"':
                 case '\'':
-                    values.add(DynamicFormattingUtils.parseLiteral(reader, c));
+                    values.add(FormattingAndParsingUtils.parseLiteral(reader, c));
                     break;
                 default:
                     reader.skip(-1);//Go backwards 1 position, for reading start of value
-                    values.add(DynamicFormattingUtils.parseValue(reader));
+                    values.add(FormattingAndParsingUtils.parseValue(reader));
             }
         }
 
@@ -309,14 +309,14 @@ public final class IntervalsParser {
             throw new IllegalArgumentException("Each interval must have 3 values");
         }
 
-        double low = DynamicFormattingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
-        double high = DynamicFormattingUtils.parseDateTimeOrTimestamp(values.get(1), timeZone);
+        double low = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
+        double high = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(1), timeZone);
 
         if (typeClass == null) {
             return new IntervalWithValue(low, high, null);
         } else {
             String valString = values.get(2);
-            Object value = DynamicFormattingUtils.convertValue(typeClass, valString);
+            Object value = FormattingAndParsingUtils.convertValue(typeClass, valString);
 
             return new IntervalWithValue(low, high, value);
         }

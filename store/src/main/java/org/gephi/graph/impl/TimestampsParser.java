@@ -19,14 +19,13 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import org.gephi.graph.api.AttributeUtils;
-import static org.gephi.graph.impl.DynamicFormattingUtils.COMMA;
-import static org.gephi.graph.impl.DynamicFormattingUtils.DYNAMIC_TYPE_LEFT_BOUND;
-import static org.gephi.graph.impl.DynamicFormattingUtils.DYNAMIC_TYPE_RIGHT_BOUND;
-import static org.gephi.graph.impl.DynamicFormattingUtils.EMPTY_DYNAMIC_VALUE;
-import static org.gephi.graph.impl.DynamicFormattingUtils.LEFT_BOUND_BRACKET;
-import static org.gephi.graph.impl.DynamicFormattingUtils.LEFT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.impl.DynamicFormattingUtils.RIGHT_BOUND_BRACKET;
-import static org.gephi.graph.impl.DynamicFormattingUtils.RIGHT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.DYNAMIC_TYPE_LEFT_BOUND;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.DYNAMIC_TYPE_RIGHT_BOUND;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_SQUARE_BRACKET;
 import org.gephi.graph.api.types.TimestampBooleanMap;
 import org.gephi.graph.api.types.TimestampByteMap;
 import org.gephi.graph.api.types.TimestampCharMap;
@@ -39,6 +38,7 @@ import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.joda.time.DateTimeZone;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
 
 /**
  * <p>
@@ -99,7 +99,7 @@ public final class TimestampsParser {
             return null;
         }
 
-        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
+        if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             return new TimestampSet();
         }
 
@@ -126,11 +126,11 @@ public final class TimestampsParser {
                         break;
                     case '"':
                     case '\'':
-                        values.add(DynamicFormattingUtils.parseLiteral(reader, c));
+                        values.add(FormattingAndParsingUtils.parseLiteral(reader, c));
                         break;
                     default:
                         reader.skip(-1);//Go backwards 1 position, for reading start of value
-                        values.add(DynamicFormattingUtils.parseValue(reader));
+                        values.add(FormattingAndParsingUtils.parseValue(reader));
                 }
             }
         } catch (IOException ex) {
@@ -140,7 +140,7 @@ public final class TimestampsParser {
         TimestampSet result = new TimestampSet(values.size());
 
         for (String value : values) {
-            result.add(DynamicFormattingUtils.parseDateTimeOrTimestamp(value, timeZone));
+            result.add(FormattingAndParsingUtils.parseDateTimeOrTimestamp(value, timeZone));
         }
 
         return result;
@@ -210,7 +210,7 @@ public final class TimestampsParser {
             throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
         }
         
-        if (input.equalsIgnoreCase(EMPTY_DYNAMIC_VALUE)) {
+        if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             return result;
         }
 
@@ -277,11 +277,11 @@ public final class TimestampsParser {
                     break;
                 case '"':
                 case '\'':
-                    values.add(DynamicFormattingUtils.parseLiteral(reader, c));
+                    values.add(FormattingAndParsingUtils.parseLiteral(reader, c));
                     break;
                 default:
                     reader.skip(-1);//Go backwards 1 position, for reading start of value
-                    values.add(DynamicFormattingUtils.parseValue(reader));
+                    values.add(FormattingAndParsingUtils.parseValue(reader));
             }
         }
 
@@ -293,10 +293,10 @@ public final class TimestampsParser {
             throw new IllegalArgumentException("Each timestamp and value array must have 2 values");
         }
 
-        double timestamp = DynamicFormattingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
+        double timestamp = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
 
         String valString = values.get(1);
-        T value = DynamicFormattingUtils.convertValue(typeClass, valString);
+        T value = FormattingAndParsingUtils.convertValue(typeClass, valString);
 
         result.put(timestamp, value);
     }

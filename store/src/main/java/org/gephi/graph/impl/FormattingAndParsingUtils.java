@@ -17,17 +17,18 @@ package org.gephi.graph.impl;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import org.gephi.graph.api.AttributeUtils;
 import org.joda.time.DateTimeZone;
 
 /**
- * Utils for parsing dynamic intervals and timestamps.
+ * Utils for formatting and parsing special data types (dynamic intervals, timestamps and arrays).
  *
  * @author Eduardo Ramos
  */
-public final class DynamicFormattingUtils {
+public final class FormattingAndParsingUtils {
 
     //Bounds
     public static final char DYNAMIC_TYPE_LEFT_BOUND = '<';
@@ -38,7 +39,7 @@ public final class DynamicFormattingUtils {
     public static final char RIGHT_BOUND_SQUARE_BRACKET = ']';
     public static final char COMMA = ',';
 
-    public static final String EMPTY_DYNAMIC_VALUE = "<empty>";
+    public static final String EMPTY_VALUE = "<empty>";
     public static final String INFINITY = "Infinity";
 
     /**
@@ -235,5 +236,73 @@ public final class DynamicFormattingUtils {
         } else {
             return s;
         }
+    }
+    
+    private static final char[] DYNAMIC_SPECIAL_CHARACTERS = " ;,()[]\"'".toCharArray();
+
+    /**
+     * @param value String value
+     * @return True if the string contains special characters for dynamic types
+     * intervals syntax
+     */
+    public static boolean containsDynamicSpecialCharacters(String value) {
+        for (char c : DYNAMIC_SPECIAL_CHARACTERS) {
+            if (value.indexOf(c) != -1) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static <T> String printArray(Object arr){
+        if(arr == null){
+            return null;
+        }
+        
+        int size = Array.getLength(arr);
+        if (size == 0) {
+            return FormattingAndParsingUtils.EMPTY_VALUE;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (int i = 0; i < size; i++) {
+            Object value = Array.get(arr, i);
+            if(value != null){
+                String stringValue = value.toString();
+                if (stringValue.equals("null") || containsArraySpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
+                    sb.append('"');
+                    sb.append(stringValue.replace("\\", "\\\\").replace("\"", "\\\""));
+                    sb.append('"');
+                } else {
+                    sb.append(stringValue);
+                }
+            } else {
+                sb.append("null");
+            }
+            
+            if (i < size - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(']');
+
+        return sb.toString();
+    }
+    
+    private static final char[] ARRAY_SPECIAL_CHARACTERS = " ,[]\"'".toCharArray();
+
+    /**
+     * @param value String value
+     * @return True if the string contains special characters for arrays
+     * intervals syntax
+     */
+    private static boolean containsArraySpecialCharacters(String value) {
+        for (char c : ARRAY_SPECIAL_CHARACTERS) {
+            if (value.indexOf(c) != -1) {
+                return true;
+            }
+        }
+        return false;
     }
 }

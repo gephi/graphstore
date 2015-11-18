@@ -23,6 +23,7 @@ import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
+import org.gephi.graph.impl.FormattingAndParsingUtils;
 import org.joda.time.DateTimeZone;
 
 /**
@@ -523,20 +524,20 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
 
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
         if (size == 0) {
-            return "<empty>";
+            return FormattingAndParsingUtils.EMPTY_VALUE;
         }
 
         T[] values = toValuesArray();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("<");
+        sb.append('<');
         for (int i = 0; i < size; i++) {
             sb.append('[');
             sb.append(AttributeUtils.printTimestampInFormat(array[i], timeFormat, timeZone));
 
             sb.append(", ");
             String stringValue = values[i].toString();
-            if (containsSpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
+            if (FormattingAndParsingUtils.containsDynamicSpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
                 sb.append('"');
                 sb.append(stringValue.replace("\\", "\\\\").replace("\"", "\\\""));
                 sb.append('"');
@@ -550,7 +551,7 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
                 sb.append("; ");
             }
         }
-        sb.append(">");
+        sb.append('>');
 
         return sb.toString();
     }
@@ -562,21 +563,5 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
     @Override
     public String toString() {
         return toString(TimeFormat.DOUBLE, null);
-    }
-
-    private static final char[] SPECIAL_CHARACTERS = ";,()[]\"'".toCharArray();
-
-    /**
-     * @param value String value
-     * @return True if the string contains special characters for dynamic
-     * intervals syntax
-     */
-    public static boolean containsSpecialCharacters(String value) {
-        for (char c : SPECIAL_CHARACTERS) {
-            if (value.indexOf(c) != -1) {
-                return true;
-            }
-        }
-        return false;
     }
 }
