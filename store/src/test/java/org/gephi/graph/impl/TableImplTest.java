@@ -154,8 +154,8 @@ public class TableImplTest {
     @Test
     public void testStandardizeArrayType() {
         TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
-        Column col = table.addColumn("Id", int[].class);
-        Assert.assertEquals(col.getTypeClass(), Integer[].class);
+        Column col = table.addColumn("Id", Integer[].class);
+        Assert.assertEquals(col.getTypeClass(), int[].class);
     }
 
     @Test

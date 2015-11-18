@@ -334,7 +334,7 @@ public class AttributeUtilsTest {
     public void testGetStandardizedType() {
         Assert.assertEquals(AttributeUtils.getStandardizedType(Integer.class), Integer.class);
         Assert.assertEquals(AttributeUtils.getStandardizedType(int.class), Integer.class);
-        Assert.assertEquals(AttributeUtils.getStandardizedType(int[].class), Integer[].class);
+        Assert.assertEquals(AttributeUtils.getStandardizedType(Integer[].class), int[].class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -345,8 +345,8 @@ public class AttributeUtilsTest {
     @Test
     public void testIsStandardizedType() {
         Assert.assertTrue(AttributeUtils.isStandardizedType(Integer.class));
-        Assert.assertFalse(AttributeUtils.isStandardizedType(int[].class));
-        Assert.assertTrue(AttributeUtils.isStandardizedType(Integer[].class));
+        Assert.assertTrue(AttributeUtils.isStandardizedType(int[].class));
+        Assert.assertFalse(AttributeUtils.isStandardizedType(Integer[].class));
         Assert.assertTrue(AttributeUtils.isStandardizedType(String.class));
     }
 
@@ -644,7 +644,7 @@ public class AttributeUtilsTest {
     public void getTypeName() {
         Assert.assertEquals(AttributeUtils.getTypeName(Integer.class), Integer.class.getSimpleName().toLowerCase());
         Assert.assertEquals(AttributeUtils.getTypeName(int.class), Integer.class.getSimpleName().toLowerCase());
-        Assert.assertEquals(AttributeUtils.getTypeName(int[].class), Integer[].class.getSimpleName().toLowerCase());
+        Assert.assertEquals(AttributeUtils.getTypeName(Integer[].class), int[].class.getSimpleName().toLowerCase());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

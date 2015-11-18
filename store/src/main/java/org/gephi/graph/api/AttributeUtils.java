@@ -168,14 +168,14 @@ public class AttributeUtils {
         typesStandardization.put(char.class, Character.class);
 
         //Array standardization
-        typesStandardization.put(boolean[].class, Boolean[].class);
-        typesStandardization.put(int[].class, Integer[].class);
-        typesStandardization.put(short[].class, Short[].class);
-        typesStandardization.put(long[].class, Long[].class);
-        typesStandardization.put(byte[].class, Byte[].class);
-        typesStandardization.put(float[].class, Float[].class);
-        typesStandardization.put(double[].class, Double[].class);
-        typesStandardization.put(char[].class, Character[].class);
+        typesStandardization.put(Boolean[].class, boolean[].class);
+        typesStandardization.put(Integer[].class, int[].class);
+        typesStandardization.put(Short[].class, short[].class);
+        typesStandardization.put(Long[].class, long[].class);
+        typesStandardization.put(Byte[].class, byte[].class);
+        typesStandardization.put(Float[].class, float[].class);
+        typesStandardization.put(Double[].class, double[].class);
+        typesStandardization.put(Character[].class, char[].class);
 
         //Assign
         TYPES_STANDARDIZATION = Collections.unmodifiableMap(typesStandardization);
@@ -334,21 +334,21 @@ public class AttributeUtils {
         
         //Array types:
         if (typeClass.equals(boolean[].class)) {
-            return ArraysParser.parseArrayPrimititveBoolean(str);
+            return ArraysParser.parseArrayAsPrimitiveArray(Boolean[].class, str);
         } else if (typeClass.equals(char[].class)) {
-            return ArraysParser.parseArrayPrimititveChar(str);
+            return ArraysParser.parseArrayAsPrimitiveArray(Character[].class, str);
         } else if (typeClass.equals(byte[].class)) {
-            return ArraysParser.parseArrayPrimititveByte(str);
+            return ArraysParser.parseArrayAsPrimitiveArray(Byte[].class, str);
         } else if (typeClass.equals(short[].class)) {
-            return ArraysParser.parseArrayPrimititveShort(str);
+            return ArraysParser.parseArrayAsPrimitiveArray(Short[].class, str);
         } else if (typeClass.equals(int[].class)) {
-            return ArraysParser.parseArrayPrimititveInt(str);
+            return ArraysParser.parseArrayAsPrimitiveArray(Integer[].class, str);
         } else if (typeClass.equals(long[].class)) {
-            return ArraysParser.parseArrayPrimititveLong(str);
+            return ArraysParser.parseArrayAsPrimitiveArray(Long[].class, str);
         } else if (typeClass.equals(float[].class)) {
-            return ArraysParser.parseArrayPrimititveFloat(str);
+            return ArraysParser.parseArrayAsPrimitiveArray(Float[].class, str);
         } else if (typeClass.equals(double[].class)) {
-            return ArraysParser.parseArrayPrimititveDouble(str);
+            return ArraysParser.parseArrayAsPrimitiveArray(Double[].class, str);
         } else if (typeClass.equals(Boolean[].class)
                 || typeClass.equals(String[].class)
                 || typeClass.equals(Character[].class)
@@ -420,6 +420,7 @@ public class AttributeUtils {
      *
      * @param array wrapped primitive array instance
      * @return primitive array instance
+     * @throws IllegalArgumentException Thrown if any of the array values is null
      */
     public static Object getPrimitiveArray(Object[] array) {
         if (!isSupported(array.getClass())) {
@@ -434,9 +435,7 @@ public class AttributeUtils {
 
             for (int i = 0; i < arrayLength; i++) {
                 Object obj = array[i];
-                if (obj != null) {
-                    Array.set(primitiveArray, i, obj);
-                }
+                Array.set(primitiveArray, i, obj);
             }
             return primitiveArray;
         }
@@ -637,12 +636,12 @@ public class AttributeUtils {
         }
         type = getStandardizedType(type);
         return Number.class.isAssignableFrom(type)
-                || Integer[].class.isAssignableFrom(type)
-                || Float[].class.isAssignableFrom(type)
-                || Double[].class.isAssignableFrom(type)
-                || Byte[].class.isAssignableFrom(type)
-                || Short[].class.isAssignableFrom(type)
-                || Long[].class.isAssignableFrom(type)
+                || int[].class.isAssignableFrom(type)
+                || float[].class.isAssignableFrom(type)
+                || double[].class.isAssignableFrom(type)
+                || byte[].class.isAssignableFrom(type)
+                || short[].class.isAssignableFrom(type)
+                || long[].class.isAssignableFrom(type)
                 || type.equals(TimestampIntegerMap.class)
                 || type.equals(TimestampFloatMap.class)
                 || type.equals(TimestampDoubleMap.class)
@@ -689,7 +688,7 @@ public class AttributeUtils {
         }
         type = getStandardizedType(type);
         return type.equals(Boolean.class)
-                || type.equals(Boolean[].class)
+                || type.equals(boolean[].class)
                 || type.equals(TimestampBooleanMap.class)
                 || type.equals(IntervalBooleanMap.class);
     }

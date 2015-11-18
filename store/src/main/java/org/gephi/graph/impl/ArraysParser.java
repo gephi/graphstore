@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import org.gephi.graph.api.AttributeUtils;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
@@ -112,104 +113,15 @@ public final class ArraysParser {
     }
     
     /**
-     * Parses an array of primitive booleans.
-     * @param input Array to parse
-     * @return
-     * @throws IllegalArgumentException 
+     * Parses an array of any primitive type.
+     * @param <T> Primitive type wrapper. For example Integer for int array or Long for long array.
+     * @param arrayTypeClass Array type to parse
+     * @param input Input string to parse
+     * @return Parsed array
+     * @throws IllegalArgumentException Parsing exception, or if any of the parsed array values is null
      */
-    public static boolean[] parseArrayPrimititveBoolean(String input) throws IllegalArgumentException {
-        Boolean[] a = parseArray(Boolean[].class, input);
-        
-        boolean[] result = new boolean[a.length];
-        
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i];
-        }
-        
-        return result;
-    }
-    
-    public static int[] parseArrayPrimititveInt(String input) throws IllegalArgumentException {
-        Integer[] a = parseArray(Integer[].class, input);
-        
-        int[] result = new int[a.length];
-        
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i];
-        }
-        
-        return result;
-    }
-    
-    public static short[] parseArrayPrimititveShort(String input) throws IllegalArgumentException {
-        Short[] a = parseArray(Short[].class, input);
-        
-        short[] result = new short[a.length];
-        
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i];
-        }
-        
-        return result;
-    }
-    
-    public static long[] parseArrayPrimititveLong(String input) throws IllegalArgumentException {
-        Long[] a = parseArray(Long[].class, input);
-        
-        long[] result = new long[a.length];
-        
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i];
-        }
-        
-        return result;
-    }
-    
-    public static byte[] parseArrayPrimititveByte(String input) throws IllegalArgumentException {
-        Byte[] a = parseArray(Byte[].class, input);
-        
-        byte[] result = new byte[a.length];
-        
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i];
-        }
-        
-        return result;
-    }
-    
-    public static float[] parseArrayPrimititveFloat(String input) throws IllegalArgumentException {
-        Float[] a = parseArray(Float[].class, input);
-        
-        float[] result = new float[a.length];
-        
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i];
-        }
-        
-        return result;
-    }
-    
-    public static double[] parseArrayPrimititveDouble(String input) throws IllegalArgumentException {
-        Double[] a = parseArray(Double[].class, input);
-        
-        double[] result = new double[a.length];
-        
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i];
-        }
-        
-        return result;
-    }
-    
-    public static char[] parseArrayPrimititveChar(String input) throws IllegalArgumentException {
-        Character[] a = parseArray(Character[].class, input);
-        
-        char[] result = new char[a.length];
-        
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i];
-        }
-        
-        return result;
+    public static <T> Object parseArrayAsPrimitiveArray(Class<T[]> arrayTypeClass, String input) throws IllegalArgumentException {
+        T[] array = parseArray(arrayTypeClass, input);
+        return AttributeUtils.getPrimitiveArray(array);
     }
 }
