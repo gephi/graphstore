@@ -48,6 +48,13 @@ public class GraphObserverImpl implements GraphObserver {
         this.graphVersion = graphVersion;
         this.graph = graph;
         this.withDiff = withDiff;
+        if (withDiff) {
+            readLock();
+            initCache();
+            readUnlock();
+        }
+        this.nodeVersion = graphVersion.nodeVersion;
+        this.edgeVersion = graphVersion.edgeVersion;
     }
 
     @Override
@@ -88,72 +95,72 @@ public class GraphObserverImpl implements GraphObserver {
         return graph;
     }
 
+    private void initCache() {
+        int maxNodeStoreId = graphStore.nodeStore.maxStoreId();
+        nodeCache = new NodeImpl[maxNodeStoreId];
+        for (Node n : graph.getNodes()) {
+            NodeImpl nImpl = (NodeImpl) n;
+            nodeCache[nImpl.storeId] = nImpl;
+        }
+        int maxEdgeStoreId = graphStore.edgeStore.maxStoreId();
+        edgeCache = new EdgeImpl[maxEdgeStoreId];
+        for (Edge e : graph.getEdges()) {
+            EdgeImpl eImpl = (EdgeImpl) e;
+            edgeCache[eImpl.storeId] = eImpl;
+        }
+    }
+
     protected void refreshDiff() {
         graphDiff = new GraphDiffImpl();
 
         if (nodeVersion < graphVersion.nodeVersion) {
             int maxStoreId = graphStore.nodeStore.maxStoreId();
-            if (nodeCache == null) {
-                nodeCache = new NodeImpl[maxStoreId];
-                for (Node n : graph.getNodes()) {
-                    NodeImpl nImpl = (NodeImpl) n;
-                    nodeCache[nImpl.storeId] = nImpl;
+
+            for (Node n : nodeCache) {
+                NodeImpl nImpl = (NodeImpl) n;
+                if (nImpl != null && !graph.contains(nImpl)) {
+                    graphDiff.removedNodes.add(nImpl);
+                }
+            }
+            if (maxStoreId > nodeCache.length || maxStoreId < nodeCache.length) {
+                NodeImpl[] newCache = new NodeImpl[maxStoreId];
+                System.arraycopy(nodeCache, 0, newCache, 0, maxStoreId > nodeCache.length ? nodeCache.length : maxStoreId);
+                nodeCache = newCache;
+            }
+            for (Node n : graph.getNodes()) {
+                NodeImpl nImpl = (NodeImpl) n;
+                int storeId = nImpl.storeId;
+                NodeImpl cachedNode = nodeCache[storeId];
+                if (cachedNode == null || cachedNode != nImpl) {
                     graphDiff.addedNodes.add(nImpl);
-                }
-            } else {
-                for (Node n : nodeCache) {
-                    NodeImpl nImpl = (NodeImpl) n;
-                    if (nImpl != null && !graph.contains(nImpl)) {
-                        graphDiff.removedNodes.add(nImpl);
-                    }
-                }
-                if (maxStoreId > nodeCache.length || maxStoreId < nodeCache.length) {
-                    NodeImpl[] newCache = new NodeImpl[maxStoreId];
-                    System.arraycopy(nodeCache, 0, newCache, 0, maxStoreId > nodeCache.length ? nodeCache.length : maxStoreId);
-                    nodeCache = newCache;
-                }
-                for (Node n : graph.getNodes()) {
-                    NodeImpl nImpl = (NodeImpl) n;
-                    int storeId = nImpl.storeId;
-                    NodeImpl cachedNode = nodeCache[storeId];
-                    if (cachedNode == null || cachedNode != nImpl) {
-                        graphDiff.addedNodes.add(nImpl);
-                        nodeCache[storeId] = nImpl;
-                    }
+                    nodeCache[storeId] = nImpl;
                 }
             }
         }
 
         if (edgeVersion < graphVersion.edgeVersion) {
             int maxStoreId = graphStore.edgeStore.maxStoreId();
-            if (edgeCache == null) {
-                edgeCache = new EdgeImpl[maxStoreId];
-                for (Edge e : graph.getEdges()) {
-                    EdgeImpl eImpl = (EdgeImpl) e;
-                    edgeCache[eImpl.storeId] = eImpl;
+
+            for (Edge e : edgeCache) {
+                EdgeImpl eImpl = (EdgeImpl) e;
+                if (eImpl != null && !graph.contains(eImpl)) {
+                    graphDiff.removedEdges.add(eImpl);
+                }
+            }
+            if (maxStoreId > edgeCache.length || maxStoreId < edgeCache.length) {
+                EdgeImpl[] newCache = new EdgeImpl[maxStoreId];
+                System.arraycopy(edgeCache, 0, newCache, 0, maxStoreId > edgeCache.length ? edgeCache.length : maxStoreId);
+                edgeCache = newCache;
+            }
+            for (Edge e : graph.getEdges()) {
+                EdgeImpl eImpl = (EdgeImpl) e;
+                int storeId = eImpl.storeId;
+                EdgeImpl cachedEdge = edgeCache[storeId];
+                if (cachedEdge == null || cachedEdge != eImpl) {
                     graphDiff.addedEdges.add(eImpl);
+                    edgeCache[storeId] = eImpl;
                 }
-            } else {
-                for (Edge e : edgeCache) {
-                    EdgeImpl eImpl = (EdgeImpl) e;
-                    if (eImpl != null && !graph.contains(eImpl)) {
-                        graphDiff.removedEdges.add(eImpl);
-                    }
-                }
-                if (maxStoreId > edgeCache.length || maxStoreId < edgeCache.length) {
-                    EdgeImpl[] newCache = new EdgeImpl[maxStoreId];
-                    System.arraycopy(edgeCache, 0, newCache, 0, maxStoreId > edgeCache.length ? edgeCache.length : maxStoreId);
-                    edgeCache = newCache;
-                }
-                for (Edge e : graph.getEdges()) {
-                    EdgeImpl eImpl = (EdgeImpl) e;
-                    int storeId = eImpl.storeId;
-                    EdgeImpl cachedEdge = edgeCache[storeId];
-                    if (cachedEdge == null || cachedEdge != eImpl) {
-                        graphDiff.addedEdges.add(eImpl);
-                        edgeCache[storeId] = eImpl;
-                    }
-                }
+
             }
         }
 

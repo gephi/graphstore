@@ -225,7 +225,7 @@ public class GraphObserverTest {
         GraphViewImpl view = viewStore.createView();
         GraphObserverImpl graphObserver = viewStore.createGraphObserver(viewStore.getDirectedGraph(view), false);
 
-        Assert.assertTrue(graphObserver.hasGraphChanged());
+        Assert.assertFalse(graphObserver.hasGraphChanged());
 
         Node n = store.factory.newNode();
         store.addNode(n);
@@ -235,17 +235,6 @@ public class GraphObserverTest {
 
         Assert.assertTrue(graphObserver.hasGraphChanged());
         Assert.assertFalse(graphObserver.hasGraphChanged());
-    }
-
-    @Test
-    public void testGetDiff() {
-        GraphStore store = new GraphStore();
-        GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
-        boolean a = graphObserver.hasGraphChanged();
-        GraphDiff diff = graphObserver.getDiff();
-
-        Assert.assertTrue(a);
-        Assert.assertNotNull(diff);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -263,9 +252,14 @@ public class GraphObserverTest {
     }
 
     @Test
-    public void testDiffInit() {
+    public void testGetDiff() {
         GraphStore store = GraphGenerator.generateSmallGraphStore();
+        Node[] nodesExpected = store.getNodes().toArray();
+        Edge[] edgesExpected = store.getEdges().toArray();
+        store.clear();
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
+        store.addAllNodes(Arrays.asList(nodesExpected));
+        store.addAllEdges(Arrays.asList(edgesExpected));
 
         boolean a = graphObserver.hasGraphChanged();
         GraphDiff diff = graphObserver.getDiff();
@@ -274,8 +268,8 @@ public class GraphObserverTest {
         Edge[] edges = diff.getAddedEdges().toArray();
 
         Assert.assertTrue(a);
-        Assert.assertTrue(Arrays.deepEquals(nodes, store.getNodes().toArray()));
-        Assert.assertTrue(Arrays.deepEquals(edges, store.getEdges().toArray()));
+        Assert.assertTrue(Arrays.deepEquals(nodes, nodesExpected));
+        Assert.assertTrue(Arrays.deepEquals(edges, edgesExpected));
         Assert.assertSame(diff.getRemovedNodes(), NodeIterable.EMPTY);
         Assert.assertSame(diff.getRemovedEdges(), EdgeIterable.EMPTY);
     }
@@ -284,7 +278,6 @@ public class GraphObserverTest {
     public void testDiffAddedNodes() {
         GraphStore store = GraphGenerator.generateSmallGraphStore();
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
-        graphObserver.hasGraphChanged();
 
         Node[] addedNodes = new Node[]{store.factory.newNode("r1"), store.factory.newNode("r2")};
         store.addAllNodes(Arrays.asList(addedNodes));
