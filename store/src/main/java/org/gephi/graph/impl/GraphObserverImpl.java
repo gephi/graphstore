@@ -38,6 +38,7 @@ public class GraphObserverImpl implements GraphObserver {
     protected int nodeVersion = Integer.MIN_VALUE;
     protected int edgeVersion = Integer.MIN_VALUE;
     protected boolean destroyed;
+    protected boolean newObserver = true;
     //Cache
     protected GraphDiffImpl graphDiff;
     protected NodeImpl[] nodeCache;
@@ -72,6 +73,7 @@ public class GraphObserverImpl implements GraphObserver {
                 }
             } finally {
                 readUnlock();
+                newObserver = false;
             }
         }
         return false;
@@ -231,6 +233,11 @@ public class GraphObserverImpl implements GraphObserver {
     @Override
     public boolean isDestroyed() {
         return destroyed;
+    }
+
+    @Override
+    public boolean isNew() {
+        return !destroyed && newObserver;
     }
 
     public synchronized void destroyObserver() {

@@ -118,6 +118,7 @@ public class GraphObserverTest {
 
         Assert.assertTrue(graphObserver.destroyed);
         Assert.assertTrue(graphObserver.isDestroyed());
+        Assert.assertFalse(graphObserver.isNew());
         Assert.assertFalse(store.observers.contains(graphObserver));
     }
 
@@ -201,7 +202,9 @@ public class GraphObserverTest {
         GraphStore store = new GraphStore();
         GraphObserverImpl graphObserver = store.createGraphObserver(store, false);
 
-        Assert.assertTrue(graphObserver.hasGraphChanged());
+        Assert.assertTrue(graphObserver.isNew());
+        Assert.assertFalse(graphObserver.hasGraphChanged());
+        Assert.assertFalse(graphObserver.isNew());
 
         store.addNode(store.factory.newNode());
         Assert.assertTrue(graphObserver.hasGraphChanged());
