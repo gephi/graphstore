@@ -59,7 +59,7 @@ public class GraphObserverImpl implements GraphObserver {
     }
 
     @Override
-    public synchronized boolean hasGraphChanged() {
+    public boolean hasGraphChanged() {
         if (!destroyed) {
             readLock();
             try {
@@ -80,7 +80,7 @@ public class GraphObserverImpl implements GraphObserver {
     }
 
     @Override
-    public synchronized GraphDiff getDiff() {
+    public GraphDiff getDiff() {
         if (!withDiff) {
             throw new RuntimeException("This observer doesn't compute diffs, set diff setting to true");
         }
@@ -240,7 +240,7 @@ public class GraphObserverImpl implements GraphObserver {
         return !destroyed && newObserver;
     }
 
-    public synchronized void destroyObserver() {
+    public void destroyObserver() {
         checkNotDestroyed();
 
         nodeCache = null;

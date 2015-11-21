@@ -35,6 +35,9 @@ package org.gephi.graph.api;
  * <p>
  * Observers should be destroyed when not needed anymore. A new observer can be
  * obtained from the <code>GraphModel</code>.
+ * <p>
+ * Note that observer instances are not thread-safe and should not be called
+ * from multiple threads simultaneously.
  *
  * @see GraphModel
  */
