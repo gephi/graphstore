@@ -150,6 +150,19 @@ public class GraphObserverTest {
         Assert.assertFalse(view.observers.contains(graphObserver));
     }
 
+    @Test
+    public void testDestroyViewObserverAlternative() {
+        GraphStore store = new GraphModelImpl().store;
+        GraphViewStore viewStore = store.viewStore;
+        GraphViewImpl view = viewStore.createView();
+        GraphObserverImpl graphObserver = viewStore.createGraphObserver(viewStore.getDirectedGraph(view), false);
+
+        graphObserver.destroy();
+
+        Assert.assertTrue(graphObserver.destroyed);
+        Assert.assertFalse(view.observers.contains(graphObserver));
+    }
+
     @Test(expectedExceptions = RuntimeException.class)
     public void testCheckDestroyOtherView() {
         GraphStore store = new GraphStore();
@@ -197,7 +210,7 @@ public class GraphObserverTest {
 
     @Test
     public void testHasGraphChangedAfterDestroy() {
-        GraphStore store = new GraphStore();
+        GraphStore store = new GraphModelImpl().store;
         GraphObserverImpl graphObserver = store.createGraphObserver(store, false);
         store.addNode(store.factory.newNode());
         graphObserver.destroy();
