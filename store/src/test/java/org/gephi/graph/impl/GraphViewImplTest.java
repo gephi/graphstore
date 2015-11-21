@@ -18,6 +18,8 @@ package org.gephi.graph.impl;
 import java.util.Arrays;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedSubgraph;
@@ -334,6 +336,30 @@ public class GraphViewImplTest {
         Assert.assertFalse(view.containsNode(n1));
         Assert.assertFalse(view.containsNode(n2));
         Assert.assertFalse(view.containsEdge(e1));
+    }
+
+    @Test
+    public void testViewNotInterEdges() {
+        GraphStore graphStore = new GraphModelImpl().store;
+        GraphFactory factory = graphStore.factory;
+        Node n1 = factory.newNode();
+        Node n2 = factory.newNode();
+        Node n3 = factory.newNode();
+        graphStore.addAllNodes(Arrays.asList(new Node[]{n1, n2, n3}));
+        Edge e1 = factory.newEdge(n1, n2, false);
+        Edge e2 = factory.newEdge(n1, n3, false);
+        graphStore.addAllEdges(Arrays.asList(new Edge[]{e1, e2}));
+
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        view.fill();
+        Graph viewGraph = store.getGraph(view);
+        viewGraph.removeNode(n3);
+
+        view.not();
+
+        Assert.assertEquals(viewGraph.getNodeCount(), 1);
+        Assert.assertEquals(viewGraph.getEdgeCount(), 0);
     }
 
     @Test

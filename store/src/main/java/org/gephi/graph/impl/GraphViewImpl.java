@@ -491,6 +491,15 @@ public class GraphViewImpl implements GraphView {
         incrementEdgeVersion();
 
         if (nodeView) {
+            for (Edge e : graphStore.edgeStore) {
+                boolean t = edgeBitVector.get(e.getStoreId());
+                if (t && (!nodeBitVector.get(e.getSource().getStoreId()) || !nodeBitVector.get(e.getTarget().getStoreId()))) {
+                    removeEdge((EdgeImpl) e);
+                }
+            }
+        }
+
+        if (nodeView) {
             IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
             if (nodeIndexStore != null) {
                 nodeIndexStore.clear(directedDecorator.view);
