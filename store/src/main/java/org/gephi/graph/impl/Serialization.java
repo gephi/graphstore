@@ -171,13 +171,14 @@ public class Serialization {
     final static int ESTIMATOR = 217;
     final static int GRAPH_ATTRIBUTES = 218;
     final static int TIMESTAMP_INDEX_STORE = 219;
-    final static int TIME_FORMAT = 220;
-    final static int TIME_STORE = 221;
-    final static int TIMESTAMP_SET = 222;
-    final static int INTERVAL_SET = 223;
-    final static int TIMESTAMP_MAP = 224;
-    final static int INTERVAL_MAP = 225;
-    final static int TIME_ZONE = 226;
+    final static int INTERVAL_INDEX_STORE = 220;
+    final static int TIME_FORMAT = 221;
+    final static int TIME_STORE = 222;
+    final static int TIMESTAMP_SET = 223;
+    final static int INTERVAL_SET = 224;
+    final static int TIMESTAMP_MAP = 225;
+    final static int INTERVAL_MAP = 226;
+    final static int TIME_ZONE = 227;
     //Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
@@ -882,6 +883,23 @@ public class Serialization {
         return timestampIndexStore;
     }
 
+    private void serializeIntervalIndexStore(final DataOutput out, final IntervalIndexStore intervalIndexStore) throws IOException {
+        serialize(out, intervalIndexStore.elementType);
+    }
+
+    private IntervalIndexStore deserializeIntervalIndexStore(final DataInput is) throws IOException, ClassNotFoundException {
+        IntervalIndexStore intervalIndexStore;
+
+        Class cls = (Class) deserialize(is);
+        if (cls.equals(Node.class)) {
+            intervalIndexStore = (IntervalIndexStore) model.store.timeStore.nodeIndexStore;
+        } else {
+            intervalIndexStore = (IntervalIndexStore) model.store.timeStore.edgeIndexStore;
+        }
+
+        return intervalIndexStore;
+    }
+
     private void serializeGraphAttributes(final DataOutput out, final GraphAttributesImpl graphAttributes) throws IOException {
         serialize(out, graphAttributes.attributes.size());
         for (Map.Entry<String, Object> entry : graphAttributes.attributes.entrySet()) {
@@ -1247,6 +1265,10 @@ public class Serialization {
             TimestampIndexStore b = (TimestampIndexStore) obj;
             out.write(TIMESTAMP_INDEX_STORE);
             serializeTimestampIndexStore(out, b);
+        } else if (obj instanceof IntervalIndexStore) {
+            IntervalIndexStore b = (IntervalIndexStore) obj;
+            out.write(INTERVAL_INDEX_STORE);
+            serializeIntervalIndexStore(out, b);
         } else if (obj instanceof GraphAttributesImpl) {
             GraphAttributesImpl b = (GraphAttributesImpl) obj;
             out.write(GRAPH_ATTRIBUTES);
@@ -1777,6 +1799,9 @@ public class Serialization {
                 break;
             case TIMESTAMP_INDEX_STORE:
                 ret = deserializeTimestampIndexStore(is);
+                break;
+            case INTERVAL_INDEX_STORE:
+                ret = deserializeIntervalIndexStore(is);
                 break;
             case GRAPH_ATTRIBUTES:
                 ret = deserializeGraphAttributes(is);
