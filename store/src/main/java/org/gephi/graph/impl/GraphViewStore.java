@@ -176,11 +176,12 @@ public class GraphViewStore {
 
     public DirectedSubgraph getDirectedGraph(GraphView view) {
         checkNonNullViewObject(view);
-        checkDirectedAllowed();
 
         if (view.isMainView()) {
             return graphStore;
         }
+
+        checkDirectedAllowed();
         return ((GraphViewImpl) view).getDirectedGraph();
     }
 
