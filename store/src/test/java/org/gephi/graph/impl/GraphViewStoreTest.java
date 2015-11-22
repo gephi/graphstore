@@ -62,11 +62,13 @@ public class GraphViewStoreTest {
         GraphViewStore store = graphStore.viewStore;
 
         GraphViewImpl view = store.createView();
+        Assert.assertFalse(view.isDestroyed());
         store.destroyView(view);
 
         Assert.assertFalse(store.contains(view));
         Assert.assertEquals(store.size(), 0);
         Assert.assertEquals(view.storeId, GraphViewStore.NULL_VIEW);
+        Assert.assertTrue(view.isDestroyed());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -215,7 +217,7 @@ public class GraphViewStoreTest {
 
             @Override
             public boolean isNodeView() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                throw new UnsupportedOperationException("Not supported yet.");
             }
 
             @Override
@@ -225,6 +227,11 @@ public class GraphViewStoreTest {
 
             @Override
             public boolean isEdgeView() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean isDestroyed() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         });

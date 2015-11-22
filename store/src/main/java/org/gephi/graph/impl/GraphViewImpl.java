@@ -592,6 +592,11 @@ public class GraphViewImpl implements GraphView {
         return interval;
     }
 
+    @Override
+    public boolean isDestroyed() {
+        return storeId == GraphViewStore.NULL_VIEW;
+    }
+
     protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
         if (observers != null) {
             GraphObserverImpl observer = new GraphObserverImpl(graphStore, version, graph, withDiff);

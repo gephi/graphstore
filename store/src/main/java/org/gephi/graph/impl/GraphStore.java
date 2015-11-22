@@ -854,6 +854,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         }
 
         @Override
+        public boolean isDestroyed() {
+            return false;
+        }
+
+        @Override
         public Interval getTimeInterval() {
             return Interval.INFINITY_INTERVAL;
         }

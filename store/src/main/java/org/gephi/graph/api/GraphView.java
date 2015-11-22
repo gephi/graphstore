@@ -81,4 +81,11 @@ public interface GraphView {
      * @return the time interval, or [-inf, +inf] if not set
      */
     public Interval getTimeInterval();
+
+    /**
+     * Returns true if this view has been destroyed.
+     *
+     * @return true if destroyed, false otherwise
+     */
+    public boolean isDestroyed();
 }
