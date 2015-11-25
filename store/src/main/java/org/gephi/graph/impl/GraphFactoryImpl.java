@@ -161,7 +161,7 @@ public class GraphFactoryImpl implements GraphFactory {
             return false;
         }
         char[] data = str.toCharArray();
-        if (data.length <= 0) {
+        if (data.length <= 0 || data.length > 9) {
             return false;
         }
         int index = 0;
