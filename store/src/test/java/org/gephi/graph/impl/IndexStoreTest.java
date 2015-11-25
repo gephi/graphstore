@@ -41,8 +41,7 @@ public class IndexStoreTest {
     public void testAddColumn() {
         ColumnStore<Node> store = generateEmptyNodeStore();
         IndexStore<Node> indexStore = store.indexStore;
-        ColumnImpl col = generateFooColumn();
-        store.addColumn(col);
+        ColumnImpl col = generateFooColumn(store);
 
         Assert.assertTrue(col.storeId != ColumnStore.NULL_ID);
         Assert.assertTrue(indexStore.hasColumn(col));
@@ -52,8 +51,7 @@ public class IndexStoreTest {
     public void testRemoveColumn() {
         ColumnStore<Node> store = generateEmptyNodeStore();
         IndexStore<Node> indexStore = store.indexStore;
-        ColumnImpl col = generateFooColumn();
-        store.addColumn(col);
+        ColumnImpl col = generateFooColumn(store);
         store.removeColumn(col);
 
         Assert.assertTrue(col.storeId == ColumnStore.NULL_ID);
@@ -498,8 +496,10 @@ public class IndexStoreTest {
         return columnStore;
     }
 
-    private ColumnImpl generateFooColumn() {
-        return new ColumnImpl("foo", String.class, "FOO", null, Origin.DATA, true, false);
+    private ColumnImpl generateFooColumn(ColumnStore store) {
+        ColumnImpl col = new ColumnImpl("foo", String.class, "FOO", null, Origin.DATA, true, false);
+        store.addColumn(col);
+        return col;
     }
 
     private Node[] getIterable(Iterable<Node> itr) {

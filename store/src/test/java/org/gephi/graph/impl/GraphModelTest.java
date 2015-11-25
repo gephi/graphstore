@@ -508,4 +508,41 @@ public class GraphModelTest {
         graphModelImpl.store.edgeTypeStore.addType("foo");
         graphModelImpl.setConfiguration(new Configuration());
     }
+
+    @Test
+    public void testNodeAttributesAddAndRemoveColumns1() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getNodeTable();
+        Column col1 = table.addColumn("foo", String.class);
+
+        Node n1 = graphModel.factory().newNode("1");
+        n1.setAttribute(col1, "bar");
+        graphModel.getStore().addNode(n1);
+
+        Index index = graphModel.getNodeIndex();
+        Assert.assertEquals(index.count(col1, "bar"), 1);
+        table.removeColumn(col1);
+        Column col2 = table.addColumn("foo2", String.class);
+
+        Assert.assertNull(n1.getAttribute(col2));
+        Assert.assertEquals(index.count(col2, "bar"), 0);
+    }
+
+    @Test
+    public void testNodeAttributesAddAndRemoveColumns2() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getNodeTable();
+        Column col1 = table.addColumn("foo", String.class);
+
+        Node n1 = graphModel.factory().newNode("1");
+        n1.setAttribute(col1, "bar");
+        graphModel.getStore().addNode(n1);
+
+        Index index = graphModel.getNodeIndex();
+        Assert.assertEquals(index.count(col1, "bar"), 1);
+        table.removeColumn(col1);
+        Column col2 = table.addColumn("foo2", String.class);
+
+        n1.setAttribute(col2, "test");
+    }
 }

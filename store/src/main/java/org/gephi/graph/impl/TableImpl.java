@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
-import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TableObserver;
@@ -31,11 +30,11 @@ public class TableImpl<T extends Element> implements Table {
     protected final ColumnStore<T> store;
 
     public TableImpl(Class<T> elementType, boolean indexed) {
-        this(new Configuration(), elementType, indexed);
+        this(null, elementType, indexed);
     }
 
-    public TableImpl(Configuration configuration, Class<T> elementType, boolean indexed) {
-        store = new ColumnStore<T>(configuration, elementType, indexed);
+    public TableImpl(GraphStore graphStore, Class<T> elementType, boolean indexed) {
+        store = new ColumnStore<T>(graphStore, elementType, indexed);
     }
 
     @Override

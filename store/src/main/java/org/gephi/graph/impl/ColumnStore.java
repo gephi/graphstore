@@ -25,10 +25,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.Node;
 
 public class ColumnStore<T extends Element> implements ColumnIterable {
 
@@ -38,6 +41,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     protected final static int NULL_ID = -1;
     protected final static short NULL_SHORT = Short.MIN_VALUE;
     //Configuration
+    protected final GraphStore graphStore;
     protected final Configuration configuration;
     //Element
     protected final Class<T> elementType;
@@ -55,14 +59,15 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     protected int length;
 
     public ColumnStore(Class<T> elementType, boolean indexed) {
-        this(new Configuration(), elementType, indexed);
+        this(null, elementType, indexed);
     }
 
-    public ColumnStore(Configuration configuration, Class<T> elementType, boolean indexed) {
+    public ColumnStore(GraphStore graphStore, Class<T> elementType, boolean indexed) {
         if (MAX_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE + 1) {
             throw new RuntimeException("Column Store size can't exceed 65534");
         }
-        this.configuration = configuration;
+        this.graphStore = graphStore;
+        this.configuration = graphStore != null ? graphStore.configuration : new Configuration();
         this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLock() : null;
         this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<String>(MAX_SIZE);
@@ -111,8 +116,23 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         checkNonNullColumnObject(column);
 
         lock();
+        graphWriteLock();
         try {
             final ColumnImpl columnImpl = (ColumnImpl) column;
+
+            // Clean attributes
+            if (graphStore != null && columnImpl.table != null) {
+                if (AttributeUtils.isNodeColumn(columnImpl)) {
+                    for (Node n : graphStore.nodeStore) {
+                        ((NodeImpl) n).attributes[columnImpl.getIndex()] = null;
+                    }
+                } else {
+                    for (Edge e : graphStore.edgeStore) {
+                        ((EdgeImpl) e).attributes[columnImpl.getIndex()] = null;
+                    }
+                }
+            }
+
             short id = idMap.removeShort(column.getId());
             if (id == NULL_SHORT) {
                 throw new IllegalArgumentException("The column doesnt exist");
@@ -126,6 +146,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
             }
             columnImpl.setStoreId(NULL_ID);
         } finally {
+            graphWriteUnlock();
             unlock();
         }
     }
@@ -311,6 +332,18 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     void unlock() {
         if (lock != null) {
             lock.unlock();
+        }
+    }
+
+    void graphWriteLock() {
+        if (graphStore != null) {
+            graphStore.autoWriteLock();
+        }
+    }
+
+    void graphWriteUnlock() {
+        if (graphStore != null) {
+            graphStore.autoWriteUnlock();
         }
     }
 

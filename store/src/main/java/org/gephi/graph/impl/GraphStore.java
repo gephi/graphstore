@@ -83,8 +83,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
         edgeStore = new EdgeStore(edgeTypeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
-        nodeTable = new TableImpl<Node>(configuration, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
-        edgeTable = new TableImpl<Edge>(configuration, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
+        nodeTable = new TableImpl<Node>(this, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
+        edgeTable = new TableImpl<Edge>(this, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
         timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
