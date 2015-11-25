@@ -139,7 +139,7 @@ public class Configuration {
      * @throws IllegalArgumentException if the type isn't supported
      */
     public void setEdgeWeightType(Class edgeWeightType) {
-        if (edgeWeightType.equals(Double.class) || edgeWeightType.equals(TimestampDoubleMap.class) || edgeWeightType.equals(IntervalDoubleMap.class)) {
+        if (Double.class.equals(edgeWeightType) || TimestampDoubleMap.class.equals(edgeWeightType) || IntervalDoubleMap.class.equals(edgeWeightType)) {
             this.edgeWeightType = edgeWeightType;
         } else {
             throw new IllegalArgumentException("Unsupported type " + edgeWeightType.getClass().getCanonicalName());
@@ -161,6 +161,9 @@ public class Configuration {
      * @param timeRepresentation time representation
      */
     public void setTimeRepresentation(TimeRepresentation timeRepresentation) {
+        if (timeRepresentation == null) {
+            throw new IllegalArgumentException("timeRepresentation cannot be null");
+        }
         this.timeRepresentation = timeRepresentation;
     }
 

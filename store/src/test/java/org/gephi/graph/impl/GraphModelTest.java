@@ -34,7 +34,9 @@ import org.testng.annotations.Test;
 import org.gephi.graph.api.TimeIndex;
 import org.joda.time.DateTimeZone;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.IntervalSet;
+import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.types.TimestampSet;
 
 public class GraphModelTest {
@@ -453,6 +455,11 @@ public class GraphModelTest {
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), IntervalSet.class);
         Assert.assertEquals(graphModelImpl.store.timeStore.nodeIndexStore.getClass(), IntervalIndexStore.class);
         Assert.assertEquals(graphModelImpl.store.timeStore.edgeIndexStore.getClass(), IntervalIndexStore.class);
+        
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getTypeClass(), Double.class);
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        graphModelImpl.setConfiguration(config);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getTypeClass(), IntervalDoubleMap.class);
     }
 
     @Test
@@ -472,6 +479,29 @@ public class GraphModelTest {
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), TimestampSet.class);
         Assert.assertEquals(graphModelImpl.store.timeStore.nodeIndexStore.getClass(), TimestampIndexStore.class);
         Assert.assertEquals(graphModelImpl.store.timeStore.edgeIndexStore.getClass(), TimestampIndexStore.class);
+        
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getTypeClass(), Double.class);
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        graphModelImpl.setConfiguration(config);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getTypeClass(), TimestampDoubleMap.class);
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testBadEdgeWeightTypeConfigurationIntervals() {
+        Configuration config = new Configuration();
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
+        config.setEdgeWeightType(TimestampDoubleMap.class);
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        graphModelImpl.setConfiguration(config);
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testBadEdgeWeightTypeConfigurationTimestamps() {
+        Configuration config = new Configuration();
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        config.setTimeRepresentation(TimeRepresentation.TIMESTAMP);
+        graphModelImpl.setConfiguration(config);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)

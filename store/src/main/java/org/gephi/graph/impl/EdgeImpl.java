@@ -17,15 +17,13 @@ package org.gephi.graph.impl;
 
 import java.awt.Color;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
-import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
-import org.gephi.graph.api.TimeRepresentation;
-import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimestampMap;
