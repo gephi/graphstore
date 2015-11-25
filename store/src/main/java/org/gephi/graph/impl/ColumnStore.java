@@ -272,6 +272,30 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     public void clear() {
         lock();
         try {
+            // Clean attributes
+            if (graphStore != null) {
+                List<Column> cols = toList();
+                int[] indices = new int[cols.size()];
+                for (int i = 0; i < indices.length; i++) {
+                    indices[i] = cols.get(i).getIndex();
+                }
+                if (graphStore.nodeTable.store == this) {
+                    for (Node n : graphStore.nodeStore) {
+                        Object[] atts = ((NodeImpl) n).attributes;
+                        for (int i = 0; i < indices.length; i++) {
+                            atts[indices[i]] = null;
+                        }
+                    }
+                } else {
+                    for (Edge e : graphStore.edgeStore) {
+                        Object[] atts = ((EdgeImpl) e).attributes;
+                        for (int i = 0; i < indices.length; i++) {
+                            atts[indices[i]] = null;
+                        }
+                    }
+                }
+            }
+
             garbageQueue.clear();
             idMap.clear();
             length = 0;

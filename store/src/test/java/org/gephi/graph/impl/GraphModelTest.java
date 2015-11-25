@@ -545,4 +545,20 @@ public class GraphModelTest {
 
         n1.setAttribute(col2, "test");
     }
+
+    @Test
+    public void testNodeAttributesAddAndClearColumns() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getNodeTable();
+        Column col1 = table.addColumn("foo", String.class);
+
+        Node n1 = graphModel.factory().newNode("1");
+        n1.setAttribute(col1, "bar");
+        graphModel.getStore().addNode(n1);
+
+        ((TableImpl) table).store.clear();
+        Column col2 = table.addColumn("foo2", String.class);
+
+        Assert.assertNull(n1.getAttribute(col2));
+    }
 }
