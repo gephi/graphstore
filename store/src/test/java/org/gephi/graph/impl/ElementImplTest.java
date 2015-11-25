@@ -549,6 +549,22 @@ public class ElementImplTest {
 
         Assert.assertNull(node.getAttribute(column));
     }
+    
+    @Test
+    public void testRemoveAttributeOnNewColumnWithoutSettingValue() {
+        GraphStore store = new GraphStore();
+        NodeImpl node = new NodeImpl("0", store);
+        store.addNode(node);
+
+        Column column = generateBasicColumn(store);
+
+        Assert.assertNull(node.getAttribute(column));
+        Assert.assertNull(node.removeAttribute(column));
+        Assert.assertNull(node.getAttribute(column));
+        
+        node.setAttribute(column, 14);
+        Assert.assertEquals(node.getAttribute(column), 14);
+    }
 
     @Test
     public void testRemoveAttributeBoolean() {

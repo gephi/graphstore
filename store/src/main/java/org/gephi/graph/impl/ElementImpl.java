@@ -205,9 +205,16 @@ public abstract class ElementImpl implements Element {
         checkReadOnlyColumn(column);
 
         int index = column.getIndex();
-        Object oldValue;
+        Object oldValue = null;
         synchronized (this) {
-            oldValue = attributes[index];
+            if (index >= attributes.length) {
+                Object[] newArray = new Object[index + 1];
+                System.arraycopy(attributes, 0, newArray, 0, attributes.length);
+                attributes = newArray;
+            } else {
+                oldValue = attributes[index];
+            }
+
             attributes[index] = null;
         }
 
