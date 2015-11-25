@@ -223,6 +223,14 @@ public class GraphFactoryTest {
     }
 
     @Test
+    public void testAutoIncrementNotInteger() {
+        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
+        graphFactory.newNode("3543543523242");
+        Assert.assertEquals(graphFactory.newNode().getId(), "0");
+    }
+
+    @Test
     public void testAutoIncrementEdgeString() {
         GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
