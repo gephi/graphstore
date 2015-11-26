@@ -118,4 +118,14 @@ public class IntervalTest {
         Interval i = new Interval(1.0, 5.0);
         i.compareTo((Double) null);
     }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testNaNLeft() {
+        new Interval(Double.NaN, 2.0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testNaNRight() {
+        new Interval(2.0, Double.NaN);
+    }
 }

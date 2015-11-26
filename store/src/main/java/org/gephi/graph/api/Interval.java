@@ -50,6 +50,9 @@ public final class Interval {
                     "The left endpoint of the interval must be less than "
                     + "the right endpoint.");
         }
+        if (Double.isNaN(low) || Double.isNaN(high)) {
+            throw new IllegalArgumentException("The interval endpoints must be different than NaN");
+        }
 
         this.low = low;
         this.high = high;
