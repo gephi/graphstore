@@ -533,4 +533,28 @@ public interface GraphModel {
      * @throws IllegalStateException if the graph model isn't empty
      */
     public void setConfiguration(Configuration configuration);
+
+    /**
+     * Returns the maximum store id number nodes have in this model.
+     * <p>
+     * Each node has a unique store identifier which can be retrieved from
+     * {@link Node#getStoreId() }. This maximum number can help design
+     * algorithms thar rely on storing nodes in a array. Note that not all
+     * consecutive ids may be assigned.
+     *
+     * @return maximum node store id
+     */
+    public int getMaxNodeStoreId();
+
+    /**
+     * Returns the maximum store id number edges have in this model.
+     * <p>
+     * Each edge has a unique store identifier which can be retrieved from
+     * {@link Edge#getStoreId() }. This maximum number can help design
+     * algorithms thar rely on storing edges in a array. Note that not all
+     * consecutive ids may be assigned.
+     *
+     * @return maximum edge store id
+     */
+    public int getMaxEdgeStoreId();
 }
