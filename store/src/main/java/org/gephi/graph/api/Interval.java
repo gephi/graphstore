@@ -96,6 +96,29 @@ public final class Interval {
     }
 
     /**
+     * Compares this interval to the given timetamp.
+     *
+     * @param timestamp
+     * @return a negative integer, zero or a positive integer if this interval
+     * is to the left of, overlaps with, or is to the right with the specified
+     * timestamp.
+     *
+     * @throws NullPointerException if {@code timestamp} is null.
+     */
+    public int compareTo(Double timestamp) {
+        if (timestamp == null) {
+            throw new NullPointerException("Timestamp cannot be null.");
+        }
+        if (timestamp < low) {
+            return 1;
+        }
+        if (timestamp > high) {
+            return -1;
+        }
+        return 0;
+    }
+
+    /**
      * Returns the left endpoint.
      *
      * @return the left endpoint.

@@ -97,9 +97,25 @@ public class IntervalTest {
         Assert.assertEquals(j.compareTo(i), 0);
     }
 
+    @Test
+    public void testCompareTimetamp() {
+        Interval i = new Interval(1.0, 10.0);
+        Assert.assertEquals(i.compareTo(1.0), 0);
+        Assert.assertEquals(i.compareTo(10.0), 0);
+        Assert.assertEquals(i.compareTo(5.0), 0);
+        Assert.assertEquals(i.compareTo(0.0), 1);
+        Assert.assertEquals(i.compareTo(11.0), -1);
+    }
+
     @Test(expectedExceptions = NullPointerException.class)
-    public void testCompareToNull() {
+    public void testCompareIntervalToNull() {
         Interval i = new Interval(1.0, 5.0);
-        i.compareTo(null);
+        i.compareTo((Interval) null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testCompareToTimestampNull() {
+        Interval i = new Interval(1.0, 5.0);
+        i.compareTo((Double) null);
     }
 }
