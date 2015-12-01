@@ -101,7 +101,7 @@ public final class Interval {
     /**
      * Compares this interval to the given timetamp.
      *
-     * @param timestamp
+     * @param timestamp timestamp
      * @return a negative integer, zero or a positive integer if this interval
      * is to the left of, overlaps with, or is to the right with the specified
      * timestamp.
