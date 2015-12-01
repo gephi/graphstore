@@ -209,7 +209,7 @@ public final class TimestampsParser {
         } else {
             throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
         }
-        
+
         if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             return result;
         }

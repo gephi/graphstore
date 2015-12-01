@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import cern.colt.bitvector.BitVector;
+import it.unimi.dsi.fastutil.doubles.Double2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import java.io.DataInput;
@@ -44,6 +45,7 @@ import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalBooleanMap;
@@ -179,6 +181,7 @@ public class Serialization {
     final static int TIMESTAMP_MAP = 225;
     final static int INTERVAL_MAP = 226;
     final static int TIME_ZONE = 227;
+    final static int INTERVAL = 228;
     //Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
@@ -850,8 +853,8 @@ public class Serialization {
         serialize(out, timestampIndexStore.elementType);
 
         serialize(out, timestampIndexStore.length);
-        serialize(out, timestampIndexStore.timestampSortedMap.keySet().toDoubleArray());
-        serialize(out, timestampIndexStore.timestampSortedMap.values().toIntArray());
+        serialize(out, timestampIndexStore.getMap().keySet().toDoubleArray());
+        serialize(out, timestampIndexStore.getMap().values().toIntArray());
         serialize(out, timestampIndexStore.garbageQueue.toIntArray());
         serialize(out, timestampIndexStore.countMap);
     }
@@ -876,8 +879,9 @@ public class Serialization {
         for (int i : garbage) {
             timestampIndexStore.garbageQueue.add(i);
         }
+        Double2IntMap m = timestampIndexStore.getMap();
         for (int i = 0; i < ints.length; i++) {
-            timestampIndexStore.timestampSortedMap.put(doubles[i], ints[i]);
+            m.put(doubles[i], ints[i]);
         }
         timestampIndexStore.countMap = counts;
         return timestampIndexStore;
@@ -885,6 +889,15 @@ public class Serialization {
 
     private void serializeIntervalIndexStore(final DataOutput out, final IntervalIndexStore intervalIndexStore) throws IOException {
         serialize(out, intervalIndexStore.elementType);
+        
+        serialize(out, intervalIndexStore.length);
+        serialize(out, intervalIndexStore.getMap().size());
+        for(Map.Entry<Interval, Integer> entry : intervalIndexStore.getMap().entrySet()) {
+            serialize(out, entry.getKey());
+            serialize(out, entry.getValue());
+        }
+        serialize(out, intervalIndexStore.garbageQueue.toIntArray());
+        serialize(out, intervalIndexStore.countMap);
     }
 
     private IntervalIndexStore deserializeIntervalIndexStore(final DataInput is) throws IOException, ClassNotFoundException {
@@ -897,6 +910,23 @@ public class Serialization {
             intervalIndexStore = (IntervalIndexStore) model.store.timeStore.edgeIndexStore;
         }
 
+        int length = (Integer) deserialize(is);
+        int mapSize = (Integer)deserialize(is);
+        
+        Interval2IntTreeMap map = intervalIndexStore.getMap();
+        for(int i=0;i<mapSize;i++) {
+            Interval key = (Interval)deserialize(is);
+            Integer value = (Integer)deserialize(is);
+            map.put(key, value);
+        }
+        int[] garbage = (int[]) deserialize(is);
+        int[] counts = (int[]) deserialize(is);
+
+        intervalIndexStore.length = length;
+        for (int i : garbage) {
+            intervalIndexStore.garbageQueue.add(i);
+        }
+        intervalIndexStore.countMap = counts;
         return intervalIndexStore;
     }
 
@@ -950,6 +980,17 @@ public class Serialization {
 
         serialize(out, timeStore.nodeIndexStore);
         serialize(out, timeStore.edgeIndexStore);
+    }
+    
+    private void serializeInterval(final DataOutput out, final Interval interval) throws IOException {
+        serialize(out, interval.getLow());
+        serialize(out, interval.getHigh());
+    }
+    
+    private Interval deserializeInterval(final DataInput is) throws IOException, ClassNotFoundException {
+        double start = (Double)deserialize(is);
+        double end = (Double)deserialize(is);
+        return new Interval(start, end);
     }
 
     private TimeStore deserializeTimeStore(final DataInput is) throws IOException, ClassNotFoundException {
@@ -1289,6 +1330,10 @@ public class Serialization {
             Configuration b = (Configuration) obj;
             out.write(CONFIGURATION);
             serializeConfiguration(out);
+        } else if (obj instanceof Interval) {
+            Interval b = (Interval)obj;
+            out.write(INTERVAL);
+            serializeInterval(out, b);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1817,6 +1862,9 @@ public class Serialization {
                 break;
             case CONFIGURATION:
                 ret = deserializeConfiguration(is);
+                break;
+            case INTERVAL:
+                ret = deserializeInterval(is);
                 break;
             case -1:
                 throw new EOFException();

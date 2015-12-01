@@ -59,7 +59,7 @@ public class TimestampIndexImplTest {
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
 
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 5.0);

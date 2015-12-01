@@ -18,45 +18,29 @@ package org.gephi.graph.impl;
 import it.unimi.dsi.fastutil.doubles.Double2IntMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntSortedMap;
 import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Interval;
-import org.gephi.graph.api.TimeIndex;
+import org.gephi.graph.api.types.TimestampMap;
+import org.gephi.graph.api.types.TimestampSet;
 
-public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
+public class TimestampIndexImpl<T extends Element> extends TimeIndexImpl<T, Double, TimestampSet, TimestampMap<?>> {
 
-    // Const
-    protected static final int NULL_INDEX = -1;
-    // Data
-    protected final GraphLock lock;
-    protected final TimestampIndexStore timestampIndexStore;
-    protected final boolean mainIndex;
-    protected TimestampIndexEntry[] timestamps;
-    protected int elementCount;
-
-    public TimestampIndexImpl(TimestampIndexStore store, boolean main) {
-        timestampIndexStore = store;
-        mainIndex = main;
-        timestamps = new TimestampIndexEntry[0];
-        lock = store.graphLock;
+    public TimestampIndexImpl(TimeIndexStore<T, Double, TimestampSet, TimestampMap<?>> store, boolean main) {
+        super(store, main);
     }
 
     @Override
     public double getMinTimestamp() {
         if (mainIndex) {
-            Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
+            Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
             if (!sortedMap.isEmpty()) {
                 return sortedMap.firstDoubleKey();
             }
         } else {
-            Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
+            Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
             if (!sortedMap.isEmpty()) {
                 ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator();
                 while (bi.hasNext()) {
@@ -64,7 +48,7 @@ public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
                     double timestamp = entry.getDoubleKey();
                     int index = entry.getIntValue();
                     if (index < timestamps.length) {
-                        TimestampIndexEntry timestampEntry = timestamps[index];
+                        TimeIndexEntry timestampEntry = timestamps[index];
                         if (timestampEntry != null) {
                             return timestamp;
                         }
@@ -78,12 +62,12 @@ public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
     @Override
     public double getMaxTimestamp() {
         if (mainIndex) {
-            Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
+            Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
             if (!sortedMap.isEmpty()) {
                 return sortedMap.lastDoubleKey();
             }
         } else {
-            Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
+            Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
             if (!sortedMap.isEmpty()) {
                 ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator(sortedMap.double2IntEntrySet().last());
                 while (bi.hasPrevious()) {
@@ -91,7 +75,7 @@ public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
                     double timestamp = entry.getDoubleKey();
                     int index = entry.getIntValue();
                     if (index < timestamps.length) {
-                        TimestampIndexEntry timestampEntry = timestamps[index];
+                        TimeIndexEntry timestampEntry = timestamps[index];
                         if (timestampEntry != null) {
                             return timestamp;
                         }
@@ -107,9 +91,9 @@ public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
         checkDouble(timestamp);
 
         readLock();
-        int index = timestampIndexStore.getTimestampIndex(timestamp);
-        if (index != NULL_INDEX) {
-            TimestampIndexEntry ts = timestamps[index];
+        Integer index = timestampIndexStore.timeSortedMap.get(timestamp);
+        if (index != null) {
+            TimeIndexEntry ts = timestamps[index];
             if (ts != null) {
                 return new ElementIterableImpl(new ElementIteratorImpl(ts.elementSet.iterator()));
             }
@@ -125,13 +109,13 @@ public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
 
         readLock();
         ObjectSet<Element> elements = new ObjectOpenHashSet<Element>();
-        Double2IntSortedMap sortedMap = timestampIndexStore.timestampSortedMap;
+        Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
         if (!sortedMap.isEmpty()) {
             for (Double2IntMap.Entry entry : sortedMap.tailMap(interval.getLow()).double2IntEntrySet()) {
                 double timestamp = entry.getDoubleKey();
                 int index = entry.getIntValue();
                 if (timestamp <= interval.getHigh()) {
-                    TimestampIndexEntry ts = timestamps[index];
+                    TimeIndexEntry ts = timestamps[index];
                     if (ts != null) {
                         elements.addAll(ts.elementSet);
                     }
@@ -145,170 +129,5 @@ public class TimestampIndexImpl<T extends Element> implements TimeIndex<T> {
         }
         readUnlock();
         return ElementIterable.EMPTY;
-    }
-
-    public boolean hasElements() {
-        return elementCount > 0;
-    }
-
-    public void clear() {
-        timestamps = new TimestampIndexEntry[0];
-        elementCount = 0;
-    }
-
-    protected void add(int timestampIndex, Element element) {
-        ensureArraySize(timestampIndex);
-        TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry == null) {
-            entry = addTimestamp(timestampIndex);
-        }
-        if (entry.add(element)) {
-            elementCount++;
-        }
-    }
-
-    protected void remove(int timestampIndex, Element element) {
-        TimestampIndexEntry entry = timestamps[timestampIndex];
-        if (entry.remove(element)) {
-            elementCount--;
-            if (entry.isEmpty()) {
-                clearEntry(timestampIndex);
-            }
-        }
-    }
-
-    protected TimestampIndexEntry addTimestamp(final int index) {
-        ensureArraySize(index);
-        TimestampIndexEntry entry = new TimestampIndexEntry();
-        timestamps[index] = entry;
-        return entry;
-    }
-
-    private void ensureArraySize(int index) {
-        if (index >= timestamps.length) {
-            TimestampIndexEntry[] newArray = new TimestampIndexEntry[index + 1];
-            System.arraycopy(timestamps, 0, newArray, 0, timestamps.length);
-            timestamps = newArray;
-        }
-    }
-
-    private void clearEntry(int index) {
-        timestamps[index] = null;
-    }
-
-    private void checkDouble(double timestamp) {
-        if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
-            throw new IllegalArgumentException("Timestamp can' be NaN or infinity");
-        }
-    }
-
-    private void readLock() {
-        if (lock != null) {
-            lock.readLock();
-        }
-    }
-
-    private void readUnlock() {
-        if (lock != null) {
-            lock.readUnlock();
-        }
-    }
-
-    private void writeLock() {
-        if (lock != null) {
-            lock.writeLock();
-        }
-    }
-
-    private void writeUnlock() {
-        if (lock != null) {
-            lock.writeUnlock();
-        }
-    }
-
-    protected static class TimestampIndexEntry {
-
-        protected final ObjectSet<Element> elementSet;
-
-        public TimestampIndexEntry() {
-            elementSet = new ObjectOpenHashSet<Element>();
-        }
-
-        public boolean add(Element element) {
-            return elementSet.add(element);
-        }
-
-        public boolean remove(Element element) {
-            return elementSet.remove(element);
-        }
-
-        public boolean isEmpty() {
-            return elementSet.isEmpty();
-        }
-    }
-
-    protected class ElementIteratorImpl implements Iterator<Element> {
-
-        private final ObjectIterator<Element> itr;
-
-        public ElementIteratorImpl(ObjectIterator<Element> itr) {
-            this.itr = itr;
-        }
-
-        @Override
-        public boolean hasNext() {
-            final boolean hasNext = itr.hasNext();
-            if (!hasNext) {
-                readUnlock();
-            }
-            return hasNext;
-        }
-
-        @Override
-        public Element next() {
-            return itr.next();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
-    }
-
-    protected class ElementIterableImpl implements ElementIterable {
-
-        protected final Iterator<Element> iterator;
-
-        public ElementIterableImpl(Iterator<Element> iterator) {
-            this.iterator = iterator;
-        }
-
-        @Override
-        public Iterator<Element> iterator() {
-            return iterator;
-        }
-
-        @Override
-        public Element[] toArray() {
-            List<Element> list = new ArrayList<Element>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list.toArray(new Element[0]);
-        }
-
-        @Override
-        public Collection<Element> toCollection() {
-            List<Element> list = new ArrayList<Element>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list;
-        }
-
-        @Override
-        public void doBreak() {
-            readUnlock();
-        }
     }
 }

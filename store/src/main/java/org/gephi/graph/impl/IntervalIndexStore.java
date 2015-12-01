@@ -16,141 +16,35 @@
 package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Element;
-import org.gephi.graph.api.Graph;
-import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
-import org.gephi.graph.api.TimeIndex;
 import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.IntervalSet;
 
-public class IntervalIndexStore<T extends Element> implements TimeIndexStore<Interval, IntervalSet, IntervalMap> {
-
-    //Lock
-    protected final GraphLock graphLock;
-    //Element
-    protected final Class<T> elementType;
+public class IntervalIndexStore<T extends Element> extends TimeIndexStore<T, Interval, IntervalSet, IntervalMap<?>> {
 
     public IntervalIndexStore(Class<T> type, GraphLock lock, boolean indexed) {
-        elementType = type;
-        graphLock = lock;
+        super(type, lock, indexed, new Interval2IntTreeMap());
+        mainIndex = indexed ? new IntervalIndexImpl(this, true) : null;
     }
 
     @Override
-    public int add(Interval interval) {
-        //TODO
-        return 0;
+    protected double getLow(Interval interval) {
+        return interval.getLow();
     }
 
     @Override
-    public int add(Interval interval, Element element) {
-        //TODO
-        return 0;
+    protected void checkK(Interval k) {
+        if (k == null) {
+            throw new NullPointerException();
+        }
     }
 
     @Override
-    public void add(IntervalSet timeSet) {
-        //TODO
+    protected TimeIndexImpl createIndex(boolean main) {
+        return new IntervalIndexImpl(this, main);
     }
-
-    @Override
-    public void add(IntervalMap timeMap) {
-        //TODO
-    }
-
-    @Override
-    public int remove(Interval interval) {
-        //TODO
-        return 0;
-    }
-
-    @Override
-    public int remove(Interval interval, Element element) {
-        //TODO
-        return 0;
-    }
-
-    @Override
-    public void remove(IntervalMap timeMap) {
-        //TODO
-    }
-
-    @Override
-    public void remove(IntervalSet timeSet) {
-        //TODO
-    }
-
-    @Override
-    public void index(Element element) {
-        //TODO
-    }
-
-    @Override
-    public void clear(Element element) {
-        //TODO
-    }
-
-    @Override
-    public boolean contains(Interval interval) {
-        //TODO
-        return false;
-    }
-
-    @Override
-    public void clear() {
-        //TODO
-    }
-
-    @Override
-    public int size() {
-        //TODO
-        return 0;
-    }
-
-    @Override
-    public TimeIndex getIndex(Graph graph) {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public void indexInView(Element element, GraphView view) {
-        //TODO
-    }
-
-    @Override
-    public void clearInView(Element element, GraphView view) {
-        //TODO
-    }
-
-    @Override
-    public void clear(GraphView view) {
-        //TODO
-    }
-
-    @Override
-    public void indexView(Graph graph) {
-        //TODO
-    }
-
-    @Override
-    public void deleteViewIndex(Graph graph) {
-        //TODO
-    }
-
-    @Override
-    public boolean hasIndex() {
-        return false;
-    }
-
-    @Override
-    public boolean deepEquals(TimeIndexStore obj) {
-        //TODO
-        return false;
-    }
-
-    @Override
-    public int deepHashCode() {
-        //TODO
-        return 0;
+    
+    protected Interval2IntTreeMap getMap() {
+        return (Interval2IntTreeMap)timeSortedMap;
     }
 }

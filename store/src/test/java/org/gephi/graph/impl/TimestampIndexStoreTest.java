@@ -44,7 +44,7 @@ public class TimestampIndexStoreTest {
         Assert.assertEquals(a, 0);
         Assert.assertTrue(store.contains(1.0));
         Assert.assertEquals(store.size(), 1);
-        Assert.assertEquals(store.getTimestampIndex(1.0), 0);
+        Assert.assertEquals(store.getMap().get(1.0), 0);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class TimestampIndexStoreTest {
         Assert.assertEquals(a, b);
         Assert.assertTrue(store.contains(1.0));
         Assert.assertEquals(store.size(), 1);
-        Assert.assertEquals(store.getTimestampIndex(1.0), 0);
+        Assert.assertEquals(store.getMap().get(1.0), 0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -478,7 +478,7 @@ public class TimestampIndexStoreTest {
 
         GraphView view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
         Assert.assertSame(store.getIndex(graph), index);
         Assert.assertFalse(index.hasElements());
     }
@@ -512,7 +512,7 @@ public class TimestampIndexStoreTest {
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
         Assert.assertTrue(index.hasElements());
     }
 
@@ -529,7 +529,7 @@ public class TimestampIndexStoreTest {
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
         store.deleteViewIndex(graph);
         Assert.assertFalse(index.hasElements());
         Assert.assertFalse(store.viewIndexes.containsKey(view));
@@ -547,7 +547,7 @@ public class TimestampIndexStoreTest {
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
 
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
         graph.addNode(n1);
 
         Assert.assertTrue(index.hasElements());
@@ -566,7 +566,7 @@ public class TimestampIndexStoreTest {
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
         store.clear();
         Assert.assertFalse(index.hasElements());
     }
@@ -583,7 +583,7 @@ public class TimestampIndexStoreTest {
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
         n1.removeTimestamp(1.0);
         Assert.assertFalse(index.hasElements());
     }
@@ -600,7 +600,7 @@ public class TimestampIndexStoreTest {
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
         n1.clearAttributes();
         Assert.assertFalse(index.hasElements());
     }
@@ -617,7 +617,7 @@ public class TimestampIndexStoreTest {
         GraphViewImpl view = graphStore.viewStore.createView();
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
-        TimestampIndexImpl index = store.createViewIndex(graph);
+        TimeIndexImpl index = store.createViewIndex(graph);
         view.clear();
         Assert.assertFalse(index.hasElements());
     }
