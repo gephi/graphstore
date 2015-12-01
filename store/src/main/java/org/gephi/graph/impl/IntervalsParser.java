@@ -103,7 +103,7 @@ public final class IntervalsParser {
         if (input == null) {
             return null;
         }
-        
+
         if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             return new IntervalSet();
         }
@@ -161,7 +161,7 @@ public final class IntervalsParser {
         if (input == null) {
             return null;
         }
-        
+
         List<IntervalWithValue<T>> intervals;
         try {
             intervals = parseIntervals(typeClass, input, timeZone);
@@ -243,7 +243,7 @@ public final class IntervalsParser {
         input = input.trim();
 
         List<IntervalWithValue<T>> intervals = new ArrayList<IntervalWithValue<T>>();
-        
+
         if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             return intervals;
         }

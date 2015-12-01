@@ -31,10 +31,10 @@ import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
  * <p>
  * Class for parsing array types.
  * </p>
- * 
+ *
  * <p>
  * The format for all arrays is like {@code [value1, value2, value3]}
- * 
+ *
  * </p>
  *
  * @author Eduardo Ramos
@@ -43,6 +43,7 @@ public final class ArraysParser {
 
     /**
      * Parses an array of any non-primitive type.
+     *
      * @param <T> Non primitive type
      * @param arrayTypeClass Array type to parse
      * @param input Input string to parse
@@ -53,10 +54,10 @@ public final class ArraysParser {
         if (input == null) {
             return null;
         }
-        
+
         @SuppressWarnings("unchecked")
         Class<T> componentType = (Class<T>) arrayTypeClass.getComponentType();
-        
+
         if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             @SuppressWarnings("unchecked")
             T[] result = (T[]) Array.newInstance(componentType, 0);
@@ -89,7 +90,7 @@ public final class ArraysParser {
                     default:
                         reader.skip(-1);//Go backwards 1 position, for reading start of value
                         String value = FormattingAndParsingUtils.parseValue(reader);
-                        if(value.equals("null")){
+                        if (value.equals("null")) {
                             value = null;//Special null value only when not in literal parsing mode
                         }
                         values.add(value);
@@ -102,23 +103,26 @@ public final class ArraysParser {
         @SuppressWarnings("unchecked")
         T[] result = (T[]) Array.newInstance(componentType, values.size());
         for (int i = 0; i < values.size(); i++) {
-            if(values.get(i) != null){
+            if (values.get(i) != null) {
                 result[i] = FormattingAndParsingUtils.convertValue(componentType, values.get(i));
             } else {
                 result[i] = null;
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * Parses an array of any primitive type.
-     * @param <T> Primitive type wrapper. For example Integer for int array or Long for long array.
+     *
+     * @param <T> Primitive type wrapper. For example Integer for int array or
+     * Long for long array.
      * @param arrayTypeClass Array type to parse
      * @param input Input string to parse
      * @return Parsed array
-     * @throws IllegalArgumentException Parsing exception, or if any of the parsed array values is null
+     * @throws IllegalArgumentException Parsing exception, or if any of the
+     * parsed array values is null
      */
     public static <T> Object parseArrayAsPrimitiveArray(Class<T[]> arrayTypeClass, String input) throws IllegalArgumentException {
         T[] array = parseArray(arrayTypeClass, input);

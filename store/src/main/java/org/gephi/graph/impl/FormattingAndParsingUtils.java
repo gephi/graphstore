@@ -24,7 +24,8 @@ import org.gephi.graph.api.AttributeUtils;
 import org.joda.time.DateTimeZone;
 
 /**
- * Utils for formatting and parsing special data types (dynamic intervals, timestamps and arrays).
+ * Utils for formatting and parsing special data types (dynamic intervals,
+ * timestamps and arrays).
  *
  * @author Eduardo Ramos
  */
@@ -237,7 +238,7 @@ public final class FormattingAndParsingUtils {
             return s;
         }
     }
-    
+
     private static final char[] DYNAMIC_SPECIAL_CHARACTERS = " ;,()[]\"'".toCharArray();
 
     /**
@@ -253,12 +254,12 @@ public final class FormattingAndParsingUtils {
         }
         return false;
     }
-    
-    public static <T> String printArray(Object arr){
-        if(arr == null){
+
+    public static <T> String printArray(Object arr) {
+        if (arr == null) {
             return null;
         }
-        
+
         int size = Array.getLength(arr);
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
@@ -268,7 +269,7 @@ public final class FormattingAndParsingUtils {
         sb.append('[');
         for (int i = 0; i < size; i++) {
             Object value = Array.get(arr, i);
-            if(value != null){
+            if (value != null) {
                 String stringValue = value.toString();
                 if (stringValue.equals("null") || containsArraySpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
                     sb.append('"');
@@ -280,7 +281,7 @@ public final class FormattingAndParsingUtils {
             } else {
                 sb.append("null");
             }
-            
+
             if (i < size - 1) {
                 sb.append(", ");
             }
@@ -289,7 +290,7 @@ public final class FormattingAndParsingUtils {
 
         return sb.toString();
     }
-    
+
     private static final char[] ARRAY_SPECIAL_CHARACTERS = " ,[]\"'".toCharArray();
 
     /**
