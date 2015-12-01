@@ -83,6 +83,28 @@ public class IntervalTreeMapTest {
     }
 
     @Test
+    public void testRemoveMultiple() {
+        Set<Interval> intervals = new HashSet(Arrays.asList(new Interval[]{
+            new Interval(1.0, 2.0),
+            new Interval(1.0, 4.0),
+            new Interval(0.0, 7.0),
+            new Interval(1.0, 3.0)
+        }));
+
+        Interval2IntTreeMap m = new Interval2IntTreeMap();
+        for (Interval i : intervals) {
+            m.put(i, 42);
+        }
+
+        Interval in = new Interval(1.0, 2.0);
+        Assert.assertEquals(m.remove(in).intValue(), 42);
+        intervals.remove(in);
+        for (Interval i : intervals) {
+            Assert.assertNotNull(m.get(i));
+        }
+    }
+
+    @Test
     public void tetRemoveTwice() {
         Interval2IntTreeMap m = new Interval2IntTreeMap();
         m.put(new Interval(1.0, 8.0), 42);
@@ -149,7 +171,7 @@ public class IntervalTreeMapTest {
 
     @Test
     public void testRandomTest() {
-        Random random = new Random(33l);
+        Random random = new Random(303l);
         final int min = 5;
         final int max = 200;
         for (int i = 0; i < 100; i++) {
@@ -192,7 +214,7 @@ public class IntervalTreeMapTest {
             for (Interval interval : intervalsNotInSet) {
                 Assert.assertFalse(map.containsKey(interval));
             }
-            for(Interval interval : intervals) {
+            for (Interval interval : intervals) {
                 Assert.assertNotNull(map.remove(interval));
             }
             Assert.assertEquals(map.size(), 0);

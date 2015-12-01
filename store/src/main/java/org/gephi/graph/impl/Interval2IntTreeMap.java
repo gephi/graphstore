@@ -190,12 +190,6 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
 
     private void delete(Node z) {
         z.max = Double.NEGATIVE_INFINITY;
-        for (Node i = z.p; i != root; i = i.p) {
-            i.max = Math.max(i.left.max, i.right.max);
-            if (i.p == root) {
-                root.max = i.max;
-            }
-        }
 
         Node y;
         Node x;
@@ -235,6 +229,14 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
             }
         } else if (y.color == BLACK) {
             deleteFixup(x);
+        }
+
+        computeMax(y);
+        for (Node i = y.p; i != root; i = i.p) {
+            computeMax(i);
+            if (i.p == root) {
+                root.max = i.max;
+            }
         }
         size--;
     }
