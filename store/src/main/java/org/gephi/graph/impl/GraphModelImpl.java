@@ -154,7 +154,7 @@ public class GraphModelImpl implements GraphModel {
     }
 
     @Override
-    public Object getEdgeLabel(int id) {
+    public Object getEdgeTypeLabel(int id) {
         store.autoReadLock();
         try {
             return store.edgeTypeStore.getLabel(id);

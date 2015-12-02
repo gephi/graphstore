@@ -269,7 +269,7 @@ public interface GraphModel {
      * @param id edge type
      * @return edge label
      */
-    public Object getEdgeLabel(int id);
+    public Object getEdgeTypeLabel(int id);
 
     /**
      * Returns the number of different edge types.

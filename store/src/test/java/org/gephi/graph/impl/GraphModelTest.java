@@ -97,7 +97,7 @@ public class GraphModelTest {
     public void testAddEdgeType() {
         GraphModelImpl graphModel = new GraphModelImpl();
         int typeId = graphModel.addEdgeType("foo");
-        Assert.assertEquals(graphModel.getEdgeLabel(typeId), "foo");
+        Assert.assertEquals(graphModel.getEdgeTypeLabel(typeId), "foo");
         Assert.assertEquals(graphModel.getEdgeType("foo"), typeId);
     }
 
