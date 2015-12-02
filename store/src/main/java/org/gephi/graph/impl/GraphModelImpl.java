@@ -164,6 +164,36 @@ public class GraphModelImpl implements GraphModel {
     }
 
     @Override
+    public int getEdgeTypeCount() {
+        store.autoReadLock();
+        try {
+            return store.edgeTypeStore.size();
+        } finally {
+            store.autoReadUnlock();
+        }
+    }
+
+    @Override
+    public Object[] getEdgeTypeLabels() {
+        store.autoReadLock();
+        try {
+            return store.edgeTypeStore.getLabels();
+        } finally {
+            store.autoReadUnlock();
+        }
+    }
+
+    @Override
+    public int[] getEdgeTypes() {
+        store.autoReadLock();
+        try {
+            return store.edgeTypeStore.getIdsAsInts();
+        } finally {
+            store.autoReadUnlock();
+        }
+    }
+
+    @Override
     public boolean isMultiGraph() {
         store.autoReadLock();
         try {

@@ -119,6 +119,22 @@ public class EdgeTypeStoreTest {
         Assert.assertEquals(edgeTypeStore.getLabel(type), "0");
     }
 
+    @Test
+    public void testGetTypes() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        int type = edgeTypeStore.addType("0");
+
+        Assert.assertEquals(edgeTypeStore.getIdsAsInts(), new int[]{EdgeTypeStore.NULL_LABEL, type});
+    }
+
+    @Test
+    public void testGetLabels() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        edgeTypeStore.addType("0");
+
+        Assert.assertEquals(edgeTypeStore.getLabels(), new Object[]{null, "0"});
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInvalidId() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();

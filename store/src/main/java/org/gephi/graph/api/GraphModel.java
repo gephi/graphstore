@@ -272,6 +272,27 @@ public interface GraphModel {
     public Object getEdgeLabel(int id);
 
     /**
+     * Returns the number of different edge types.
+     *
+     * @return edge type count
+     */
+    public int getEdgeTypeCount();
+
+    /**
+     * Returns the edge types.
+     *
+     * @return edge types
+     */
+    public int[] getEdgeTypes();
+
+    /**
+     * Returns the edge type labels.
+     *
+     * @return edge type labels
+     */
+    public Object[] getEdgeTypeLabels();
+
+    /**
      * Returns true if the graph is directed.
      *
      * @return true if directed, false otherwise

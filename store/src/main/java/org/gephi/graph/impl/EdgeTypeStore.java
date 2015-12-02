@@ -153,12 +153,21 @@ public class EdgeTypeStore {
         return label;
     }
 
-    protected Object[] getLabels() {
+    public Object[] getLabels() {
         return labelMap.keySet().toArray();
     }
 
     protected short[] getIds() {
         return labelMap.values().toShortArray();
+    }
+
+    public int[] getIdsAsInts() {
+        short[] s = getIds();
+        int[] res = new int[s.length];
+        for (int i = 0; i < s.length; i++) {
+            res[i] = shortToInt(s[i]);
+        }
+        return res;
     }
 
     protected short[] getGarbage() {
