@@ -65,7 +65,7 @@ public class TableObserverTest {
         TableImpl table = new TableImpl(Node.class, false);
         Column col = table.addColumn("0", TimestampIntegerMap.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
-        col.setEstimator(Estimator.SUM);
+        col.setEstimator(Estimator.MAX);
 
         Assert.assertTrue(tableObserver.hasTableChanged());
         Assert.assertFalse(tableObserver.hasTableChanged());

@@ -18,6 +18,7 @@ package org.gephi.graph.api.types;
 import java.lang.reflect.Array;
 import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
@@ -573,7 +574,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
             w = w.multiply(new BigDecimal(((Number) getValue(intervals[i])).doubleValue()));
             result = result.add(w);
         }
-        return result.divide(period);
+        return result.divide(period, 10, RoundingMode.HALF_EVEN);
     }
 
     protected Double getAverageDouble(final Interval interval) {

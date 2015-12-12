@@ -164,7 +164,7 @@ public final class TimestampCharMap extends TimestampMap<Character> {
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST);
+        return estimator.is(Estimator.FIRST, Estimator.LAST);
     }
 
     @Override

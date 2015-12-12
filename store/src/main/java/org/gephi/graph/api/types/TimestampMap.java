@@ -137,8 +137,6 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         switch (estimator) {
             case AVERAGE:
                 return getAverage(interval);
-            case SUM:
-                return getSum(interval);
             case MIN:
                 return getMin(interval);
             case MAX:
@@ -244,6 +242,23 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         return Arrays.binarySearch(array, 0, size, timestamp);
     }
 
+    protected int[] getOverlappingTimestamps(double intervalStart, double intervalEnd) {
+        int index = Arrays.binarySearch(array, 0, size, intervalStart);
+        index = index >= 0 ? index : (-index - 1);
+        if (index < size) {
+            int[] res = new int[size - index];
+            int i = 0;
+            for (; index < size && array[index] <= intervalEnd; index++) {
+                res[i++] = index;
+            }
+            if (res.length != i) {
+                return Arrays.copyOf(res, i);
+            }
+            return res;
+        }
+        return new int[0];
+    }
+
     @Override
     public boolean contains(Double timestamp) {
         return getIndex(timestamp) >= 0;
@@ -328,34 +343,22 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         if (size == 0) {
             return null;
         }
-        double lowBound = interval.getLow();
-        int index = Arrays.binarySearch(array, lowBound);
-        if (index >= 0) {
-            return getValue(index);
-        } else {
-            index = -index - 1;
-            if (index < size && array[index] <= interval.getHigh()) {
-                return getValue(index);
-            }
+        int[] timestamps = getOverlappingTimestamps(interval.getLow(), interval.getHigh());
+        if (timestamps.length == 0) {
+            return null;
         }
-        return null;
+        return getValue(timestamps[0]);
     }
 
     protected Object getLast(final Interval interval) {
         if (size == 0) {
             return null;
         }
-        double highBound = interval.getHigh();
-        int index = Arrays.binarySearch(array, highBound);
-        if (index >= 0) {
-            return getValue(index);
-        } else {
-            index = -index - 1;
-            if (index < size && array[index] >= interval.getLow()) {
-                return getValue(index);
-            }
+        int[] timestamps = getOverlappingTimestamps(interval.getLow(), interval.getHigh());
+        if (timestamps.length == 0) {
+            return null;
         }
-        return null;
+        return getValue(timestamps[timestamps.length - 1]);
     }
 
     protected Object getMin(final Interval interval) {
@@ -367,22 +370,14 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         if (size == 0) {
             return null;
         }
-        double lowBound = interval.getLow();
-        double highBound = interval.getHigh();
-        int index = Arrays.binarySearch(array, lowBound);
-        if (index < 0) {
-            index = -index - 1;
-        }
-
-        double min = Double.POSITIVE_INFINITY;
-        boolean found = false;
-        for (int i = index; i < size && array[i] <= highBound; i++) {
-            double val = ((Number) getValue(i)).doubleValue();
-            min = (double) Math.min(min, val);
-            found = true;
-        }
-        if (!found) {
+        int[] timestamps = getOverlappingTimestamps(interval.getLow(), interval.getHigh());
+        if (timestamps.length == 0) {
             return null;
+        }
+        double min = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < timestamps.length; i++) {
+            double val = ((Number) getValue(timestamps[i])).doubleValue();
+            min = Math.min(val, min);
         }
         return min;
     }
@@ -396,22 +391,14 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         if (size == 0) {
             return null;
         }
-        double lowBound = interval.getLow();
-        double highBound = interval.getHigh();
-        int index = Arrays.binarySearch(array, lowBound);
-        if (index < 0) {
-            index = -index - 1;
-        }
-
-        double max = Double.NEGATIVE_INFINITY;
-        boolean found = false;
-        for (int i = index; i < size && array[i] <= highBound; i++) {
-            double val = ((Number) getValue(i)).doubleValue();
-            max = (double) Math.max(max, val);
-            found = true;
-        }
-        if (!found) {
+        int[] timestamps = getOverlappingTimestamps(interval.getLow(), interval.getHigh());
+        if (timestamps.length == 0) {
             return null;
+        }
+        double max = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < timestamps.length; i++) {
+            double val = ((Number) getValue(timestamps[i])).doubleValue();
+            max = Math.max(val, max);
         }
         return max;
     }
@@ -425,101 +412,45 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         if (size == 0) {
             return null;
         }
-        double lowBound = interval.getLow();
-        double highBound = interval.getHigh();
-        int index = Arrays.binarySearch(array, lowBound);
-        if (index < 0) {
-            index = -index - 1;
-        }
-
-        BigDecimal total = new BigDecimal(0);
-        int count = 0;
-        for (int i = index; i < size && array[i] <= highBound; i++) {
-            double val = ((Number) getValue(i)).doubleValue();
-            total = total.add(BigDecimal.valueOf(val));
-            count++;
-        }
-        if (count == 0) {
+        int[] timestamps = getOverlappingTimestamps(interval.getLow(), interval.getHigh());
+        if (timestamps.length == 0) {
             return null;
+        } else if (timestamps.length == 1) {
+            return new BigDecimal(((Number) getValue(timestamps[0])).doubleValue());
         }
-        return total.divide(BigDecimal.valueOf(count), 10, RoundingMode.HALF_EVEN);
-    }
-
-    protected Object getSum(final Interval interval) {
-        BigDecimal sum = getSumBigDecimal(interval);
-        return sum != null ? sum.doubleValue() : null;
-    }
-
-    protected BigDecimal getSumBigDecimal(final Interval interval) {
-        if (size == 0) {
-            return null;
+        BigDecimal result = new BigDecimal(0.0);
+        BigDecimal period = new BigDecimal(0.0);
+        BigDecimal two = new BigDecimal(2.0);
+        for (int i = 1; i < timestamps.length; i++) {
+            BigDecimal p = new BigDecimal(array[timestamps[i]] - array[timestamps[i - 1]]);
+            period = period.add(p);
+            BigDecimal lowVal = new BigDecimal(((Number) getValue(timestamps[i - 1])).doubleValue());
+            BigDecimal highVal = new BigDecimal(((Number) getValue(timestamps[i])).doubleValue());
+            result = result.add(lowVal.add(highVal).divide(two).multiply(p));
         }
-        double lowBound = interval.getLow();
-        double highBound = interval.getHigh();
-        int index = Arrays.binarySearch(array, lowBound);
-        if (index < 0) {
-            index = -index - 1;
-        }
-
-        BigDecimal total = new BigDecimal(0);
-        int count = 0;
-        for (int i = index; i < size && array[i] <= highBound; i++) {
-            double val = ((Number) getValue(i)).doubleValue();
-            total = total.add(BigDecimal.valueOf(val));
-            count++;
-        }
-        if (count == 0) {
-            return null;
-        }
-        return total;
+        return result.divide(period, 10, RoundingMode.HALF_EVEN);
     }
 
     protected Double getAverageDouble(final Interval interval) {
         if (size == 0) {
             return null;
         }
-        double lowBound = interval.getLow();
-        double highBound = interval.getHigh();
-        int index = Arrays.binarySearch(array, lowBound);
-        if (index < 0) {
-            index = -index - 1;
-        }
-
-        double total = 0.0;
-        int count = 0;
-        for (int i = index; i < size && array[i] <= highBound; i++) {
-            double val = ((Number) getValue(i)).doubleValue();
-            total += val;
-            count++;
-        }
-        if (count == 0) {
+        int[] timestamps = getOverlappingTimestamps(interval.getLow(), interval.getHigh());
+        if (timestamps.length == 0) {
             return null;
+        } else if (timestamps.length == 1) {
+            return ((Number) getValue(timestamps[0])).doubleValue();
         }
-        return total / count;
-    }
-
-    protected Double getSumDouble(final Interval interval) {
-        if (size == 0) {
-            return null;
+        double result = 0.0;
+        double period = 0.0;
+        for (int i = 1; i < timestamps.length; i++) {
+            double p = array[timestamps[i]] - array[timestamps[i - 1]];
+            period += p;
+            double lowVal = ((Number) getValue(timestamps[i - 1])).doubleValue();
+            double highVal = ((Number) getValue(timestamps[i])).doubleValue();
+            result += p * (lowVal + highVal) / 2.0;
         }
-        double lowBound = interval.getLow();
-        double highBound = interval.getHigh();
-        int index = Arrays.binarySearch(array, lowBound);
-        if (index < 0) {
-            index = -index - 1;
-        }
-
-        double total = 0.0;
-        int count = 0;
-        for (int i = index; i < size && array[i] <= highBound; i++) {
-            double val = ((Number) getValue(i)).doubleValue();
-            total += val;
-            count++;
-        }
-        if (count == 0) {
-            return null;
-        }
-        return total;
+        return result / period;
     }
 
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {

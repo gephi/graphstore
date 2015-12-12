@@ -102,12 +102,6 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
     }
 
     @Override
-    protected Object getSum(Interval interval) {
-        BigDecimal sum = getSumBigDecimal(interval);
-        return sum != null ? sum.floatValue() : null;
-    }
-
-    @Override
     protected Object getMax(Interval interval) {
         Double max = getMaxDouble(interval);
         return max != null ? max.floatValue() : null;
@@ -138,7 +132,7 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE, Estimator.SUM);
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE);
     }
 
     @Override

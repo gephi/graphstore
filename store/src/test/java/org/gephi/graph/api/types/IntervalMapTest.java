@@ -236,27 +236,6 @@ public class IntervalMapTest {
     }
 
     @Test
-    public void testGetTimestamps() {
-//        TimestampDoubleMap set = new TimestampDoubleMap();
-//
-//        set.put(1.0, 1.0);
-//        set.put(2.0, 2.0);
-//
-//        testDoubleArrayEquals(new double[]{1.0, 2.0}, set.getTimestamps());
-    }
-
-    @Test
-    public void testGetTimestampsTrim() {
-//        TimestampDoubleMap set = new TimestampDoubleMap();
-//
-//        set.put(1.0, 1.0);
-//        set.put(2.0, 2.0);
-//        set.remove(2.0);
-//
-//        testDoubleArrayEquals(new double[]{1.0}, set.getTimestamps());
-    }
-
-    @Test
     public void testIsSupported() {
         for (IntervalMap set : getAllInstances()) {
             Assert.assertTrue(set.isSupported(Estimator.FIRST));

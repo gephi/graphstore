@@ -96,8 +96,8 @@ public class ColumnImplTest {
     @Test
     public void testColumnSetEstimator() {
         ColumnImpl col = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
-        col.setEstimator(Estimator.SUM);
-        Assert.assertEquals(col.getEstimator(), Estimator.SUM);
+        col.setEstimator(Estimator.MIN);
+        Assert.assertEquals(col.getEstimator(), Estimator.MIN);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ColumnImplTest {
         ColumnImpl col1 = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
         ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col1.deepEquals(col2));
-        col2.setEstimator(Estimator.SUM);
+        col2.setEstimator(Estimator.MIN);
         Assert.assertFalse(col1.deepEquals(col2));
     }
 
@@ -136,7 +136,7 @@ public class ColumnImplTest {
         ColumnImpl col1 = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
         ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
         Assert.assertEquals(col1.deepHashCode(), col2.deepHashCode());
-        col2.setEstimator(Estimator.SUM);
+        col2.setEstimator(Estimator.MIN);
         Assert.assertNotEquals(col1.deepHashCode(), col2.deepHashCode());
     }
 }

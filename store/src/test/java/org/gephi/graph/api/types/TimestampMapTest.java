@@ -197,10 +197,42 @@ public class TimestampMapTest {
     }
 
     @Test
+    public void testGetOverlappingTimestamps() {
+        TimestampIntegerMap i = new TimestampIntegerMap();
+        i.put(2001.0, 42);
+
+        Assert.assertEquals(i.getOverlappingTimestamps(2001, 2002), new int[]{0});
+        Assert.assertEquals(i.getOverlappingTimestamps(2000, 2001), new int[]{0});
+        Assert.assertEquals(i.getOverlappingTimestamps(2000, Double.POSITIVE_INFINITY), new int[]{0});
+
+        TimestampIntegerMap j = new TimestampIntegerMap();
+        j.put(2001.0, 42);
+        j.put(2002.0, 42);
+        j.put(2004.0, 42);
+        j.put(2005.0, 42);
+
+        Assert.assertEquals(j.getOverlappingTimestamps(1998, 1999), new int[]{});
+        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2001), new int[]{0});
+        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2001.5), new int[]{0});
+        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2002), new int[]{0, 1});
+        Assert.assertEquals(j.getOverlappingTimestamps(2001, 2001), new int[]{0});
+        Assert.assertEquals(j.getOverlappingTimestamps(2001, 2002), new int[]{0, 1});
+        Assert.assertEquals(j.getOverlappingTimestamps(2003, 2005), new int[]{2, 3});
+        Assert.assertEquals(j.getOverlappingTimestamps(2005, 2005), new int[]{3});
+        Assert.assertEquals(j.getOverlappingTimestamps(2005, 2016), new int[]{3});
+        Assert.assertEquals(j.getOverlappingTimestamps(2006, 2007), new int[]{});
+    }
+
+    @Test
     public void testIsSupported() {
         for (TimestampMap set : getAllInstances()) {
             Assert.assertTrue(set.isSupported(Estimator.FIRST));
             Assert.assertTrue(set.isSupported(Estimator.LAST));
+            if (Number.class.isAssignableFrom(set.getTypeClass())) {
+                Assert.assertTrue(set.isSupported(Estimator.MAX));
+                Assert.assertTrue(set.isSupported(Estimator.MIN));
+                Assert.assertTrue(set.isSupported(Estimator.AVERAGE));
+            }
         }
     }
 
@@ -211,6 +243,25 @@ public class TimestampMapTest {
                 if (set.isSupported(e)) {
                     Assert.assertNull(set.get(new Interval(1.0, 2.0), e));
                 }
+            }
+        }
+    }
+
+    @Test
+    public void testEstimatorNull() {
+        for (TimestampMap set : getAllInstances()) {
+            set.put(2.0, getDefaultValue(set));
+
+            Assert.assertNull(set.getFirst(new Interval(6.0, 7.0)));
+            Assert.assertNull(set.getLast(new Interval(6.0, 7.0)));
+            if (set.isSupported(Estimator.MIN)) {
+                Assert.assertNull(set.getMin(new Interval(6.0, 7.0)));
+            }
+            if (set.isSupported(Estimator.MAX)) {
+                Assert.assertNull(set.getMax(new Interval(6.0, 7.0)));
+            }
+            if (set.isSupported(Estimator.AVERAGE)) {
+                Assert.assertNull(set.getAverage(new Interval(6.0, 7.0)));
             }
         }
     }
@@ -275,11 +326,8 @@ public class TimestampMapTest {
 
         Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
-        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-
-        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-        Assert.assertTrue(sum instanceof Integer);
-        Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
+        double expected = ((12 + 45) / 2.0 + 2.0 * (-31 + 45) + (-31 + 64) / 2.0) / 6.0;
+        Assert.assertEquals(avg, expected);
     }
 
     @Test
@@ -298,12 +346,6 @@ public class TimestampMapTest {
 
         Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
         Assert.assertEquals(last, values[3]);
-
-        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-        Assert.assertEquals(min, values[0]);
-
-        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-        Assert.assertEquals(max, values[1]);
     }
 
     @Test
@@ -331,11 +373,8 @@ public class TimestampMapTest {
 
         Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
-        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-
-        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-        Assert.assertTrue(sum instanceof Double);
-        Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
+        double expected = ((12 + 45.3) / 2.0 + 2.0 * (-31.3 + 45.3) + (-31.3 + 64.4) / 2.0) / 6.0;
+        Assert.assertTrue(Math.abs((Double) avg - expected) < 0.0000001);
     }
 
     @Test
@@ -363,11 +402,8 @@ public class TimestampMapTest {
 
         Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Float);
-        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (float) values.length));
-
-        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-        Assert.assertTrue(sum instanceof Float);
-        Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
+        float expected = (float) (((12 + 45.3) / 2.0 + 2.0 * (-31.3 + 45.3) + (-31.3 + 64.4) / 2.0) / 6.0);
+        Assert.assertEquals(expected, avg);
     }
 
     @Test
@@ -395,11 +431,8 @@ public class TimestampMapTest {
 
         Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
-        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-
-        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-        Assert.assertTrue(sum instanceof Long);
-        Assert.assertEquals(sum, (long) (values[0] + values[1] + values[2] + values[3]));
+        double expected = (((120 + 450) / 2.0 + 2.0 * (-3100 + 450) + (-3100 + 6400) / 2.0) / 6.0);
+        Assert.assertTrue(Math.abs((Double) avg - expected) < 0.00001);
     }
 
     @Test
@@ -427,11 +460,8 @@ public class TimestampMapTest {
 
         Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
-        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-
-        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-        Assert.assertTrue(sum instanceof Long);
-        Assert.assertEquals(sum, (long) (values[0] + values[1] + values[2] + values[3]));
+        double expected = (((120l + 450000l) / 2.0 + 2.0 * (-31000002343l + 450000l) + (-31000002343l + 640000000001232l) / 2.0) / 6.0);
+        Assert.assertTrue(Math.abs((Double) avg - expected) < 0.00001);
     }
 
     @Test
@@ -468,11 +498,8 @@ public class TimestampMapTest {
 
         Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
         Assert.assertTrue(avg instanceof Double);
-        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-
-        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-        Assert.assertTrue(sum instanceof Integer);
-        Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
+        double expected = ((((short) 12 + (short) 45) / 2.0 + 2.0 * ((short) -31 + (short) 45) + ((short) -31 + (short) 64) / 2.0) / 6.0);
+        Assert.assertTrue(Math.abs((Double) avg - expected) < 0.00001);
     }
 
     @Test

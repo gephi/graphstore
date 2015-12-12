@@ -101,12 +101,6 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
     }
 
     @Override
-    protected Object getSum(Interval interval) {
-        Double sum = getSumDouble(interval);
-        return sum != null ? sum.intValue() : null;
-    }
-
-    @Override
     protected Object getMax(Interval interval) {
         Double max = getMaxDouble(interval);
         return max != null ? max.byteValue() : null;
@@ -137,7 +131,7 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE, Estimator.SUM);
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE);
     }
 
     @Override

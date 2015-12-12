@@ -126,14 +126,14 @@ public final class IntervalBooleanMap extends IntervalMap<Boolean> {
         if (intervals.length == 0) {
             return null;
         }
-        for(int i=0;i<intervals.length;i++) {
-            if(getValue(intervals[i]).equals(Boolean.FALSE)) {
+        for (int i = 0; i < intervals.length; i++) {
+            if (getValue(intervals[i]).equals(Boolean.FALSE)) {
                 return Boolean.FALSE;
             }
         }
         return Boolean.TRUE;
     }
-    
+
     @Override
     protected Object getMax(Interval interval) {
         if (size == 0) {
@@ -143,8 +143,8 @@ public final class IntervalBooleanMap extends IntervalMap<Boolean> {
         if (intervals.length == 0) {
             return null;
         }
-        for(int i=0;i<intervals.length;i++) {
-            if(getValue(intervals[i]).equals(Boolean.TRUE)) {
+        for (int i = 0; i < intervals.length; i++) {
+            if (getValue(intervals[i]).equals(Boolean.TRUE)) {
                 return Boolean.TRUE;
             }
         }
