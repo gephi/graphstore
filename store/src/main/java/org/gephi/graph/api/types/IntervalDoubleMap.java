@@ -114,7 +114,7 @@ public final class IntervalDoubleMap extends IntervalMap<Double> {
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.FIRST, Estimator.LAST);
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE);
     }
 
     @Override

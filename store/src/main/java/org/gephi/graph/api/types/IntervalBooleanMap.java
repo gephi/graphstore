@@ -114,7 +114,41 @@ public final class IntervalBooleanMap extends IntervalMap<Boolean> {
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.FIRST, Estimator.LAST);
+        return estimator.is(Estimator.FIRST, Estimator.LAST, Estimator.MIN, Estimator.MAX);
+    }
+
+    @Override
+    protected Object getMin(Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        int[] intervals = getOverlappingIntervals(interval.getLow(), interval.getHigh());
+        if (intervals.length == 0) {
+            return null;
+        }
+        for(int i=0;i<intervals.length;i++) {
+            if(getValue(intervals[i]).equals(Boolean.FALSE)) {
+                return Boolean.FALSE;
+            }
+        }
+        return Boolean.TRUE;
+    }
+    
+    @Override
+    protected Object getMax(Interval interval) {
+        if (size == 0) {
+            return null;
+        }
+        int[] intervals = getOverlappingIntervals(interval.getLow(), interval.getHigh());
+        if (intervals.length == 0) {
+            return null;
+        }
+        for(int i=0;i<intervals.length;i++) {
+            if(getValue(intervals[i]).equals(Boolean.TRUE)) {
+                return Boolean.TRUE;
+            }
+        }
+        return Boolean.FALSE;
     }
 
     @Override

@@ -114,7 +114,19 @@ public final class IntervalShortMap extends IntervalMap<Short> {
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.FIRST, Estimator.LAST);
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE);
+    }
+    
+    @Override
+    protected Object getMax(Interval interval) {
+        Double max = getMaxDouble(interval);
+        return max != null ? max.shortValue() : null;
+    }
+
+    @Override
+    protected Object getMin(Interval interval) {
+        Double min = getMinDouble(interval);
+        return min != null ? min.shortValue() : null;
     }
 
     @Override

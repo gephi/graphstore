@@ -32,10 +32,6 @@ public enum Estimator {
      */
     MEDIAN,
     /**
-     * Sum value.
-     */
-    SUM,
-    /**
      * Minimum value.
      */
     MIN,

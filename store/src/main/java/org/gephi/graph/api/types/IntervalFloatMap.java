@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.api.types;
 
+import java.math.BigDecimal;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 
@@ -114,7 +115,25 @@ public final class IntervalFloatMap extends IntervalMap<Float> {
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.FIRST, Estimator.LAST);
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE);
+    }
+
+    @Override
+    protected Object getMax(Interval interval) {
+        Double max = getMaxDouble(interval);
+        return max != null ? max.floatValue() : null;
+    }
+
+    @Override
+    protected Object getMin(Interval interval) {
+        Double min = getMinDouble(interval);
+        return min != null ? min.floatValue() : null;
+    }
+
+    @Override
+    protected Object getAverage(Interval interval) {
+        BigDecimal average = getAverageBigDecimal(interval);
+        return average != null ? average.floatValue() : null;
     }
 
     @Override

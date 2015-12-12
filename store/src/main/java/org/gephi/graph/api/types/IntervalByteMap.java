@@ -114,7 +114,25 @@ public final class IntervalByteMap extends IntervalMap<Byte> {
 
     @Override
     public boolean isSupported(Estimator estimator) {
-        return estimator.is(Estimator.FIRST, Estimator.LAST);
+        return estimator.is(Estimator.MIN, Estimator.MAX, Estimator.FIRST, Estimator.LAST, Estimator.AVERAGE);
+    }
+
+    @Override
+    protected Object getMax(Interval interval) {
+        Double max = getMaxDouble(interval);
+        return max != null ? max.byteValue() : null;
+    }
+
+    @Override
+    protected Object getMin(Interval interval) {
+        Double min = getMinDouble(interval);
+        return min != null ? min.byteValue() : null;
+    }
+
+    @Override
+    protected Object getAverage(Interval interval) {
+        Double average = getAverageDouble(interval);
+        return average != null ? average : null;
     }
 
     @Override

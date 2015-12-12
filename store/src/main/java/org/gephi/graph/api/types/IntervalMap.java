@@ -127,8 +127,6 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         switch (estimator) {
             case AVERAGE:
                 return getAverage(interval);
-            case SUM:
-                return getSum(interval);
             case MIN:
                 return getMin(interval);
             case MAX:
@@ -341,6 +339,61 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         return -1;
     }
 
+    protected int[] getOverlappingIntervals(double intervalStart, double intervalEnd) {
+        int realSize = size * 2;
+        int index = Arrays.binarySearch(array, 0, realSize, intervalStart);
+        if (index >= 0) {
+            int startIndex = index % 2 == 0 ? index : index - 1;
+            for (; startIndex - 2 >= 0;) {
+                if (array[startIndex - 2] == intervalStart) {
+                    startIndex -= 2;
+                } else {
+                    break;
+                }
+            }
+
+            int[] res = new int[size - (startIndex / 2)];
+            int i = 0;
+            for (; startIndex < realSize && array[startIndex] <= intervalEnd; startIndex += 2) {
+                res[i++] = startIndex / 2;
+            }
+            if (res.length != i) {
+                return Arrays.copyOf(res, i);
+            }
+            return res;
+        } else {
+            int startIndex = (-index - 1) % 2 == 0 ? (-index - 1) : -index - 2;
+            if (startIndex < realSize && array[startIndex] <= intervalEnd) {
+                int[] res = new int[size - (startIndex / 2)];
+                int i = 0;
+                for (; startIndex < realSize && array[startIndex] <= intervalEnd; startIndex += 2) {
+                    res[i++] = startIndex / 2;
+                }
+                if (i != 0) {
+                    if (res.length != i) {
+                        return Arrays.copyOf(res, i);
+                    }
+                    return res;
+                }
+            }
+        }
+        return new int[0];
+    }
+
+    protected double[] getIntervalsWeight(double intervalStart, double intervalEnd, int[] intervals) {
+        double[] res = new double[intervals.length];
+        for (int i = 0; i < intervals.length; i++) {
+            double start = array[i * 2];
+            double end = array[i * 2 + 1];
+            if (start != end) {
+                start = Math.max(intervalStart, start);
+                end = Math.min(intervalEnd, end);
+                res[i] = end - start;
+            }
+        }
+        return res;
+    }
+
     @Override
     public boolean contains(Interval interval) {
         return getIndex(interval.getLow(), interval.getHigh()) >= 0;
@@ -438,16 +491,22 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         if (size == 0) {
             return null;
         }
-        //TODO
-        return null;
+        int[] intervals = getOverlappingIntervals(interval.getLow(), interval.getHigh());
+        if (intervals.length == 0) {
+            return null;
+        }
+        return getValue(intervals[0]);
     }
 
     protected Object getLast(final Interval interval) {
         if (size == 0) {
             return null;
         }
-        //TODO
-        return null;
+        int[] intervals = getOverlappingIntervals(interval.getLow(), interval.getHigh());
+        if (intervals.length == 0) {
+            return null;
+        }
+        return getValue(intervals[intervals.length - 1]);
     }
 
     protected Object getMin(final Interval interval) {
@@ -459,8 +518,16 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         if (size == 0) {
             return null;
         }
-        //TODO
-        return null;
+        int[] intervals = getOverlappingIntervals(interval.getLow(), interval.getHigh());
+        if (intervals.length == 0) {
+            return null;
+        }
+        double min = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < intervals.length; i++) {
+            double val = ((Number) getValue(intervals[i])).doubleValue();
+            min = Math.min(val, min);
+        }
+        return min;
     }
 
     protected Object getMax(final Interval interval) {
@@ -472,8 +539,16 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         if (size == 0) {
             return null;
         }
-        //TODO
-        return null;
+        int[] intervals = getOverlappingIntervals(interval.getLow(), interval.getHigh());
+        if (intervals.length == 0) {
+            return null;
+        }
+        double max = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < intervals.length; i++) {
+            double val = ((Number) getValue(intervals[i])).doubleValue();
+            max = Math.max(val, max);
+        }
+        return max;
     }
 
     protected Object getAverage(final Interval interval) {
@@ -485,37 +560,39 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         if (size == 0) {
             return null;
         }
-        //TODO
-        return null;
-    }
-
-    protected Object getSum(final Interval interval) {
-        BigDecimal sum = getSumBigDecimal(interval);
-        return sum != null ? sum.doubleValue() : null;
-    }
-
-    protected BigDecimal getSumBigDecimal(final Interval interval) {
-        if (size == 0) {
+        int[] intervals = getOverlappingIntervals(interval.getLow(), interval.getHigh());
+        if (intervals.length == 0) {
             return null;
         }
-        //TODO
-        return null;
+        double[] weights = getIntervalsWeight(interval.getLow(), interval.getHigh(), intervals);
+        BigDecimal result = new BigDecimal(0.0);
+        BigDecimal period = new BigDecimal(0.0);
+        for (int i = 0; i < intervals.length; i++) {
+            BigDecimal w = new BigDecimal(weights[i]);
+            period = period.add(w);
+            w = w.multiply(new BigDecimal(((Number) getValue(intervals[i])).doubleValue()));
+            result = result.add(w);
+        }
+        return result.divide(period);
     }
 
     protected Double getAverageDouble(final Interval interval) {
         if (size == 0) {
             return null;
         }
-        //TODO
-        return null;
-    }
-
-    protected Double getSumDouble(final Interval interval) {
-        if (size == 0) {
+        int[] intervals = getOverlappingIntervals(interval.getLow(), interval.getHigh());
+        if (intervals.length == 0) {
             return null;
         }
-        //TODO
-        return null;
+        double[] weights = getIntervalsWeight(interval.getLow(), interval.getHigh(), intervals);
+        double result = 0.0, period = 0.0;
+        for (int i = 0; i < intervals.length; i++) {
+            double w = weights[i];
+            period += w;
+            w *= ((Number) getValue(intervals[i])).doubleValue();
+            result += w;
+        }
+        return result / period;
     }
 
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {

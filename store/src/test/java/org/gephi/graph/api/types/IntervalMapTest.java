@@ -17,6 +17,7 @@ package org.gephi.graph.api.types;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
@@ -191,6 +192,50 @@ public class IntervalMapTest {
     }
 
     @Test
+    public void testGetOverlappingIntervals() {
+        IntervalIntegerMap i = new IntervalIntegerMap();
+        i.put(new Interval(2001, 2004), 42);
+
+        Assert.assertEquals(i.getOverlappingIntervals(2001, 2004), new int[]{0});
+        Assert.assertEquals(i.getOverlappingIntervals(2001, 2005), new int[]{0});
+        Assert.assertEquals(i.getOverlappingIntervals(2001, Double.POSITIVE_INFINITY), new int[]{0});
+
+        IntervalIntegerMap j = new IntervalIntegerMap();
+        j.put(new Interval(2000, 2002), 42);
+        j.put(new Interval(2002, 2002), 42);
+        j.put(new Interval(2002, 2004), 42);
+        j.put(new Interval(2005, 2006), 42);
+
+        Assert.assertEquals(j.getOverlappingIntervals(1998, 1999), new int[]{});
+        Assert.assertEquals(j.getOverlappingIntervals(1998, 2001), new int[]{0});
+        Assert.assertEquals(j.getOverlappingIntervals(1998, 2000), new int[]{0});
+        Assert.assertEquals(j.getOverlappingIntervals(1998, 2002), new int[]{0, 1, 2});
+        Assert.assertEquals(j.getOverlappingIntervals(2000, 2001), new int[]{0});
+        Assert.assertEquals(j.getOverlappingIntervals(2001, 2001), new int[]{0});
+        Assert.assertEquals(j.getOverlappingIntervals(2003, 2003), new int[]{2});
+        Assert.assertEquals(j.getOverlappingIntervals(2003, 2007), new int[]{2, 3});
+        Assert.assertEquals(j.getOverlappingIntervals(2009, 2010), new int[]{});
+        Assert.assertEquals(j.getOverlappingIntervals(2002, 2004.9), new int[]{1, 2});
+    }
+
+    @Test
+    public void getIntervalsWeight() {
+        IntervalIntegerMap j = new IntervalIntegerMap();
+        j.put(new Interval(2000, 2002), 42);
+        j.put(new Interval(2003, 2004), 42);
+        j.put(new Interval(2005, 2006), 42);
+
+        Assert.assertEquals(j.getIntervalsWeight(2000, 2002, j.getOverlappingIntervals(2000, 2002)), new double[]{2.0});
+        Assert.assertEquals(j.getIntervalsWeight(2001, 2002, j.getOverlappingIntervals(2001, 2002)), new double[]{1.0});
+        Assert.assertEquals(j.getIntervalsWeight(2000, 2001, j.getOverlappingIntervals(2000, 2001)), new double[]{1.0});
+        Assert.assertEquals(j.getIntervalsWeight(2000.5, 2001.5, j.getOverlappingIntervals(2000.5, 2001.5)), new double[]{1.0});
+        Assert.assertEquals(j.getIntervalsWeight(1999, 2000, j.getOverlappingIntervals(1999, 2000)), new double[]{0});
+        Assert.assertEquals(j.getIntervalsWeight(1999, 2001, j.getOverlappingIntervals(1999, 2001)), new double[]{1.0});
+        Assert.assertEquals(j.getIntervalsWeight(2000, 2003, j.getOverlappingIntervals(2000, 2003)), new double[]{2.0, 0});
+        Assert.assertEquals(j.getIntervalsWeight(2000, 2004, j.getOverlappingIntervals(2000, 2004)), new double[]{2.0, 1.0});
+    }
+
+    @Test
     public void testGetTimestamps() {
 //        TimestampDoubleMap set = new TimestampDoubleMap();
 //
@@ -216,6 +261,11 @@ public class IntervalMapTest {
         for (IntervalMap set : getAllInstances()) {
             Assert.assertTrue(set.isSupported(Estimator.FIRST));
             Assert.assertTrue(set.isSupported(Estimator.LAST));
+            if (Number.class.isAssignableFrom(set.getTypeClass())) {
+                Assert.assertTrue(set.isSupported(Estimator.MAX));
+                Assert.assertTrue(set.isSupported(Estimator.MIN));
+                Assert.assertTrue(set.isSupported(Estimator.AVERAGE));
+            }
         }
     }
 
@@ -230,262 +280,150 @@ public class IntervalMapTest {
         }
     }
 
-//    @Test
-//    public void testBooleanEstimators() {
-//        TimestampBooleanMap set = new TimestampBooleanMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//
-//        set.put(indices[0], Boolean.TRUE);
-//        set.put(indices[1], Boolean.FALSE);
-//        set.put(indices[2], Boolean.FALSE);
-//        set.put(indices[3], Boolean.TRUE);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, Boolean.TRUE);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, Boolean.TRUE);
-//
-//        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-//        Assert.assertEquals(min, Boolean.FALSE);
-//
-//        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-//        Assert.assertEquals(max, Boolean.TRUE);
-//    }
-//
-//    @Test
-//    public void testByteEstimators() {
-//        TimestampByteMap set = new TimestampByteMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//        byte[] values = new byte[]{12, 45, -31, 64};
-//
-//        set.put(indices[0], values[0]);
-//        set.put(indices[1], values[1]);
-//        set.put(indices[2], values[2]);
-//        set.put(indices[3], values[3]);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, values[0]);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, values[3]);
-//
-//        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-//        Assert.assertEquals(min, values[2]);
-//
-//        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-//        Assert.assertEquals(max, values[3]);
-//
-//        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
-//        Assert.assertTrue(avg instanceof Double);
-//        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-//
-//        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-//        Assert.assertTrue(sum instanceof Integer);
-//        Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
-//    }
-//
-//    @Test
-//    public void testCharEstimators() {
-//        TimestampCharMap set = new TimestampCharMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//        char[] values = new char[]{'a', 'z', 'e', 'c'};
-//
-//        set.put(indices[0], values[0]);
-//        set.put(indices[1], values[1]);
-//        set.put(indices[2], values[2]);
-//        set.put(indices[3], values[3]);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, values[0]);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, values[3]);
-//
-//        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-//        Assert.assertEquals(min, values[0]);
-//
-//        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-//        Assert.assertEquals(max, values[1]);
-//    }
-//
-//    @Test
-//    public void testDoubleEstimators() {
-//        TimestampDoubleMap set = new TimestampDoubleMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//        double[] values = new double[]{12.0, 45.3, -31.3, 64.4};
-//
-//        set.put(indices[0], values[0]);
-//        set.put(indices[1], values[1]);
-//        set.put(indices[2], values[2]);
-//        set.put(indices[3], values[3]);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, values[0]);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, values[3]);
-//
-//        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-//        Assert.assertEquals(min, values[2]);
-//
-//        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-//        Assert.assertEquals(max, values[3]);
-//
-//        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
-//        Assert.assertTrue(avg instanceof Double);
-//        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-//
-//        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-//        Assert.assertTrue(sum instanceof Double);
-//        Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
-//    }
-//
-//    @Test
-//    public void testFloatEstimators() {
-//        TimestampFloatMap set = new TimestampFloatMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//        float[] values = new float[]{12f, 45.3f, -31.3f, 64.4f};
-//
-//        set.put(indices[0], values[0]);
-//        set.put(indices[1], values[1]);
-//        set.put(indices[2], values[2]);
-//        set.put(indices[3], values[3]);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, values[0]);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, values[3]);
-//
-//        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-//        Assert.assertEquals(min, values[2]);
-//
-//        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-//        Assert.assertEquals(max, values[3]);
-//
-//        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
-//        Assert.assertTrue(avg instanceof Float);
-//        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (float) values.length));
-//
-//        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-//        Assert.assertTrue(sum instanceof Float);
-//        Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
-//    }
-//
-//    @Test
-//    public void testIntegerEstimators() {
-//        TimestampIntegerMap set = new TimestampIntegerMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//        int[] values = new int[]{120, 450, -3100, 6400};
-//
-//        set.put(indices[0], values[0]);
-//        set.put(indices[1], values[1]);
-//        set.put(indices[2], values[2]);
-//        set.put(indices[3], values[3]);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, values[0]);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, values[3]);
-//
-//        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-//        Assert.assertEquals(min, values[2]);
-//
-//        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-//        Assert.assertEquals(max, values[3]);
-//
-//        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
-//        Assert.assertTrue(avg instanceof Double);
-//        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-//
-//        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-//        Assert.assertTrue(sum instanceof Long);
-//        Assert.assertEquals(sum, (long) (values[0] + values[1] + values[2] + values[3]));
-//    }
-//
-//    @Test
-//    public void testLongEstimators() {
-//        TimestampLongMap set = new TimestampLongMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//        long[] values = new long[]{120l, 450000l, -31000002343l, 640000000001232l};
-//
-//        set.put(indices[0], values[0]);
-//        set.put(indices[1], values[1]);
-//        set.put(indices[2], values[2]);
-//        set.put(indices[3], values[3]);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, values[0]);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, values[3]);
-//
-//        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-//        Assert.assertEquals(min, values[2]);
-//
-//        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-//        Assert.assertEquals(max, values[3]);
-//
-//        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
-//        Assert.assertTrue(avg instanceof Double);
-//        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-//
-//        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-//        Assert.assertTrue(sum instanceof Long);
-//        Assert.assertEquals(sum, (long) (values[0] + values[1] + values[2] + values[3]));
-//    }
-//
-//    @Test
-//    public void testShortEstimators() {
-//        TimestampShortMap set = new TimestampShortMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//        short[] values = new short[]{12, 45, -31, 64};
-//
-//        set.put(indices[0], values[0]);
-//        set.put(indices[1], values[1]);
-//        set.put(indices[2], values[2]);
-//        set.put(indices[3], values[3]);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, values[0]);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, values[3]);
-//
-//        Object min = set.get(new Interval(1.0, 7.0), Estimator.MIN);
-//        Assert.assertEquals(min, values[2]);
-//
-//        Object max = set.get(new Interval(1.0, 7.0), Estimator.MAX);
-//        Assert.assertEquals(max, values[3]);
-//
-//        Object avg = set.get(new Interval(1.0, 7.0), Estimator.AVERAGE);
-//        Assert.assertTrue(avg instanceof Double);
-//        Assert.assertEquals(avg, ((values[0] + values[1] + values[2] + values[3]) / (double) values.length));
-//
-//        Object sum = set.get(new Interval(1.0, 7.0), Estimator.SUM);
-//        Assert.assertTrue(sum instanceof Integer);
-//        Assert.assertEquals(sum, (values[0] + values[1] + values[2] + values[3]));
-//    }
-//
-//    @Test
-//    public void testStringEstimators() {
-//        TimestampStringMap set = new TimestampStringMap();
-//        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-//        String[] values = new String[]{"a", "z", "e", "ch"};
-//
-//        set.put(indices[0], values[0]);
-//        set.put(indices[1], values[1]);
-//        set.put(indices[2], values[2]);
-//        set.put(indices[3], values[3]);
-//
-//        Object first = set.get(new Interval(1.0, 7.0), Estimator.FIRST);
-//        Assert.assertEquals(first, values[0]);
-//
-//        Object last = set.get(new Interval(1.0, 7.0), Estimator.LAST);
-//        Assert.assertEquals(last, values[3]);
-//    }
+    @Test
+    public void testEstimatorNull() {
+        for (IntervalMap set : getAllInstances()) {
+            set.put(new Interval(0, 2), getDefaultValue(set));
+
+            Assert.assertNull(set.getFirst(new Interval(6.0, 7.0)));
+            Assert.assertNull(set.getLast(new Interval(6.0, 7.0)));
+            if (set.isSupported(Estimator.MIN)) {
+                Assert.assertNull(set.getMin(new Interval(6.0, 7.0)));
+            }
+            if (set.isSupported(Estimator.MAX)) {
+                Assert.assertNull(set.getMax(new Interval(6.0, 7.0)));
+            }
+            if (set.isSupported(Estimator.AVERAGE)) {
+                Assert.assertNull(set.getAverage(new Interval(6.0, 7.0)));
+            }
+        }
+    }
+
+    @Test
+    public void testBooleanEstimators() {
+        IntervalBooleanMap set = new IntervalBooleanMap();
+        set.put(new Interval(0, 2), Boolean.TRUE);
+        set.put(new Interval(2, 4), Boolean.FALSE);
+
+        Assert.assertEquals(set.getFirst(new Interval(0, 4)), Boolean.TRUE);
+        Assert.assertEquals(set.getLast(new Interval(0, 4)), Boolean.FALSE);
+
+        Assert.assertEquals(set.getMin(new Interval(0, 1)), Boolean.TRUE);
+        Assert.assertEquals(set.getMin(new Interval(3, 4)), Boolean.FALSE);
+        Assert.assertEquals(set.getMin(new Interval(0, 2)), Boolean.FALSE);
+
+        Assert.assertEquals(set.getMax(new Interval(0, 1)), Boolean.TRUE);
+        Assert.assertEquals(set.getMax(new Interval(3, 4)), Boolean.FALSE);
+        Assert.assertEquals(set.getMax(new Interval(2, 4)), Boolean.TRUE);
+    }
+
+    @Test
+    public void testByteEstimators() {
+        IntervalByteMap set = new IntervalByteMap();
+        set.put(new Interval(0, 2), (byte) 2);
+        set.put(new Interval(2, 5), (byte) 4);
+
+        Assert.assertEquals(set.getFirst(new Interval(0, 5)), (byte) 2);
+        Assert.assertEquals(set.getLast(new Interval(0, 5)), (byte) 4);
+
+        Assert.assertEquals(set.getMin(new Interval(0, 5)), (byte) 2);
+        Assert.assertEquals(set.getMax(new Interval(0, 5)), (byte) 4);
+        Assert.assertEquals(set.getAverage(new Interval(0, 5)), (2.0 * 2 + 3.0 * 4) / 5.0);
+    }
+
+    @Test
+    public void testCharEstimators() {
+        IntervalCharMap set = new IntervalCharMap();
+        set.put(new Interval(0, 2), 'a');
+        set.put(new Interval(2, 5), 'b');
+
+        Assert.assertEquals(set.getFirst(new Interval(0, 5)), 'a');
+        Assert.assertEquals(set.getLast(new Interval(0, 5)), 'b');
+    }
+
+    @Test
+    public void testDoubleEstimators() {
+        IntervalDoubleMap set = new IntervalDoubleMap();
+        set.put(new Interval(0, 2), 2.0);
+        set.put(new Interval(2, 5), 4.0);
+
+        Assert.assertEquals(set.getFirst(new Interval(0, 5)), 2.0);
+        Assert.assertEquals(set.getLast(new Interval(0, 5)), 4.0);
+
+        Assert.assertEquals(set.getMin(new Interval(0, 5)), 2.0);
+        Assert.assertEquals(set.getMax(new Interval(0, 5)), 4.0);
+        Assert.assertEquals(set.getAverage(new Interval(0, 5)), (2.0 * 2.0 + 3.0 * 4.0) / 5.0);
+    }
+
+    @Test
+    public void testDoubleEstimatorsBig() {
+        IntervalDoubleMap set = new IntervalDoubleMap();
+        set.put(new Interval(0, 2), Double.MIN_VALUE);
+        set.put(new Interval(2, 5), Double.MAX_VALUE);
+
+        BigDecimal expected = new BigDecimal(Double.MIN_VALUE).multiply(new BigDecimal(2.0));
+        expected = expected.add(new BigDecimal(Double.MAX_VALUE).multiply(new BigDecimal(3.0)));
+        expected = expected.divide(new BigDecimal(5.0));
+
+        Assert.assertEquals(set.getAverage(new Interval(0, 5)), expected.doubleValue());
+    }
+
+    @Test
+    public void testFloatEstimators() {
+        IntervalFloatMap set = new IntervalFloatMap();
+        set.put(new Interval(0, 2), 2f);
+        set.put(new Interval(2, 5), 4f);
+
+        Assert.assertEquals(set.getFirst(new Interval(0, 5)), 2f);
+        Assert.assertEquals(set.getLast(new Interval(0, 5)), 4f);
+
+        Assert.assertEquals(set.getMin(new Interval(0, 5)), 2f);
+        Assert.assertEquals(set.getMax(new Interval(0, 5)), 4f);
+        Assert.assertEquals(set.getAverage(new Interval(0, 5)), (float) ((2.0 * 2.0 + 3.0 * 4.0) / 5.0));
+    }
+
+    @Test
+    public void testIntegerEstimators() {
+        IntervalIntegerMap set = new IntervalIntegerMap();
+        set.put(new Interval(0, 2), 2);
+        set.put(new Interval(2, 5), 4);
+
+        Assert.assertEquals(set.getFirst(new Interval(0, 5)), 2);
+        Assert.assertEquals(set.getLast(new Interval(0, 5)), 4);
+
+        Assert.assertEquals(set.getMin(new Interval(0, 5)), 2);
+        Assert.assertEquals(set.getMax(new Interval(0, 5)), 4);
+        Assert.assertEquals(set.getAverage(new Interval(0, 5)), (double) ((2.0 * 2 + 3.0 * 4) / 5.0));
+    }
+
+    @Test
+    public void testLongEstimators() {
+        IntervalLongMap set = new IntervalLongMap();
+        set.put(new Interval(0, 2), 2l);
+        set.put(new Interval(2, 5), 4l);
+
+        Assert.assertEquals(set.getFirst(new Interval(0, 5)), 2l);
+        Assert.assertEquals(set.getLast(new Interval(0, 5)), 4l);
+
+        Assert.assertEquals(set.getMin(new Interval(0, 5)), 2l);
+        Assert.assertEquals(set.getMax(new Interval(0, 5)), 4l);
+        Assert.assertEquals(set.getAverage(new Interval(0, 5)), (double) ((2.0 * 2l + 3.0 * 4l) / 5.0));
+    }
+
+    @Test
+    public void testShortEstimators() {
+        IntervalShortMap set = new IntervalShortMap();
+        set.put(new Interval(0, 2), (short) 2);
+        set.put(new Interval(2, 5), (short) 4);
+
+        Assert.assertEquals(set.getFirst(new Interval(0, 5)), (short) 2);
+        Assert.assertEquals(set.getLast(new Interval(0, 5)), (short) 4);
+
+        Assert.assertEquals(set.getMin(new Interval(0, 5)), (short) 2);
+        Assert.assertEquals(set.getMax(new Interval(0, 5)), (short) 4);
+        Assert.assertEquals(set.getAverage(new Interval(0, 5)), (double) ((2.0 * (short) 2 + 3.0 * (short) 4) / 5.0));
+    }
+
     @Test
     public void testEquals() {
         Interval[] indices = new Interval[]{new Interval(1.0, 2.0), new Interval(3.0, 4.0), new Interval(2.0, 2.0), new Interval(2.0, 3.0)};
