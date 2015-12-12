@@ -128,13 +128,13 @@ public class TimestampsParserTest {
         assertEquals(expected, result);
         assertEquals(expected.toString(), result.toString());
     }
-    
+
     @Test
     public void testParseTimestampsEmpty() {
         TimestampStringMap expectedMap = new TimestampStringMap();
         assertEqualTimestampMaps(expectedMap, TimestampsParser.parseTimestampMap(String.class, "<empty>"));
         assertEqualTimestampMaps(expectedMap, TimestampsParser.parseTimestampMap(String.class, "<EMPTY>"));
-        
+
         TimestampSet expectedSet = new TimestampSet();
         assertEquals(expectedSet, TimestampsParser.parseTimestampSet("<empty>"));
         assertEquals(expectedSet, TimestampsParser.parseTimestampSet("<EMPTY>"));
@@ -310,7 +310,7 @@ public class TimestampsParserTest {
                 "<[2.0, \";a b c\"]>",
                 parseTimestampMapToString("<[' 2.0', ';a b c')")
         );
-        
+
         assertEquals(
                 "<[2.0, \" d\"]>",
                 parseTimestampMapToString("<[' 2.0', ' d')")

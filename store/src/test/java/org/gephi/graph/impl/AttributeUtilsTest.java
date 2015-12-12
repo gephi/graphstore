@@ -78,7 +78,7 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("123456789123456789123456789123456789", BigInteger.class), new BigInteger("123456789123456789123456789123456789"));
         Assert.assertEquals(AttributeUtils.parse("123456789123456789123456789123456789.123456789123456789123456789123456789", BigDecimal.class), new BigDecimal("123456789123456789123456789123456789.123456789123456789123456789123456789"));
     }
-    
+
     @Test
     public void testParsePrimitiveTypes() {
         Assert.assertEquals(AttributeUtils.parse("0", int.class), 0);
@@ -92,33 +92,33 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("1", boolean.class), true);
         Assert.assertEquals(AttributeUtils.parse("0", boolean.class), false);
     }
-    
+
     @Test
     public void testParseArrayTypes() {
         Assert.assertEquals(AttributeUtils.parse("[true, false, 1, 0, null]", Boolean[].class), new Boolean[]{true, false, true, false, null});
         Assert.assertEquals(AttributeUtils.parse("[true, false, 1, 0]", boolean[].class), new boolean[]{true, false, true, false});
-        
+
         Assert.assertEquals(AttributeUtils.parse("[-1, 3, null]", Integer[].class), new Integer[]{-1, 3, null});
         Assert.assertEquals(AttributeUtils.parse("[-1, 3, null]", Integer[].class).getClass(), Integer[].class);
         Assert.assertEquals(AttributeUtils.parse("[-1, 0, 2]", int[].class), new int[]{-1, 0, 2});
-        
+
         Assert.assertEquals(AttributeUtils.parse("[-1, 3, null]", Byte[].class), new Byte[]{-1, 3, null});
         Assert.assertEquals(AttributeUtils.parse("[-1, 0, 2]", byte[].class), new byte[]{-1, 0, 2});
-        
+
         Assert.assertEquals(AttributeUtils.parse("[-1, 3, null]", Short[].class), new Short[]{-1, 3, null});
         Assert.assertEquals(AttributeUtils.parse("[-1, 0, \"2\"]", short[].class), new short[]{-1, 0, 2});
-        
+
         Assert.assertEquals(AttributeUtils.parse("[-1, 3, null]", Long[].class), new Long[]{-1l, 3l, null});
         Assert.assertEquals(AttributeUtils.parse("[-1, 0, 2]", long[].class), new long[]{-1, 0, 2});
-        
+
         Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2000000., null]", Float[].class), new Float[]{-1e6f, 1.0f, .001f, 2e6f, null});
         Assert.assertEquals(AttributeUtils.parse("[1]", float[].class).getClass(), float[].class);
         Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2e6]", float[].class), new float[]{-1e6f, 1.0f, .001f, 2e6f});
-        
+
         Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2000000., null]", Double[].class), new Double[]{-1e6, 1.0, .001, 2e6, null});
         Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2e6]", double[].class), new double[]{-1e6, 1.0, .001, 2e6});
         Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2e6]", double[].class).getClass(), double[].class);
-        
+
         Assert.assertEquals(AttributeUtils.parse("[' true ', 'null', null]", String[].class), new String[]{" true ", "null", null});
         Assert.assertEquals(AttributeUtils.parse("['123456789123456789123456789123456789']", BigInteger[].class), new BigInteger[]{new BigInteger("123456789123456789123456789123456789")});
         Assert.assertEquals(AttributeUtils.parse("['123456789123456789123456789123456789.123456789123456789123456789123456789']", BigDecimal[].class), new BigDecimal[]{new BigDecimal("123456789123456789123456789123456789.123456789123456789123456789123456789")});
@@ -515,33 +515,33 @@ public class AttributeUtilsTest {
     }
 
     @Test
-    public void testPrintArray(){
+    public void testPrintArray() {
         Assert.assertEquals(
-                AttributeUtils.printArray(new String[]{null, "null", " b ", "\"c"}), 
+                AttributeUtils.printArray(new String[]{null, "null", " b ", "\"c"}),
                 "[null, \"null\", \" b \", \"\\\"c\"]"
         );
         Assert.assertEquals(
-                AttributeUtils.printArray(new Integer[]{-1, 2, 3, null}), 
+                AttributeUtils.printArray(new Integer[]{-1, 2, 3, null}),
                 "[-1, 2, 3, null]"
         );
         Assert.assertEquals(
-                AttributeUtils.printArray(new int[]{-1, 2, 3}), 
+                AttributeUtils.printArray(new int[]{-1, 2, 3}),
                 "[-1, 2, 3]"
         );
         Assert.assertEquals(
-                AttributeUtils.printArray(new boolean[]{true, false, true}), 
+                AttributeUtils.printArray(new boolean[]{true, false, true}),
                 "[true, false, true]"
         );
         Assert.assertEquals(
-                AttributeUtils.printArray(new char[]{}), 
+                AttributeUtils.printArray(new char[]{}),
                 "<empty>"
         );
         Assert.assertEquals(
-                AttributeUtils.printArray(new String[]{"[a, b, c]"}), 
+                AttributeUtils.printArray(new String[]{"[a, b, c]"}),
                 "[\"[a, b, c]\"]"
         );
     }
-    
+
     @Test
     public void testIsNumberType() {
         Assert.assertTrue(AttributeUtils.isNumberType(Integer.class));

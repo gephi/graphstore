@@ -889,10 +889,10 @@ public class Serialization {
 
     private void serializeIntervalIndexStore(final DataOutput out, final IntervalIndexStore intervalIndexStore) throws IOException {
         serialize(out, intervalIndexStore.elementType);
-        
+
         serialize(out, intervalIndexStore.length);
         serialize(out, intervalIndexStore.getMap().size());
-        for(Map.Entry<Interval, Integer> entry : intervalIndexStore.getMap().entrySet()) {
+        for (Map.Entry<Interval, Integer> entry : intervalIndexStore.getMap().entrySet()) {
             serialize(out, entry.getKey());
             serialize(out, entry.getValue());
         }
@@ -911,12 +911,12 @@ public class Serialization {
         }
 
         int length = (Integer) deserialize(is);
-        int mapSize = (Integer)deserialize(is);
-        
+        int mapSize = (Integer) deserialize(is);
+
         Interval2IntTreeMap map = intervalIndexStore.getMap();
-        for(int i=0;i<mapSize;i++) {
-            Interval key = (Interval)deserialize(is);
-            Integer value = (Integer)deserialize(is);
+        for (int i = 0; i < mapSize; i++) {
+            Interval key = (Interval) deserialize(is);
+            Integer value = (Integer) deserialize(is);
             map.put(key, value);
         }
         int[] garbage = (int[]) deserialize(is);
@@ -981,15 +981,15 @@ public class Serialization {
         serialize(out, timeStore.nodeIndexStore);
         serialize(out, timeStore.edgeIndexStore);
     }
-    
+
     private void serializeInterval(final DataOutput out, final Interval interval) throws IOException {
         serialize(out, interval.getLow());
         serialize(out, interval.getHigh());
     }
-    
+
     private Interval deserializeInterval(final DataInput is) throws IOException, ClassNotFoundException {
-        double start = (Double)deserialize(is);
-        double end = (Double)deserialize(is);
+        double start = (Double) deserialize(is);
+        double end = (Double) deserialize(is);
         return new Interval(start, end);
     }
 
@@ -1331,7 +1331,7 @@ public class Serialization {
             out.write(CONFIGURATION);
             serializeConfiguration(out);
         } else if (obj instanceof Interval) {
-            Interval b = (Interval)obj;
+            Interval b = (Interval) obj;
             out.write(INTERVAL);
             serializeInterval(out, b);
         } else {

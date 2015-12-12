@@ -158,12 +158,12 @@ public class IntervalsParserTest {
         IntervalStringMap expectedMap = new IntervalStringMap();
         assertEqualIntervalMaps(expectedMap, IntervalsParser.parseIntervalMap(String.class, "<empty>"));
         assertEqualIntervalMaps(expectedMap, IntervalsParser.parseIntervalMap(String.class, "<EMPTY>"));
-        
+
         IntervalSet expectedSet = new IntervalSet();
         assertEquals(expectedSet, IntervalsParser.parseIntervalSet("<empty>"));
         assertEquals(expectedSet, IntervalsParser.parseIntervalSet("<EMPTY>"));
     }
-    
+
     @Test
     public void testParseIntervalMapString() {
         IntervalStringMap expected = new IntervalStringMap();

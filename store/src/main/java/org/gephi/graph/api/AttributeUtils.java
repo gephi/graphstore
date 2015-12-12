@@ -246,8 +246,8 @@ public class AttributeUtils {
         if (str == null || str.isEmpty()) {
             return null;
         }
-        
-        if(typeClass.isPrimitive()){
+
+        if (typeClass.isPrimitive()) {
             typeClass = getStandardizedType(typeClass);//For primitives we can use auto-unboxing
         }
 
@@ -331,7 +331,7 @@ public class AttributeUtils {
         } else if (typeClass.equals(TimestampCharMap.class)) {
             return TimestampsParser.parseTimestampMap(Character.class, str, timeZone);
         }
-        
+
         //Array types:
         if (typeClass.equals(boolean[].class)) {
             return ArraysParser.parseArrayAsPrimitiveArray(Boolean[].class, str);
@@ -359,8 +359,7 @@ public class AttributeUtils {
                 || typeClass.equals(Float[].class)
                 || typeClass.equals(Double[].class)
                 || typeClass.equals(BigInteger[].class)
-                || typeClass.equals(BigDecimal[].class)
-                ) {
+                || typeClass.equals(BigDecimal[].class)) {
             return ArraysParser.parseArray(typeClass, str);
         }
 
@@ -420,7 +419,8 @@ public class AttributeUtils {
      *
      * @param array wrapped primitive array instance
      * @return primitive array instance
-     * @throws IllegalArgumentException Thrown if any of the array values is null
+     * @throws IllegalArgumentException Thrown if any of the array values is
+     * null
      */
     public static Object getPrimitiveArray(Object[] array) {
         if (!isSupported(array.getClass())) {
@@ -576,7 +576,7 @@ public class AttributeUtils {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
-        
+
         if (type.equals(TimestampBooleanMap.class) || type.equals(IntervalBooleanMap.class)) {
             return Boolean.class;
         } else if (type.equals(TimestampIntegerMap.class) || type.equals(IntervalIntegerMap.class)) {
@@ -820,7 +820,8 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the string representation of the given timestamp in the given format.
+     * Returns the string representation of the given timestamp in the given
+     * format.
      *
      * @param timestamp time, in milliseconds
      * @param timeFormat time format
@@ -841,8 +842,8 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the string representation of the given timestamp in the given format.
-     * Default time zone is used (UTC).
+     * Returns the string representation of the given timestamp in the given
+     * format. Default time zone is used (UTC).
      *
      * @param timestamp time, in milliseconds
      * @param timeFormat time format
@@ -851,17 +852,19 @@ public class AttributeUtils {
     public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat) {
         return printTimestampInFormat(timestamp, timeFormat, null);
     }
-    
+
     /**
-     * Returns the string representation of the given array.
-     * The used format is the same format supported by {@link #parse(java.lang.String, java.lang.Class)} method
+     * Returns the string representation of the given array. The used format is
+     * the same format supported by
+     * {@link #parse(java.lang.String, java.lang.Class)} method
+     *
      * @param arr Input array. Can be an array of objects or primitives.
      * @return formatted array
      */
-    public static String printArray(Object arr){
+    public static String printArray(Object arr) {
         return FormattingAndParsingUtils.printArray(arr);
     }
-    
+
     /**
      * Returns true if the given column is a node column.
      *

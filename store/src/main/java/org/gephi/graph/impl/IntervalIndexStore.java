@@ -43,8 +43,8 @@ public class IntervalIndexStore<T extends Element> extends TimeIndexStore<T, Int
     protected TimeIndexImpl createIndex(boolean main) {
         return new IntervalIndexImpl(this, main);
     }
-    
+
     protected Interval2IntTreeMap getMap() {
-        return (Interval2IntTreeMap)timeSortedMap;
+        return (Interval2IntTreeMap) timeSortedMap;
     }
 }
