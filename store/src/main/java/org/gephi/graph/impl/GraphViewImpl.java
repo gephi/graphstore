@@ -98,6 +98,7 @@ public class GraphViewImpl implements GraphView {
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
         this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
+        this.interval = view.interval;
     }
 
     protected DirectedSubgraph getDirectedGraph() {
