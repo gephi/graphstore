@@ -316,7 +316,11 @@ public class Serialization {
         serialize(out, edge.source.storeId);
         serialize(out, edge.target.storeId);
         serialize(out, edge.type);
-        serialize(out, edge.getWeight());
+        if (edge.graphStore != null && edge.hasDynamicWeight()) {
+            serialize(out, edge.getWeight());
+        } else {
+            serialize(out, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT);
+        }
         serialize(out, edge.isDirected());
         serialize(out, edge.attributes);
         serialize(out, edge.properties);
