@@ -225,7 +225,9 @@ public class GraphViewStore {
     protected void addNode(NodeImpl node) {
         if (views.length > 0) {
             for (GraphViewImpl view : views) {
-                view.ensureNodeVectorSize(node);
+                if (view != null) {
+                    view.ensureNodeVectorSize(node);
+                }
             }
         }
     }
@@ -233,7 +235,9 @@ public class GraphViewStore {
     protected void removeNode(NodeImpl node) {
         if (views.length > 0) {
             for (GraphViewImpl view : views) {
-                view.removeNode(node);
+                if (view != null) {
+                    view.removeNode(node);
+                }
             }
         }
     }
@@ -241,10 +245,12 @@ public class GraphViewStore {
     protected void addEdge(EdgeImpl edge) {
         if (views.length > 0) {
             for (GraphViewImpl view : views) {
-                view.ensureEdgeVectorSize(edge);
+                if (view != null) {
+                    view.ensureEdgeVectorSize(edge);
 
-                if (view.nodeView && !view.edgeView) {
-                    view.addEdgeInNodeView(edge);
+                    if (view.nodeView && !view.edgeView) {
+                        view.addEdgeInNodeView(edge);
+                    }
                 }
             }
         }
@@ -253,7 +259,9 @@ public class GraphViewStore {
     protected void removeEdge(EdgeImpl edge) {
         if (views.length > 0) {
             for (GraphViewImpl view : views) {
-                view.removeEdge(edge);
+                if (view != null) {
+                    view.removeEdge(edge);
+                }
             }
         }
     }

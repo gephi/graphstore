@@ -17,7 +17,6 @@ package org.gephi.graph.impl;
 
 import java.awt.Color;
 import java.util.Map;
-import java.util.logging.Logger;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;

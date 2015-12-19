@@ -393,4 +393,32 @@ public class GraphViewStoreTest {
         store.setVisibleView(graphStore.mainGraphView);
         Assert.assertEquals(visibleView, graphStore.mainGraphView);
     }
+
+    @Test
+    public void testAddRemoveNodeWithGarbage() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        GraphView view = store.createView();
+        store.destroyView(view);
+
+        Node n = graphStore.factory.newNode("foo");
+        Assert.assertTrue(graphStore.addNode(n));
+        Assert.assertTrue(graphStore.removeNode(n));
+    }
+
+    @Test
+    public void testAddRemoveEdgeWithGarbage() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        GraphView view = store.createView();
+        store.destroyView(view);
+
+        Node n = graphStore.factory.newNode("foo");
+        graphStore.addNode(n);
+        Edge e = graphStore.factory.newEdge("bar", n, n, 0, 1.0, true);
+        Assert.assertTrue(graphStore.addEdge(e));
+        Assert.assertTrue(graphStore.removeEdge(e));
+    }
 }
