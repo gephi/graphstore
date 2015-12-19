@@ -68,6 +68,7 @@ import org.joda.time.DateTimeZone;
 // Greatly inspired from JDBM https://github.com/jankotek/JDBM3
 public class Serialization {
 
+    final static float VERSION = 0.4f;
     final static int NULL_ID = -1;
     final static int NULL = 0;
     final static int NORMAL = 1;
@@ -200,11 +201,13 @@ public class Serialization {
 
     public void serializeGraphModel(DataOutput out, GraphModelImpl model) throws IOException {
         this.model = model;
+        serialize(out, VERSION);
         serialize(out, model.configuration);
         serialize(out, model.store);
     }
 
     public GraphModelImpl deserializeGraphModel(DataInput is) throws IOException, ClassNotFoundException {
+        float version = (Float) deserialize(is);
         Configuration config = (Configuration) deserialize(is);
         model = new GraphModelImpl(config);
         deserialize(is);
