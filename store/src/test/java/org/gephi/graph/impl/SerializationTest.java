@@ -248,6 +248,7 @@ public class SerializationTest {
         view2.addNode(edge.getSource());
         view2.addNode(edge.getTarget());
         view2.addEdge(edge);
+        view2.setTimeInterval(new Interval(1.0, 4.0));
 
         viewStore.removeView(view);
 

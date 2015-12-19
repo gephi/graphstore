@@ -564,6 +564,7 @@ public class Serialization {
         serialize(out, view.version);
 
         serialize(out, view.attributes);
+        serialize(out, view.interval);
     }
 
     private GraphViewImpl deserializeGraphView(final DataInput is) throws IOException, ClassNotFoundException {
@@ -581,6 +582,7 @@ public class Serialization {
         int mutualEdgesCount = (Integer) deserialize(is);
         GraphVersion version = (GraphVersion) deserialize(is);
         GraphAttributesImpl atts = (GraphAttributesImpl) deserialize(is);
+        Interval interval = (Interval) deserialize(is);
 
         view.nodeCount = nodeCount;
         view.edgeCount = edgeCount;
@@ -596,6 +598,7 @@ public class Serialization {
         view.version.edgeVersion = version.edgeVersion;
 
         view.attributes.setGraphAttributes(atts);
+        view.interval = interval;
 
         return view;
     }

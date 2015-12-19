@@ -733,6 +733,7 @@ public class GraphViewImpl implements GraphView {
         hash = 11 * hash + Arrays.hashCode(this.typeCounts);
         hash = 11 * hash + Arrays.hashCode(this.mutualEdgeTypeCounts);
         hash = 11 * hash + this.mutualEdgesCount;
+        hash = 11 * hash + (this.interval != null ? this.interval.hashCode() : 0);
         return hash;
     }
 
@@ -765,6 +766,9 @@ public class GraphViewImpl implements GraphView {
             return false;
         }
         if (this.mutualEdgesCount != obj.mutualEdgesCount) {
+            return false;
+        }
+        if (this.interval != obj.interval && (this.interval == null || !this.interval.equals(obj.interval))) {
             return false;
         }
         return true;
