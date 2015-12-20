@@ -12,6 +12,6 @@ before_install:
 install:
   - echo "<settings><servers><server><id>ossrh</id><username>\${env.OSSRH_USER}</username><password>\${env.OSSRH_PASS}</password></server></servers></settings>" > ~/settings.xml
 script:
-  - mvn clean deploy --settings ~/settings.xml -Djava.awt.headless=true -Dgpg.defaultKeyring=false -Dgpg-keyname=1481F619 -Dgpg.passphrase=${env.GPG_PASSPHRASE} -Dgpg.publicKeyring=src/travis/pubring.gpg -Dgpg.secretKeyring=src/travis/secretring.gpg
+  - mvn clean deploy --settings ~/settings.xml -Djava.awt.headless=true -Dgpg.defaultKeyring=false -Dgpg-keyname=1481F619 -Dgpg.passphrase=$GPG_PASSPHRASE -Dgpg.publicKeyring=src/travis/pubring.gpg -Dgpg.secretKeyring=src/travis/secretring.gpg
 after_success:  
   - mvn clean test jacoco:report coveralls:report
