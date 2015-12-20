@@ -339,13 +339,17 @@ public abstract class ElementImpl implements Element {
                         if (oldValue != null && oldValue instanceof TimeMap) {
                             timeIndexStore.remove((TimeMap) oldValue);
                         }
-                        timeIndexStore.add((TimeMap) value);
+                        if (value != null) {
+                            timeIndexStore.add((TimeMap) value);
+                        }
                     } else if (TimeSet.class.isAssignableFrom(column.getTypeClass())
                             && column.getIndex() == GraphStoreConfiguration.ELEMENT_TIMESET_INDEX) {
                         if (oldValue != null) {
                             timeIndexStore.remove((TimeSet) oldValue);
                         }
-                        timeIndexStore.add((TimeSet) value);
+                        if (value != null) {
+                            timeIndexStore.add((TimeSet) value);
+                        }
                     }
                 }
             } else if (column.isIndexed() && columnStore != null && isValid()) {

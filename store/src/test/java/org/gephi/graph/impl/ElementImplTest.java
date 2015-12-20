@@ -34,6 +34,8 @@ import org.gephi.graph.api.types.TimestampLongMap;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
@@ -231,6 +233,19 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1, new Interval(1.0, 2.0));
+    }
+
+    @Test
+    public void testSetNullToNewTimeIndexedNodeAttribute() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getNodeTable();
+        Column col1 = table.addColumn("foo", TimestampDoubleMap.class);
+
+        Node n1 = graphModel.factory().newNode("1");
+        graphModel.getStore().addNode(n1);
+        n1.setAttribute(col1, null);
+
+        Assert.assertNull(n1.getAttribute(col1));
     }
 
     @Test
