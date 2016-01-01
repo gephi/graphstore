@@ -137,7 +137,8 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         checkValidInViewNodeObject(target);
         graphStore.autoReadLock();
         try {
-            return graphStore.edgeStore.isAdjacent(source, target);
+            EdgeImpl edge = graphStore.edgeStore.get(source, target);
+            return edge != null && view.containsEdge(edge);
         } finally {
             graphStore.autoReadUnlock();
         }
@@ -149,7 +150,8 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         checkValidInViewNodeObject(target);
         graphStore.autoReadLock();
         try {
-            return graphStore.edgeStore.isAdjacent(source, target, type);
+            EdgeImpl edge = graphStore.edgeStore.get(source, target, type);
+            return edge != null && view.containsEdge(edge);
         } finally {
             graphStore.autoReadUnlock();
         }

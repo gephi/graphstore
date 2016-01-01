@@ -626,8 +626,12 @@ public class GraphViewDecoratorTest {
         addSomeElements(graphStore, view);
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
-        for (Edge e : graph.getEdges()) {
-            Assert.assertTrue(graph.isAdjacent(e.getSource(), e.getTarget()));
+        for (Edge e : graphStore.getEdges()) {
+            if (graph.contains(e)) {
+                Assert.assertTrue(graph.isAdjacent(e.getSource(), e.getTarget()));
+            } else if (graph.contains(e.getSource()) && graph.contains(e.getTarget())) {
+                Assert.assertFalse(graph.isAdjacent(e.getSource(), e.getTarget()));
+            }
         }
         graph.clearEdges();
         Node[] nodes = graph.getNodes().toArray();
@@ -643,7 +647,11 @@ public class GraphViewDecoratorTest {
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
         for (Edge e : graph.getEdges()) {
-            Assert.assertTrue(graph.isAdjacent(e.getSource(), e.getTarget(), e.getType()));
+            if (graph.contains(e)) {
+                Assert.assertTrue(graph.isAdjacent(e.getSource(), e.getTarget(), e.getType()));
+            } else if (graph.contains(e.getSource()) && graph.contains(e.getTarget())) {
+                Assert.assertFalse(graph.isAdjacent(e.getSource(), e.getTarget(), e.getType()));
+            }
         }
         graph.clearEdges();
         Node[] nodes = graph.getNodes().toArray();
