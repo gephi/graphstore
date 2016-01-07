@@ -165,7 +165,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         checkNonNullObject(key);
         lock();
         try {
-            short id = idMap.getShort(key);
+            short id = idMap.getShort(key.toLowerCase());
             if (id == NULL_SHORT) {
                 throw new IllegalArgumentException("The column doesnt exist");
             }
@@ -195,7 +195,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         checkNonNullObject(key);
         lock();
         try {
-            short id = idMap.getShort(key);
+            short id = idMap.getShort(key.toLowerCase());
             if (id == NULL_SHORT) {
                 return null;
             }
@@ -209,7 +209,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         checkNonNullObject(key);
         lock();
         try {
-            return idMap.containsKey(key);
+            return idMap.containsKey(key.toLowerCase());
         } finally {
             unlock();
         }

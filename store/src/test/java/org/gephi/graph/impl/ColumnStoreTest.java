@@ -46,13 +46,14 @@ public class ColumnStoreTest {
     @Test
     public void testAddColumn() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col = new ColumnImpl("a", Integer.class, null, null, Origin.DATA, false, false);
 
         store.addColumn(col);
 
-        Assert.assertTrue(store.hasColumn("0"));
+        Assert.assertTrue(store.hasColumn("a"));
         Assert.assertEquals(store.size(), 1);
-        Assert.assertEquals(store.getColumn("0"), col);
+        Assert.assertEquals(store.getColumn("a"), col);
+        Assert.assertEquals(store.getColumn("A"), col);
         Assert.assertEquals(col.getIndex(), 0);
         Assert.assertEquals(store.getColumnByIndex(0), col);
     }
@@ -157,6 +158,13 @@ public class ColumnStoreTest {
         store.addColumn(col);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testAddColumnDifferentCase() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        store.addColumn(new ColumnImpl("A", Integer.class, null, null, Origin.DATA, false, false));
+        store.addColumn(new ColumnImpl("a", Integer.class, null, null, Origin.DATA, false, false));
+    }
+
     @Test
     public void testDefaultValue() {
         Integer defaultValue = 25;
@@ -189,6 +197,19 @@ public class ColumnStoreTest {
         store.removeColumn("0");
 
         Assert.assertFalse(store.hasColumn("0"));
+        Assert.assertEquals(store.size(), 0);
+        Assert.assertEquals(col.getIndex(), ColumnStore.NULL_ID);
+    }
+
+    @Test
+    public void testRemoveColumnStringDifferentCase() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        ColumnImpl col = new ColumnImpl("a", Integer.class, null, null, Origin.DATA, false, false);
+
+        store.addColumn(col);
+        store.removeColumn("A");
+
+        Assert.assertFalse(store.hasColumn("a"));
         Assert.assertEquals(store.size(), 0);
         Assert.assertEquals(col.getIndex(), ColumnStore.NULL_ID);
     }
@@ -228,10 +249,11 @@ public class ColumnStoreTest {
     @Test
     public void testGetColumnIndex() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        ColumnImpl col = new ColumnImpl("a", Integer.class, null, null, Origin.DATA, false, false);
         store.addColumn(col);
 
-        Assert.assertEquals(store.getColumnIndex("0"), 0);
+        Assert.assertEquals(store.getColumnIndex("a"), 0);
+        Assert.assertEquals(store.getColumnIndex("A"), 0);
     }
 
     @Test
@@ -243,6 +265,16 @@ public class ColumnStoreTest {
         Assert.assertTrue(store.hasColumn(col.getId()));
         Assert.assertFalse(store.hasColumn(""));
         Assert.assertFalse(store.hasColumn("A"));
+    }
+
+    @Test
+    public void testHasColumnDifferentCase() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        ColumnImpl col = new ColumnImpl("A", Integer.class, null, null, Origin.DATA, false, false);
+        store.addColumn(col);
+
+        Assert.assertTrue(store.hasColumn("A"));
+        Assert.assertTrue(store.hasColumn("a"));
     }
 
     @Test
