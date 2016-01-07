@@ -96,6 +96,15 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute(column), 1);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetAttributeStringNotFound() {
+        GraphStore store = new GraphStore();
+        generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute("foo", 1);
+    }
+
     @Test
     public void testSetAttributeTimestamp() {
         GraphStore store = new GraphStore();
@@ -318,6 +327,14 @@ public class ElementImplTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetAttributeKeyUnknown() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.getAttribute("foo");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetAttributeUnknownColumn() {
         GraphStore store = new GraphStore();
         ColumnImpl columnImpl = new ColumnImpl("0", String.class, "title", "", Origin.DATA, false, false);
@@ -388,6 +405,14 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute("age", 1.0), 1);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetAttributeTimestampStringUnknown() {
+        GraphStore store = new GraphStore();
+        NodeImpl node = new NodeImpl("0", store);
+
+        node.getAttribute("foo", 1.0);
+    }
+
     @Test
     public void testGetAttributeIntervalString() {
         GraphStore store = getIntervalGraphStore();
@@ -397,6 +422,14 @@ public class ElementImplTest {
         node.setAttribute(column, 1, new Interval(1.0, 2.0));
 
         Assert.assertEquals(node.getAttribute("age", new Interval(1.0, 2.0)), 1);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetAttributeIntervalStringUnknown() {
+        GraphStore store = new GraphStore();
+        NodeImpl node = new NodeImpl("0", store);
+
+        node.getAttribute("foo", new Interval(1.0, 2.0));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -611,6 +644,18 @@ public class ElementImplTest {
         Assert.assertNull(node.getAttribute("age"));
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testRemoveAttributeByStringUnknown() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 14);
+        store.addNode(node);
+
+        node.removeAttribute("foo");
+    }
+
     @Test
     public void testRemoveTimestampAttribute() {
         GraphStore store = new GraphStore();
@@ -702,6 +747,18 @@ public class ElementImplTest {
         Assert.assertNull(node.getAttribute(column, 1.0));
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testRemoveAttributeWithTimestampByStringUnknown() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimestampColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 15, 1.0);
+        store.addNode(node);
+
+        node.removeAttribute("foo", 1.0);
+    }
+
     @Test
     public void testRemoveAttributeWithIntervalByString() {
         GraphStore store = getIntervalGraphStore();
@@ -713,6 +770,18 @@ public class ElementImplTest {
 
         Assert.assertEquals(node.removeAttribute("age", new Interval(1.0, 2.0)), 15);
         Assert.assertNull(node.getAttribute(column, new Interval(1.0, 2.0)));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testRemoveAttributeWithIntervalByStringUnknown() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 15, new Interval(1.0, 2.0));
+        store.addNode(node);
+
+        node.removeAttribute("foo", new Interval(1.0, 2.0));
     }
 
     @Test

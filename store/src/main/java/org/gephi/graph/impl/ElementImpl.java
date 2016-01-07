@@ -84,7 +84,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object getAttribute(String key) {
-        return getAttribute(getColumnStore().getColumn(key));
+        return getAttribute(checkColumnExists(key));
     }
 
     @Override
@@ -107,7 +107,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object getAttribute(String key, double timestamp) {
-        return getAttribute(getColumnStore().getColumn(key), timestamp);
+        return getAttribute(checkColumnExists(key), timestamp);
     }
 
     @Override
@@ -119,7 +119,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object getAttribute(String key, Interval interval) {
-        return getAttribute(getColumnStore().getColumn(key), interval);
+        return getAttribute(checkColumnExists(key), interval);
     }
 
     @Override
@@ -147,7 +147,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object getAttribute(String key, GraphView view) {
-        return getAttribute(getColumnStore().getColumn(key), view);
+        return getAttribute(checkColumnExists(key), view);
     }
 
     @Override
@@ -196,7 +196,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object removeAttribute(String key) {
-        return removeAttribute(getColumnStore().getColumn(key));
+        return removeAttribute(checkColumnExists(key));
     }
 
     @Override
@@ -247,7 +247,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object removeAttribute(String key, double timestamp) {
-        return removeAttribute(getColumnStore().getColumn(key), timestamp);
+        return removeAttribute(checkColumnExists(key), timestamp);
     }
 
     @Override
@@ -258,7 +258,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object removeAttribute(String key, Interval interval) {
-        return removeAttribute(getColumnStore().getColumn(key), interval);
+        return removeAttribute(checkColumnExists(key), interval);
     }
 
     private Object removeTimeAttribute(Column column, Object timeObject) {
@@ -310,7 +310,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public void setAttribute(String key, Object value) {
-        setAttribute(getColumnStore().getColumn(key), value);
+        setAttribute(checkColumnExists(key), value);
     }
 
     @Override
@@ -364,7 +364,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public void setAttribute(String key, Object value, double timestamp) {
-        setAttribute(getColumnStore().getColumn(key), value, timestamp);
+        setAttribute(checkColumnExists(key), value, timestamp);
     }
 
     @Override
@@ -376,7 +376,7 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public void setAttribute(String key, Object value, Interval interval) {
-        setAttribute(getColumnStore().getColumn(key), value, interval);
+        setAttribute(checkColumnExists(key), value, interval);
     }
 
     @Override
@@ -699,6 +699,14 @@ public abstract class ElementImpl implements Element {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             throw new IllegalArgumentException("Timestamp can't be NaN or infinity");
         }
+    }
+
+    Column checkColumnExists(String key) {
+        Column col = getColumnStore().getColumn(key);
+        if (col == null) {
+            throw new IllegalArgumentException("The column '" + key + "' is not found");
+        }
+        return col;
     }
 
     void checkColumn(Column column) {
