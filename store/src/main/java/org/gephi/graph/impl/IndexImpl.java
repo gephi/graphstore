@@ -473,7 +473,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
                     return (Number) ((SortedMap) map).firstKey();
                 }
             } else {
-                throw new UnsupportedOperationException("is not a sortable column.");
+                throw new UnsupportedOperationException("'" + column.getId() + "' is not a sortable column (" + column.getTypeClass().getSimpleName() + ").");
             }
         }
 
@@ -485,7 +485,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
                     return (Number) ((SortedMap) map).lastKey();
                 }
             } else {
-                throw new UnsupportedOperationException(" is not a sortable column.");
+                throw new UnsupportedOperationException("'" + column.getId() + "' is not a sortable column (" + column.getTypeClass().getSimpleName() + ").");
             }
         }
 
