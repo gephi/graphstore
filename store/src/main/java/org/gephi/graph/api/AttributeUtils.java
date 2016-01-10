@@ -427,7 +427,9 @@ public class AttributeUtils {
             throw new IllegalArgumentException("Unsupported type " + array.getClass().getCanonicalName());
         }
         Class arrayClass = array.getClass().getComponentType();
-        if (!arrayClass.isPrimitive()) {
+        if (!arrayClass.isPrimitive() && (arrayClass == Double.class || arrayClass == Float.class || arrayClass == Long.class
+                || arrayClass == Integer.class || arrayClass == Short.class || arrayClass == Character.class
+                || arrayClass == Byte.class || arrayClass == Boolean.class)) {
             Class primitiveClass = getPrimitiveType(arrayClass);
 
             int arrayLength = array.length;
