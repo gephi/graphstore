@@ -760,6 +760,30 @@ public class AttributeUtils {
     public static double parseDateTime(String dateTime) {
         return parseDateTime(dateTime, null);
     }
+    
+    /**
+     * Parses an ISO date with or without time or a timestamp (in milliseconds).
+     * Returns the date or timestamp converted to a timestamp in milliseconds.
+     *
+     * @param timeStr Date or timestamp string
+     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @return Timestamp
+     */
+    public static double parseDateTimeOrTimestamp(String timeStr, DateTimeZone timeZone) {
+        return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr, timeZone);
+    }
+
+    /**
+     * Parses an ISO date with or without time or a timestamp (in milliseconds).
+     * Returns the date or timestamp converted to a timestamp in milliseconds.
+     * Default time zone is used (UTC).
+     *
+     * @param timeStr Date or timestamp string
+     * @return Timestamp
+     */
+    public static double parseDateTimeOrTimestamp(String timeStr) {
+        return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr, null);
+    }
 
     /**
      * Returns the string representation of the given timestamp.

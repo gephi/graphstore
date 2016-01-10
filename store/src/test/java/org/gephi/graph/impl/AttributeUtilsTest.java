@@ -480,6 +480,35 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parseDateTime("2012-09-12T15:04:01"), AttributeUtils.parseDateTime("2012-09-12T15:04:01", DateTimeZone.forID("+00:00")));
         Assert.assertEquals(AttributeUtils.parseDateTime("2012-09-12T15:04:01+03:30"), AttributeUtils.parseDateTime("2012-09-12T15:04:01", DateTimeZone.forID("+03:30")));
     }
+    
+    @Test
+    public void testParseDateTimeOrTimestamp() {
+        //Unix timestamps:
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("0"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("0.0"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1.0"), 1.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("-123."), -123.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("2.5e6"), 2.5e6);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("-Infinity"), Double.NEGATIVE_INFINITY);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("Infinity"), Double.POSITIVE_INFINITY);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("0"), AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00"));
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("0"), AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00Z"));
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("0"), AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00", DateTimeZone.forID("+00:00")));
+        
+        //Dates
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00", null), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00", DateTimeZone.UTC), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T01:30:00", DateTimeZone.forID("+01:30")), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00+00:00"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00Z"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00.000+00:00"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00.000Z"), 0.0);
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1969-12-31T22:00:00-02:00"), 0.0);
+
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("2012-09-12T15:04:01"), AttributeUtils.parseDateTime("2012-09-12T15:04:01", DateTimeZone.forID("+00:00")));
+        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("2012-09-12T15:04:01+03:30"), AttributeUtils.parseDateTime("2012-09-12T15:04:01", DateTimeZone.forID("+03:30")));
+    }
 
     @Test
     public void testPrintDate() {
