@@ -136,7 +136,7 @@ public class IndexStore<T extends Element> {
             final ColumnImpl[] cols = columnStore.columns;
             for (int i = 0; i < length; i++) {
                 Column c = cols[i];
-                if (c != null && c.isIndexed()) {
+                if (c != null && c.isIndexed() && elementImpl.attributes.length > c.getIndex()) {
                     Object value = elementImpl.attributes[c.getIndex()];
                     mainIndex.remove(c, value, element);
                     for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {

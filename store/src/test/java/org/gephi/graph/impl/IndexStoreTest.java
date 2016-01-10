@@ -188,6 +188,15 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testClearNodeWithoutSet() {
+        ColumnStore<Node> columnStore = generateBasicNodeColumnStore();
+        IndexStore<Node> indexStore = columnStore.indexStore;
+
+        NodeImpl n = new NodeImpl("0");
+        indexStore.clear(n);
+    }
+
+    @Test
     public void testIndexNodeUnique() {
         ColumnStore<Node> columnStore = generateBasicNodeColumnStore();
         IndexStore<Node> indexStore = columnStore.indexStore;
