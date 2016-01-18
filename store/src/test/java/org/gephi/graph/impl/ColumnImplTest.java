@@ -43,6 +43,15 @@ public class ColumnImplTest {
     }
 
     @Test
+    public void testColumnStandardizedType() {
+        ColumnImpl col1 = new ColumnImpl("0", int.class, null, null, Origin.DATA, false, false);
+        Assert.assertEquals(col1.getTypeClass(), Integer.class);
+
+        ColumnImpl col2 = new ColumnImpl("0", Integer[].class, null, null, Origin.DATA, false, false);
+        Assert.assertEquals(col2.getTypeClass(), int[].class);
+    }
+
+    @Test
     public void testColumnIsDynamic() {
         ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         Assert.assertFalse(col1.isDynamic());

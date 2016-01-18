@@ -448,6 +448,7 @@ public class AttributeUtilsTest {
     public void testStandardizeValue() {
         Assert.assertEquals(AttributeUtils.standardizeValue(new Integer(1)), 1);
         Assert.assertEquals((int[]) AttributeUtils.standardizeValue(new Integer[]{1, 2}), new int[]{1, 2});
+        Assert.assertEquals((int[]) AttributeUtils.standardizeValue(new int[]{1, 2}), new int[]{1, 2});
         Assert.assertEquals((String[]) AttributeUtils.standardizeValue(new String[]{"foo"}), new String[]{"foo"});
     }
 

@@ -51,6 +51,7 @@ public class ColumnImpl implements Column {
         if (typeClass == null) {
             throw new NullPointerException();
         }
+        typeClass = AttributeUtils.getStandardizedType(typeClass);
         this.table = table;
         this.id = id.toLowerCase();//Make sure column has lowercase id from wherever it's created
         this.typeClass = typeClass;
