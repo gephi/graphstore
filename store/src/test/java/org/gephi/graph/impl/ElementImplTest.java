@@ -96,6 +96,22 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute(column), 1);
     }
 
+    @Test
+    public void testSetAttributeStandardizedType() {
+        GraphStore store = new GraphStore();
+        store.nodeTable.store.addColumn(new ColumnImpl("arr1", Integer[].class, "Array", null, Origin.DATA, true, false));
+        store.nodeTable.store.addColumn(new ColumnImpl("arr2", int[].class, "Array", null, Origin.DATA, true, false));
+        Column column1 = store.nodeTable.store.getColumn("arr1");
+        Column column2 = store.nodeTable.store.getColumn("arr2");
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column1, new Integer[]{42});
+        node.setAttribute(column2, new Integer[]{42});
+
+        Assert.assertEquals((int[]) node.getAttribute(column1), new int[]{42});
+        Assert.assertEquals((int[]) node.getAttribute(column2), new int[]{42});
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetAttributeStringNotFound() {
         GraphStore store = new GraphStore();

@@ -34,7 +34,7 @@ public class GraphAttributesImpl {
         if (value != null) {
             checkSupportedTypes(value.getClass());
         }
-        attributes.put(key, value);
+        attributes.put(key, AttributeUtils.standardizeValue(value));
     }
 
     public synchronized Object getValue(String key) {

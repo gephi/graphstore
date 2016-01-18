@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import java.util.Map;
 import java.util.Set;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Estimator;
@@ -317,6 +318,8 @@ public abstract class ElementImpl implements Element {
     public void setAttribute(Column column, Object value) {
         checkColumn(column);
         checkReadOnlyColumn(column);
+
+        value = AttributeUtils.standardizeValue(value);
         checkType(column, value);
 
         int index = column.getIndex();
