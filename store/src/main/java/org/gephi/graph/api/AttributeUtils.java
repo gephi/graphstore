@@ -618,7 +618,7 @@ public class AttributeUtils {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
-        if (type.isArray()) {
+        if (type.isArray() && !type.getComponentType().isPrimitive()) {
             return getPrimitiveArray((Object[]) value);
         }
         return value;
