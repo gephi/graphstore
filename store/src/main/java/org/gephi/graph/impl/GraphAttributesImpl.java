@@ -37,6 +37,10 @@ public class GraphAttributesImpl {
         attributes.put(key, AttributeUtils.standardizeValue(value));
     }
 
+    public synchronized void removeValue(String key) {
+        attributes.remove(key);
+    }
+
     public synchronized Object getValue(String key) {
         return attributes.get(key);
     }

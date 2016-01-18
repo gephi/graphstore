@@ -53,6 +53,15 @@ public class GraphAttributesTest {
     }
 
     @Test
+    public void testRemove() {
+        GraphAttributesImpl atts = new GraphAttributesImpl();
+        atts.setValue("foo", "bar");
+        atts.removeValue("foo");
+
+        Assert.assertNull(atts.getValue("foo"));
+    }
+
+    @Test
     public void testSetNull() {
         GraphAttributesImpl atts = new GraphAttributesImpl();
         atts.setValue("foo", null);
