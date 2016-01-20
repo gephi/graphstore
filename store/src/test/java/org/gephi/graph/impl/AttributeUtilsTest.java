@@ -18,8 +18,14 @@ package org.gephi.graph.impl;
 import java.awt.Color;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
@@ -365,8 +371,16 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isSupported(TimestampSet.class));
         Assert.assertTrue(AttributeUtils.isSupported(IntervalDoubleMap.class));
         Assert.assertTrue(AttributeUtils.isSupported(IntervalSet.class));
+        Assert.assertTrue(AttributeUtils.isSupported(List.class));
+        Assert.assertTrue(AttributeUtils.isSupported(ArrayList.class));
+        Assert.assertTrue(AttributeUtils.isSupported(Set.class));
+        Assert.assertTrue(AttributeUtils.isSupported(HashSet.class));
+        Assert.assertTrue(AttributeUtils.isSupported(Map.class));
+        Assert.assertTrue(AttributeUtils.isSupported(HashMap.class));
 
         Assert.assertFalse(AttributeUtils.isSupported(Color.class));
+        Assert.assertFalse(AttributeUtils.isSupported(Collection.class));
+        Assert.assertFalse(AttributeUtils.isSupported(Iterable.class));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -450,6 +464,26 @@ public class AttributeUtilsTest {
         Assert.assertEquals((int[]) AttributeUtils.standardizeValue(new Integer[]{1, 2}), new int[]{1, 2});
         Assert.assertEquals((int[]) AttributeUtils.standardizeValue(new int[]{1, 2}), new int[]{1, 2});
         Assert.assertEquals((String[]) AttributeUtils.standardizeValue(new String[]{"foo"}), new String[]{"foo"});
+
+        List<Integer> list1 = Arrays.asList(42);
+        Assert.assertEquals((List<Integer>) AttributeUtils.standardizeValue(list1), list1);
+
+        List list2 = Arrays.asList(42, "foo");
+        Assert.assertEquals((List) AttributeUtils.standardizeValue(list2), list2);
+
+        List list3 = new ArrayList();
+        list3.add(new Integer[]{1, 2});
+        Assert.assertEquals(((List) AttributeUtils.standardizeValue(list3)).get(0), new int[]{1, 2});
+
+        Set set1 = new HashSet(Arrays.asList(42, "foo"));
+        Assert.assertEquals((Set) AttributeUtils.standardizeValue(set1), set1);
+
+        Map map1 = new HashMap();
+        map1.put("foo", "bar");
+        map1.put("bar", new Integer[]{1, 2});
+        Map map1Result = (Map) AttributeUtils.standardizeValue(map1);
+        Assert.assertEquals(map1Result.get("foo"), "bar");
+        Assert.assertEquals(map1Result.get("bar"), new int[]{1, 2});
     }
 
     @Test
@@ -460,6 +494,30 @@ public class AttributeUtilsTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testStandardizeValueUnsupportedType() {
         AttributeUtils.standardizeValue(new Color(0, 0, 0));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testStandardizeValueUnsupportedListContent() {
+        AttributeUtils.standardizeValue(Arrays.asList(Color.BLACK));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testStandardizeValueUnsupportedSetContent() {
+        AttributeUtils.standardizeValue(new HashSet(Arrays.asList(Color.BLACK)));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testStandardizeValueUnsupportedMapKeyContent() {
+        Map map = new HashMap();
+        map.put(new Object[]{1}, "bar");
+        AttributeUtils.standardizeValue(map);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testStandardizeValueUnsupportedMapValueContent() {
+        Map map = new HashMap();
+        map.put("foo", Color.BLACK);
+        AttributeUtils.standardizeValue(map);
     }
 
     @Test
@@ -481,7 +539,7 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parseDateTime("2012-09-12T15:04:01"), AttributeUtils.parseDateTime("2012-09-12T15:04:01", DateTimeZone.forID("+00:00")));
         Assert.assertEquals(AttributeUtils.parseDateTime("2012-09-12T15:04:01+03:30"), AttributeUtils.parseDateTime("2012-09-12T15:04:01", DateTimeZone.forID("+03:30")));
     }
-    
+
     @Test
     public void testParseDateTimeOrTimestamp() {
         //Unix timestamps:
@@ -495,7 +553,7 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("0"), AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00"));
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("0"), AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00Z"));
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("0"), AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00", DateTimeZone.forID("+00:00")));
-        
+
         //Dates
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00"), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00", null), 0.0);
@@ -670,6 +728,26 @@ public class AttributeUtilsTest {
         Assert.assertFalse(AttributeUtils.isDynamicType(Integer.class));
         Assert.assertFalse(AttributeUtils.isDynamicType(TimestampMap.class));
         Assert.assertFalse(AttributeUtils.isDynamicType(IntervalMap.class));
+    }
+
+    @Test
+    public void testIsCollectionType() {
+        Assert.assertTrue(AttributeUtils.isCollectionType(List.class));
+        Assert.assertTrue(AttributeUtils.isCollectionType(ArrayList.class));
+        Assert.assertTrue(AttributeUtils.isCollectionType(Set.class));
+        Assert.assertTrue(AttributeUtils.isCollectionType(HashSet.class));
+        Assert.assertFalse(AttributeUtils.isCollectionType(Integer.class));
+        Assert.assertFalse(AttributeUtils.isCollectionType(Collection.class));
+        Assert.assertFalse(AttributeUtils.isCollectionType(Object[].class));
+        Assert.assertFalse(AttributeUtils.isCollectionType(List[].class));
+    }
+
+    @Test
+    public void testIsMapType() {
+        Assert.assertTrue(AttributeUtils.isMapType(Map.class));
+        Assert.assertTrue(AttributeUtils.isMapType(HashMap.class));
+        Assert.assertFalse(AttributeUtils.isMapType(List.class));
+        Assert.assertFalse(AttributeUtils.isMapType(Map[].class));
     }
 
     @Test

@@ -15,6 +15,9 @@
  */
 package org.gephi.graph.api;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.gephi.graph.impl.TimestampsParser;
 import org.gephi.graph.impl.IntervalsParser;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
@@ -34,9 +37,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -152,6 +158,11 @@ public class AttributeUtils {
         supportedTypes.add(IntervalDoubleMap.class);
         supportedTypes.add(IntervalCharMap.class);
         supportedTypes.add(IntervalStringMap.class);
+
+        //Lists, Maps, Sets
+        supportedTypes.add(List.class);
+        supportedTypes.add(Set.class);
+        supportedTypes.add(Map.class);
 
         //Assign
         SUPPORTED_TYPES = Collections.unmodifiableSet(supportedTypes);
@@ -463,7 +474,7 @@ public class AttributeUtils {
         if (type == null) {
             throw new NullPointerException();
         }
-        return SUPPORTED_TYPES.contains(type);
+        return SUPPORTED_TYPES.contains(type) || isCollectionType(type) || isMapType(type);
     }
 
     /**
@@ -621,6 +632,40 @@ public class AttributeUtils {
         if (type.isArray() && !type.getComponentType().isPrimitive()) {
             return getPrimitiveArray((Object[]) value);
         }
+        if (List.class.isAssignableFrom(type)) {
+            List source = (List) value;
+            List r = new ObjectArrayList(source.size());
+            for (Object o : source) {
+                if (!isSupported(o.getClass()) || !(isSimpleType(o.getClass()) || isArrayType(o.getClass()))) {
+                    throw new IllegalArgumentException("The list contains unsupported type " + o.getClass().getCanonicalName());
+                }
+                r.add(standardizeValue(o));
+            }
+            return r;
+        } else if (Set.class.isAssignableFrom(type)) {
+            Set source = (Set) value;
+            Set r = new ObjectOpenHashSet(source.size());
+            for (Object o : source) {
+                if (!isSupported(o.getClass()) || !(isSimpleType(o.getClass()) || isArrayType(o.getClass()))) {
+                    throw new IllegalArgumentException("The set contains unsupported type " + o.getClass().getCanonicalName());
+                }
+                r.add(standardizeValue(o));
+            }
+            return r;
+        } else if (Map.class.isAssignableFrom(type)) {
+            Map<?, ?> source = (Map) value;
+            Map r = new Object2ObjectOpenHashMap(source.size());
+            for (Map.Entry entry : source.entrySet()) {
+                if (!isSupported(entry.getKey().getClass()) || !isSimpleType(entry.getKey().getClass())) {
+                    throw new IllegalArgumentException("The map contains unsupported key type " + entry.getKey().getClass().getCanonicalName());
+                }
+                if (!isSupported(entry.getValue().getClass()) || !(isSimpleType(entry.getValue().getClass()) || isArrayType(entry.getValue().getClass()))) {
+                    throw new IllegalArgumentException("The map contains unsupported value type " + entry.getValue().getClass().getCanonicalName());
+                }
+                r.put(entry.getKey(), standardizeValue(entry.getValue()));
+            }
+            return r;
+        }
         return value;
     }
 
@@ -726,6 +771,40 @@ public class AttributeUtils {
     }
 
     /**
+     * Returns true if <em>type</em> is an array type.
+     *
+     * @param type type to test
+     * @return true if <em>type</em> is an array type, false otherwise
+     */
+    public static boolean isArrayType(Class type) {
+        return type.isArray() && isSupported(type.getComponentType());
+    }
+
+    /**
+     * Returns true if <em>type</em> is a collection type.
+     * <p>
+     * Collection types are either <em>List</em> or <em>Set</em>.
+     *
+     * @param type type to test
+     * @return true if <em>type</em> is a collection type, false otherwise
+     */
+    public static boolean isCollectionType(Class type) {
+        return List.class.isAssignableFrom(type) || Set.class.isAssignableFrom(type);
+    }
+
+    /**
+     * Returns true if <em>type</em> is a map type.
+     * <p>
+     * Collection types implement the <em>Map</em> interface.
+     *
+     * @param type type to test
+     * @return true if <em>type</em> is a map type, false otherwise
+     */
+    public static boolean isMapType(Class type) {
+        return Map.class.isAssignableFrom(type);
+    }
+
+    /**
      * Returns the type name for the given type.
      *
      * @param type type to get its name
@@ -760,7 +839,7 @@ public class AttributeUtils {
     public static double parseDateTime(String dateTime) {
         return parseDateTime(dateTime, null);
     }
-    
+
     /**
      * Parses an ISO date with or without time or a timestamp (in milliseconds).
      * Returns the date or timestamp converted to a timestamp in milliseconds.

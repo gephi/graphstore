@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.AttributeUtils;
@@ -760,6 +761,18 @@ public abstract class ElementImpl implements Element {
                         || (value instanceof String && !typeClass.equals(IntervalStringMap.class))
                         || (value instanceof Character && !typeClass.equals(IntervalCharMap.class))) {
                     throw new IllegalArgumentException("The object class does not match with the dynamic type (" + typeClass.getName() + ")");
+                }
+            } else if (List.class.isAssignableFrom(typeClass)) {
+                if (!(value instanceof List)) {
+                    throw new IllegalArgumentException("The object class does not match with the list type (" + typeClass.getName() + ")");
+                }
+            } else if (Set.class.isAssignableFrom(typeClass)) {
+                if (!(value instanceof Set)) {
+                    throw new IllegalArgumentException("The object class does not match with the set type (" + typeClass.getName() + ")");
+                }
+            } else if (Map.class.isAssignableFrom(typeClass)) {
+                if (!(value instanceof Map)) {
+                    throw new IllegalArgumentException("The object class does not match with the map type (" + typeClass.getName() + ")");
                 }
             } else if (!value.getClass().equals(typeClass)) {
                 throw new IllegalArgumentException("The object class does not match with the column type (" + typeClass.getName() + ")");

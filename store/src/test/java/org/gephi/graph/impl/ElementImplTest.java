@@ -15,7 +15,11 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
@@ -119,6 +123,60 @@ public class ElementImplTest {
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute("foo", 1);
+    }
+
+    @Test
+    public void testSetAttributeList() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicListColumn(store);
+
+        List l = new ArrayList();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, l);
+        Assert.assertEquals(node.getAttribute(column), l);
+
+        l.add("foo");
+        l.add(1);
+        Assert.assertEquals(node.getAttribute(column), new ArrayList());
+        node.setAttribute(column, l);
+        Assert.assertEquals(node.getAttribute(column), l);
+    }
+
+    @Test
+    public void testSetAttributeSet() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicSetColumn(store);
+
+        Set s = new HashSet();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, s);
+        Assert.assertEquals(node.getAttribute(column), s);
+
+        s.add("foo");
+        s.add(1);
+        Assert.assertEquals(node.getAttribute(column), new HashSet());
+        node.setAttribute(column, s);
+        Assert.assertEquals(node.getAttribute(column), s);
+    }
+
+    @Test
+    public void testSetAttributeMap() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicMapColumn(store);
+
+        Map m = new HashMap();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, m);
+        Assert.assertEquals(node.getAttribute(column), m);
+
+        m.put("foo", "bar");
+        m.put("bar", 1);
+        Assert.assertEquals(node.getAttribute(column), new HashMap());
+        node.setAttribute(column, m);
+        Assert.assertEquals(node.getAttribute(column), m);
     }
 
     @Test
@@ -1007,6 +1065,21 @@ public class ElementImplTest {
     private Column generateBasicBooleanColumn(GraphStore graphStore) {
         graphStore.nodeTable.store.addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("visible");
+    }
+
+    private Column generateBasicListColumn(GraphStore graphStore) {
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("list", List.class, "List", null, Origin.DATA, true, false));
+        return graphStore.nodeTable.store.getColumn("list");
+    }
+
+    private Column generateBasicSetColumn(GraphStore graphStore) {
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("set", Set.class, "Set", null, Origin.DATA, true, false));
+        return graphStore.nodeTable.store.getColumn("set");
+    }
+
+    private Column generateBasicMapColumn(GraphStore graphStore) {
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("map", Map.class, "Map", null, Origin.DATA, true, false));
+        return graphStore.nodeTable.store.getColumn("map");
     }
 
     private Column generateTimestampColumn(GraphStore graphStore) {
