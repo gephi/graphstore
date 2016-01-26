@@ -45,6 +45,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TextProperties;
 import org.gephi.graph.spi.LayoutData;
 
@@ -659,6 +660,11 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public Iterable<Map.Entry> getAttributes(Column column) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Table getTable() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
