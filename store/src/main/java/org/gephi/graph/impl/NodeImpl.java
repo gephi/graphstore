@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 import java.awt.Color;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeProperties;
+import org.gephi.graph.api.Table;
 import org.gephi.graph.spi.LayoutData;
 
 public class NodeImpl extends ElementImpl implements Node {
@@ -73,6 +74,14 @@ public class NodeImpl extends ElementImpl implements Node {
     ColumnStore getColumnStore() {
         if (graphStore != null) {
             return graphStore.nodeTable.store;
+        }
+        return null;
+    }
+
+    @Override
+    public Table getTable() {
+        if (graphStore != null) {
+            return graphStore.nodeTable;
         }
         return null;
     }

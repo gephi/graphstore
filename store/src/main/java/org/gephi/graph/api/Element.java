@@ -323,4 +323,11 @@ public interface Element extends ElementProperties {
      * Clears all attribute values.
      */
     public void clearAttributes();
+
+    /**
+     * Returns the table the element is associated with.
+     *
+     * @return table
+     */
+    public Table getTable();
 }

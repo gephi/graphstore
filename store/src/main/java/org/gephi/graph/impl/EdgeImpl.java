@@ -23,6 +23,7 @@ import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Table;
 import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimestampMap;
@@ -281,6 +282,14 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     public boolean isSelfLoop() {
         return source == target;
+    }
+
+    @Override
+    public Table getTable() {
+        if (graphStore != null) {
+            return graphStore.edgeTable;
+        }
+        return null;
     }
 
     @Override

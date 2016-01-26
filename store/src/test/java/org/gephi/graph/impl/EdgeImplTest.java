@@ -340,4 +340,12 @@ public class EdgeImplTest {
 
         Assert.assertFalse(edge.isMutual());
     }
+
+    @Test
+    public void testGetTable() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        for (Edge e : graphStore.getEdges()) {
+            Assert.assertSame(e.getTable(), graphStore.getModel().getEdgeTable());
+        }
+    }
 }

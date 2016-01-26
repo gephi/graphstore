@@ -25,6 +25,7 @@ import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
@@ -1046,6 +1047,14 @@ public class ElementImplTest {
         node.checkType(new ColumnImpl("0", IntervalBooleanMap.class, null, null, Origin.DATA, false, false), true);
         node.checkType(new ColumnImpl("0", IntervalStringMap.class, null, null, Origin.DATA, false, false), "foo");
 
+    }
+
+    @Test
+    public void testGetTable() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertSame(n.getTable(), graphStore.getModel().getNodeTable());
+        }
     }
 
     //Utility
