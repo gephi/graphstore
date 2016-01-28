@@ -279,6 +279,11 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
     }
 
     @Override
+    public boolean hasNode(final Object id) {
+        return getNode(id) != null;
+    }
+
+    @Override
     public Edge getEdge(Object id) {
         graphStore.autoReadLock();
         try {
@@ -290,6 +295,11 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         } finally {
             graphStore.autoReadUnlock();
         }
+    }
+
+    @Override
+    public boolean hasEdge(final Object id) {
+        return getEdge(id) != null;
     }
 
     @Override

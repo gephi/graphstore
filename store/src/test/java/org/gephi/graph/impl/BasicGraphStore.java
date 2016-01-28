@@ -184,8 +184,18 @@ public class BasicGraphStore implements DirectedGraph {
     }
 
     @Override
+    public boolean hasNode(Object id) {
+        return nodeStore.get(id) != null;
+    }
+
+    @Override
     public Edge getEdge(Object id) {
         return edgeStore.get(id);
+    }
+
+    @Override
+    public boolean hasEdge(Object id) {
+        return edgeStore.get(id) != null;
     }
 
     @Override

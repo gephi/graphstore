@@ -530,6 +530,8 @@ public class GraphStoreTest {
         graphStore.addNode(n1);
         Assert.assertSame(graphStore.getNode("foo"), n1);
         Assert.assertNull(graphStore.getNode("bar"));
+        Assert.assertTrue(graphStore.hasNode("foo"));
+        Assert.assertFalse(graphStore.hasNode("bar"));
     }
 
     @Test
@@ -537,6 +539,8 @@ public class GraphStoreTest {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         Assert.assertNotNull(graphStore.getEdge("0"));
         Assert.assertNull(graphStore.getEdge("bar"));
+        Assert.assertTrue(graphStore.hasEdge("0"));
+        Assert.assertFalse(graphStore.hasEdge("bar"));
     }
 
     @Test

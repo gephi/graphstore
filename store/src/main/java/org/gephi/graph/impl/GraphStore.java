@@ -171,6 +171,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public boolean hasNode(final Object id) {
+        return getNode(id) != null;
+    }
+
+    @Override
     public EdgeImpl getEdge(final Object id) {
         autoReadLock();
         try {
@@ -178,6 +183,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         } finally {
             autoReadUnlock();
         }
+    }
+
+    @Override
+    public boolean hasEdge(final Object id) {
+        return getEdge(id) != null;
     }
 
     @Override

@@ -100,8 +100,18 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public boolean hasNode(final Object id) {
+        return store.hasNode(id);
+    }
+
+    @Override
     public Edge getEdge(Object id) {
         return store.getEdge(id);
+    }
+
+    @Override
+    public boolean hasEdge(final Object id) {
+        return store.hasEdge(id);
     }
 
     @Override
@@ -110,8 +120,18 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public EdgeIterable getEdges(Node node1, Node node2) {
+        return store.getEdgeIterableWrapper(store.edgeStore.edgesUndirectedIterator(node1, node2));
+    }
+
+    @Override
     public Edge getEdge(Node node1, Node node2, int type) {
         return store.getEdge(node1, node2, type);
+    }
+
+    @Override
+    public EdgeIterable getEdges(Node node1, Node node2, int type) {
+        return store.getEdgeIterableWrapper(store.edgeStore.edgesUndirectedIterator(node1, node2, type));
     }
 
     @Override

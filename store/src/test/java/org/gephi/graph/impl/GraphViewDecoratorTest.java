@@ -671,6 +671,9 @@ public class GraphViewDecoratorTest {
         Assert.assertSame(graph.getNode("1"), n1);
         Assert.assertNull(graph.getNode("2"));
         Assert.assertNull(graph.getNode("99"));
+        Assert.assertTrue(graph.hasNode("1"));
+        Assert.assertFalse(graph.hasNode("2"));
+        Assert.assertFalse(graph.hasNode("99"));
     }
 
     @Test
@@ -684,6 +687,8 @@ public class GraphViewDecoratorTest {
 
         Assert.assertSame(graph.getEdge("0"), graphStore.getEdges().toArray()[0]);
         Assert.assertNull(graph.getEdge("99"));
+        Assert.assertTrue(graph.hasEdge("0"));
+        Assert.assertFalse(graph.hasEdge("99"));
     }
 
     @Test

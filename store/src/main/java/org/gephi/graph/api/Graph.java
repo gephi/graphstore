@@ -65,6 +65,8 @@ public interface Graph {
 
     /**
      * Removes a node from this graph.
+     * <p>
+     * All edges attached to the node will be removed as well.
      *
      * @param node the node to remove
      * @return true if the node was removed, false if it didn't exist
@@ -112,12 +114,28 @@ public interface Graph {
     public Node getNode(Object id);
 
     /**
+     * Returns true if a node with <em>id</em> as identifier exists.
+     *
+     * @param id node id
+     * @return true if a node exists, false otherwise
+     */
+    public boolean hasNode(Object id);
+
+    /**
      * Gets an edge by its identifier.
      *
      * @param id the edge id
      * @return the edge, or null if not found
      */
     public Edge getEdge(Object id);
+
+    /**
+     * Returns true if an edge with <em>id</em> as identifier exists.
+     *
+     * @param id edge id
+     * @return true if an edge exists, false otherwise
+     */
+    public boolean hasEdge(Object id);
 
     /**
      * Gets the edge adjacent to node1 and node2.
