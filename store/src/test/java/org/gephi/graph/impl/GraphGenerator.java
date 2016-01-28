@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Node;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.impl.BasicGraphStore.BasicEdgeStore;
 
@@ -37,11 +39,11 @@ import org.gephi.graph.impl.BasicGraphStore.BasicEdgeStore;
 public class GraphGenerator {
 
     public static EdgeImpl[] generateSmallEdgeList() {
-        return generateEdgeList(100, 0, true, true);
+        return generateEdgeList(100, 0, true, true, false);
     }
 
     public static EdgeImpl[] generateSmallUndirectedEdgeList() {
-        return generateEdgeList(100, 0, false, true);
+        return generateEdgeList(100, 0, false, true, false);
     }
 
     public static EdgeImpl[] generateSmallMixedEdgeList() {
@@ -57,11 +59,11 @@ public class GraphGenerator {
     }
 
     public static EdgeImpl[] generateLargeEdgeList() {
-        return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, true, true);
+        return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, true, true, false);
     }
 
     public static EdgeImpl[] generatelargeUndirectedEdgeList() {
-        return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, false, true);
+        return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, false, true, false);
     }
 
     public static EdgeImpl[] generateLargeMixedEdgeList() {
@@ -73,11 +75,11 @@ public class GraphGenerator {
     }
 
     public static EdgeImpl generateSingleEdge() {
-        return generateEdgeList(1, 0, true, false)[0];
+        return generateEdgeList(1, 0, true, false, false)[0];
     }
 
     public static EdgeImpl generateSingleEdge(int type) {
-        return generateEdgeList(1, type, true, false)[0];
+        return generateEdgeList(1, type, true, false, false)[0];
     }
 
     public static EdgeImpl generateSelfLoop(int type, boolean directed) {
@@ -87,20 +89,24 @@ public class GraphGenerator {
     }
 
     public static EdgeImpl generateSingleUndirectedEdge() {
-        return generateEdgeList(1, 0, false, false)[0];
+        return generateEdgeList(1, 0, false, false, false)[0];
     }
 
     public static EdgeImpl[] generateEdgeList(int edgeCount) {
-        return generateEdgeList(edgeCount, 0, true, true);
+        return generateEdgeList(edgeCount, 0, true, true, false);
+    }
+
+    public static EdgeImpl[] generateEdgeListWithParallel(int edgeCount) {
+        return generateEdgeList(edgeCount, 0, true, true, true);
     }
 
     public static EdgeImpl[] generateMixedEdgeList(int edgeCount) {
         return generateMixedEdgeList(edgeCount, 0, true);
     }
 
-    public static EdgeImpl[] generateEdgeList(int edgeCount, int type, boolean directed, boolean allowSelfLoops) {
+    public static EdgeImpl[] generateEdgeList(int edgeCount, int type, boolean directed, boolean allowSelfLoops, boolean allowParallel) {
         int nodeCount = Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0));
-        return generateEdgeList(generateNodeStore(nodeCount), edgeCount, type, directed, allowSelfLoops);
+        return generateEdgeList(generateNodeStore(nodeCount), edgeCount, type, directed, allowSelfLoops, allowParallel);
     }
 
     public static EdgeImpl[] generateMixedEdgeList(int edgeCount, int type, boolean allowSelfLoops) {
@@ -108,7 +114,7 @@ public class GraphGenerator {
         return generateMixedEdgeList(generateNodeStore(nodeCount), edgeCount, type, allowSelfLoops);
     }
 
-    public static EdgeImpl[] generateEdgeList(NodeStore nodeStore, int edgeCount, int type, boolean directed, boolean allowSelfLoops) {
+    public static EdgeImpl[] generateEdgeList(NodeStore nodeStore, int edgeCount, int type, boolean directed, boolean allowSelfLoops, boolean allowParallel) {
         int nodeCount = nodeStore.size();
         final List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>();
         LongSet idSet = new LongOpenHashSet();
@@ -138,7 +144,7 @@ public class GraphGenerator {
             NodeImpl source = nodeStore.get(sourceId);
             NodeImpl target = nodeStore.get(targetId);
             EdgeImpl edge = new EdgeImpl(String.valueOf(c), graphStore, source, target, type, 1.0, directed);
-            if (!leafs.contains(sourceId) && !leafs.contains(targetId) && (allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(edge.getLongId())) {
+            if (!leafs.contains(sourceId) && !leafs.contains(targetId) && (allowSelfLoops || (!allowSelfLoops && source != target)) && (allowParallel || !idSet.contains(edge.getLongId()))) {
                 edgeList.add(edge);
                 c++;
                 idSet.add(edge.getLongId());
@@ -257,7 +263,7 @@ public class GraphGenerator {
         List<EdgeImpl> edges = new ArrayList<EdgeImpl>();
         int[] typeAssignemnts = distributeTypeCounts(typeCount, edgeCount);
         for (int i = 0; i < typeCount; i++) {
-            edges.addAll(Arrays.asList(generateEdgeList(nodeStore, typeAssignemnts[i], i, directed, allowSelfLoops)));
+            edges.addAll(Arrays.asList(generateEdgeList(nodeStore, typeAssignemnts[i], i, directed, allowSelfLoops, false)));
         }
         Collections.shuffle(edges, new Random(87));
         return edges.toArray(new EdgeImpl[0]);
@@ -375,6 +381,17 @@ public class GraphGenerator {
         return generateTinyGraphStore(GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION);
     }
 
+    public static GraphStore generateTinyUndirectedGraphStore() {
+        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(new Node[]{n1, n2}));
+        Edge e0 = graphStore.factory.newEdge("0", n1, n2, EdgeTypeStore.NULL_LABEL, 1.0, false);
+        graphStore.addEdge(e0);
+        return graphStore;
+    }
+
     public static GraphStore generateTinyGraphStore(Configuration configuration) {
         GraphModelImpl graphModel = new GraphModelImpl(configuration);
         GraphStore graphStore = graphModel.store;
@@ -398,7 +415,17 @@ public class GraphGenerator {
         GraphStore graphStore = new GraphModelImpl().store;
         NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)), graphStore);
         graphStore.addAllNodes(Arrays.asList(nodes));
-        EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, true, true);
+        EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, true, true, false);
+        graphStore.addAllEdges(Arrays.asList(edges));
+        return graphStore;
+    }
+
+    public static GraphStore generateSmallMixedGraphStore() {
+        int edgeCount = 100;
+        GraphStore graphStore = new GraphModelImpl().store;
+        NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)), graphStore);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+        EdgeImpl[] edges = generateMixedEdgeList(graphStore.nodeStore, edgeCount, 0, true);
         graphStore.addAllEdges(Arrays.asList(edges));
         return graphStore;
     }
@@ -418,7 +445,7 @@ public class GraphGenerator {
         GraphStore graphStore = new GraphModelImpl().store;
         NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)), graphStore);
         graphStore.addAllNodes(Arrays.asList(nodes));
-        EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, false, true);
+        EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, false, true, false);
         graphStore.addAllEdges(Arrays.asList(edges));
         return graphStore;
     }

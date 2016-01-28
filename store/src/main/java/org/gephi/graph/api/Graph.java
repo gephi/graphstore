@@ -139,15 +139,30 @@ public interface Graph {
 
     /**
      * Gets the edge adjacent to node1 and node2.
+     * <p>
+     * If multiple parallel edges exist it returns the first edge.
      *
-     * @param node1 the first node
-     * @param node2 the second node
-     * @return the adjacent edge, or null if not found
+     * @param node1 first node
+     * @param node2 second node
+     * @return adjacent edge, or null if not found
      */
     public Edge getEdge(Node node1, Node node2);
 
     /**
+     * Get the edges adjacent to node1 and node2.
+     * <p>
+     * If there aren't any parallel edges only one edge will be returned.
+     *
+     * @param node1 first node
+     * @param node2 second node
+     * @return adjacent edges
+     */
+    public EdgeIterable getEdges(Node node1, Node node2);
+
+    /**
      * Gets the edge adjacent to node1 and node2 and from the given type.
+     * <p>
+     * If multiple parallel edges exist it returns the first edge.
      *
      * @param node1 the first node
      * @param node2 the second node
@@ -155,6 +170,18 @@ public interface Graph {
      * @return the adjacent edge, or null if not found
      */
     public Edge getEdge(Node node1, Node node2, int type);
+
+    /**
+     * Gets the edges adjacent to node1 and node 2 and from the given type.
+     * <p>
+     * If there aren't any parallel edges only one edge will be returned.
+     *
+     * @param node1 the first node
+     * @param node2 the second node
+     * @param type the edge type
+     * @return the adjacent edges, or an empty iterator if not found
+     */
+    public EdgeIterable getEdges(Node node1, Node node2, int type);
 
     /**
      * Gets all the nodes in the graph.

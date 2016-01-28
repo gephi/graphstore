@@ -419,6 +419,16 @@ public class BasicGraphStore implements DirectedGraph {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public EdgeIterable getEdges(Node node1, Node node2) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public EdgeIterable getEdges(Node node1, Node node2, int type) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public static class BasicElement implements Element {
 
         protected final Map<String, Object> properties = new HashMap<String, Object>();

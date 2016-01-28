@@ -67,7 +67,7 @@ public class GraphStoreTest {
         graphStore.addAllNodes(Arrays.asList(nodes));
         basicStore.addAllNodes(Arrays.asList(basicNodes));
 
-        EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 20000, 0, true, true);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 20000, 0, true, true, false);
         BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator.generateBasicEdgeList(basicStore.nodeStore, 20000, 0, true, true);
 
         graphStore.addAllEdges(Arrays.asList(edges));
@@ -89,7 +89,7 @@ public class GraphStoreTest {
         graphStore.addAllNodes(Arrays.asList(nodes));
         basicStore.addAllNodes(Arrays.asList(basicNodes));
 
-        EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 20000, 0, false, true);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 20000, 0, false, true, false);
         BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator.generateBasicEdgeList(basicStore.nodeStore, 20000, 0, false, true);
 
         graphStore.addAllEdges(Arrays.asList(edges));
@@ -481,7 +481,7 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 100, 0, true, true);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 100, 0, true, true, false);
         graphStore.addAllEdges(Arrays.asList(edges));
 
         int edgeCount = graphStore.getEdgeCount();
@@ -574,10 +574,33 @@ public class GraphStoreTest {
     public void testGetEdges() {
         GraphStore graphStore = new GraphStore();
         NodeStore nodeStore = GraphGenerator.generateNodeStore(5);
-        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 4, 0, true, true);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 4, 0, true, true, false);
         graphStore.addAllEdges(Arrays.asList(edges));
         EdgeIterable edgeIterable = graphStore.getEdges();
         testEdgeIterable(edgeIterable, edges);
+    }
+
+    @Test
+    public void testGetNodeEdges() {
+        GraphStore graphStore = new GraphStore();
+        NodeStore nodeStore = GraphGenerator.generateNodeStore(5);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 4, 0, true, true, false);
+        graphStore.addAllEdges(Arrays.asList(edges));
+
+        for (EdgeImpl e : edges) {
+            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[]{e});
+            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[]{e});
+        }
+    }
+
+    @Test
+    public void testGetNodeEdgesMixed() {
+        GraphStore graphStore = GraphGenerator.generateSmallMixedGraphStore();
+
+        for (EdgeImpl e : graphStore.edgeStore.toArray()) {
+            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[]{e});
+            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[]{e});
+        }
     }
 
     @Test
@@ -600,7 +623,7 @@ public class GraphStoreTest {
     public void testRemoveEdge() {
         GraphStore graphStore = new GraphStore();
         NodeStore nodeStore = GraphGenerator.generateNodeStore(2);
-        EdgeImpl edge = GraphGenerator.generateEdgeList(nodeStore, 1, 0, true, true)[0];
+        EdgeImpl edge = GraphGenerator.generateEdgeList(nodeStore, 1, 0, true, true, false)[0];
         graphStore.addEdge(edge);
 
         Assert.assertTrue(graphStore.removeEdge(edge));
@@ -622,7 +645,7 @@ public class GraphStoreTest {
     public void testRemoveAllEdges() {
         GraphStore graphStore = new GraphStore();
         NodeStore nodeStore = GraphGenerator.generateNodeStore(5);
-        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 5, 0, true, true);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 5, 0, true, true, false);
         graphStore.addAllEdges(Arrays.asList(edges));
 
         graphStore.removeAllEdges(Arrays.asList(edges));

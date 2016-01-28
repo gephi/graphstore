@@ -299,20 +299,38 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public Edge getEdge(final Node node1, final Node node2, final int type) {
         autoReadLock();
         try {
-            return edgeStore.get(node1, node2, type);
+            return edgeStore.get(node1, node2, type, false);
         } finally {
             autoReadUnlock();
         }
     }
 
     @Override
+    public EdgeIterable getEdges(Node node1, Node node2, int type) {
+        Iterator<Edge> itr = edgeStore.getAll(node1, node2, type, false);
+        if (itr != null) {
+            return new EdgeIterableWrapper(itr);
+        }
+        return EdgeIterable.EMPTY;
+    }
+
+    @Override
     public Edge getEdge(final Node node1, final Node node2) {
         autoReadLock();
         try {
-            return edgeStore.get(node1, node2);
+            return edgeStore.get(node1, node2, false);
         } finally {
             autoReadUnlock();
         }
+    }
+
+    @Override
+    public EdgeIterable getEdges(Node node1, Node node2) {
+        Iterator<Edge> itr = edgeStore.getAll(node1, node2, false);
+        if (itr != null) {
+            return new EdgeIterableWrapper(itr);
+        }
+        return EdgeIterable.EMPTY;
     }
 
     @Override
@@ -604,6 +622,12 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected void autoReadUnlock() {
         if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
             readUnlock();
+        }
+    }
+
+    protected void autoReadUnlockAll() {
+        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
+            readUnlockAll();
         }
     }
 

@@ -15,12 +15,13 @@
  */
 package org.gephi.graph.impl;
 
-import it.unimi.dsi.fastutil.longs.Long2IntOpenCustomHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.longs.LongHash;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +42,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected EdgeBlock blocks[];
     protected EdgeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
-    protected Long2IntOpenCustomHashMap[] longDictionary;
+    protected Long2ObjectOpenCustomHashMap<int[]>[] longDictionary;
     //Stats
     protected int undirectedSize;
     protected int mutualEdgesSize;
@@ -81,9 +82,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.currentBlock = blocks[currentBlockIndex];
         this.dictionary = new Object2IntOpenHashMap(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE);
         this.dictionary.defaultReturnValue(NULL_ID);
-        this.longDictionary = new Long2IntOpenCustomHashMap[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
-        this.longDictionary[0] = new Long2IntOpenCustomHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
-        this.longDictionary[0].defaultReturnValue(NULL_ID);
+        this.longDictionary = new Long2ObjectOpenCustomHashMap[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        this.longDictionary[0] = new Long2ObjectOpenCustomHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
         this.mutualEdgesTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
     }
 
@@ -167,12 +167,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     private void ensureLongDictionaryCapacity(int type) {
         int length = longDictionary.length;
         if (type >= length) {
-            Long2IntOpenCustomHashMap[] newArray = new Long2IntOpenCustomHashMap[type + 1];
+            Long2ObjectOpenCustomHashMap[] newArray = new Long2ObjectOpenCustomHashMap[type + 1];
             System.arraycopy(longDictionary, 0, newArray, 0, length);
             longDictionary = newArray;
             for (int i = length; i <= type; i++) {
-                Long2IntOpenCustomHashMap newMap = new Long2IntOpenCustomHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
-                newMap.defaultReturnValue(NULL_ID);
+                Long2ObjectOpenCustomHashMap newMap = new Long2ObjectOpenCustomHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
                 longDictionary[i] = newMap;
             }
             int[] newSizeArray = new int[type + 1];
@@ -391,6 +390,18 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return new NeighborsUndirectedIterator((NodeImpl) node, new EdgeTypeInOutIterator((NodeImpl) node, type));
     }
 
+    public Iterator<Edge> edgesUndirectedIterator(final Node node1, final Node node2) {
+        checkValidNodeObject(node1);
+        checkValidNodeObject(node2);
+        return undirectedIterator(getAll(node1, node2, true));
+    }
+
+    public Iterator<Edge> edgesUndirectedIterator(final Node node1, final Node node2, int type) {
+        checkValidNodeObject(node1);
+        checkValidNodeObject(node2);
+        return undirectedIterator(getAll(node1, node2, type, true));
+    }
+
     public EdgeImpl get(int id) {
         checkValidId(id);
 
@@ -407,11 +418,15 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return null;
     }
 
-    public EdgeImpl get(final Node source, final Node target) {
-        return get(source, target, EdgeTypeStore.NULL_LABEL);
+    public EdgeImpl get(final Node source, final Node target, boolean undirectedDecorator) {
+        return get(source, target, EdgeTypeStore.NULL_LABEL, undirectedDecorator);
     }
 
-    public EdgeImpl get(final Node source, final Node target, final int type) {
+    public EdgesIterator getAll(final Node source, final Node target, boolean undirectedDecorator) {
+        return getAll(source, target, EdgeTypeStore.NULL_LABEL, undirectedDecorator);
+    }
+
+    public EdgeImpl get(final Node source, final Node target, final int type, boolean undirectedDecorator) {
         checkNonNullObject(source);
         checkNonNullObject(target);
         NodeImpl sourceImpl = (NodeImpl) source;
@@ -419,27 +434,80 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         if (type < longDictionary.length) {
             if (isUndirectedGraph()) {
-                int index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
-                if (index != NULL_ID) {
-                    return get(index);
+                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
+                if (index != null) {
+                    return get(index[0]);
                 }
             } else if (isMixedGraph()) {
-                int index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
-                if (index != NULL_ID) {
-                    return get(index);
+                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
+                if (index != null) {
+                    return get(index[0]);
                 } else if (targetImpl.storeId > sourceImpl.storeId) {
                     index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
-                    if (index != NULL_ID) {
-                        EdgeImpl mutual = get(index);
-                        if (!mutual.isDirected()) {
-                            return mutual;
+                    if (index != null) {
+                        EdgeImpl e = get(index[0]);
+                        if (!e.isDirected() || undirectedDecorator) {
+                            return e;
                         }
+                    }
+                } else if (undirectedDecorator) {
+                    index = longDictionary[type].get(getLongId(targetImpl, sourceImpl, true));
+                    if (index != null) {
+                        return get(index[0]);
                     }
                 }
             } else {
-                int index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
-                if (index != NULL_ID) {
-                    return get(index);
+                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
+                if (index != null) {
+                    return get(index[0]);
+                } else if (undirectedDecorator) {
+                    index = longDictionary[type].get(getLongId(targetImpl, sourceImpl, true));
+                    if (index != null) {
+                        return get(index[0]);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public EdgesIterator getAll(final Node source, final Node target, final int type, boolean undirectedDecorator) {
+        checkNonNullObject(source);
+        checkNonNullObject(target);
+        NodeImpl sourceImpl = (NodeImpl) source;
+        NodeImpl targetImpl = (NodeImpl) target;
+
+        if (type < longDictionary.length) {
+            if (isUndirectedGraph()) {
+                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
+                if (index != null) {
+                    return new EdgesIterator(index);
+                }
+            } else if (isMixedGraph() && !undirectedDecorator) {
+                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
+                if (index != null) {
+                    return new EdgesIterator(index);
+                } else if (targetImpl.storeId > sourceImpl.storeId) {
+                    index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
+                    if (index != null) {
+                        return new EdgesIteratorOnlyUndirected(index);
+                    }
+                }
+            } else {
+                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
+                if (undirectedDecorator) {
+                    int[] reverseIndex = longDictionary[type].get(getLongId(targetImpl, sourceImpl, true));
+                    if (reverseIndex != null) {
+                        if (index != null) {
+                            index = Arrays.copyOf(index, index.length + reverseIndex.length);
+                            System.arraycopy(reverseIndex, 0, index, index.length - reverseIndex.length, reverseIndex.length);
+                        } else {
+                            index = reverseIndex;
+                        }
+                    }
+                }
+                if (index != null) {
+                    return new EdgesIterator(index);
                 }
             }
         }
@@ -456,7 +524,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     private EdgeImpl getMutual(final EdgeImpl edge) {
-        return get(edge.target, edge.source, edge.type);
+        return get(edge.target, edge.source, edge.type, false);
     }
 
     @Override
@@ -475,9 +543,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             NodeImpl target = edge.target;
 
             ensureLongDictionaryCapacity(type);
-            Long2IntOpenCustomHashMap dico = longDictionary[type];
+            Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
             long longId = getLongId(source, target, directed);
-            if (dico.containsKey(longId)) {
+            int[] dicoValue = dico.get(longId);
+            if (dicoValue != null && !GraphStoreConfiguration.ENABLE_PARALLEL_EDGES) {
                 return false;
             }
 
@@ -505,21 +574,34 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             source.outDegree++;
             target.inDegree++;
 
-            dico.put(longId, edge.storeId);
+            if (dicoValue == null) {
+                dicoValue = new int[]{edge.storeId};
+            } else {
+                dicoValue = Arrays.copyOf(dicoValue, dicoValue.length + 1);
+                dicoValue[dicoValue.length - 1] = edge.storeId;
+            }
+            dico.put(longId, dicoValue);
+
             if (viewStore != null) {
                 viewStore.addEdge(edge);
             }
             edge.indexAttributes();
 
             if (directed && !edge.isSelfLoop()) {
-                EdgeImpl mutual = getMutual(edge);
-                if (mutual != null) {
-                    edge.setMutual(true);
-                    mutual.setMutual(true);
-                    source.mutualDegree++;
-                    target.mutualDegree++;
-                    mutualEdgesSize++;
-                    mutualEdgesTypeSize[type]++;
+                int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
+                if (index != null) {
+                    for (int i = 0; i < index.length; i++) {
+                        EdgeImpl mutual = get(index[i]);
+                        if (!mutual.isMutual()) {
+                            mutual.setMutual(true);
+                            edge.setMutual(true);
+                            source.mutualDegree++;
+                            target.mutualDegree++;
+                            mutualEdgesSize++;
+                            mutualEdgesTypeSize[type]++;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -588,17 +670,40 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             }
 
             int type = edge.type;
-            longDictionary[type].remove(getLongId(source, target, directed));
+
+            Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
+            long longId = getLongId(source, target, directed);
+            int[] dicoValue = dico.get(longId);
+            if (dicoValue.length == 1) {
+                dico.remove(longId);
+            } else {
+                int[] newDicoValue = new int[dicoValue.length - 1];
+                int j = 0;
+                for (int i = 0; i < dicoValue.length; i++) {
+                    int v = dicoValue[i];
+                    if (v != id) {
+                        newDicoValue[j++] = v;
+                    }
+                }
+                dico.put(longId, newDicoValue);
+            }
 
             if (directed && !edge.isSelfLoop()) {
-                EdgeImpl mutual = getMutual(edge);
-                if (mutual != null) {
-                    edge.setMutual(false);
-                    mutual.setMutual(false);
-                    source.mutualDegree--;
-                    target.mutualDegree--;
-                    mutualEdgesSize--;
-                    mutualEdgesTypeSize[type]--;
+                int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
+                if (index != null) {
+                    for (int i = 0; i < index.length; i++) {
+                        EdgeImpl mutual = get(index[i]);
+                        if (mutual.isMutual()) {
+                            edge.setMutual(true);
+
+                            mutual.setMutual(false);
+                            source.mutualDegree--;
+                            target.mutualDegree--;
+                            mutualEdgesSize--;
+                            mutualEdgesTypeSize[type]--;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -644,11 +749,13 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 if (longDictionary[type].containsKey(getLongId(source, target, true))) {
                     return true;
                 } else if (target.storeId > source.storeId) {
-                    int index = longDictionary[type].get(getLongId(source, target, false));
-                    if (index != NULL_ID) {
-                        EdgeImpl mutual = get(index);
-                        if (!mutual.isDirected()) {
-                            return true;
+                    int[] index = longDictionary[type].get(getLongId(source, target, false));
+                    if (index != null) {
+                        for (int i = 0; i < index.length; i++) {
+                            EdgeImpl mutual = get(index[i]);
+                            if (!mutual.isDirected()) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -876,21 +983,19 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     void checkUndirectedNotExist(EdgeImpl edge) {
         int type = edge.type;
         if (type < longDictionary.length) {
-            if ((isMixedGraph() || isUndirectedGraph()) && edge.isDirected()) {
-                int index = longDictionary[type].get(getLongId(edge.source, edge.target, false));
-                if (index != NULL_ID) {
+            if (edge.isDirected() && !isDirectedGraph()) {
+                int[] index = longDictionary[type].get(getLongId(edge.source, edge.target, false));
+                if (index != null && !get(index[0]).isDirected()) {
                     throw new IllegalArgumentException("An undirected edge already exists");
                 }
-            } else if (!edge.isDirected() && !edge.isSelfLoop()) {
-                //Check if not directed any direction
-                int index = longDictionary[type].get(getLongId(edge.source, edge.target, true));
-                if (index != NULL_ID) {
-                    throw new IllegalArgumentException("A directed edge already exists");
-                } else {
-                    index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
-                    if (index != NULL_ID) {
-                        throw new IllegalArgumentException("A directed edge already exists");
-                    }
+            } else if (!edge.isDirected() && !isUndirectedGraph()) {
+                int[] index = longDictionary[type].get(getLongId(edge.source, edge.target, true));
+                if (index != null && get(index[0]).isDirected()) {
+                    throw new IllegalArgumentException("An directed edge already exists");
+                }
+                index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
+                if (index != null && get(index[0]).isDirected()) {
+                    throw new IllegalArgumentException("An directed edge already exists");
                 }
             }
         }
@@ -1475,6 +1580,73 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         public void remove() {
             checkWriteLock();
             EdgeStore.this.remove(lastEdge);
+        }
+    }
+
+    protected class EdgesIterator implements Iterator<Edge> {
+
+        protected final int[] indices;
+        protected int index;
+
+        public EdgesIterator(int[] indices) {
+            this.indices = indices;
+            readLock();
+        }
+
+        @Override
+        public boolean hasNext() {
+            boolean res = index < indices.length;
+            if (!res) {
+                readUnlock();
+            }
+            return res;
+        }
+
+        @Override
+        public Edge next() {
+            return get(indices[index++]);
+        }
+
+        @Override
+        public void remove() {
+            checkWriteLock();
+            EdgeStore.this.remove(get(indices[index - 1]));
+        }
+    }
+
+    protected final class EdgesIteratorOnlyUndirected extends EdgesIterator {
+
+        protected EdgeImpl pointer;
+
+        public EdgesIteratorOnlyUndirected(int[] indices) {
+            super(indices);
+        }
+
+        @Override
+        public boolean hasNext() {
+            pointer = null;
+            while (index < indices.length && pointer == null) {
+                pointer = EdgeStore.this.get(indices[index++]);
+                if (pointer.isDirected()) {
+                    pointer = null;
+                }
+            }
+            if (pointer == null) {
+                readUnlock();
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public Edge next() {
+            return pointer;
+        }
+
+        @Override
+        public void remove() {
+            checkWriteLock();
+            EdgeStore.this.remove(pointer);
         }
     }
 
