@@ -16,12 +16,20 @@
 package org.gephi.graph.impl;
 
 import cern.colt.bitvector.BitVector;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
@@ -718,6 +726,69 @@ public class SerializationTest {
         ser = new Serialization(graphModel);
         Configuration l = (Configuration) ser.deserialize(buf);
         Assert.assertTrue(configuration.equals(l));
+    }
+
+    @Test
+    public void testList() throws IOException, ClassNotFoundException {
+        Serialization ser = new Serialization(null);
+
+        List emptyList = new ArrayList();
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(emptyList)), emptyList);
+
+        List intList = new ArrayList();
+        intList.add(5);
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(intList)), intList);
+
+        List stringList = new ArrayList();
+        stringList.add("foo");
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(stringList)), stringList);
+
+        List mixedList = new ArrayList();
+        mixedList.add("foo");
+        mixedList.add(42);
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(mixedList)), mixedList);
+    }
+
+    @Test
+    public void testSet() throws IOException, ClassNotFoundException {
+        Serialization ser = new Serialization(null);
+
+        Set emptySet = new HashSet();
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(emptySet)), emptySet);
+
+        Set intSet = new ObjectOpenHashSet();
+        intSet.add(5);
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(intSet)), intSet);
+
+        Set stringSet = new ObjectOpenHashSet();
+        stringSet.add("foo");
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(stringSet)), stringSet);
+
+        Set mixedSet = new ObjectOpenHashSet();
+        mixedSet.add("foo");
+        mixedSet.add(42);
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(mixedSet)), mixedSet);
+    }
+
+    @Test
+    public void testMap() throws IOException, ClassNotFoundException {
+        Serialization ser = new Serialization(null);
+
+        Map emptyMap = new HashMap();
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(emptyMap)), emptyMap);
+
+        Map intMap = new Object2ObjectOpenHashMap();
+        intMap.put(5, 5);
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(intMap)), intMap);
+
+        Map stringMap = new Object2ObjectOpenHashMap();
+        stringMap.put("foo", "bar");
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(stringMap)), stringMap);
+
+        Map mixedMap = new Object2ObjectOpenHashMap();
+        mixedMap.put("foo", "bar");
+        mixedMap.put(42, 42);
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(mixedMap)), mixedMap);
     }
 
     @Test

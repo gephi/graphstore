@@ -465,18 +465,25 @@ public class AttributeUtilsTest {
         Assert.assertEquals((int[]) AttributeUtils.standardizeValue(new int[]{1, 2}), new int[]{1, 2});
         Assert.assertEquals((String[]) AttributeUtils.standardizeValue(new String[]{"foo"}), new String[]{"foo"});
 
+        Assert.assertEquals(AttributeUtils.standardizeValue(new ArrayList()), new ArrayList());
+        Assert.assertEquals(AttributeUtils.standardizeValue(new HashSet()), new HashSet());
+        Assert.assertEquals(AttributeUtils.standardizeValue(new HashMap()), new HashMap());
+
         List<Integer> list1 = Arrays.asList(42);
         Assert.assertEquals((List<Integer>) AttributeUtils.standardizeValue(list1), list1);
 
-        List list2 = Arrays.asList(42, "foo");
+        List list2 = Arrays.asList("foo");
         Assert.assertEquals((List) AttributeUtils.standardizeValue(list2), list2);
 
         List list3 = new ArrayList();
         list3.add(new Integer[]{1, 2});
         Assert.assertEquals(((List) AttributeUtils.standardizeValue(list3)).get(0), new int[]{1, 2});
 
-        Set set1 = new HashSet(Arrays.asList(42, "foo"));
+        Set set1 = new HashSet(Arrays.asList("bar", "foo"));
         Assert.assertEquals((Set) AttributeUtils.standardizeValue(set1), set1);
+
+        Set set2 = new HashSet(Arrays.asList(32, 42));
+        Assert.assertEquals((Set) AttributeUtils.standardizeValue(set2), set2);
 
         Map map1 = new HashMap();
         map1.put("foo", "bar");
@@ -484,6 +491,10 @@ public class AttributeUtilsTest {
         Map map1Result = (Map) AttributeUtils.standardizeValue(map1);
         Assert.assertEquals(map1Result.get("foo"), "bar");
         Assert.assertEquals(map1Result.get("bar"), new int[]{1, 2});
+
+        Map map2 = new HashMap();
+        map2.put(42, "bar");
+        Assert.assertEquals((Map) AttributeUtils.standardizeValue(map2), map2);
     }
 
     @Test
@@ -502,8 +513,18 @@ public class AttributeUtilsTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testStandardizeValueMixedListContent() {
+        AttributeUtils.standardizeValue(Arrays.asList("foo", 42));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testStandardizeValueUnsupportedSetContent() {
         AttributeUtils.standardizeValue(new HashSet(Arrays.asList(Color.BLACK)));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testStandardizeValueMixedSetContent() {
+        AttributeUtils.standardizeValue(new HashSet(Arrays.asList("foo", 42)));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -517,6 +538,14 @@ public class AttributeUtilsTest {
     public void testStandardizeValueUnsupportedMapValueContent() {
         Map map = new HashMap();
         map.put("foo", Color.BLACK);
+        AttributeUtils.standardizeValue(map);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testStandardizeValueMixedMapKeyContent() {
+        Map map = new HashMap();
+        map.put(42, "foo");
+        map.put("foo", 42);
         AttributeUtils.standardizeValue(map);
     }
 

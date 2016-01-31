@@ -16,9 +16,35 @@
 package org.gephi.graph.impl;
 
 import cern.colt.bitvector.BitVector;
+import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
+import it.unimi.dsi.fastutil.booleans.BooleanOpenHashSet;
+import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.bytes.ByteArrayList;
+import it.unimi.dsi.fastutil.bytes.ByteOpenHashSet;
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.chars.CharArrayList;
+import it.unimi.dsi.fastutil.chars.CharOpenHashSet;
 import it.unimi.dsi.fastutil.doubles.Double2IntMap;
+import it.unimi.dsi.fastutil.doubles.Double2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
+import it.unimi.dsi.fastutil.floats.Float2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatOpenHashSet;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.ShortArrayList;
+import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.EOFException;
@@ -27,8 +53,10 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
@@ -183,6 +211,9 @@ public class Serialization {
     final static int INTERVAL_MAP = 226;
     final static int TIME_ZONE = 227;
     final static int INTERVAL = 228;
+    final static int LIST = 229;
+    final static int SET = 230;
+    final static int MAP = 231;
     //Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
@@ -1040,6 +1071,180 @@ public class Serialization {
         return config;
     }
 
+    private void serializeList(final DataOutput out, final List list) throws IOException {
+        Class oCls = list.getClass();
+        if (oCls.equals(IntArrayList.class)) {
+            serialize(out, ((IntArrayList) list).toIntArray());
+        } else if (oCls.equals(FloatArrayList.class)) {
+            serialize(out, ((FloatArrayList) list).toFloatArray());
+        } else if (oCls.equals(DoubleArrayList.class)) {
+            serialize(out, ((DoubleArrayList) list).toDoubleArray());
+        } else if (oCls.equals(ShortArrayList.class)) {
+            serialize(out, ((ShortArrayList) list).toShortArray());
+        } else if (oCls.equals(ByteArrayList.class)) {
+            serialize(out, ((ByteArrayList) list).toByteArray());
+        } else if (oCls.equals(LongArrayList.class)) {
+            serialize(out, ((LongArrayList) list).toLongArray());
+        } else if (oCls.equals(BooleanArrayList.class)) {
+            serialize(out, ((BooleanArrayList) list).toBooleanArray());
+        } else if (oCls.equals(CharArrayList.class)) {
+            serialize(out, ((CharArrayList) list).toCharArray());
+        } else {
+            serialize(out, list.size());
+            for (Object obj : list) {
+                serialize(out, obj);
+            }
+        }
+    }
+
+    private List deserializeList(final DataInput is) throws IOException, ClassNotFoundException {
+        Object h = deserialize(is);
+        Class oCls = h.getClass();
+        if (oCls.equals(Integer.class)) {
+            int size = (Integer) h;
+            ObjectArrayList list = new ObjectArrayList(size);
+            for (int i = 0; i < size; i++) {
+                list.add(deserialize(is));
+            }
+            return list;
+        } else if (oCls.equals(int[].class)) {
+            return new IntArrayList((int[]) h);
+        } else if (oCls.equals(float[].class)) {
+            return new FloatArrayList((float[]) h);
+        } else if (oCls.equals(double[].class)) {
+            return new DoubleArrayList((double[]) h);
+        } else if (oCls.equals(short[].class)) {
+            return new ShortArrayList((short[]) h);
+        } else if (oCls.equals(byte[].class)) {
+            return new ByteArrayList((byte[]) h);
+        } else if (oCls.equals(long[].class)) {
+            return new LongArrayList((long[]) h);
+        } else if (oCls.equals(boolean[].class)) {
+            return new BooleanArrayList((boolean[]) h);
+        } else if (oCls.equals(char[].class)) {
+            return new CharArrayList((char[]) h);
+        }
+        throw new EOFException();
+    }
+
+    private void serializeSet(final DataOutput out, final Set set) throws IOException {
+        Class oCls = set.getClass();
+        if (oCls.equals(IntOpenHashSet.class)) {
+            serialize(out, ((IntOpenHashSet) set).toIntArray());
+        } else if (oCls.equals(FloatOpenHashSet.class)) {
+            serialize(out, ((FloatOpenHashSet) set).toFloatArray());
+        } else if (oCls.equals(DoubleOpenHashSet.class)) {
+            serialize(out, ((DoubleOpenHashSet) set).toDoubleArray());
+        } else if (oCls.equals(ShortOpenHashSet.class)) {
+            serialize(out, ((ShortOpenHashSet) set).toShortArray());
+        } else if (oCls.equals(ByteOpenHashSet.class)) {
+            serialize(out, ((ByteOpenHashSet) set).toByteArray());
+        } else if (oCls.equals(LongOpenHashSet.class)) {
+            serialize(out, ((LongOpenHashSet) set).toLongArray());
+        } else if (oCls.equals(BooleanOpenHashSet.class)) {
+            serialize(out, ((BooleanOpenHashSet) set).toBooleanArray());
+        } else if (oCls.equals(CharOpenHashSet.class)) {
+            serialize(out, ((CharOpenHashSet) set).toCharArray());
+        } else {
+            serialize(out, set.size());
+            for (Object obj : set) {
+                serialize(out, obj);
+            }
+        }
+    }
+
+    private Set deserializeSet(final DataInput is) throws IOException, ClassNotFoundException {
+        Object h = deserialize(is);
+        Class oCls = h.getClass();
+        if (oCls.equals(Integer.class)) {
+            int size = (Integer) h;
+            ObjectOpenHashSet set = new ObjectOpenHashSet(size);
+            for (int i = 0; i < size; i++) {
+                set.add(deserialize(is));
+            }
+            return set;
+        } else if (oCls.equals(int[].class)) {
+            return new IntOpenHashSet((int[]) h);
+        } else if (oCls.equals(float[].class)) {
+            return new FloatOpenHashSet((float[]) h);
+        } else if (oCls.equals(double[].class)) {
+            return new DoubleOpenHashSet((double[]) h);
+        } else if (oCls.equals(short[].class)) {
+            return new ShortOpenHashSet((short[]) h);
+        } else if (oCls.equals(byte[].class)) {
+            return new ByteOpenHashSet((byte[]) h);
+        } else if (oCls.equals(long[].class)) {
+            return new LongOpenHashSet((long[]) h);
+        } else if (oCls.equals(boolean[].class)) {
+            return new BooleanOpenHashSet((boolean[]) h);
+        } else if (oCls.equals(char[].class)) {
+            return new CharOpenHashSet((char[]) h);
+        }
+        throw new EOFException();
+    }
+
+    private void serializeMap(final DataOutput out, final Map map) throws IOException {
+        Class oCls = map.getClass();
+        if (oCls.equals(Int2ObjectOpenHashMap.class)) {
+            serialize(out, ((Int2ObjectOpenHashMap) map).keySet().toIntArray());
+            serialize(out, map.values().toArray());
+        } else if (oCls.equals(Float2ObjectOpenHashMap.class)) {
+            serialize(out, ((Float2ObjectOpenHashMap) map).keySet().toFloatArray());
+            serialize(out, map.values().toArray());
+        } else if (oCls.equals(Double2ObjectOpenHashMap.class)) {
+            serialize(out, ((Double2ObjectOpenHashMap) map).keySet().toDoubleArray());
+            serialize(out, map.values().toArray());
+        } else if (oCls.equals(Short2ObjectOpenHashMap.class)) {
+            serialize(out, ((Short2ObjectOpenHashMap) map).keySet().toShortArray());
+            serialize(out, map.values().toArray());
+        } else if (oCls.equals(Long2ObjectOpenHashMap.class)) {
+            serialize(out, ((Long2ObjectOpenHashMap) map).keySet().toLongArray());
+            serialize(out, map.values().toArray());
+        } else if (oCls.equals(Byte2ObjectOpenHashMap.class)) {
+            serialize(out, ((Byte2ObjectOpenHashMap) map).keySet().toByteArray());
+            serialize(out, map.values().toArray());
+        } else if (oCls.equals(Char2ObjectOpenHashMap.class)) {
+            serialize(out, ((Char2ObjectOpenHashMap) map).keySet().toCharArray());
+            serialize(out, map.values().toArray());
+        } else {
+            serialize(out, map.size());
+
+            Set<Map.Entry<Object, Object>> entrySet = map.entrySet();
+            for (Map.Entry entry : entrySet) {
+                serialize(out, entry.getKey());
+                serialize(out, entry.getValue());
+            }
+        }
+    }
+
+    private Map deserializeMap(final DataInput is) throws IOException, ClassNotFoundException {
+        Object h = deserialize(is);
+        Class oCls = h.getClass();
+        if (oCls.equals(Integer.class)) {
+            int size = (Integer) h;
+            Object2ObjectOpenHashMap set = new Object2ObjectOpenHashMap(size);
+            for (int i = 0; i < size; i++) {
+                set.put(deserialize(is), deserialize(is));
+            }
+            return set;
+        } else if (oCls.equals(int[].class)) {
+            return new Int2ObjectOpenHashMap((int[]) h, (Object[]) deserialize(is));
+        } else if (oCls.equals(float[].class)) {
+            return new Float2ObjectOpenHashMap((float[]) h, (Object[]) deserialize(is));
+        } else if (oCls.equals(double[].class)) {
+            return new Double2ObjectOpenHashMap((double[]) h, (Object[]) deserialize(is));
+        } else if (oCls.equals(short[].class)) {
+            return new Short2ObjectOpenHashMap((short[]) h, (Object[]) deserialize(is));
+        } else if (oCls.equals(byte[].class)) {
+            return new Byte2ObjectOpenHashMap((byte[]) h, (Object[]) deserialize(is));
+        } else if (oCls.equals(long[].class)) {
+            return new Long2ObjectOpenHashMap((long[]) h, (Object[]) deserialize(is));
+        } else if (oCls.equals(char[].class)) {
+            return new Char2ObjectOpenHashMap((char[]) h, (Object[]) deserialize(is));
+        }
+        throw new EOFException();
+    }
+
     //SERIALIZE PRIMITIVES
     protected byte[] serialize(Object obj) throws IOException {
         DataInputOutput ba = new DataInputOutput();
@@ -1344,6 +1549,18 @@ public class Serialization {
             Interval b = (Interval) obj;
             out.write(INTERVAL);
             serializeInterval(out, b);
+        } else if (obj instanceof List) {
+            List b = (List) obj;
+            out.write(LIST);
+            serializeList(out, b);
+        } else if (obj instanceof Set) {
+            Set b = (Set) obj;
+            out.write(SET);
+            serializeSet(out, b);
+        } else if (obj instanceof Map) {
+            Map b = (Map) obj;
+            out.write(MAP);
+            serializeMap(out, b);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -1875,6 +2092,15 @@ public class Serialization {
                 break;
             case INTERVAL:
                 ret = deserializeInterval(is);
+                break;
+            case LIST:
+                ret = deserializeList(is);
+                break;
+            case SET:
+                ret = deserializeSet(is);
+                break;
+            case MAP:
+                ret = deserializeMap(is);
                 break;
             case -1:
                 throw new EOFException();

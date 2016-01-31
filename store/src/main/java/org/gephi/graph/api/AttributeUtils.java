@@ -15,9 +15,32 @@
  */
 package org.gephi.graph.api;
 
+import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
+import it.unimi.dsi.fastutil.booleans.BooleanOpenHashSet;
+import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.bytes.ByteArrayList;
+import it.unimi.dsi.fastutil.bytes.ByteOpenHashSet;
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.chars.CharArrayList;
+import it.unimi.dsi.fastutil.chars.CharOpenHashSet;
+import it.unimi.dsi.fastutil.doubles.Double2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
+import it.unimi.dsi.fastutil.floats.Float2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatOpenHashSet;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.ShortArrayList;
+import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import org.gephi.graph.impl.TimestampsParser;
 import org.gephi.graph.impl.IntervalsParser;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
@@ -38,6 +61,7 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collections;
+import static java.util.Collections.list;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -83,6 +107,11 @@ public class AttributeUtils {
     private static final Map<DateTimeZone, DateTimeFormatter> DATE_PRINTERS_BY_TIMEZONE;
     private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PRINTERS_BY_TIMEZONE;
     private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PARSERS_BY_TIMEZONE;
+
+    //Collectio  types to speedup lookup
+    private static final Set<Class> TYPED_LIST_TYPES;
+    private static final Set<Class> TYPED_SET_TYPES;
+    private static final Set<Class> TYPED_MAP_TYPES;
 
     static {
         final Set<Class> supportedTypes = new HashSet<Class>();
@@ -208,6 +237,38 @@ public class AttributeUtils {
         DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
         decimalFormatSymbols.setInfinity(FormattingAndParsingUtils.INFINITY);
         TIMESTAMP_PRINTER = new DecimalFormat("0.0###", decimalFormatSymbols);//1 to 4 decimals
+
+        //List types
+        TYPED_LIST_TYPES = new HashSet<Class>();
+        TYPED_LIST_TYPES.add(IntArrayList.class);
+        TYPED_LIST_TYPES.add(FloatArrayList.class);
+        TYPED_LIST_TYPES.add(DoubleArrayList.class);
+        TYPED_LIST_TYPES.add(ShortArrayList.class);
+        TYPED_LIST_TYPES.add(LongArrayList.class);
+        TYPED_LIST_TYPES.add(ByteArrayList.class);
+        TYPED_LIST_TYPES.add(BooleanArrayList.class);
+        TYPED_LIST_TYPES.add(CharArrayList.class);
+
+        //Set types
+        TYPED_SET_TYPES = new HashSet<Class>();
+        TYPED_SET_TYPES.add(IntOpenHashSet.class);
+        TYPED_SET_TYPES.add(FloatOpenHashSet.class);
+        TYPED_SET_TYPES.add(DoubleOpenHashSet.class);
+        TYPED_SET_TYPES.add(ShortOpenHashSet.class);
+        TYPED_SET_TYPES.add(LongOpenHashSet.class);
+        TYPED_SET_TYPES.add(ByteOpenHashSet.class);
+        TYPED_SET_TYPES.add(BooleanOpenHashSet.class);
+        TYPED_SET_TYPES.add(CharOpenHashSet.class);
+
+        //Map types
+        TYPED_MAP_TYPES = new HashSet<Class>();
+        TYPED_MAP_TYPES.add(Int2ObjectOpenHashMap.class);
+        TYPED_MAP_TYPES.add(Float2ObjectOpenHashMap.class);
+        TYPED_MAP_TYPES.add(Double2ObjectOpenHashMap.class);
+        TYPED_MAP_TYPES.add(Short2ObjectOpenHashMap.class);
+        TYPED_MAP_TYPES.add(Long2ObjectOpenHashMap.class);
+        TYPED_MAP_TYPES.add(Byte2ObjectOpenHashMap.class);
+        TYPED_MAP_TYPES.add(Char2ObjectOpenHashMap.class);
     }
 
     private AttributeUtils() {
@@ -631,40 +692,151 @@ public class AttributeUtils {
             return getPrimitiveArray((Object[]) value);
         }
         if (List.class.isAssignableFrom(type)) {
-            List source = (List) value;
-            List r = new ObjectArrayList(source.size());
-            for (Object o : source) {
-                if (!isSupported(o.getClass()) || !(isSimpleType(o.getClass()) || isArrayType(o.getClass()))) {
-                    throw new IllegalArgumentException("The list contains unsupported type " + o.getClass().getCanonicalName());
-                }
-                r.add(standardizeValue(o));
-            }
-            return r;
+            return getStandardizedList((List) value);
         } else if (Set.class.isAssignableFrom(type)) {
-            Set source = (Set) value;
-            Set r = new ObjectOpenHashSet(source.size());
-            for (Object o : source) {
-                if (!isSupported(o.getClass()) || !(isSimpleType(o.getClass()) || isArrayType(o.getClass()))) {
-                    throw new IllegalArgumentException("The set contains unsupported type " + o.getClass().getCanonicalName());
-                }
-                r.add(standardizeValue(o));
-            }
-            return r;
+            return getStandardizedSet((Set) value);
         } else if (Map.class.isAssignableFrom(type)) {
-            Map<?, ?> source = (Map) value;
-            Map r = new Object2ObjectOpenHashMap(source.size());
-            for (Map.Entry entry : source.entrySet()) {
-                if (!isSupported(entry.getKey().getClass()) || !isSimpleType(entry.getKey().getClass())) {
-                    throw new IllegalArgumentException("The map contains unsupported key type " + entry.getKey().getClass().getCanonicalName());
-                }
-                if (!isSupported(entry.getValue().getClass()) || !(isSimpleType(entry.getValue().getClass()) || isArrayType(entry.getValue().getClass()))) {
-                    throw new IllegalArgumentException("The map contains unsupported value type " + entry.getValue().getClass().getCanonicalName());
-                }
-                r.put(entry.getKey(), standardizeValue(entry.getValue()));
-            }
-            return r;
+            return getStandardizedMap((Map) value);
         }
         return value;
+    }
+
+    private static List getStandardizedList(List list) {
+        Class listClass = list.getClass();
+        if (TYPED_LIST_TYPES.contains(listClass)) {
+            return list;
+        }
+
+        Class oCls = null;
+        for (Object o : list) {
+            if (o != null) {
+                if (oCls == null) {
+                    oCls = o.getClass();
+                } else if (!o.getClass().equals(oCls)) {
+                    throw new IllegalArgumentException("The list contains mixed classes");
+                }
+            }
+        }
+        if (oCls != null && !(isSimpleType(oCls) || isArrayType(oCls))) {
+            throw new IllegalArgumentException("The list contains unsupported type " + oCls.getClass().getCanonicalName());
+        }
+        if (oCls != null) {
+            if (oCls.equals(Integer.class)) {
+                return new IntArrayList(list);
+            } else if (oCls.equals(Float.class)) {
+                return new FloatArrayList(list);
+            } else if (oCls.equals(Double.class)) {
+                return new DoubleArrayList(list);
+            } else if (oCls.equals(Short.class)) {
+                return new ShortArrayList(list);
+            } else if (oCls.equals(Byte.class)) {
+                return new ByteArrayList(list);
+            } else if (oCls.equals(Long.class)) {
+                return new LongArrayList(list);
+            } else if (oCls.equals(Boolean.class)) {
+                return new BooleanArrayList(list);
+            } else if (oCls.equals(Character.class)) {
+                return new CharArrayList(list);
+            }
+        }
+        List result = new ObjectArrayList(list.size());
+        for (Object o : list) {
+            result.add(standardizeValue(o));
+        }
+        return result;
+    }
+
+    private static Set getStandardizedSet(Set set) {
+        Class listClass = set.getClass();
+        if (TYPED_LIST_TYPES.contains(listClass)) {
+            return set;
+        }
+
+        Class oCls = null;
+        for (Object o : set) {
+            if (o != null) {
+                if (oCls == null) {
+                    oCls = o.getClass();
+                } else if (!o.getClass().equals(oCls)) {
+                    throw new IllegalArgumentException("The set contains mixed classes");
+                }
+            }
+        }
+        if (oCls != null && !(isSimpleType(oCls) || isArrayType(oCls))) {
+            throw new IllegalArgumentException("The set contains unsupported type " + oCls.getClass().getCanonicalName());
+        }
+        if (oCls != null) {
+            if (oCls.equals(Integer.class)) {
+                return new IntOpenHashSet(set);
+            } else if (oCls.equals(Float.class)) {
+                return new FloatOpenHashSet(set);
+            } else if (oCls.equals(Double.class)) {
+                return new DoubleOpenHashSet(set);
+            } else if (oCls.equals(Short.class)) {
+                return new ShortOpenHashSet(set);
+            } else if (oCls.equals(Byte.class)) {
+                return new ByteOpenHashSet(set);
+            } else if (oCls.equals(Long.class)) {
+                return new LongOpenHashSet(set);
+            } else if (oCls.equals(Boolean.class)) {
+                return new BooleanOpenHashSet(set);
+            } else if (oCls.equals(Character.class)) {
+                return new CharOpenHashSet(set);
+            }
+        }
+        Set result = new ObjectOpenHashSet(set.size());
+        for (Object o : set) {
+            result.add(standardizeValue(o));
+        }
+        return result;
+    }
+
+    private static Map getStandardizedMap(Map<?, ?> map) {
+        Class mapClass = map.getClass();
+        if (TYPED_MAP_TYPES.contains(mapClass)) {
+            return map;
+        }
+
+        Class oCls = null;
+        for (Map.Entry entry : map.entrySet()) {
+            Object key = entry.getKey();
+            Object value = entry.getValue();
+            if (key != null) {
+                if (oCls == null) {
+                    oCls = key.getClass();
+                } else if (!key.getClass().equals(oCls)) {
+                    throw new IllegalArgumentException("The map contains mixed key classes");
+                }
+            }
+            if (value != null && !(isSimpleType(value.getClass()) || isArrayType(value.getClass()))) {
+                throw new IllegalArgumentException("The map contains unsupported value type " + value.getClass().getCanonicalName());
+            }
+        }
+        if (oCls != null && !isSimpleType(oCls)) {
+            throw new IllegalArgumentException("The map contains unsupported key type " + oCls.getClass().getCanonicalName());
+        }
+        if (oCls != null) {
+            if (oCls.equals(Integer.class)) {
+                return new Int2ObjectOpenHashMap(map);
+            } else if (oCls.equals(Float.class)) {
+                return new Float2ObjectOpenHashMap(map);
+            } else if (oCls.equals(Double.class)) {
+                return new Double2ObjectOpenHashMap(map);
+            } else if (oCls.equals(Short.class)) {
+                return new Short2ObjectOpenHashMap(map);
+            } else if (oCls.equals(Byte.class)) {
+                return new Byte2ObjectOpenHashMap(map);
+            } else if (oCls.equals(Long.class)) {
+                return new Long2ObjectOpenHashMap(map);
+            } else if (oCls.equals(Character.class)) {
+                return new Char2ObjectOpenHashMap(map);
+            }
+        }
+        Map result = new Object2ObjectOpenHashMap(map.size());
+        for (Map.Entry o : map.entrySet()) {
+            result.put(o.getKey(), standardizeValue(o.getValue()));
+        }
+        return result;
     }
 
     /**

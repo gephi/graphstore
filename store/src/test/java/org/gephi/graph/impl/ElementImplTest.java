@@ -138,7 +138,7 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute(column), l);
 
         l.add("foo");
-        l.add(1);
+        l.add("bar");
         Assert.assertEquals(node.getAttribute(column), new ArrayList());
         node.setAttribute(column, l);
         Assert.assertEquals(node.getAttribute(column), l);
@@ -156,7 +156,7 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute(column), s);
 
         s.add("foo");
-        s.add(1);
+        s.add("bar");
         Assert.assertEquals(node.getAttribute(column), new HashSet());
         node.setAttribute(column, s);
         Assert.assertEquals(node.getAttribute(column), s);
