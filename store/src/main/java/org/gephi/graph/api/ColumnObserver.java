@@ -45,6 +45,13 @@ public interface ColumnObserver {
     public boolean hasColumnChanged();
 
     /**
+     * Gets the column difference.
+     *
+     * @return the column diff
+     */
+    public ColumnDiff getDiff();
+
+    /**
      * Gets the column this observer belongs to.
      *
      * @return the table

@@ -23,7 +23,6 @@ import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnObserver;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
-import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Node;
@@ -134,7 +133,7 @@ public class ColumnStoreTest {
             }
 
             @Override
-            public ColumnObserver createColumnObserver() {
+            public ColumnObserver createColumnObserver(boolean withDiff) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 

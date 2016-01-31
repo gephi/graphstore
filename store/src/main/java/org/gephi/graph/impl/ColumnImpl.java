@@ -175,10 +175,12 @@ public class ColumnImpl implements Column {
     }
 
     @Override
-    public synchronized ColumnObserverImpl createColumnObserver() {
+    public ColumnObserverImpl createColumnObserver(boolean withDiff) {
         if (observers != null) {
-            ColumnObserverImpl observer = new ColumnObserverImpl(this);
-            observers.add(observer);
+            ColumnObserverImpl observer = new ColumnObserverImpl(table.store.graphStore, this, withDiff);
+            synchronized (observers) {
+                observers.add(observer);
+            }
 
             return observer;
         }
@@ -187,13 +189,22 @@ public class ColumnImpl implements Column {
 
     protected void destroyColumnObserver(ColumnObserverImpl observer) {
         if (observers != null) {
-            observers.remove(observer);
+            synchronized (observers) {
+                observers.remove(observer);
+            }
             observer.destroyObserver();
         }
     }
 
-    protected void incrementVersion() {
+    protected void incrementVersion(ElementImpl element) {
         version.incrementAndGetVersion();
+        if (observers != null && !observers.isEmpty()) {
+            synchronized (observers) {
+                for (ColumnObserverImpl observer : observers) {
+                    observer.setElement(element);
+                }
+            }
+        }
     }
 
     @Override

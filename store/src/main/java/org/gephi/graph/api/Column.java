@@ -137,7 +137,8 @@ public interface Column {
     /**
      * Create a new column observer.
      *
+     * @param withDiff true if column observer should provide column differences
      * @return the column observer
      */
-    public ColumnObserver createColumnObserver();
+    public ColumnObserver createColumnObserver(boolean withDiff);
 }

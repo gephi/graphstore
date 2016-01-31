@@ -476,7 +476,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         return 0;
     }
 
-    private boolean isValidIndex(int id) {
+    protected boolean isValidIndex(int id) {
         if (id < 0 || id >= currentBlock.offset + currentBlock.nodeLength) {
             return false;
         }

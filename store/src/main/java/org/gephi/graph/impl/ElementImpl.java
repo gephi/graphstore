@@ -235,7 +235,7 @@ public abstract class ElementImpl implements Element {
             } else if (column.isIndexed() && columnStore != null && isValid()) {
                 columnStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
             }
-            columnImpl.incrementVersion();
+            columnImpl.incrementVersion(this);
         }
         return oldValue;
     }
@@ -285,7 +285,7 @@ public abstract class ElementImpl implements Element {
             if (timeIndexStore != null) {
                 timeIndexStore.remove(timeObject);
             }
-            ((ColumnImpl) column).incrementVersion();
+            ((ColumnImpl) column).incrementVersion(this);
         }
         return oldValue;
     }
@@ -305,7 +305,7 @@ public abstract class ElementImpl implements Element {
             ColumnStore columnStore = getColumnStore();
             if (columnStore != null && isValid()) {
                 Column col = columnStore.getColumnByIndex(index);
-                ((ColumnImpl) col).incrementVersion();
+                ((ColumnImpl) col).incrementVersion(this);
             }
         }
     }
@@ -362,7 +362,7 @@ public abstract class ElementImpl implements Element {
             attributes[index] = value;
         }
         if (isValid()) {
-            ((ColumnImpl) column).incrementVersion();
+            ((ColumnImpl) column).incrementVersion(this);
         }
     }
 
@@ -430,7 +430,7 @@ public abstract class ElementImpl implements Element {
             }
         }
         if (isValid()) {
-            ((ColumnImpl) column).incrementVersion();
+            ((ColumnImpl) column).incrementVersion(this);
         }
     }
 
@@ -484,7 +484,7 @@ public abstract class ElementImpl implements Element {
             ColumnStore columnStore = getColumnStore();
             if (columnStore != null) {
                 Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
-                ((ColumnImpl) column).incrementVersion();
+                ((ColumnImpl) column).incrementVersion(this);
             }
         }
 
@@ -523,7 +523,7 @@ public abstract class ElementImpl implements Element {
             ColumnStore columnStore = getColumnStore();
             if (columnStore != null) {
                 Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
-                ((ColumnImpl) column).incrementVersion();
+                ((ColumnImpl) column).incrementVersion(this);
             }
         }
 

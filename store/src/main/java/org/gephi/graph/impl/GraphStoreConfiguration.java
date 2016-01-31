@@ -46,6 +46,8 @@ public final class GraphStoreConfiguration {
     //GraphView
     public static final int VIEW_DEFAULT_TYPE_COUNT = 1;
     public static final double VIEW_GROWING_FACTOR = 1.1;
+    //Diff
+    public static final double COLUMNDIFF_GROWING_FACTOR = 1.1;
     //Properties
     public static final boolean ENABLE_ELEMENT_LABEL = true;
     public static final boolean ENABLE_ELEMENT_TIME_SET = true;

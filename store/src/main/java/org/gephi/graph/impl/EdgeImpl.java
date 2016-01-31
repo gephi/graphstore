@@ -132,7 +132,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
         ColumnStore columnStore = getColumnStore();
         if (res && columnStore != null && isValid()) {
             Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
-            ((ColumnImpl) column).incrementVersion();
+            ((ColumnImpl) column).incrementVersion(this);
         }
     }
 
@@ -227,7 +227,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
         ColumnStore columnStore = getColumnStore();
         if (columnStore != null && isValid()) {
             Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
-            ((ColumnImpl) column).incrementVersion();
+            ((ColumnImpl) column).incrementVersion(this);
         }
     }
 

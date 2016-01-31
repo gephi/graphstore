@@ -1019,7 +1019,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return undirectedSize == 0;
     }
 
-    boolean isValidIndex(int id) {
+    protected boolean isValidIndex(int id) {
         return id >= 0 && id < currentBlock.offset + currentBlock.nodeLength;
     }
 
