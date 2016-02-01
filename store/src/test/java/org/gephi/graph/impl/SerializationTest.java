@@ -16,8 +16,31 @@
 package org.gephi.graph.impl;
 
 import cern.colt.bitvector.BitVector;
+import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
+import it.unimi.dsi.fastutil.booleans.BooleanOpenHashSet;
+import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.bytes.ByteArrayList;
+import it.unimi.dsi.fastutil.bytes.ByteOpenHashSet;
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.chars.CharArrayList;
+import it.unimi.dsi.fastutil.chars.CharOpenHashSet;
+import it.unimi.dsi.fastutil.doubles.Double2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
+import it.unimi.dsi.fastutil.floats.Float2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatOpenHashSet;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.ShortArrayList;
+import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -747,6 +770,15 @@ public class SerializationTest {
         mixedList.add("foo");
         mixedList.add(42);
         Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(mixedList)), mixedList);
+
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new IntArrayList(new int[]{42}))), new IntArrayList(new int[]{42}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new FloatArrayList(new float[]{42f}))), new FloatArrayList(new float[]{42f}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new DoubleArrayList(new double[]{42.0}))), new DoubleArrayList(new double[]{42.0}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new ShortArrayList(new short[]{42}))), new ShortArrayList(new short[]{42}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new ByteArrayList(new byte[]{42}))), new ByteArrayList(new byte[]{42}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new LongArrayList(new long[]{42l}))), new LongArrayList(new long[]{42l}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new BooleanArrayList(new boolean[]{true}))), new BooleanArrayList(new boolean[]{true}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new CharArrayList(new char[]{'a'}))), new CharArrayList(new char[]{'a'}));
     }
 
     @Test
@@ -768,6 +800,15 @@ public class SerializationTest {
         mixedSet.add("foo");
         mixedSet.add(42);
         Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(mixedSet)), mixedSet);
+
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new IntOpenHashSet(new int[]{42}))), new IntOpenHashSet(new int[]{42}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new FloatOpenHashSet(new float[]{42f}))), new FloatOpenHashSet(new float[]{42f}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new DoubleOpenHashSet(new double[]{42.0}))), new DoubleOpenHashSet(new double[]{42.0}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new ShortOpenHashSet(new short[]{42}))), new ShortOpenHashSet(new short[]{42}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new ByteOpenHashSet(new byte[]{42}))), new ByteOpenHashSet(new byte[]{42}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new LongOpenHashSet(new long[]{42l}))), new LongOpenHashSet(new long[]{42l}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new BooleanOpenHashSet(new boolean[]{true}))), new BooleanOpenHashSet(new boolean[]{true}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new CharOpenHashSet(new char[]{'a'}))), new CharOpenHashSet(new char[]{'a'}));
     }
 
     @Test
@@ -789,6 +830,14 @@ public class SerializationTest {
         mixedMap.put("foo", "bar");
         mixedMap.put(42, 42);
         Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(mixedMap)), mixedMap);
+
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new Int2ObjectOpenHashMap(new int[]{42}, new Object[]{"foo"}))), new Int2ObjectOpenHashMap(new int[]{42}, new Object[]{"foo"}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new Float2ObjectOpenHashMap(new float[]{42f}, new Object[]{"foo"}))), new Float2ObjectOpenHashMap(new float[]{42f}, new Object[]{"foo"}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new Double2ObjectOpenHashMap(new double[]{42.0}, new Object[]{"foo"}))), new Double2ObjectOpenHashMap(new double[]{42.0}, new Object[]{"foo"}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new Short2ObjectOpenHashMap(new short[]{42}, new Object[]{"foo"}))), new Short2ObjectOpenHashMap(new short[]{42}, new Object[]{"foo"}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new Byte2ObjectOpenHashMap(new byte[]{42}, new Object[]{"foo"}))), new Byte2ObjectOpenHashMap(new byte[]{42}, new Object[]{"foo"}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new Long2ObjectOpenHashMap(new long[]{42l}, new Object[]{"foo"}))), new Long2ObjectOpenHashMap(new long[]{42l}, new Object[]{"foo"}));
+        Assert.assertEquals(new Serialization(null).deserialize(ser.serialize(new Char2ObjectOpenHashMap(new char[]{'a'}, new Object[]{"foo"}))), new Char2ObjectOpenHashMap(new char[]{'a'}, new Object[]{"foo"}));
     }
 
     @Test
