@@ -27,5 +27,13 @@ public enum Origin {
     /**
      * Data.
      */
-    DATA
+    DATA,
+    /**
+     * Data (suited for ranking).
+     */
+    DATE_RANKING,
+    /**
+     * Data (suited for partition).
+     */
+    DATA_PARTITION,
 }
