@@ -210,8 +210,6 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, ti);
 
-        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], ti);
         Assert.assertEquals(node.getAttribute(column), ti);
     }
 
