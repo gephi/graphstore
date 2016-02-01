@@ -150,6 +150,21 @@ public class EdgeStoreTest {
     }
 
     @Test
+    public void testGetLargeBlockCount() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateVeryLargeEdgeList();
+
+        edgeStore.addAll(Arrays.asList(edges));
+        EdgeImpl firstEdge = edgeStore.get(0);
+        EdgeImpl middleEdge = edgeStore.get(edges.length / 2);
+        EdgeImpl lastEdge = edgeStore.get(edges.length - 1);
+
+        Assert.assertEquals(firstEdge, edges[0]);
+        Assert.assertEquals(middleEdge, edges[edges.length / 2]);
+        Assert.assertEquals(lastEdge, edges[edges.length - 1]);
+    }
+
+    @Test
     public void testClear() {
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.clear();

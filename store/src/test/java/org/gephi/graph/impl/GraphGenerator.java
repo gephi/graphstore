@@ -62,6 +62,10 @@ public class GraphGenerator {
         return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, true, true, false);
     }
 
+    public static EdgeImpl[] generateVeryLargeEdgeList() {
+        return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * GraphStoreConfiguration.EDGESTORE_DEFAULT_BLOCKS + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, true, true, false);
+    }
+
     public static EdgeImpl[] generatelargeUndirectedEdgeList() {
         return generateEdgeList(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, false, true, false);
     }

@@ -51,6 +51,7 @@ import org.gephi.graph.api.types.IntervalIntegerMap;
 import org.gephi.graph.api.types.IntervalLongMap;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
+import org.gephi.graph.api.types.TimestampSet;
 import static org.gephi.graph.impl.GraphStoreConfiguration.ENABLE_ELEMENT_LABEL;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -188,6 +189,23 @@ public class ElementImplTest {
         TimestampIntegerMap ti = new TimestampIntegerMap();
         ti.put(1.0, 42);
         ti.put(2.0, 10);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, ti);
+
+        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], ti);
+        Assert.assertEquals(node.getAttribute(column), ti);
+    }
+
+    @Test
+    public void testSetAttributeTimeset() {
+        GraphStore store = new GraphStore();
+        Column column = store.nodeTable.getColumn("timeset");
+
+        TimestampSet ti = new TimestampSet();
+        ti.add(1.0);
+        ti.add(2.0);
 
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, ti);
