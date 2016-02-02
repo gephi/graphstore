@@ -555,6 +555,30 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testSetConfigurationEdgeWeightColumnFalse() {
+        GraphModelImpl graphModelImpl = new GraphModelImpl();
+
+        Configuration config = new Configuration();
+        config.setEdgeWeightColumn(Boolean.FALSE);
+        graphModelImpl.setConfiguration(config);
+        Assert.assertFalse(graphModelImpl.store.edgeTable.hasColumn("weight"));
+        Assert.assertNotEquals(graphModelImpl.store.edgeTable.addColumn("foo", Integer.class).getIndex(), GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+    }
+
+    @Test
+    public void testSetConfigurationEdgeWeightColumnTrue() {
+        Configuration config = new Configuration();
+        config.setEdgeWeightColumn(Boolean.FALSE);
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
+
+        config = new Configuration();
+        config.setEdgeWeightColumn(Boolean.TRUE);
+        graphModelImpl.setConfiguration(config);
+        Assert.assertTrue(graphModelImpl.store.edgeTable.hasColumn("weight"));
+        Assert.assertEquals(graphModelImpl.store.edgeTable.getColumn("weight").getIndex(), GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+    }
+
+    @Test
     public void testNodeAttributesAddAndRemoveColumns1() {
         GraphModelImpl graphModel = new GraphModelImpl();
         Table table = graphModel.getNodeTable();

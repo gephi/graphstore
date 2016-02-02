@@ -109,7 +109,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
                 edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
             }
         }
-        edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
+        if (configuration.getEdgeWeightColumn()) {
+            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
+        } else {
+            edgeTable.store.length++;
+        }
     }
 
     @Override

@@ -96,7 +96,7 @@ import org.joda.time.DateTimeZone;
 // Greatly inspired from JDBM https://github.com/jankotek/JDBM3
 public class Serialization {
 
-    final static float VERSION = 0.4f;
+    final static float VERSION = 0.5f;
     final static int NULL_ID = -1;
     final static int NULL = 0;
     final static int NORMAL = 1;
@@ -217,6 +217,7 @@ public class Serialization {
     //Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
+    protected float readVersion = VERSION;
     //Deserialized configuration
     protected GraphStoreConfigurationVersion graphStoreConfigurationVersion;
 
@@ -238,7 +239,7 @@ public class Serialization {
     }
 
     public GraphModelImpl deserializeGraphModel(DataInput is) throws IOException, ClassNotFoundException {
-        float version = (Float) deserialize(is);
+        readVersion = (Float) deserialize(is);
         Configuration config = (Configuration) deserialize(is);
         model = new GraphModelImpl(config);
         deserialize(is);
@@ -1051,6 +1052,7 @@ public class Serialization {
         serialize(out, config.getEdgeLabelType());
         serialize(out, config.getEdgeWeightType());
         serialize(out, config.getTimeRepresentation());
+        serialize(out, config.getEdgeWeightColumn());
     }
 
     private Configuration deserializeConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
@@ -1067,6 +1069,10 @@ public class Serialization {
         config.setEdgeLabelType(edgeLabelType);
         config.setEdgeWeightType(edgeWeightType);
         config.setTimeRepresentation(timeRepresentation);
+        if (readVersion >= 0.5) {
+            Boolean edgeColumn = (Boolean) deserialize(is);
+            config.setEdgeWeightColumn(edgeColumn);
+        }
 
         return config;
     }

@@ -41,6 +41,7 @@ public class Configuration {
     private Class edgeLabelType;
     private Class edgeWeightType;
     private TimeRepresentation timeRepresentation;
+    private Boolean edgeWeightColumn;
 
     /**
      * Default constructor.
@@ -51,6 +52,7 @@ public class Configuration {
         edgeLabelType = GraphStoreConfiguration.DEFAULT_EDGE_LABEL_TYPE;
         edgeWeightType = GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT_TYPE;
         timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
+        edgeWeightColumn = true;
     }
 
     /**
@@ -168,6 +170,24 @@ public class Configuration {
     }
 
     /**
+     * Returns whether an edge weight column is created.
+     *
+     * @return edge weight column
+     */
+    public Boolean getEdgeWeightColumn() {
+        return edgeWeightColumn;
+    }
+
+    /**
+     * Sets whether to create an edge weight column.
+     *
+     * @param edgeWeightColumn edge weight column
+     */
+    public void setEdgeWeightColumn(Boolean edgeWeightColumn) {
+        this.edgeWeightColumn = edgeWeightColumn;
+    }
+
+    /**
      * Copy this configuration.
      *
      * @return a copy of this configuration
@@ -179,6 +199,7 @@ public class Configuration {
         copy.edgeLabelType = edgeLabelType;
         copy.edgeWeightType = edgeWeightType;
         copy.timeRepresentation = timeRepresentation;
+        copy.edgeWeightColumn = edgeWeightColumn;
         return copy;
     }
 
@@ -190,6 +211,7 @@ public class Configuration {
         hash = 19 * hash + (this.edgeLabelType != null ? this.edgeLabelType.hashCode() : 0);
         hash = 19 * hash + (this.edgeWeightType != null ? this.edgeWeightType.hashCode() : 0);
         hash = 19 * hash + (this.timeRepresentation != null ? this.timeRepresentation.hashCode() : 0);
+        hash = 19 * hash + (this.edgeWeightColumn != null ? this.edgeWeightColumn.hashCode() : 0);
         return hash;
     }
 
@@ -218,6 +240,9 @@ public class Configuration {
             return false;
         }
         if (this.timeRepresentation != other.timeRepresentation && (this.timeRepresentation == null || !this.timeRepresentation.equals(other.timeRepresentation))) {
+            return false;
+        }
+        if (this.edgeWeightColumn != other.edgeWeightColumn && (this.edgeWeightColumn == null || !this.edgeWeightColumn.equals(other.edgeWeightColumn))) {
             return false;
         }
         return true;

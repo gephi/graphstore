@@ -30,6 +30,7 @@ public class ConfigurationTest {
         Assert.assertNotNull(c.getNodeIdType());
         Assert.assertNotNull(c.getEdgeIdType());
         Assert.assertNotNull(c.getEdgeLabelType());
+        Assert.assertNotNull(c.getEdgeWeightColumn());
     }
 
     @Test
@@ -69,6 +70,13 @@ public class ConfigurationTest {
         Configuration c = new Configuration();
         c.setTimeRepresentation(TimeRepresentation.INTERVAL);
         Assert.assertEquals(c.getTimeRepresentation(), TimeRepresentation.INTERVAL);
+    }
+
+    @Test
+    public void testSetEdgeWeightColumn() {
+        Configuration c = new Configuration();
+        c.setEdgeWeightColumn(Boolean.FALSE);
+        Assert.assertEquals(c.getEdgeWeightColumn(), Boolean.FALSE);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

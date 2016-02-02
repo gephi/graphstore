@@ -446,13 +446,28 @@ public class GraphModelImpl implements GraphModel {
                 store.timeStore.resetConfiguration();
             }
 
+            //Change whether edge weight column
+            if (!config.getEdgeWeightColumn().equals(configuration.getEdgeWeightColumn())) {
+                TableImpl<Edge> edgeTable = store.edgeTable;
+                if (config.getEdgeWeightColumn()) {
+                    edgeTable.store.garbageQueue.add(edgeTable.store.intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
+                    edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, config.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
+                } else {
+                    edgeTable.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
+                    edgeTable.store.garbageQueue.remove(edgeTable.store.intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
+                }
+            }
+
             //Change weight column type:
             if (!config.getEdgeWeightType().equals(configuration.getEdgeWeightType())) {
                 TableImpl<Edge> edgeTable = store.edgeTable;
 
-                edgeTable.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
                 Class newWeightType = config.getEdgeWeightType();
-                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, newWeightType, "Weight", null, Origin.PROPERTY, false, false));
+                if (config.getEdgeWeightColumn()) {
+                    edgeTable.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
+
+                    edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, newWeightType, "Weight", null, Origin.PROPERTY, false, false));
+                }
 
                 configuration.setEdgeWeightType(newWeightType);
             }
