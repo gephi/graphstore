@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.AttributeUtils;
+import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
@@ -46,35 +48,79 @@ public class GraphAttributesImpl {
     }
 
     public synchronized Object getValue(String key, double timestamp) {
-        TimestampMap valueSet = (TimestampMap) attributes.get(key);
+        return getValueInternal(key, timestamp);
+    }
+
+    public synchronized Object getValue(String key, Interval interval) {
+        return getValueInternal(key, interval);
+    }
+
+    private Object getValueInternal(String key, Object timeObj) {
+        TimeMap valueSet = (TimeMap) attributes.get(key);
         if (valueSet != null) {
-            return valueSet.get(timestamp, null);
+            return valueSet.get(timeObj, null);
         }
         return null;
     }
 
+    public synchronized void removeValue(String key, double timestamp) {
+        removeValueInternal(key, timestamp);
+
+    }
+
+    public synchronized void removeValue(String key, Interval interval) {
+        removeValueInternal(key, interval);
+    }
+
+    private void removeValueInternal(String key, Object timeObj) {
+        TimeMap timeMap = (TimeMap) attributes.get(key);
+        if (timeMap != null) {
+            if (timeMap.remove(timeObj)) {
+                if (timeMap.isEmpty()) {
+                    attributes.remove(key);
+                }
+            }
+        }
+    }
+
     public synchronized void setValue(String key, Object value, double timestamp) {
+        setValueInternal(key, value, timestamp);
+    }
+
+    public synchronized void setValue(String key, Object value, Interval interval) {
+        setValueInternal(key, value, interval);
+    }
+
+    private void setValueInternal(String key, Object value, Object timeObj) {
         if (value == null) {
             throw new NullPointerException("The value can't be null for the key '" + key + "'");
         }
-        checkSupportedDynamicTypes(value.getClass());
-
-        TimestampMap valueSet = null;
+        TimeMap valueSet = null;
         if (attributes.containsKey(key)) {
-            valueSet = (TimestampMap) attributes.get(key);
+            valueSet = (TimeMap) attributes.get(key);
+
+            if (!value.getClass().equals(valueSet.getTypeClass())) {
+                throw new IllegalArgumentException("The value type " + value.getClass().getName() + " doesn't match with the expected type " + valueSet.getTypeClass().getName());
+            }
         } else {
+            if (timeObj instanceof Interval) {
+                checkSupportedIntervalTypes(value.getClass());
+            } else {
+                checkSupportedTimestampTypes(value.getClass());
+            }
             try {
-                valueSet = AttributeUtils.getTimestampMapType(value.getClass()).newInstance();
+                if (timeObj instanceof Interval) {
+                    valueSet = AttributeUtils.getIntervalMapType(value.getClass()).newInstance();
+                } else {
+                    valueSet = AttributeUtils.getTimestampMapType(value.getClass()).newInstance();
+                }
                 attributes.put(key, valueSet);
             } catch (Exception ex) {
                 throw new RuntimeException("The dynamic type can't be created", ex);
             }
         }
-        if (!value.getClass().equals(valueSet.getTypeClass())) {
-            throw new IllegalArgumentException("The value type " + value.getClass().getName() + " doesn't match with the expected type " + valueSet.getTypeClass().getName());
-        }
 
-        valueSet.put(timestamp, value);
+        valueSet.put(timeObj, value);
     }
 
     protected void setGraphAttributes(GraphAttributesImpl graphAttributes) {
@@ -87,9 +133,17 @@ public class GraphAttributesImpl {
         }
     }
 
-    private void checkSupportedDynamicTypes(Class type) {
+    private void checkSupportedTimestampTypes(Class type) {
         try {
             AttributeUtils.getTimestampMapType(type);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unsupported dynamic type " + type.getName());
+        }
+    }
+
+    private void checkSupportedIntervalTypes(Class type) {
+        try {
+            AttributeUtils.getIntervalMapType(type);
         } catch (Exception e) {
             throw new IllegalArgumentException("Unsupported dynamic type " + type.getName());
         }

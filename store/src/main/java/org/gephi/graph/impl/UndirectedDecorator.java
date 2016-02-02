@@ -22,6 +22,7 @@ import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Subgraph;
@@ -273,6 +274,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public Object getAttribute(String key, Interval interval) {
+        return store.attributes.getValue(key, interval);
+    }
+
+    @Override
     public Set<String> getAttributeKeys() {
         return store.attributes.getKeys();
     }
@@ -285,6 +291,26 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     @Override
     public void setAttribute(String key, Object value, double timestamp) {
         store.attributes.setValue(key, value, timestamp);
+    }
+
+    @Override
+    public void setAttribute(String key, Object value, Interval interval) {
+        store.attributes.setValue(key, value, interval);
+    }
+
+    @Override
+    public void removeAttribute(String key) {
+        store.attributes.removeValue(key);
+    }
+
+    @Override
+    public void removeAttribute(String key, Interval interval) {
+        store.attributes.removeValue(key, interval);
+    }
+
+    @Override
+    public void removeAttribute(String key, double timestamp) {
+        store.attributes.removeValue(key, timestamp);
     }
 
     @Override

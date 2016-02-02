@@ -405,12 +405,37 @@ public class BasicGraphStore implements DirectedGraph {
     }
 
     @Override
+    public Object getAttribute(String key, Interval interval) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public void setAttribute(String key, Object value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void setAttribute(String key, Object value, double timestamp) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setAttribute(String key, Object value, Interval interval) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void removeAttribute(String key) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void removeAttribute(String key, Interval interval) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void removeAttribute(String key, double timestamp) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

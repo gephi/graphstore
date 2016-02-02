@@ -22,6 +22,7 @@ import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.testng.Assert;
@@ -756,6 +757,11 @@ public class GraphViewDecoratorTest {
         graph.setAttribute("foo", "bar");
         Assert.assertEquals(graph.getAttribute("foo"), "bar");
         Assert.assertTrue(graph.getAttributeKeys().contains("foo"));
+        graph.setAttribute("foo", "foo");
+        Assert.assertEquals(graph.getAttribute("foo"), "foo");
+        graph.removeAttribute("foo");
+        Assert.assertFalse(graph.getAttributeKeys().contains("foo"));
+        Assert.assertNull(graph.getAttribute("foo"));
     }
 
     @Test
@@ -769,6 +775,31 @@ public class GraphViewDecoratorTest {
         graph.setAttribute("foo", "bar", 1.0);
         Assert.assertEquals(graph.getAttribute("foo", 1.0), "bar");
         Assert.assertTrue(graph.getAttributeKeys().contains("foo"));
+        graph.setAttribute("foo", "foo", 2.0);
+        Assert.assertEquals(graph.getAttribute("foo", 2.0), "foo");
+        graph.removeAttribute("foo", 1.0);
+        Assert.assertNull(graph.getAttribute("foo", 1.0));
+        graph.removeAttribute("foo", 2.0);
+        Assert.assertFalse(graph.getAttributeKeys().contains("foo"));
+    }
+
+    @Test
+    public void testAttributesWithIntervals() {
+        GraphStore graphStore = new GraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        Assert.assertNull(graph.getAttribute("foo", new Interval(1.0, 2.0)));
+        graph.setAttribute("foo", "bar", new Interval(1.0, 2.0));
+        Assert.assertEquals(graph.getAttribute("foo", new Interval(1.0, 2.0)), "bar");
+        Assert.assertTrue(graph.getAttributeKeys().contains("foo"));
+        graph.setAttribute("foo", "foo", new Interval(2.0, 4.0));
+        Assert.assertEquals(graph.getAttribute("foo", new Interval(2.0, 4.0)), "foo");
+        graph.removeAttribute("foo", new Interval(1.0, 2.0));
+        Assert.assertNull(graph.getAttribute("foo", new Interval(1.0, 2.0)));
+        graph.removeAttribute("foo", new Interval(2.0, 4.0));
+        Assert.assertFalse(graph.getAttributeKeys().contains("foo"));
     }
 
     @Test

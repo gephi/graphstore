@@ -382,12 +382,28 @@ public interface Graph {
     public Object getAttribute(String key, double timestamp);
 
     /**
+     * Gets the attribute for the given key and interval
+     *
+     * @param key the key
+     * @param interval the interval
+     * @return the attribute value, or null if not found
+     */
+    public Object getAttribute(String key, Interval interval);
+
+    /**
      * Sets the attribute value for the given key.
      *
      * @param key the key
      * @param value the value
      */
     public void setAttribute(String key, Object value);
+
+    /**
+     * Removes the attribute for the given key.
+     *
+     * @param key key
+     */
+    public void removeAttribute(String key);
 
     /**
      * Sets the attribute value for the given key and timestamp.
@@ -397,6 +413,31 @@ public interface Graph {
      * @param timestamp the timestamp
      */
     public void setAttribute(String key, Object value, double timestamp);
+
+    /**
+     * Sets the attribute value for the given key and interval.
+     *
+     * @param key the key
+     * @param value the value
+     * @param interval the interval
+     */
+    public void setAttribute(String key, Object value, Interval interval);
+
+    /**
+     * Removes the attribute for the given key and timestamp.
+     *
+     * @param key key
+     * @param timestamp timestamp
+     */
+    public void removeAttribute(String key, double timestamp);
+
+    /**
+     * Removes the attribute for the given key and interval.
+     *
+     * @param key key
+     * @param interval interval
+     */
+    public void removeAttribute(String key, Interval interval);
 
     /**
      * Gets all attribute keys.

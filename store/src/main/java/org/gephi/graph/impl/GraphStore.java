@@ -574,6 +574,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public Object getAttribute(String key, Interval interval) {
+        return attributes.getValue(key, interval);
+    }
+
+    @Override
     public Set<String> getAttributeKeys() {
         return attributes.getKeys();
     }
@@ -584,8 +589,28 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public void removeAttribute(String key) {
+        attributes.removeValue(key);
+    }
+
+    @Override
     public void setAttribute(String key, Object value, double timestamp) {
         attributes.setValue(key, value, timestamp);
+    }
+
+    @Override
+    public void setAttribute(String key, Object value, Interval interval) {
+        attributes.setValue(key, value, interval);
+    }
+
+    @Override
+    public void removeAttribute(String key, double timestamp) {
+        attributes.removeValue(key, timestamp);
+    }
+
+    @Override
+    public void removeAttribute(String key, Interval interval) {
+        attributes.removeValue(key, interval);
     }
 
     @Override

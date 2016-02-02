@@ -757,15 +757,17 @@ public class GraphStoreTest {
 
     @Test
     public void testAttributes() {
-        GraphStore graphStore = new GraphStore();
-        GraphViewStore store = graphStore.viewStore;
-        GraphViewImpl view = store.createView();
-        DirectedSubgraph graph = store.getDirectedGraph(view);
+        GraphStore graph = new GraphStore();
 
         Assert.assertNull(graph.getAttribute("foo"));
         graph.setAttribute("foo", "bar");
         Assert.assertEquals(graph.getAttribute("foo"), "bar");
         Assert.assertTrue(graph.getAttributeKeys().contains("foo"));
+        graph.setAttribute("foo", "foo");
+        Assert.assertEquals(graph.getAttribute("foo"), "foo");
+        graph.removeAttribute("foo");
+        Assert.assertFalse(graph.getAttributeKeys().contains("foo"));
+        Assert.assertNull(graph.getAttribute("foo"));
     }
 
     @Test
@@ -776,6 +778,28 @@ public class GraphStoreTest {
         graphStore.setAttribute("foo", "bar", 1.0);
         Assert.assertEquals(graphStore.getAttribute("foo", 1.0), "bar");
         Assert.assertTrue(graphStore.getAttributeKeys().contains("foo"));
+        graphStore.setAttribute("foo", "foo", 2.0);
+        Assert.assertEquals(graphStore.getAttribute("foo", 2.0), "foo");
+        graphStore.removeAttribute("foo", 1.0);
+        Assert.assertNull(graphStore.getAttribute("foo", 1.0));
+        graphStore.removeAttribute("foo", 2.0);
+        Assert.assertFalse(graphStore.getAttributeKeys().contains("foo"));
+    }
+
+    @Test
+    public void testAttributesWithIntervals() {
+        GraphStore graphStore = new GraphStore();
+
+        Assert.assertNull(graphStore.getAttribute("foo", new Interval(1.0, 2.0)));
+        graphStore.setAttribute("foo", "bar", new Interval(1.0, 2.0));
+        Assert.assertEquals(graphStore.getAttribute("foo", new Interval(1.0, 2.0)), "bar");
+        Assert.assertTrue(graphStore.getAttributeKeys().contains("foo"));
+        graphStore.setAttribute("foo", "foo", new Interval(2.0, 4.0));
+        Assert.assertEquals(graphStore.getAttribute("foo", new Interval(2.0, 4.0)), "foo");
+        graphStore.removeAttribute("foo", new Interval(1.0, 2.0));
+        Assert.assertNull(graphStore.getAttribute("foo", new Interval(1.0, 2.0)));
+        graphStore.removeAttribute("foo", new Interval(2.0, 4.0));
+        Assert.assertFalse(graphStore.getAttributeKeys().contains("foo"));
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
