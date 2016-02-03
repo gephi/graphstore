@@ -25,7 +25,7 @@ import org.gephi.graph.api.Interval;
 
 public final class Interval2IntTreeMap implements Map<Interval, Integer> {
 
-    private Node nil;  // the sentinel node
+    private Node nil; // the sentinel node
     private Node root; // the root of this interval tree
     private int size = 0;
 
@@ -377,7 +377,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
      * Returns the interval with the lowest left endpoint.
      *
      * @return the interval with the lowest left endpoint or null if the tree is
-     * empty.
+     *         empty.
      */
     public Interval minimum() {
         if (root.left == nil) {
@@ -397,7 +397,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
      * Returns the interval with the highest right endpoint.
      *
      * @return the interval with the highest right endpoint or null if the tree
-     * is empty.
+     *         is empty.
      */
     public Interval maximum() {
         if (root.left == nil) {
@@ -627,8 +627,8 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
      * @param obj object to which this interval tree is to be compared
      *
      * @return {@code true} if and only if the specified {@code Object} is a
-     * {@code IntervalTree} which contain the same intervals as this
-     * {@code IntervalTree's}.
+     *         {@code IntervalTree} which contain the same intervals as this
+     *         {@code IntervalTree's}.
      *
      * @see #hashCode
      */
@@ -687,14 +687,15 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
 
     private static class Node {
 
-        private final Interval i;   // i.low is the key of this node
+        private final Interval i; // i.low is the key of this node
         private final int v; // value
-        private double max; // the maximum value of any interval endpoint stored in the subtree rooted at this node
+        private double max; // the maximum value of any interval endpoint stored
+                            // in the subtree rooted at this node
 
         private Color color; // the color of this node
-        private Node left;  // the left subtree of this node
+        private Node left; // the left subtree of this node
         private Node right; // the right subtree of this node
-        private Node p;     // the parent node
+        private Node p; // the parent node
 
         public Node() {
             color = BLACK;

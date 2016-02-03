@@ -844,7 +844,7 @@ public class GraphViewDecoratorTest {
         Assert.assertTrue(graph1.contains(n2));
     }
 
-    //UTILITY
+    // UTILITY
     private boolean isIterablesEqual(ElementIterable n1, ElementIterable n2) {
         ObjectSet s1 = new ObjectOpenHashSet();
         for (Object n : n1) {

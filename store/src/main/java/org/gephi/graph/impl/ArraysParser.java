@@ -66,7 +66,16 @@ public final class ArraysParser {
 
         ArrayList<String> values = new ArrayList<String>();
         try {
-            StringReader reader = new StringReader(input + ' ');//Add 1 space so reader.skip function always works when necessary (end of string not reached).
+            StringReader reader = new StringReader(input + ' ');// Add 1 space
+                                                                // so
+                                                                // reader.skip
+                                                                // function
+                                                                // always works
+                                                                // when
+                                                                // necessary
+                                                                // (end of
+                                                                // string not
+                                                                // reached).
             int r;
             char c;
             while ((r = reader.read()) != -1) {
@@ -81,17 +90,20 @@ public final class ArraysParser {
                     case '\r':
                     case '\n':
                     case COMMA:
-                        //Ignore special characters and leading whitespace or similar until a value or literal starts:
+                        // Ignore special characters and leading whitespace or
+                        // similar until a value or literal starts:
                         break;
                     case '"':
                     case '\'':
                         values.add(FormattingAndParsingUtils.parseLiteral(reader, c));
                         break;
                     default:
-                        reader.skip(-1);//Go backwards 1 position, for reading start of value
+                        reader.skip(-1);// Go backwards 1 position, for reading
+                                        // start of value
                         String value = FormattingAndParsingUtils.parseValue(reader);
                         if (value.equals("null")) {
-                            value = null;//Special null value only when not in literal parsing mode
+                            value = null;// Special null value only when not in
+                                         // literal parsing mode
                         }
                         values.add(value);
                 }
@@ -117,12 +129,12 @@ public final class ArraysParser {
      * Parses an array of any primitive type.
      *
      * @param <T> Primitive type wrapper. For example Integer for int array or
-     * Long for long array.
+     *        Long for long array.
      * @param arrayTypeClass Array type to parse
      * @param input Input string to parse
      * @return Parsed array
      * @throws IllegalArgumentException Parsing exception, or if any of the
-     * parsed array values is null
+     *         parsed array values is null
      */
     public static <T> Object parseArrayAsPrimitiveArray(Class<T[]> arrayTypeClass, String input) throws IllegalArgumentException {
         T[] array = parseArray(arrayTypeClass, input);

@@ -622,7 +622,7 @@ public class TimestampIndexStoreTest {
         Assert.assertFalse(index.hasElements());
     }
 
-    //UTILITY
+    // UTILITY
     private <T> Object[] getArrayFromIterable(Iterable<T> iterable) {
         List<T> list = new ArrayList<T>();
         for (T t : iterable) {

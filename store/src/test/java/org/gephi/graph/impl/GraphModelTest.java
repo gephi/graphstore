@@ -106,14 +106,14 @@ public class GraphModelTest {
         GraphModelImpl graphModel = new GraphModelImpl();
         int typeId = graphModel.addEdgeType("foo");
         Assert.assertEquals(graphModel.getEdgeTypeCount(), 2);
-        Assert.assertEquals(graphModel.getEdgeTypes(), new int[]{EdgeTypeStore.NULL_LABEL, typeId});
+        Assert.assertEquals(graphModel.getEdgeTypes(), new int[] { EdgeTypeStore.NULL_LABEL, typeId });
     }
 
     @Test
     public void testGetEdgeTypeLabels() {
         GraphModelImpl graphModel = new GraphModelImpl();
         graphModel.addEdgeType("foo");
-        Assert.assertEquals(graphModel.getEdgeTypeLabels(), new Object[]{null, "foo"});
+        Assert.assertEquals(graphModel.getEdgeTypeLabels(), new Object[] { null, "foo" });
     }
 
     @Test
@@ -136,7 +136,7 @@ public class GraphModelTest {
         GraphModelImpl graphModel = new GraphModelImpl();
         Node n1 = graphModel.factory().newNode("1");
         Node n2 = graphModel.factory().newNode("2");
-        graphModel.getStore().addAllNodes(Arrays.asList(new Node[]{n1, n2}));
+        graphModel.getStore().addAllNodes(Arrays.asList(new Node[] { n1, n2 }));
         Edge e = graphModel.factory().newEdge(n1, n2, false);
         graphModel.getStore().addEdge(e);
         Assert.assertTrue(graphModel.isUndirected());
@@ -149,10 +149,10 @@ public class GraphModelTest {
         Node n1 = graphModel.factory().newNode("1");
         Node n2 = graphModel.factory().newNode("2");
         Node n3 = graphModel.factory().newNode("3");
-        graphModel.getStore().addAllNodes(Arrays.asList(new Node[]{n1, n2, n3}));
+        graphModel.getStore().addAllNodes(Arrays.asList(new Node[] { n1, n2, n3 }));
         Edge e1 = graphModel.factory().newEdge(n1, n2, false);
         Edge e2 = graphModel.factory().newEdge(n1, n3, true);
-        graphModel.getStore().addAllEdges(Arrays.asList(new Edge[]{e1, e2}));
+        graphModel.getStore().addAllEdges(Arrays.asList(new Edge[] { e1, e2 }));
         Assert.assertTrue(graphModel.isMixed());
         Assert.assertFalse(graphModel.isDirected());
         Assert.assertFalse(graphModel.isUndirected());
@@ -221,7 +221,7 @@ public class GraphModelTest {
     @Test
     public void testSetTimeZone() {
         GraphModelImpl graphModel = new GraphModelImpl();
-        Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.UTC);//Default
+        Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.UTC);// Default
         graphModel.setTimeZone(DateTimeZone.forID("-02:00"));
         Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.forID("-02:00"));
         graphModel.setTimeZone(DateTimeZone.UTC);
@@ -257,7 +257,7 @@ public class GraphModelTest {
 
         Node n1 = graphModel.factory().newNode("1");
         Node n2 = graphModel.factory().newNode("2");
-        graphModel.getStore().addAllNodes(Arrays.asList(new Node[]{n1, n2}));
+        graphModel.getStore().addAllNodes(Arrays.asList(new Node[] { n1, n2 }));
 
         n1.addTimestamp(1.0);
         n1.addTimestamp(5.0);

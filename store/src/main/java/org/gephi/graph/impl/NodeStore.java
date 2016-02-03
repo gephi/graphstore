@@ -27,15 +27,15 @@ import org.gephi.graph.api.NodeIterable;
 
 public class NodeStore implements Collection<Node>, NodeIterable {
 
-    //Const
+    // Const
     protected final static int NULL_ID = -1;
-    //Store
+    // Store
     protected final EdgeStore edgeStore;
-    //Locking (optional)
+    // Locking (optional)
     protected final GraphLock lock;
-    //Version
+    // Version
     protected final GraphVersion version;
-    //Data
+    // Data
     protected int size;
     protected int garbageSize;
     protected int blocksCount;
@@ -43,7 +43,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected NodeBlock blocks[];
     protected NodeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
-    //View store
+    // View store
     protected final GraphViewStore viewStore;
 
     public NodeStore() {

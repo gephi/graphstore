@@ -34,16 +34,16 @@ import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>, M extends TimeMap<K, ?>> {
 
-    //Lock
+    // Lock
     protected final GraphLock graphLock;
-    //Element
+    // Element
     protected final Class<T> elementType;
-    //Timestamp index managament
+    // Timestamp index managament
     protected final Map<K, Integer> timeSortedMap;
     protected final IntSortedSet garbageQueue;
     protected int[] countMap;
     protected int length;
-    //Index
+    // Index
     protected TimeIndexImpl mainIndex;
     protected final Map<GraphView, TimeIndexImpl> viewIndexes;
 
@@ -52,7 +52,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         graphLock = lock;
 
         garbageQueue = new IntRBTreeSet();
-        //Subclass
+        // Subclass
         timeSortedMap = sortedMap;
         countMap = new int[0];
 

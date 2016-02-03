@@ -293,61 +293,61 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     AbstractIndex createIndex(ColumnImpl column) {
         if (column.getTypeClass().equals(Byte.class)) {
-            //Byte
+            // Byte
             return new ByteIndex(column);
         } else if (column.getTypeClass().equals(Short.class)) {
-            //Short
+            // Short
             return new ShortIndex(column);
         } else if (column.getTypeClass().equals(Integer.class)) {
-            //Integer
+            // Integer
             return new IntegerIndex(column);
         } else if (column.getTypeClass().equals(Long.class)) {
-            //Long
+            // Long
             return new LongIndex(column);
         } else if (column.getTypeClass().equals(Float.class)) {
-            //Float
+            // Float
             return new FloatIndex(column);
         } else if (column.getTypeClass().equals(Double.class)) {
-            //Double
+            // Double
             return new DoubleIndex(column);
         } else if (column.getTypeClass().equals(Boolean.class)) {
-            //Boolean
+            // Boolean
             return new BooleanIndex(column);
         } else if (column.getTypeClass().equals(Character.class)) {
-            //Char
+            // Char
             return new CharIndex(column);
         } else if (column.getTypeClass().equals(String.class)) {
-            //String
+            // String
             return new DefaultIndex(column);
         } else if (column.getTypeClass().equals(byte[].class)) {
-            //Byte Array
+            // Byte Array
             return new ByteArrayIndex(column);
         } else if (column.getTypeClass().equals(short[].class)) {
-            //Short Array
+            // Short Array
             return new ShortArrayIndex(column);
         } else if (column.getTypeClass().equals(int[].class)) {
-            //Integer Array
+            // Integer Array
             return new IntegerArrayIndex(column);
         } else if (column.getTypeClass().equals(long[].class)) {
-            //Long Array
+            // Long Array
             return new LongArrayIndex(column);
         } else if (column.getTypeClass().equals(float[].class)) {
-            //Float array
+            // Float array
             return new FloatArrayIndex(column);
         } else if (column.getTypeClass().equals(double[].class)) {
-            //Double array
+            // Double array
             return new DoubleArrayIndex(column);
         } else if (column.getTypeClass().equals(boolean[].class)) {
-            //Boolean array
+            // Boolean array
             return new BooleanArrayIndex(column);
         } else if (column.getTypeClass().equals(char[].class)) {
-            //Char array
+            // Char array
             return new CharArrayIndex(column);
         } else if (column.getTypeClass().equals(String[].class)) {
-            //String array
+            // String array
             return new DefaultArrayIndex(column);
         } else if (column.getTypeClass().isArray()) {
-            //Default Array
+            // Default Array
             return new DefaultArrayIndex(column);
         }
         return new DefaultIndex(column);
@@ -390,14 +390,14 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     protected abstract class AbstractIndex<K> implements Iterable<Map.Entry<K, Set<T>>> {
 
-        //Const
+        // Const
         public static final boolean TRIMMING_ENABLED = false;
         public static final int TRIMMING_FREQUENCY = 30;
-        //Data
+        // Data
         protected final ColumnImpl column;
         protected final Set<T> nullSet;
         protected Map<K, Set<T>> map;
-        //Variable
+        // Variable
         protected int elements;
 
         public AbstractIndex(ColumnImpl column) {

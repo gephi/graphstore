@@ -113,15 +113,13 @@ public final class DataInputOutput implements DataInput, DataOutput, ObjectInput
 
     @Override
     public short readShort() throws IOException {
-        return (short) (((short) (buf[pos++] & 0xff) << 8)
-                | ((short) (buf[pos++] & 0xff) << 0));
+        return (short) (((short) (buf[pos++] & 0xff) << 8) | ((short) (buf[pos++] & 0xff) << 0));
 
     }
 
     @Override
     public int readUnsignedShort() throws IOException {
-        return (((int) (buf[pos++] & 0xff) << 8)
-                | ((int) (buf[pos++] & 0xff) << 0));
+        return (((int) (buf[pos++] & 0xff) << 8) | ((int) (buf[pos++] & 0xff) << 0));
     }
 
     @Override
@@ -131,23 +129,13 @@ public final class DataInputOutput implements DataInput, DataOutput, ObjectInput
 
     @Override
     public int readInt() throws IOException {
-        return (((buf[pos++] & 0xff) << 24)
-                | ((buf[pos++] & 0xff) << 16)
-                | ((buf[pos++] & 0xff) << 8)
-                | ((buf[pos++] & 0xff) << 0));
+        return (((buf[pos++] & 0xff) << 24) | ((buf[pos++] & 0xff) << 16) | ((buf[pos++] & 0xff) << 8) | ((buf[pos++] & 0xff) << 0));
 
     }
 
     @Override
     public long readLong() throws IOException {
-        return (((long) (buf[pos++] & 0xff) << 56)
-                | ((long) (buf[pos++] & 0xff) << 48)
-                | ((long) (buf[pos++] & 0xff) << 40)
-                | ((long) (buf[pos++] & 0xff) << 32)
-                | ((long) (buf[pos++] & 0xff) << 24)
-                | ((long) (buf[pos++] & 0xff) << 16)
-                | ((long) (buf[pos++] & 0xff) << 8)
-                | ((long) (buf[pos++] & 0xff) << 0));
+        return (((long) (buf[pos++] & 0xff) << 56) | ((long) (buf[pos++] & 0xff) << 48) | ((long) (buf[pos++] & 0xff) << 40) | ((long) (buf[pos++] & 0xff) << 32) | ((long) (buf[pos++] & 0xff) << 24) | ((long) (buf[pos++] & 0xff) << 16) | ((long) (buf[pos++] & 0xff) << 8) | ((long) (buf[pos++] & 0xff) << 0));
 
     }
 
@@ -283,41 +271,41 @@ public final class DataInputOutput implements DataInput, DataOutput, ObjectInput
 
     @Override
     public int read() throws IOException {
-        //is here just to implement ObjectInput
+        // is here just to implement ObjectInput
         return readUnsignedByte();
     }
 
     @Override
     public int read(byte[] b) throws IOException {
-        //is here just to implement ObjectInput
+        // is here just to implement ObjectInput
         readFully(b);
         return b.length;
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        //is here just to implement ObjectInput
+        // is here just to implement ObjectInput
         readFully(b, off, len);
         return len;
     }
 
     @Override
     public long skip(long n) throws IOException {
-        //is here just to implement ObjectInput
+        // is here just to implement ObjectInput
         pos += n;
         return n;
     }
 
     @Override
     public void close() throws IOException {
-        //is here just to implement ObjectInput
-        //do nothing
+        // is here just to implement ObjectInput
+        // do nothing
     }
 
     @Override
     public void flush() throws IOException {
-        //is here just to implement ObjectOutput
-        //do nothing
+        // is here just to implement ObjectOutput
+        // do nothing
     }
 
     @Override

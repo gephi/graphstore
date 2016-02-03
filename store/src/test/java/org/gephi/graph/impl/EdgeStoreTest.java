@@ -327,7 +327,7 @@ public class EdgeStoreTest {
         EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
         edgeStore.addAll(Arrays.asList(edges));
 
-        EdgeImpl[] r = new EdgeImpl[]{edges[0]};
+        EdgeImpl[] r = new EdgeImpl[] { edges[0] };
         boolean a = edgeStore.retainAll(Arrays.asList(r));
         boolean b = edgeStore.retainAll(Arrays.asList(r));
 
@@ -469,7 +469,7 @@ public class EdgeStoreTest {
         edgeStore.addAll(Arrays.asList(edges));
         edgeStore.remove(edges[0]);
 
-        Assert.assertEquals(edgeStore.toArray(), new EdgeImpl[]{edges[1], edges[2]});
+        Assert.assertEquals(edgeStore.toArray(), new EdgeImpl[] { edges[1], edges[2] });
     }
 
     @Test
@@ -1403,7 +1403,7 @@ public class EdgeStoreTest {
             }
 
             if (!e.isSelfLoop() && idSet.contains(EdgeStore.getLongId(e.target, e.source, true))) {
-                //Mutual
+                // Mutual
                 Assert.assertEquals(source.mutualDegree, sourceMutual + 1);
                 Assert.assertEquals(target.mutualDegree, targetMutual + 1);
                 mutualEdges++;

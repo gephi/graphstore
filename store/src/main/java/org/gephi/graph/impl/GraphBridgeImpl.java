@@ -46,7 +46,7 @@ public class GraphBridgeImpl implements GraphBridge {
         }
         GraphStore sourceStore = null;
 
-        //Verify nodes and add to id set
+        // Verify nodes and add to id set
         Set<Integer> nodeIds = new IntOpenHashSet();
         for (Node node : nodes) {
             NodeImpl nodeImpl = verifyNode(node);
@@ -54,17 +54,16 @@ public class GraphBridgeImpl implements GraphBridge {
             nodeIds.add(nodeImpl.storeId);
         }
 
-        //Verify compatibility
+        // Verify compatibility
         verifyCompatibility(sourceStore);
 
-        //Verify edges and add to edges list
+        // Verify edges and add to edges list
         Set<Integer> edgeTypeIds = new IntOpenHashSet();
         List<EdgeImpl> edges = new ArrayList<EdgeImpl>();
         for (Node node : nodes) {
             for (Edge edge : sourceStore.getEdges(node)) {
                 Node oppositeNode = sourceStore.getOpposite(node, edge);
-                if (store.getNode(oppositeNode.getId()) != null
-                        || nodeIds.contains(oppositeNode.getStoreId())) {
+                if (store.getNode(oppositeNode.getId()) != null || nodeIds.contains(oppositeNode.getStoreId())) {
                     EdgeImpl edgeImpl = verifyEdge(edge);
                     if (edgeImpl.isSelfLoop() || oppositeNode.getStoreId() > node.getStoreId()) {
                         edges.add(edgeImpl);
@@ -77,42 +76,42 @@ public class GraphBridgeImpl implements GraphBridge {
             }
         }
 
-        //Copy edge labels
+        // Copy edge labels
         EdgeTypeStore sourceEdgeTypeStore = sourceStore.edgeTypeStore;
         for (Integer edgeId : edgeTypeIds) {
             Object label = sourceEdgeTypeStore.getLabel(edgeId);
             store.edgeTypeStore.addType(label, edgeId);
         }
 
-        //Copy node columns
+        // Copy node columns
         TableImpl<Node> nodeTable = store.nodeTable;
         copyColumns(sourceStore.nodeTable, nodeTable);
 
-        //Copy edge columns
+        // Copy edge columns
         TableImpl<Edge> edgeTable = store.edgeTable;
         copyColumns(sourceStore.edgeTable, edgeTable);
 
-        //Copy nodes
+        // Copy nodes
         GraphFactory factory = store.factory;
         for (Node node : nodes) {
             if (store.getNode(node.getId()) == null) {
                 Node nodeCopy = factory.newNode(node.getId());
 
-                //Properties
+                // Properties
                 copyNodeProperties(node, nodeCopy);
 
-                //Text properties
+                // Text properties
                 copyTextProperties(node.getTextProperties(), nodeCopy.getTextProperties());
 
-                //Attributes
+                // Attributes
                 copyAttributes(sourceStore.nodeTable, nodeTable, node, nodeCopy);
 
-                //Add
+                // Add
                 store.addNode(nodeCopy);
             }
         }
 
-        //Copy edges
+        // Copy edges
         for (EdgeImpl edge : edges) {
             if (store.getEdge(edge.getId()) == null) {
                 Node source = store.getNode(edge.getSource().getId());
@@ -120,19 +119,19 @@ public class GraphBridgeImpl implements GraphBridge {
 
                 Edge edgeCopy = factory.newEdge(edge.getId(), source, target, edge.getType(), 0.0, edge.isDirected());
 
-                //Weight
+                // Weight
                 copyEdgeWeight(edge, edgeCopy);
 
-                //Properties
+                // Properties
                 copyEdgeProperties(edge, edgeCopy);
 
-                //Text properties
+                // Text properties
                 copyTextProperties(edge.getTextProperties(), edgeCopy.getTextProperties());
 
-                //Attributes
+                // Attributes
                 copyAttributes(sourceStore.edgeTable, edgeTable, edge, edgeCopy);
 
-                //Add
+                // Add
                 store.addEdge(edgeCopy);
             }
         }
@@ -177,8 +176,7 @@ public class GraphBridgeImpl implements GraphBridge {
     private void copyColumns(TableImpl sourceTable, TableImpl destTable) {
         for (Column col : sourceTable.toArray()) {
             if (!col.isProperty() && !destTable.hasColumn(col.getId())) {
-                destTable.addColumn(col.getId(), col.getTitle(),
-                        col.getTypeClass(), col.getOrigin(), col.getDefaultValue(), col.isIndexed());
+                destTable.addColumn(col.getId(), col.getTitle(), col.getTypeClass(), col.getOrigin(), col.getDefaultValue(), col.isIndexed());
             }
         }
     }
@@ -218,8 +216,7 @@ public class GraphBridgeImpl implements GraphBridge {
         EdgeImpl edgeImpl = (EdgeImpl) edge;
         verifyElement(edgeImpl);
         EdgeImpl existingEdge = store.getEdge(edge.getId());
-        if (existingEdge != null && (!existingEdge.getSource().getId().equals(edge.getSource().getId())
-                || !existingEdge.getTarget().getId().equals(edge.getTarget().getId()))) {
+        if (existingEdge != null && (!existingEdge.getSource().getId().equals(edge.getSource().getId()) || !existingEdge.getTarget().getId().equals(edge.getTarget().getId()))) {
             throw new RuntimeException("An edge with a similar id '" + edge.getId() + "' already exists");
         }
 
@@ -252,7 +249,7 @@ public class GraphBridgeImpl implements GraphBridge {
             }
         }
 
-        //Verify edge table
+        // Verify edge table
         TableImpl<Edge> destEdgeTable = store.edgeTable;
         for (Column sourceCol : sourceStore.edgeTable) {
             if (!sourceCol.isProperty()) {

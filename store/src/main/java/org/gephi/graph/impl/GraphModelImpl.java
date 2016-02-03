@@ -404,9 +404,7 @@ public class GraphModelImpl implements GraphModel {
 
         store.autoWriteLock();
         try {
-            if (store.getNodeCount() > 0 || !store.attributes.isEmpty() || store.nodeTable.countColumns()
-                    != GraphStoreConfiguration.NODE_DEFAULT_COLUMNS || store.edgeTable.countColumns() != GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS
-                    || store.edgeTypeStore.size() > 1) {
+            if (store.getNodeCount() > 0 || !store.attributes.isEmpty() || store.nodeTable.countColumns() != GraphStoreConfiguration.NODE_DEFAULT_COLUMNS || store.edgeTable.countColumns() != GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS || store.edgeTypeStore.size() > 1) {
                 throw new IllegalStateException("The store should be empty when modifying the configuration");
             }
 
@@ -428,7 +426,7 @@ public class GraphModelImpl implements GraphModel {
                 configuration.setEdgeLabelType(config.getEdgeLabelType());
             }
 
-            //Replace dynamic timeset columns if time representation changes:
+            // Replace dynamic timeset columns if time representation changes:
             if (!config.getTimeRepresentation().equals(configuration.getTimeRepresentation())) {
                 TableImpl<Node> nodeTable = store.nodeTable;
                 nodeTable.removeColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID);
@@ -446,7 +444,7 @@ public class GraphModelImpl implements GraphModel {
                 store.timeStore.resetConfiguration();
             }
 
-            //Change whether edge weight column
+            // Change whether edge weight column
             if (!config.getEdgeWeightColumn().equals(configuration.getEdgeWeightColumn())) {
                 TableImpl<Edge> edgeTable = store.edgeTable;
                 if (config.getEdgeWeightColumn()) {
@@ -458,7 +456,7 @@ public class GraphModelImpl implements GraphModel {
                 }
             }
 
-            //Change weight column type:
+            // Change weight column type:
             if (!config.getEdgeWeightType().equals(configuration.getEdgeWeightType())) {
                 TableImpl<Edge> edgeTable = store.edgeTable;
 
@@ -535,7 +533,7 @@ public class GraphModelImpl implements GraphModel {
     private void checkValidConfiguration(Configuration config) {
         Class edgeWeightType = config.getEdgeWeightType();
         if (edgeWeightType.equals(Double.class)) {
-            return;//Double is always allowed
+            return;// Double is always allowed
         }
 
         switch (config.getTimeRepresentation()) {

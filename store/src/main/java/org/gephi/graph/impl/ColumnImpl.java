@@ -27,7 +27,7 @@ import org.gephi.graph.api.types.TimeSet;
 
 public class ColumnImpl implements Column {
 
-    //Attributes
+    // Attributes
     protected final TableImpl table;
     protected final String id;
     protected final Class typeClass;
@@ -39,9 +39,9 @@ public class ColumnImpl implements Column {
     protected final boolean dynamic;
     protected final boolean readOnly;
     protected Estimator estimator;
-    //Observers
+    // Observers
     protected final List<ColumnObserverImpl> observers;
-    //Store Id
+    // Store Id
     protected int storeId = ColumnStore.NULL_ID;
 
     public ColumnImpl(TableImpl table, String id, Class typeClass, String title, Object defaultValue, Origin origin, boolean indexed, boolean readOnly) {
@@ -53,7 +53,8 @@ public class ColumnImpl implements Column {
         }
         typeClass = AttributeUtils.getStandardizedType(typeClass);
         this.table = table;
-        this.id = id.toLowerCase();//Make sure column has lowercase id from wherever it's created
+        this.id = id.toLowerCase();// Make sure column has lowercase id from
+                                   // wherever it's created
         this.typeClass = typeClass;
         this.title = title;
         this.defaultValue = defaultValue;

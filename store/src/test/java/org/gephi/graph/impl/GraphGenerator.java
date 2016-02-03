@@ -390,7 +390,7 @@ public class GraphGenerator {
         GraphStore graphStore = graphModel.store;
         Node n1 = graphStore.factory.newNode("1");
         Node n2 = graphStore.factory.newNode("2");
-        graphStore.addAllNodes(Arrays.asList(new Node[]{n1, n2}));
+        graphStore.addAllNodes(Arrays.asList(new Node[] { n1, n2 }));
         Edge e0 = graphStore.factory.newEdge("0", n1, n2, EdgeTypeStore.NULL_LABEL, 1.0, false);
         graphStore.addEdge(e0);
         return graphStore;

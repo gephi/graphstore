@@ -23,7 +23,7 @@ import java.util.Map;
 public final class MapDeepEquals {
 
     private MapDeepEquals() {
-        // Only static 
+        // Only static
     }
 
     /**

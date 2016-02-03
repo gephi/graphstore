@@ -31,7 +31,7 @@ import org.joda.time.DateTimeZone;
  */
 public final class FormattingAndParsingUtils {
 
-    //Bounds
+    // Bounds
     public static final char DYNAMIC_TYPE_LEFT_BOUND = '<';
     public static final char DYNAMIC_TYPE_RIGHT_BOUND = '>';
     public static final char LEFT_BOUND_BRACKET = '(';
@@ -54,7 +54,7 @@ public final class FormattingAndParsingUtils {
     public static double parseDateTimeOrTimestamp(String timeStr, DateTimeZone timeZone) {
         double value;
         try {
-            //Try first to parse as a single double:
+            // Try first to parse as a single double:
             value = Double.parseDouble(infinityIgnoreCase(timeStr));
             if (Double.isNaN(value)) {
                 throw new IllegalArgumentException("NaN is not allowed as an interval bound");
@@ -141,7 +141,8 @@ public final class FormattingAndParsingUtils {
             switch (c) {
                 case RIGHT_BOUND_BRACKET:
                 case RIGHT_BOUND_SQUARE_BRACKET:
-                    reader.skip(-1);//Go backwards 1 position, for detecting end of bounds
+                    reader.skip(-1);// Go backwards 1 position, for detecting
+                                    // end of bounds
                 case COMMA:
                     return sb.toString().trim();
                 default:
@@ -164,21 +165,9 @@ public final class FormattingAndParsingUtils {
      */
     protected static <T> T convertValue(Class<T> typeClass, String valString) {
         Object value;
-        if (typeClass.equals(Byte.class)
-                || typeClass.equals(byte.class)
-                || typeClass.equals(Short.class)
-                || typeClass.equals(short.class)
-                || typeClass.equals(Integer.class)
-                || typeClass.equals(int.class)
-                || typeClass.equals(Long.class)
-                || typeClass.equals(long.class)
-                || typeClass.equals(BigInteger.class)) {
+        if (typeClass.equals(Byte.class) || typeClass.equals(byte.class) || typeClass.equals(Short.class) || typeClass.equals(short.class) || typeClass.equals(Integer.class) || typeClass.equals(int.class) || typeClass.equals(Long.class) || typeClass.equals(long.class) || typeClass.equals(BigInteger.class)) {
             value = parseNumberWithoutDecimals((Class<? extends Number>) typeClass, valString);
-        } else if (typeClass.equals(Float.class)
-                || typeClass.equals(float.class)
-                || typeClass.equals(Double.class)
-                || typeClass.equals(double.class)
-                || typeClass.equals(BigDecimal.class)) {
+        } else if (typeClass.equals(Float.class) || typeClass.equals(float.class) || typeClass.equals(Double.class) || typeClass.equals(double.class) || typeClass.equals(BigDecimal.class)) {
             value = parseNumberWithDecimals((Class<? extends Number>) typeClass, valString);
         } else {
             value = AttributeUtils.parse(valString, typeClass);
@@ -244,7 +233,7 @@ public final class FormattingAndParsingUtils {
     /**
      * @param value String value
      * @return True if the string contains special characters for dynamic types
-     * intervals syntax
+     *         intervals syntax
      */
     public static boolean containsDynamicSpecialCharacters(String value) {
         for (char c : DYNAMIC_SPECIAL_CHARACTERS) {
@@ -296,7 +285,7 @@ public final class FormattingAndParsingUtils {
     /**
      * @param value String value
      * @return True if the string contains special characters for arrays
-     * intervals syntax
+     *         intervals syntax
      */
     private static boolean containsArraySpecialCharacters(String value) {
         for (char c : ARRAY_SPECIAL_CHARACTERS) {

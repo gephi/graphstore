@@ -43,8 +43,7 @@ public final class LongPacker {
      * @return the number of bytes written
      * @throws IOException if an error occurs with the stream
      */
-    static public int packLong(DataOutput os, long value)
-            throws IOException {
+    static public int packLong(DataOutput os, long value) throws IOException {
 
         if (value < 0) {
             throw new IllegalArgumentException("negative value: v=" + value);
@@ -69,8 +68,7 @@ public final class LongPacker {
      * @return the number of bytes written
      * @throws IOException if an error occurs with the stream
      */
-    static public int packLong(byte[] ba, long value)
-            throws IOException {
+    static public int packLong(byte[] ba, long value) throws IOException {
 
         if (value < 0) {
             throw new IllegalArgumentException("negative value: v=" + value);
@@ -93,8 +91,7 @@ public final class LongPacker {
      * @return the long value
      * @throws IOException if an error occurs with the stream
      */
-    static public long unpackLong(DataInput is)
-            throws IOException {
+    static public long unpackLong(DataInput is) throws IOException {
 
         long result = 0;
         for (int offset = 0; offset < 64; offset += 7) {
@@ -147,8 +144,7 @@ public final class LongPacker {
      * @return the number of bytes written
      * @throws IOException if an error occurs with the stream
      */
-    static public int packInt(DataOutput os, int value)
-            throws IOException {
+    static public int packInt(DataOutput os, int value) throws IOException {
 
         if (value < 0) {
             throw new IllegalArgumentException("negative value: v=" + value);
@@ -172,8 +168,7 @@ public final class LongPacker {
      * @return the long value
      * @throws IOException if an error occurs with the stream
      */
-    static public int unpackInt(DataInput is)
-            throws IOException {
+    static public int unpackInt(DataInput is) throws IOException {
         for (int offset = 0, result = 0; offset < 32; offset += 7) {
             int b = is.readUnsignedByte();
             result |= (b & 0x7F) << offset;
@@ -191,8 +186,7 @@ public final class LongPacker {
      * @return the long value
      * @throws IOException if an error occurs with the stream
      */
-    static public int unpackInt(ByteBuffer bb)
-            throws IOException {
+    static public int unpackInt(ByteBuffer bb) throws IOException {
         for (int offset = 0, result = 0; offset < 32; offset += 7) {
             int b = bb.get() & 0xffff;
             result |= (b & 0x7F) << offset;

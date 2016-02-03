@@ -283,22 +283,22 @@ public class IntervalSetTest {
     public void tesGetIntervals() {
         IntervalSet set = new IntervalSet();
         set.add(new Interval(0.0, 5.0));
-        Assert.assertEquals(set.getIntervals(), new double[]{0.0, 5.0});
+        Assert.assertEquals(set.getIntervals(), new double[] { 0.0, 5.0 });
         set.add(new Interval(6.0, 8.0));
         set.remove(new Interval(0.0, 5.0));
 
-        Assert.assertEquals(set.getIntervals(), new double[]{6.0, 8.0});
+        Assert.assertEquals(set.getIntervals(), new double[] { 6.0, 8.0 });
     }
 
     @Test
     public void testoArray() {
         IntervalSet set = new IntervalSet();
         set.add(new Interval(0.0, 5.0));
-        Assert.assertEquals(set.toArray(), new Interval[]{new Interval(0.0, 5.0)});
+        Assert.assertEquals(set.toArray(), new Interval[] { new Interval(0.0, 5.0) });
         set.add(new Interval(6.0, 8.0));
         set.remove(new Interval(0.0, 5.0));
 
-        Assert.assertEquals(set.toArray(), new Interval[]{new Interval(6.0, 8.0)});
+        Assert.assertEquals(set.toArray(), new Interval[] { new Interval(6.0, 8.0) });
     }
 
     @Test
@@ -337,14 +337,14 @@ public class IntervalSetTest {
         Assert.assertEquals(set1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01]; [2012-07-17, 2012-07-17]>");
         Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0]; [1342483341000.0, 1342483380000.0]>");
 
-        //Test with time zone printing:
+        // Test with time zone printing:
         Assert.assertEquals(set1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, 2012-03-01]; [2012-07-17, 2012-07-17]>");
         Assert.assertEquals(set1.toString(TimeFormat.DATE, DateTimeZone.forID("+12:00")), "<[2012-02-29, 2012-03-01]; [2012-07-17, 2012-07-17]>");
         set1.add(new Interval(AttributeUtils.parseDateTime("2012-07-18T18:30:00"), AttributeUtils.parseDateTime("2012-07-18T18:30:01")));
         Assert.assertEquals(set1.toString(TimeFormat.DATE, DateTimeZone.forID("+08:00")), "<[2012-02-29, 2012-03-01]; [2012-07-17, 2012-07-17]; [2012-07-19, 2012-07-19]>");
         Assert.assertEquals(set1.toString(TimeFormat.DATE, DateTimeZone.forID("-10:00")), "<[2012-02-28, 2012-02-29]; [2012-07-16, 2012-07-16]; [2012-07-18, 2012-07-18]>");
 
-        //Test infinity:
+        // Test infinity:
         IntervalSet setInf = new IntervalSet();
         setInf.add(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
         Assert.assertEquals(setInf.toString(TimeFormat.DATE), "<[-Infinity, Infinity]>");
@@ -355,7 +355,7 @@ public class IntervalSetTest {
         IntervalSet set1 = new IntervalSet();
         Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<empty>");
 
-        //Test with default timezone UTC+0
+        // Test with default timezone UTC+0
         set1.add(new Interval(AttributeUtils.parseDateTime("2012-02-29"), AttributeUtils.parseDateTime("2012-03-01")));
         Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z]>");
 
@@ -363,11 +363,11 @@ public class IntervalSetTest {
         Assert.assertEquals(set1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z]>");
         Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0]; [1342487444000.0, 1342487445000.0]>");
 
-        //Test with time zone printing:
+        // Test with time zone printing:
         Assert.assertEquals(set1.toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z]>");
         Assert.assertEquals(set1.toString(TimeFormat.DATETIME, DateTimeZone.forID("+12:00")), "<[2012-02-29T12:00:00.000+12:00, 2012-03-01T12:00:00.000+12:00]; [2012-07-17T13:10:44.000+12:00, 2012-07-17T13:10:45.000+12:00]>");
 
-        //Test with timezone parsing and UTC printing:
+        // Test with timezone parsing and UTC printing:
         IntervalSet set2 = new IntervalSet();
         set2.add(new Interval(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), AttributeUtils.parseDateTime("2012-02-29T02:30:00+02:30")));
         Assert.assertEquals(set2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z]>");
@@ -376,7 +376,7 @@ public class IntervalSetTest {
         Assert.assertEquals(set2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z]; [2012-02-29T01:10:44.000Z, 2012-02-29T01:10:45.000Z]>");
         Assert.assertEquals(set2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330473600000.0]; [1330477844000.0, 1330477845000.0]>");
 
-        //Test infinity:
+        // Test infinity:
         IntervalSet setInf = new IntervalSet();
         setInf.add(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
         Assert.assertEquals(setInf.toString(TimeFormat.DATETIME), "<[-Infinity, Infinity]>");

@@ -71,7 +71,7 @@ public class GraphBridgeTest {
         GraphStore dest = new GraphStore();
         Node n1 = dest.factory.newNode("foo");
         Node n2 = dest.factory.newNode("bar");
-        dest.addAllNodes(Arrays.asList(new Node[]{n1, n2}));
+        dest.addAllNodes(Arrays.asList(new Node[] { n1, n2 }));
         Edge e0 = dest.factory.newEdge("0", n1, n2, 0, 1.0, true);
         dest.addEdge(e0);
 
@@ -81,7 +81,7 @@ public class GraphBridgeTest {
     @Test(expectedExceptions = RuntimeException.class)
     public void testElementOtherStore() {
         GraphStore store = new GraphStore();
-        Node[] nodes = new Node[]{store.factory.newNode("foo")};
+        Node[] nodes = new Node[] { store.factory.newNode("foo") };
 
         new GraphBridgeImpl(new GraphStore()).copyNodes(nodes);
     }
@@ -232,10 +232,7 @@ public class GraphBridgeTest {
         Set<Integer> typeIds = new HashSet<Integer>();
         for (Edge edge : source.getEdges()) {
             if (dest.getNode(edge.getSource().getId()) != null && dest.getNode(edge.getTarget().getId()) != null) {
-                Edge edgeCopy = dest.factory.newEdge(edge.getId(),
-                        dest.getNode(edge.getSource().getId()),
-                        dest.getNode(edge.getTarget().getId()),
-                        edge.getType(), edge.getWeight(), edge.isDirected());
+                Edge edgeCopy = dest.factory.newEdge(edge.getId(), dest.getNode(edge.getSource().getId()), dest.getNode(edge.getTarget().getId()), edge.getType(), edge.getWeight(), edge.isDirected());
                 dest.addEdge(edgeCopy);
                 typeIds.add(edge.getType());
                 if (dest.getEdgeCount() >= 15) {

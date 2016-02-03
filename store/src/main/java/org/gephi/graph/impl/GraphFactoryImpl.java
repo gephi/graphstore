@@ -29,18 +29,16 @@ public class GraphFactoryImpl implements GraphFactory {
 
     protected final AtomicInteger NODE_IDS = new AtomicInteger();
     protected final AtomicInteger EDGE_IDS = new AtomicInteger();
-    //Config
+    // Config
     protected AssignConfiguration nodeAssignConfiguration;
     protected AssignConfiguration edgeAssignConfiguration;
-    //Store
+    // Store
     protected final GraphStore store;
 
     public GraphFactoryImpl(GraphStore store) {
         this.store = store;
-        this.nodeAssignConfiguration
-                = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getNodeIdType()));
-        this.edgeAssignConfiguration
-                = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getEdgeIdType()));
+        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getNodeIdType()));
+        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getEdgeIdType()));
     }
 
     @Override
@@ -122,8 +120,7 @@ public class GraphFactoryImpl implements GraphFactory {
                 return String.valueOf(NODE_IDS.getAndIncrement());
             case DISABLED:
             default:
-                throw new UnsupportedOperationException(
-                        "Automatic node ids assignement isn't available for this type: '" + store.configuration.getNodeIdType().getName() + "'");
+                throw new UnsupportedOperationException("Automatic node ids assignement isn't available for this type: '" + store.configuration.getNodeIdType().getName() + "'");
         }
     }
 
@@ -135,8 +132,7 @@ public class GraphFactoryImpl implements GraphFactory {
                 return String.valueOf(EDGE_IDS.getAndIncrement());
             case DISABLED:
             default:
-                throw new UnsupportedOperationException(
-                        "Automatic edge ids assignement isn't available for this type: '" + store.configuration.getEdgeIdType().getName() + "'");
+                throw new UnsupportedOperationException("Automatic edge ids assignement isn't available for this type: '" + store.configuration.getEdgeIdType().getName() + "'");
         }
     }
 
@@ -203,10 +199,8 @@ public class GraphFactoryImpl implements GraphFactory {
     }
 
     public void resetConfiguration() {
-        this.nodeAssignConfiguration
-                = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getNodeIdType()));
-        this.edgeAssignConfiguration
-                = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getEdgeIdType()));
+        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getNodeIdType()));
+        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getEdgeIdType()));
     }
 
     protected final AssignConfiguration getAssignConfiguration(Class type) {

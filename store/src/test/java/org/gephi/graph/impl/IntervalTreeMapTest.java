@@ -84,12 +84,7 @@ public class IntervalTreeMapTest {
 
     @Test
     public void testRemoveMultiple() {
-        Set<Interval> intervals = new HashSet(Arrays.asList(new Interval[]{
-            new Interval(1.0, 2.0),
-            new Interval(1.0, 4.0),
-            new Interval(0.0, 7.0),
-            new Interval(1.0, 3.0)
-        }));
+        Set<Interval> intervals = new HashSet(Arrays.asList(new Interval[] { new Interval(1.0, 2.0), new Interval(1.0, 4.0), new Interval(0.0, 7.0), new Interval(1.0, 3.0) }));
 
         Interval2IntTreeMap m = new Interval2IntTreeMap();
         for (Interval i : intervals) {
@@ -241,7 +236,7 @@ public class IntervalTreeMapTest {
         m.put(i5, 42);
         m.put(i6, 42);
 
-        Assert.assertEquals(m.getIntervals(), Arrays.asList(new Interval[]{i2, i1, i6, i4, i5, i3}));
+        Assert.assertEquals(m.getIntervals(), Arrays.asList(new Interval[] { i2, i1, i6, i4, i5, i3 }));
     }
 
     @Test
@@ -262,11 +257,11 @@ public class IntervalTreeMapTest {
 
         Iterator<Entry<Interval, Integer>> itr = m.entrySet(Interval.INFINITY_INTERVAL).iterator();
         Assert.assertNotNull(itr);
-        testEntrySetIterator(itr, new Interval[]{i2, i1, i4, i3}, new int[]{2, 1, 4, 3});
+        testEntrySetIterator(itr, new Interval[] { i2, i1, i4, i3 }, new int[] { 2, 1, 4, 3 });
 
         Iterator<Integer> itr2 = m.values(Interval.INFINITY_INTERVAL).iterator();
         Assert.assertNotNull(itr2);
-        testValueSetIterator(itr2, new int[]{2, 1, 4, 3});
+        testValueSetIterator(itr2, new int[] { 2, 1, 4, 3 });
 
     }
 
@@ -287,19 +282,19 @@ public class IntervalTreeMapTest {
 
         Iterator<Entry<Interval, Integer>> itr = m.entrySet(new Interval(3.5, 16.0)).iterator();
         Assert.assertNotNull(itr);
-        testEntrySetIterator(itr, new Interval[]{i1, i4, i3}, new int[]{1, 4, 3});
+        testEntrySetIterator(itr, new Interval[] { i1, i4, i3 }, new int[] { 1, 4, 3 });
 
         Iterator<Entry<Interval, Integer>> itr2 = m.entrySet(2.0).iterator();
         Assert.assertNotNull(itr2);
-        testEntrySetIterator(itr2, new Interval[]{i2, i1}, new int[]{2, 1});
+        testEntrySetIterator(itr2, new Interval[] { i2, i1 }, new int[] { 2, 1 });
 
         Iterator<Integer> itr3 = m.values(new Interval(3.5, 16.0)).iterator();
         Assert.assertNotNull(itr3);
-        testValueSetIterator(itr3, new int[]{1, 4, 3});
+        testValueSetIterator(itr3, new int[] { 1, 4, 3 });
 
         Iterator<Integer> itr4 = m.values(2.0).iterator();
         Assert.assertNotNull(itr4);
-        testValueSetIterator(itr4, new int[]{2, 1});
+        testValueSetIterator(itr4, new int[] { 2, 1 });
     }
 
     @Test

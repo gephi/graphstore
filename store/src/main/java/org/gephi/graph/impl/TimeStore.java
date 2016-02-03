@@ -23,9 +23,9 @@ import org.gephi.graph.api.TimeRepresentation;
 public class TimeStore {
 
     protected final GraphStore graphStore;
-    //Lock (optional
+    // Lock (optional
     protected final GraphLock lock;
-    //Store
+    // Store
     protected TimeIndexStore nodeIndexStore;
     protected TimeIndexStore edgeIndexStore;
 
@@ -60,7 +60,7 @@ public class TimeStore {
 
     public double getMin(Graph graph) {
         if (nodeIndexStore == null || edgeIndexStore == null) {
-            //TODO: Manual calculation
+            // TODO: Manual calculation
             return Double.NEGATIVE_INFINITY;
         }
         double nodeMin = nodeIndexStore.getIndex(graph).getMinTimestamp();
@@ -76,7 +76,7 @@ public class TimeStore {
 
     public double getMax(Graph graph) {
         if (nodeIndexStore == null || edgeIndexStore == null) {
-            //TODO: Manual calculation
+            // TODO: Manual calculation
             return Double.POSITIVE_INFINITY;
         }
         double nodeMax = nodeIndexStore.getIndex(graph).getMaxTimestamp();

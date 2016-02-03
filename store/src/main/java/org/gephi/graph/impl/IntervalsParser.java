@@ -95,9 +95,10 @@ public final class IntervalsParser {
      * @param input Input string to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link IntervalSet}, or null if the input equals
-     * '&lt;empty&gt;' or is null
+     *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if there are no intervals in the
-     * input string or bounds cannot be parsed into doubles or dates/datetimes.
+     *         input string or bounds cannot be parsed into doubles or
+     *         dates/datetimes.
      */
     public static IntervalSet parseIntervalSet(String input, DateTimeZone timeZone) throws IllegalArgumentException {
         if (input == null) {
@@ -129,9 +130,10 @@ public final class IntervalsParser {
      *
      * @param input Input string to parse
      * @return Resulting {@link IntervalSet}, or null if the input equals
-     * '&lt;empty&gt;' or is null
+     *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if there are no intervals in the
-     * input string or bounds cannot be parsed into doubles or dates/datetimes.
+     *         input string or bounds cannot be parsed into doubles or
+     *         dates/datetimes.
      */
     public static IntervalSet parseIntervalSet(String input) throws IllegalArgumentException {
         return parseIntervalSet(input, null);
@@ -143,15 +145,15 @@ public final class IntervalsParser {
      *
      * @param <T> Underlying type of the {@link IntervalMap} values
      * @param typeClass Simple type or {@link IntervalMap} subtype for the
-     * result intervals' values.
+     *        result intervals' values.
      * @param input Input string to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link IntervalMap}, or null if the input equals
-     * '&lt;empty&gt;' or is null
+     *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if type class is not supported,
-     * any of the intervals don't have a value or have an invalid value, there
-     * are no intervals in the input string or bounds cannot be parsed into
-     * doubles or dates/datetimes.
+     *         any of the intervals don't have a value or have an invalid value,
+     *         there are no intervals in the input string or bounds cannot be
+     *         parsed into doubles or dates/datetimes.
      */
     public static <T> IntervalMap<T> parseIntervalMap(Class<T> typeClass, String input, DateTimeZone timeZone) throws IllegalArgumentException {
         if (typeClass == null) {
@@ -211,14 +213,14 @@ public final class IntervalsParser {
      *
      * @param <T> Underlying type of the {@link IntervalMap} values
      * @param typeClass Simple type or {@link IntervalMap} subtype for the
-     * result intervals' values.
+     *        result intervals' values.
      * @param input Input string to parse
      * @return Resulting {@link IntervalMap}, or null if the input equals
-     * '&lt;empty&gt;' or is null
+     *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if type class is not supported,
-     * any of the intervals don't have a value or have an invalid value, there
-     * are no intervals in the input string or bounds cannot be parsed into
-     * doubles or dates/datetimes.
+     *         any of the intervals don't have a value or have an invalid value,
+     *         there are no intervals in the input string or bounds cannot be
+     *         parsed into doubles or dates/datetimes.
      */
     public static <T> IntervalMap<T> parseIntervalMap(Class<T> typeClass, String input) throws IllegalArgumentException {
         return parseIntervalMap(typeClass, input, null);
@@ -230,7 +232,7 @@ public final class IntervalsParser {
      *
      * @param <T> Type of the interval value
      * @param typeClass Class of the intervals' values or null to parse
-     * intervals without values
+     *        intervals without values
      * @param input Input to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return List of Interval
@@ -248,7 +250,13 @@ public final class IntervalsParser {
             return intervals;
         }
 
-        StringReader reader = new StringReader(input + ' ');//Add 1 space so reader.skip function always works when necessary (end of string not reached).
+        StringReader reader = new StringReader(input + ' ');// Add 1 space so
+                                                            // reader.skip
+                                                            // function always
+                                                            // works when
+                                                            // necessary (end of
+                                                            // string not
+                                                            // reached).
 
         int r;
         char c;
@@ -260,7 +268,7 @@ public final class IntervalsParser {
                     intervals.add(parseInterval(typeClass, reader, timeZone));
                     break;
                 default:
-                //Ignore other chars outside of intervals
+                    // Ignore other chars outside of intervals
             }
         }
 
@@ -287,14 +295,16 @@ public final class IntervalsParser {
                 case '\r':
                 case '\n':
                 case COMMA:
-                    //Ignore leading whitespace or similar until a value or literal starts:
+                    // Ignore leading whitespace or similar until a value or
+                    // literal starts:
                     break;
                 case '"':
                 case '\'':
                     values.add(FormattingAndParsingUtils.parseLiteral(reader, c));
                     break;
                 default:
-                    reader.skip(-1);//Go backwards 1 position, for reading start of value
+                    reader.skip(-1);// Go backwards 1 position, for reading
+                                    // start of value
                     values.add(FormattingAndParsingUtils.parseValue(reader));
             }
         }

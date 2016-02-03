@@ -18,7 +18,7 @@ package org.gephi.graph.api;
 /**
  * Interface to retrieve added and removed elements from the graph.
  * <p>
- * This interface is associated with a {@link  GraphObserver} and provides an
+ * This interface is associated with a {@link GraphObserver} and provides an
  * easy access to the elements added or removed.
  */
 public interface GraphDiff {

@@ -1581,7 +1581,7 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public void doBreak() {
-            //Not used because no locking
+            // Not used because no locking
         }
     }
 
@@ -1618,7 +1618,7 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public void doBreak() {
-            //Not used because no locking
+            // Not used because no locking
         }
     }
 }

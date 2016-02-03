@@ -338,7 +338,7 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         return true;
     }
 
-    //Estimators
+    // Estimators
     protected Object getFirst(final Interval interval) {
         if (size == 0) {
             return null;

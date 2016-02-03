@@ -140,7 +140,7 @@ public class TableObserverTest {
         final TableDiff tableDiff = tableObserver.getDiff();
         Assert.assertNotNull(tableDiff);
 
-        Assert.assertEquals(Arrays.asList(new Column[]{col}), tableDiff.getModifiedColumns());
+        Assert.assertEquals(Arrays.asList(new Column[] { col }), tableDiff.getModifiedColumns());
         Assert.assertTrue(tableDiff.getRemovedColumns().isEmpty());
         Assert.assertTrue(tableDiff.getAddedColumns().isEmpty());
     }

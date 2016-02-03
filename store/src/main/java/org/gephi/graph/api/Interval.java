@@ -25,8 +25,8 @@ public final class Interval {
      */
     public static final Interval INFINITY_INTERVAL = new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
-    private final double low;   // the left endpoint
-    private final double high;  // the right endpoint
+    private final double low; // the left endpoint
+    private final double high; // the right endpoint
 
     /**
      * Copy constructor.
@@ -46,9 +46,7 @@ public final class Interval {
      */
     public Interval(double low, double high) {
         if (low > high) {
-            throw new IllegalArgumentException(
-                    "The left endpoint of the interval must be less than "
-                    + "the right endpoint.");
+            throw new IllegalArgumentException("The left endpoint of the interval must be less than " + "the right endpoint.");
         }
         if (Double.isNaN(low) || Double.isNaN(high)) {
             throw new IllegalArgumentException("The interval endpoints must be different than NaN");
@@ -65,9 +63,9 @@ public final class Interval {
      * Any two intervals <i>i</i> and <i>i'</i> satisfy the interval trichotomy;
      * that is, exactly one of the following three properties holds:
      * <ol>
-     * <li> <i>i</i> and <i>i'</i> overlap
-     * <li> <i>i</i> is to the left of <i>i'</i>
-     * <li> <i>i</i> is to the right of <i>i'</i>
+     * <li><i>i</i> and <i>i'</i> overlap
+     * <li><i>i</i> is to the left of <i>i'</i>
+     * <li><i>i</i> is to the right of <i>i'</i>
      * </ol>
      *
      * <p>
@@ -79,8 +77,8 @@ public final class Interval {
      * @param interval the interval to be compared
      *
      * @return a negative integer, zero, or a positive integer as this interval
-     * is to the left of, overlaps with, or is to the right of the specified
-     * interval.
+     *         is to the left of, overlaps with, or is to the right of the
+     *         specified interval.
      *
      * @throws NullPointerException if {@code interval} is null.
      */
@@ -103,8 +101,8 @@ public final class Interval {
      *
      * @param timestamp timestamp
      * @return a negative integer, zero or a positive integer if this interval
-     * is to the left of, overlaps with, or is to the right with the specified
-     * timestamp.
+     *         is to the left of, overlaps with, or is to the right with the
+     *         specified timestamp.
      *
      * @throws NullPointerException if {@code timestamp} is null.
      */
@@ -149,7 +147,8 @@ public final class Interval {
      * @param obj object to which this interval is to be compared
      *
      * @return {@code true} if and only if the specified {@code Object} is a
-     * {@code Interval} whose low and high are equal to this {@code Interval's}.
+     *         {@code Interval} whose low and high are equal to this
+     *         {@code Interval's}.
      *
      */
     @Override

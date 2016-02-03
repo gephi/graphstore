@@ -487,7 +487,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         return true;
     }
 
-    //Estimators
+    // Estimators
     protected Object getFirst(final Interval interval) {
         if (size == 0) {
             return null;

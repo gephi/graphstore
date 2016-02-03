@@ -26,7 +26,7 @@ import org.gephi.graph.api.Element;
 
 public class TableImpl<T extends Element> implements Table {
 
-    //Store
+    // Store
     protected final ColumnStore<T> store;
 
     public TableImpl(Class<T> elementType, boolean indexed) {

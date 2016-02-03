@@ -27,13 +27,13 @@ import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public class EdgeTypeStore {
 
-    //Const
+    // Const
     protected final static int NULL_TYPE = -1;
     protected final static int NULL_LABEL = 0;
     private final static short NULL_SHORT = Short.MIN_VALUE;
-    //Config
+    // Config
     public final static int MAX_SIZE = 65534;
-    //Data
+    // Data
     protected final Configuration configuration;
     protected final Object2ShortMap labelMap;
     protected final Short2ObjectMap idMap;
@@ -54,7 +54,7 @@ public class EdgeTypeStore {
         this.idMap = new Short2ObjectOpenHashMap(MAX_SIZE);
         labelMap.defaultReturnValue(NULL_SHORT);
 
-        //Add null type
+        // Add null type
         short id = intToShort(NULL_LABEL);
         length++;
         labelMap.put(null, id);
@@ -190,7 +190,7 @@ public class EdgeTypeStore {
         garbageQueue.clear();
         length = 0;
 
-        //Add null type
+        // Add null type
         short id = intToShort(NULL_LABEL);
         length++;
         labelMap.put(null, id);
@@ -218,15 +218,7 @@ public class EdgeTypeStore {
     private void checkType(final Object o) {
         if (o != null) {
             Class cl = o.getClass();
-            if (!(cl.equals(Integer.class)
-                    || cl.equals(String.class)
-                    || cl.equals(Float.class)
-                    || cl.equals(Double.class)
-                    || cl.equals(Short.class)
-                    || cl.equals(Byte.class)
-                    || cl.equals(Long.class)
-                    || cl.equals(Character.class)
-                    || cl.equals(Boolean.class))) {
+            if (!(cl.equals(Integer.class) || cl.equals(String.class) || cl.equals(Float.class) || cl.equals(Double.class) || cl.equals(Short.class) || cl.equals(Byte.class) || cl.equals(Long.class) || cl.equals(Character.class) || cl.equals(Boolean.class))) {
                 throw new IllegalArgumentException("The type id is " + cl.getCanonicalName() + " but must be a primitive type (int, string, long...)");
             }
             if (!configuration.getEdgeLabelType().equals(o.getClass())) {

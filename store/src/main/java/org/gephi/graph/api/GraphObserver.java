@@ -78,8 +78,7 @@ public interface GraphObserver {
 
     /**
      * Returns true if this observer has never got its
-     * <em>hasGraphChanged()</em>
-     * method called.
+     * <em>hasGraphChanged()</em> method called.
      *
      * @return true if new observer, false otherwise
      */

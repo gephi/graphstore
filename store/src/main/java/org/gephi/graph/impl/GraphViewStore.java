@@ -28,16 +28,16 @@ import org.gephi.graph.api.UndirectedSubgraph;
 
 public class GraphViewStore {
 
-    //Const
+    // Const
     protected static final int NULL_VIEW = -1;
-    //Config
+    // Config
     protected static final int DEFAULT_VIEWS = 0;
-    //Data
+    // Data
     protected final IntSortedSet garbageQueue;
     protected final GraphStore graphStore;
     protected GraphViewImpl[] views;
     protected int length;
-    //Visible view
+    // Visible view
     protected GraphView visibleView;
 
     public GraphViewStore(GraphStore graphStore) {
@@ -292,7 +292,7 @@ public class GraphViewStore {
 
         view.destroyAllObservers();
 
-        //Check if not visible view
+        // Check if not visible view
         if (visibleView == view) {
             visibleView = graphStore.mainGraphView;
         }

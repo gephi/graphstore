@@ -171,17 +171,18 @@ public class EdgeImplTest {
         Assert.assertEquals(e.getWeight(graphStore.getView()), 10.0);
     }
 
-//    @Test
-//    public void testGetIntervalWeightMainGraphView() {
-//        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
-//        Edge e = graphStore.getEdge("0");
-//        Interval i1 = new Interval(1.0, 2.0);
-//        Interval i2 = new Interval(3.0, 4.0);
-//        e.setWeight(42.0, i1);
-//        Assert.assertEquals(e.getWeight(graphStore.getView()), 42.0);
-//        e.setWeight(10.0, i2);
-//        Assert.assertEquals(e.getWeight(graphStore.getView()), 10.0);
-//    }
+    // @Test
+    // public void testGetIntervalWeightMainGraphView() {
+    // GraphStore graphStore =
+    // GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+    // Edge e = graphStore.getEdge("0");
+    // Interval i1 = new Interval(1.0, 2.0);
+    // Interval i2 = new Interval(3.0, 4.0);
+    // e.setWeight(42.0, i1);
+    // Assert.assertEquals(e.getWeight(graphStore.getView()), 42.0);
+    // e.setWeight(10.0, i2);
+    // Assert.assertEquals(e.getWeight(graphStore.getView()), 10.0);
+    // }
     @Test
     public void testGetWeightDefaultEstimator() {
         Configuration config = new Configuration();

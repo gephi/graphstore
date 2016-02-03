@@ -41,7 +41,7 @@ public class TimestampMapTest {
             Object[] defaultValues = getTestValues(set);
 
             Assert.assertTrue(set.put(1.0, defaultValues[0]));
-            testValues(set, new double[]{1.0}, new Object[]{defaultValues[0]});
+            testValues(set, new double[] { 1.0 }, new Object[] { defaultValues[0] });
         }
     }
 
@@ -52,7 +52,7 @@ public class TimestampMapTest {
 
             Assert.assertTrue(set.put(1.0, defaultValues[0]));
             Assert.assertFalse(set.put(1.0, defaultValues[1]));
-            testValues(set, new double[]{1.0}, new Object[]{defaultValues[1]});
+            testValues(set, new double[] { 1.0 }, new Object[] { defaultValues[1] });
         }
     }
 
@@ -63,7 +63,7 @@ public class TimestampMapTest {
 
             Assert.assertTrue(set.put(1.0, defaultValues[0]));
             Assert.assertTrue(set.put(6.0, defaultValues[1]));
-            testValues(set, new double[]{1.0, 6.0}, defaultValues);
+            testValues(set, new double[] { 1.0, 6.0 }, defaultValues);
         }
     }
 
@@ -74,7 +74,7 @@ public class TimestampMapTest {
 
             Assert.assertTrue(set.put(1.0, defaultValues[0]));
             Assert.assertTrue(set.put(6.0, defaultValues[1]));
-            testValues(set, new double[]{1.0, 6.0}, defaultValues);
+            testValues(set, new double[] { 1.0, 6.0 }, defaultValues);
         }
     }
 
@@ -103,10 +103,10 @@ public class TimestampMapTest {
             set.put(2.0, defaultValues[1]);
             Assert.assertTrue(set.remove(1.0));
             Assert.assertTrue(set.put(1.0, defaultValues[0]));
-            testValues(set, new double[]{1.0, 2.0}, defaultValues);
+            testValues(set, new double[] { 1.0, 2.0 }, defaultValues);
             Assert.assertTrue(set.remove(2.0));
             Assert.assertTrue(set.put(2.0, defaultValues[1]));
-            testValues(set, new double[]{1.0, 2.0}, defaultValues);
+            testValues(set, new double[] { 1.0, 2.0 }, defaultValues);
         }
     }
 
@@ -119,7 +119,7 @@ public class TimestampMapTest {
             set.put(2.0, defaultValues[1]);
             Assert.assertFalse(set.remove(3.0));
             Assert.assertFalse(set.remove(0.0));
-            testValues(set, new double[]{1.0, 2.0}, defaultValues);
+            testValues(set, new double[] { 1.0, 2.0 }, defaultValues);
         }
     }
 
@@ -156,7 +156,7 @@ public class TimestampMapTest {
             Assert.assertTrue(set.put(1.0, defaultValues[0]));
             Assert.assertTrue(set.put(2.0, defaultValues[1]));
 
-            testValues(set, new double[]{1.0, 2.0}, defaultValues);
+            testValues(set, new double[] { 1.0, 2.0 }, defaultValues);
         }
     }
 
@@ -182,7 +182,7 @@ public class TimestampMapTest {
         set.put(1.0, 1.0);
         set.put(2.0, 2.0);
 
-        testDoubleArrayEquals(new double[]{1.0, 2.0}, set.getTimestamps());
+        testDoubleArrayEquals(new double[] { 1.0, 2.0 }, set.getTimestamps());
     }
 
     @Test
@@ -193,7 +193,7 @@ public class TimestampMapTest {
         set.put(2.0, 2.0);
         set.remove(2.0);
 
-        testDoubleArrayEquals(new double[]{1.0}, set.getTimestamps());
+        testDoubleArrayEquals(new double[] { 1.0 }, set.getTimestamps());
     }
 
     @Test
@@ -201,9 +201,9 @@ public class TimestampMapTest {
         TimestampIntegerMap i = new TimestampIntegerMap();
         i.put(2001.0, 42);
 
-        Assert.assertEquals(i.getOverlappingTimestamps(2001, 2002), new int[]{0});
-        Assert.assertEquals(i.getOverlappingTimestamps(2000, 2001), new int[]{0});
-        Assert.assertEquals(i.getOverlappingTimestamps(2000, Double.POSITIVE_INFINITY), new int[]{0});
+        Assert.assertEquals(i.getOverlappingTimestamps(2001, 2002), new int[] { 0 });
+        Assert.assertEquals(i.getOverlappingTimestamps(2000, 2001), new int[] { 0 });
+        Assert.assertEquals(i.getOverlappingTimestamps(2000, Double.POSITIVE_INFINITY), new int[] { 0 });
 
         TimestampIntegerMap j = new TimestampIntegerMap();
         j.put(2001.0, 42);
@@ -211,16 +211,16 @@ public class TimestampMapTest {
         j.put(2004.0, 42);
         j.put(2005.0, 42);
 
-        Assert.assertEquals(j.getOverlappingTimestamps(1998, 1999), new int[]{});
-        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2001), new int[]{0});
-        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2001.5), new int[]{0});
-        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2002), new int[]{0, 1});
-        Assert.assertEquals(j.getOverlappingTimestamps(2001, 2001), new int[]{0});
-        Assert.assertEquals(j.getOverlappingTimestamps(2001, 2002), new int[]{0, 1});
-        Assert.assertEquals(j.getOverlappingTimestamps(2003, 2005), new int[]{2, 3});
-        Assert.assertEquals(j.getOverlappingTimestamps(2005, 2005), new int[]{3});
-        Assert.assertEquals(j.getOverlappingTimestamps(2005, 2016), new int[]{3});
-        Assert.assertEquals(j.getOverlappingTimestamps(2006, 2007), new int[]{});
+        Assert.assertEquals(j.getOverlappingTimestamps(1998, 1999), new int[] {});
+        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2001), new int[] { 0 });
+        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2001.5), new int[] { 0 });
+        Assert.assertEquals(j.getOverlappingTimestamps(1998, 2002), new int[] { 0, 1 });
+        Assert.assertEquals(j.getOverlappingTimestamps(2001, 2001), new int[] { 0 });
+        Assert.assertEquals(j.getOverlappingTimestamps(2001, 2002), new int[] { 0, 1 });
+        Assert.assertEquals(j.getOverlappingTimestamps(2003, 2005), new int[] { 2, 3 });
+        Assert.assertEquals(j.getOverlappingTimestamps(2005, 2005), new int[] { 3 });
+        Assert.assertEquals(j.getOverlappingTimestamps(2005, 2016), new int[] { 3 });
+        Assert.assertEquals(j.getOverlappingTimestamps(2006, 2007), new int[] {});
     }
 
     @Test
@@ -269,7 +269,7 @@ public class TimestampMapTest {
     @Test
     public void testBooleanEstimators() {
         TimestampBooleanMap set = new TimestampBooleanMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
 
         set.put(indices[0], Boolean.TRUE);
         set.put(indices[1], Boolean.FALSE);
@@ -304,8 +304,8 @@ public class TimestampMapTest {
     @Test
     public void testByteEstimators() {
         TimestampByteMap set = new TimestampByteMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        byte[] values = new byte[]{12, 45, -31, 64};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        byte[] values = new byte[] { 12, 45, -31, 64 };
 
         set.put(indices[0], values[0]);
         set.put(indices[1], values[1]);
@@ -333,8 +333,8 @@ public class TimestampMapTest {
     @Test
     public void testCharEstimators() {
         TimestampCharMap set = new TimestampCharMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        char[] values = new char[]{'a', 'z', 'e', 'c'};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        char[] values = new char[] { 'a', 'z', 'e', 'c' };
 
         set.put(indices[0], values[0]);
         set.put(indices[1], values[1]);
@@ -351,8 +351,8 @@ public class TimestampMapTest {
     @Test
     public void testDoubleEstimators() {
         TimestampDoubleMap set = new TimestampDoubleMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        double[] values = new double[]{12.0, 45.3, -31.3, 64.4};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        double[] values = new double[] { 12.0, 45.3, -31.3, 64.4 };
 
         set.put(indices[0], values[0]);
         set.put(indices[1], values[1]);
@@ -380,8 +380,8 @@ public class TimestampMapTest {
     @Test
     public void testFloatEstimators() {
         TimestampFloatMap set = new TimestampFloatMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        float[] values = new float[]{12f, 45.3f, -31.3f, 64.4f};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        float[] values = new float[] { 12f, 45.3f, -31.3f, 64.4f };
 
         set.put(indices[0], values[0]);
         set.put(indices[1], values[1]);
@@ -409,8 +409,8 @@ public class TimestampMapTest {
     @Test
     public void testIntegerEstimators() {
         TimestampIntegerMap set = new TimestampIntegerMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        int[] values = new int[]{120, 450, -3100, 6400};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        int[] values = new int[] { 120, 450, -3100, 6400 };
 
         set.put(indices[0], values[0]);
         set.put(indices[1], values[1]);
@@ -438,8 +438,8 @@ public class TimestampMapTest {
     @Test
     public void testLongEstimators() {
         TimestampLongMap set = new TimestampLongMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        long[] values = new long[]{120l, 450000l, -31000002343l, 640000000001232l};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        long[] values = new long[] { 120l, 450000l, -31000002343l, 640000000001232l };
 
         set.put(indices[0], values[0]);
         set.put(indices[1], values[1]);
@@ -467,8 +467,8 @@ public class TimestampMapTest {
     @Test
     public void testShortEstimators() {
         TimestampShortMap set = new TimestampShortMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        short[] values = new short[]{12, 45, -31, 64};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        short[] values = new short[] { 12, 45, -31, 64 };
 
         set.put(indices[0], values[0]);
         set.put(indices[1], values[1]);
@@ -505,8 +505,8 @@ public class TimestampMapTest {
     @Test
     public void testStringEstimators() {
         TimestampStringMap set = new TimestampStringMap();
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        String[] values = new String[]{"a", "z", "e", "ch"};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        String[] values = new String[] { "a", "z", "e", "ch" };
 
         set.put(indices[0], values[0]);
         set.put(indices[1], values[1]);
@@ -522,8 +522,8 @@ public class TimestampMapTest {
 
     @Test
     public void testEquals() {
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        String[] values = new String[]{"a", "z", "e"};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        String[] values = new String[] { "a", "z", "e" };
         TimestampStringMap set1 = new TimestampStringMap();
         TimestampStringMap set2 = new TimestampStringMap();
         TimestampStringMap set3 = new TimestampStringMap();
@@ -560,8 +560,8 @@ public class TimestampMapTest {
 
     @Test
     public void testEqualsWithCapacity() {
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        String[] values = new String[]{"a", "z", "e"};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        String[] values = new String[] { "a", "z", "e" };
         TimestampStringMap set1 = new TimestampStringMap(10);
         TimestampStringMap set2 = new TimestampStringMap();
 
@@ -581,8 +581,8 @@ public class TimestampMapTest {
 
     @Test
     public void testEqualsWithRemove() {
-        double[] indices = new double[]{1.0, 2.0, 6.0, 7.0};
-        String[] values = new String[]{"a", "z", "e"};
+        double[] indices = new double[] { 1.0, 2.0, 6.0, 7.0 };
+        String[] values = new String[] { "a", "z", "e" };
         TimestampStringMap set1 = new TimestampStringMap();
         TimestampStringMap set2 = new TimestampStringMap();
 
@@ -640,12 +640,12 @@ public class TimestampMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, foo]; [2012-02-29, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330473741000.0, bar]>");
 
-        //Test with time zone printing:
+        // Test with time zone printing:
         Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, foo]; [2012-02-29, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("+03:00")), "<[2012-02-29, foo]; [2012-02-29, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("-03:00")), "<[2012-02-28, foo]; [2012-02-28, bar]>");
 
-        //Test infinity:
+        // Test infinity:
         TimestampStringMap mapInf = new TimestampStringMap();
         mapInf.put(Double.NEGATIVE_INFINITY, "value");
         mapInf.put(Double.POSITIVE_INFINITY, "value");
@@ -657,7 +657,7 @@ public class TimestampMapTest {
         TimestampStringMap map1 = new TimestampStringMap();
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<empty>");
 
-        //Test with default timezone UTC+0
+        // Test with default timezone UTC+0
         map1.put(AttributeUtils.parseDateTime("2012-02-29"), "foo");
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, foo]>");
 
@@ -665,11 +665,11 @@ public class TimestampMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330477844000.0, bar]>");
 
-        //Test with time zone printing:
+        // Test with time zone printing:
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.forID("-01:30")), "<[2012-02-28T22:30:00.000-01:30, foo]; [2012-02-28T23:40:44.000-01:30, bar]>");
 
-        //Test with timezone parsing and UTC printing:
+        // Test with timezone parsing and UTC printing:
         TimestampStringMap map2 = new TimestampStringMap();
         map2.put(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), "foo");
         Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, foo]>");
@@ -678,14 +678,14 @@ public class TimestampMapTest {
         Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, foo]; [2012-02-29T02:10:44.000Z, bar]>");
         Assert.assertEquals(map2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, foo]; [1330481444000.0, bar]>");
 
-        //Test infinity:
+        // Test infinity:
         TimestampStringMap mapInf = new TimestampStringMap();
         mapInf.put(Double.NEGATIVE_INFINITY, "value");
         mapInf.put(Double.POSITIVE_INFINITY, "value");
         Assert.assertEquals(mapInf.toString(TimeFormat.DATETIME), "<[-Infinity, value]; [Infinity, value]>");
     }
 
-    //UTILITY
+    // UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);
         for (int i = 0; i < a.length; i++) {
@@ -694,52 +694,32 @@ public class TimestampMapTest {
     }
 
     private TimestampMap[] getAllInstances() {
-        return new TimestampMap[]{
-            new TimestampDoubleMap(),
-            new TimestampByteMap(),
-            new TimestampFloatMap(),
-            new TimestampIntegerMap(),
-            new TimestampLongMap(),
-            new TimestampShortMap(),
-            new TimestampStringMap(),
-            new TimestampCharMap(),
-            new TimestampBooleanMap()
-        };
+        return new TimestampMap[] { new TimestampDoubleMap(), new TimestampByteMap(), new TimestampFloatMap(), new TimestampIntegerMap(), new TimestampLongMap(), new TimestampShortMap(), new TimestampStringMap(), new TimestampCharMap(), new TimestampBooleanMap() };
     }
 
     private TimestampMap[] getAllInstances(int capacity) {
-        return new TimestampMap[]{
-            new TimestampDoubleMap(capacity),
-            new TimestampByteMap(capacity),
-            new TimestampFloatMap(capacity),
-            new TimestampIntegerMap(capacity),
-            new TimestampLongMap(capacity),
-            new TimestampShortMap(capacity),
-            new TimestampStringMap(capacity),
-            new TimestampCharMap(capacity),
-            new TimestampBooleanMap(capacity)
-        };
+        return new TimestampMap[] { new TimestampDoubleMap(capacity), new TimestampByteMap(capacity), new TimestampFloatMap(capacity), new TimestampIntegerMap(capacity), new TimestampLongMap(capacity), new TimestampShortMap(capacity), new TimestampStringMap(capacity), new TimestampCharMap(capacity), new TimestampBooleanMap(capacity) };
     }
 
     private Object[] getTestValues(TimestampMap set) {
         if (set.getTypeClass().equals(String.class)) {
-            return new String[]{"foo", "bar"};
+            return new String[] { "foo", "bar" };
         } else if (set.getTypeClass().equals(Boolean.class)) {
-            return new Boolean[]{Boolean.TRUE, Boolean.FALSE};
+            return new Boolean[] { Boolean.TRUE, Boolean.FALSE };
         } else if (set.getTypeClass().equals(Float.class)) {
-            return new Float[]{1f, 2f};
+            return new Float[] { 1f, 2f };
         } else if (set.getTypeClass().equals(Double.class)) {
-            return new Double[]{1.0, 2.0};
+            return new Double[] { 1.0, 2.0 };
         } else if (set.getTypeClass().equals(Integer.class)) {
-            return new Integer[]{1, 2};
+            return new Integer[] { 1, 2 };
         } else if (set.getTypeClass().equals(Short.class)) {
-            return new Short[]{1, 2};
+            return new Short[] { 1, 2 };
         } else if (set.getTypeClass().equals(Long.class)) {
-            return new Long[]{1l, 2l};
+            return new Long[] { 1l, 2l };
         } else if (set.getTypeClass().equals(Byte.class)) {
-            return new Byte[]{1, 2};
+            return new Byte[] { 1, 2 };
         } else if (set.getTypeClass().equals(Character.class)) {
-            return new Character[]{'f', 'o'};
+            return new Character[] { 'f', 'o' };
         } else {
             throw new RuntimeException("Unrecognized type");
         }

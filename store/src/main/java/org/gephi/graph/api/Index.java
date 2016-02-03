@@ -21,6 +21,7 @@ import java.util.Collection;
  * An index is associated with each table and keeps track of each unique value
  * in indexed columns.
  * <p>
+ * 
  * @param <T> Element class
  */
 public interface Index<T extends Element> {
@@ -31,7 +32,7 @@ public interface Index<T extends Element> {
      * @param column the column to count values
      * @param value the value
      * @return the number of elements in the index with <em>value</em> in
-     * <em>column</em>, or zero if none
+     *         <em>column</em>, or zero if none
      */
     public int count(Column column, Object value);
 
@@ -42,7 +43,7 @@ public interface Index<T extends Element> {
      * @param column the column to get values
      * @param value the value
      * @return an iterable with element with <em>value</em> in <em>column</em>,
-     * or null if value not found
+     *         or null if value not found
      */
     public Iterable<T> get(Column column, Object value);
 

@@ -181,7 +181,7 @@ public class Serialization {
     final static int CLASS = 126;
     final static int DATE = 127;
     final static String EMPTY_STRING = "";
-    //Specifics
+    // Specifics
     final static int NODE = 200;
     final static int EDGE = 201;
     final static int EDGETYPE_STORE = 202;
@@ -214,11 +214,11 @@ public class Serialization {
     final static int LIST = 229;
     final static int SET = 230;
     final static int MAP = 231;
-    //Store
+    // Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
     protected float readVersion = VERSION;
-    //Deserialized configuration
+    // Deserialized configuration
     protected GraphStoreConfigurationVersion graphStoreConfigurationVersion;
 
     public Serialization() {
@@ -247,36 +247,36 @@ public class Serialization {
     }
 
     public void serializeGraphStore(DataOutput out, GraphStore store) throws IOException {
-        //Configuration
+        // Configuration
         serializeGraphStoreConfiguration(out);
 
-        //GraphVersion
+        // GraphVersion
         serialize(out, store.version);
 
-        //Edge types
+        // Edge types
         EdgeTypeStore edgeTypeStore = store.edgeTypeStore;
         serialize(out, edgeTypeStore);
 
-        //Column
+        // Column
         serialize(out, store.nodeTable);
         serialize(out, store.edgeTable);
 
-        //Time store
+        // Time store
         serialize(out, store.timeStore);
 
-        //Factory
+        // Factory
         serialize(out, store.factory);
 
-        //Atts
+        // Atts
         serialize(out, store.attributes);
 
-        //TimeFormat
+        // TimeFormat
         serialize(out, store.timeFormat);
 
-        //Time zone
+        // Time zone
         serialize(out, store.timeZone);
 
-        //Nodes + Edges
+        // Nodes + Edges
         int nodesAndEdges = store.nodeStore.size() + store.edgeStore.size();
         serialize(out, nodesAndEdges);
 
@@ -287,53 +287,53 @@ public class Serialization {
             serialize(out, edge);
         }
 
-        //Views
+        // Views
         serialize(out, store.viewStore);
     }
 
     public GraphStore deserializeGraphStore(DataInput is) throws IOException, ClassNotFoundException {
-        if (!model.store.nodeStore.isEmpty()) {   //TODO test other stores
+        if (!model.store.nodeStore.isEmpty()) { // TODO test other stores
             throw new IOException("The store is not empty");
         }
 
-        //Store Configuration
+        // Store Configuration
         deserialize(is);
 
-        //Graph Version
+        // Graph Version
         GraphVersion version = (GraphVersion) deserialize(is);
         model.store.version.nodeVersion = version.nodeVersion;
         model.store.version.edgeVersion = version.edgeVersion;
 
-        //Edge types
+        // Edge types
         deserialize(is);
 
-        //Columns
+        // Columns
         deserialize(is);
         deserialize(is);
 
-        //Time store
+        // Time store
         deserialize(is);
 
-        //Factory
+        // Factory
         deserialize(is);
 
-        //Atts
+        // Atts
         GraphAttributesImpl attributes = (GraphAttributesImpl) deserialize(is);
         model.store.attributes.setGraphAttributes(attributes);
 
-        //TimeFormat
+        // TimeFormat
         deserialize(is);
 
-        //Time zone
+        // Time zone
         deserialize(is);
 
-        //Nodes and edges
+        // Nodes and edges
         int nodesAndEdges = (Integer) deserialize(is);
         for (int i = 0; i < nodesAndEdges; i++) {
             deserialize(is);
         }
 
-        //ViewStore
+        // ViewStore
         deserialize(is);
 
         return model.store;
@@ -1251,7 +1251,7 @@ public class Serialization {
         throw new EOFException();
     }
 
-    //SERIALIZE PRIMITIVES
+    // SERIALIZE PRIMITIVES
     protected byte[] serialize(Object obj) throws IOException {
         DataInputOutput ba = new DataInputOutput();
 
@@ -1391,7 +1391,7 @@ public class Serialization {
             boolean[] a = (boolean[]) obj;
             LongPacker.packInt(out, a.length);
             for (boolean s : a) {
-                out.writeBoolean(s); //TODO pack 8 booleans to single byte
+                out.writeBoolean(s); // TODO pack 8 booleans to single byte
             }
         } else if (obj instanceof double[]) {
             out.write(DOUBLE_ARRAY);
@@ -1576,7 +1576,8 @@ public class Serialization {
         final int len = obj.length();
         LongPacker.packInt(out, len);
         for (int i = 0; i < len; i++) {
-            int c = (int) obj.charAt(i); //TODO investigate if c could be negative here
+            int c = (int) obj.charAt(i); // TODO investigate if c could be
+                                         // negative here
             LongPacker.packInt(out, c);
         }
     }
@@ -1742,7 +1743,7 @@ public class Serialization {
         }
     }
 
-    //DESERIALIZE PRIMITIVES
+    // DESERIALIZE PRIMITIVES
     protected Object deserialize(byte[] buf) throws ClassNotFoundException, IOException {
         DataInputOutput bs = new DataInputOutput(buf);
         Object ret = deserialize(bs);

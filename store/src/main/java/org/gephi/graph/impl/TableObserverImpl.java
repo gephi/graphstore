@@ -17,11 +17,11 @@ public class TableObserverImpl implements TableObserver {
 
     protected final TableImpl table;
     protected boolean destroyed;
-    //Config
+    // Config
     protected final boolean withDiff;
-    //Hashcodes
+    // Hashcodes
     protected int tableHash;
-    //Cache
+    // Cache
     protected TableDiffImpl tableDiff;
     protected Column[] columnCache;
     protected int[] columnHashCache;

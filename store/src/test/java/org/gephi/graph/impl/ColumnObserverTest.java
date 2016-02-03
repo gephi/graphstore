@@ -97,7 +97,7 @@ public class ColumnObserverTest {
         Assert.assertTrue(observer.hasColumnChanged());
         ColumnDiff diff = observer.getDiff();
         Assert.assertNotNull(diff);
-        Assert.assertEquals(diff.getTouchedElements().toArray(), new Element[]{node});
+        Assert.assertEquals(diff.getTouchedElements().toArray(), new Element[] { node });
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ColumnObserverTest {
         store.addNode(node2);
         node2.setAttribute(column, 2);
         Assert.assertTrue(observer.hasColumnChanged());
-        Assert.assertEquals(observer.getDiff().getTouchedElements().toArray(), new Element[]{node2});
+        Assert.assertEquals(observer.getDiff().getTouchedElements().toArray(), new Element[] { node2 });
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ColumnObserverTest {
         Assert.assertTrue(observer.hasColumnChanged());
         ColumnDiff diff = observer.getDiff();
         Assert.assertNotNull(diff);
-        Assert.assertEquals(diff.getTouchedElements().toArray(), new Element[]{node});
+        Assert.assertEquals(diff.getTouchedElements().toArray(), new Element[] { node });
     }
 
     @Test
@@ -213,7 +213,7 @@ public class ColumnObserverTest {
 
         Node n1 = store.factory.newNode();
         Node n2 = store.factory.newNode();
-        store.addAllNodes(Arrays.asList(new Node[]{n1, n2}));
+        store.addAllNodes(Arrays.asList(new Node[] { n1, n2 }));
         Edge edge = store.factory.newEdge(n1, n2);
         edge.setWeight(2.0);
         store.addEdge(edge);

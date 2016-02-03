@@ -84,7 +84,7 @@ public class TimestampsParserTest {
         assertNull(TimestampsParser.parseTimestampSet(null));
         assertEquals(new TimestampSet(), TimestampsParser.parseTimestampSet("[]"));
 
-        //Doubles:
+        // Doubles:
         assertEquals(buildTimestampSet(1), TimestampsParser.parseTimestampSet("[1]"));
         assertEquals(buildTimestampSet(1, 2), TimestampsParser.parseTimestampSet("[1, 2]"));
         assertEquals(buildTimestampSet(1, 2, 3), TimestampsParser.parseTimestampSet("<[1, 2, 3]>"));
@@ -93,25 +93,13 @@ public class TimestampsParserTest {
         assertEquals(buildTimestampSet(-5000, -1, 0, 0.5), TimestampsParser.parseTimestampSet("(-5000,-1, 0, .5)"));
         assertEquals(buildTimestampSet(-5000, -1, 0, 0.5), TimestampsParser.parseTimestampSet("(-5e3, -1, 0, .5)"));
 
-        //Dates:
-        assertEquals(
-                buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")),
-                TimestampsParser.parseTimestampSet("[2015-01-01, 2015-01-31]")
-        );
-        assertEquals(
-                buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")),
-                TimestampsParser.parseTimestampSet("[2015-01, 2015-01-31]")
-        );
+        // Dates:
+        assertEquals(buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")), TimestampsParser.parseTimestampSet("[2015-01-01, 2015-01-31]"));
+        assertEquals(buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")), TimestampsParser.parseTimestampSet("[2015-01, 2015-01-31]"));
 
-        //Date times:
-        assertEquals(
-                buildTimestampSet(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"), parseDateTimeIntoTimestamp("2015-01-02 00:00:00")),
-                TimestampsParser.parseTimestampSet("[2015-01-01T21:12:05, 2015-01-02]")
-        );
-        assertEquals(
-                buildTimestampSet(parseDateTimeMillisIntoTimestamp("2015-01-01 21:12:05.121"), parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999")),
-                TimestampsParser.parseTimestampSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]")
-        );
+        // Date times:
+        assertEquals(buildTimestampSet(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"), parseDateTimeIntoTimestamp("2015-01-02 00:00:00")), TimestampsParser.parseTimestampSet("[2015-01-01T21:12:05, 2015-01-02]"));
+        assertEquals(buildTimestampSet(parseDateTimeMillisIntoTimestamp("2015-01-01 21:12:05.121"), parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999")), TimestampsParser.parseTimestampSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -301,109 +289,72 @@ public class TimestampsParserTest {
 
     @Test
     public void testParseComplexFormatTimestampsAndDefaultStringRepresentation() {
-        assertEquals(
-                "<[2.0, \"; A3R; JJG; JJG\"]; [3.5, \"; A3R; JJG; [ ] () , JJG\"]; [10.0, 30]>",
-                parseTimestampMapToString("[2.0 , \"; A3R; JJG; JJG\"); [3.5, \"; A3R; JJG; [ ] () , JJG\"]; [10,30]")
+        assertEquals("<[2.0, \"; A3R; JJG; JJG\"]; [3.5, \"; A3R; JJG; [ ] () , JJG\"]; [10.0, 30]>", parseTimestampMapToString("[2.0 , \"; A3R; JJG; JJG\"); [3.5, \"; A3R; JJG; [ ] () , JJG\"]; [10,30]"));
+
+        assertEquals("<[2.0, \";a b c\"]>", parseTimestampMapToString("<[' 2.0', ';a b c')"));
+
+        assertEquals("<[2.0, \" d\"]>", parseTimestampMapToString("<[' 2.0', ' d')"));
+
+        assertEquals("<[1.0, xy]; [4.0, \"['a;b']\"]>", parseTimestampMapToString(" (  1,  xy)  (4, '[\\'a;b\\']']"));
+
+        assertEquals("<[1.0, xy]; [4.0, \"['a;b\\\"']\"]>", parseTimestampMapToString(" (  1,  xy)  (4, '[\\'a;b\\\"\\']']")// Playing
+                                                                                                                            // with
+                                                                                                                            // double
+                                                                                                                            // quote
+                                                                                                                            // literals
         );
 
-        assertEquals(
-                "<[2.0, \";a b c\"]>",
-                parseTimestampMapToString("<[' 2.0', ';a b c')")
+        assertEquals("<[1.0, xy]; [4.0, \"[\\\"a;b'\\\"]\"]>", parseTimestampMapToString(" (  1,   xy)  (4, '[\"a;b\\\'\"]']")// Playing
+                                                                                                                              // with
+                                                                                                                              // single
+                                                                                                                              // quote
+                                                                                                                              // literals
         );
 
-        assertEquals(
-                "<[2.0, \" d\"]>",
-                parseTimestampMapToString("<[' 2.0', ' d')")
-        );
+        assertEquals("<[1.25, <test>]>", parseTimestampMapToString("[1.25, <test>]"));
+        assertEquals("<[1.55, <test>]>", parseTimestampMapToString("['1.55', '<test>']"));
 
-        assertEquals(
-                "<[1.0, xy]; [4.0, \"['a;b']\"]>",
-                parseTimestampMapToString(" (  1,  xy)  (4, '[\\'a;b\\']']")
-        );
+        assertEquals("<[1.25, 21.12]>", parseTimestampMapToString("[1.25, \"21.12  \"  ]", Double.class));
 
-        assertEquals(
-                "<[1.0, xy]; [4.0, \"['a;b\\\"']\"]>",
-                parseTimestampMapToString(" (  1,  xy)  (4, '[\\'a;b\\\"\\']']")//Playing with double quote literals
-        );
+        assertEquals("<[1.25, 0.0]>", parseTimestampMapToString("[1.25,,0]", Double.class));
 
-        assertEquals(
-                "<[1.0, xy]; [4.0, \"[\\\"a;b'\\\"]\"]>",
-                parseTimestampMapToString(" (  1,   xy)  (4, '[\"a;b\\\'\"]']")//Playing with single quote literals
-        );
+        assertEquals("<[1.25, 1.55]>", parseTimestampSetToString("[1.25,1.55]"));
 
-        assertEquals(
-                "<[1.25, <test>]>",
-                parseTimestampMapToString("[1.25, <test>]")
-        );
-        assertEquals(
-                "<[1.55, <test>]>",
-                parseTimestampMapToString("['1.55', '<test>']")
-        );
-
-        assertEquals(
-                "<[1.25, 21.12]>",
-                parseTimestampMapToString("[1.25, \"21.12  \"  ]", Double.class)
-        );
-
-        assertEquals(
-                "<[1.25, 0.0]>",
-                parseTimestampMapToString("[1.25,,0]", Double.class)
-        );
-
-        assertEquals(
-                "<[1.25, 1.55]>",
-                parseTimestampSetToString("[1.25,1.55]")
-        );
-
-        assertEquals(
-                "<[1.25, 1.55]>",
-                parseTimestampSetToString(" 1.25,1.55")//We don't require bounds for timestamp sets, since only one array is necessary
+        assertEquals("<[1.25, 1.55]>", parseTimestampSetToString(" 1.25,1.55")// We
+                                                                              // don't
+                                                                              // require
+                                                                              // bounds
+                                                                              // for
+                                                                              // timestamp
+                                                                              // sets,
+                                                                              // since
+                                                                              // only
+                                                                              // one
+                                                                              // array
+                                                                              // is
+                                                                              // necessary
         );
     }
 
     @Test
     public void testParseInfinityTimestampsAndDefaultStringRepresentation() {
-        assertEquals(
-                "<[-Infinity, 1.55]>",
-                parseTimestampSetToString("[-Infinity,1.55]")
-        );
+        assertEquals("<[-Infinity, 1.55]>", parseTimestampSetToString("[-Infinity,1.55]"));
 
-        assertEquals(
-                "<[0.0, Infinity]>",
-                parseTimestampSetToString("[0.0,Infinity]")
-        );
+        assertEquals("<[0.0, Infinity]>", parseTimestampSetToString("[0.0,Infinity]"));
 
-        assertEquals(
-                "<[-Infinity, Infinity]>",
-                parseTimestampSetToString("[-Infinity,Infinity]")
-        );
+        assertEquals("<[-Infinity, Infinity]>", parseTimestampSetToString("[-Infinity,Infinity]"));
 
-        assertEquals(
-                "<[-Infinity, 0.0, 1.0, 2.0]>",
-                parseTimestampSetToString("[-INFINITY, 0.0, 1.0, 2.0]")
-        );
+        assertEquals("<[-Infinity, 0.0, 1.0, 2.0]>", parseTimestampSetToString("[-INFINITY, 0.0, 1.0, 2.0]"));
 
-        assertEquals(
-                "<[-Infinity, 0.0, 1.0, 2.0, Infinity]>",
-                parseTimestampSetToString("[-infinity, 0.0, 1.0, 2.0, infinity]")
-        );
+        assertEquals("<[-Infinity, 0.0, 1.0, 2.0, Infinity]>", parseTimestampSetToString("[-infinity, 0.0, 1.0, 2.0, infinity]"));
 
-        assertEquals(
-                "<[-Infinity, 1.0E12]; [1.0, 2.0]; [Infinity, 3.0]>",
-                parseTimestampMapToString("[-Infinity, 1e12]; [1.0, 2.]; [Infinity, 3]", Double.class)
-        );
+        assertEquals("<[-Infinity, 1.0E12]; [1.0, 2.0]; [Infinity, 3.0]>", parseTimestampMapToString("[-Infinity, 1e12]; [1.0, 2.]; [Infinity, 3]", Double.class));
     }
 
     @Test
     public void testParseUnordered() {
-        assertEquals(
-                "<[-Infinity, -3.0, 0.0, 1.0]>",
-                parseTimestampSetToString("[-Infinity, 0.0, -3.0, 1.0]")
-        );
+        assertEquals("<[-Infinity, -3.0, 0.0, 1.0]>", parseTimestampSetToString("[-Infinity, 0.0, -3.0, 1.0]"));
 
-        assertEquals(
-                "<[-Infinity, 1.0]; [-3.0, 3.0]; [0.0, 2.0]; [1.0, 4.0]>",
-                parseTimestampMapToString("[-Infinity, 1] [0.0, 2] [-3.0, 3] [1.0, 4]", Double.class)
-        );
+        assertEquals("<[-Infinity, 1.0]; [-3.0, 3.0]; [0.0, 2.0]; [1.0, 4.0]>", parseTimestampMapToString("[-Infinity, 1] [0.0, 2] [-3.0, 3] [1.0, 4]", Double.class));
     }
 }

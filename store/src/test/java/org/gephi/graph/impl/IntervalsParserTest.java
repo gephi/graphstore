@@ -84,7 +84,7 @@ public class IntervalsParserTest {
     public void testParseIntervalSet() throws ParseException {
         assertNull(IntervalsParser.parseIntervalSet(null));
 
-        //Doubles:
+        // Doubles:
         assertEquals(buildIntervalSet(new Interval(1, 2)), IntervalsParser.parseIntervalSet("[1, 2]"));
         assertEquals(buildIntervalSet(new Interval(1, 2), new Interval(2, 3)), IntervalsParser.parseIntervalSet("<[1, 2]; [2,3]>"));
         assertEquals(buildIntervalSet(new Interval(1, 2), new Interval(2, 31)), IntervalsParser.parseIntervalSet("<[1, 2]; [2,31.]>"));
@@ -92,25 +92,13 @@ public class IntervalsParserTest {
         assertEquals(buildIntervalSet(new Interval(-5000, -1), new Interval(0, 0.5)), IntervalsParser.parseIntervalSet("(-5000,-1][0, .5)"));
         assertEquals(buildIntervalSet(new Interval(-5000, -1), new Interval(0, 0.5)), IntervalsParser.parseIntervalSet("(-5e3,-1)(0, .5)"));
 
-        //Dates:
-        assertEquals(
-                buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31"))),
-                IntervalsParser.parseIntervalSet("[2015-01-01, 2015-01-31]")
-        );
-        assertEquals(
-                buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31"))),
-                IntervalsParser.parseIntervalSet("[2015-01, 2015-01-31]")
-        );
+        // Dates:
+        assertEquals(buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31"))), IntervalsParser.parseIntervalSet("[2015-01-01, 2015-01-31]"));
+        assertEquals(buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31"))), IntervalsParser.parseIntervalSet("[2015-01, 2015-01-31]"));
 
-        //Date times:
-        assertEquals(
-                buildIntervalSet(new Interval(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"), parseDateTimeIntoTimestamp("2015-01-02 00:00:00"))),
-                IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05, 2015-01-02]")
-        );
-        assertEquals(
-                buildIntervalSet(new Interval(parseDateTimeMillisIntoTimestamp("2015-01-01 21:12:05.121"), parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999"))),
-                IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]")
-        );
+        // Date times:
+        assertEquals(buildIntervalSet(new Interval(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"), parseDateTimeIntoTimestamp("2015-01-02 00:00:00"))), IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05, 2015-01-02]"));
+        assertEquals(buildIntervalSet(new Interval(parseDateTimeMillisIntoTimestamp("2015-01-01 21:12:05.121"), parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999"))), IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -195,8 +183,12 @@ public class IntervalsParserTest {
         expected.put(new Interval(5, 6), (short) 3);
         expected.put(new Interval(6, 7), (short) 4);
 
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Short.class, "[1, 2, 1.1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(short.class, "[1, 2, 1.1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Short.class, "[1, 2, 1.1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));// Decimals
+                                                                                                                                               // are
+                                                                                                                                               // ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(short.class, "[1, 2, 1.1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));// Decimals
+                                                                                                                                               // are
+                                                                                                                                               // ignored
     }
 
     @Test
@@ -207,8 +199,12 @@ public class IntervalsParserTest {
         expected.put(new Interval(5, 6), 3);
         expected.put(new Interval(6, 7), 4);
 
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Integer.class, "[1, 2, 1.]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(int.class, "[1, 2, 1.]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Integer.class, "[1, 2, 1.]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));// Decimals
+                                                                                                                                                // are
+                                                                                                                                                // ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(int.class, "[1, 2, 1.]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));// Decimals
+                                                                                                                                            // are
+                                                                                                                                            // ignored
     }
 
     @Test
@@ -219,8 +215,12 @@ public class IntervalsParserTest {
         expected.put(new Interval(5, 6), 3l);
         expected.put(new Interval(6, 7), 4l);
 
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Long.class, "[1, 2, 1.0]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
-        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(long.class, "[1, 2, 1.0]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));//Decimals are ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(Long.class, "[1, 2, 1.0]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));// Decimals
+                                                                                                                                              // are
+                                                                                                                                              // ignored
+        assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(long.class, "[1, 2, 1.0]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]"));// Decimals
+                                                                                                                                              // are
+                                                                                                                                              // ignored
     }
 
     @Test
@@ -325,91 +325,53 @@ public class IntervalsParserTest {
 
     @Test
     public void testParseComplexFormatIntervalsAndDefaultStringRepresentation() {
-        assertEquals(
-                "<[2.0, 3.5, \"; A3R; JJG; JJG\"]; [3.5, 8.0, \"; A3R; JJG; [ ] () , JJG\"]; [10.0, 20.0, 30]>",
-                parseIntervalMapToString("[2.0, 3.5, \"; A3R; JJG; JJG\"); [3.5, 8.0, \"; A3R; JJG; [ ] () , JJG\"]; [10,20,30]")
+        assertEquals("<[2.0, 3.5, \"; A3R; JJG; JJG\"]; [3.5, 8.0, \"; A3R; JJG; [ ] () , JJG\"]; [10.0, 20.0, 30]>", parseIntervalMapToString("[2.0, 3.5, \"; A3R; JJG; JJG\"); [3.5, 8.0, \"; A3R; JJG; [ ] () , JJG\"]; [10,20,30]"));
+
+        assertEquals("<[2.0, 3.5, \";a b c\"]>", parseIntervalMapToString("<[' 2.0', '3.5', ';a b c')"));
+
+        assertEquals("<[1.0, 2.0, xy]; [4.0, 5.0, \"['a;b']\"]>", parseIntervalMapToString(" (  1, 2,  xy)  (4,5, '[\\'a;b\\']']"));
+
+        assertEquals("<[1.0, 2.0, xy]; [4.0, 5.0, \"['a;b\\\"']\"]>", parseIntervalMapToString(" (  1, 2,  xy)  (4,5, '[\\'a;b\\\"\\']']")// Playing
+                                                                                                                                          // with
+                                                                                                                                          // double
+                                                                                                                                          // quote
+                                                                                                                                          // literals
         );
 
-        assertEquals(
-                "<[2.0, 3.5, \";a b c\"]>",
-                parseIntervalMapToString("<[' 2.0', '3.5', ';a b c')")
+        assertEquals("<[1.0, 2.0, xy]; [4.0, 5.0, \"[\\\"a;b'\\\"]\"]>", parseIntervalMapToString(" (  1, 2,  xy)  (4,5, '[\"a;b\\\'\"]']")// Playing
+                                                                                                                                           // with
+                                                                                                                                           // single
+                                                                                                                                           // quote
+                                                                                                                                           // literals
         );
 
-        assertEquals(
-                "<[1.0, 2.0, xy]; [4.0, 5.0, \"['a;b']\"]>",
-                parseIntervalMapToString(" (  1, 2,  xy)  (4,5, '[\\'a;b\\']']")
-        );
+        assertEquals("<[1.25, 1.55, <test>]>", parseIntervalMapToString("[1.25,1.55, <test>]"));
+        assertEquals("<[1.25, 1.55, <test>]>", parseIntervalMapToString("[1.25,'1.55' '<test>']"));
 
-        assertEquals(
-                "<[1.0, 2.0, xy]; [4.0, 5.0, \"['a;b\\\"']\"]>",
-                parseIntervalMapToString(" (  1, 2,  xy)  (4,5, '[\\'a;b\\\"\\']']")//Playing with double quote literals
-        );
+        assertEquals("<[1.25, 1.55, 21.12]>", parseIntervalMapToString("[1.25,1.55,   \"21.12  \"  ]", Double.class));
 
-        assertEquals(
-                "<[1.0, 2.0, xy]; [4.0, 5.0, \"[\\\"a;b'\\\"]\"]>",
-                parseIntervalMapToString(" (  1, 2,  xy)  (4,5, '[\"a;b\\\'\"]']")//Playing with single quote literals
-        );
+        assertEquals("<[1.25, 1.55, 0.0]>", parseIntervalMapToString("[1.25,1.55,0]", Double.class));
 
-        assertEquals(
-                "<[1.25, 1.55, <test>]>",
-                parseIntervalMapToString("[1.25,1.55, <test>]")
-        );
-        assertEquals(
-                "<[1.25, 1.55, <test>]>",
-                parseIntervalMapToString("[1.25,'1.55' '<test>']")
-        );
-
-        assertEquals(
-                "<[1.25, 1.55, 21.12]>",
-                parseIntervalMapToString("[1.25,1.55,   \"21.12  \"  ]", Double.class)
-        );
-
-        assertEquals(
-                "<[1.25, 1.55, 0.0]>",
-                parseIntervalMapToString("[1.25,1.55,0]", Double.class)
-        );
-
-        assertEquals(
-                "<[1.25, 1.55]>",
-                parseIntervalSetToString("[1.25,1.55]")
-        );
+        assertEquals("<[1.25, 1.55]>", parseIntervalSetToString("[1.25,1.55]"));
     }
 
     @Test
     public void testParseInfinityIntervalsAndDefaultStringRepresentation() {
-        assertEquals(
-                "<[-Infinity, 1.55]>",
-                parseIntervalSetToString("[-Infinity,1.55]")
-        );
+        assertEquals("<[-Infinity, 1.55]>", parseIntervalSetToString("[-Infinity,1.55]"));
 
-        assertEquals(
-                "<[0.0, Infinity]>",
-                parseIntervalSetToString("[0.0,Infinity]")
-        );
+        assertEquals("<[0.0, Infinity]>", parseIntervalSetToString("[0.0,Infinity]"));
 
-        assertEquals(
-                "<[-Infinity, Infinity]>",
-                parseIntervalSetToString("[-Infinity,Infinity]")
-        );
+        assertEquals("<[-Infinity, Infinity]>", parseIntervalSetToString("[-Infinity,Infinity]"));
 
-        assertEquals(
-                "<[-Infinity, 0.0]; [1.0, 2.0]>",
-                parseIntervalSetToString("[-infinity, 0.0]; [1.0, 2.0]")
-        );
+        assertEquals("<[-Infinity, 0.0]; [1.0, 2.0]>", parseIntervalSetToString("[-infinity, 0.0]; [1.0, 2.0]"));
 
-        assertEquals(
-                "<[-Infinity, 0.0]; [1.0, 2.0]; [2.0, Infinity]>",
-                parseIntervalSetToString("[-infinity, 0.0]; [1.0, 2.0]; [2.0, infinity]")
-        );
+        assertEquals("<[-Infinity, 0.0]; [1.0, 2.0]; [2.0, Infinity]>", parseIntervalSetToString("[-infinity, 0.0]; [1.0, 2.0]; [2.0, infinity]"));
 
-        assertEquals(
-                "<[-Infinity, 0.0, 1.0E12]; [1.0, 2.0, 2.0]; [2.0, Infinity, 3.0]>",
-                parseIntervalMapToString("[-Infinity, 0.0, 1e12]; [1.0, 2.0, 2.]; [2.0, Infinity, 3]", Double.class)
-        );
+        assertEquals("<[-Infinity, 0.0, 1.0E12]; [1.0, 2.0, 2.0]; [2.0, Infinity, 3.0]>", parseIntervalMapToString("[-Infinity, 0.0, 1e12]; [1.0, 2.0, 2.]; [2.0, Infinity, 3]", Double.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testParseInfinityBadIntervalsOverlapping() {
-        IntervalsParser.parseIntervalSet("[-Infinity, 0.0]; [-3.0, 1.0]");//Overlapping
+        IntervalsParser.parseIntervalSet("[-Infinity, 0.0]; [-3.0, 1.0]");// Overlapping
     }
 }

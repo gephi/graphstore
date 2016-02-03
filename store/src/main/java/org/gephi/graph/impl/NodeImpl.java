@@ -26,11 +26,11 @@ public class NodeImpl extends ElementImpl implements Node {
     protected int storeId = NodeStore.NULL_ID;
     protected EdgeImpl[] headOut = new EdgeImpl[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
     protected EdgeImpl[] headIn = new EdgeImpl[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
-    //Degree
+    // Degree
     protected int inDegree;
     protected int outDegree;
     protected int mutualDegree;
-    //Props
+    // Props
     protected final NodePropertiesImpl properties;
 
     public NodeImpl(Object id, GraphStore graphStore) {
@@ -260,7 +260,7 @@ public class NodeImpl extends ElementImpl implements Node {
 
         public NodePropertiesImpl() {
             this.textProperties = new TextPropertiesImpl();
-            this.rgba = 255 << 24;  //Alpha set to 1
+            this.rgba = 255 << 24; // Alpha set to 1
         }
 
         @Override

@@ -72,8 +72,8 @@ public interface TimeSet<K> {
     public K[] toArray();
 
     /**
-     * Returns the same result as {@link #toArray() } but in a primitive array
-     * if the underlying storage is in a primtive form.
+     * Returns the same result as {@link #toArray() } but in a primitive array if
+     * the underlying storage is in a primtive form.
      *
      * @return array of all keys
      */

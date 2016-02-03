@@ -461,7 +461,7 @@ public class IndexStoreTest {
         Assert.assertEquals(index.count(column, "bar"), 0);
     }
 
-    //UTILITY
+    // UTILITY
     private NodeImpl[] generateNodesWithUniqueAttributes(ColumnStore<Node> columnStore) {
         int count = 100;
         NodeImpl[] nodes = new NodeImpl[count];

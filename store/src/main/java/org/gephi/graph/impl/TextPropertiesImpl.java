@@ -28,7 +28,7 @@ public class TextPropertiesImpl implements TextProperties {
     protected float height;
 
     public TextPropertiesImpl() {
-        this.rgba = 255 << 24;  //Alpha set to 1
+        this.rgba = 255 << 24; // Alpha set to 1
         this.size = 1f;
         this.visible = true;
     }

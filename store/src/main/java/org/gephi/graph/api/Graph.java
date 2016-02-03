@@ -310,7 +310,7 @@ public interface Graph {
      * @param node2 the second node
      * @param type the edge type
      * @return true if node1 and node2 are adjacent with an edge og the given
-     * type, false otherwise
+     *         type, false otherwise
      */
     public boolean isAdjacent(Node node1, Node node2, int type);
 

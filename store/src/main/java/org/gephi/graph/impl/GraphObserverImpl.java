@@ -28,18 +28,18 @@ import org.gephi.graph.api.NodeIterable;
 
 public class GraphObserverImpl implements GraphObserver {
 
-    //Store and graph
+    // Store and graph
     protected final GraphStore graphStore;
     protected final Graph graph;
     protected final GraphVersion graphVersion;
-    //Config
+    // Config
     protected final boolean withDiff;
-    //Version
+    // Version
     protected int nodeVersion = Integer.MIN_VALUE;
     protected int edgeVersion = Integer.MIN_VALUE;
     protected boolean destroyed;
     protected boolean newObserver = true;
-    //Cache
+    // Cache
     protected GraphDiffImpl graphDiff;
     protected NodeImpl[] nodeCache;
     protected EdgeImpl[] edgeCache;

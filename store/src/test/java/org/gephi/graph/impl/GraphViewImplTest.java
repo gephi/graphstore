@@ -291,7 +291,7 @@ public class GraphViewImplTest {
         NodeImpl n3 = e2.getSource();
         NodeImpl n4 = e2.getTarget();
 
-        view2.addAllNodes(Arrays.asList(new NodeImpl[]{n1, n2, n3, n4}));
+        view2.addAllNodes(Arrays.asList(new NodeImpl[] { n1, n2, n3, n4 }));
         view2.addEdge(e1);
         Assert.assertFalse(view.containsEdge(e2));
 
@@ -345,10 +345,10 @@ public class GraphViewImplTest {
         Node n1 = factory.newNode();
         Node n2 = factory.newNode();
         Node n3 = factory.newNode();
-        graphStore.addAllNodes(Arrays.asList(new Node[]{n1, n2, n3}));
+        graphStore.addAllNodes(Arrays.asList(new Node[] { n1, n2, n3 }));
         Edge e1 = factory.newEdge(n1, n2, false);
         Edge e2 = factory.newEdge(n1, n3, false);
-        graphStore.addAllEdges(Arrays.asList(new Edge[]{e1, e2}));
+        graphStore.addAllEdges(Arrays.asList(new Edge[] { e1, e2 }));
 
         GraphViewStore store = graphStore.viewStore;
         GraphViewImpl view = store.createView();

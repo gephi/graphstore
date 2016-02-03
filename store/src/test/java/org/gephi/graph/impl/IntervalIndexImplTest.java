@@ -188,7 +188,7 @@ public class IntervalIndexImplTest {
         Assert.assertFalse(store.mainIndex.hasElements());
     }
 
-    //UTILITY
+    // UTILITY
     private <T> Object[] getArrayFromIterable(Iterable<T> iterable) {
         List<T> list = new ArrayList<T>();
         for (T t : iterable) {

@@ -33,7 +33,7 @@ import org.gephi.graph.impl.EdgeStore.EdgeInOutIterator;
 
 public class GraphViewImpl implements GraphView {
 
-    //Data
+    // Data
     protected final GraphStore graphStore;
     protected final boolean nodeView;
     protected final boolean edgeView;
@@ -41,19 +41,19 @@ public class GraphViewImpl implements GraphView {
     protected BitVector nodeBitVector;
     protected BitVector edgeBitVector;
     protected int storeId;
-    //Version
+    // Version
     protected final GraphVersion version;
     protected final List<GraphObserverImpl> observers;
-    //Decorators
+    // Decorators
     protected final GraphViewDecorator directedDecorator;
     protected final GraphViewDecorator undirectedDecorator;
-    //Stats
+    // Stats
     protected int nodeCount;
     protected int edgeCount;
     protected int[] typeCounts;
     protected int[] mutualEdgeTypeCounts;
     protected int mutualEdgesCount;
-    //Dynamic
+    // Dynamic
     protected Interval interval;
 
     public GraphViewImpl(final GraphStore store, boolean nodes, boolean edges) {
@@ -132,13 +132,13 @@ public class GraphViewImpl implements GraphView {
             }
 
             if (nodeView && !edgeView) {
-                //Add edges
+                // Add edges
                 EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
                 while (itr.hasNext()) {
                     EdgeImpl edge = itr.next();
                     NodeImpl opposite = edge.source == nodeImpl ? edge.target : edge.source;
                     if (nodeBitVector.get(opposite.getStoreId())) {
-                        //Add edge
+                        // Add edge
                         int edgeid = edge.storeId;
                         boolean edgeisSet = edgeBitVector.get(edgeid);
                         if (!edgeisSet) {
@@ -147,7 +147,7 @@ public class GraphViewImpl implements GraphView {
 
                             addEdge(edge);
                         }
-                        //End
+                        // End
                     }
                 }
             }
@@ -231,7 +231,7 @@ public class GraphViewImpl implements GraphView {
                 timeIndexStore.clearInView(nodeImpl, this);
             }
 
-            //Remove edges
+            // Remove edges
             EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
             while (itr.hasNext()) {
                 EdgeImpl edgeImpl = itr.next();

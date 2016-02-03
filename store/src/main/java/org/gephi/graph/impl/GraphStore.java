@@ -43,7 +43,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     protected final GraphModelImpl graphModel;
     protected final Configuration configuration;
-    //Stores
+    // Stores
     protected final NodeStore nodeStore;
     protected final EdgeStore edgeStore;
     protected final EdgeTypeStore edgeTypeStore;
@@ -52,20 +52,20 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected final GraphViewStore viewStore;
     protected final TimeStore timeStore;
     protected final GraphAttributesImpl attributes;
-    //Factory
+    // Factory
     protected final GraphFactoryImpl factory;
-    //Lock
+    // Lock
     protected final GraphLock lock;
-    //Version
+    // Version
     protected final GraphVersion version;
     protected final List<GraphObserverImpl> observers;
-    //Undirected
+    // Undirected
     protected final UndirectedDecorator undirectedDecorator;
-    //Main Graph view
+    // Main Graph view
     protected final GraphView mainGraphView;
-    //TimeFormat
+    // TimeFormat
     protected TimeFormat timeFormat;
-    //Time zone
+    // Time zone
     protected DateTimeZone timeZone;
 
     public GraphStore() {
@@ -93,7 +93,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
         undirectedDecorator = new UndirectedDecorator(this);
 
-        //Default cols
+        // Default cols
         nodeTable.store.addColumn(new ColumnImpl(nodeTable, "id", configuration.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
         edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", configuration.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {

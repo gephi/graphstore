@@ -549,12 +549,12 @@ public class GraphStoreTest {
         Node n1 = graphStore.factory.newNode("1");
         Node n2 = graphStore.factory.newNode("2");
         Node n3 = graphStore.factory.newNode("3");
-        graphStore.addAllNodes(Arrays.asList(new Node[]{n1, n2, n3}));
+        graphStore.addAllNodes(Arrays.asList(new Node[] { n1, n2, n3 }));
 
         Edge e1 = graphStore.factory.newEdge(n1, n2);
         Edge e2 = graphStore.factory.newEdge(n2, n1);
         Edge e3 = graphStore.factory.newEdge(n1, n3);
-        graphStore.addAllEdges(Arrays.asList(new Edge[]{e1, e2, e3}));
+        graphStore.addAllEdges(Arrays.asList(new Edge[] { e1, e2, e3 }));
 
         Assert.assertSame(graphStore.getMutualEdge(e1), e2);
         Assert.assertSame(graphStore.getMutualEdge(e2), e1);
@@ -588,8 +588,8 @@ public class GraphStoreTest {
         graphStore.addAllEdges(Arrays.asList(edges));
 
         for (EdgeImpl e : edges) {
-            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[]{e});
-            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[]{e});
+            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
+            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
         }
     }
 
@@ -598,8 +598,8 @@ public class GraphStoreTest {
         GraphStore graphStore = GraphGenerator.generateSmallMixedGraphStore();
 
         for (EdgeImpl e : graphStore.edgeStore.toArray()) {
-            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[]{e});
-            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[]{e});
+            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
+            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
         }
     }
 
@@ -823,7 +823,7 @@ public class GraphStoreTest {
     @Test
     public void testNodeIterableToArray() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
-        Node[] expected = new Node[]{graphStore.getNode("1"), graphStore.getNode("2")};
+        Node[] expected = new Node[] { graphStore.getNode("1"), graphStore.getNode("2") };
         Node[] nodeArray = graphStore.getNodes().toArray();
         Node[] nodeCollection = graphStore.getNodes().toCollection().toArray(new Node[0]);
         Assert.assertEquals(nodeArray, expected);
@@ -833,14 +833,14 @@ public class GraphStoreTest {
     @Test
     public void testEdgeIterableToArray() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
-        Edge[] expected = new Edge[]{graphStore.getEdge("0")};
+        Edge[] expected = new Edge[] { graphStore.getEdge("0") };
         Edge[] edgeArray = graphStore.getEdges().toArray();
         Edge[] edgeCollection = graphStore.getEdges().toCollection().toArray(new Edge[0]);
         Assert.assertEquals(edgeArray, expected);
         Assert.assertEquals(edgeCollection, expected);
     }
 
-    //UTILITY
+    // UTILITY
     private void testNodeIterable(NodeIterable iterable, NodeImpl[] nodes) {
         Set<Node> nodeSet = new HashSet<Node>(iterable.toCollection());
         for (NodeImpl n : nodes) {
@@ -863,7 +863,7 @@ public class GraphStoreTest {
         EdgeStore edgeStore = graphStore.edgeStore;
         NodeStore nodeStore = graphStore.nodeStore;
 
-        //Nodes
+        // Nodes
         Assert.assertEquals(nodeStore.size(), basicNodeStore.size());
         int size = basicNodeStore.size();
         for (Node n : nodeStore) {
@@ -872,7 +872,7 @@ public class GraphStoreTest {
         }
         Assert.assertEquals(size, 0);
 
-        //Edges
+        // Edges
         Assert.assertEquals(edgeStore.size(), basicEdgeStore.size());
         size = basicEdgeStore.size();
         for (Edge e : edgeStore) {
@@ -881,14 +881,14 @@ public class GraphStoreTest {
         }
         Assert.assertEquals(size, 0);
 
-        //Type counts
+        // Type counts
         for (Int2IntMap.Entry typeCountEntry : basicEdgeStore.typeCountMap.int2IntEntrySet()) {
             int type = typeCountEntry.getIntKey();
             int count = typeCountEntry.getIntValue();
             Assert.assertEquals(edgeStore.size(type), count);
         }
 
-        //Edges
+        // Edges
         IntSet typeSet = new IntOpenHashSet();
         int edgeCount = 0;
         for (Edge basicEdge : basicEdgeStore) {
@@ -906,7 +906,7 @@ public class GraphStoreTest {
 
         Assert.assertEquals(edgeStore.size(), edgeCount);
 
-        //Node and neighbors
+        // Node and neighbors
         int nodeCount = 0;
         for (Node basicNode : basicNodeStore) {
             Node node = nodeStore.get(basicNode.getId());

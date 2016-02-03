@@ -30,22 +30,22 @@ import org.gephi.graph.api.types.TimestampMap;
 
 public class EdgeImpl extends ElementImpl implements Edge {
 
-    //Const
+    // Const
     protected static final byte DIRECTED_BYTE = 1;
     protected static final byte MUTUAL_BYTE = 1 << 1;
-    //Final Data
+    // Final Data
     protected final NodeImpl source;
     protected final NodeImpl target;
     protected final int type;
-    //Pointers
+    // Pointers
     protected int storeId = EdgeStore.NULL_ID;
     protected int nextOutEdge = EdgeStore.NULL_ID;
     protected int nextInEdge = EdgeStore.NULL_ID;
     protected int previousOutEdge = EdgeStore.NULL_ID;
     protected int previousInEdge = EdgeStore.NULL_ID;
-    //Flags
+    // Flags
     protected byte flags;
-    //Props
+    // Props
     protected final EdgePropertiesImpl properties;
 
     public EdgeImpl(Object id, GraphStore graphStore, NodeImpl source, NodeImpl target, int type, double weight, boolean directed) {
@@ -405,7 +405,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
         public EdgePropertiesImpl() {
             textProperties = new TextPropertiesImpl();
-            this.rgba = 255 << 24;  //Alpha set to 1
+            this.rgba = 255 << 24; // Alpha set to 1
         }
 
         @Override

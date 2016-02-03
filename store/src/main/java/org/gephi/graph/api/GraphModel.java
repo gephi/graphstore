@@ -38,13 +38,15 @@ import org.joda.time.DateTimeZone;
  * </ul>
  * <p>
  * New instances can be obtained via the embedded factory:
+ * 
  * <pre>
  * GraphModel model = GraphModel.Factory.newInstance();
- * </pre> This API revolves around a set of simple concepts. A
- * <code>GraphModel</code> encapsulate all elements and metadata associated with
- * a graph structure. In other words its a single graph but it also contains
- * configuration, indices, views and other less important services such as
- * observers.
+ * </pre>
+ * 
+ * This API revolves around a set of simple concepts. A <code>GraphModel</code>
+ * encapsulate all elements and metadata associated with a graph structure. In
+ * other words its a single graph but it also contains configuration, indices,
+ * views and other less important services such as observers.
  * <p>
  * Then, <code>GraphModel</code> gives access to the <code>Graph</code>
  * interface, which focuses only on the graph structure and provide methods to
@@ -75,9 +77,11 @@ import org.joda.time.DateTimeZone;
  * Elements should be created through the {@link #factory() } method.
  * <p>
  * For performance reasons, edge labels are internally represented as integers
- * and the mapping between arbitrary labels is managed through the {@link #addEdgeType(java.lang.Object)
- * } and {@link #getEdgeType(java.lang.Object) } methods. By default, edges have
- * a <code>null</code> label, which is internally represented as zero.
+ * and the mapping between arbitrary labels is managed through the
+ * {@link #addEdgeType(java.lang.Object)
+ * } and
+ * {@link #getEdgeType(java.lang.Object) } methods. By default, edges have a
+ * <code>null</code> label, which is internally represented as zero.
  *
  * @see Graph
  * @see Element
@@ -391,8 +395,8 @@ public interface GraphModel {
      * Returns the <b>node</b> table. Contains all the columns associated to
      * node elements.
      * <p>
-     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b>
-     * tables by default.
+     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables
+     * by default.
      *
      * @return node table, contains node columns
      */
@@ -402,8 +406,8 @@ public interface GraphModel {
      * Returns the <b>edge</b> table. Contains all the columns associated to
      * edge elements.
      * <p>
-     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b>
-     * tables by default.
+     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables
+     * by default.
      *
      * @return edge table, contains edge columns
      */
@@ -505,7 +509,7 @@ public interface GraphModel {
      *
      * @param graph the graph to observe
      * @param withGraphDiff true to include graph difference feature, false
-     * otherwise
+     *        otherwise
      * @return newly created graph observer
      */
     public GraphObserver createGraphObserver(Graph graph, boolean withGraphDiff);
@@ -559,9 +563,9 @@ public interface GraphModel {
      * Returns the maximum store id number nodes have in this model.
      * <p>
      * Each node has a unique store identifier which can be retrieved from
-     * {@link Node#getStoreId() }. This maximum number can help design
-     * algorithms thar rely on storing nodes in a array. Note that not all
-     * consecutive ids may be assigned.
+     * {@link Node#getStoreId() }. This maximum number can help design algorithms
+     * thar rely on storing nodes in a array. Note that not all consecutive ids
+     * may be assigned.
      *
      * @return maximum node store id
      */
@@ -571,9 +575,9 @@ public interface GraphModel {
      * Returns the maximum store id number edges have in this model.
      * <p>
      * Each edge has a unique store identifier which can be retrieved from
-     * {@link Edge#getStoreId() }. This maximum number can help design
-     * algorithms thar rely on storing edges in a array. Note that not all
-     * consecutive ids may be assigned.
+     * {@link Edge#getStoreId() }. This maximum number can help design algorithms
+     * thar rely on storing edges in a array. Note that not all consecutive ids
+     * may be assigned.
      *
      * @return maximum edge store id
      */

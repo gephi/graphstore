@@ -90,9 +90,10 @@ public final class TimestampsParser {
      * @param input Input string to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link TimestampSet}, or null if the input equals
-     * '&lt;empty&gt;' or is null
+     *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if there are no timestamps in the
-     * input string or bounds cannot be parsed into doubles or dates/datetimes.
+     *         input string or bounds cannot be parsed into doubles or
+     *         dates/datetimes.
      */
     public static TimestampSet parseTimestampSet(String input, DateTimeZone timeZone) throws IllegalArgumentException {
         if (input == null) {
@@ -105,7 +106,16 @@ public final class TimestampsParser {
 
         ArrayList<String> values = new ArrayList<String>();
         try {
-            StringReader reader = new StringReader(input + ' ');//Add 1 space so reader.skip function always works when necessary (end of string not reached).
+            StringReader reader = new StringReader(input + ' ');// Add 1 space
+                                                                // so
+                                                                // reader.skip
+                                                                // function
+                                                                // always works
+                                                                // when
+                                                                // necessary
+                                                                // (end of
+                                                                // string not
+                                                                // reached).
             int r;
             char c;
             while ((r = reader.read()) != -1) {
@@ -122,14 +132,16 @@ public final class TimestampsParser {
                     case '\r':
                     case '\n':
                     case COMMA:
-                        //Ignore special characters and leading whitespace or similar until a value or literal starts:
+                        // Ignore special characters and leading whitespace or
+                        // similar until a value or literal starts:
                         break;
                     case '"':
                     case '\'':
                         values.add(FormattingAndParsingUtils.parseLiteral(reader, c));
                         break;
                     default:
-                        reader.skip(-1);//Go backwards 1 position, for reading start of value
+                        reader.skip(-1);// Go backwards 1 position, for reading
+                                        // start of value
                         values.add(FormattingAndParsingUtils.parseValue(reader));
                 }
             }
@@ -152,9 +164,10 @@ public final class TimestampsParser {
      *
      * @param input Input string to parse
      * @return Resulting {@link TimestampSet}, or null if the input equals
-     * '&lt;empty&gt;' or is null
+     *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if there are no timestamps in the
-     * input string or bounds cannot be parsed into doubles or dates/datetimes.
+     *         input string or bounds cannot be parsed into doubles or
+     *         dates/datetimes.
      */
     public static TimestampSet parseTimestampSet(String input) throws IllegalArgumentException {
         return parseTimestampSet(input, null);
@@ -166,15 +179,15 @@ public final class TimestampsParser {
      *
      * @param <T> Underlying type of the {@link TimestampMap} values
      * @param typeClass Simple type or {@link TimestampMap} subtype for the
-     * result values.
+     *        result values.
      * @param input Input string to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link TimestampMap}, or null if the input equals
-     * '&lt;empty&gt;' or is null
+     *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if type class is not supported,
-     * any of the timestamps don't have a value or have an invalid value, there
-     * are no timestamps in the input string or bounds cannot be parsed into
-     * doubles or dates/datetimes.
+     *         any of the timestamps don't have a value or have an invalid
+     *         value, there are no timestamps in the input string or bounds
+     *         cannot be parsed into doubles or dates/datetimes.
      */
     public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input, DateTimeZone timeZone) throws IllegalArgumentException {
         if (typeClass == null) {
@@ -214,7 +227,13 @@ public final class TimestampsParser {
             return result;
         }
 
-        StringReader reader = new StringReader(input + ' ');//Add 1 space so reader.skip function always works when necessary (end of string not reached).
+        StringReader reader = new StringReader(input + ' ');// Add 1 space so
+                                                            // reader.skip
+                                                            // function always
+                                                            // works when
+                                                            // necessary (end of
+                                                            // string not
+                                                            // reached).
 
         try {
             int r;
@@ -227,7 +246,7 @@ public final class TimestampsParser {
                         parseTimestampAndValue(typeClass, reader, result, timeZone);
                         break;
                     default:
-                    //Ignore other chars outside of bounds
+                        // Ignore other chars outside of bounds
                 }
             }
         } catch (IOException ex) {
@@ -243,14 +262,14 @@ public final class TimestampsParser {
      *
      * @param <T> Underlying type of the {@link TimestampMap} values
      * @param typeClass Simple type or {@link TimestampMap} subtype for the
-     * result values.
+     *        result values.
      * @param input Input string to parse
      * @return Resulting {@link TimestampMap}, or null if the input equals
-     * '&lt;empty&gt;' or is null
+     *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if type class is not supported,
-     * any of the timestamps don't have a value or have an invalid value, there
-     * are no timestamps in the input string or bounds cannot be parsed into
-     * doubles or dates/datetimes.
+     *         any of the timestamps don't have a value or have an invalid
+     *         value, there are no timestamps in the input string or bounds
+     *         cannot be parsed into doubles or dates/datetimes.
      */
     public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input) throws IllegalArgumentException {
         return parseTimestampMap(typeClass, input, null);
@@ -273,14 +292,16 @@ public final class TimestampsParser {
                 case '\r':
                 case '\n':
                 case COMMA:
-                    //Ignore leading whitespace or similar until a value or literal starts:
+                    // Ignore leading whitespace or similar until a value or
+                    // literal starts:
                     break;
                 case '"':
                 case '\'':
                     values.add(FormattingAndParsingUtils.parseLiteral(reader, c));
                     break;
                 default:
-                    reader.skip(-1);//Go backwards 1 position, for reading start of value
+                    reader.skip(-1);// Go backwards 1 position, for reading
+                                    // start of value
                     values.add(FormattingAndParsingUtils.parseValue(reader));
             }
         }

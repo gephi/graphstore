@@ -161,12 +161,12 @@ public class TableImplTest {
     @Test
     public void testStandardizeArrayDefaultValue() {
         TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
-        Integer[] t = new Integer[]{1, 2};
+        Integer[] t = new Integer[] { 1, 2 };
 
         Column col = table.addColumn("Id", null, Integer[].class, Origin.DATA, t, false);
         Object d = col.getDefaultValue();
         Assert.assertEquals(d.getClass(), int[].class);
-        Assert.assertEquals(d, new int[]{1, 2});
+        Assert.assertEquals(d, new int[] { 1, 2 });
     }
 
     @Test
@@ -187,7 +187,7 @@ public class TableImplTest {
         table.removeColumn("Id");
         Assert.assertFalse(table.hasColumn("Id"));
 
-        //Test case insensitive
+        // Test case insensitive
         table.addColumn("Id", Integer.class);
         table.removeColumn("id");
         Assert.assertFalse(table.hasColumn("Id"));
@@ -213,14 +213,14 @@ public class TableImplTest {
     public void testToArray() {
         TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
         Column col = table.addColumn("Id", Integer.class);
-        Assert.assertEquals(table.toArray(), new Column[]{col});
+        Assert.assertEquals(table.toArray(), new Column[] { col });
     }
 
     @Test
     public void testToList() {
         TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
         Column col = table.addColumn("Id", Integer.class);
-        Assert.assertEquals(table.toList(), Arrays.asList(new Column[]{col}));
+        Assert.assertEquals(table.toList(), Arrays.asList(new Column[] { col }));
     }
 
     @Test

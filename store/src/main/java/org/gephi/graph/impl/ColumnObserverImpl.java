@@ -31,16 +31,16 @@ import org.gephi.graph.api.NodeIterable;
 
 public class ColumnObserverImpl implements ColumnObserver {
 
-    //Store and column
+    // Store and column
     protected final GraphStore graphStore;
     protected final ColumnImpl column;
-    //Version
+    // Version
     protected int version = Integer.MIN_VALUE;
     protected boolean destroyed;
-    //Config
+    // Config
     protected final boolean withDiff;
     protected BitVector bitVector;
-    //Cache
+    // Cache
     protected ColumnDiffImpl columnDiff;
 
     public ColumnObserverImpl(GraphStore store, ColumnImpl column, boolean withDiff) {

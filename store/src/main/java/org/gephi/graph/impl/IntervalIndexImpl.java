@@ -62,7 +62,7 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
                 return sortedMap.getHigh();
             }
         } else {
-            //TODO Better algorithm to find max
+            // TODO Better algorithm to find max
             Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
             if (!sortedMap.isEmpty()) {
                 double max = Double.NEGATIVE_INFINITY;

@@ -239,14 +239,14 @@ public class NodeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testAddAllNull() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), null};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), null };
         nodeStore.addAll(Arrays.asList(nodes));
     }
 
     @Test
     public void testRemoveAll() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         nodeStore.addAll(Arrays.asList(nodes));
 
         boolean a = nodeStore.removeAll(new ArrayList<Node>());
@@ -262,7 +262,7 @@ public class NodeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testRemoveAllNull() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1") };
         nodeStore.addAll(Arrays.asList(nodes));
         nodes[0] = null;
         nodeStore.removeAll(Arrays.asList(nodes));
@@ -277,10 +277,10 @@ public class NodeStoreTest {
     @Test
     public void testRetainAll() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         nodeStore.addAll(Arrays.asList(nodes));
 
-        NodeImpl[] r = new NodeImpl[]{nodes[0]};
+        NodeImpl[] r = new NodeImpl[] { nodes[0] };
         boolean a = nodeStore.retainAll(Arrays.asList(r));
         boolean b = nodeStore.retainAll(Arrays.asList(r));
 
@@ -297,7 +297,7 @@ public class NodeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testRetainAllNull() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         nodeStore.addAll(Arrays.asList(nodes));
         nodes[0] = null;
         nodeStore.retainAll(Arrays.asList(nodes));
@@ -312,7 +312,7 @@ public class NodeStoreTest {
     @Test
     public void testContainsAll() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         nodeStore.addAll(Arrays.asList(nodes));
         Assert.assertTrue(nodeStore.containsAll(Arrays.asList(nodes)));
     }
@@ -320,7 +320,7 @@ public class NodeStoreTest {
     @Test
     public void testIterator() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         nodeStore.addAll(Arrays.asList(nodes));
 
         NodeStore.NodeStoreIterator itr = nodeStore.iterator();
@@ -335,7 +335,7 @@ public class NodeStoreTest {
     @Test
     public void testIteratorRemove() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         nodeStore.addAll(Arrays.asList(nodes));
 
         NodeStore.NodeStoreIterator itr = nodeStore.iterator();
@@ -359,7 +359,7 @@ public class NodeStoreTest {
     @Test
     public void testIteratorAfterRemove() {
         NodeStore nodeStore = new NodeStore();
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         nodeStore.addAll(Arrays.asList(nodes));
         nodeStore.remove(nodes[1]);
         NodeStore.NodeStoreIterator itr = nodeStore.iterator();
@@ -376,9 +376,9 @@ public class NodeStoreTest {
 
     @Test
     public void testDeepEqualsAndDeepHashCode() {
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
-        NodeImpl[] nodes2 = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
-        NodeImpl[] nodes3 = new NodeImpl[]{new NodeImpl("1"), new NodeImpl("0"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
+        NodeImpl[] nodes2 = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
+        NodeImpl[] nodes3 = new NodeImpl[] { new NodeImpl("1"), new NodeImpl("0"), new NodeImpl("2") };
 
         NodeStore nodeStore1 = new NodeStore();
         NodeStore nodeStore2 = new NodeStore();
@@ -401,7 +401,7 @@ public class NodeStoreTest {
 
     @Test
     public void testToArray() {
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         NodeStore nodeStore = new NodeStore();
         Assert.assertEquals(new NodeImpl[0], nodeStore.toArray());
         nodeStore.addAll(Arrays.asList(nodes));
@@ -414,13 +414,13 @@ public class NodeStoreTest {
 
     @Test
     public void testToArrayAfterRemove() {
-        NodeImpl[] nodes = new NodeImpl[]{new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2")};
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };
         NodeStore nodeStore = new NodeStore();
 
         nodeStore.addAll(Arrays.asList(nodes));
         nodeStore.remove(nodes[0]);
 
-        Assert.assertEquals(nodeStore.toArray(), new NodeImpl[]{nodes[1], nodes[2]});
+        Assert.assertEquals(nodeStore.toArray(), new NodeImpl[] { nodes[1], nodes[2] });
     }
 
     @Test

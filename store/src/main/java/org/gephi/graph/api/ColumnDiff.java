@@ -18,7 +18,7 @@ package org.gephi.graph.api;
 /**
  * Interface to retrieve elements touched in a column.
  * <p>
- * This interface is associated with a {@link  ColumnObserver} and provides an
+ * This interface is associated with a {@link ColumnObserver} and provides an
  * easy access to the elements which value has been modified.
  */
 public interface ColumnDiff {

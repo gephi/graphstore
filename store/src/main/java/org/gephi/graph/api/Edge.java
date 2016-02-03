@@ -117,7 +117,7 @@ public interface Edge extends Element, EdgeProperties {
     /**
      * Returns the edge's type label.
      *
-     * @return type label.
+     * @return type label
      */
     public Object getTypeLabel();
 

@@ -31,10 +31,10 @@ import org.gephi.graph.api.Node;
 
 public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
-    //Const
+    // Const
     protected final static int NULL_ID = -1;
     protected final static int NODE_BITS = 31;
-    //Data
+    // Data
     protected int size;
     protected int garbageSize;
     protected int blocksCount;
@@ -43,17 +43,17 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected EdgeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
     protected Long2ObjectOpenCustomHashMap<int[]>[] longDictionary;
-    //Stats
+    // Stats
     protected int undirectedSize;
     protected int mutualEdgesSize;
     protected int[] mutualEdgesTypeSize;
-    //Locking (optional)
+    // Locking (optional)
     protected final GraphLock lock;
-    //Version
+    // Version
     protected final GraphVersion version;
-    //Types counting (optional)
+    // Types counting (optional)
     protected final EdgeTypeStore edgeTypeStore;
-    //View store
+    // View store
     protected final GraphViewStore viewStore;
 
     public EdgeStore() {
@@ -575,7 +575,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             target.inDegree++;
 
             if (dicoValue == null) {
-                dicoValue = new int[]{edge.storeId};
+                dicoValue = new int[] { edge.storeId };
             } else {
                 dicoValue = Arrays.copyOf(dicoValue, dicoValue.length + 1);
                 dicoValue[dicoValue.length - 1] = edge.storeId;
@@ -712,7 +712,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             }
 
             if (edgeTypeStore != null) {
-                //TODO - if type count is zero, do smthing
+                // TODO - if type count is zero, do smthing
             }
 
             return true;

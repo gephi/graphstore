@@ -35,27 +35,27 @@ import org.gephi.graph.api.Node;
 
 public class ColumnStore<T extends Element> implements ColumnIterable {
 
-    //Config
+    // Config
     protected final static int MAX_SIZE = 65534;
-    //Const
+    // Const
     protected final static int NULL_ID = -1;
     protected final static short NULL_SHORT = Short.MIN_VALUE;
-    //Configuration
+    // Configuration
     protected final GraphStore graphStore;
     protected final Configuration configuration;
-    //Element
+    // Element
     protected final Class<T> elementType;
-    //Columns
+    // Columns
     protected final Object2ShortMap<String> idMap;
     protected final ColumnImpl[] columns;
     protected final ShortSortedSet garbageQueue;
-    //Index
+    // Index
     protected final IndexStore<T> indexStore;
-    //Version
+    // Version
     protected final List<TableObserverImpl> observers;
-    //Locking (optional)
+    // Locking (optional)
     protected final TableLock lock;
-    //Variables
+    // Variables
     protected int length;
 
     public ColumnStore(Class<T> elementType, boolean indexed) {
@@ -454,7 +454,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         while (itr.hasNext()) {
             hash = 11 * hash + itr.next().deepHashCode();
         }
-        //TODO what about timestampmap
+        // TODO what about timestampmap
         return hash;
     }
 }

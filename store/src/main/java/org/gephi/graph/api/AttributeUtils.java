@@ -61,7 +61,6 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collections;
-import static java.util.Collections.list;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -103,12 +102,13 @@ public class AttributeUtils {
     private static final DateTimeFormatter DATE_TIME_PRINTER;
     private static final DecimalFormat TIMESTAMP_PRINTER;
 
-    //These are used to avoid creating a lot of new instances of DateTimeFormatter
+    // These are used to avoid creating a lot of new instances of
+    // DateTimeFormatter
     private static final Map<DateTimeZone, DateTimeFormatter> DATE_PRINTERS_BY_TIMEZONE;
     private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PRINTERS_BY_TIMEZONE;
     private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PARSERS_BY_TIMEZONE;
 
-    //Collectio  types to speedup lookup
+    // Collectio types to speedup lookup
     private static final Set<Class> TYPED_LIST_TYPES;
     private static final Set<Class> TYPED_SET_TYPES;
     private static final Set<Class> TYPED_MAP_TYPES;
@@ -116,7 +116,7 @@ public class AttributeUtils {
     static {
         final Set<Class> supportedTypes = new HashSet<Class>();
 
-        //Primitives
+        // Primitives
         supportedTypes.add(Boolean.class);
         supportedTypes.add(boolean.class);
         supportedTypes.add(Integer.class);
@@ -136,10 +136,10 @@ public class AttributeUtils {
         supportedTypes.add(Character.class);
         supportedTypes.add(char.class);
 
-        //Objects
+        // Objects
         supportedTypes.add(String.class);
 
-        //Primitives Array
+        // Primitives Array
         supportedTypes.add(Boolean[].class);
         supportedTypes.add(boolean[].class);
         supportedTypes.add(Integer[].class);
@@ -159,10 +159,10 @@ public class AttributeUtils {
         supportedTypes.add(Character[].class);
         supportedTypes.add(char[].class);
 
-        //Objects array
+        // Objects array
         supportedTypes.add(String[].class);
 
-        //Dynamic (timestamps)
+        // Dynamic (timestamps)
         supportedTypes.add(TimestampSet.class);
         supportedTypes.add(TimestampBooleanMap.class);
         supportedTypes.add(TimestampIntegerMap.class);
@@ -174,7 +174,7 @@ public class AttributeUtils {
         supportedTypes.add(TimestampCharMap.class);
         supportedTypes.add(TimestampStringMap.class);
 
-        //Dynamic (intervals)
+        // Dynamic (intervals)
         supportedTypes.add(IntervalSet.class);
         supportedTypes.add(IntervalBooleanMap.class);
         supportedTypes.add(IntervalIntegerMap.class);
@@ -186,15 +186,15 @@ public class AttributeUtils {
         supportedTypes.add(IntervalCharMap.class);
         supportedTypes.add(IntervalStringMap.class);
 
-        //Lists, Maps, Sets
+        // Lists, Maps, Sets
         supportedTypes.add(List.class);
         supportedTypes.add(Set.class);
         supportedTypes.add(Map.class);
 
-        //Assign
+        // Assign
         SUPPORTED_TYPES = Collections.unmodifiableSet(supportedTypes);
 
-        //Primitive types standardization
+        // Primitive types standardization
         final Map<Class, Class> typesStandardization = new HashMap<Class, Class>();
         typesStandardization.put(boolean.class, Boolean.class);
         typesStandardization.put(int.class, Integer.class);
@@ -205,7 +205,7 @@ public class AttributeUtils {
         typesStandardization.put(double.class, Double.class);
         typesStandardization.put(char.class, Character.class);
 
-        //Array standardization
+        // Array standardization
         typesStandardization.put(Boolean[].class, boolean[].class);
         typesStandardization.put(Integer[].class, int[].class);
         typesStandardization.put(Short[].class, short[].class);
@@ -215,16 +215,14 @@ public class AttributeUtils {
         typesStandardization.put(Double[].class, double[].class);
         typesStandardization.put(Character[].class, char[].class);
 
-        //Assign
+        // Assign
         TYPES_STANDARDIZATION = Collections.unmodifiableMap(typesStandardization);
 
-        //Datetime
+        // Datetime - make sure UTC timezone is used by default
         DATE_TIME_PARSER = ISODateTimeFormat.dateOptionalTimeParser()
-                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);//Make sure UTC timezone is used by default
-        DATE_PRINTER = ISODateTimeFormat.date()
-                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);//Make sure UTC timezone is used by default
-        DATE_TIME_PRINTER = ISODateTimeFormat.dateTime()
-                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);//Make sure UTC timezone is used by default
+                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
+        DATE_PRINTER = ISODateTimeFormat.date().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
+        DATE_TIME_PRINTER = ISODateTimeFormat.dateTime().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
 
         DATE_PRINTERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
         DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
@@ -236,9 +234,10 @@ public class AttributeUtils {
 
         DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
         decimalFormatSymbols.setInfinity(FormattingAndParsingUtils.INFINITY);
-        TIMESTAMP_PRINTER = new DecimalFormat("0.0###", decimalFormatSymbols);//1 to 4 decimals
+        // 1 to 4 decimals
+        TIMESTAMP_PRINTER = new DecimalFormat("0.0###", decimalFormatSymbols);
 
-        //List types
+        // List types
         TYPED_LIST_TYPES = new HashSet<Class>();
         TYPED_LIST_TYPES.add(IntArrayList.class);
         TYPED_LIST_TYPES.add(FloatArrayList.class);
@@ -249,7 +248,7 @@ public class AttributeUtils {
         TYPED_LIST_TYPES.add(BooleanArrayList.class);
         TYPED_LIST_TYPES.add(CharArrayList.class);
 
-        //Set types
+        // Set types
         TYPED_SET_TYPES = new HashSet<Class>();
         TYPED_SET_TYPES.add(IntOpenHashSet.class);
         TYPED_SET_TYPES.add(FloatOpenHashSet.class);
@@ -260,7 +259,7 @@ public class AttributeUtils {
         TYPED_SET_TYPES.add(BooleanOpenHashSet.class);
         TYPED_SET_TYPES.add(CharOpenHashSet.class);
 
-        //Map types
+        // Map types
         TYPED_MAP_TYPES = new HashSet<Class>();
         TYPED_MAP_TYPES.add(Int2ObjectOpenHashMap.class);
         TYPED_MAP_TYPES.add(Float2ObjectOpenHashMap.class);
@@ -308,9 +307,9 @@ public class AttributeUtils {
      * @param str string to parse
      * @param typeClass class of the desired type
      * @param timeZone time zone to use or null to use default time zone (UTC),
-     * for dynamic types only
+     *        for dynamic types only
      * @return an instance of the type class, or null if <em>str</em> is null or
-     * empty
+     *         empty
      */
     public static Object parse(String str, Class typeClass, DateTimeZone timeZone) {
         if (str == null || str.isEmpty()) {
@@ -318,10 +317,11 @@ public class AttributeUtils {
         }
 
         if (typeClass.isPrimitive()) {
-            typeClass = getStandardizedType(typeClass);//For primitives we can use auto-unboxing
+            typeClass = getStandardizedType(typeClass);// For primitives we can
+                                                       // use auto-unboxing
         }
 
-        //Simple and primitive types:
+        // Simple and primitive types:
         if (typeClass.equals(String.class)) {
             return str;
         } else if (typeClass.equals(Byte.class)) {
@@ -356,7 +356,7 @@ public class AttributeUtils {
             return str.charAt(0);
         }
 
-        //Interval types:
+        // Interval types:
         if (typeClass.equals(IntervalSet.class)) {
             return IntervalsParser.parseIntervalSet(str, timeZone);
         } else if (typeClass.equals(IntervalStringMap.class)) {
@@ -379,7 +379,7 @@ public class AttributeUtils {
             return IntervalsParser.parseIntervalMap(Character.class, str, timeZone);
         }
 
-        //Timestamp types:
+        // Timestamp types:
         if (typeClass.equals(TimestampSet.class)) {
             return TimestampsParser.parseTimestampSet(str, timeZone);
         } else if (typeClass.equals(TimestampStringMap.class)) {
@@ -402,7 +402,7 @@ public class AttributeUtils {
             return TimestampsParser.parseTimestampMap(Character.class, str, timeZone);
         }
 
-        //Array types:
+        // Array types:
         if (typeClass.equals(boolean[].class)) {
             return ArraysParser.parseArrayAsPrimitiveArray(Boolean[].class, str);
         } else if (typeClass.equals(char[].class)) {
@@ -419,17 +419,10 @@ public class AttributeUtils {
             return ArraysParser.parseArrayAsPrimitiveArray(Float[].class, str);
         } else if (typeClass.equals(double[].class)) {
             return ArraysParser.parseArrayAsPrimitiveArray(Double[].class, str);
-        } else if (typeClass.equals(Boolean[].class)
-                || typeClass.equals(String[].class)
-                || typeClass.equals(Character[].class)
-                || typeClass.equals(Byte[].class)
-                || typeClass.equals(Short[].class)
-                || typeClass.equals(Integer[].class)
-                || typeClass.equals(Long[].class)
-                || typeClass.equals(Float[].class)
-                || typeClass.equals(Double[].class)
-                || typeClass.equals(BigInteger[].class)
-                || typeClass.equals(BigDecimal[].class)) {
+        } else if (typeClass.equals(Boolean[].class) || typeClass.equals(String[].class) || typeClass
+                .equals(Character[].class) || typeClass.equals(Byte[].class) || typeClass.equals(Short[].class) || typeClass
+                .equals(Integer[].class) || typeClass.equals(Long[].class) || typeClass.equals(Float[].class) || typeClass
+                .equals(Double[].class) || typeClass.equals(BigInteger[].class) || typeClass.equals(BigDecimal[].class)) {
             return ArraysParser.parseArray(typeClass, str);
         }
 
@@ -445,7 +438,7 @@ public class AttributeUtils {
      * @param str string to parse
      * @param typeClass class of the desired type
      * @return an instance of the type class, or null if <em>str</em> is null or
-     * empty
+     *         empty
      */
     public static Object parse(String str, Class typeClass) {
         return parse(str, typeClass, null);
@@ -490,16 +483,14 @@ public class AttributeUtils {
      * @param array wrapped primitive array instance
      * @return primitive array instance
      * @throws IllegalArgumentException Thrown if any of the array values is
-     * null
+     *         null
      */
     public static Object getPrimitiveArray(Object[] array) {
         if (!isSupported(array.getClass())) {
             throw new IllegalArgumentException("Unsupported type " + array.getClass().getCanonicalName());
         }
         Class arrayClass = array.getClass().getComponentType();
-        if (!arrayClass.isPrimitive() && (arrayClass == Double.class || arrayClass == Float.class || arrayClass == Long.class
-                || arrayClass == Integer.class || arrayClass == Short.class || arrayClass == Character.class
-                || arrayClass == Byte.class || arrayClass == Boolean.class)) {
+        if (!arrayClass.isPrimitive() && (arrayClass == Double.class || arrayClass == Float.class || arrayClass == Long.class || arrayClass == Integer.class || arrayClass == Short.class || arrayClass == Character.class || arrayClass == Byte.class || arrayClass == Boolean.class)) {
             Class primitiveClass = getPrimitiveType(arrayClass);
 
             int arrayLength = array.length;
@@ -559,7 +550,7 @@ public class AttributeUtils {
     /**
      * Returns true if <em>type</em> is a standardized type.
      * <p>
-     * Non standardized types are transformed into standardized types using 
+     * Non standardized types are transformed into standardized types using
      * {@link #getStandardizedType(java.lang.Class) }.
      *
      * @param type the type to test
@@ -718,7 +709,8 @@ public class AttributeUtils {
             }
         }
         if (oCls != null && !(isSimpleType(oCls) || isArrayType(oCls))) {
-            throw new IllegalArgumentException("The list contains unsupported type " + oCls.getClass().getCanonicalName());
+            throw new IllegalArgumentException("The list contains unsupported type " + oCls.getClass()
+                    .getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
@@ -763,7 +755,8 @@ public class AttributeUtils {
             }
         }
         if (oCls != null && !(isSimpleType(oCls) || isArrayType(oCls))) {
-            throw new IllegalArgumentException("The set contains unsupported type " + oCls.getClass().getCanonicalName());
+            throw new IllegalArgumentException("The set contains unsupported type " + oCls.getClass()
+                    .getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
@@ -809,11 +802,13 @@ public class AttributeUtils {
                 }
             }
             if (value != null && !(isSimpleType(value.getClass()) || isArrayType(value.getClass()))) {
-                throw new IllegalArgumentException("The map contains unsupported value type " + value.getClass().getCanonicalName());
+                throw new IllegalArgumentException("The map contains unsupported value type " + value.getClass()
+                        .getCanonicalName());
             }
         }
         if (oCls != null && !isSimpleType(oCls)) {
-            throw new IllegalArgumentException("The map contains unsupported key type " + oCls.getClass().getCanonicalName());
+            throw new IllegalArgumentException("The map contains unsupported key type " + oCls.getClass()
+                    .getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
@@ -852,25 +847,15 @@ public class AttributeUtils {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         type = getStandardizedType(type);
-        return Number.class.isAssignableFrom(type)
-                || int[].class.isAssignableFrom(type)
-                || float[].class.isAssignableFrom(type)
-                || double[].class.isAssignableFrom(type)
-                || byte[].class.isAssignableFrom(type)
-                || short[].class.isAssignableFrom(type)
-                || long[].class.isAssignableFrom(type)
-                || type.equals(TimestampIntegerMap.class)
-                || type.equals(TimestampFloatMap.class)
-                || type.equals(TimestampDoubleMap.class)
-                || type.equals(TimestampLongMap.class)
-                || type.equals(TimestampShortMap.class)
-                || type.equals(TimestampByteMap.class)
-                || type.equals(IntervalIntegerMap.class)
-                || type.equals(IntervalFloatMap.class)
-                || type.equals(IntervalDoubleMap.class)
-                || type.equals(IntervalLongMap.class)
-                || type.equals(IntervalShortMap.class)
-                || type.equals(IntervalByteMap.class);
+        return Number.class.isAssignableFrom(type) || int[].class.isAssignableFrom(type) || float[].class
+                .isAssignableFrom(type) || double[].class.isAssignableFrom(type) || byte[].class.isAssignableFrom(type) || short[].class
+                .isAssignableFrom(type) || long[].class.isAssignableFrom(type) || type
+                .equals(TimestampIntegerMap.class) || type.equals(TimestampFloatMap.class) || type
+                .equals(TimestampDoubleMap.class) || type.equals(TimestampLongMap.class) || type
+                .equals(TimestampShortMap.class) || type.equals(TimestampByteMap.class) || type
+                .equals(IntervalIntegerMap.class) || type.equals(IntervalFloatMap.class) || type
+                .equals(IntervalDoubleMap.class) || type.equals(IntervalLongMap.class) || type
+                .equals(IntervalShortMap.class) || type.equals(IntervalByteMap.class);
     }
 
     /**
@@ -885,10 +870,8 @@ public class AttributeUtils {
         if (!isSupported(type)) {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
-        return type.equals(String.class)
-                || type.equals(String[].class)
-                || type.equals(TimestampStringMap.class)
-                || type.equals(IntervalStringMap.class);
+        return type.equals(String.class) || type.equals(String[].class) || type.equals(TimestampStringMap.class) || type
+                .equals(IntervalStringMap.class);
     }
 
     /**
@@ -904,10 +887,8 @@ public class AttributeUtils {
             throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
         }
         type = getStandardizedType(type);
-        return type.equals(Boolean.class)
-                || type.equals(boolean[].class)
-                || type.equals(TimestampBooleanMap.class)
-                || type.equals(IntervalBooleanMap.class);
+        return type.equals(Boolean.class) || type.equals(boolean[].class) || type.equals(TimestampBooleanMap.class) || type
+                .equals(IntervalBooleanMap.class);
     }
 
     /**
@@ -917,12 +898,9 @@ public class AttributeUtils {
      * @return true if <em>type</em> is a dynamic type, false otherwise
      */
     public static boolean isDynamicType(Class type) {
-        return (!type.equals(TimestampMap.class)
-                && TimestampMap.class.isAssignableFrom(type))
-                || type.equals(TimestampSet.class)
-                || (!type.equals(IntervalMap.class)
-                && IntervalMap.class.isAssignableFrom(type))
-                || type.equals(IntervalSet.class);
+        return (!type.equals(TimestampMap.class) && TimestampMap.class.isAssignableFrom(type)) || type
+                .equals(TimestampSet.class) || (!type.equals(IntervalMap.class) && IntervalMap.class
+                .isAssignableFrom(type)) || type.equals(IntervalSet.class);
     }
 
     /**
@@ -934,10 +912,7 @@ public class AttributeUtils {
      * @return true if <em>type</em> is a simple type, false otherwise
      */
     public static boolean isSimpleType(Class type) {
-        return (type.isPrimitive() && type != void.class)
-                || type == Double.class || type == Float.class || type == Long.class
-                || type == Integer.class || type == Short.class || type == Character.class
-                || type == Byte.class || type == Boolean.class || type == String.class;
+        return (type.isPrimitive() && type != void.class) || type == Double.class || type == Float.class || type == Long.class || type == Integer.class || type == Short.class || type == Character.class || type == Byte.class || type == Boolean.class || type == String.class;
     }
 
     /**

@@ -111,11 +111,11 @@ public class ElementImplTest {
         Column column2 = store.nodeTable.store.getColumn("arr2");
 
         NodeImpl node = new NodeImpl("0", store);
-        node.setAttribute(column1, new Integer[]{42});
-        node.setAttribute(column2, new Integer[]{42});
+        node.setAttribute(column1, new Integer[] { 42 });
+        node.setAttribute(column2, new Integer[] { 42 });
 
-        Assert.assertEquals((int[]) node.getAttribute(column1), new int[]{42});
-        Assert.assertEquals((int[]) node.getAttribute(column2), new int[]{42});
+        Assert.assertEquals((int[]) node.getAttribute(column1), new int[] { 42 });
+        Assert.assertEquals((int[]) node.getAttribute(column2), new int[] { 42 });
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -899,11 +899,11 @@ public class ElementImplTest {
         node.addTimestamp(1.0);
         node.addTimestamp(2.0);
 
-        Assert.assertEquals(node.getTimestamps(), new double[]{1.0, 2.0});
+        Assert.assertEquals(node.getTimestamps(), new double[] { 1.0, 2.0 });
 
         node.removeTimestamp(1.0);
 
-        Assert.assertEquals(node.getTimestamps(), new double[]{2.0});
+        Assert.assertEquals(node.getTimestamps(), new double[] { 2.0 });
     }
 
     @Test
@@ -917,11 +917,11 @@ public class ElementImplTest {
         node.addInterval(i1);
         node.addInterval(i2);
 
-        Assert.assertEquals(node.getIntervals(), new Interval[]{i1, i2});
+        Assert.assertEquals(node.getIntervals(), new Interval[] { i1, i2 });
 
         node.removeInterval(i1);
 
-        Assert.assertEquals(node.getIntervals(), new Interval[]{i2});
+        Assert.assertEquals(node.getIntervals(), new Interval[] { i2 });
     }
 
     @Test
@@ -1073,7 +1073,7 @@ public class ElementImplTest {
         }
     }
 
-    //Utility
+    // Utility
     private GraphStore getIntervalGraphStore() {
         Configuration config = new Configuration();
         config.setTimeRepresentation(TimeRepresentation.INTERVAL);
@@ -1117,7 +1117,7 @@ public class ElementImplTest {
         return graphStore.nodeTable.store.getColumn("age");
     }
 
-    //Properties size
+    // Properties size
     public int getElementPropertiesLength() {
         return 1 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIME_SET ? 1 : 0);
     }

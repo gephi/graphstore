@@ -287,7 +287,8 @@ public final class IntervalSet implements TimeSet<Interval> {
         int realSize = size * 2;
         for (int i = 0; i < realSize; i++) {
             double t = this.array[i];
-            hash = 37 * hash + (int) (Double.doubleToLongBits(t) ^ (Double.doubleToLongBits(t) >>> 32));;
+            hash = 37 * hash + (int) (Double.doubleToLongBits(t) ^ (Double.doubleToLongBits(t) >>> 32));
+            ;
         }
         return hash;
     }
