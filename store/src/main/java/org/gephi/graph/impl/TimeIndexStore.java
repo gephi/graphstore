@@ -388,7 +388,8 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
 
     protected void ensureArraySize(int index) {
         if (index >= countMap.length) {
-            int newSize = Math.min(Math.max(index + 1, (int) (index * GraphStoreConfiguration.TIMESTAMP_STORE_GROWING_FACTOR)), Integer.MAX_VALUE);
+            int newSize = Math
+                    .min(Math.max(index + 1, (int) (index * GraphStoreConfiguration.TIMESTAMP_STORE_GROWING_FACTOR)), Integer.MAX_VALUE);
             int[] newArray = new int[newSize];
             System.arraycopy(countMap, 0, newArray, 0, countMap.length);
             countMap = newArray;

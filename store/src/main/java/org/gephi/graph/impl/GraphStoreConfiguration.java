@@ -64,7 +64,8 @@ public final class GraphStoreConfiguration {
     public static final int ELEMENT_ID_INDEX = 0;
     public static final int ELEMENT_LABEL_INDEX = 1;
     public static final int ELEMENT_TIMESET_INDEX = ENABLE_ELEMENT_LABEL ? 2 : 1;
-    public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIME_SET ? ELEMENT_TIMESET_INDEX + 1 : ELEMENT_TIMESET_INDEX;
+    public static final int EDGE_WEIGHT_INDEX = ENABLE_ELEMENT_TIME_SET ? ELEMENT_TIMESET_INDEX + 1
+            : ELEMENT_TIMESET_INDEX;
     // TimeFormat
     public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
     // Time zone
@@ -75,6 +76,8 @@ public final class GraphStoreConfiguration {
     // Miscellaneous
     public static final double TIMESTAMP_STORE_GROWING_FACTOR = 1.1;
     public static final double INTERVAL_STORE_GROWING_FACTOR = 1.1;
-    public static final int NODE_DEFAULT_COLUMNS = 1 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIME_SET ? 1 : 0);
-    public static final int EDGE_DEFAULT_COLUMNS = 2 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIME_SET ? 1 : 0);
+    public static final int NODE_DEFAULT_COLUMNS = 1 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIME_SET ? 1
+            : 0);
+    public static final int EDGE_DEFAULT_COLUMNS = 2 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIME_SET ? 1
+            : 0);
 }

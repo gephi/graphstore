@@ -46,7 +46,8 @@ public final class Interval {
      */
     public Interval(double low, double high) {
         if (low > high) {
-            throw new IllegalArgumentException("The left endpoint of the interval must be less than " + "the right endpoint.");
+            throw new IllegalArgumentException(
+                    "The left endpoint of the interval must be less than " + "the right endpoint.");
         }
         if (Double.isNaN(low) || Double.isNaN(high)) {
             throw new IllegalArgumentException("The interval endpoints must be different than NaN");

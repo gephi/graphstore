@@ -165,9 +165,12 @@ public final class FormattingAndParsingUtils {
      */
     protected static <T> T convertValue(Class<T> typeClass, String valString) {
         Object value;
-        if (typeClass.equals(Byte.class) || typeClass.equals(byte.class) || typeClass.equals(Short.class) || typeClass.equals(short.class) || typeClass.equals(Integer.class) || typeClass.equals(int.class) || typeClass.equals(Long.class) || typeClass.equals(long.class) || typeClass.equals(BigInteger.class)) {
+        if (typeClass.equals(Byte.class) || typeClass.equals(byte.class) || typeClass.equals(Short.class) || typeClass
+                .equals(short.class) || typeClass.equals(Integer.class) || typeClass.equals(int.class) || typeClass
+                .equals(Long.class) || typeClass.equals(long.class) || typeClass.equals(BigInteger.class)) {
             value = parseNumberWithoutDecimals((Class<? extends Number>) typeClass, valString);
-        } else if (typeClass.equals(Float.class) || typeClass.equals(float.class) || typeClass.equals(Double.class) || typeClass.equals(double.class) || typeClass.equals(BigDecimal.class)) {
+        } else if (typeClass.equals(Float.class) || typeClass.equals(float.class) || typeClass.equals(Double.class) || typeClass
+                .equals(double.class) || typeClass.equals(BigDecimal.class)) {
             value = parseNumberWithDecimals((Class<? extends Number>) typeClass, valString);
         } else {
             value = AttributeUtils.parse(valString, typeClass);
@@ -260,7 +263,8 @@ public final class FormattingAndParsingUtils {
             Object value = Array.get(arr, i);
             if (value != null) {
                 String stringValue = value.toString();
-                if (stringValue.equals("null") || containsArraySpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
+                if (stringValue.equals("null") || containsArraySpecialCharacters(stringValue) || stringValue.trim()
+                        .isEmpty()) {
                     sb.append('"');
                     sb.append(stringValue.replace("\\", "\\\\").replace("\"", "\\\""));
                     sb.append('"');

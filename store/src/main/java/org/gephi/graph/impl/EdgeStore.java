@@ -83,7 +83,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.dictionary = new Object2IntOpenHashMap(GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE);
         this.dictionary.defaultReturnValue(NULL_ID);
         this.longDictionary = new Long2ObjectOpenCustomHashMap[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
-        this.longDictionary[0] = new Long2ObjectOpenCustomHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
+        this.longDictionary[0] = new Long2ObjectOpenCustomHashMap(
+                GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE,
+                GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
         this.mutualEdgesTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
     }
 
@@ -93,7 +95,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         int blockCapacity = currentBlock.getCapacity();
         while (capacity > blockCapacity) {
             if (currentBlockIndex == blocksCount - 1) {
-                int blocksNeeded = (int) Math.ceil((capacity - blockCapacity) / (double) GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE);
+                int blocksNeeded = (int) Math
+                        .ceil((capacity - blockCapacity) / (double) GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE);
                 for (int i = 0; i < blocksNeeded; i++) {
                     if (blocksCount == blocks.length) {
                         EdgeBlock[] newBlocks = new EdgeBlock[blocksCount + 1];
@@ -171,7 +174,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             System.arraycopy(longDictionary, 0, newArray, 0, length);
             longDictionary = newArray;
             for (int i = length; i <= type; i++) {
-                Long2ObjectOpenCustomHashMap newMap = new Long2ObjectOpenCustomHashMap(GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
+                Long2ObjectOpenCustomHashMap newMap = new Long2ObjectOpenCustomHashMap(
+                        GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE,
+                        GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
                 longDictionary[i] = newMap;
             }
             int[] newSizeArray = new int[type + 1];
@@ -1245,7 +1250,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         @Override
         public void remove() {
             if (pointer.isMutual()) {
-                throw new UnsupportedOperationException("Removing directed edges from undirected iterator is not supported");
+                throw new UnsupportedOperationException(
+                        "Removing directed edges from undirected iterator is not supported");
             }
             EdgeStore.this.remove(pointer);
         }
@@ -1778,7 +1784,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         @Override
         public void remove() {
             if (pointer.isMutual()) {
-                throw new UnsupportedOperationException("Removing directed edges from undirected iterator is not supported");
+                throw new UnsupportedOperationException(
+                        "Removing directed edges from undirected iterator is not supported");
             }
             EdgeStore.this.remove(pointer);
         }

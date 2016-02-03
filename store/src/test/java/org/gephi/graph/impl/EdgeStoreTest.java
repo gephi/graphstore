@@ -1109,7 +1109,8 @@ public class EdgeStoreTest {
         EdgeImpl edge = GraphGenerator.generateSingleUndirectedEdge();
         edgeStore.add(edge);
 
-        Assert.assertEquals(EdgeStore.getLongId(edge.source, edge.target, false), EdgeStore.getLongId(edge.target, edge.source, false));
+        Assert.assertEquals(EdgeStore.getLongId(edge.source, edge.target, false), EdgeStore
+                .getLongId(edge.target, edge.source, false));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

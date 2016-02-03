@@ -75,7 +75,8 @@ public class ColumnObserverImpl implements ColumnObserver {
             throw new RuntimeException("This observer doesn't compute diffs, set diff setting to true");
         }
         if (columnDiff == null) {
-            throw new IllegalStateException("The hasGraphChanged() method should be called first and getDiff() only once then");
+            throw new IllegalStateException(
+                    "The hasGraphChanged() method should be called first and getDiff() only once then");
         }
         ColumnDiff diff = columnDiff;
         columnDiff = null;
@@ -178,7 +179,8 @@ public class ColumnObserverImpl implements ColumnObserver {
         if (bitVector == null) {
             bitVector = new BitVector(sid + 1);
         } else if (sid >= bitVector.size()) {
-            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.COLUMNDIFF_GROWING_FACTOR)), Integer.MAX_VALUE);
+            int newSize = Math
+                    .min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.COLUMNDIFF_GROWING_FACTOR)), Integer.MAX_VALUE);
             bitVector = growBitVector(bitVector, newSize);
         }
     }

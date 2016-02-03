@@ -84,7 +84,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
             if (weightObject instanceof Double) {
                 return (Double) weightObject;
             }
-            throw new IllegalStateException("The weight is dynamic, call getWeight(timestamp) or getWeight(interval) instead");
+            throw new IllegalStateException(
+                    "The weight is dynamic, call getWeight(timestamp) or getWeight(interval) instead");
         }
     }
 
@@ -114,7 +115,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
             TimeMap dynamicValue = null;
             if (oldValue == null) {
                 try {
-                    attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue = (TimeMap) graphStore.configuration.getEdgeWeightType().newInstance();
+                    attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue = (TimeMap) graphStore.configuration
+                            .getEdgeWeightType().newInstance();
                 } catch (InstantiationException ex) {
                     throw new RuntimeException(ex);
                 } catch (IllegalAccessException ex) {
@@ -171,7 +173,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 checkViewExist((GraphView) view);
 
                 TimeMap dynamicValue = (TimeMap) value;
-                Estimator estimator = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getEstimator();
+                Estimator estimator = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
+                        .getEstimator();
                 if (estimator == null) {
                     estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
                 }
@@ -382,19 +385,25 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     final void checkIdType(Object id) {
         if (graphStore != null && !id.getClass().equals(graphStore.configuration.getEdgeIdType())) {
-            throw new IllegalArgumentException("The id class does not match with the expected type (" + graphStore.configuration.getEdgeIdType().getName() + ")");
+            throw new IllegalArgumentException(
+                    "The id class does not match with the expected type (" + graphStore.configuration.getEdgeIdType()
+                            .getName() + ")");
         }
     }
 
     final void checkWeightStaticType() {
         if (graphStore != null && !Double.class.equals(graphStore.configuration.getEdgeWeightType())) {
-            throw new IllegalArgumentException("The weight class does not match with the expected type (" + graphStore.configuration.getEdgeWeightType().getName() + ")");
+            throw new IllegalArgumentException(
+                    "The weight class does not match with the expected type (" + graphStore.configuration
+                            .getEdgeWeightType().getName() + ")");
         }
     }
 
     final void checkWeightDynamicType() {
         if (graphStore != null && Double.class.equals(graphStore.configuration.getEdgeWeightType())) {
-            throw new IllegalArgumentException("The weight class does not match with the expected type (" + graphStore.configuration.getEdgeWeightType().getName() + ")");
+            throw new IllegalArgumentException(
+                    "The weight class does not match with the expected type (" + graphStore.configuration
+                            .getEdgeWeightType().getName() + ")");
         }
     }
 
@@ -489,7 +498,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
             if (this.rgba != obj.rgba) {
                 return false;
             }
-            if (this.textProperties != obj.textProperties && (this.textProperties == null || !this.textProperties.deepEquals(obj.textProperties))) {
+            if (this.textProperties != obj.textProperties && (this.textProperties == null || !this.textProperties
+                    .deepEquals(obj.textProperties))) {
                 return false;
             }
             return true;

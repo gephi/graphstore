@@ -232,7 +232,8 @@ public class GraphBridgeTest {
         Set<Integer> typeIds = new HashSet<Integer>();
         for (Edge edge : source.getEdges()) {
             if (dest.getNode(edge.getSource().getId()) != null && dest.getNode(edge.getTarget().getId()) != null) {
-                Edge edgeCopy = dest.factory.newEdge(edge.getId(), dest.getNode(edge.getSource().getId()), dest.getNode(edge.getTarget().getId()), edge.getType(), edge.getWeight(), edge.isDirected());
+                Edge edgeCopy = dest.factory.newEdge(edge.getId(), dest.getNode(edge.getSource().getId()), dest
+                        .getNode(edge.getTarget().getId()), edge.getType(), edge.getWeight(), edge.isDirected());
                 dest.addEdge(edgeCopy);
                 typeIds.add(edge.getType());
                 if (dest.getEdgeCount() >= 15) {

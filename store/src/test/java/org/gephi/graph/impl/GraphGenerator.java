@@ -148,7 +148,8 @@ public class GraphGenerator {
             NodeImpl source = nodeStore.get(sourceId);
             NodeImpl target = nodeStore.get(targetId);
             EdgeImpl edge = new EdgeImpl(String.valueOf(c), graphStore, source, target, type, 1.0, directed);
-            if (!leafs.contains(sourceId) && !leafs.contains(targetId) && (allowSelfLoops || (!allowSelfLoops && source != target)) && (allowParallel || !idSet.contains(edge.getLongId()))) {
+            if (!leafs.contains(sourceId) && !leafs.contains(targetId) && (allowSelfLoops || (!allowSelfLoops && source != target)) && (allowParallel || !idSet
+                    .contains(edge.getLongId()))) {
                 edgeList.add(edge);
                 c++;
                 idSet.add(edge.getLongId());
@@ -181,8 +182,10 @@ public class GraphGenerator {
             int targetId = r.nextInt(nodeCount);
             BasicGraphStore.BasicNode source = nodeStore.get(String.valueOf(sourceId));
             BasicGraphStore.BasicNode target = nodeStore.get(String.valueOf(targetId));
-            BasicGraphStore.BasicEdge edge = new BasicGraphStore.BasicEdge(String.valueOf(c), source, target, type, 1.0, directed);
-            if (!leafs.contains(sourceId) && !leafs.contains(targetId) && (allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(edge.getStringId())) {
+            BasicGraphStore.BasicEdge edge = new BasicGraphStore.BasicEdge(String.valueOf(c), source, target, type,
+                    1.0, directed);
+            if (!leafs.contains(sourceId) && !leafs.contains(targetId) && (allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet
+                    .contains(edge.getStringId())) {
                 edgeList.add(edge);
                 c++;
                 idSet.add(edge.getStringId());
@@ -215,7 +218,9 @@ public class GraphGenerator {
             NodeImpl source = nodeStore.get(sourceId);
             NodeImpl target = nodeStore.get(targetId);
             EdgeImpl edge = new EdgeImpl(String.valueOf(c), source, target, type, 1.0, false);
-            if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(EdgeStore.getLongId(edge.source, edge.target, true)) && !idSet.contains(EdgeStore.getLongId(edge.target, edge.source, true))) {
+            if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(EdgeStore
+                    .getLongId(edge.source, edge.target, true)) && !idSet.contains(EdgeStore
+                    .getLongId(edge.target, edge.source, true))) {
                 edgeList.add(edge);
                 c++;
                 idSet.add(edge.getLongId());
@@ -235,7 +240,8 @@ public class GraphGenerator {
             int targetId = r.nextInt(nodeCount);
             BasicGraphStore.BasicNode source = nodeStore.get(String.valueOf(sourceId));
             BasicGraphStore.BasicNode target = nodeStore.get(String.valueOf(targetId));
-            BasicGraphStore.BasicEdge edge = new BasicGraphStore.BasicEdge(String.valueOf(c), source, target, type, 1.0, true);
+            BasicGraphStore.BasicEdge edge = new BasicGraphStore.BasicEdge(String.valueOf(c), source, target, type,
+                    1.0, true);
             if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(edge.getStringId())) {
                 edgeList.add(edge);
                 c++;
@@ -247,8 +253,11 @@ public class GraphGenerator {
             int targetId = r.nextInt(nodeCount);
             BasicGraphStore.BasicNode source = nodeStore.get(String.valueOf(sourceId));
             BasicGraphStore.BasicNode target = nodeStore.get(String.valueOf(targetId));
-            BasicGraphStore.BasicEdge edge = new BasicGraphStore.BasicEdge(String.valueOf(c), source, target, type, 1.0, false);
-            if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(BasicEdgeStore.getStringId(edge.source, edge.target, true)) && !idSet.contains(BasicEdgeStore.getStringId(edge.target, edge.source, true))) {
+            BasicGraphStore.BasicEdge edge = new BasicGraphStore.BasicEdge(String.valueOf(c), source, target, type,
+                    1.0, false);
+            if ((allowSelfLoops || (!allowSelfLoops && source != target)) && !idSet.contains(BasicEdgeStore
+                    .getStringId(edge.source, edge.target, true)) && !idSet.contains(BasicEdgeStore
+                    .getStringId(edge.target, edge.source, true))) {
                 edgeList.add(edge);
                 c++;
                 idSet.add(edge.getStringId());
@@ -267,7 +276,8 @@ public class GraphGenerator {
         List<EdgeImpl> edges = new ArrayList<EdgeImpl>();
         int[] typeAssignemnts = distributeTypeCounts(typeCount, edgeCount);
         for (int i = 0; i < typeCount; i++) {
-            edges.addAll(Arrays.asList(generateEdgeList(nodeStore, typeAssignemnts[i], i, directed, allowSelfLoops, false)));
+            edges.addAll(Arrays
+                    .asList(generateEdgeList(nodeStore, typeAssignemnts[i], i, directed, allowSelfLoops, false)));
         }
         Collections.shuffle(edges, new Random(87));
         return edges.toArray(new EdgeImpl[0]);
@@ -279,7 +289,8 @@ public class GraphGenerator {
         BasicGraphStore.BasicNodeStore nodeStore = generateBasicNodeStore(nodeCount);
         int[] typeAssignemnts = distributeTypeCounts(typeCount, edgeCount);
         for (int i = 0; i < typeCount; i++) {
-            edges.addAll(Arrays.asList(generateBasicEdgeList(nodeStore, typeAssignemnts[i], i, directed, allowSelfLoops)));
+            edges.addAll(Arrays
+                    .asList(generateBasicEdgeList(nodeStore, typeAssignemnts[i], i, directed, allowSelfLoops)));
         }
         Collections.shuffle(edges, new Random(87));
         return edges.toArray(new BasicGraphStore.BasicEdge[0]);

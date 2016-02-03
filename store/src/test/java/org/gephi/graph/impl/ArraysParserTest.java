@@ -121,16 +121,20 @@ public class ArraysParserTest {
 
     @Test
     public void testParseBigInteger() {
-        BigInteger[] a1 = ArraysParser.parseArray(BigInteger[].class, "[123456789123456789123456789, -123456789123456789123456789]");
+        BigInteger[] a1 = ArraysParser
+                .parseArray(BigInteger[].class, "[123456789123456789123456789, -123456789123456789123456789]");
 
-        Assert.assertEquals(new BigInteger[] { new BigInteger("123456789123456789123456789"), new BigInteger("-123456789123456789123456789") }, a1);
+        Assert.assertEquals(new BigInteger[] { new BigInteger("123456789123456789123456789"), new BigInteger(
+                "-123456789123456789123456789") }, a1);
     }
 
     @Test
     public void testParseBigDecimal() {
-        BigDecimal[] a1 = ArraysParser.parseArray(BigDecimal[].class, "[123456789123456789123456789.123456789123456789123456789, -123456789123456789123456789.123456789123456789123456789]");
+        BigDecimal[] a1 = ArraysParser
+                .parseArray(BigDecimal[].class, "[123456789123456789123456789.123456789123456789123456789, -123456789123456789123456789.123456789123456789123456789]");
 
-        Assert.assertEquals(new BigDecimal[] { new BigDecimal("123456789123456789123456789.123456789123456789123456789"), new BigDecimal("-123456789123456789123456789.123456789123456789123456789") }, a1);
+        Assert.assertEquals(new BigDecimal[] { new BigDecimal("123456789123456789123456789.123456789123456789123456789"), new BigDecimal(
+                "-123456789123456789123456789.123456789123456789123456789") }, a1);
     }
 
     @Test
@@ -160,8 +164,10 @@ public class ArraysParserTest {
 
     @Test
     public void testParseComplexFormats() {
-        Assert.assertEquals(new String[] { "value1", "value2", " value 'b' \" 3 " }, ArraysParser.parseArray(String[].class, "value1,value2, \" value 'b' \\\" 3 \""));
+        Assert.assertEquals(new String[] { "value1", "value2", " value 'b' \" 3 " }, ArraysParser
+                .parseArray(String[].class, "value1,value2, \" value 'b' \\\" 3 \""));
 
-        Assert.assertEquals(new String[] { "value1", "value2", " value \"b\" ' 3 " }, ArraysParser.parseArray(String[].class, "value1, value2,' value \"b\" \\' 3 '"));
+        Assert.assertEquals(new String[] { "value1", "value2", " value \"b\" ' 3 " }, ArraysParser
+                .parseArray(String[].class, "value1, value2,' value \"b\" \\' 3 '"));
     }
 }

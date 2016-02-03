@@ -70,7 +70,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         this.blocks = new NodeBlock[GraphStoreConfiguration.NODESTORE_DEFAULT_BLOCKS];
         this.blocks[0] = new NodeBlock(0);
         this.currentBlock = blocks[currentBlockIndex];
-        this.dictionary = new Object2IntOpenHashMap(GraphStoreConfiguration.NODESTORE_DEFAULT_DICTIONARY_SIZE, GraphStoreConfiguration.NODESTORE_DICTIONARY_LOAD_FACTOR);
+        this.dictionary = new Object2IntOpenHashMap(GraphStoreConfiguration.NODESTORE_DEFAULT_DICTIONARY_SIZE,
+                GraphStoreConfiguration.NODESTORE_DICTIONARY_LOAD_FACTOR);
         this.dictionary.defaultReturnValue(NULL_ID);
     }
 
@@ -80,7 +81,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         int blockCapacity = currentBlock.getCapacity();
         while (capacity > blockCapacity) {
             if (currentBlockIndex == blocksCount - 1) {
-                int blocksNeeded = (int) Math.ceil((capacity - blockCapacity) / (double) GraphStoreConfiguration.NODESTORE_BLOCK_SIZE);
+                int blocksNeeded = (int) Math
+                        .ceil((capacity - blockCapacity) / (double) GraphStoreConfiguration.NODESTORE_BLOCK_SIZE);
                 for (int i = 0; i < blocksNeeded; i++) {
                     if (blocksCount == blocks.length) {
                         NodeBlock[] newBlocks = new NodeBlock[blocksCount + 1];

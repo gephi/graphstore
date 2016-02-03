@@ -68,7 +68,8 @@ public class GraphStoreTest {
         basicStore.addAllNodes(Arrays.asList(basicNodes));
 
         EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 20000, 0, true, true, false);
-        BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator.generateBasicEdgeList(basicStore.nodeStore, 20000, 0, true, true);
+        BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator
+                .generateBasicEdgeList(basicStore.nodeStore, 20000, 0, true, true);
 
         graphStore.addAllEdges(Arrays.asList(edges));
         basicStore.addAllEdges(Arrays.asList(basicEdges));
@@ -90,7 +91,8 @@ public class GraphStoreTest {
         basicStore.addAllNodes(Arrays.asList(basicNodes));
 
         EdgeImpl[] edges = GraphGenerator.generateEdgeList(graphStore.nodeStore, 20000, 0, false, true, false);
-        BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator.generateBasicEdgeList(basicStore.nodeStore, 20000, 0, false, true);
+        BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator
+                .generateBasicEdgeList(basicStore.nodeStore, 20000, 0, false, true);
 
         graphStore.addAllEdges(Arrays.asList(edges));
         basicStore.addAllEdges(Arrays.asList(basicEdges));
@@ -112,7 +114,8 @@ public class GraphStoreTest {
         basicStore.addAllNodes(Arrays.asList(basicNodes));
 
         EdgeImpl[] edges = GraphGenerator.generateMixedEdgeList(graphStore.nodeStore, 20000, 0, true);
-        BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator.generateBasicMixedEdgeList(basicStore.nodeStore, 20000, 0, true);
+        BasicGraphStore.BasicEdge[] basicEdges = GraphGenerator
+                .generateBasicMixedEdgeList(basicStore.nodeStore, 20000, 0, true);
 
         graphStore.addAllEdges(Arrays.asList(edges));
         basicStore.addAllEdges(Arrays.asList(basicEdges));

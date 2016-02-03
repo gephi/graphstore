@@ -89,7 +89,8 @@ public class IntervalMapTest {
             Assert.assertTrue(set.put(new Interval(2.0, 2.0), defaultValues[0]));
             Assert.assertTrue(set.put(new Interval(2.0, 3.0), defaultValues[1]));
             defaultValues = new Object[] { defaultValues[0], defaultValues[0], defaultValues[1], defaultValues[1] };
-            testValues(set, new Interval[] { new Interval(1.0, 2.0), new Interval(2.0, 2.0), new Interval(2.0, 3.0), new Interval(3.0, 4.0) }, defaultValues);
+            testValues(set, new Interval[] { new Interval(1.0, 2.0), new Interval(2.0, 2.0), new Interval(2.0, 3.0), new Interval(
+                    3.0, 4.0) }, defaultValues);
         }
     }
 
@@ -405,7 +406,8 @@ public class IntervalMapTest {
 
     @Test
     public void testEquals() {
-        Interval[] indices = new Interval[] { new Interval(1.0, 2.0), new Interval(3.0, 4.0), new Interval(2.0, 2.0), new Interval(2.0, 3.0) };
+        Interval[] indices = new Interval[] { new Interval(1.0, 2.0), new Interval(3.0, 4.0), new Interval(2.0, 2.0), new Interval(
+                2.0, 3.0) };
         String[] values = new String[] { "a", "z", "e" };
         IntervalStringMap set1 = new IntervalStringMap();
         IntervalStringMap set2 = new IntervalStringMap();
@@ -514,7 +516,8 @@ public class IntervalMapTest {
         map1.put(new Interval(AttributeUtils.parseDateTime("2012-02-29"), AttributeUtils.parseDateTime("2012-03-01")), "foo");
         Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01, foo]>");
 
-        map1.put(new Interval(AttributeUtils.parseDateTime("2012-07-17T00:02:21"), AttributeUtils.parseDateTime("2012-07-17T00:03:00")), "bar");
+        map1.put(new Interval(AttributeUtils.parseDateTime("2012-07-17T00:02:21"), AttributeUtils
+                .parseDateTime("2012-07-17T00:03:00")), "bar");
         Assert.assertEquals(map1.toString(TimeFormat.DATE), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342483341000.0, 1342483380000.0, bar]>");
 
@@ -538,7 +541,8 @@ public class IntervalMapTest {
         map1.put(new Interval(AttributeUtils.parseDateTime("2012-02-29"), AttributeUtils.parseDateTime("2012-03-01")), "foo");
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]>");
 
-        map1.put(new Interval(AttributeUtils.parseDateTime("2012-07-17T01:10:44"), AttributeUtils.parseDateTime("2012-07-17T01:10:45")), "bar");
+        map1.put(new Interval(AttributeUtils.parseDateTime("2012-07-17T01:10:44"), AttributeUtils
+                .parseDateTime("2012-07-17T01:10:45")), "bar");
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342487444000.0, 1342487445000.0, bar]>");
 
@@ -548,10 +552,12 @@ public class IntervalMapTest {
 
         // Test with timezone parsing and UTC printing:
         IntervalStringMap map2 = new IntervalStringMap();
-        map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), AttributeUtils.parseDateTime("2012-02-29T02:30:00+02:30")), "foo");
+        map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T00:00:00+02:30"), AttributeUtils
+                .parseDateTime("2012-02-29T02:30:00+02:30")), "foo");
         Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z, foo]>");
 
-        map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T01:10:44+00:00"), AttributeUtils.parseDateTime("2012-02-29T01:10:45+00:00")), "bar");
+        map2.put(new Interval(AttributeUtils.parseDateTime("2012-02-29T01:10:44+00:00"), AttributeUtils
+                .parseDateTime("2012-02-29T01:10:45+00:00")), "bar");
         Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, 2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, 2012-02-29T01:10:45.000Z, bar]>");
         Assert.assertEquals(map2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, 1330473600000.0, foo]; [1330477844000.0, 1330477845000.0, bar]>");
 
@@ -574,7 +580,9 @@ public class IntervalMapTest {
     }
 
     private IntervalMap[] getAllInstances(int capacity) {
-        return new IntervalMap[] { new IntervalStringMap(capacity), new IntervalBooleanMap(capacity), new IntervalFloatMap(capacity), new IntervalDoubleMap(capacity), new IntervalIntegerMap(capacity), new IntervalShortMap(capacity), new IntervalLongMap(capacity), new IntervalByteMap(capacity), new IntervalCharMap(capacity) };
+        return new IntervalMap[] { new IntervalStringMap(capacity), new IntervalBooleanMap(capacity), new IntervalFloatMap(
+                capacity), new IntervalDoubleMap(capacity), new IntervalIntegerMap(capacity), new IntervalShortMap(
+                capacity), new IntervalLongMap(capacity), new IntervalByteMap(capacity), new IntervalCharMap(capacity) };
     }
 
     private Object[] getTestValues(IntervalMap set) {
@@ -638,11 +646,13 @@ public class IntervalMapTest {
             if (typeClass != String.class) {
                 try {
                     Method getMethod = set.getClass().getMethod("get" + typeClass.getSimpleName(), Interval.class);
-                    Method getMethodWithDefault = set.getClass().getMethod("get" + typeClass.getSimpleName(), Interval.class, getMethod.getReturnType());
+                    Method getMethodWithDefault = set.getClass()
+                            .getMethod("get" + typeClass.getSimpleName(), Interval.class, getMethod.getReturnType());
 
                     Assert.assertEquals(getMethod.invoke(set, expectedIntervals[i]), expectedValues[i]);
                     Assert.assertEquals(getMethodWithDefault.invoke(set, expectedIntervals[i], getDefaultValue(set)), expectedValues[i]);
-                    Assert.assertEquals(getMethodWithDefault.invoke(set, new Interval(99999.0, 999999.0), getDefaultValue(set)), getDefaultValue(set));
+                    Assert.assertEquals(getMethodWithDefault
+                            .invoke(set, new Interval(99999.0, 999999.0), getDefaultValue(set)), getDefaultValue(set));
 
                     boolean thrown = false;
                     try {

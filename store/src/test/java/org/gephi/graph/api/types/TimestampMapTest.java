@@ -698,7 +698,10 @@ public class TimestampMapTest {
     }
 
     private TimestampMap[] getAllInstances(int capacity) {
-        return new TimestampMap[] { new TimestampDoubleMap(capacity), new TimestampByteMap(capacity), new TimestampFloatMap(capacity), new TimestampIntegerMap(capacity), new TimestampLongMap(capacity), new TimestampShortMap(capacity), new TimestampStringMap(capacity), new TimestampCharMap(capacity), new TimestampBooleanMap(capacity) };
+        return new TimestampMap[] { new TimestampDoubleMap(capacity), new TimestampByteMap(capacity), new TimestampFloatMap(
+                capacity), new TimestampIntegerMap(capacity), new TimestampLongMap(capacity), new TimestampShortMap(
+                capacity), new TimestampStringMap(capacity), new TimestampCharMap(capacity), new TimestampBooleanMap(
+                capacity) };
     }
 
     private Object[] getTestValues(TimestampMap set) {
@@ -764,7 +767,8 @@ public class TimestampMapTest {
             if (typeClass != String.class) {
                 try {
                     Method getMethod = set.getClass().getMethod("get" + typeClass.getSimpleName(), double.class);
-                    Method getMethodWithDefault = set.getClass().getMethod("get" + typeClass.getSimpleName(), double.class, getMethod.getReturnType());
+                    Method getMethodWithDefault = set.getClass()
+                            .getMethod("get" + typeClass.getSimpleName(), double.class, getMethod.getReturnType());
 
                     Assert.assertEquals(getMethod.invoke(set, expectedTimestamp[i]), expectedValues[i]);
                     Assert.assertEquals(getMethodWithDefault.invoke(set, expectedTimestamp[i], getDefaultValue(set)), expectedValues[i]);

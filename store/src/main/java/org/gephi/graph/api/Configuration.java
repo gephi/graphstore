@@ -141,7 +141,8 @@ public class Configuration {
      * @throws IllegalArgumentException if the type isn't supported
      */
     public void setEdgeWeightType(Class edgeWeightType) {
-        if (Double.class.equals(edgeWeightType) || TimestampDoubleMap.class.equals(edgeWeightType) || IntervalDoubleMap.class.equals(edgeWeightType)) {
+        if (Double.class.equals(edgeWeightType) || TimestampDoubleMap.class.equals(edgeWeightType) || IntervalDoubleMap.class
+                .equals(edgeWeightType)) {
             this.edgeWeightType = edgeWeightType;
         } else {
             throw new IllegalArgumentException("Unsupported type " + edgeWeightType.getClass().getCanonicalName());
@@ -227,22 +228,28 @@ public class Configuration {
             return false;
         }
         final Configuration other = (Configuration) obj;
-        if (this.nodeIdType != other.nodeIdType && (this.nodeIdType == null || !this.nodeIdType.equals(other.nodeIdType))) {
+        if (this.nodeIdType != other.nodeIdType && (this.nodeIdType == null || !this.nodeIdType
+                .equals(other.nodeIdType))) {
             return false;
         }
-        if (this.edgeIdType != other.edgeIdType && (this.edgeIdType == null || !this.edgeIdType.equals(other.edgeIdType))) {
+        if (this.edgeIdType != other.edgeIdType && (this.edgeIdType == null || !this.edgeIdType
+                .equals(other.edgeIdType))) {
             return false;
         }
-        if (this.edgeLabelType != other.edgeLabelType && (this.edgeLabelType == null || !this.edgeLabelType.equals(other.edgeLabelType))) {
+        if (this.edgeLabelType != other.edgeLabelType && (this.edgeLabelType == null || !this.edgeLabelType
+                .equals(other.edgeLabelType))) {
             return false;
         }
-        if (this.edgeWeightType != other.edgeWeightType && (this.edgeWeightType == null || !this.edgeWeightType.equals(other.edgeWeightType))) {
+        if (this.edgeWeightType != other.edgeWeightType && (this.edgeWeightType == null || !this.edgeWeightType
+                .equals(other.edgeWeightType))) {
             return false;
         }
-        if (this.timeRepresentation != other.timeRepresentation && (this.timeRepresentation == null || !this.timeRepresentation.equals(other.timeRepresentation))) {
+        if (this.timeRepresentation != other.timeRepresentation && (this.timeRepresentation == null || !this.timeRepresentation
+                .equals(other.timeRepresentation))) {
             return false;
         }
-        if (this.edgeWeightColumn != other.edgeWeightColumn && (this.edgeWeightColumn == null || !this.edgeWeightColumn.equals(other.edgeWeightColumn))) {
+        if (this.edgeWeightColumn != other.edgeWeightColumn && (this.edgeWeightColumn == null || !this.edgeWeightColumn
+                .equals(other.edgeWeightColumn))) {
             return false;
         }
         return true;

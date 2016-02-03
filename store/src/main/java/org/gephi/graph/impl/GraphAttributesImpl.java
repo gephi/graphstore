@@ -100,7 +100,9 @@ public class GraphAttributesImpl {
             valueSet = (TimeMap) attributes.get(key);
 
             if (!value.getClass().equals(valueSet.getTypeClass())) {
-                throw new IllegalArgumentException("The value type " + value.getClass().getName() + " doesn't match with the expected type " + valueSet.getTypeClass().getName());
+                throw new IllegalArgumentException(
+                        "The value type " + value.getClass().getName() + " doesn't match with the expected type " + valueSet
+                                .getTypeClass().getName());
             }
         } else {
             if (timeObj instanceof Interval) {

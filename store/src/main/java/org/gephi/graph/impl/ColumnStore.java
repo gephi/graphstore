@@ -429,7 +429,8 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         if (obj == null) {
             return false;
         }
-        if (this.elementType != obj.elementType && (this.elementType == null || !this.elementType.equals(obj.elementType))) {
+        if (this.elementType != obj.elementType && (this.elementType == null || !this.elementType
+                .equals(obj.elementType))) {
             return false;
         }
         Iterator<Column> itr1 = this.iterator();

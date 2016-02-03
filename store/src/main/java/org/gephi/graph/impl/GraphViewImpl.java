@@ -494,7 +494,8 @@ public class GraphViewImpl implements GraphView {
         if (nodeView) {
             for (Edge e : graphStore.edgeStore) {
                 boolean t = edgeBitVector.get(e.getStoreId());
-                if (t && (!nodeBitVector.get(e.getSource().getStoreId()) || !nodeBitVector.get(e.getTarget().getStoreId()))) {
+                if (t && (!nodeBitVector.get(e.getSource().getStoreId()) || !nodeBitVector.get(e.getTarget()
+                        .getStoreId()))) {
                     removeEdge((EdgeImpl) e);
                 }
             }
@@ -627,7 +628,8 @@ public class GraphViewImpl implements GraphView {
     protected void ensureNodeVectorSize(NodeImpl node) {
         int sid = node.storeId;
         if (sid >= nodeBitVector.size()) {
-            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
+            int newSize = Math
+                    .min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
             nodeBitVector = growBitVector(nodeBitVector, newSize);
         }
     }
@@ -647,7 +649,8 @@ public class GraphViewImpl implements GraphView {
     protected void ensureEdgeVectorSize(EdgeImpl edge) {
         int sid = edge.storeId;
         if (sid >= edgeBitVector.size()) {
-            int newSize = Math.min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
+            int newSize = Math
+                    .min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
             edgeBitVector = growBitVector(edgeBitVector, newSize);
         }
     }
@@ -742,10 +745,12 @@ public class GraphViewImpl implements GraphView {
         if (obj == null) {
             return false;
         }
-        if (this.nodeBitVector != obj.nodeBitVector && (this.nodeBitVector == null || !this.nodeBitVector.equals(obj.nodeBitVector))) {
+        if (this.nodeBitVector != obj.nodeBitVector && (this.nodeBitVector == null || !this.nodeBitVector
+                .equals(obj.nodeBitVector))) {
             return false;
         }
-        if (this.edgeBitVector != obj.edgeBitVector && (this.edgeBitVector == null || !this.edgeBitVector.equals(obj.edgeBitVector))) {
+        if (this.edgeBitVector != obj.edgeBitVector && (this.edgeBitVector == null || !this.edgeBitVector
+                .equals(obj.edgeBitVector))) {
             return false;
         }
         if (this.nodeCount != obj.nodeCount) {

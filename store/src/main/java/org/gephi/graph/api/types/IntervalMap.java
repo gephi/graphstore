@@ -279,7 +279,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
                 if (startValue == intervalStart && endValue > intervalEnd) {
                     return -1;
                 }
-                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2 : 0)) == 0) {
+                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2
+                        : 0)) == 0) {
                     if (removeIndex == realSize - 2) {
                         size--;
                     } else {
@@ -332,7 +333,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
                 if (startValue == intervalStart && endValue > intervalEnd) {
                     return -1;
                 }
-                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2 : 0)) == 0) {
+                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2
+                        : 0)) == 0) {
                     return foundIndex;
                 }
             }
@@ -479,7 +481,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
             if (i % 2 == 0) {
                 Object o1 = this.getValue(i / 2);
                 Object o2 = other.getValue(i / 2);
-                if ((o1 == null && o2 != null) || (o1 != null && o2 == null) || (o1 != null && o2 != null && !o1.equals(o2))) {
+                if ((o1 == null && o2 != null) || (o1 != null && o2 == null) || (o1 != null && o2 != null && !o1
+                        .equals(o2))) {
                     return false;
                 }
             }

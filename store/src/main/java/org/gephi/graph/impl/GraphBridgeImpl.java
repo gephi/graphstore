@@ -176,7 +176,8 @@ public class GraphBridgeImpl implements GraphBridge {
     private void copyColumns(TableImpl sourceTable, TableImpl destTable) {
         for (Column col : sourceTable.toArray()) {
             if (!col.isProperty() && !destTable.hasColumn(col.getId())) {
-                destTable.addColumn(col.getId(), col.getTitle(), col.getTypeClass(), col.getOrigin(), col.getDefaultValue(), col.isIndexed());
+                destTable.addColumn(col.getId(), col.getTitle(), col.getTypeClass(), col.getOrigin(), col
+                        .getDefaultValue(), col.isIndexed());
             }
         }
     }
@@ -216,7 +217,8 @@ public class GraphBridgeImpl implements GraphBridge {
         EdgeImpl edgeImpl = (EdgeImpl) edge;
         verifyElement(edgeImpl);
         EdgeImpl existingEdge = store.getEdge(edge.getId());
-        if (existingEdge != null && (!existingEdge.getSource().getId().equals(edge.getSource().getId()) || !existingEdge.getTarget().getId().equals(edge.getTarget().getId()))) {
+        if (existingEdge != null && (!existingEdge.getSource().getId().equals(edge.getSource().getId()) || !existingEdge
+                .getTarget().getId().equals(edge.getTarget().getId()))) {
             throw new RuntimeException("An edge with a similar id '" + edge.getId() + "' already exists");
         }
 
@@ -243,7 +245,8 @@ public class GraphBridgeImpl implements GraphBridge {
             if (!sourceCol.isProperty()) {
                 Column destColumn = destNodeTable.getColumn(sourceCol.getId());
                 if (destColumn != null && !destColumn.getTypeClass().equals(sourceCol.getTypeClass())) {
-                    throw new RuntimeException("A node column '" + destColumn.getId() + "' already exists with a different type");
+                    throw new RuntimeException(
+                            "A node column '" + destColumn.getId() + "' already exists with a different type");
 
                 }
             }
@@ -255,7 +258,8 @@ public class GraphBridgeImpl implements GraphBridge {
             if (!sourceCol.isProperty()) {
                 Column destColumn = destEdgeTable.getColumn(sourceCol.getId());
                 if (destColumn != null && !destColumn.getTypeClass().equals(sourceCol.getTypeClass())) {
-                    throw new RuntimeException("An edge column '" + destColumn.getId() + "' already exists with a different type");
+                    throw new RuntimeException(
+                            "An edge column '" + destColumn.getId() + "' already exists with a different type");
 
                 }
             }

@@ -641,7 +641,8 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
             }
 
             Iterator<Map.Entry<Interval, Integer>> thisIntervals = entrySet(Interval.INFINITY_INTERVAL).iterator();
-            Iterator<Map.Entry<Interval, Integer>> otherIntervals = other.entrySet(Interval.INFINITY_INTERVAL).iterator();
+            Iterator<Map.Entry<Interval, Integer>> otherIntervals = other.entrySet(Interval.INFINITY_INTERVAL)
+                    .iterator();
 
             while (thisIntervals.hasNext()) {
                 Map.Entry<Interval, Integer> thisEntry = thisIntervals.next();

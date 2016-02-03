@@ -252,7 +252,8 @@ public class ColumnImpl implements Column {
         if (this.typeClass != col.typeClass && (this.typeClass == null || !this.typeClass.equals(col.typeClass))) {
             return false;
         }
-        if (this.defaultValue != col.defaultValue && (this.defaultValue == null || !this.defaultValue.equals(col.defaultValue))) {
+        if (this.defaultValue != col.defaultValue && (this.defaultValue == null || !this.defaultValue
+                .equals(col.defaultValue))) {
             return false;
         }
         if (this.origin != col.origin) {

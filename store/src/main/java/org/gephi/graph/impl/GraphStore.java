@@ -81,11 +81,14 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         viewStore = new GraphViewStore(this);
         version = GraphStoreConfiguration.ENABLE_OBSERVERS ? new GraphVersion(this) : null;
         observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
-        edgeStore = new EdgeStore(edgeTypeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
-        nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
+        edgeStore = new EdgeStore(edgeTypeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore,
+                GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
+        nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore,
+                GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeTable = new TableImpl<Node>(this, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
         edgeTable = new TableImpl<Edge>(this, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
-        timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
+        timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null,
+                GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
         timeFormat = GraphStoreConfiguration.DEFAULT_TIME_FORMAT;
@@ -94,23 +97,32 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         undirectedDecorator = new UndirectedDecorator(this);
 
         // Default cols
-        nodeTable.store.addColumn(new ColumnImpl(nodeTable, "id", configuration.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
-        edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", configuration.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
+        nodeTable.store.addColumn(new ColumnImpl(nodeTable, "id", configuration.getNodeIdType(), "Id", null,
+                Origin.PROPERTY, false, true));
+        edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", configuration.getEdgeIdType(), "Id", null,
+                Origin.PROPERTY, false, true));
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
-            nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID, String.class, "Label", null, Origin.PROPERTY, false, false));
-            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID, String.class, "Label", null, Origin.PROPERTY, false, false));
+            nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID,
+                    String.class, "Label", null, Origin.PROPERTY, false, false));
+            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID,
+                    String.class, "Label", null, Origin.PROPERTY, false, false));
         }
         if (GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET) {
             if (configuration.getTimeRepresentation().equals(TimeRepresentation.TIMESTAMP)) {
-                nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
-                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+                nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
+                        TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
+                        TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
             } else {
-                nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
-                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
+                nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
+                        IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
+                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
+                        IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
             }
         }
         if (configuration.getEdgeWeightColumn()) {
-            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
+            edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID,
+                    configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
         } else {
             edgeTable.store.length++;
         }
@@ -224,7 +236,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         autoWriteLock();
         try {
             nodeStore.checkNonNullNodeObject(node);
-            for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator((NodeImpl) node); edgeIterator.hasNext();) {
+            for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator((NodeImpl) node); edgeIterator
+                    .hasNext();) {
                 edgeIterator.next();
                 edgeIterator.remove();
             }
@@ -250,7 +263,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         try {
             for (Node node : nodes) {
                 nodeStore.checkNonNullNodeObject(node);
-                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator((NodeImpl) node); edgeIterator.hasNext();) {
+                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator((NodeImpl) node); edgeIterator
+                        .hasNext();) {
                     edgeIterator.next();
                     edgeIterator.remove();
                 }
@@ -792,7 +806,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         if (this.edgeStore != obj.edgeStore && (this.edgeStore == null || !this.edgeStore.deepEquals(obj.edgeStore))) {
             return false;
         }
-        if (this.edgeTypeStore != obj.edgeTypeStore && (this.edgeTypeStore == null || !this.edgeTypeStore.deepEquals(obj.edgeTypeStore))) {
+        if (this.edgeTypeStore != obj.edgeTypeStore && (this.edgeTypeStore == null || !this.edgeTypeStore
+                .deepEquals(obj.edgeTypeStore))) {
             return false;
         }
         if (this.nodeTable != obj.nodeTable && (this.nodeTable == null || !this.nodeTable.deepEquals(obj.nodeTable))) {

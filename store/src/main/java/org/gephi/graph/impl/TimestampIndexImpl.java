@@ -69,7 +69,8 @@ public class TimestampIndexImpl<T extends Element> extends TimeIndexImpl<T, Doub
         } else {
             Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
             if (!sortedMap.isEmpty()) {
-                ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator(sortedMap.double2IntEntrySet().last());
+                ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator(sortedMap
+                        .double2IntEntrySet().last());
                 while (bi.hasPrevious()) {
                     Double2IntMap.Entry entry = bi.previous();
                     double timestamp = entry.getDoubleKey();

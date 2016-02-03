@@ -114,7 +114,8 @@ public final class IntervalSet implements TimeSet<Interval> {
                 if (startValue == interval.getLow() && endValue > interval.getHigh()) {
                     return false;
                 }
-                if ((shift = (interval.getHigh() > endValue ? 2 : interval.getHigh() < endValue ? -2 : interval.getLow() > startValue ? 2 : 0)) == 0) {
+                if ((shift = (interval.getHigh() > endValue ? 2 : interval.getHigh() < endValue ? -2 : interval
+                        .getLow() > startValue ? 2 : 0)) == 0) {
                     return true;
                 }
             }
@@ -261,7 +262,8 @@ public final class IntervalSet implements TimeSet<Interval> {
                 if (startValue == intervalStart && endValue > intervalEnd) {
                     return -1;
                 }
-                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2 : 0)) == 0) {
+                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2
+                        : 0)) == 0) {
                     if (removeIndex == realSize - 2) {
                         size--;
                     } else {

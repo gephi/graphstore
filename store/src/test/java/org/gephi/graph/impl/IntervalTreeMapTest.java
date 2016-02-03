@@ -84,7 +84,8 @@ public class IntervalTreeMapTest {
 
     @Test
     public void testRemoveMultiple() {
-        Set<Interval> intervals = new HashSet(Arrays.asList(new Interval[] { new Interval(1.0, 2.0), new Interval(1.0, 4.0), new Interval(0.0, 7.0), new Interval(1.0, 3.0) }));
+        Set<Interval> intervals = new HashSet(Arrays.asList(new Interval[] { new Interval(1.0, 2.0), new Interval(1.0,
+                4.0), new Interval(0.0, 7.0), new Interval(1.0, 3.0) }));
 
         Interval2IntTreeMap m = new Interval2IntTreeMap();
         for (Interval i : intervals) {

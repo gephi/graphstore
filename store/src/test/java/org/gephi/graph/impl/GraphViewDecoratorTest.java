@@ -497,11 +497,14 @@ public class GraphViewDecoratorTest {
         for (Node n : graph.getNodes()) {
             Node m = copyGraphStore.getNode(n.getId());
             Assert.assertTrue(isIterablesEqual(graph.getEdges(n), copyGraphStore.undirectedDecorator.getEdges(m)));
-            Assert.assertTrue(isIterablesEqual(graph.getNeighbors(n), copyGraphStore.undirectedDecorator.getNeighbors(m)));
+            Assert.assertTrue(isIterablesEqual(graph.getNeighbors(n), copyGraphStore.undirectedDecorator
+                    .getNeighbors(m)));
 
             for (int i = 0; i < typeCount; i++) {
-                Assert.assertTrue(isIterablesEqual(graph.getEdges(n, i), copyGraphStore.undirectedDecorator.getEdges(m, i)));
-                Assert.assertTrue(isIterablesEqual(graph.getNeighbors(n, i), copyGraphStore.undirectedDecorator.getNeighbors(m, i)));
+                Assert.assertTrue(isIterablesEqual(graph.getEdges(n, i), copyGraphStore.undirectedDecorator
+                        .getEdges(m, i)));
+                Assert.assertTrue(isIterablesEqual(graph.getNeighbors(n, i), copyGraphStore.undirectedDecorator
+                        .getNeighbors(m, i)));
             }
         }
     }

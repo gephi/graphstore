@@ -93,12 +93,16 @@ public class IntervalsParserTest {
         assertEquals(buildIntervalSet(new Interval(-5000, -1), new Interval(0, 0.5)), IntervalsParser.parseIntervalSet("(-5e3,-1)(0, .5)"));
 
         // Dates:
-        assertEquals(buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31"))), IntervalsParser.parseIntervalSet("[2015-01-01, 2015-01-31]"));
-        assertEquals(buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31"))), IntervalsParser.parseIntervalSet("[2015-01, 2015-01-31]"));
+        assertEquals(buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"),
+                parseDateIntoTimestamp("2015-01-31"))), IntervalsParser.parseIntervalSet("[2015-01-01, 2015-01-31]"));
+        assertEquals(buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"),
+                parseDateIntoTimestamp("2015-01-31"))), IntervalsParser.parseIntervalSet("[2015-01, 2015-01-31]"));
 
         // Date times:
-        assertEquals(buildIntervalSet(new Interval(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"), parseDateTimeIntoTimestamp("2015-01-02 00:00:00"))), IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05, 2015-01-02]"));
-        assertEquals(buildIntervalSet(new Interval(parseDateTimeMillisIntoTimestamp("2015-01-01 21:12:05.121"), parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999"))), IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]"));
+        assertEquals(buildIntervalSet(new Interval(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"),
+                parseDateTimeIntoTimestamp("2015-01-02 00:00:00"))), IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05, 2015-01-02]"));
+        assertEquals(buildIntervalSet(new Interval(parseDateTimeMillisIntoTimestamp("2015-01-01 21:12:05.121"),
+                parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999"))), IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]"));
     }
 
     @Test(expected = IllegalArgumentException.class)

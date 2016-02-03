@@ -466,15 +466,19 @@ public class GraphModelTest {
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("id").getTypeClass(), Byte.class);
         Assert.assertEquals(graphModelImpl.store.factory.nodeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.INTEGER);
         Assert.assertEquals(graphModelImpl.store.factory.edgeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.DISABLED);
-        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), IntervalSet.class);
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), IntervalSet.class);
+        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID)
+                .getTypeClass(), IntervalSet.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID)
+                .getTypeClass(), IntervalSet.class);
         Assert.assertEquals(graphModelImpl.store.timeStore.nodeIndexStore.getClass(), IntervalIndexStore.class);
         Assert.assertEquals(graphModelImpl.store.timeStore.edgeIndexStore.getClass(), IntervalIndexStore.class);
 
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getTypeClass(), Double.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
+                .getTypeClass(), Double.class);
         config.setEdgeWeightType(IntervalDoubleMap.class);
         graphModelImpl.setConfiguration(config);
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getTypeClass(), IntervalDoubleMap.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
+                .getTypeClass(), IntervalDoubleMap.class);
     }
 
     @Test
@@ -490,15 +494,19 @@ public class GraphModelTest {
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("id").getTypeClass(), Byte.class);
         Assert.assertEquals(graphModelImpl.store.factory.nodeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.INTEGER);
         Assert.assertEquals(graphModelImpl.store.factory.edgeAssignConfiguration, GraphFactoryImpl.AssignConfiguration.DISABLED);
-        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), TimestampSet.class);
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID).getTypeClass(), TimestampSet.class);
+        Assert.assertEquals(graphModelImpl.getNodeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID)
+                .getTypeClass(), TimestampSet.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID)
+                .getTypeClass(), TimestampSet.class);
         Assert.assertEquals(graphModelImpl.store.timeStore.nodeIndexStore.getClass(), TimestampIndexStore.class);
         Assert.assertEquals(graphModelImpl.store.timeStore.edgeIndexStore.getClass(), TimestampIndexStore.class);
 
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getTypeClass(), Double.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
+                .getTypeClass(), Double.class);
         config.setEdgeWeightType(TimestampDoubleMap.class);
         graphModelImpl.setConfiguration(config);
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX).getTypeClass(), TimestampDoubleMap.class);
+        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
+                .getTypeClass(), TimestampDoubleMap.class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

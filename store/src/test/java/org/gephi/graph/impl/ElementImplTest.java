@@ -105,7 +105,8 @@ public class ElementImplTest {
     @Test
     public void testSetAttributeStandardizedType() {
         GraphStore store = new GraphStore();
-        store.nodeTable.store.addColumn(new ColumnImpl("arr1", Integer[].class, "Array", null, Origin.DATA, true, false));
+        store.nodeTable.store
+                .addColumn(new ColumnImpl("arr1", Integer[].class, "Array", null, Origin.DATA, true, false));
         store.nodeTable.store.addColumn(new ColumnImpl("arr2", int[].class, "Array", null, Origin.DATA, true, false));
         Column column1 = store.nodeTable.store.getColumn("arr1");
         Column column2 = store.nodeTable.store.getColumn("arr2");
@@ -1083,17 +1084,20 @@ public class ElementImplTest {
     }
 
     private Column generateBasicColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
+        graphStore.nodeTable.store
+                .addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 
     private Column generateBasicBooleanColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA, true, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA,
+                true, false));
         return graphStore.nodeTable.store.getColumn("visible");
     }
 
     private Column generateBasicListColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("list", List.class, "List", null, Origin.DATA, true, false));
+        graphStore.nodeTable.store
+                .addColumn(new ColumnImpl("list", List.class, "List", null, Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("list");
     }
 
@@ -1108,12 +1112,14 @@ public class ElementImplTest {
     }
 
     private Column generateTimestampColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA, false, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA,
+                false, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 
     private Column generateIntervalColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", IntervalIntegerMap.class, "Age", null, Origin.DATA, false, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", IntervalIntegerMap.class, "Age", null, Origin.DATA,
+                false, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 

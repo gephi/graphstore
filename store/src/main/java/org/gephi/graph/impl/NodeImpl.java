@@ -243,7 +243,9 @@ public class NodeImpl extends ElementImpl implements Node {
 
     final void checkIdType(Object id) {
         if (graphStore != null && !id.getClass().equals(graphStore.configuration.getNodeIdType())) {
-            throw new IllegalArgumentException("The id class does not match with the expected type (" + graphStore.configuration.getNodeIdType().getName() + ")");
+            throw new IllegalArgumentException(
+                    "The id class does not match with the expected type (" + graphStore.configuration.getNodeIdType()
+                            .getName() + ")");
         }
     }
 
@@ -438,10 +440,12 @@ public class NodeImpl extends ElementImpl implements Node {
             if (this.fixed != obj.fixed) {
                 return false;
             }
-            if (this.layoutData != obj.layoutData && (this.layoutData == null || !this.layoutData.equals(obj.layoutData))) {
+            if (this.layoutData != obj.layoutData && (this.layoutData == null || !this.layoutData
+                    .equals(obj.layoutData))) {
                 return false;
             }
-            if (this.textProperties != obj.textProperties && (this.textProperties == null || !this.textProperties.deepEquals(obj.textProperties))) {
+            if (this.textProperties != obj.textProperties && (this.textProperties == null || !this.textProperties
+                    .deepEquals(obj.textProperties))) {
                 return false;
             }
             return true;

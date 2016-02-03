@@ -94,12 +94,16 @@ public class TimestampsParserTest {
         assertEquals(buildTimestampSet(-5000, -1, 0, 0.5), TimestampsParser.parseTimestampSet("(-5e3, -1, 0, .5)"));
 
         // Dates:
-        assertEquals(buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")), TimestampsParser.parseTimestampSet("[2015-01-01, 2015-01-31]"));
-        assertEquals(buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")), TimestampsParser.parseTimestampSet("[2015-01, 2015-01-31]"));
+        assertEquals(buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")), TimestampsParser
+                .parseTimestampSet("[2015-01-01, 2015-01-31]"));
+        assertEquals(buildTimestampSet(parseDateIntoTimestamp("2015-01-01"), parseDateIntoTimestamp("2015-01-31")), TimestampsParser
+                .parseTimestampSet("[2015-01, 2015-01-31]"));
 
         // Date times:
-        assertEquals(buildTimestampSet(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"), parseDateTimeIntoTimestamp("2015-01-02 00:00:00")), TimestampsParser.parseTimestampSet("[2015-01-01T21:12:05, 2015-01-02]"));
-        assertEquals(buildTimestampSet(parseDateTimeMillisIntoTimestamp("2015-01-01 21:12:05.121"), parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999")), TimestampsParser.parseTimestampSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]"));
+        assertEquals(buildTimestampSet(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"), parseDateTimeIntoTimestamp("2015-01-02 00:00:00")), TimestampsParser
+                .parseTimestampSet("[2015-01-01T21:12:05, 2015-01-02]"));
+        assertEquals(buildTimestampSet(parseDateTimeMillisIntoTimestamp("2015-01-01 21:12:05.121"), parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999")), TimestampsParser
+                .parseTimestampSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]"));
     }
 
     @Test(expected = IllegalArgumentException.class)

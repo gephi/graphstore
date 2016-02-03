@@ -37,23 +37,28 @@ public class GraphFactoryImpl implements GraphFactory {
 
     public GraphFactoryImpl(GraphStore store) {
         this.store = store;
-        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getNodeIdType()));
-        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getEdgeIdType()));
+        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration
+                .getNodeIdType()));
+        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration
+                .getEdgeIdType()));
     }
 
     @Override
     public Edge newEdge(Node source, Node target) {
-        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, true);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL,
+                GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, true);
     }
 
     @Override
     public Edge newEdge(Node source, Node target, boolean directed) {
-        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, directed);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, EdgeTypeStore.NULL_LABEL,
+                GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, directed);
     }
 
     @Override
     public Edge newEdge(Node source, Node target, int type, boolean directed) {
-        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, type, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, directed);
+        return new EdgeImpl(nextEdgeId(), store, (NodeImpl) source, (NodeImpl) target, type,
+                GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT, directed);
     }
 
     @Override
@@ -120,7 +125,9 @@ public class GraphFactoryImpl implements GraphFactory {
                 return String.valueOf(NODE_IDS.getAndIncrement());
             case DISABLED:
             default:
-                throw new UnsupportedOperationException("Automatic node ids assignement isn't available for this type: '" + store.configuration.getNodeIdType().getName() + "'");
+                throw new UnsupportedOperationException(
+                        "Automatic node ids assignement isn't available for this type: '" + store.configuration
+                                .getNodeIdType().getName() + "'");
         }
     }
 
@@ -132,7 +139,9 @@ public class GraphFactoryImpl implements GraphFactory {
                 return String.valueOf(EDGE_IDS.getAndIncrement());
             case DISABLED:
             default:
-                throw new UnsupportedOperationException("Automatic edge ids assignement isn't available for this type: '" + store.configuration.getEdgeIdType().getName() + "'");
+                throw new UnsupportedOperationException(
+                        "Automatic edge ids assignement isn't available for this type: '" + store.configuration
+                                .getEdgeIdType().getName() + "'");
         }
     }
 
@@ -199,8 +208,10 @@ public class GraphFactoryImpl implements GraphFactory {
     }
 
     public void resetConfiguration() {
-        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getNodeIdType()));
-        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration.getEdgeIdType()));
+        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration
+                .getNodeIdType()));
+        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration
+                .getEdgeIdType()));
     }
 
     protected final AssignConfiguration getAssignConfiguration(Class type) {

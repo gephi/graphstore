@@ -738,27 +738,49 @@ public abstract class ElementImpl implements Element {
         if (value != null) {
             Class typeClass = column.getTypeClass();
             if (TimestampMap.class.isAssignableFrom(typeClass)) {
-                if ((value instanceof Double && (!typeClass.equals(TimestampDoubleMap.class))) || (value instanceof Float && !typeClass.equals(TimestampFloatMap.class)) || (value instanceof Boolean && !typeClass.equals(TimestampBooleanMap.class)) || (value instanceof Integer && !typeClass.equals(TimestampIntegerMap.class)) || (value instanceof Long && !typeClass.equals(TimestampLongMap.class)) || (value instanceof Short && !typeClass.equals(TimestampShortMap.class)) || (value instanceof Byte && !typeClass.equals(TimestampByteMap.class)) || (value instanceof String && !typeClass.equals(TimestampStringMap.class)) || (value instanceof Character && !typeClass.equals(TimestampCharMap.class))) {
-                    throw new IllegalArgumentException("The object class does not match with the dynamic type (" + typeClass.getName() + ")");
+                if ((value instanceof Double && (!typeClass.equals(TimestampDoubleMap.class))) || (value instanceof Float && !typeClass
+                        .equals(TimestampFloatMap.class)) || (value instanceof Boolean && !typeClass
+                        .equals(TimestampBooleanMap.class)) || (value instanceof Integer && !typeClass
+                        .equals(TimestampIntegerMap.class)) || (value instanceof Long && !typeClass
+                        .equals(TimestampLongMap.class)) || (value instanceof Short && !typeClass
+                        .equals(TimestampShortMap.class)) || (value instanceof Byte && !typeClass
+                        .equals(TimestampByteMap.class)) || (value instanceof String && !typeClass
+                        .equals(TimestampStringMap.class)) || (value instanceof Character && !typeClass
+                        .equals(TimestampCharMap.class))) {
+                    throw new IllegalArgumentException(
+                            "The object class does not match with the dynamic type (" + typeClass.getName() + ")");
                 }
             } else if (IntervalMap.class.isAssignableFrom(typeClass)) {
-                if ((value instanceof Double && (!typeClass.equals(IntervalDoubleMap.class))) || (value instanceof Float && !typeClass.equals(IntervalFloatMap.class)) || (value instanceof Boolean && !typeClass.equals(IntervalBooleanMap.class)) || (value instanceof Integer && !typeClass.equals(IntervalIntegerMap.class)) || (value instanceof Long && !typeClass.equals(IntervalLongMap.class)) || (value instanceof Short && !typeClass.equals(IntervalShortMap.class)) || (value instanceof Byte && !typeClass.equals(IntervalByteMap.class)) || (value instanceof String && !typeClass.equals(IntervalStringMap.class)) || (value instanceof Character && !typeClass.equals(IntervalCharMap.class))) {
-                    throw new IllegalArgumentException("The object class does not match with the dynamic type (" + typeClass.getName() + ")");
+                if ((value instanceof Double && (!typeClass.equals(IntervalDoubleMap.class))) || (value instanceof Float && !typeClass
+                        .equals(IntervalFloatMap.class)) || (value instanceof Boolean && !typeClass
+                        .equals(IntervalBooleanMap.class)) || (value instanceof Integer && !typeClass
+                        .equals(IntervalIntegerMap.class)) || (value instanceof Long && !typeClass
+                        .equals(IntervalLongMap.class)) || (value instanceof Short && !typeClass
+                        .equals(IntervalShortMap.class)) || (value instanceof Byte && !typeClass
+                        .equals(IntervalByteMap.class)) || (value instanceof String && !typeClass
+                        .equals(IntervalStringMap.class)) || (value instanceof Character && !typeClass
+                        .equals(IntervalCharMap.class))) {
+                    throw new IllegalArgumentException(
+                            "The object class does not match with the dynamic type (" + typeClass.getName() + ")");
                 }
             } else if (List.class.isAssignableFrom(typeClass)) {
                 if (!(value instanceof List)) {
-                    throw new IllegalArgumentException("The object class does not match with the list type (" + typeClass.getName() + ")");
+                    throw new IllegalArgumentException(
+                            "The object class does not match with the list type (" + typeClass.getName() + ")");
                 }
             } else if (Set.class.isAssignableFrom(typeClass)) {
                 if (!(value instanceof Set)) {
-                    throw new IllegalArgumentException("The object class does not match with the set type (" + typeClass.getName() + ")");
+                    throw new IllegalArgumentException(
+                            "The object class does not match with the set type (" + typeClass.getName() + ")");
                 }
             } else if (Map.class.isAssignableFrom(typeClass)) {
                 if (!(value instanceof Map)) {
-                    throw new IllegalArgumentException("The object class does not match with the map type (" + typeClass.getName() + ")");
+                    throw new IllegalArgumentException(
+                            "The object class does not match with the map type (" + typeClass.getName() + ")");
                 }
             } else if (!value.getClass().equals(typeClass)) {
-                throw new IllegalArgumentException("The object class does not match with the column type (" + typeClass.getName() + ")");
+                throw new IllegalArgumentException(
+                        "The object class does not match with the column type (" + typeClass.getName() + ")");
             }
         }
     }

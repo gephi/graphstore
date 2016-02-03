@@ -85,7 +85,8 @@ public class GraphObserverImpl implements GraphObserver {
             throw new RuntimeException("This observer doesn't compute diffs, set diff setting to true");
         }
         if (graphDiff == null) {
-            throw new IllegalStateException("The hasGraphChanged() method should be called first and getDiff() only once then");
+            throw new IllegalStateException(
+                    "The hasGraphChanged() method should be called first and getDiff() only once then");
         }
         GraphDiff diff = graphDiff;
         graphDiff = null;
@@ -126,7 +127,8 @@ public class GraphObserverImpl implements GraphObserver {
             }
             if (maxStoreId > nodeCache.length || maxStoreId < nodeCache.length) {
                 NodeImpl[] newCache = new NodeImpl[maxStoreId];
-                System.arraycopy(nodeCache, 0, newCache, 0, maxStoreId > nodeCache.length ? nodeCache.length : maxStoreId);
+                System.arraycopy(nodeCache, 0, newCache, 0, maxStoreId > nodeCache.length ? nodeCache.length
+                        : maxStoreId);
                 nodeCache = newCache;
             }
             for (Node n : graph.getNodes()) {
@@ -151,7 +153,8 @@ public class GraphObserverImpl implements GraphObserver {
             }
             if (maxStoreId > edgeCache.length || maxStoreId < edgeCache.length) {
                 EdgeImpl[] newCache = new EdgeImpl[maxStoreId];
-                System.arraycopy(edgeCache, 0, newCache, 0, maxStoreId > edgeCache.length ? edgeCache.length : maxStoreId);
+                System.arraycopy(edgeCache, 0, newCache, 0, maxStoreId > edgeCache.length ? edgeCache.length
+                        : maxStoreId);
                 edgeCache = newCache;
             }
             for (Edge e : graph.getEdges()) {

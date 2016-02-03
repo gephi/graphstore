@@ -218,11 +218,15 @@ public class EdgeTypeStore {
     private void checkType(final Object o) {
         if (o != null) {
             Class cl = o.getClass();
-            if (!(cl.equals(Integer.class) || cl.equals(String.class) || cl.equals(Float.class) || cl.equals(Double.class) || cl.equals(Short.class) || cl.equals(Byte.class) || cl.equals(Long.class) || cl.equals(Character.class) || cl.equals(Boolean.class))) {
-                throw new IllegalArgumentException("The type id is " + cl.getCanonicalName() + " but must be a primitive type (int, string, long...)");
+            if (!(cl.equals(Integer.class) || cl.equals(String.class) || cl.equals(Float.class) || cl
+                    .equals(Double.class) || cl.equals(Short.class) || cl.equals(Byte.class) || cl.equals(Long.class) || cl
+                    .equals(Character.class) || cl.equals(Boolean.class))) {
+                throw new IllegalArgumentException(
+                        "The type id is " + cl.getCanonicalName() + " but must be a primitive type (int, string, long...)");
             }
             if (!configuration.getEdgeLabelType().equals(o.getClass())) {
-                throw new IllegalArgumentException("The expected type was " + configuration.getEdgeLabelType().getCanonicalName() + " and " + o.getClass().getCanonicalName() + " was found");
+                throw new IllegalArgumentException("The expected type was " + configuration.getEdgeLabelType()
+                        .getCanonicalName() + " and " + o.getClass().getCanonicalName() + " was found");
             }
         }
     }

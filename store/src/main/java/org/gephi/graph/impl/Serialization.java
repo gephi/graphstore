@@ -531,7 +531,8 @@ public class Serialization {
         boolean readOnly = (Boolean) deserialize(is);
         Estimator estimator = (Estimator) deserialize(is);
 
-        ColumnImpl column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed, readOnly);
+        ColumnImpl column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed,
+                readOnly);
         column.storeId = storeId;
         if (estimator != null) {
             column.setEstimator(estimator);
@@ -663,7 +664,8 @@ public class Serialization {
         boolean enableNodeProperties = (Boolean) deserialize(is);
         boolean enableEdgeProperties = (Boolean) deserialize(is);
 
-        graphStoreConfigurationVersion = new GraphStoreConfigurationVersion(enableElementLabel, enableElementTimestamp, enableNodeProperties, enableEdgeProperties);
+        graphStoreConfigurationVersion = new GraphStoreConfigurationVersion(enableElementLabel, enableElementTimestamp,
+                enableNodeProperties, enableEdgeProperties);
         return graphStoreConfigurationVersion;
     }
 

@@ -56,7 +56,8 @@ public class TableObserverImpl implements TableObserver {
             throw new RuntimeException("This observer doesn't compute diffs, set diff setting to true");
         }
         if (tableDiff == null) {
-            throw new IllegalStateException("The hasGraphChanged() method should be called first and getDiff() only once then");
+            throw new IllegalStateException(
+                    "The hasGraphChanged() method should be called first and getDiff() only once then");
         }
         TableDiff diff = tableDiff;
         tableDiff = null;

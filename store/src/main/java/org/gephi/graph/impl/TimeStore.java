@@ -114,10 +114,12 @@ public class TimeStore {
         if (obj == null) {
             return false;
         }
-        if (this.nodeIndexStore != obj.nodeIndexStore && (this.nodeIndexStore == null || !this.nodeIndexStore.deepEquals(obj.nodeIndexStore))) {
+        if (this.nodeIndexStore != obj.nodeIndexStore && (this.nodeIndexStore == null || !this.nodeIndexStore
+                .deepEquals(obj.nodeIndexStore))) {
             return false;
         }
-        if (this.edgeIndexStore != obj.edgeIndexStore && (this.edgeIndexStore == null || !this.edgeIndexStore.deepEquals(obj.edgeIndexStore))) {
+        if (this.edgeIndexStore != obj.edgeIndexStore && (this.edgeIndexStore == null || !this.edgeIndexStore
+                .deepEquals(obj.edgeIndexStore))) {
             return false;
         }
         return true;
