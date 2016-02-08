@@ -124,11 +124,17 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
             if (graphStore != null && columnImpl.table != null) {
                 if (AttributeUtils.isNodeColumn(columnImpl)) {
                     for (Node n : graphStore.nodeStore) {
-                        ((NodeImpl) n).attributes[columnImpl.getIndex()] = null;
+                        Object[] attributes = ((NodeImpl) n).attributes;
+                        if (attributes.length > columnImpl.getIndex()) {
+                            attributes[columnImpl.getIndex()] = null;
+                        }
                     }
                 } else {
                     for (Edge e : graphStore.edgeStore) {
-                        ((EdgeImpl) e).attributes[columnImpl.getIndex()] = null;
+                        Object[] attributes = ((EdgeImpl) e).attributes;
+                        if (attributes.length > columnImpl.getIndex()) {
+                            attributes[columnImpl.getIndex()] = null;
+                        }
                     }
                 }
             }

@@ -624,6 +624,19 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testRemoveColumnWithNodes() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getNodeTable();
+
+        Node n1 = graphModel.factory().newNode("1");
+        graphModel.getStore().addNode(n1);
+
+        Column col1 = table.addColumn("foo", String.class);
+        table.removeColumn(col1);
+        Assert.assertFalse(table.hasColumn("foo"));
+    }
+
+    @Test
     public void testNodeAttributesAddAndClearColumns() {
         GraphModelImpl graphModel = new GraphModelImpl();
         Table table = graphModel.getNodeTable();
