@@ -318,6 +318,7 @@ public final class IntervalSet implements TimeSet<Interval> {
         return true;
     }
 
+    @Override
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
@@ -341,6 +342,7 @@ public final class IntervalSet implements TimeSet<Interval> {
         return sb.toString();
     }
 
+    @Override
     public String toString(TimeFormat timeFormat) {
         return toString(timeFormat, null);
     }

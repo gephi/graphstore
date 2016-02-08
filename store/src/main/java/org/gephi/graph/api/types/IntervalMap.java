@@ -599,6 +599,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         return result / period;
     }
 
+    @Override
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
@@ -635,6 +636,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         return sb.toString();
     }
 
+    @Override
     public String toString(TimeFormat timeFormat) {
         return toString(timeFormat, null);
     }

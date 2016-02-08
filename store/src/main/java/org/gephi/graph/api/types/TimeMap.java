@@ -17,6 +17,8 @@ package org.gephi.graph.api.types;
 
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.TimeFormat;
+import org.joda.time.DateTimeZone;
 
 /**
  * Interface that defines the functionalities both timestamp and interval map
@@ -122,4 +124,21 @@ public interface TimeMap<K, V> {
      * @return true if empty, false otherwise
      */
     public boolean isEmpty();
+
+    /**
+     * Returns this map as a string.
+     *
+     * @param timeFormat time format
+     * @return map as string
+     */
+    public String toString(TimeFormat timeFormat);
+
+    /**
+     * Returns this map as a string.
+     *
+     * @param timeFormat time format
+     * @param timeZone time zone
+     * @return map as string
+     */
+    public String toString(TimeFormat timeFormat, DateTimeZone timeZone);
 }

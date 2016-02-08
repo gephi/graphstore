@@ -15,6 +15,9 @@
  */
 package org.gephi.graph.api.types;
 
+import org.gephi.graph.api.TimeFormat;
+import org.joda.time.DateTimeZone;
+
 /**
  * Interface that defines the functionalities both timestamp and interval set
  * have.
@@ -83,4 +86,21 @@ public interface TimeSet<K> {
      * Empties this set.
      */
     public void clear();
+
+    /**
+     * Returns this set as a string.
+     *
+     * @param timeFormat time format
+     * @return set as string
+     */
+    public String toString(TimeFormat timeFormat);
+
+    /**
+     * Returns this set as a string.
+     *
+     * @param timeFormat time format
+     * @param timeZone time zone
+     * @return set as string
+     */
+    public String toString(TimeFormat timeFormat, DateTimeZone timeZone);
 }
