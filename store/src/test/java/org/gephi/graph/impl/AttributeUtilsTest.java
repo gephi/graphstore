@@ -42,6 +42,7 @@ import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
 import org.gephi.graph.api.types.IntervalCharMap;
@@ -637,6 +638,33 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.printArray(new boolean[] { true, false, true }), "[true, false, true]");
         Assert.assertEquals(AttributeUtils.printArray(new char[] {}), "<empty>");
         Assert.assertEquals(AttributeUtils.printArray(new String[] { "[a, b, c]" }), "[\"[a, b, c]\"]");
+    }
+
+    @Test
+    public void testPrint() {
+        Assert.assertEquals(AttributeUtils.print(null), "null");
+        Assert.assertEquals(Integer.toString(42), AttributeUtils.print(new Integer(42)));
+        Assert.assertEquals("foo", AttributeUtils.print("foo"));
+        Assert.assertEquals("[-1, 2, 3]", AttributeUtils.print(new int[] { -1, 2, 3 }));
+
+        String date = "2003-01-01";
+        double d = AttributeUtils.parseDateTime(date);
+
+        TimestampSet ts = new TimestampSet();
+        ts.add(d);
+
+        Assert.assertEquals(AttributeUtils.print(ts), ts.toString(TimeFormat.DOUBLE));
+        Assert.assertEquals(AttributeUtils.print(ts, TimeFormat.DATE, null), ts.toString(TimeFormat.DATE, null));
+        Assert.assertEquals(AttributeUtils.print(ts, TimeFormat.DATETIME, DateTimeZone.forID("+00:30")), ts
+                .toString(TimeFormat.DATETIME, DateTimeZone.forID("+00:30")));
+
+        TimestampIntegerMap tm = new TimestampIntegerMap();
+        tm.put(d, 42);
+
+        Assert.assertEquals(AttributeUtils.print(tm), tm.toString(TimeFormat.DOUBLE));
+        Assert.assertEquals(AttributeUtils.print(tm, TimeFormat.DATE, null), tm.toString(TimeFormat.DATE, null));
+        Assert.assertEquals(AttributeUtils.print(tm, TimeFormat.DATETIME, DateTimeZone.forID("+00:30")), tm
+                .toString(TimeFormat.DATETIME, DateTimeZone.forID("+00:30")));
     }
 
     @Test

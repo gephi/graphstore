@@ -79,6 +79,7 @@ import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimeMap;
+import org.gephi.graph.api.types.TimeSet;
 import org.gephi.graph.impl.ArraysParser;
 import org.gephi.graph.impl.GraphStoreConfiguration;
 import org.joda.time.DateTimeZone;
@@ -298,6 +299,40 @@ public class AttributeUtils {
 
     private static DateTimeFormatter getDatePrinterByTimeZone(DateTimeZone timeZone) {
         return getDateTimeFormatterByTimeZone(DATE_PRINTERS_BY_TIMEZONE, DATE_PRINTER, timeZone);
+    }
+
+    /**
+     * Returns the string representation of the given value.
+     *
+     * @param value value
+     * @return string representation
+     */
+    public static String print(Object value) {
+        return print(value, TimeFormat.DOUBLE, null);
+    }
+
+    /**
+     * Returns the string representation of the given value.
+     *
+     * @param value value
+     * @param timeFormat time format
+     * @param timeZone time zone
+     * @return string representation
+     */
+    public static String print(Object value, TimeFormat timeFormat, DateTimeZone timeZone) {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof TimeSet) {
+            return ((TimeSet) value).toString(timeFormat, timeZone);
+        }
+        if (value instanceof TimeMap) {
+            return ((TimeMap) value).toString(timeFormat, timeZone);
+        }
+        if (value.getClass().isArray()) {
+            return printArray(value);
+        }
+        return value.toString();
     }
 
     /**
