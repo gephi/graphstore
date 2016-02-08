@@ -47,7 +47,7 @@ GraphStore uses Maven for building.
 
 ## How to obtain code coverage report
 
-        > mvn jacoco:report
+	> mvn jacoco:report
 
 ## Contribute
 
