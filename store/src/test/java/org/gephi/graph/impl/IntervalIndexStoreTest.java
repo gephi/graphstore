@@ -26,6 +26,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalIntegerMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -449,6 +450,27 @@ public class IntervalIndexStoreTest {
         nodeImpl.removeAttribute(graphModel.store.nodeTable.getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX));
         Assert.assertEquals(store.size(), 0);
         Assert.assertFalse(store.contains(new Interval(1.0, 2.0)));
+    }
+
+    @Test
+    public void testAddWithAttribute() {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphStore graphStore = new GraphModelImpl(config).store;
+        TimeStore timestampStore = graphStore.timeStore;
+        IntervalIndexStore store = (IntervalIndexStore) timestampStore.nodeIndexStore;
+
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
+        graphStore.addNode(nodeImpl);
+        nodeImpl.addInterval(new Interval(1.0, 2.0));
+
+        Column col = graphStore.nodeTable.addColumn("0", IntervalIntegerMap.class);
+        nodeImpl.setAttribute(col, 42, new Interval(3.0, 4.0));
+        Assert.assertTrue(store.contains(new Interval(3.0, 4.0)));
+
+        Object[] nodes = getArrayFromIterable(store.getIndex(graphStore).get(new Interval(1.0, 4.0)));
+        Assert.assertEquals(nodes.length, 1);
+        Assert.assertSame(nodes[0], nodeImpl);
     }
 
     @Test

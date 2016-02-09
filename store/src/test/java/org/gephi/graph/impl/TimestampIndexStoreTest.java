@@ -24,6 +24,7 @@ import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -464,6 +465,26 @@ public class TimestampIndexStoreTest {
         nodeImpl.removeAttribute(graphStore.nodeTable.getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX));
         Assert.assertEquals(store.size(), 0);
         Assert.assertFalse(store.contains(3.0));
+    }
+
+    @Test
+    public void testAddWithAttribute() {
+        GraphStore graphStore = new GraphModelImpl().store;
+        TimeStore timestampStore = graphStore.timeStore;
+        TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
+
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
+        graphStore.addNode(nodeImpl);
+        nodeImpl.addTimestamp(3.0);
+
+        Column col = graphStore.nodeTable.addColumn("0", TimestampIntegerMap.class);
+        nodeImpl.setAttribute(col, 42, 4.0);
+        Assert.assertTrue(store.contains(4.0));
+
+        Object[] nodes = getArrayFromIterable(store.getIndex(graphStore).get(new Interval(3.0, 4.0)));
+        Assert.assertEquals(nodes.length, 1);
+        Assert.assertSame(nodes[0], nodeImpl);
+        Assert.assertTrue(store.getIndex(graphStore).get(4.0).toCollection().isEmpty());
     }
 
     @Test

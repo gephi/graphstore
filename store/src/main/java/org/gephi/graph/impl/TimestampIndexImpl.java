@@ -93,7 +93,7 @@ public class TimestampIndexImpl<T extends Element> extends TimeIndexImpl<T, Doub
 
         readLock();
         Integer index = timestampIndexStore.timeSortedMap.get(timestamp);
-        if (index != null) {
+        if (index != null && index < timestamps.length) {
             TimeIndexEntry ts = timestamps[index];
             if (ts != null) {
                 return new ElementIterableImpl(new ElementIteratorImpl(ts.elementSet.iterator()));
@@ -116,9 +116,11 @@ public class TimestampIndexImpl<T extends Element> extends TimeIndexImpl<T, Doub
                 double timestamp = entry.getDoubleKey();
                 int index = entry.getIntValue();
                 if (timestamp <= interval.getHigh()) {
-                    TimeIndexEntry ts = timestamps[index];
-                    if (ts != null) {
-                        elements.addAll(ts.elementSet);
+                    if (index < timestamps.length) {
+                        TimeIndexEntry ts = timestamps[index];
+                        if (ts != null) {
+                            elements.addAll(ts.elementSet);
+                        }
                     }
                 } else {
                     break;

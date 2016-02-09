@@ -95,9 +95,11 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
         Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
         if (!sortedMap.isEmpty()) {
             for (Integer index : sortedMap.values(timestamp)) {
-                TimeIndexEntry ts = timestamps[index];
-                if (ts != null) {
-                    elements.addAll(ts.elementSet);
+                if (index < timestamps.length) {
+                    TimeIndexEntry ts = timestamps[index];
+                    if (ts != null) {
+                        elements.addAll(ts.elementSet);
+                    }
                 }
             }
         }
@@ -116,9 +118,11 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
         Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
         if (!sortedMap.isEmpty()) {
             for (Integer index : sortedMap.values(interval)) {
-                TimeIndexEntry ts = timestamps[index];
-                if (ts != null) {
-                    elements.addAll(ts.elementSet);
+                if (index < timestamps.length) {
+                    TimeIndexEntry ts = timestamps[index];
+                    if (ts != null) {
+                        elements.addAll(ts.elementSet);
+                    }
                 }
             }
         }
