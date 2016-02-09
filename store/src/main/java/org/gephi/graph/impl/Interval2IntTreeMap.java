@@ -25,6 +25,9 @@ import org.gephi.graph.api.Interval;
 
 public final class Interval2IntTreeMap implements Map<Interval, Integer> {
 
+    // Constant so the min/max returns the lowest/highest non-infinite value
+    private static final boolean EXCLUDE_INFINITE = true;
+    //
     private Node nil; // the sentinel node
     private Node root; // the root of this interval tree
     private int size = 0;
@@ -383,14 +386,25 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
         if (root.left == nil) {
             return null;
         }
-        return treeMinimum(root.left).i;
+
+        return treeMinimum(root.left);
     }
 
-    private Node treeMinimum(Node x) {
+    private Interval treeMinimum(Node x) {
+        // TODO: Better algorithm
         while (x.left != nil) {
             x = x.left;
         }
-        return x;
+        if (EXCLUDE_INFINITE && Double.isInfinite(x.i.getLow())) {
+            List<Interval> ints = getIntervals();
+            for (Interval i : ints) {
+                if (!Double.isInfinite(i.getLow())) {
+                    return i;
+                }
+            }
+            return ints.get(0);
+        }
+        return x.i;
     }
 
     /**
@@ -425,7 +439,11 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
         if (isEmpty()) {
             return Double.NEGATIVE_INFINITY;
         }
-        return minimum().getLow();
+        Interval min = minimum();
+        if (Double.isInfinite(min.getLow()) && !Double.isInfinite(min.getHigh())) {
+            return min.getHigh();
+        }
+        return min.getLow();
     }
 
     /**
@@ -438,7 +456,23 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
         if (isEmpty()) {
             return Double.POSITIVE_INFINITY;
         }
-        return root.left.max;
+        double max = root.left.max;
+        if (Double.isInfinite(max)) {
+            // TODO: Better alg
+            max = Double.NEGATIVE_INFINITY;
+            for (Interval i : getIntervals()) {
+                if (!Double.isInfinite(i.getLow())) {
+                    max = Math.max(max, i.getLow());
+                }
+                if (!Double.isInfinite(i.getHigh())) {
+                    max = Math.max(max, i.getHigh());
+                }
+            }
+            if (max == Double.NEGATIVE_INFINITY) {
+                return Double.POSITIVE_INFINITY;
+            }
+        }
+        return max;
     }
 
     @Override
@@ -691,7 +725,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
         private final Interval i; // i.low is the key of this node
         private final int v; // value
         private double max; // the maximum value of any interval endpoint stored
-                            // in the subtree rooted at this node
+        // in the subtree rooted at this node
 
         private Color color; // the color of this node
         private Node left; // the left subtree of this node

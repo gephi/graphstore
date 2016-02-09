@@ -144,6 +144,44 @@ public class IntervalTreeMapTest {
         Assert.assertEquals(m.getHigh(), 12.0);
     }
 
+    @Test
+    public void testLowInfinite() {
+        Interval2IntTreeMap m = new Interval2IntTreeMap();
+        m.put(new Interval(Double.NEGATIVE_INFINITY, 8.0), 42);
+        Assert.assertEquals(m.getLow(), 8.0);
+        m.put(new Interval(Double.NEGATIVE_INFINITY, 5.0), 42);
+        Assert.assertEquals(m.getLow(), 5.0);
+        m.put(new Interval(3.0, 9.0), 42);
+        Assert.assertEquals(m.getLow(), 3.0);
+    }
+
+    @Test
+    public void testLowOnlyInfinite() {
+        Interval2IntTreeMap m = new Interval2IntTreeMap();
+        Assert.assertEquals(m.getLow(), Double.NEGATIVE_INFINITY);
+        m.put(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), 42);
+        Assert.assertEquals(m.getLow(), Double.NEGATIVE_INFINITY);
+    }
+
+    @Test
+    public void testHighInfinite() {
+        Interval2IntTreeMap m = new Interval2IntTreeMap();
+        m.put(new Interval(1.0, Double.POSITIVE_INFINITY), 42);
+        Assert.assertEquals(m.getHigh(), 1.0);
+        m.put(new Interval(4.0, Double.POSITIVE_INFINITY), 42);
+        Assert.assertEquals(m.getHigh(), 4.0);
+        m.put(new Interval(3.0, 9.0), 42);
+        Assert.assertEquals(m.getHigh(), 9.0);
+    }
+
+    @Test
+    public void testHighOnlyInfinite() {
+        Interval2IntTreeMap m = new Interval2IntTreeMap();
+        Assert.assertEquals(m.getHigh(), Double.POSITIVE_INFINITY);
+        m.put(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), 42);
+        Assert.assertEquals(m.getHigh(), Double.POSITIVE_INFINITY);
+    }
+
     public void testMinMax() {
         Interval i1 = new Interval(1.0, 8.0);
         Interval i2 = new Interval(-1.0, 3.0);

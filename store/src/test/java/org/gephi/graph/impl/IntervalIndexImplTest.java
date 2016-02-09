@@ -91,6 +91,36 @@ public class IntervalIndexImplTest {
     }
 
     @Test
+    public void testGetMinWithInfinite() {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        TimeStore timeStore = graphModel.store.timeStore;
+        IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
+
+        store.add(new Interval(Double.NEGATIVE_INFINITY, 3.0));
+        Assert.assertEquals(store.mainIndex.getMinTimestamp(), 3.0);
+
+        store.add(new Interval(2.0, 3.0));
+        Assert.assertEquals(store.mainIndex.getMinTimestamp(), 2.0);
+    }
+
+    @Test
+    public void testGetMaxWithInfinite() {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        TimeStore timeStore = graphModel.store.timeStore;
+        IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
+
+        store.add(new Interval(1.0, Double.POSITIVE_INFINITY));
+        Assert.assertEquals(store.mainIndex.getMaxTimestamp(), 1.0);
+
+        store.add(new Interval(1.0, 2.0));
+        Assert.assertEquals(store.mainIndex.getMaxTimestamp(), 2.0);
+    }
+
+    @Test
     public void testGetElements() {
         Configuration config = new Configuration();
         config.setTimeRepresentation(TimeRepresentation.INTERVAL);
