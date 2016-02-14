@@ -23,6 +23,7 @@ import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TableObserver;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.Graph;
 
 public class TableImpl<T extends Element> implements Table {
 
@@ -137,6 +138,11 @@ public class TableImpl<T extends Element> implements Table {
     @Override
     public Class getElementClass() {
         return store.elementType;
+    }
+
+    @Override
+    public Graph getGraph() {
+        return store.graphStore;
     }
 
     public void destroyTableObserver(TableObserver observer) {

@@ -123,4 +123,11 @@ public interface Table extends ColumnIterable {
      * @return a newly created table observer
      */
     public TableObserver createTableObserver(boolean withDiff);
+
+    /**
+     * Returns the graph this table is associated with.
+     *
+     * @return graph
+     */
+    public Graph getGraph();
 }
