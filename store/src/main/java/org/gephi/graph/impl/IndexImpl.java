@@ -15,15 +15,25 @@
  */
 package org.gephi.graph.impl;
 
+import it.unimi.dsi.fastutil.booleans.BooleanArrays;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.bytes.ByteArrays;
 import it.unimi.dsi.fastutil.chars.Char2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.chars.CharArrays;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.doubles.DoubleArrays;
 import it.unimi.dsi.fastutil.floats.Float2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.floats.FloatArrays;
 import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.longs.Long2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.longs.LongArrays;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.shorts.ShortArrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -886,339 +896,84 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
     }
 
-    protected class DefaultArrayIndex extends DefaultIndex {
+    protected class DefaultArrayIndex extends AbstractIndex<Object[]> {
 
-        public DefaultArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public DefaultArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (Object s : (Object[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (Object s : (Object[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
+            map = new Object2ObjectOpenCustomHashMap<Object[], Set<T>>(ObjectArrays.HASH_STRATEGY);
         }
     }
 
-    protected class BooleanArrayIndex extends BooleanIndex {
+    protected class BooleanArrayIndex extends AbstractIndex<boolean[]> {
 
-        public BooleanArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public BooleanArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (boolean s : (boolean[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (boolean s : (boolean[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
+            map = new Object2ObjectOpenCustomHashMap<boolean[], Set<T>>(BooleanArrays.HASH_STRATEGY);
         }
     }
 
-    protected class DoubleArrayIndex extends DoubleIndex {
+    protected class DoubleArrayIndex extends AbstractIndex<double[]> {
 
-        public DoubleArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public DoubleArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (double s : (double[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (double s : (double[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
-        }
-
-        @Override
-        protected boolean isSortable() {
-            return true;
+            map = new Object2ObjectOpenCustomHashMap<double[], Set<T>>(DoubleArrays.HASH_STRATEGY);
         }
     }
 
-    protected class IntegerArrayIndex extends IntegerIndex {
+    protected class IntegerArrayIndex extends AbstractIndex<int[]> {
 
-        public IntegerArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public IntegerArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (int s : (int[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (int s : (int[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
-        }
-
-        @Override
-        protected boolean isSortable() {
-            return true;
+            map = new Object2ObjectOpenCustomHashMap<int[], Set<T>>(IntArrays.HASH_STRATEGY);
         }
     }
 
-    protected class FloatArrayIndex extends FloatIndex {
+    protected class FloatArrayIndex extends AbstractIndex<float[]> {
 
-        public FloatArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public FloatArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (float s : (float[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (float s : (float[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
-        }
-
-        @Override
-        protected boolean isSortable() {
-            return true;
+            map = new Object2ObjectOpenCustomHashMap<float[], Set<T>>(FloatArrays.HASH_STRATEGY);
         }
     }
 
-    protected class LongArrayIndex extends LongIndex {
+    protected class LongArrayIndex extends AbstractIndex<long[]> {
 
-        public LongArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public LongArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (long s : (long[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (long s : (long[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
-        }
-
-        @Override
-        protected boolean isSortable() {
-            return true;
+            map = new Object2ObjectOpenCustomHashMap<long[], Set<T>>(LongArrays.HASH_STRATEGY);
         }
     }
 
-    protected class ShortArrayIndex extends ShortIndex {
+    protected class ShortArrayIndex extends AbstractIndex<short[]> {
 
-        public ShortArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public ShortArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (short s : (short[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (short s : (short[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
-        }
-
-        @Override
-        protected boolean isSortable() {
-            return true;
+            map = new Object2ObjectOpenCustomHashMap<short[], Set<T>>(ShortArrays.HASH_STRATEGY);
         }
     }
 
-    protected class ByteArrayIndex extends ByteIndex {
+    protected class ByteArrayIndex extends AbstractIndex<byte[]> {
 
-        public ByteArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public ByteArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (byte s : (byte[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (byte s : (byte[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
-        }
-
-        @Override
-        protected boolean isSortable() {
-            return true;
+            map = new Object2ObjectOpenCustomHashMap<byte[], Set<T>>(ByteArrays.HASH_STRATEGY);
         }
     }
 
-    protected class CharArrayIndex extends CharIndex {
+    protected class CharArrayIndex extends AbstractIndex<char[]> {
 
-        public CharArrayIndex(Column column) {
-            super((ColumnImpl) column);
-        }
+        public CharArrayIndex(ColumnImpl column) {
+            super(column);
 
-        @Override
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                for (char s : (char[]) value) {
-                    super.putValue(element, s);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                for (char s : (char[]) value) {
-                    super.removeValue(element, s);
-                }
-            }
+            map = new Object2ObjectOpenCustomHashMap<char[], Set<T>>(CharArrays.HASH_STRATEGY);
         }
     }
 
