@@ -15,9 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -29,6 +26,10 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
 
 public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph {
 
@@ -736,10 +737,10 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
         if (view == null) {
             throw new NullPointerException();
         }
-        if (!(view instanceof GraphViewImpl)) {
-            throw new ClassCastException("Object must be a GraphViewImpl object");
+        if (!(view instanceof AbstractGraphView)) {
+            throw new ClassCastException("Object must be a AbstractGraphView object");
         }
-        if (((GraphViewImpl) view).graphStore != graphStore) {
+        if (((AbstractGraphView) view).graphStore != graphStore) {
             throw new RuntimeException("The view doesn't belong to this store");
         }
     }
