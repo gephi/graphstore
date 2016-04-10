@@ -586,7 +586,7 @@ public class Serialization {
     private void serializeGraphView(final DataOutput out, final GraphViewImpl view) throws IOException {
         serialize(out, view.nodeView);
         serialize(out, view.edgeView);
-        serialize(out, view.storeId);
+        serialize(out, view.getStoreId());
         serialize(out, view.nodeCount);
         serialize(out, view.edgeCount);
 
@@ -600,7 +600,7 @@ public class Serialization {
         serialize(out, view.version);
 
         serialize(out, view.attributes);
-        serialize(out, view.interval);
+        serialize(out, view.getTimeInterval());
     }
 
     private GraphViewImpl deserializeGraphView(final DataInput is) throws IOException, ClassNotFoundException {
@@ -624,7 +624,7 @@ public class Serialization {
         view.edgeCount = edgeCount;
         view.nodeBitVector = nodeCountVector;
         view.edgeBitVector = edgeCountVector;
-        view.storeId = storeId;
+        view.setStoreId(storeId);
 
         view.typeCounts = typeCounts;
         view.mutualEdgesCount = mutualEdgesCount;
@@ -634,7 +634,7 @@ public class Serialization {
         view.version.edgeVersion = version.edgeVersion;
 
         view.attributes.setGraphAttributes(atts);
-        view.interval = interval;
+        view.setTimeInterval(interval);
 
         return view;
     }

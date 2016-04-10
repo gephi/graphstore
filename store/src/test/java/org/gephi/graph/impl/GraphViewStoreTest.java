@@ -67,7 +67,7 @@ public class GraphViewStoreTest {
 
         Assert.assertFalse(store.contains(view));
         Assert.assertEquals(store.size(), 0);
-        Assert.assertEquals(view.storeId, GraphViewStore.NULL_VIEW);
+        Assert.assertEquals(view.getStoreId(), GraphViewStore.NULL_VIEW);
         Assert.assertTrue(view.isDestroyed());
     }
 
@@ -128,7 +128,7 @@ public class GraphViewStoreTest {
 
         view = store.createView();
 
-        Assert.assertEquals(view.storeId, 0);
+        Assert.assertEquals(view.getStoreId(), 0);
         Assert.assertEquals(store.length, 1);
         Assert.assertEquals(store.garbageQueue.size(), 0);
     }

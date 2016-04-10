@@ -17,11 +17,12 @@ package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
-import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.HierarchicalGraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
@@ -35,7 +36,7 @@ public class GraphViewStore {
     // Data
     protected final IntSortedSet garbageQueue;
     protected final GraphStore graphStore;
-    protected GraphViewImpl[] views;
+    protected AbstractGraphView[] views;
     protected int length;
     // Visible view
     protected GraphView visibleView;
@@ -45,9 +46,24 @@ public class GraphViewStore {
             throw new NullPointerException();
         }
         this.graphStore = graphStore;
-        this.views = new GraphViewImpl[DEFAULT_VIEWS];
+        this.views = new AbstractGraphView[DEFAULT_VIEWS];
         this.garbageQueue = new IntRBTreeSet();
         this.visibleView = graphStore.mainGraphView;
+    }
+
+    public HierarchicalGraphView createHierarchicalView() {
+        return createHierarchicalView(true, true);
+    }
+
+    public HierarchicalGraphView createHierarchicalView(boolean nodes, boolean edges) {
+        graphStore.autoWriteLock();
+        try {
+            HierarchicalGraphViewImpl graphView = new HierarchicalGraphViewImpl(graphStore, nodes, edges);
+            addView(graphView);
+            return graphView;
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
     }
 
     public GraphViewImpl createView() {
@@ -82,11 +98,18 @@ public class GraphViewStore {
             }
         } else {
             checkNonNullViewObject(view);
-            checkViewExist((GraphViewImpl) view);
-
+            checkViewExist((AbstractGraphView) view);
             graphStore.autoWriteLock();
             try {
-                GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, nodes, edges);
+                final GraphViewImpl copy;
+                if (view instanceof GraphViewImpl) {
+                    copy = (GraphViewImpl) view;
+                } else if (view instanceof HierarchicalGraphViewImpl) {
+                    copy = ((HierarchicalGraphViewImpl) view).viewDelegate;
+                } else {
+                    throw new IllegalArgumentException();
+                }
+                GraphViewImpl graphView = new GraphViewImpl(copy, nodes, edges);
                 addView(graphView);
                 return graphView;
             } finally {
@@ -102,25 +125,25 @@ public class GraphViewStore {
 
             TimeIndexStore nodeTimeStore = graphStore.timeStore.nodeIndexStore;
             if (nodeTimeStore != null) {
-                nodeTimeStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+                nodeTimeStore.deleteViewIndex(((AbstractGraphView) view).getDirectedGraph());
             }
 
             TimeIndexStore edgeTimeStore = graphStore.timeStore.edgeIndexStore;
             if (edgeTimeStore != null) {
-                edgeTimeStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+                edgeTimeStore.deleteViewIndex(((AbstractGraphView) view).getDirectedGraph());
             }
 
             IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
             if (nodeIndexStore != null) {
-                nodeIndexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+                nodeIndexStore.deleteViewIndex(((AbstractGraphView) view).getDirectedGraph());
             }
 
             IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
             if (edgeIndexStore != null) {
-                edgeIndexStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
+                edgeIndexStore.deleteViewIndex(((AbstractGraphView) view).getDirectedGraph());
             }
 
-            removeView((GraphViewImpl) view);
+            removeView((AbstractGraphView) view);
         } finally {
             graphStore.autoWriteUnlock();
         }
@@ -128,11 +151,11 @@ public class GraphViewStore {
 
     public void setTimeInterval(GraphView view, Interval interval) {
         checkNonNullViewObject(view);
-        checkViewExist((GraphViewImpl) view);
+        checkViewExist((AbstractGraphView) view);
 
         graphStore.autoWriteLock();
         try {
-            GraphViewImpl graphView = (GraphViewImpl) view;
+            AbstractGraphView graphView = (AbstractGraphView) view;
             graphView.setTimeInterval(interval);
         } finally {
             graphStore.autoWriteUnlock();
@@ -143,8 +166,8 @@ public class GraphViewStore {
         graphStore.autoReadLock();
         try {
             checkNonNullViewObject(view);
-            GraphViewImpl viewImpl = (GraphViewImpl) view;
-            int id = viewImpl.storeId;
+            AbstractGraphView viewImpl = (AbstractGraphView) view;
+            int id = viewImpl.getStoreId();
             if (id != NULL_VIEW && id < length && views[id] == view) {
                 return true;
             }
@@ -165,12 +188,12 @@ public class GraphViewStore {
             if (view.isMainView()) {
                 return graphStore.undirectedDecorator;
             }
-            return ((GraphViewImpl) view).getUndirectedGraph();
+            return ((AbstractGraphView) view).getUndirectedGraph();
         } else {
             if (view.isMainView()) {
                 return graphStore;
             }
-            return ((GraphViewImpl) view).getDirectedGraph();
+            return ((AbstractGraphView) view).getDirectedGraph();
         }
     }
 
@@ -182,7 +205,7 @@ public class GraphViewStore {
         }
 
         checkDirectedAllowed();
-        return ((GraphViewImpl) view).getDirectedGraph();
+        return ((AbstractGraphView) view).getDirectedGraph();
     }
 
     public UndirectedSubgraph getUndirectedGraph(GraphView view) {
@@ -191,7 +214,7 @@ public class GraphViewStore {
         if (view.isMainView()) {
             return graphStore.undirectedDecorator;
         }
-        return ((GraphViewImpl) view).getUndirectedGraph();
+        return ((AbstractGraphView) view).getUndirectedGraph();
     }
 
     public GraphView getVisibleView() {
@@ -203,20 +226,20 @@ public class GraphViewStore {
             visibleView = graphStore.mainGraphView;
         } else {
             checkNonNullViewObject(view);
-            checkViewExist((GraphViewImpl) view);
+            checkViewExist((AbstractGraphView) view);
             visibleView = view;
         }
     }
 
     public GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
-        GraphViewImpl graphViewImpl = (GraphViewImpl) graph.getView();
+        AbstractGraphView graphViewImpl = (AbstractGraphView) graph.getView();
         checkViewExist(graphViewImpl);
 
         return graphViewImpl.createGraphObserver(graph, withDiff);
     }
 
     public void destroyGraphObserver(GraphObserverImpl graphObserver) {
-        GraphViewImpl graphViewImpl = (GraphViewImpl) graphObserver.graph.getView();
+        AbstractGraphView graphViewImpl = (AbstractGraphView) graphObserver.graph.getView();
         checkViewExist(graphViewImpl);
 
         graphViewImpl.destroyGraphObserver(graphObserver);
@@ -224,9 +247,9 @@ public class GraphViewStore {
 
     protected void addNode(NodeImpl node) {
         if (views.length > 0) {
-            for (GraphViewImpl view : views) {
+            for (AbstractGraphView view : views) {
                 if (view != null) {
-                    view.ensureNodeVectorSize(node);
+                    view.nodeAdded(node);
                 }
             }
         }
@@ -234,9 +257,9 @@ public class GraphViewStore {
 
     protected void removeNode(NodeImpl node) {
         if (views.length > 0) {
-            for (GraphViewImpl view : views) {
+            for (AbstractGraphView view : views) {
                 if (view != null) {
-                    view.removeNode(node);
+                    view.nodeRemoved(node);
                 }
             }
         }
@@ -244,13 +267,9 @@ public class GraphViewStore {
 
     protected void addEdge(EdgeImpl edge) {
         if (views.length > 0) {
-            for (GraphViewImpl view : views) {
+            for (AbstractGraphView view : views) {
                 if (view != null) {
-                    view.ensureEdgeVectorSize(edge);
-
-                    if (view.nodeView && !view.edgeView) {
-                        view.addEdgeInNodeView(edge);
-                    }
+                    view.edgeAdded(edge);
                 }
             }
         }
@@ -258,15 +277,15 @@ public class GraphViewStore {
 
     protected void removeEdge(EdgeImpl edge) {
         if (views.length > 0) {
-            for (GraphViewImpl view : views) {
+            for (AbstractGraphView view : views) {
                 if (view != null) {
-                    view.removeEdge(edge);
+                    view.edgeRemoved(edge);
                 }
             }
         }
     }
 
-    protected int addView(final GraphViewImpl view) {
+    protected int addView(final AbstractGraphView view) {
         checkNonNullViewObject(view);
 
         int id;
@@ -278,19 +297,18 @@ public class GraphViewStore {
             ensureArraySize(id);
         }
         views[id] = view;
-        view.storeId = id;
+        view.setStoreId(id);
         return id;
     }
 
-    protected void removeView(final GraphViewImpl view) {
+    protected void removeView(final AbstractGraphView view) {
         checkViewExist(view);
 
-        int id = view.storeId;
+        int id = view.getStoreId();
         views[id] = null;
         garbageQueue.add(id);
-        view.storeId = NULL_VIEW;
 
-        view.destroyAllObservers();
+        view.viewDestroyed();
 
         // Check if not visible view
         if (visibleView == view) {
@@ -300,7 +318,7 @@ public class GraphViewStore {
 
     private void ensureArraySize(int index) {
         if (index >= views.length) {
-            GraphViewImpl[] newArray = new GraphViewImpl[index + 1];
+            AbstractGraphView[] newArray = new AbstractGraphView[index + 1];
             System.arraycopy(views, 0, newArray, 0, views.length);
             views = newArray;
         }
@@ -308,7 +326,7 @@ public class GraphViewStore {
 
     public int deepHashCode() {
         int hash = 5;
-        for (GraphViewImpl view : this.views) {
+        for (AbstractGraphView view : this.views) {
             hash = 67 * hash + view.deepHashCode();
         }
         hash = 67 * hash + this.length;
@@ -327,8 +345,8 @@ public class GraphViewStore {
             return false;
         }
         for (int i = 0; i < l; i++) {
-            GraphViewImpl e1 = this.views[i];
-            GraphViewImpl e2 = obj.views[i];
+            AbstractGraphView e1 = this.views[i];
+            AbstractGraphView e2 = obj.views[i];
 
             if (e1 == e2) {
                 continue;
@@ -349,14 +367,14 @@ public class GraphViewStore {
             throw new NullPointerException();
         }
         if (o != graphStore.mainGraphView) {
-            if (!(o instanceof GraphViewImpl)) {
-                throw new ClassCastException("View must be a GraphViewImpl object");
+            if (!(o instanceof AbstractGraphView)) {
+                throw new ClassCastException("View must be a AbstractGraphView object");
             }
         }
     }
 
-    protected void checkViewExist(final GraphViewImpl view) {
-        int id = view.storeId;
+    protected void checkViewExist(final AbstractGraphView view) {
+        final int id = view.getStoreId();
         if (id == NULL_VIEW || id >= length || views[id] != view) {
             throw new IllegalArgumentException("The view doesn't exist");
         }
