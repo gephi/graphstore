@@ -27,6 +27,16 @@ public interface HierarchicalNodeGroup {
     void collapse();
 
     /**
+     * @return Returns true if this group contains on or more children nodes.
+     */
+    boolean hasChildren();
+
+    /**
+     * @return Returns true if this group is the root node.
+     */
+    boolean isRoot();
+
+    /**
      * @return Return iterator containing children nodes (not recursive).
      */
     Iterable<Node> getNodes();

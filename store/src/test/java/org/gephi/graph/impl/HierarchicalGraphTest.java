@@ -8,8 +8,11 @@ import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class HierarchicalGraphTest {
     @Test
@@ -110,6 +113,97 @@ public class HierarchicalGraphTest {
             Assert.assertNotNull(other);
             Assert.assertTrue(others.contains(other));
             graph.removeEdge(edge);
+        }
+    }
+
+    @Test
+    public void testNeighbors() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        HierarchicalGraphView view = store.createHierarchicalView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        Set<Integer> types = new TreeSet<Integer>();
+        for (Node node : graphStore.getNodes().toArray()) {
+            graph.addNode(node);
+        }
+        for (Edge edge : graphStore.getEdges().toArray()) {
+            graph.addEdge(edge);
+            types.add(edge.getType());
+        }
+
+        Node parentNode = store.getGraph(view).getNode("5");
+        HierarchicalNodeGroup group = view.getRoot().addNode(parentNode);
+        Node childNode1 = store.getGraph(view).getNode("1");
+        group.addNode(childNode1);
+        Node childNode2 = store.getGraph(view).getNode("2");
+        group.addNode(childNode2);
+
+        int parentNeighborsCount = graph.getNeighbors(parentNode).toCollection().size();
+
+        Collection<Edge> expandedEdges = new HashSet<Edge>();
+        for (int type : types) {
+            expandedEdges.addAll(graph.getEdges(parentNode, type).toCollection());
+        }
+        Assert.assertFalse(expandedEdges.isEmpty());
+
+        group.collapse();
+
+        Collection<Edge> collapsedEdges = new HashSet<Edge>();
+        for (int type : types) {
+            collapsedEdges.addAll(graph.getEdges(parentNode, type).toCollection());
+        }
+        Assert.assertFalse(collapsedEdges.isEmpty());
+        Assert.assertTrue(collapsedEdges.size() > expandedEdges.size());
+
+        group.expand();
+
+        Collection<Edge> resetEdges = new HashSet<Edge>();
+        for (int type : types) {
+            resetEdges.addAll(graph.getEdges(parentNode, type).toCollection());
+        }
+        Assert.assertFalse(resetEdges.isEmpty());
+        Assert.assertEquals(expandedEdges.size(), resetEdges.size());
+
+        for (Node child : Arrays.asList(childNode1, childNode2)) {
+            Collection<Node> originalNeighbors = graph.getNeighbors(child).toCollection();
+            Assert.assertNotNull(originalNeighbors.isEmpty());
+            for (Node neighbor : originalNeighbors) {
+                Collection<Edge> edges = new HashSet<Edge>();
+                for (int type : types) {
+                    edges.addAll(graph.getEdges(child, neighbor, type).toCollection());
+                    edges.addAll(graph.getEdges(neighbor, child, type).toCollection());
+                }
+                Assert.assertFalse(edges.isEmpty());
+            }
+
+            group.collapse();
+
+            Collection<Node> collapsedNeighbors = graph.getNeighbors(child).toCollection();
+            Assert.assertTrue(collapsedNeighbors.isEmpty());
+            Assert.assertTrue(graph.getNeighbors(parentNode).toCollection().size() > parentNeighborsCount);
+            for (Node neighbor : originalNeighbors) {
+                Collection<Edge> edges = new HashSet<Edge>();
+                for (int type : types) {
+                    edges.addAll(graph.getEdges(child, neighbor, type).toCollection());
+                    edges.addAll(graph.getEdges(neighbor, child, type).toCollection());
+                }
+                Assert.assertTrue(edges.isEmpty());
+            }
+
+            group.expand();
+
+            Collection<Node> expandedNeighbors = graph.getNeighbors(child).toCollection();
+            Assert.assertEquals(originalNeighbors.size(), expandedNeighbors.size());
+            Assert.assertEquals(parentNeighborsCount, graph.getNeighbors(parentNode).toCollection().size());
+            for (Node neighbor : originalNeighbors) {
+                Collection<Edge> edges = new HashSet<Edge>();
+                for (int type : types) {
+                    edges.addAll(graph.getEdges(child, neighbor, type).toCollection());
+                    edges.addAll(graph.getEdges(neighbor, child, type).toCollection());
+                }
+                Assert.assertFalse(edges.isEmpty());
+            }
         }
     }
 }
