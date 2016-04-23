@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -224,12 +223,12 @@ public class HierarchicalGraphViewImpl extends AbstractGraphView implements Grap
 
     @Override
     public Iterable<HierarchicalNodeGroup> getGroups() {
-        final List<HierarchicalNodeGroup> groups = new ArrayList<HierarchicalNodeGroup>();
+        final Set<HierarchicalNodeGroup> groups = new HashSet<HierarchicalNodeGroup>();
         groups.add(this.root);
         for (final HierarchicalNodeGroupImpl group : this.root.getGroups(true)) {
             groups.add(group);
         }
-        return Collections.unmodifiableList(groups);
+        return Collections.unmodifiableCollection(groups);
     }
 
     @Override
@@ -399,7 +398,7 @@ public class HierarchicalGraphViewImpl extends AbstractGraphView implements Grap
                     if (null == parentGroup.node) {
                         return childGroup.node;
                     }
-                    if (parentGroup.isExpanded()) {
+                    if (parentGroup.isExpanded() && !parentGroup.hasCollapsedParent()) {
                         return childGroup.node;
                     }
                     final HierarchicalNodeGroupImpl tmp = parentGroup;
@@ -446,68 +445,116 @@ public class HierarchicalGraphViewImpl extends AbstractGraphView implements Grap
 
         @Override
         public void expand() {
-            this.collapsed = false;
-            for (final HierarchicalNodeGroupImpl child : this.nodeMap.values()) {
-                child.expand();
+            graphStore.autoWriteLock();
+            try {
+                this.setCollapsedWithLock(false);
+            } finally {
+                graphStore.autoWriteUnlock();
             }
         }
 
         @Override
         public void collapse() {
-            this.collapsed = true;
-            for (final HierarchicalNodeGroupImpl child : this.nodeMap.values()) {
-                child.collapse();
+            graphStore.autoWriteLock();
+            try {
+                this.setCollapsedWithLock(true);
+            } finally {
+                graphStore.autoWriteUnlock();
             }
+        }
+
+        private void setCollapsedWithLock(final boolean value) {
+            this.collapsed = value;
+            for (final HierarchicalNodeGroupImpl child : this.nodeMap.values()) {
+                child.setCollapsedWithLock(value);
+            }
+        }
+
+        @Override
+        public boolean hasChildren() {
+            graphStore.autoReadLock();
+            try {
+                return !this.nodeMap.isEmpty();
+            } finally {
+                graphStore.autoReadUnlock();
+            }
+        }
+
+        @Override
+        public boolean isRoot() {
+            return root.equals(this);
         }
 
         @Override
         public Iterable<Node> getNodes() {
             graphStore.autoReadLock();
-            final List<Node> list;
             try {
-                list = new ArrayList<Node>(this.nodeMap.keySet());
+                return Collections.unmodifiableCollection(new ArrayList<Node>(this.nodeMap.keySet()));
             } finally {
                 graphStore.autoReadUnlock();
             }
-            return Collections.unmodifiableCollection(list);
         }
 
         @Override
         public Collection<Node> getNodes(boolean recursive) {
             graphStore.autoReadLock();
-            final Set<Node> set = new HashSet<Node>(this.nodeMap.size());
             try {
                 if (recursive) {
+                    final Set<Node> set = new HashSet<Node>(this.nodeMap.size());
                     for (final Map.Entry<Node, HierarchicalNodeGroupImpl> entry : this.nodeMap.entrySet()) {
                         set.add(entry.getKey());
-                        if (recursive) {
-                            set.addAll(entry.getValue().getNodes(true));
-                        }
+                        set.addAll(entry.getValue().getNodes(true));
                     }
+                    return Collections.unmodifiableCollection(set);
+                } else {
+                    return Collections.unmodifiableCollection(new ArrayList<Node>(this.nodeMap.keySet()));
                 }
             } finally {
                 graphStore.autoReadUnlock();
             }
-            return Collections.unmodifiableCollection(set);
         }
 
         public Collection<HierarchicalNodeGroupImpl> getGroups(final boolean recursive) {
             graphStore.autoReadLock();
-            final List<HierarchicalNodeGroupImpl> list;
             try {
                 if (recursive) {
-                    list = new ArrayList<HierarchicalNodeGroupImpl>();
+                    final Collection<HierarchicalNodeGroupImpl> set = new HashSet<HierarchicalNodeGroupImpl>();
                     for (final HierarchicalNodeGroupImpl group : this.nodeMap.values()) {
-                        list.add(group);
-                        list.addAll(group.getGroups(true));
+                        set.add(group);
+                        set.addAll(group.getGroups(true));
                     }
+                    return Collections.unmodifiableCollection(set);
                 } else {
-                    list = new ArrayList<HierarchicalNodeGroupImpl>(this.nodeMap.values());
+                    return Collections.unmodifiableCollection(new ArrayList<HierarchicalNodeGroupImpl>(this.nodeMap
+                            .values()));
                 }
             } finally {
                 graphStore.autoReadUnlock();
             }
-            return Collections.unmodifiableCollection(list);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            HierarchicalNodeGroupImpl that = (HierarchicalNodeGroupImpl) o;
+
+            if (parent != null ? !parent.equals(that.parent) : that.parent != null) {
+                return false;
+            }
+            return node != null ? node.equals(that.node) : that.node == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = parent != null ? parent.hashCode() : 0;
+            result = 31 * result + (node != null ? node.hashCode() : 0);
+            return result;
         }
     }
 }

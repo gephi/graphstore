@@ -450,38 +450,36 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
     }
 
     @Override
-    public NodeIterable getNeighbors(Node node) {
+    public NodeIterable getNeighbors(final Node node) {
         checkValidInViewNodeObject(node);
         Set<Node> set = new HashSet<Node>();
-        for (final Node n : view.mapWithHidden(node)) {
-            final Iterator<Node> itr = new NeighborsIterator((NodeImpl) n, new UndirectedEdgeViewIterator(
-                    graphStore.edgeStore.edgeIterator(n)));
-            while (itr.hasNext()) {
-                final Node neighbor = itr.next();
-                if (neighbor != null) {
-                    set.add(neighbor);
-                }
+        Set<Node> mapped = new HashSet<Node>();
+        mapped.add(node);
+        mapped.addAll(view.mapWithHidden(node));
+        for (Node n : mapped) {
+            for (Edge edge : this.getEdges(n)) {
+                set.add(edge.getSource());
+                set.add(edge.getTarget());
             }
         }
-        checkValidInViewNodeObject(node);
+        set.removeAll(mapped);
         return graphStore.getNodeIterableWrapper(new NodeViewIterator(set.iterator()));
     }
 
     @Override
-    public NodeIterable getNeighbors(Node node, int type) {
+    public NodeIterable getNeighbors(final Node node, final int type) {
         checkValidInViewNodeObject(node);
         Set<Node> set = new HashSet<Node>();
-        for (final Node n : view.mapWithHidden(node)) {
-            final Iterator<Node> itr = new NeighborsIterator((NodeImpl) n, new UndirectedEdgeViewIterator(
-                    graphStore.edgeStore.edgeIterator(n, type)));
-            while (itr.hasNext()) {
-                final Node neighbor = itr.next();
-                if (neighbor != null) {
-                    set.add(neighbor);
-                }
+        Set<Node> mapped = new HashSet<Node>();
+        mapped.add(node);
+        mapped.addAll(view.mapWithHidden(node));
+        for (Node n : mapped) {
+            for (Edge edge : this.getEdges(n, type)) {
+                set.add(edge.getSource());
+                set.add(edge.getTarget());
             }
         }
-        checkValidInViewNodeObject(node);
+        set.removeAll(mapped);
         return graphStore.getNodeIterableWrapper(new NodeViewIterator(set.iterator()));
     }
 
@@ -1147,11 +1145,11 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
     }
 
     private class NeighborsIterator implements Iterator<Node> {
-        private final NodeImpl node;
+        private final Node node;
 
         private final Iterator<Edge> itr;
 
-        public NeighborsIterator(NodeImpl node, Iterator<Edge> itr) {
+        public NeighborsIterator(Node node, Iterator<Edge> itr) {
             this.node = node;
             this.itr = itr;
         }
