@@ -89,7 +89,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 });
             }
         }
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)));
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)), false);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 });
             }
         }
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)));
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)), false);
     }
 
     @Override
@@ -168,7 +168,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 }
             });
         }
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)));
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)), false);
     }
 
     @Override
@@ -183,7 +183,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 }
             });
         }
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)));
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)), false);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 }
             });
         }
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)));
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)), false);
     }
 
     @Override
@@ -213,7 +213,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 }
             });
         }
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)));
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)), false);
     }
 
     @Override
@@ -499,7 +499,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 }
             });
         }
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)));
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)), false);
     }
 
     @Override
@@ -518,7 +518,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 }
             });
         }
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)));
+        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(new ChainedFutureIterator<Edge>(list)), false);
     }
 
     @Override
