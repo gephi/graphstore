@@ -1077,7 +1077,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
     private final class EdgeViewIterator implements Iterator<Edge> {
         private final Iterator<Edge> edgeIterator;
 
-        private EdgeImpl pointer;
+        private Edge pointer;
 
         public EdgeViewIterator(Iterator<Edge> edgeIterator) {
             this.edgeIterator = edgeIterator;
@@ -1090,9 +1090,13 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
                 if (!edgeIterator.hasNext()) {
                     return false;
                 }
-                pointer = (EdgeImpl) edgeIterator.next();
+                pointer = edgeIterator.next();
                 if (pointer != null) {
-                    if (!view.containsEdge(pointer)) {
+                    if (pointer instanceof EdgeImpl && !view.containsEdge((EdgeImpl) pointer)) {
+                        pointer = null;
+                    }
+                    if (pointer instanceof MappedEdgeDecorator && !view
+                            .containsEdge(((MappedEdgeDecorator) pointer).edge)) {
                         pointer = null;
                     }
                 }
@@ -1115,7 +1119,7 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
     private final class UndirectedEdgeViewIterator implements Iterator<Edge> {
         private final Iterator<Edge> itr;
 
-        private EdgeImpl pointer;
+        private Edge pointer;
 
         public UndirectedEdgeViewIterator(Iterator<Edge> itr) {
             this.itr = itr;
@@ -1124,11 +1128,20 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
         @Override
         public boolean hasNext() {
             pointer = null;
-            while (pointer == null || !view.containsEdge(pointer) || isUndirectedToIgnore(pointer)) {
+            while (pointer == null) {
                 if (!itr.hasNext()) {
                     return false;
                 }
-                pointer = (EdgeImpl) itr.next();
+                pointer = itr.next();
+                if (pointer != null) {
+                    if (pointer instanceof EdgeImpl && !view.containsEdge((EdgeImpl) pointer) && isUndirectedToIgnore((EdgeImpl) pointer)) {
+                        pointer = null;
+                    }
+                    if (pointer instanceof MappedEdgeDecorator && !view
+                            .containsEdge(((MappedEdgeDecorator) pointer).edge) && isUndirectedToIgnore(((MappedEdgeDecorator) pointer).edge)) {
+                        pointer = null;
+                    }
+                }
             }
             return true;
         }
@@ -1200,17 +1213,21 @@ public class HierarchicalGraphDecorator implements DirectedSubgraph, UndirectedS
             return edge;
         }
 
-        return new MappedEdgeDecorator(edge, mappedSource, mappedTarget);
+        if (edge instanceof EdgeImpl) {
+            return new MappedEdgeDecorator((EdgeImpl) edge, mappedSource, mappedTarget);
+        } else {
+            return edge;
+        }
     }
 
     protected class MappedEdgeDecorator implements Edge {
-        private final Edge edge;
+        private final EdgeImpl edge;
 
         private final Node source;
 
         private final Node target;
 
-        private MappedEdgeDecorator(final Edge edge, final Node source, final Node target) {
+        private MappedEdgeDecorator(final EdgeImpl edge, final Node source, final Node target) {
             this.edge = edge;
             this.source = source;
             this.target = target;
