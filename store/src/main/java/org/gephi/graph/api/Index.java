@@ -72,6 +72,17 @@ public interface Index<T extends Element> {
     public int countElements(Column column);
 
     /**
+     * Returns whether the column is numeric and sortable, and therefore methods
+     * {@link #getMinValue(org.gephi.graph.api.Column)} and
+     * {@link #getMaxValue(org.gephi.graph.api.Column)} are available for the
+     * column.
+     *
+     * @param column the column
+     * @return true if the column is sortable, false otherwise
+     */
+    public boolean isSortable(Column column);
+
+    /**
      * Returns the minimum value in the given column.
      * <p>
      * Only applies for numerical columns.

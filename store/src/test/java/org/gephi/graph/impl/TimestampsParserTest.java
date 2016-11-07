@@ -30,8 +30,8 @@ import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.types.TimestampSet;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -106,12 +106,12 @@ public class TimestampsParserTest {
                 .parseTimestampSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampSetBadDateFormat1() {
         TimestampsParser.parseTimestampSet("[2015-13-01, 2015-01-31]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampSetBadDateFormat2() {
         TimestampsParser.parseTimestampSet("[2015-01-35, 2015-01-31]");
     }
@@ -239,42 +239,42 @@ public class TimestampsParserTest {
         assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(char.class, "[1, a]; [3, b]; [5, 'c']; [6, \"d\"]"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampMapByteBadFormat() {
         TimestampsParser.parseTimestampMap(Byte.class, "[1, a]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampMapShortBadFormat() {
         TimestampsParser.parseTimestampMap(Short.class, "[1, a]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampMapIntegerBadFormat() {
         TimestampsParser.parseTimestampMap(Integer.class, "[1, a]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampMapLongBadFormat() {
         TimestampsParser.parseTimestampMap(Long.class, "[1, a]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampMapFloatBadFormat() {
         TimestampsParser.parseTimestampMap(Float.class, "[1, 1..4]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampMapDoubleBadFormat() {
         TimestampsParser.parseTimestampMap(Double.class, "[1, 4oe]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampMapCharBadFormat() {
         TimestampsParser.parseTimestampMap(Character.class, "[1, abc]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseTimestampUnsupportedType() {
         TimestampsParser.parseTimestampMap(Date.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]");
     }

@@ -17,14 +17,12 @@ package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
-import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -197,6 +195,19 @@ public class IndexImplTest {
     }
 
     @Test
+    public void testIsSortable() {
+        IndexImpl<Node> index = generateEmptyIndex();
+
+        Column ageCol = index.columnStore.getColumn("age");
+        Column bigIntCol = index.columnStore.getColumn("big_int");
+        Column fooCol = index.columnStore.getColumn("foo");
+
+        Assert.assertTrue(index.isSortable(ageCol));
+        Assert.assertTrue(index.isSortable(bigIntCol));
+        Assert.assertFalse(index.isSortable(fooCol));
+    }
+
+    @Test
     public void testMinMaxValue() {
         IndexImpl<Node> index = generateEmptyIndex();
         NodeImpl[] nodes = generateNodesWithUniqueAttributes(index, true);
@@ -220,6 +231,39 @@ public class IndexImplTest {
 
         Assert.assertEquals(index.getMinValue(ageCol), min);
         Assert.assertEquals(index.getMaxValue(ageCol), max);
+    }
+
+    @Test
+    public void testMinMaxValueBigInteger() {
+        IndexImpl<Node> index = generateEmptyIndex();
+        NodeImpl[] nodes = generateNodesWithUniqueAttributes(index, true);
+
+        Column bigIntCol = index.columnStore.getColumn("big_int");
+
+        Assert.assertNull(index.getMinValue(bigIntCol));
+        Assert.assertNull(index.getMaxValue(bigIntCol));
+
+        putAll(nodes, index);
+
+        BigInteger min = BigInteger.valueOf(Long.MAX_VALUE);
+        BigInteger max = BigInteger.valueOf(Long.MIN_VALUE);
+        for (NodeImpl n : nodes) {
+            BigInteger v = (BigInteger) n.getAttribute(bigIntCol);
+            if (v != null) {
+                if (v.compareTo(min) == -1) {
+                    min = v;
+                }
+                if (v.compareTo(max) == 1) {
+                    max = v;
+                }
+            }
+        }
+
+        Assert.assertNotNull(index.getMinValue(bigIntCol));
+        Assert.assertNotNull(index.getMaxValue(bigIntCol));
+
+        Assert.assertEquals(index.getMinValue(bigIntCol), min);
+        Assert.assertEquals(index.getMaxValue(bigIntCol), max);
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
@@ -637,6 +681,8 @@ public class IndexImplTest {
                         n.setAttribute(col, "" + i);
                     } else if (col.getTypeClass().equals(Integer.class)) {
                         n.setAttribute(col, i);
+                    } else if (col.getTypeClass().equals(BigInteger.class)) {
+                        n.setAttribute(col, BigInteger.valueOf(i));
                     }
                 }
             }
@@ -659,6 +705,7 @@ public class IndexImplTest {
         ColumnStore<Node> columnStore = generateEmptyNodeStore();
         columnStore.addColumn(new ColumnImpl("foo", String.class, "foo", null, Origin.DATA, true, false));
         columnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl("big_int", BigInteger.class, "BigInt", null, Origin.DATA, true, false));
         return columnStore.indexStore.mainIndex;
     }
 
