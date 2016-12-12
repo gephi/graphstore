@@ -23,6 +23,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import org.gephi.graph.api.Edge;
@@ -34,6 +35,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     // Const
     protected final static int NULL_ID = -1;
     protected final static int NODE_BITS = 31;
+    protected static final Iterator<Edge> EMPTY_EDGE_ITERATOR = Collections.<Edge> emptyList().iterator();
     // Data
     protected int size;
     protected int garbageSize;
@@ -427,7 +429,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return get(source, target, EdgeTypeStore.NULL_LABEL, undirectedDecorator);
     }
 
-    public EdgesIterator getAll(final Node source, final Node target, boolean undirectedDecorator) {
+    public Iterator<Edge> getAll(final Node source, final Node target, boolean undirectedDecorator) {
         return getAll(source, target, EdgeTypeStore.NULL_LABEL, undirectedDecorator);
     }
 
@@ -476,7 +478,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return null;
     }
 
-    public EdgesIterator getAll(final Node source, final Node target, final int type, boolean undirectedDecorator) {
+    public Iterator<Edge> getAll(final Node source, final Node target, final int type, boolean undirectedDecorator) {
         checkNonNullObject(source);
         checkNonNullObject(target);
         NodeImpl sourceImpl = (NodeImpl) source;
@@ -516,7 +518,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 }
             }
         }
-        return null;
+
+        return EMPTY_EDGE_ITERATOR;
     }
 
     public EdgeImpl getMutualEdge(final Edge e) {

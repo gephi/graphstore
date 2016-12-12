@@ -597,11 +597,34 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testGetNodeEdgesUnusedEdgeType() {
+        GraphStore graphStore = new GraphStore();
+        NodeStore nodeStore = GraphGenerator.generateNodeStore(5);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 4, 1, true, true, false);
+        graphStore.addAllEdges(Arrays.asList(edges));
+
+        for (EdgeImpl e : edges) {
+            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] {});
+            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
+        }
+    }
+
+    @Test
     public void testGetNodeEdgesMixed() {
         GraphStore graphStore = GraphGenerator.generateSmallMixedGraphStore();
 
         for (EdgeImpl e : graphStore.edgeStore.toArray()) {
             testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
+            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
+        }
+    }
+
+    @Test
+    public void testGetNodeEdgesMixedUnusedEdgeType() {
+        GraphStore graphStore = GraphGenerator.generateSmallMixedGraphStore(2);
+
+        for (EdgeImpl e : graphStore.edgeStore.toArray()) {
+            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] {});
             testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
         }
     }
