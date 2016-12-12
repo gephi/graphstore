@@ -49,8 +49,12 @@ public class ColumnImpl implements Column {
             throw new IllegalArgumentException("The column ID can't be null or empty");
         }
         if (typeClass == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("The type class can't be null");
         }
+        if (origin == null) {
+            throw new NullPointerException("The origin can't be null");
+        }
+
         typeClass = AttributeUtils.getStandardizedType(typeClass);
         this.table = table;
         this.id = id.toLowerCase();// Make sure column has lowercase id from

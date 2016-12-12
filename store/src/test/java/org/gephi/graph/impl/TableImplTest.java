@@ -71,6 +71,34 @@ public class TableImplTest {
         table.addColumn("Id", null, Integer.class, Origin.DATA, defaultValue, false);
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testOriginCantBeNull() {
+        TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
+
+        table.addColumn("Id", null, Integer.class, null, 0, false);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testOriginCantBeNull2() {
+        TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
+
+        table.addColumn("Id", Integer.class, null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testTypeClassCantBeNull() {
+        TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
+
+        table.addColumn("Id", null, null, Origin.DATA, 0, false);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testTypeClassCantBeNull2() {
+        TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
+
+        table.addColumn("Id", null);
+    }
+
     @Test
     public void testIsIndexed() {
         TableImpl<Node> table = new TableImpl<Node>(Node.class, true);
