@@ -436,11 +436,15 @@ public class GraphGenerator {
     }
 
     public static GraphStore generateSmallMixedGraphStore() {
+        return generateSmallMixedGraphStore(0);
+    }
+
+    public static GraphStore generateSmallMixedGraphStore(int type) {
         int edgeCount = 100;
         GraphStore graphStore = new GraphModelImpl().store;
         NodeImpl[] nodes = generateNodeList(Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)), graphStore);
         graphStore.addAllNodes(Arrays.asList(nodes));
-        EdgeImpl[] edges = generateMixedEdgeList(graphStore.nodeStore, edgeCount, 0, true);
+        EdgeImpl[] edges = generateMixedEdgeList(graphStore.nodeStore, edgeCount, type, true);
         graphStore.addAllEdges(Arrays.asList(edges));
         return graphStore;
     }

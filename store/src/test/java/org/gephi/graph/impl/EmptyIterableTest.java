@@ -24,7 +24,7 @@ import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class EmptyIterableTest {
@@ -48,7 +48,7 @@ public class EmptyIterableTest {
     @Test
     public void testEdgeIterableToArray() {
         EdgeIterable itr = EdgeIterable.EMPTY;
-        Assert.assertArrayEquals(itr.toArray(), new Edge[0]);
+        Assert.assertEquals(itr.toArray(), new Edge[0]);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class EmptyIterableTest {
     @Test
     public void testNodeIterableToArray() {
         NodeIterable itr = NodeIterable.EMPTY;
-        Assert.assertArrayEquals(itr.toArray(), new Node[0]);
+        Assert.assertEquals(itr.toArray(), new Node[0]);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class EmptyIterableTest {
     @Test
     public void testElementIterableToArray() {
         ElementIterable itr = ElementIterable.EMPTY;
-        Assert.assertArrayEquals(itr.toArray(), new Element[0]);
+        Assert.assertEquals(itr.toArray(), new Element[0]);
     }
 
     @Test

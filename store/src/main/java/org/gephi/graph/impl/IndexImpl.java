@@ -28,6 +28,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.longs.Long2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.longs.LongArrays;
+import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrays;
@@ -106,6 +107,20 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
         AbstractIndex index = getIndex((ColumnImpl) column);
         return index.getValueSet(value);
+    }
+
+    @Override
+    public boolean isSortable(Column column) {
+        checkNonNullColumnObject(column);
+
+        lock();
+        try {
+            AbstractIndex index = getIndex((ColumnImpl) column);
+
+            return index.isSortable();
+        } finally {
+            unlock();
+        }
     }
 
     @Override
@@ -320,6 +335,9 @@ public class IndexImpl<T extends Element> implements Index<T> {
         } else if (column.getTypeClass().equals(Double.class)) {
             // Double
             return new DoubleIndex(column);
+        } else if (Number.class.isAssignableFrom(column.getTypeClass())) {
+            // Other numbers
+            return new GenericNumberIndex(column);
         } else if (column.getTypeClass().equals(Boolean.class)) {
             // Boolean
             return new BooleanIndex(column);
@@ -536,7 +554,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
 
         protected boolean isSortable() {
-            return Number.class.isAssignableFrom(column.getTypeClass());
+            return Number.class.isAssignableFrom(column.getTypeClass()) && map instanceof SortedMap;
         }
 
         protected final class WithNullDecorator implements Collection<K> {
@@ -884,6 +902,15 @@ public class IndexImpl<T extends Element> implements Index<T> {
             super(column);
 
             map = new Byte2ObjectAVLTreeMap<Set<T>>();
+        }
+    }
+
+    protected class GenericNumberIndex extends AbstractIndex<Number> {
+
+        public GenericNumberIndex(ColumnImpl column) {
+            super(column);
+
+            map = new Object2ObjectAVLTreeMap<Number, Set<T>>();
         }
     }
 

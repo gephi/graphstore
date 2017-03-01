@@ -135,6 +135,7 @@ public class UndirectedDecoratorTest {
         store.addAllEdges(Arrays.asList(new Edge[] { e0, e1, e2, e3 }));
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2), new Edge[] { e2, e3 });
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 0), new Edge[] { e2, e3 });
+        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 1), new Edge[] {});
     }
 
     @Test
@@ -150,6 +151,24 @@ public class UndirectedDecoratorTest {
         store.addAllEdges(Arrays.asList(new Edge[] { e0, e1 }));
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2), new Edge[] { e0, e1 });
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 0), new Edge[] { e0, e1 });
+        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 1), new Edge[] {});
+    }
+
+    @Test
+    public void testGetEdgesUndirectedAllWithNonNullType() {
+        GraphStore store = new GraphStore();
+        Node n1 = store.factory.newNode("1");
+        Node n2 = store.factory.newNode("2");
+        store.addNode(n1);
+        store.addNode(n2);
+        Edge e0 = store.factory.newEdge("0", n1, n2, 1, 1.0, false);
+        Edge e1 = store.factory.newEdge("1", n2, n1, 2, 1.0, false);
+
+        store.addAllEdges(Arrays.asList(new Edge[] { e0, e1 }));
+        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2), new Edge[] {});
+        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 0), new Edge[] {});
+        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 1), new Edge[] { e0 });
+        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 2), new Edge[] { e1 });
     }
 
     @Test
@@ -169,12 +188,19 @@ public class UndirectedDecoratorTest {
         store.addAllEdges(Arrays.asList(new Edge[] { e0, e1, e2, e3 }));
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2), new Edge[] { e2 });
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 0), new Edge[] { e2 });
+        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 1), new Edge[] {});
+
         testEdgeIterable(store.undirectedDecorator.getEdges(n2, n1), new Edge[] { e2 });
         testEdgeIterable(store.undirectedDecorator.getEdges(n2, n1, 0), new Edge[] { e2 });
+        testEdgeIterable(store.undirectedDecorator.getEdges(n2, n1, 1), new Edge[] {});
+
         testEdgeIterable(store.undirectedDecorator.getEdges(n2, n3), new Edge[] { e1, e3 });
         testEdgeIterable(store.undirectedDecorator.getEdges(n2, n3, 0), new Edge[] { e1, e3 });
+        testEdgeIterable(store.undirectedDecorator.getEdges(n2, n3, 1), new Edge[] {});
+
         testEdgeIterable(store.undirectedDecorator.getEdges(n3, n2), new Edge[] { e1, e3 });
         testEdgeIterable(store.undirectedDecorator.getEdges(n3, n2, 0), new Edge[] { e1, e3 });
+        testEdgeIterable(store.undirectedDecorator.getEdges(n3, n2, 1), new Edge[] {});
     }
 
     // UTILITY

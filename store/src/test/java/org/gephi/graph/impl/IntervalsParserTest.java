@@ -31,8 +31,8 @@ import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -105,37 +105,37 @@ public class IntervalsParserTest {
                 parseDateTimeMillisIntoTimestamp("2015-01-02 00:00:01.999"))), IntervalsParser.parseIntervalSet("[2015-01-01T21:12:05.121, 2015-01-02T00:00:01.999]"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalSetBadEmpty1() {
         IntervalsParser.parseIntervalSet("[]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalSetBadEmpty2() {
         IntervalsParser.parseIntervalSet("[1]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalSetBadEmpty3() {
         IntervalsParser.parseIntervalSet("[1,]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalSetBadEmpty4() {
         IntervalsParser.parseIntervalSet("");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalSetBadEmpty5() {
         IntervalsParser.parseIntervalSet("<>");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalSetBadDateFormat1() {
         IntervalsParser.parseIntervalSet("[2015-13-01, 2015-01-31]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalSetBadDateFormat2() {
         IntervalsParser.parseIntervalSet("[2015-01-35, 2015-01-31]");
     }
@@ -275,42 +275,42 @@ public class IntervalsParserTest {
         assertEqualIntervalMaps(expected, IntervalsParser.parseIntervalMap(char.class, "[1, 2, a]; [3, 5, b]; [5, 6, 'c']; [6, 7, \"d\"]"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalMapByteBadFormat() {
         IntervalsParser.parseIntervalMap(Byte.class, "[1, 2, a]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalMapShortBadFormat() {
         IntervalsParser.parseIntervalMap(Short.class, "[1, 2, a]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalMapIntegerBadFormat() {
         IntervalsParser.parseIntervalMap(Integer.class, "[1, 2, a]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalMapLongBadFormat() {
         IntervalsParser.parseIntervalMap(Long.class, "[1, 2, a]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalMapFloatBadFormat() {
         IntervalsParser.parseIntervalMap(Float.class, "[1, 2, 1..4]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalMapDoubleBadFormat() {
         IntervalsParser.parseIntervalMap(Double.class, "[1, 2, 4oe]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalMapCharBadFormat() {
         IntervalsParser.parseIntervalMap(Character.class, "[1, 2, abc]");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseIntervalUnsupportedType() {
         IntervalsParser.parseIntervalMap(Date.class, "[1, 2, 1]; [3, 5, 2]; [5, 6, '3']; [6, 7, \"4\"]");
     }
@@ -374,7 +374,7 @@ public class IntervalsParserTest {
         assertEquals("<[-Infinity, 0.0, 1.0E12]; [1.0, 2.0, 2.0]; [2.0, Infinity, 3.0]>", parseIntervalMapToString("[-Infinity, 0.0, 1e12]; [1.0, 2.0, 2.]; [2.0, Infinity, 3]", Double.class));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseInfinityBadIntervalsOverlapping() {
         IntervalsParser.parseIntervalSet("[-Infinity, 0.0]; [-3.0, 1.0]");// Overlapping
     }

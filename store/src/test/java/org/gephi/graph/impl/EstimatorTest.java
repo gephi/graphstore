@@ -16,7 +16,7 @@
 package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Estimator;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class EstimatorTest {
