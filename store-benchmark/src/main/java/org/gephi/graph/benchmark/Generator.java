@@ -2,11 +2,13 @@ package org.gephi.graph.benchmark;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.Node;
-import org.gephi.graph.store.GraphModelImpl;
-import org.gephi.graph.store.GraphStore;
+import org.gephi.graph.impl.GraphModelImpl;
+import org.gephi.graph.impl.GraphStore;
 
 public abstract class Generator {
 
@@ -16,7 +18,11 @@ public abstract class Generator {
     protected List<Edge> edges;
 
     public Generator() {
-        GraphModelImpl model = new GraphModelImpl();
+        this(new Configuration());
+    }
+
+    public Generator(final Configuration config) {
+        GraphModelImpl model = new GraphModelImpl(config);
         factory = model.factory();
         graphStore = model.getStore();
         nodes = new ArrayList<Node>();

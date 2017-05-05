@@ -16,13 +16,10 @@
 package org.gephi.graph.benchmark;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import java.util.Random;
 import org.gephi.graph.api.Edge;
-import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.Node;
-import org.gephi.graph.store.EdgeImpl;
-import org.gephi.graph.store.GraphModelImpl;
-import org.gephi.graph.store.GraphStore;
+
+import java.util.Random;
 
 /**
  * Generates a directed connected graph.
@@ -79,8 +76,11 @@ public class KleinbergGraph extends Generator {
                         if ((isTorusBased() || !isTorusBased() && k >= 0 && k < n && l >= 0 && l < n)
                                 && d(i, j, k, l) <= p && nodes.get(i * n + j) != nodes.get(((k + n) % n) * n + ((l + n) % n))) {
                             Edge edge = factory.newEdge(nodes.get(i * n + j), nodes.get(((k + n) % n) * n + ((l + n) % n)), 0, true);
-                            edges.add(edge);
-                            edgeSet.add(((EdgeImpl) edge).getLongId());
+                            Object id = edge.getId();
+                            if (id instanceof Number) {
+                                edges.add(edge);
+                                edgeSet.add(((Number) id).longValue());
+                            }
                         }
                     }
                 }
@@ -111,10 +111,13 @@ public class KleinbergGraph extends Generator {
                                 if (!isTorusBased() && d(i, j, k, l) > p || isTorusBased() && dtb(i, j, k, l) > p) {
                                     pki += Math.pow(!isTorusBased() ? d(i, j, k, l) : dtb(i, j, k, l), -r) / sum;
                                     Edge edge = factory.newEdge(nodes.get(i * n + j), nodes.get(k * n + l), 0, true);
-                                    if (b <= pki && !edgeSet.contains(((EdgeImpl) edge).getLongId())) {
-                                        edges.add(edge);
-                                        edgeSet.add(((EdgeImpl) edge).getLongId());
-                                        e = true;
+                                    Object id = edge.getId();
+                                    if (id instanceof Number) {
+                                        if (b <= pki && !edgeSet.contains(((Number) id).longValue())) {
+                                            edges.add(edge);
+                                            edgeSet.add(((Number) id).longValue());
+                                            e = true;
+                                        }
                                     }
                                 }
                             }

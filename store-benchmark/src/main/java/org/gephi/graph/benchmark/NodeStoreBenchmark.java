@@ -17,9 +17,11 @@ package org.gephi.graph.benchmark;
 
 import java.util.Iterator;
 import java.util.List;
+
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Node;
-import org.gephi.graph.store.NodeImpl;
-import org.gephi.graph.store.NodeStore;
+import org.gephi.graph.impl.NodeImpl;
+import org.gephi.graph.impl.NodeStore;
 
 /**
  *
@@ -30,7 +32,10 @@ public class NodeStoreBenchmark {
     private Object object;
 
     public Runnable iterateStore(final int nodes) {
-        final RandomGraph graph = new RandomGraph(nodes, 0).generate().commit();
+        final Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        config.setNodeIdType(Integer.class);
+        final RandomGraph graph = new RandomGraph(nodes, 0, config).generate().commit();
         final NodeStore nodeStore = graph.getStore().getNodeStore();
         Runnable runnable = new Runnable() {
             @Override
@@ -46,7 +51,10 @@ public class NodeStoreBenchmark {
     }
 
     public Runnable resetNodeStore(final int nodes) {
-        final RandomGraph graph = new RandomGraph(nodes, 0).generate().commit();
+        final Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        config.setNodeIdType(Integer.class);
+        final RandomGraph graph = new RandomGraph(nodes, 0, config).generate().commit();
         final NodeStore nodeStore = graph.getStore().getNodeStore();
         final List<Node> nodeList = graph.getNodes();
         Runnable runnable = new Runnable() {
@@ -64,7 +72,10 @@ public class NodeStoreBenchmark {
     }
 
     public Runnable pushStore(int nodes) {
-        final RandomGraph graph = new RandomGraph(nodes, 0).generate();
+        final Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        config.setNodeIdType(Integer.class);
+        final RandomGraph graph = new RandomGraph(nodes, 0, config).generate();
         final NodeStore nodeStore = graph.getStore().getNodeStore();
         final List<Node> nodeList = graph.getNodes();
 
