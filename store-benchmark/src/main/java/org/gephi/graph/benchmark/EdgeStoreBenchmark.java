@@ -2,10 +2,11 @@ package org.gephi.graph.benchmark;
 
 import java.util.Iterator;
 import java.util.List;
+
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
-import org.gephi.graph.store.EdgeImpl;
-import org.gephi.graph.store.EdgeStore;
+import org.gephi.graph.impl.EdgeStore;
 
 /**
  *
@@ -16,7 +17,10 @@ public class EdgeStoreBenchmark {
     private Object object;
     
     public Runnable pushEdgeStore(int nodes, double prob) {
-        final RandomGraph graph = new RandomGraph(nodes, prob).generate();
+        final Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        config.setNodeIdType(Integer.class);
+        final RandomGraph graph = new RandomGraph(nodes, prob, config).generate();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Node> nodeList = graph.getNodes();
         final List<Edge> edgeList = graph.getEdges();
@@ -35,7 +39,10 @@ public class EdgeStoreBenchmark {
     }
 
     public Runnable iterateEdgeStore(int nodes, double prob) {
-        final RandomGraph graph = new RandomGraph(nodes, prob).generate().commit();
+        final Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        config.setNodeIdType(Integer.class);
+        final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         
         Runnable runnable = new Runnable() {
@@ -43,7 +50,7 @@ public class EdgeStoreBenchmark {
             public void run() {
                 Iterator<Edge> itr = edgeStore.iterator();
                 for (; itr.hasNext();) {
-                    object = (EdgeImpl) itr.next();
+                    object = itr.next();
                 }
             }
         };
@@ -51,7 +58,10 @@ public class EdgeStoreBenchmark {
     }
 
     public Runnable iterateEdgeStoreNeighborsOut(int nodes, double prob) {
-        final RandomGraph graph = new RandomGraph(nodes, prob).generate().commit();
+        final Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        config.setNodeIdType(Integer.class);
+        final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Node> nodeList = graph.getNodes();
         
@@ -61,7 +71,7 @@ public class EdgeStoreBenchmark {
                 for (Node node : nodeList) {
                     Iterator<Edge> itr = edgeStore.edgeOutIterator(node);
                     for (; itr.hasNext();) {
-                        object = (EdgeImpl) itr.next();
+                        object = itr.next();
                     }
                 }
             }
@@ -70,7 +80,10 @@ public class EdgeStoreBenchmark {
     }
 
     public Runnable iterateEdgeStoreNeighborsInOut(int nodes, double prob) {
-        final RandomGraph graph = new RandomGraph(nodes, prob).generate().commit();
+        final Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        config.setNodeIdType(Integer.class);
+        final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Node> nodeList = graph.getNodes();
         
@@ -80,7 +93,7 @@ public class EdgeStoreBenchmark {
                 for (Node node : nodeList) {
                     Iterator<Edge> itr = edgeStore.edgeIterator(node);
                     for (; itr.hasNext();) {
-                        object = (EdgeImpl) itr.next();
+                        object = itr.next();
                     }
                 }
             }
@@ -89,7 +102,10 @@ public class EdgeStoreBenchmark {
     }
 
     public Runnable resetEdgeStore(int nodes, double prob) {
-        final RandomGraph graph = new RandomGraph(nodes, prob).generate().commit();
+        final Configuration config = new Configuration();
+        config.setEdgeIdType(Integer.class);
+        config.setNodeIdType(Integer.class);
+        final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Edge> edgeList = graph.getEdges();
         

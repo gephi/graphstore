@@ -16,9 +16,11 @@
 package org.gephi.graph.benchmark;
 
 import java.util.Random;
+
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
-import org.gephi.graph.store.NodeImpl;
+import org.gephi.graph.impl.NodeImpl;
 
 /**
  * Generates directed connected random graph with wiring probability p
@@ -30,16 +32,24 @@ public class RandomGraph extends Generator {
     protected final int numberOfNodes;
     protected final int numberOfEdges;
     protected final double wiringProbability;
-    
+
     public RandomGraph(int n, double p) {
-        super();
+        this(n, p, new Configuration());
+    }
+
+    public RandomGraph(int n, double p, Configuration config) {
+        super(config);
         numberOfNodes = n;
         numberOfEdges = (int)(n*(n-1)*p);
         wiringProbability = p;
     }
     
     public RandomGraph(int nodes, int edges) {
-        this(nodes, ((double)edges)/(nodes*(nodes-1)));
+        this(nodes, edges, new Configuration());
+    }
+
+    public RandomGraph(int nodes, int edges, Configuration confi) {
+        this(nodes, ((double)edges)/(nodes*(nodes-1)), confi);
     }
 
     @Override

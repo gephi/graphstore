@@ -36,6 +36,8 @@ import it.unimi.dsi.fastutil.objects.ObjectBigArrayBigList;
 import it.unimi.dsi.fastutil.objects.ObjectBigList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import org.gephi.graph.api.types.TimestampSet;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -43,7 +45,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import org.gephi.attribute.time.TimestampSet;
 
 /**
  *
@@ -654,7 +655,8 @@ public class DataStructureBenchmark {
                 for (int i = 0; i < size; i++) {
                     TimestampSet set = new TimestampSet(timestamps);
                     for (int j = 0; j < timestamps; j++) {
-                        set.add(rand.nextInt(timestamps));
+                        final double val = rand.nextInt(timestamps);
+                        set.add(val);
                         trees.add(set);
                     }
                 }
