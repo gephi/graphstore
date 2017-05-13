@@ -147,6 +147,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 throw new IllegalStateException("The weight is static, call getWeight() instead");
             }
             TimestampMap dynamicValue = (TimestampMap) weightValue;
+            if (dynamicValue == null) {
+                return 0.0;
+            }
             return (Double) dynamicValue.get(timestamp, 0.0);
         }
     }
@@ -160,6 +163,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 throw new IllegalStateException("The weight is static, call getWeight() instead");
             }
             IntervalMap dynamicValue = (IntervalMap) weightValue;
+            if (dynamicValue == null) {
+                return 0.0;
+            }
             return (Double) dynamicValue.get(interval, 0.0);
         }
     }
