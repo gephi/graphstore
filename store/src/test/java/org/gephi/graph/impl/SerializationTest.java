@@ -41,6 +41,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -1196,6 +1197,27 @@ public class SerializationTest {
         byte[] bytes = dio.toByteArray();
 
         GraphModelImpl read = ser.deserializeGraphModel(dio.reset(bytes));
+        Assert.assertTrue(read.deepEquals(gm));
+    }
+
+    @Test
+    public void testDeserializeWithoutVersion() throws Exception {
+        GraphModelImpl gm = GraphGenerator.generateSmallGraphStore().graphModel;
+        Serialization ser = new Serialization(gm) {
+            @Override
+            public void serializeGraphModel(DataOutput out, GraphModelImpl model) throws IOException {
+                this.model = model;
+                serialize(out, model.configuration);
+                serialize(out, model.store);
+            }
+        };
+
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, gm);
+        byte[] bytes = dio.toByteArray();
+
+        ser = new Serialization();
+        GraphModelImpl read = ser.deserializeGraphModelWithoutVersionPrefix(dio.reset(bytes), Serialization.VERSION);
         Assert.assertTrue(read.deepEquals(gm));
     }
 }

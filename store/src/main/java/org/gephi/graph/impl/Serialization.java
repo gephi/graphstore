@@ -246,6 +246,14 @@ public class Serialization {
         return model;
     }
 
+    public GraphModelImpl deserializeGraphModelWithoutVersionPrefix(DataInput is, float version) throws IOException, ClassNotFoundException {
+        readVersion = version;
+        Configuration config = (Configuration) deserialize(is);
+        model = new GraphModelImpl(config);
+        deserialize(is);
+        return model;
+    }
+
     public void serializeGraphStore(DataOutput out, GraphStore store) throws IOException {
         // Configuration
         serializeGraphStoreConfiguration(out);
@@ -1269,7 +1277,7 @@ public class Serialization {
             out.write(NULL);
 
         } else if (clazz == Boolean.class) {
-            if (((Boolean) obj).booleanValue()) {
+            if (((Boolean) obj)) {
                 out.write(BOOLEAN_TRUE);
             } else {
                 out.write(BOOLEAN_FALSE);
@@ -1771,46 +1779,46 @@ public class Serialization {
                 ret = Boolean.FALSE;
                 break;
             case INTEGER_MINUS_1:
-                ret = Integer.valueOf(-1);
+                ret = -1;
                 break;
             case INTEGER_0:
-                ret = Integer.valueOf(0);
+                ret = 0;
                 break;
             case INTEGER_1:
-                ret = Integer.valueOf(1);
+                ret = 1;
                 break;
             case INTEGER_2:
-                ret = Integer.valueOf(2);
+                ret = 2;
                 break;
             case INTEGER_3:
-                ret = Integer.valueOf(3);
+                ret = 3;
                 break;
             case INTEGER_4:
-                ret = Integer.valueOf(4);
+                ret = 4;
                 break;
             case INTEGER_5:
-                ret = Integer.valueOf(5);
+                ret = 5;
                 break;
             case INTEGER_6:
-                ret = Integer.valueOf(6);
+                ret = 6;
                 break;
             case INTEGER_7:
-                ret = Integer.valueOf(7);
+                ret = 7;
                 break;
             case INTEGER_8:
-                ret = Integer.valueOf(8);
+                ret = 8;
                 break;
             case INTEGER_MINUS_MAX:
-                ret = Integer.valueOf(Integer.MIN_VALUE);
+                ret = Integer.MIN_VALUE;
                 break;
             case INTEGER_255:
-                ret = Integer.valueOf(is.readUnsignedByte());
+                ret = is.readUnsignedByte();
                 break;
             case INTEGER_PACK_NEG:
-                ret = Integer.valueOf(-LongPacker.unpackInt(is));
+                ret = -LongPacker.unpackInt(is);
                 break;
             case INTEGER_PACK:
-                ret = Integer.valueOf(LongPacker.unpackInt(is));
+                ret = LongPacker.unpackInt(is);
                 break;
             case LONG_MINUS_1:
                 ret = Long.valueOf(-1);
@@ -1846,40 +1854,40 @@ public class Serialization {
                 ret = Long.valueOf(is.readUnsignedByte());
                 break;
             case LONG_PACK_NEG:
-                ret = Long.valueOf(-LongPacker.unpackLong(is));
+                ret = -LongPacker.unpackLong(is);
                 break;
             case LONG_PACK:
-                ret = Long.valueOf(LongPacker.unpackLong(is));
+                ret = LongPacker.unpackLong(is);
                 break;
             case LONG_MINUS_MAX:
-                ret = Long.valueOf(Long.MIN_VALUE);
+                ret = Long.MIN_VALUE;
                 break;
             case SHORT_MINUS_1:
-                ret = Short.valueOf((short) -1);
+                ret = ((short) -1);
                 break;
             case SHORT_0:
-                ret = Short.valueOf((short) 0);
+                ret = ((short) 0);
                 break;
             case SHORT_1:
-                ret = Short.valueOf((short) 1);
+                ret = ((short) 1);
                 break;
             case SHORT_255:
-                ret = Short.valueOf((short) is.readUnsignedByte());
+                ret = ((short) is.readUnsignedByte());
                 break;
             case SHORT_FULL:
-                ret = Short.valueOf(is.readShort());
+                ret = is.readShort();
                 break;
             case BYTE_MINUS_1:
-                ret = Byte.valueOf((byte) -1);
+                ret = ((byte) -1);
                 break;
             case BYTE_0:
-                ret = Byte.valueOf((byte) 0);
+                ret = ((byte) 0);
                 break;
             case BYTE_1:
-                ret = Byte.valueOf((byte) 1);
+                ret = ((byte) 1);
                 break;
             case BYTE_FULL:
-                ret = Byte.valueOf(is.readByte());
+                ret = (is.readByte());
                 break;
             case SHORT_ARRAY:
                 int size = LongPacker.unpackInt(is);
@@ -1917,7 +1925,7 @@ public class Serialization {
                 }
                 break;
             case CHAR:
-                ret = Character.valueOf(is.readChar());
+                ret = is.readChar();
                 break;
             case FLOAT_MINUS_1:
                 ret = Float.valueOf(-1);
@@ -1935,7 +1943,7 @@ public class Serialization {
                 ret = Float.valueOf(is.readShort());
                 break;
             case FLOAT_FULL:
-                ret = Float.valueOf(is.readFloat());
+                ret = is.readFloat();
                 break;
             case DOUBLE_MINUS_1:
                 ret = Double.valueOf(-1);
@@ -1953,7 +1961,7 @@ public class Serialization {
                 ret = Double.valueOf(is.readShort());
                 break;
             case DOUBLE_FULL:
-                ret = Double.valueOf(is.readDouble());
+                ret = is.readDouble();
                 break;
             case BIGINTEGER:
                 ret = new BigInteger(deserializeArrayByteInt(is));

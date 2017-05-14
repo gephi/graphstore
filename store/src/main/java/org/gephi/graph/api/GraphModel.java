@@ -139,6 +139,26 @@ public interface GraphModel {
         }
 
         /**
+         * Read the <code>input</code> and return the read graph model without
+         * an explicit version header in the input. To be used with old
+         * graphstore serialized data prior to version 0.4 (first, that added
+         * the version header).
+         *
+         * @param input data input to read from
+         * @param graphStoreVersion Forced version to use
+         * @return new graph model
+         * @throws IOException if an io error occurs
+         */
+        public static GraphModel readWithoutVersionHeader(DataInput input, float graphStoreVersion) throws IOException {
+            try {
+                org.gephi.graph.impl.Serialization s = new org.gephi.graph.impl.Serialization();
+                return s.deserializeGraphModelWithoutVersionPrefix(input, graphStoreVersion);
+            } catch (ClassNotFoundException e) {
+                throw new IOException(e);
+            }
+        }
+
+        /**
          * Write <code>graphModel</code> to <code>output</code>.
          *
          * @param output data output to write to

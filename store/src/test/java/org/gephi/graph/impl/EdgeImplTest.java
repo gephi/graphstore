@@ -53,7 +53,7 @@ public class EdgeImplTest {
         e.setWeight(42.0, 1.0);
         Assert.assertEquals(e.getWeight(2.0), 0.0);
     }
-    
+
     @Test
     public void testGetDefaultTimestampWeightWhenNotSet() {
         Configuration config = new Configuration();
@@ -73,7 +73,7 @@ public class EdgeImplTest {
         e.setWeight(42.0, new Interval(1.0, 2.0));
         Assert.assertEquals(e.getWeight(new Interval(2.0, 4.0)), 0.0);
     }
-    
+
     @Test
     public void testGetDefaultIntervalWeightWhenNotSet() {
         Configuration config = new Configuration();
