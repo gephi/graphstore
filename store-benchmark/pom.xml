@@ -4,7 +4,7 @@
 
     <groupId>org.gephi</groupId>
     <artifactId>graphstore-benchmark</artifactId>
-    <version>0.5.7-SNAPSHOT</version>
+    <version>0.5.7</version>
     <packaging>jar</packaging>
 
     <name>graphstore-benchmark</name>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>graphstore</artifactId>
-            <version>0.5.7-SNAPSHOT</version>
+            <version>0.5.7</version>
         </dependency>
     </dependencies>
 </project>
