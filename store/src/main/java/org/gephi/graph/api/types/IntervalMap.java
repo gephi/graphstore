@@ -122,6 +122,10 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
 
     @Override
     public Object get(Interval interval, Estimator estimator) {
+        if (estimator == null) {
+            return get(interval, (T) null);
+        }
+
         if (!isSupported(estimator)) {
             throw new UnsupportedOperationException("Not supported estimator.");
         }

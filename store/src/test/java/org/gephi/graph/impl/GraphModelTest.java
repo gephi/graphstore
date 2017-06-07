@@ -436,6 +436,19 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testSerializationReadWithoutVersionHeader() throws IOException {
+        DataInputOutput dio = new DataInputOutput();
+        GraphModelImpl graphModelImpl = GraphGenerator.generateSmallGraphStore().graphModel;
+        GraphModel.Serialization.write(dio, graphModelImpl);
+        byte[] bytes = dio.toByteArray();
+        dio.reset(bytes);
+        dio.skip(5);// id byte + FLOAT_255 (int)
+        GraphModelImpl readModelImpl = (GraphModelImpl) GraphModel.Serialization
+                .readWithoutVersionHeader(dio, Serialization.VERSION);
+        Assert.assertTrue(readModelImpl.deepEquals(readModelImpl));
+    }
+
+    @Test
     public void testGetConfiguration() {
         Configuration config = new Configuration();
         config.setNodeIdType(Long.class);
