@@ -27,6 +27,7 @@ import org.gephi.graph.api.Table;
 import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimestampMap;
+import static org.gephi.graph.impl.GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
 
 public class EdgeImpl extends ElementImpl implements Edge {
 
@@ -83,9 +84,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
             Object weightObject = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
             if (weightObject instanceof Double) {
                 return (Double) weightObject;
+            } else {
+                return getWeight(graphStore.getView());
             }
-            throw new IllegalStateException(
-                    "The weight is dynamic, call getWeight(timestamp) or getWeight(interval) instead");
         }
     }
 
@@ -140,33 +141,45 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public double getWeight(double timestamp) {
-        checkTimeRepresentationTimestamp();
         synchronized (this) {
             Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
             if (weightValue instanceof Double) {
                 throw new IllegalStateException("The weight is static, call getWeight() instead");
             }
-            TimestampMap dynamicValue = (TimestampMap) weightValue;
+
+            TimeMap dynamicValue = (TimeMap) weightValue;
             if (dynamicValue == null) {
-                return 0.0;
+                return DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
             }
-            return (Double) dynamicValue.get(timestamp, 0.0);
+
+            if (dynamicValue instanceof IntervalMap) {
+                return (Double) ((IntervalMap) dynamicValue)
+                        .get(new Interval(timestamp, timestamp), DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+            } else {
+                return (Double) dynamicValue.get(timestamp, DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+            }
         }
     }
 
     @Override
     public double getWeight(Interval interval) {
-        checkTimeRepresentationInterval();
         synchronized (this) {
             Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
             if (weightValue instanceof Double) {
                 throw new IllegalStateException("The weight is static, call getWeight() instead");
             }
-            IntervalMap dynamicValue = (IntervalMap) weightValue;
+
+            TimeMap dynamicValue = (TimeMap) weightValue;
             if (dynamicValue == null) {
-                return 0.0;
+                return DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
             }
-            return (Double) dynamicValue.get(interval, 0.0);
+
+            if (dynamicValue instanceof TimestampMap) {
+                Double doubleVal = (Double) dynamicValue.get(interval, GraphStoreConfiguration.DEFAULT_ESTIMATOR);
+                return doubleVal != null ? doubleVal : DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
+            } else {
+                return (Double) dynamicValue.get(interval, DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+            }
         }
     }
 
@@ -184,10 +197,13 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 if (estimator == null) {
                     estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
                 }
-                return (Double) dynamicValue.get(interval, estimator);
+
+                Double doubleVal = (Double) dynamicValue.get(interval, estimator);
+                return doubleVal != null ? doubleVal : DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
             } else if (value == null) {
-                return GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT;
+                return DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
             } else {
+                // Must be double
                 return (Double) value;
             }
         }

@@ -56,6 +56,7 @@ public final class GraphStoreConfiguration {
     public static final Class DEFAULT_EDGE_LABEL_TYPE = String.class;
     public static final Class DEFAULT_EDGE_WEIGHT_TYPE = Double.class;
     public static final Double DEFAULT_EDGE_WEIGHT = 1.0;
+    public static final Double DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING = 0.0;
     // Properties name
     public static final String ELEMENT_ID_COLUMN_ID = "id";
     public static final String ELEMENT_LABEL_COLUMN_ID = "label";
