@@ -24,10 +24,12 @@ import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Origin;
 import org.gephi.graph.impl.utils.DataInputOutput;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -634,6 +636,34 @@ public class GraphModelTest {
         Column col2 = table.addColumn("foo2", String.class);
 
         n1.setAttribute(col2, "test");
+    }
+
+    @Test
+    public void testReplaceEdgeWeightColumnUpdatesConfiguration() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Graph graph = graphModel.getGraph();
+
+        Table table = graphModel.getEdgeTable();
+
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        Edge edge = graphModel.factory().newEdge(n1, n2);
+        graph.addNode(n1);
+        graph.addNode(n2);
+        graph.addEdge(edge);
+
+        Assert.assertTrue(graphModel.getConfiguration().getEdgeWeightColumn());
+        Assert.assertEquals(graphModel.getConfiguration().getEdgeWeightType(), Double.class);
+        Assert.assertFalse(edge.hasDynamicWeight());
+
+        table.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
+        Assert.assertFalse(graphModel.getConfiguration().getEdgeWeightColumn());
+
+        table.addColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, IntervalDoubleMap.class, Origin.PROPERTY);
+
+        Assert.assertTrue(graphModel.getConfiguration().getEdgeWeightColumn());
+        Assert.assertEquals(graphModel.getConfiguration().getEdgeWeightType(), IntervalDoubleMap.class);
+        Assert.assertTrue(edge.hasDynamicWeight());
     }
 
     @Test

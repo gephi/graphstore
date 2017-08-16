@@ -78,6 +78,27 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<TableObserverImpl>() : null;
     }
 
+    private void updateConfiguration(Column changedColumn) {
+        String columnId = changedColumn.getId();
+        if (Edge.class.equals(elementType)) {
+            if (columnId.equals(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID)) {
+                if (hasColumn(columnId)) {
+                    Class edgeWeightColumnClass = getColumn(columnId).getTypeClass();
+                    configuration.setEdgeWeightType(edgeWeightColumnClass);
+                    configuration.setEdgeWeightColumn(true);
+                } else {
+                    configuration.setEdgeWeightColumn(false);
+                }
+            } else if (columnId.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
+                configuration.setEdgeIdType(changedColumn.getTypeClass());
+            }
+        } else if (Node.class.equals(elementType)) {
+            if (columnId.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
+                configuration.setNodeIdType(changedColumn.getTypeClass());
+            }
+        }
+    }
+
     public void addColumn(final Column column) {
         checkNonNullColumnObject(column);
         checkIndexStatus(column);
@@ -104,6 +125,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 if (indexStore != null) {
                     indexStore.addColumn(columnImpl);
                 }
+                updateConfiguration(column);
             } else {
                 throw new IllegalArgumentException("The column already exist");
             }
@@ -151,6 +173,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 indexStore.removeColumn((ColumnImpl) column);
             }
             columnImpl.setStoreId(NULL_ID);
+            updateConfiguration(column);
         } finally {
             graphWriteUnlock();
             unlock();

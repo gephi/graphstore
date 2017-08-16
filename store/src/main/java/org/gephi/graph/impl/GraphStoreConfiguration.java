@@ -57,6 +57,7 @@ public final class GraphStoreConfiguration {
     public static final Class DEFAULT_EDGE_WEIGHT_TYPE = Double.class;
     public static final Double DEFAULT_EDGE_WEIGHT = 1.0;
     // Properties name
+    public static final String ELEMENT_ID_COLUMN_ID = "id";
     public static final String ELEMENT_LABEL_COLUMN_ID = "label";
     public static final String ELEMENT_TIMESET_COLUMN_ID = "timeset";
     public static final String EDGE_WEIGHT_COLUMN_ID = "weight";

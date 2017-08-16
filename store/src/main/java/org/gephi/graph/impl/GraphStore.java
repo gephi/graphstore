@@ -97,10 +97,10 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         undirectedDecorator = new UndirectedDecorator(this);
 
         // Default cols
-        nodeTable.store.addColumn(new ColumnImpl(nodeTable, "id", configuration.getNodeIdType(), "Id", null,
-                Origin.PROPERTY, false, true));
-        edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", configuration.getEdgeIdType(), "Id", null,
-                Origin.PROPERTY, false, true));
+        nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID, configuration
+                .getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
+        edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID, configuration
+                .getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
             nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID,
                     String.class, "Label", null, Origin.PROPERTY, false, false));

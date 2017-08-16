@@ -182,7 +182,10 @@ public class TableImplTest {
     @Test
     public void testStandardizeArrayType() {
         TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
-        Column col = table.addColumn("Id", Integer[].class);
+        Column col = table.addColumn("test_col"/*
+                                                * Id does not allow non-simple
+                                                * types
+                                                */, Integer[].class);
         Assert.assertEquals(col.getTypeClass(), int[].class);
     }
 
@@ -191,7 +194,10 @@ public class TableImplTest {
         TableImpl<Node> table = new TableImpl<Node>(Node.class, false);
         Integer[] t = new Integer[] { 1, 2 };
 
-        Column col = table.addColumn("Id", null, Integer[].class, Origin.DATA, t, false);
+        Column col = table.addColumn("test_col"/*
+                                                * Id does not allow non-simple
+                                                * types
+                                                */, null, Integer[].class, Origin.DATA, t, false);
         Object d = col.getDefaultValue();
         Assert.assertEquals(d.getClass(), int[].class);
         Assert.assertEquals(d, new int[] { 1, 2 });
