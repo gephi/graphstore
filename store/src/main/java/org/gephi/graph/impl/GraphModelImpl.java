@@ -417,17 +417,17 @@ public class GraphModelImpl implements GraphModel {
 
             if (!config.getNodeIdType().equals(configuration.getNodeIdType())) {
                 TableImpl<Node> nodeTable = store.nodeTable;
-                nodeTable.store.removeColumn("id");
-                nodeTable.store.addColumn(new ColumnImpl(nodeTable, "id", config.getNodeIdType(), "Id", null,
-                        Origin.PROPERTY, false, true));
+                nodeTable.store.removeColumn(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID);
+                nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID,
+                        config.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
                 configuration.setNodeIdType(config.getNodeIdType());
             }
 
             if (!config.getEdgeIdType().equals(configuration.getEdgeIdType())) {
                 TableImpl<Edge> edgeTable = store.edgeTable;
-                edgeTable.store.removeColumn("id");
-                edgeTable.store.addColumn(new ColumnImpl(edgeTable, "id", config.getEdgeIdType(), "Id", null,
-                        Origin.PROPERTY, false, true));
+                edgeTable.store.removeColumn(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID);
+                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID,
+                        config.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
                 configuration.setEdgeIdType(config.getEdgeIdType());
             }
 

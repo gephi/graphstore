@@ -545,6 +545,20 @@ public class Serialization {
         if (estimator != null) {
             column.setEstimator(estimator);
         }
+
+        // Make sure configured types match the deserialized column types:
+        if (Edge.class.equals(table.getElementClass())) {
+            if (id.equals(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID)) {
+                table.store.configuration.setEdgeWeightType(typeClass);
+            } else if (id.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
+                table.store.configuration.setEdgeIdType(typeClass);
+            }
+        } else if (Node.class.equals(table.getElementClass())) {
+            if (id.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
+                table.store.configuration.setNodeIdType(typeClass);
+            }
+        }
+
         return column;
     }
 
@@ -1587,7 +1601,7 @@ public class Serialization {
         LongPacker.packInt(out, len);
         for (int i = 0; i < len; i++) {
             int c = (int) obj.charAt(i); // TODO investigate if c could be
-                                         // negative here
+            // negative here
             LongPacker.packInt(out, c);
         }
     }
