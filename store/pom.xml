@@ -140,18 +140,6 @@
                     <artifactId>formatter-maven-plugin</artifactId>
                     <version>0.5.2</version>
                 </plugin>
-                <plugin>
-                    <groupId>com.versioneye</groupId>
-                    <artifactId>versioneye-maven-plugin</artifactId>
-                    <version>3.11.4</version>
-                    <configuration>
-                        <visibility>public</visibility>
-                        <updatePropertiesAfterCreate>true</updatePropertiesAfterCreate>
-                        <mergeAfterCreate>true</mergeAfterCreate>
-                        <trackPlugins>true</trackPlugins>
-                        <propertiesPath>${basedir}/versioneye.properties</propertiesPath>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
 		
