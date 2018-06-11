@@ -32,6 +32,7 @@ public final class GraphStoreConfiguration {
     public static final boolean ENABLE_NODE_PROPERTIES = true;
     public static final boolean ENABLE_EDGE_PROPERTIES = true;
     public static final boolean ENABLE_PARALLEL_EDGES = true;
+    public static final boolean ENABLE_SPATIAL_INDEX = true;
     // NodeStore
     public final static int NODESTORE_BLOCK_SIZE = 5000;
     public final static int NODESTORE_DEFAULT_BLOCKS = 10;
@@ -75,6 +76,8 @@ public final class GraphStoreConfiguration {
     // Dynamics
     public static final Estimator DEFAULT_ESTIMATOR = Estimator.FIRST;
     public static final TimeRepresentation DEFAULT_TIME_REPRESENTATION = TimeRepresentation.TIMESTAMP;
+    // Spatial index
+    public static final float SPATIAL_INDEX_DIMENSION_BOUNDARY = 1e6f;
     // Miscellaneous
     public static final double TIMESTAMP_STORE_GROWING_FACTOR = 1.1;
     public static final double INTERVAL_STORE_GROWING_FACTOR = 1.1;

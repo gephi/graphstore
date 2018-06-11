@@ -142,7 +142,7 @@ public class ColumnObserverImpl implements ColumnObserver {
         protected final ObjectList<K> touchedElements;
 
         public ColumnDiffImpl() {
-            this.touchedElements = new ObjectArrayList<K>();
+            this.touchedElements = new ObjectArrayList<>();
         }
 
         protected void addElement(K element) {

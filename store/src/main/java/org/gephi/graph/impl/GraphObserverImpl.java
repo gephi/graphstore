@@ -187,10 +187,10 @@ public class GraphObserverImpl implements GraphObserver {
         protected final ObjectList<Edge> removedEdges;
 
         public GraphDiffImpl() {
-            addedNodes = new ObjectArrayList<Node>();
-            removedNodes = new ObjectArrayList<Node>();
-            addedEdges = new ObjectArrayList<Edge>();
-            removedEdges = new ObjectArrayList<Edge>();
+            addedNodes = new ObjectArrayList<>();
+            removedNodes = new ObjectArrayList<>();
+            addedEdges = new ObjectArrayList<>();
+            removedEdges = new ObjectArrayList<>();
         }
 
         @Override

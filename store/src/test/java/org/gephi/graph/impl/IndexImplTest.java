@@ -156,7 +156,7 @@ public class IndexImplTest {
 
         for (Column col : index.columnStore) {
             if (col.isIndexed()) {
-                ObjectSet<Object> set = new ObjectOpenHashSet<Object>();
+                ObjectSet<Object> set = new ObjectOpenHashSet<>();
                 for (NodeImpl n : nodes) {
                     Object obj = n.getAttribute(col);
                     set.add(obj);
@@ -288,7 +288,7 @@ public class IndexImplTest {
             if (col.isIndexed()) {
                 Collection collection = index.values(col);
 
-                ObjectSet<Object> expected = new ObjectOpenHashSet<Object>();
+                ObjectSet<Object> expected = new ObjectOpenHashSet<>();
                 for (NodeImpl n : nodes) {
                     Object obj = n.getAttribute(col);
                     expected.add(obj);
@@ -296,7 +296,7 @@ public class IndexImplTest {
 
                 Assert.assertEquals(collection.size(), expected.size());
                 Assert.assertEquals(index.countValues(col), expected.size());
-                Assert.assertEquals(new ObjectOpenHashSet<Object>(collection), expected);
+                Assert.assertEquals(new ObjectOpenHashSet<>(collection), expected);
             }
         }
     }
@@ -716,7 +716,7 @@ public class IndexImplTest {
     }
 
     private Node[] getIterable(Iterable<Node> itr) {
-        List<Node> list = new ArrayList<Node>();
+        List<Node> list = new ArrayList<>();
         for (Node n : itr) {
             list.add(n);
         }

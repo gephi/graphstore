@@ -118,9 +118,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 try {
                     attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue = (TimeMap) graphStore.configuration
                             .getEdgeWeightType().newInstance();
-                } catch (InstantiationException ex) {
-                    throw new RuntimeException(ex);
-                } catch (IllegalAccessException ex) {
+                } catch (InstantiationException | IllegalAccessException ex) {
                     throw new RuntimeException(ex);
                 }
             } else {
@@ -174,12 +172,14 @@ public class EdgeImpl extends ElementImpl implements Edge {
                 return DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
             }
 
-            if (dynamicValue instanceof TimestampMap) {
-                Double doubleVal = (Double) dynamicValue.get(interval, GraphStoreConfiguration.DEFAULT_ESTIMATOR);
-                return doubleVal != null ? doubleVal : DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
-            } else {
-                return (Double) dynamicValue.get(interval, DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+            Estimator estimator = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
+                    .getEstimator();
+            if (estimator == null) {
+                estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
             }
+
+            Double doubleVal = (Double) dynamicValue.get(interval, estimator);
+            return doubleVal != null ? doubleVal : DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
         }
     }
 

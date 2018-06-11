@@ -868,7 +868,7 @@ public class GraphStoreTest {
 
     // UTILITY
     private void testNodeIterable(NodeIterable iterable, NodeImpl[] nodes) {
-        Set<Node> nodeSet = new HashSet<Node>(iterable.toCollection());
+        Set<Node> nodeSet = new HashSet<>(iterable.toCollection());
         for (NodeImpl n : nodes) {
             Assert.assertTrue(nodeSet.remove(n));
         }
@@ -876,7 +876,7 @@ public class GraphStoreTest {
     }
 
     private void testEdgeIterable(EdgeIterable iterable, EdgeImpl[] edges) {
-        Set<Edge> edgeSet = new HashSet<Edge>(iterable.toCollection());
+        Set<Edge> edgeSet = new HashSet<>(iterable.toCollection());
         for (EdgeImpl n : edges) {
             Assert.assertTrue(edgeSet.remove(n));
         }

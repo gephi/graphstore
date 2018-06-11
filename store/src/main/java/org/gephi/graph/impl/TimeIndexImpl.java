@@ -128,7 +128,7 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
         protected final ObjectSet<Element> elementSet;
 
         public TimeIndexEntry() {
-            elementSet = new ObjectOpenHashSet<Element>();
+            elementSet = new ObjectOpenHashSet<>();
         }
 
         public boolean add(Element element) {
@@ -187,7 +187,7 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
 
         @Override
         public Element[] toArray() {
-            List<Element> list = new ArrayList<Element>();
+            List<Element> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -196,7 +196,7 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
 
         @Override
         public Collection<Element> toCollection() {
-            List<Element> list = new ArrayList<Element>();
+            List<Element> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }

@@ -37,14 +37,11 @@ public class NodeStoreBenchmark {
         config.setNodeIdType(Integer.class);
         final RandomGraph graph = new RandomGraph(nodes, 0, config).generate().commit();
         final NodeStore nodeStore = graph.getStore().getNodeStore();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Iterator<Node> m = nodeStore.iterator();
-                for (; m.hasNext();) {
-                    NodeImpl b = (NodeImpl) m.next();
-                    object = b;
-                }
+        Runnable runnable = () -> {
+            Iterator<Node> m = nodeStore.iterator();
+            for (; m.hasNext();) {
+                NodeImpl b = (NodeImpl) m.next();
+                object = b;
             }
         };
         return runnable;
@@ -57,15 +54,12 @@ public class NodeStoreBenchmark {
         final RandomGraph graph = new RandomGraph(nodes, 0, config).generate().commit();
         final NodeStore nodeStore = graph.getStore().getNodeStore();
         final List<Node> nodeList = graph.getNodes();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                for (Node n : nodeList) {
-                    nodeStore.remove(n);
-                }
-                for (Node n : nodeList) {
-                    nodeStore.add(n);
-                }
+        Runnable runnable = () -> {
+            for (Node n : nodeList) {
+                nodeStore.remove(n);
+            }
+            for (Node n : nodeList) {
+                nodeStore.add(n);
             }
         };
         return runnable;
@@ -79,13 +73,10 @@ public class NodeStoreBenchmark {
         final NodeStore nodeStore = graph.getStore().getNodeStore();
         final List<Node> nodeList = graph.getNodes();
 
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                nodeStore.clear();
-                for (Node n : nodeList) {
-                    nodeStore.add(n);
-                }
+        Runnable runnable = () -> {
+            nodeStore.clear();
+            for (Node n : nodeList) {
+                nodeStore.add(n);
             }
         };
         return runnable;

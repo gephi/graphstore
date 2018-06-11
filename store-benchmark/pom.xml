@@ -4,7 +4,7 @@
 
     <groupId>org.gephi</groupId>
     <artifactId>graphstore-benchmark</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>graphstore-benchmark</name>
@@ -35,8 +35,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>graphstore</artifactId>
-            <version>0.6.0-SNAPSHOT</version>
+            <version>0.6.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

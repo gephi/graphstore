@@ -73,7 +73,7 @@ public class GraphViewImpl implements GraphView {
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
-        this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
+        this.observers = graphStore.version != null ? new ArrayList<>() : null;
         this.interval = Interval.INFINITY_INTERVAL;
     }
 
@@ -97,7 +97,7 @@ public class GraphViewImpl implements GraphView {
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
-        this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
+        this.observers = graphStore.version != null ? new ArrayList<>() : null;
         this.interval = view.interval;
     }
 

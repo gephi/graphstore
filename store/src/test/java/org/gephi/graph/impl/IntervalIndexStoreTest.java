@@ -35,13 +35,13 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testEmpty() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         Assert.assertTrue(store.size() == 0);
     }
 
     @Test
     public void testAddOne() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         int a = store.add(new Interval(1.0, 2.0));
 
         Assert.assertEquals(a, 0);
@@ -52,7 +52,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testAddTwiceSame() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         int a = store.add(new Interval(1.0, 2.0));
         int b = store.add(new Interval(1.0, 2.0));
 
@@ -64,7 +64,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testRemove() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         store.add(new Interval(1.0, 2.0));
         store.remove(new Interval(1.0, 2.0));
 
@@ -74,7 +74,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testRemoveWithCount() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         store.add(new Interval(1.0, 2.0));
         store.add(new Interval(1.0, 2.0));
         store.remove(new Interval(1.0, 2.0));
@@ -90,7 +90,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testRemoveUnknown() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         store.remove(new Interval(1.0, 2.0));
 
         Assert.assertTrue(store.size() == 0);
@@ -99,13 +99,13 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testNotContains() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         Assert.assertFalse(store.contains(new Interval(1.0, 2.0)));
     }
 
     @Test
     public void testAddAfterRemove() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         store.add(new Interval(1.0, 2.0));
         store.remove(new Interval(1.0, 2.0));
         int a = store.add(new Interval(3.0, 4.0));
@@ -116,7 +116,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testContains() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         Interval i = new Interval(1.0, 2.0);
 
         Assert.assertFalse(store.contains(i));
@@ -132,7 +132,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testGarbage() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
 
         store.add(new Interval(1.0, 2.0));
         int pos = store.add(new Interval(3.0, 4.0));
@@ -152,7 +152,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testClear() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         store.clear();
 
         store.add(new Interval(3.0, 6.0));
@@ -164,20 +164,20 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testDeepEqualsEmpty() {
-        IntervalIndexStore<Node> store1 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store1 = new IntervalIndexStore<>(Node.class, null, false);
         Assert.assertFalse(store1.deepEquals(null));
         Assert.assertTrue(store1.deepEquals(store1));
 
-        IntervalIndexStore<Node> store2 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store2 = new IntervalIndexStore<>(Node.class, null, false);
         Assert.assertTrue(store1.deepEquals(store2));
     }
 
     @Test
     public void testDeepHashCodeEmpty() {
-        IntervalIndexStore<Node> store1 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store1 = new IntervalIndexStore<>(Node.class, null, false);
         Assert.assertEquals(store1.deepHashCode(), store1.deepHashCode());
 
-        IntervalIndexStore<Node> store2 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store2 = new IntervalIndexStore<>(Node.class, null, false);
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
     }
 
@@ -186,20 +186,20 @@ public class IntervalIndexStoreTest {
         Interval i1 = new Interval(1.0, 2.0);
         Interval i2 = new Interval(3.0, 4.0);
 
-        IntervalIndexStore<Node> store1 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store1 = new IntervalIndexStore<>(Node.class, null, false);
         store1.add(i1);
         store1.add(i2);
         store1.remove(i1);
 
-        IntervalIndexStore<Node> store2 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store2 = new IntervalIndexStore<>(Node.class, null, false);
         store2.add(i1);
         store2.add(i2);
         store2.remove(i1);
 
-        IntervalIndexStore<Node> store3 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store3 = new IntervalIndexStore<>(Node.class, null, false);
         store3.add(i1);
 
-        IntervalIndexStore<Node> store4 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store4 = new IntervalIndexStore<>(Node.class, null, false);
         store4.add(i1);
         store4.add(i1);
 
@@ -213,20 +213,20 @@ public class IntervalIndexStoreTest {
         Interval i1 = new Interval(1.0, 2.0);
         Interval i2 = new Interval(3.0, 4.0);
 
-        IntervalIndexStore<Node> store1 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store1 = new IntervalIndexStore<>(Node.class, null, false);
         store1.add(i1);
         store1.add(i2);
         store1.remove(i1);
 
-        IntervalIndexStore<Node> store2 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store2 = new IntervalIndexStore<>(Node.class, null, false);
         store2.add(i1);
         store2.add(i2);
         store2.remove(i1);
 
-        IntervalIndexStore<Node> store3 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store3 = new IntervalIndexStore<>(Node.class, null, false);
         store3.add(i1);
 
-        IntervalIndexStore<Node> store4 = new IntervalIndexStore<Node>(Node.class, null, false);
+        IntervalIndexStore<Node> store4 = new IntervalIndexStore<>(Node.class, null, false);
         store4.add(i1);
         store4.add(i1);
 
@@ -237,7 +237,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testAddElement() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, true);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, true);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 
@@ -248,7 +248,7 @@ public class IntervalIndexStoreTest {
 
     @Test
     public void testRemoveElement() {
-        IntervalIndexStore<Node> store = new IntervalIndexStore<Node>(Node.class, null, true);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, true);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 
@@ -632,7 +632,7 @@ public class IntervalIndexStoreTest {
 
     // UTILITY
     private <T> Object[] getArrayFromIterable(Iterable<T> iterable) {
-        List<T> list = new ArrayList<T>();
+        List<T> list = new ArrayList<>();
         for (T t : iterable) {
             list.add(t);
         }

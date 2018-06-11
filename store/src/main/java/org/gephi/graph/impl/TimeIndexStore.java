@@ -56,7 +56,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         timeSortedMap = sortedMap;
         countMap = new int[0];
 
-        viewIndexes = indexed ? new Object2ObjectOpenHashMap<GraphView, TimeIndexImpl>() : null;
+        viewIndexes = indexed ? new Object2ObjectOpenHashMap<>() : null;
     }
 
     protected abstract void checkK(K k);

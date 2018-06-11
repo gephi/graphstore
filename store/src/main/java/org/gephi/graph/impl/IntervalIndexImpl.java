@@ -91,7 +91,7 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
         checkDouble(timestamp);
 
         readLock();
-        ObjectSet<Element> elements = new ObjectOpenHashSet<Element>();
+        ObjectSet<Element> elements = new ObjectOpenHashSet<>();
         Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
         if (!sortedMap.isEmpty()) {
             for (Integer index : sortedMap.values(timestamp)) {
@@ -114,7 +114,7 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
     public ElementIterable get(Interval interval) {
 
         readLock();
-        ObjectSet<Element> elements = new ObjectOpenHashSet<Element>();
+        ObjectSet<Element> elements = new ObjectOpenHashSet<>();
         Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
         if (!sortedMap.isEmpty()) {
             for (Integer index : sortedMap.values(interval)) {

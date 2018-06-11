@@ -103,7 +103,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
             lock.lock();
             AbstractIndex index = getIndex((ColumnImpl) column);
             Set<T> valueSet = index.getValueSet(value);
-            return valueSet == null ? null : new LockableIterable<T>(index.getValueSet(value));
+            return valueSet == null ? null : new LockableIterable<>(index.getValueSet(value));
         }
         AbstractIndex index = getIndex((ColumnImpl) column);
         return index.getValueSet(value);
@@ -430,7 +430,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         public AbstractIndex(ColumnImpl column) {
             this.column = column;
-            this.nullSet = new ObjectOpenHashSet<T>();
+            this.nullSet = new ObjectOpenHashSet<>();
         }
 
         public Object putValue(T element, Object value) {
@@ -754,7 +754,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         public ValueSet(K value) {
             this.value = value;
-            this.set = new ObjectOpenHashSet<T>();
+            this.set = new ObjectOpenHashSet<>();
         }
 
         @Override
@@ -838,7 +838,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public DefaultIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenHashMap<Object, Set<T>>();
+            map = new Object2ObjectOpenHashMap<>();
         }
     }
 
@@ -847,7 +847,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public BooleanIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenHashMap<Boolean, Set<T>>();
+            map = new Object2ObjectOpenHashMap<>();
         }
     }
 
@@ -856,7 +856,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public DoubleIndex(ColumnImpl column) {
             super(column);
 
-            map = new Double2ObjectAVLTreeMap<Set<T>>();
+            map = new Double2ObjectAVLTreeMap<>();
         }
     }
 
@@ -865,7 +865,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public IntegerIndex(ColumnImpl column) {
             super(column);
 
-            map = new Int2ObjectAVLTreeMap<Set<T>>();
+            map = new Int2ObjectAVLTreeMap<>();
         }
     }
 
@@ -874,7 +874,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public FloatIndex(ColumnImpl column) {
             super(column);
 
-            map = new Float2ObjectAVLTreeMap<Set<T>>();
+            map = new Float2ObjectAVLTreeMap<>();
         }
     }
 
@@ -883,7 +883,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public LongIndex(ColumnImpl column) {
             super(column);
 
-            map = new Long2ObjectAVLTreeMap<Set<T>>();
+            map = new Long2ObjectAVLTreeMap<>();
         }
     }
 
@@ -892,7 +892,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public ShortIndex(ColumnImpl column) {
             super(column);
 
-            map = new Short2ObjectAVLTreeMap<Set<T>>();
+            map = new Short2ObjectAVLTreeMap<>();
         }
     }
 
@@ -901,7 +901,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public ByteIndex(ColumnImpl column) {
             super(column);
 
-            map = new Byte2ObjectAVLTreeMap<Set<T>>();
+            map = new Byte2ObjectAVLTreeMap<>();
         }
     }
 
@@ -910,7 +910,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public GenericNumberIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectAVLTreeMap<Number, Set<T>>();
+            map = new Object2ObjectAVLTreeMap<>();
         }
     }
 
@@ -919,7 +919,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public CharIndex(ColumnImpl column) {
             super(column);
 
-            map = new Char2ObjectAVLTreeMap<Set<T>>();
+            map = new Char2ObjectAVLTreeMap<>();
         }
     }
 
@@ -928,7 +928,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public DefaultArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<Object[], Set<T>>(ObjectArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(ObjectArrays.HASH_STRATEGY);
         }
     }
 
@@ -937,7 +937,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public BooleanArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<boolean[], Set<T>>(BooleanArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(BooleanArrays.HASH_STRATEGY);
         }
     }
 
@@ -946,7 +946,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public DoubleArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<double[], Set<T>>(DoubleArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(DoubleArrays.HASH_STRATEGY);
         }
     }
 
@@ -955,7 +955,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public IntegerArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<int[], Set<T>>(IntArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(IntArrays.HASH_STRATEGY);
         }
     }
 
@@ -964,7 +964,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public FloatArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<float[], Set<T>>(FloatArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(FloatArrays.HASH_STRATEGY);
         }
     }
 
@@ -973,7 +973,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public LongArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<long[], Set<T>>(LongArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(LongArrays.HASH_STRATEGY);
         }
     }
 
@@ -982,7 +982,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public ShortArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<short[], Set<T>>(ShortArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(ShortArrays.HASH_STRATEGY);
         }
     }
 
@@ -991,7 +991,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public ByteArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<byte[], Set<T>>(ByteArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(ByteArrays.HASH_STRATEGY);
         }
     }
 
@@ -1000,7 +1000,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         public CharArrayIndex(ColumnImpl column) {
             super(column);
 
-            map = new Object2ObjectOpenCustomHashMap<char[], Set<T>>(CharArrays.HASH_STRATEGY);
+            map = new Object2ObjectOpenCustomHashMap<>(CharArrays.HASH_STRATEGY);
         }
     }
 
@@ -1014,7 +1014,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         @Override
         public Iterator<T> iterator() {
-            return new LockableIterator<T>(ite.iterator());
+            return new LockableIterator<>(ite.iterator());
         }
     }
 

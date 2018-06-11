@@ -25,8 +25,8 @@ public abstract class Generator {
         GraphModelImpl model = new GraphModelImpl(config);
         factory = model.factory();
         graphStore = model.getStore();
-        nodes = new ArrayList<Node>();
-        edges = new ArrayList<Edge>();
+        nodes = new ArrayList<>();
+        edges = new ArrayList<>();
     }
 
     public GraphStore getStore() {

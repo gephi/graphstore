@@ -45,6 +45,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.SpatialContext;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TextProperties;
 import org.gephi.graph.spi.LayoutData;
@@ -459,7 +460,7 @@ public class BasicGraphStore implements DirectedGraph {
 
     public static class BasicElement implements Element {
 
-        protected final Map<String, Object> properties = new HashMap<String, Object>();
+        protected final Map<String, Object> properties = new HashMap<>();
         protected final Object id;
 
         public BasicElement(Object id) {
@@ -724,10 +725,10 @@ public class BasicGraphStore implements DirectedGraph {
 
         public BasicNode(Object id) {
             super(id);
-            this.outEdges = new Int2ObjectOpenHashMap<Object2ObjectMap<Object, BasicEdge>>(1);
-            this.inEdges = new Int2ObjectOpenHashMap<Object2ObjectMap<Object, BasicEdge>>(1);
-            this.outEdges.put(0, new Object2ObjectOpenHashMap<Object, BasicEdge>());
-            this.inEdges.put(0, new Object2ObjectOpenHashMap<Object, BasicEdge>());
+            this.outEdges = new Int2ObjectOpenHashMap<>(1);
+            this.inEdges = new Int2ObjectOpenHashMap<>(1);
+            this.outEdges.put(0, new Object2ObjectOpenHashMap<>());
+            this.inEdges.put(0, new Object2ObjectOpenHashMap<>());
         }
 
         @Override
@@ -1055,7 +1056,7 @@ public class BasicGraphStore implements DirectedGraph {
         protected final Object2ObjectMap<Object, BasicNode> idToNodeMap;
 
         public BasicNodeStore() {
-            idToNodeMap = new Object2ObjectOpenHashMap<Object, BasicNode>();
+            idToNodeMap = new Object2ObjectOpenHashMap<>();
         }
 
         @Override
@@ -1209,8 +1210,8 @@ public class BasicGraphStore implements DirectedGraph {
         protected final Int2IntMap typeCountMap;
 
         public BasicEdgeStore() {
-            idToEdgeMap = new Object2ObjectLinkedOpenHashMap<Object, BasicGraphStore.BasicEdge>();
-            sourceTargetIdEdgeMap = new Object2ObjectLinkedOpenHashMap<String, BasicEdge>();
+            idToEdgeMap = new Object2ObjectLinkedOpenHashMap<>();
+            sourceTargetIdEdgeMap = new Object2ObjectLinkedOpenHashMap<>();
             typeCountMap = new Int2IntOpenHashMap();
         }
 
@@ -1259,7 +1260,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         public Iterator<Edge> outIterator(BasicNode node) {
-            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<>();
             for (Object2ObjectMap<Object, BasicEdge> col : node.outEdges.values()) {
                 set.addAll(col.values());
             }
@@ -1267,7 +1268,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         public Iterator<Edge> outIterator(BasicNode node, int type) {
-            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<>();
             if (node.outEdges.containsKey(type)) {
                 set.addAll(node.outEdges.get(type).values());
             }
@@ -1275,7 +1276,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         public Iterator<Edge> inIterator(BasicNode node) {
-            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<>();
             for (Object2ObjectMap<Object, BasicEdge> col : node.inEdges.values()) {
                 set.addAll(col.values());
             }
@@ -1283,7 +1284,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         public Iterator<Edge> inIterator(BasicNode node, int type) {
-            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<>();
             if (node.inEdges.containsKey(type)) {
                 set.addAll(node.inEdges.get(type).values());
             }
@@ -1291,7 +1292,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         public Iterator<Edge> inOutIterator(BasicNode node) {
-            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<>();
             for (Object2ObjectMap<Object, BasicEdge> col : node.outEdges.values()) {
                 set.addAll(col.values());
             }
@@ -1302,7 +1303,7 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         public Iterator<Edge> inOutIterator(BasicNode node, int type) {
-            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<BasicEdge>();
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<>();
             if (node.outEdges.containsKey(type)) {
                 set.addAll(node.outEdges.get(type).values());
             }
@@ -1362,14 +1363,14 @@ public class BasicGraphStore implements DirectedGraph {
 
             Object2ObjectMap<Object, BasicEdge> outMap = source.outEdges.get(type);
             if (outMap == null) {
-                outMap = new Object2ObjectOpenHashMap<Object, BasicEdge>();
+                outMap = new Object2ObjectOpenHashMap<>();
                 source.outEdges.put(type, outMap);
             }
             outMap.put(target.getId(), basicEdge);
 
             Object2ObjectMap<Object, BasicEdge> inMap = target.inEdges.get(type);
             if (inMap == null) {
-                inMap = new Object2ObjectOpenHashMap<Object, BasicEdge>();
+                inMap = new Object2ObjectOpenHashMap<>();
                 target.inEdges.put(type, inMap);
             }
             inMap.put(source.getId(), basicEdge);
@@ -1514,7 +1515,7 @@ public class BasicGraphStore implements DirectedGraph {
 
     private static class NeighborsUndirectedIterator implements Iterator<Node> {
 
-        protected Set<BasicNode> output = new ObjectOpenHashSet<BasicNode>();
+        protected Set<BasicNode> output = new ObjectOpenHashSet<>();
         protected final BasicNode node;
         protected final Iterator<Edge> itr;
         protected BasicNode pointer;
@@ -1566,7 +1567,7 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public Node[] toArray() {
-            List<Node> list = new ArrayList<Node>();
+            List<Node> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -1575,7 +1576,7 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public Collection<Node> toCollection() {
-            List<Node> list = new ArrayList<Node>();
+            List<Node> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -1603,7 +1604,7 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public Edge[] toArray() {
-            List<Edge> list = new ArrayList<Edge>();
+            List<Edge> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -1612,7 +1613,7 @@ public class BasicGraphStore implements DirectedGraph {
 
         @Override
         public Collection<Edge> toCollection() {
-            List<Edge> list = new ArrayList<Edge>();
+            List<Edge> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -1623,5 +1624,10 @@ public class BasicGraphStore implements DirectedGraph {
         public void doBreak() {
             // Not used because no locking
         }
+    }
+
+    @Override
+    public SpatialContext getSpatialContext() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

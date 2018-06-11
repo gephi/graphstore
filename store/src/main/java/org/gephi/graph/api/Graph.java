@@ -498,4 +498,6 @@ public interface Graph {
      * Closes a write lock for the current thread.
      */
     public void writeUnlock();
+
+    public SpatialContext getSpatialContext();
 }

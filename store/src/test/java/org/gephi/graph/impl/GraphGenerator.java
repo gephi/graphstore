@@ -120,7 +120,7 @@ public class GraphGenerator {
 
     public static EdgeImpl[] generateEdgeList(NodeStore nodeStore, int edgeCount, int type, boolean directed, boolean allowSelfLoops, boolean allowParallel) {
         int nodeCount = nodeStore.size();
-        final List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>();
+        final List<EdgeImpl> edgeList = new ArrayList<>();
         LongSet idSet = new LongOpenHashSet();
         Random r = new Random(124);
 
@@ -160,7 +160,7 @@ public class GraphGenerator {
 
     public static BasicGraphStore.BasicEdge[] generateBasicEdgeList(BasicGraphStore.BasicNodeStore nodeStore, int edgeCount, int type, boolean directed, boolean allowSelfLoops) {
         int nodeCount = nodeStore.size();
-        final List<BasicGraphStore.BasicEdge> edgeList = new ArrayList<BasicGraphStore.BasicEdge>();
+        final List<BasicGraphStore.BasicEdge> edgeList = new ArrayList<>();
         ObjectSet<String> idSet = new ObjectOpenHashSet();
         Random r = new Random(124);
 
@@ -196,7 +196,7 @@ public class GraphGenerator {
 
     public static EdgeImpl[] generateMixedEdgeList(NodeStore nodeStore, int edgeCount, int type, boolean allowSelfLoops) {
         int nodeCount = nodeStore.size();
-        final List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>();
+        final List<EdgeImpl> edgeList = new ArrayList<>();
         LongSet idSet = new LongOpenHashSet();
         Random r = new Random(124);
         int c = 0;
@@ -231,7 +231,7 @@ public class GraphGenerator {
 
     public static BasicGraphStore.BasicEdge[] generateBasicMixedEdgeList(BasicGraphStore.BasicNodeStore nodeStore, int edgeCount, int type, boolean allowSelfLoops) {
         int nodeCount = nodeStore.size();
-        final List<BasicGraphStore.BasicEdge> edgeList = new ArrayList<BasicGraphStore.BasicEdge>();
+        final List<BasicGraphStore.BasicEdge> edgeList = new ArrayList<>();
         ObjectSet<String> idSet = new ObjectOpenHashSet();
         Random r = new Random(124);
         int c = 0;
@@ -273,7 +273,7 @@ public class GraphGenerator {
     }
 
     public static EdgeImpl[] generateMultiTypeEdgeList(NodeStore nodeStore, int edgeCount, int typeCount, boolean directed, boolean allowSelfLoops) {
-        List<EdgeImpl> edges = new ArrayList<EdgeImpl>();
+        List<EdgeImpl> edges = new ArrayList<>();
         int[] typeAssignemnts = distributeTypeCounts(typeCount, edgeCount);
         for (int i = 0; i < typeCount; i++) {
             edges.addAll(Arrays
@@ -284,7 +284,7 @@ public class GraphGenerator {
     }
 
     public static BasicGraphStore.BasicEdge[] generateBasicMultiTypeEdgeList(int edgeCount, int typeCount, boolean directed, boolean allowSelfLoops) {
-        List<BasicGraphStore.BasicEdge> edges = new ArrayList<BasicGraphStore.BasicEdge>();
+        List<BasicGraphStore.BasicEdge> edges = new ArrayList<>();
         int nodeCount = Math.max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0));
         BasicGraphStore.BasicNodeStore nodeStore = generateBasicNodeStore(nodeCount);
         int[] typeAssignemnts = distributeTypeCounts(typeCount, edgeCount);

@@ -34,6 +34,7 @@ import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.SpatialContext;
 import org.gephi.graph.api.Subgraph;
 import org.joda.time.DateTimeZone;
 import org.gephi.graph.api.TimeRepresentation;
@@ -67,6 +68,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected TimeFormat timeFormat;
     // Time zone
     protected DateTimeZone timeZone;
+    // Spatial context
+    protected GraphStoreSpatialContextImpl spatialIndex;
 
     public GraphStore() {
         this(null);
@@ -76,17 +79,23 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         configuration = model != null ? model.configuration : new Configuration();
         graphModel = model;
         lock = new GraphLock();
+        if (GraphStoreConfiguration.ENABLE_SPATIAL_INDEX) {
+            spatialIndex = new GraphStoreSpatialContextImpl(this);
+        } else {
+            spatialIndex = null;
+        }
+
         edgeTypeStore = new EdgeTypeStore();
         mainGraphView = new MainGraphView();
         viewStore = new GraphViewStore(this);
         version = GraphStoreConfiguration.ENABLE_OBSERVERS ? new GraphVersion(this) : null;
-        observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<GraphObserverImpl>() : null;
-        edgeStore = new EdgeStore(edgeTypeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore,
-                GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
-        nodeStore = new NodeStore(edgeStore, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore,
-                GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
-        nodeTable = new TableImpl<Node>(this, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
-        edgeTable = new TableImpl<Edge>(this, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
+        observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<>() : null;
+        edgeStore = new EdgeStore(edgeTypeStore, spatialIndex, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock
+                : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
+        nodeStore = new NodeStore(edgeStore, spatialIndex, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null,
+                viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
+        nodeTable = new TableImpl<>(this, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
+        edgeTable = new TableImpl<>(this, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
         timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null,
                 GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
         attributes = new GraphAttributesImpl();
@@ -819,6 +828,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         return true;
     }
 
+    @Override
+    public SpatialContext getSpatialContext() {
+        return spatialIndex;
+    }
+
     protected class NodeIterableWrapper implements NodeIterable {
 
         protected final Iterator<Node> iterator;
@@ -840,7 +854,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
         @Override
         public Node[] toArray() {
-            List<Node> list = new ArrayList<Node>();
+            List<Node> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -849,7 +863,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
         @Override
         public Collection<Node> toCollection() {
-            List<Node> list = new ArrayList<Node>();
+            List<Node> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -885,7 +899,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
         @Override
         public Edge[] toArray() {
-            List<Edge> list = new ArrayList<Edge>();
+            List<Edge> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }
@@ -894,7 +908,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
         @Override
         public Collection<Edge> toCollection() {
-            List<Edge> list = new ArrayList<Edge>();
+            List<Edge> list = new ArrayList<>();
             for (; iterator.hasNext();) {
                 list.add(iterator.next());
             }

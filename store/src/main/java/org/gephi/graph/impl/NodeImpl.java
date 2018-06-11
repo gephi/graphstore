@@ -164,6 +164,12 @@ public class NodeImpl extends ElementImpl implements Node {
         return properties.getTextProperties();
     }
 
+    private void updateNodeInSpatialIndex() {
+        if (storeId != NodeStore.NULL_ID && graphStore != null && graphStore.spatialIndex != null) {
+            graphStore.spatialIndex.moveNode(this);
+        }
+    }
+
     protected void setNodeProperties(NodePropertiesImpl nodeProperties) {
         properties.x = nodeProperties.x;
         properties.y = nodeProperties.y;
@@ -174,31 +180,38 @@ public class NodeImpl extends ElementImpl implements Node {
         if (properties.textProperties != null) {
             properties.setTextProperties(nodeProperties.textProperties);
         }
+
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setX(float x) {
         properties.setX(x);
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setY(float y) {
         properties.setY(y);
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setZ(float z) {
         properties.setZ(z);
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setPosition(float x, float y) {
         properties.setPosition(x, y);
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setPosition(float x, float y, float z) {
         properties.setPosition(x, y, z);
+        updateNodeInSpatialIndex();
     }
 
     @Override
@@ -229,6 +242,7 @@ public class NodeImpl extends ElementImpl implements Node {
     @Override
     public void setSize(float size) {
         properties.setSize(size);
+        updateNodeInSpatialIndex();
     }
 
     @Override

@@ -171,7 +171,7 @@ public class TimestampIndexImplTest {
 
     // UTILITY
     private <T> Object[] getArrayFromIterable(Iterable<T> iterable) {
-        List<T> list = new ArrayList<T>();
+        List<T> list = new ArrayList<>();
         for (T t : iterable) {
             list.add(t);
         }
