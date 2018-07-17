@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Table;
@@ -456,13 +457,15 @@ public class GraphModelImpl implements GraphModel {
             }
 
             // Change whether edge weight column
+            final boolean edgeWeightIndexed = AttributeUtils.isSimpleType(config.getEdgeWeightType());
+
             if (!config.getEdgeWeightColumn().equals(configuration.getEdgeWeightColumn())) {
                 TableImpl<Edge> edgeTable = store.edgeTable;
                 if (config.getEdgeWeightColumn()) {
                     edgeTable.store.garbageQueue.add(edgeTable.store
                             .intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
                     edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID,
-                            config.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
+                            config.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, edgeWeightIndexed, false));
                 } else {
                     edgeTable.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
                     edgeTable.store.garbageQueue.remove(edgeTable.store
@@ -479,7 +482,7 @@ public class GraphModelImpl implements GraphModel {
                     edgeTable.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
 
                     edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID,
-                            newWeightType, "Weight", null, Origin.PROPERTY, false, false));
+                            newWeightType, "Weight", null, Origin.PROPERTY, edgeWeightIndexed, false));
                 }
 
                 configuration.setEdgeWeightType(newWeightType);

@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.TimeFormat;
@@ -130,8 +131,9 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             }
         }
         if (configuration.getEdgeWeightColumn()) {
+            final boolean edgeWeightIndexed = AttributeUtils.isSimpleType(configuration.getEdgeWeightType());
             edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID,
-                    configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
+                    configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, edgeWeightIndexed, false));
         } else {
             edgeTable.store.length++;
         }
