@@ -246,13 +246,19 @@ public class EdgeImpl extends ElementImpl implements Edge {
     public void setWeight(double weight) {
         checkWeightStaticType();
 
+        final Object oldValue;
         synchronized (this) {
+            oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
             attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
         }
+
         ColumnStore columnStore = getColumnStore();
         if (columnStore != null && isValid()) {
             Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
             ((ColumnImpl) column).incrementVersion(this);
+            if (column.isIndexed()) {
+                columnStore.indexStore.set(column, oldValue, weight, this);
+            }
         }
     }
 
