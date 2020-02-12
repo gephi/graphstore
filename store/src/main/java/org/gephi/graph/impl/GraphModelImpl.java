@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.HierarchicalGraphView;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeFormat;
@@ -236,6 +237,11 @@ public class GraphModelImpl implements GraphModel {
     @Override
     public GraphView createView(boolean node, boolean edge) {
         return store.viewStore.createView(node, edge);
+    }
+
+    @Override
+    public HierarchicalGraphView createHierarchicalView() {
+        return store.viewStore.createHierarchicalView();
     }
 
     @Override

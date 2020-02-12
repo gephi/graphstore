@@ -15,11 +15,12 @@
  */
 package org.gephi.graph.api;
 
+import org.gephi.graph.impl.GraphModelImpl;
+import org.joda.time.DateTimeZone;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import org.gephi.graph.impl.GraphModelImpl;
-import org.joda.time.DateTimeZone;
 
 /**
  * Graph API's entry point.
@@ -370,6 +371,13 @@ public interface GraphModel {
      * @return newly created graph view
      */
     public GraphView createView(boolean node, boolean edge);
+
+    /**
+     * Creates a new hierarchical graph view.
+     *
+     * @return newly created hierarchical graph view
+     */
+    public HierarchicalGraphView createHierarchicalView();
 
     /**
      * Creates a new graph view based on an existing view.

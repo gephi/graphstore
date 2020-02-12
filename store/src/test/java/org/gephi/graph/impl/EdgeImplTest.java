@@ -62,7 +62,6 @@ public class EdgeImplTest {
         Edge e = graphStore.getEdge("0");
         Assert.assertEquals(e.getWeight(2.0), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
     }
-
     @Test
     public void testGetDefaultIntervalWeight() {
         Configuration config = new Configuration();

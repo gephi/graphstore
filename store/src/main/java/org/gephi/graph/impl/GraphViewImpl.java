@@ -17,30 +17,26 @@ package org.gephi.graph.impl;
 
 import cern.colt.bitvector.BitVector;
 import cern.colt.bitvector.QuickBitVector;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.gephi.graph.impl.EdgeStore.EdgeInOutIterator;
 
-public class GraphViewImpl implements GraphView {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+public class GraphViewImpl extends AbstractGraphView implements GraphView {
 
     // Data
-    protected final GraphStore graphStore;
-    protected final boolean nodeView;
-    protected final boolean edgeView;
-    protected final GraphAttributesImpl attributes;
     protected BitVector nodeBitVector;
     protected BitVector edgeBitVector;
-    protected int storeId;
     // Version
     protected final GraphVersion version;
     protected final List<GraphObserverImpl> observers;
@@ -53,14 +49,9 @@ public class GraphViewImpl implements GraphView {
     protected int[] typeCounts;
     protected int[] mutualEdgeTypeCounts;
     protected int mutualEdgesCount;
-    // Dynamic
-    protected Interval interval;
 
     public GraphViewImpl(final GraphStore store, boolean nodes, boolean edges) {
-        this.graphStore = store;
-        this.nodeView = nodes;
-        this.edgeView = edges;
-        this.attributes = new GraphAttributesImpl();
+        super(store, nodes, edges);
         if (nodes) {
             this.nodeBitVector = new BitVector(store.nodeStore.maxStoreId());
         } else {
@@ -74,14 +65,10 @@ public class GraphViewImpl implements GraphView {
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
         this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
-        this.interval = Interval.INFINITY_INTERVAL;
     }
 
     public GraphViewImpl(final GraphViewImpl view, boolean nodes, boolean edges) {
-        this.graphStore = view.graphStore;
-        this.nodeView = nodes;
-        this.edgeView = edges;
-        this.attributes = new GraphAttributesImpl();
+        super(view, nodes, edges);
         if (nodes) {
             this.nodeBitVector = view.nodeBitVector.copy();
             this.nodeCount = view.nodeCount;
@@ -98,14 +85,15 @@ public class GraphViewImpl implements GraphView {
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
         this.observers = graphStore.version != null ? new ArrayList<GraphObserverImpl>() : null;
-        this.interval = view.interval;
     }
 
-    protected DirectedSubgraph getDirectedGraph() {
+    @Override
+    public DirectedSubgraph getDirectedGraph() {
         return directedDecorator;
     }
 
-    protected UndirectedSubgraph getUndirectedGraph() {
+    @Override
+    public UndirectedSubgraph getUndirectedGraph() {
         return undirectedDecorator;
     }
 
@@ -563,42 +551,6 @@ public class GraphViewImpl implements GraphView {
     }
 
     @Override
-    public GraphModelImpl getGraphModel() {
-        return graphStore.graphModel;
-    }
-
-    @Override
-    public boolean isMainView() {
-        return false;
-    }
-
-    @Override
-    public boolean isNodeView() {
-        return nodeView;
-    }
-
-    @Override
-    public boolean isEdgeView() {
-        return edgeView;
-    }
-
-    public void setTimeInterval(Interval interval) {
-        if (interval == null) {
-            interval = Interval.INFINITY_INTERVAL;
-        }
-        this.interval = interval;
-    }
-
-    @Override
-    public Interval getTimeInterval() {
-        return interval;
-    }
-
-    @Override
-    public boolean isDestroyed() {
-        return storeId == GraphViewStore.NULL_VIEW;
-    }
-
     protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
         if (observers != null) {
             GraphObserverImpl observer = new GraphObserverImpl(graphStore, version, graph, withDiff);
@@ -609,10 +561,11 @@ public class GraphViewImpl implements GraphView {
         return null;
     }
 
-    protected void destroyGraphObserver(GraphObserverImpl observer) {
+    @Override
+    protected void destroyGraphObserver(GraphObserver observer) {
         if (observers != null) {
             observers.remove(observer);
-            observer.destroyObserver();
+            ((GraphObserverImpl) observer).destroyObserver();
         }
     }
 
@@ -623,6 +576,35 @@ public class GraphViewImpl implements GraphView {
             }
             observers.clear();
         }
+    }
+
+    @Override
+    protected void viewDestroyed() {
+        this.setStoreId(GraphViewStore.NULL_VIEW);
+        this.destroyAllObservers();
+    }
+
+    @Override
+    protected void nodeAdded(NodeImpl node) {
+        this.ensureNodeVectorSize(node);
+    }
+
+    @Override
+    protected void nodeRemoved(NodeImpl node) {
+        this.removeNode(node);
+    }
+
+    @Override
+    protected void edgeAdded(EdgeImpl edge) {
+        this.ensureEdgeVectorSize(edge);
+        if (this.nodeView && !this.edgeView) {
+            this.addEdgeInNodeView(edge);
+        }
+    }
+
+    @Override
+    protected void edgeRemoved(EdgeImpl edge) {
+        this.removeEdge(edge);
     }
 
     protected void ensureNodeVectorSize(NodeImpl node) {
@@ -726,6 +708,7 @@ public class GraphViewImpl implements GraphView {
         }
     }
 
+    @Override
     public int deepHashCode() {
         int hash = 5;
         hash = 17 * hash + (this.nodeView ? 1 : 0);
@@ -737,14 +720,19 @@ public class GraphViewImpl implements GraphView {
         hash = 11 * hash + Arrays.hashCode(this.typeCounts);
         hash = 11 * hash + Arrays.hashCode(this.mutualEdgeTypeCounts);
         hash = 11 * hash + this.mutualEdgesCount;
-        hash = 11 * hash + (this.interval != null ? this.interval.hashCode() : 0);
+        hash = 11 * hash + (this.getTimeInterval() != null ? this.getTimeInterval().hashCode() : 0);
         return hash;
     }
 
-    public boolean deepEquals(GraphViewImpl obj) {
-        if (obj == null) {
+    @Override
+    public boolean deepEquals(AbstractGraphView view) {
+        if (view == null) {
             return false;
         }
+        if (!(view instanceof GraphViewImpl)) {
+            return false;
+        }
+        GraphViewImpl obj = (GraphViewImpl) view;
         if (this.nodeBitVector != obj.nodeBitVector && (this.nodeBitVector == null || !this.nodeBitVector
                 .equals(obj.nodeBitVector))) {
             return false;
@@ -774,7 +762,8 @@ public class GraphViewImpl implements GraphView {
         if (this.mutualEdgesCount != obj.mutualEdgesCount) {
             return false;
         }
-        if (this.interval != obj.interval && (this.interval == null || !this.interval.equals(obj.interval))) {
+        if (this.getTimeInterval() != obj.getTimeInterval() && (this.getTimeInterval() == null || !this
+                .getTimeInterval().equals(obj.getTimeInterval()))) {
             return false;
         }
         return true;
