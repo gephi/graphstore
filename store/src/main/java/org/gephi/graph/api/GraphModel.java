@@ -18,7 +18,7 @@ package org.gephi.graph.api;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import org.gephi.graph.impl.GraphModelImpl;
 
 /**
@@ -553,14 +553,14 @@ public interface GraphModel {
      *
      * @return time zone
      */
-    public ZonedDateTime getTimeZone();
+    public ZoneId getTimeZone();
 
     /**
      * Sets the time zone used to display time.
      *
      * @param timeZone time zone
      */
-    public void setTimeZone(ZonedDateTime timeZone);
+    public void setTimeZone(ZoneId timeZone);
 
     /**
      * Returns the current configuration.

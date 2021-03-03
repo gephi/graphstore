@@ -224,11 +224,11 @@ public class GraphModelTest {
     @Test
     public void testSetTimeZone() {
         GraphModelImpl graphModel = new GraphModelImpl();
-        Assert.assertEquals(graphModel.getTimeZone(), ZonedDateTime.now(ZoneId.of("UTC")));// Default
-        graphModel.setTimeZone(ZonedDateTime.now(ZoneId.of("-02:00")));
-        Assert.assertEquals(graphModel.getTimeZone(), ZonedDateTime.now(ZoneId.of("-02:00")));
-        graphModel.setTimeZone(ZonedDateTime.now(ZoneId.of("UTC")));
-        Assert.assertEquals(graphModel.getTimeZone(), ZonedDateTime.now(ZoneId.of("UTC")));
+        Assert.assertEquals(graphModel.getTimeZone(), ZoneId.of("UTC"));// Default
+        graphModel.setTimeZone(ZoneId.of("-02:00"));
+        Assert.assertEquals(graphModel.getTimeZone(), ZoneId.of("-02:00"));
+        graphModel.setTimeZone(ZoneId.of("UTC"));
+        Assert.assertEquals(graphModel.getTimeZone(), ZoneId.of("UTC"));
     }
 
     @Test

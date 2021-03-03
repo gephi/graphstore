@@ -61,10 +61,12 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -224,13 +226,51 @@ public class AttributeUtils {
         // Datetime - make sure UTC timezone is used by default
         DATE_TIME_PARSER = new DateTimeFormatterBuilder()
                 .parseCaseInsensitive()
-                .append(DateTimeFormatter.ISO_LOCAL_DATE)
+                .appendOptional(DateTimeFormatter.ISO_DATE)
+                .appendOptional(DateTimeFormatter.ofPattern("yyyyMMdd"))
                 .optionalStart()
                 .appendLiteral('T')
                 .append(DateTimeFormatter.ISO_TIME)
-                .toFormatter().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE.getZone());
-        DATE_PRINTER = DateTimeFormatter.ISO_DATE.withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE.getZone());
-        DATE_TIME_PRINTER = DateTimeFormatter.ISO_DATE_TIME.withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE.getZone());
+                .appendPattern("[.SSSSSSSSS][.SSSSSS][.SSS]")
+                .optionalEnd()
+                .optionalStart()
+                .appendFraction(ChronoField.NANO_OF_SECOND, 9, 9, true)
+                .optionalEnd()
+                // optional nanos with 6 digits (including decimal point)
+                .optionalStart()
+                .appendFraction(ChronoField.NANO_OF_SECOND, 6, 6, true)
+                .optionalEnd()
+                // optional nanos with 3 digits (including decimal point)
+                .optionalStart()
+                .appendFraction(ChronoField.NANO_OF_SECOND, 3, 3, true)
+                .optionalEnd()
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                .parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
+                .toFormatter()
+                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
+
+        DATE_PRINTER = new DateTimeFormatterBuilder()
+                .parseCaseInsensitive()
+                .appendPattern("yyyy-MM-dd")
+                .toFormatter()
+                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
+
+        DATE_TIME_PRINTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
+                .append(DateTimeFormatter.ISO_LOCAL_DATE)
+                .appendLiteral('T')
+                .appendPattern("HH:mm:ss")
+                .appendPattern(".SSS")
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                .parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
+                .appendOffset("+HH:MM", "Z")
+                .toFormatter()
+                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
+//        DATE_TIME_PRINTER = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSxxx")
+//                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE.getZone());
 
         DATE_PRINTERS_BY_TIMEZONE = new HashMap<ZoneId, DateTimeFormatter>();
         DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<ZoneId, DateTimeFormatter>();
@@ -287,7 +327,7 @@ public class AttributeUtils {
             return baseFormatter;
         }
 
-        DateTimeFormatter formatter = cache.get(timeZone);
+        DateTimeFormatter formatter = cache.get(timeZone.getZone());
         if (formatter == null) {
             formatter = baseFormatter.withZone(timeZone.getZone());
             cache.put(timeZone.getZone(), formatter);
@@ -1013,15 +1053,12 @@ public class AttributeUtils {
      * @return milliseconds representation
      */
     public static double parseDateTime(String dateTime, ZonedDateTime timeZone) {
-        if (timeZone == null) {
-            ZonedDateTime zdt = ZonedDateTime.parse(dateTime);
-            return (double) zdt.toInstant().toEpochMilli();
-
-        } else {
-            DateTimeFormatter dateTimeParserByTimeZone = getDateTimeParserByTimeZone(timeZone);
-            ZonedDateTime zdt = ZonedDateTime.parse(dateTime, dateTimeParserByTimeZone);
-            return (double) zdt.toInstant().toEpochMilli();
-        }
+        DateTimeFormatter dateTimeParserByTimeZone = getDateTimeParserByTimeZone(timeZone);
+//        TemporalAccessor temporalAccessor = dateTimeParserByTimeZone.parseBest(dateTime, ZonedDateTime::from,
+//                LocalDateTime::from,
+//                LocalDate::from);
+        Instant instant = dateTimeParserByTimeZone.parse(dateTime, Instant::from);
+        return (double) instant.toEpochMilli();
     }
 
     /**
@@ -1080,8 +1117,10 @@ public class AttributeUtils {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
-        ZonedDateTime atZone = Instant.ofEpochMilli((long) timestamp).atZone(timeZone.getZone());
-        return getDatePrinterByTimeZone(timeZone).format(atZone);
+        Instant ofEpochMilli = Instant.ofEpochMilli((long) timestamp);
+        DateTimeFormatter datePrinterByTimeZone = getDatePrinterByTimeZone(timeZone);
+        ZonedDateTime zonedDateTime = ofEpochMilli.atZone(datePrinterByTimeZone.getZone());
+        return zonedDateTime.format(datePrinterByTimeZone);
     }
 
     /**
@@ -1106,9 +1145,11 @@ public class AttributeUtils {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
-        ZonedDateTime atZone = Instant.ofEpochMilli((long) timestamp).atZone(timeZone.getZone());
-
-        return getDateTimePrinterByTimeZone(timeZone).format(atZone);
+        DateTimeFormatter dateTimePrinterByTimeZone = getDateTimePrinterByTimeZone(timeZone);
+        Instant ofEpochMilli = Instant.ofEpochMilli((long) timestamp);
+        ZonedDateTime zonedDateTime = ofEpochMilli.atZone(dateTimePrinterByTimeZone.getZone());
+        OffsetDateTime time = OffsetDateTime.from(zonedDateTime);
+        return time.format(dateTimePrinterByTimeZone);
     }
 
     /**

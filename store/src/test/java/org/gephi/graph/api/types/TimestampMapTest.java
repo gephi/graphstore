@@ -763,7 +763,7 @@ public class TimestampMapTest {
             Assert.assertEquals(set.get(expectedTimestamp[i], null), expectedValues[i]);
             Assert.assertEquals(set.get(999999.0, getDefaultValue(set)), getDefaultValue(set));
             Assert.assertTrue(set.contains(expectedTimestamp[i]));
-            Assert.assertEquals(keysArray[i], expectedTimestamp[i]);
+            Assert.assertEquals(keysArray[i], expectedTimestamp[i],0.0);
 
             if (typeClass != String.class) {
                 try {

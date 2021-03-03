@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
@@ -1028,14 +1029,14 @@ public class Serialization {
         return tf;
     }
 
-    private void serializeTimeZone(final DataOutput out, final ZonedDateTime timeZone) throws IOException {
-        serialize(out, timeZone.getZone());
+    private void serializeTimeZone(final DataOutput out, final ZoneId timeZone) throws IOException {
+        serialize(out, timeZone.getId());
     }
 
-    private ZonedDateTime deserializeTimeZone(final DataInput is) throws IOException, ClassNotFoundException {
+    private ZoneId deserializeTimeZone(final DataInput is) throws IOException, ClassNotFoundException {
         String id = (String) deserialize(is);
 
-        ZonedDateTime tz = ZonedDateTime.parse(id);
+        ZoneId tz = ZoneId.of(id);
         model.store.timeZone = tz;
 
         return tz;
@@ -1563,8 +1564,8 @@ public class Serialization {
             TimeFormat b = (TimeFormat) obj;
             out.write(TIME_FORMAT);
             serializeTimeFormat(out, b);
-        } else if (obj instanceof ZonedDateTime) {
-            ZonedDateTime b = (ZonedDateTime) obj;
+        } else if (obj instanceof ZoneId) {
+            ZoneId b = (ZoneId) obj;
             out.write(TIME_ZONE);
             serializeTimeZone(out, b);
         } else if (obj instanceof TimeStore) {

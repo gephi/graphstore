@@ -72,7 +72,7 @@ public final class GraphStoreConfiguration {
     // TimeFormat
     public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
     // Time zone
-    public static final ZonedDateTime DEFAULT_TIME_ZONE = ZonedDateTime.now(ZoneId.of("UTC").normalized());
+    public static final ZoneId DEFAULT_TIME_ZONE = ZoneId.of("UTC");
     // Dynamics
     public static final Estimator DEFAULT_ESTIMATOR = Estimator.FIRST;
     public static final TimeRepresentation DEFAULT_TIME_REPRESENTATION = TimeRepresentation.TIMESTAMP;

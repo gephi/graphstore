@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
@@ -361,12 +362,12 @@ public class GraphModelImpl implements GraphModel {
     }
 
     @Override
-    public ZonedDateTime getTimeZone() {
+    public ZoneId getTimeZone() {
         return store.timeZone;
     }
 
     @Override
-    public void setTimeZone(ZonedDateTime timeZone) {
+    public void setTimeZone(ZoneId timeZone) {
         store.timeZone = timeZone;
     }
 

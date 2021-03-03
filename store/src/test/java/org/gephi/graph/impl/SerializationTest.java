@@ -681,12 +681,12 @@ public class SerializationTest {
     public void testTimeZone() throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore store = graphModel.store;
-        store.timeZone = ZonedDateTime.now(ZoneId.of("+01:30"));
+        store.timeZone = ZoneId.of("+01:30");
 
         Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(store.timeZone);
-        ZonedDateTime l = (ZonedDateTime) ser.deserialize(buf);
-        Assert.assertEquals(ZonedDateTime.now(ZoneId.of("+01:30")), l);
+        ZoneId l = (ZoneId) ser.deserialize(buf);
+        Assert.assertEquals(ZoneId.of("+01:30"), l);
     }
 
     @Test
