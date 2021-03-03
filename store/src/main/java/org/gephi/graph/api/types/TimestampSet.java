@@ -15,11 +15,11 @@
  */
 package org.gephi.graph.api.types;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
-import org.joda.time.DateTimeZone;
 
 /**
  * Sorted set for timestamps.
@@ -190,7 +190,7 @@ public final class TimestampSet implements TimeSet<Double> {
         return true;
     }
 
-    public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
+    public String toString(TimeFormat timeFormat, ZonedDateTime timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
         }

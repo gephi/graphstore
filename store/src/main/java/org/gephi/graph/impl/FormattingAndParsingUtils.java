@@ -20,8 +20,8 @@ import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.ZonedDateTime;
 import org.gephi.graph.api.AttributeUtils;
-import org.joda.time.DateTimeZone;
 
 /**
  * Utils for formatting and parsing special data types (dynamic intervals,
@@ -51,7 +51,7 @@ public final class FormattingAndParsingUtils {
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Timestamp
      */
-    public static double parseDateTimeOrTimestamp(String timeStr, DateTimeZone timeZone) {
+    public static double parseDateTimeOrTimestamp(String timeStr, ZonedDateTime timeZone) {
         double value;
         try {
             // Try first to parse as a single double:

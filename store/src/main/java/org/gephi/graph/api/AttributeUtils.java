@@ -60,6 +60,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,9 +87,6 @@ import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimeSet;
 import org.gephi.graph.impl.ArraysParser;
 import org.gephi.graph.impl.GraphStoreConfiguration;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 
 /**
  * Set of utility methods to manipulate supported attribute types.
@@ -105,9 +107,9 @@ public class AttributeUtils {
 
     // These are used to avoid creating a lot of new instances of
     // DateTimeFormatter
-    private static final Map<DateTimeZone, DateTimeFormatter> DATE_PRINTERS_BY_TIMEZONE;
-    private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PRINTERS_BY_TIMEZONE;
-    private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PARSERS_BY_TIMEZONE;
+    private static final Map<ZoneId, DateTimeFormatter> DATE_PRINTERS_BY_TIMEZONE;
+    private static final Map<ZoneId, DateTimeFormatter> DATE_TIME_PRINTERS_BY_TIMEZONE;
+    private static final Map<ZoneId, DateTimeFormatter> DATE_TIME_PARSERS_BY_TIMEZONE;
 
     // Collectio types to speedup lookup
     private static final Set<Class> TYPED_LIST_TYPES;
@@ -220,14 +222,19 @@ public class AttributeUtils {
         TYPES_STANDARDIZATION = Collections.unmodifiableMap(typesStandardization);
 
         // Datetime - make sure UTC timezone is used by default
-        DATE_TIME_PARSER = ISODateTimeFormat.dateOptionalTimeParser()
-                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
-        DATE_PRINTER = ISODateTimeFormat.date().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
-        DATE_TIME_PRINTER = ISODateTimeFormat.dateTime().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
+        DATE_TIME_PARSER = new DateTimeFormatterBuilder()
+                .parseCaseInsensitive()
+                .append(DateTimeFormatter.ISO_LOCAL_DATE)
+                .optionalStart()
+                .appendLiteral('T')
+                .append(DateTimeFormatter.ISO_TIME)
+                .toFormatter().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE.getZone());
+        DATE_PRINTER = DateTimeFormatter.ISO_DATE.withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE.getZone());
+        DATE_TIME_PRINTER = DateTimeFormatter.ISO_DATE_TIME.withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE.getZone());
 
-        DATE_PRINTERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
-        DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
-        DATE_TIME_PARSERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
+        DATE_PRINTERS_BY_TIMEZONE = new HashMap<ZoneId, DateTimeFormatter>();
+        DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<ZoneId, DateTimeFormatter>();
+        DATE_TIME_PARSERS_BY_TIMEZONE = new HashMap<ZoneId, DateTimeFormatter>();
 
         DATE_PRINTERS_BY_TIMEZONE.put(DATE_PRINTER.getZone(), DATE_PRINTER);
         DATE_TIME_PRINTERS_BY_TIMEZONE.put(DATE_TIME_PRINTER.getZone(), DATE_TIME_PRINTER);
@@ -275,29 +282,29 @@ public class AttributeUtils {
         // Only static methods
     }
 
-    private static DateTimeFormatter getDateTimeFormatterByTimeZone(Map<DateTimeZone, DateTimeFormatter> cache, DateTimeFormatter baseFormatter, DateTimeZone timeZone) {
+    private static DateTimeFormatter getDateTimeFormatterByTimeZone(Map<ZoneId, DateTimeFormatter> cache, DateTimeFormatter baseFormatter, ZonedDateTime timeZone) {
         if (timeZone == null) {
             return baseFormatter;
         }
 
         DateTimeFormatter formatter = cache.get(timeZone);
         if (formatter == null) {
-            formatter = baseFormatter.withZone(timeZone);
-            cache.put(timeZone, formatter);
+            formatter = baseFormatter.withZone(timeZone.getZone());
+            cache.put(timeZone.getZone(), formatter);
         }
 
         return formatter;
     }
 
-    private static DateTimeFormatter getDateTimeParserByTimeZone(DateTimeZone timeZone) {
+    private static DateTimeFormatter getDateTimeParserByTimeZone(ZonedDateTime timeZone) {
         return getDateTimeFormatterByTimeZone(DATE_TIME_PARSERS_BY_TIMEZONE, DATE_TIME_PARSER, timeZone);
     }
 
-    private static DateTimeFormatter getDateTimePrinterByTimeZone(DateTimeZone timeZone) {
+    private static DateTimeFormatter getDateTimePrinterByTimeZone(ZonedDateTime timeZone) {
         return getDateTimeFormatterByTimeZone(DATE_TIME_PRINTERS_BY_TIMEZONE, DATE_TIME_PRINTER, timeZone);
     }
 
-    private static DateTimeFormatter getDatePrinterByTimeZone(DateTimeZone timeZone) {
+    private static DateTimeFormatter getDatePrinterByTimeZone(ZonedDateTime timeZone) {
         return getDateTimeFormatterByTimeZone(DATE_PRINTERS_BY_TIMEZONE, DATE_PRINTER, timeZone);
     }
 
@@ -319,7 +326,7 @@ public class AttributeUtils {
      * @param timeZone time zone
      * @return string representation
      */
-    public static String print(Object value, TimeFormat timeFormat, DateTimeZone timeZone) {
+    public static String print(Object value, TimeFormat timeFormat, ZonedDateTime timeZone) {
         if (value == null) {
             return "null";
         }
@@ -342,18 +349,18 @@ public class AttributeUtils {
      * @param str string to parse
      * @param typeClass class of the desired type
      * @param timeZone time zone to use or null to use default time zone (UTC),
-     *        for dynamic types only
+     * for dynamic types only
      * @return an instance of the type class, or null if <em>str</em> is null or
-     *         empty
+     * empty
      */
-    public static Object parse(String str, Class typeClass, DateTimeZone timeZone) {
+    public static Object parse(String str, Class typeClass, ZonedDateTime timeZone) {
         if (str == null || str.isEmpty()) {
             return null;
         }
 
         if (typeClass.isPrimitive()) {
             typeClass = getStandardizedType(typeClass);// For primitives we can
-                                                       // use auto-unboxing
+            // use auto-unboxing
         }
 
         // Simple and primitive types:
@@ -473,7 +480,7 @@ public class AttributeUtils {
      * @param str string to parse
      * @param typeClass class of the desired type
      * @return an instance of the type class, or null if <em>str</em> is null or
-     *         empty
+     * empty
      */
     public static Object parse(String str, Class typeClass) {
         return parse(str, typeClass, null);
@@ -518,7 +525,7 @@ public class AttributeUtils {
      * @param array wrapped primitive array instance
      * @return primitive array instance
      * @throws IllegalArgumentException Thrown if any of the array values is
-     *         null
+     * null
      */
     public static Object getPrimitiveArray(Object[] array) {
         if (!isSupported(array.getClass())) {
@@ -1005,8 +1012,16 @@ public class AttributeUtils {
      * @param timeZone time zone to use or null to use default time zone (UTC)
      * @return milliseconds representation
      */
-    public static double parseDateTime(String dateTime, DateTimeZone timeZone) {
-        return getDateTimeParserByTimeZone(timeZone).parseDateTime(dateTime).getMillis();
+    public static double parseDateTime(String dateTime, ZonedDateTime timeZone) {
+        if (timeZone == null) {
+            ZonedDateTime zdt = ZonedDateTime.parse(dateTime);
+            return (double) zdt.toInstant().toEpochMilli();
+
+        } else {
+            DateTimeFormatter dateTimeParserByTimeZone = getDateTimeParserByTimeZone(timeZone);
+            ZonedDateTime zdt = ZonedDateTime.parse(dateTime, dateTimeParserByTimeZone);
+            return (double) zdt.toInstant().toEpochMilli();
+        }
     }
 
     /**
@@ -1028,7 +1043,7 @@ public class AttributeUtils {
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Timestamp
      */
-    public static double parseDateTimeOrTimestamp(String timeStr, DateTimeZone timeZone) {
+    public static double parseDateTimeOrTimestamp(String timeStr, ZonedDateTime timeZone) {
         return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr, timeZone);
     }
 
@@ -1061,11 +1076,12 @@ public class AttributeUtils {
      * @param timeZone time zone to use or null to use default time zone (UTC)
      * @return formatted date
      */
-    public static String printDate(double timestamp, DateTimeZone timeZone) {
+    public static String printDate(double timestamp, ZonedDateTime timeZone) {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
-        return getDatePrinterByTimeZone(timeZone).print((long) timestamp);
+        ZonedDateTime atZone = Instant.ofEpochMilli((long) timestamp).atZone(timeZone.getZone());
+        return getDatePrinterByTimeZone(timeZone).format(atZone);
     }
 
     /**
@@ -1086,11 +1102,13 @@ public class AttributeUtils {
      * @param timeZone time zone to use or null to use default time zone (UTC)
      * @return formatted time
      */
-    public static String printDateTime(double timestamp, DateTimeZone timeZone) {
+    public static String printDateTime(double timestamp, ZonedDateTime timeZone) {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
-        return getDateTimePrinterByTimeZone(timeZone).print((long) timestamp);
+        ZonedDateTime atZone = Instant.ofEpochMilli((long) timestamp).atZone(timeZone.getZone());
+
+        return getDateTimePrinterByTimeZone(timeZone).format(atZone);
     }
 
     /**
@@ -1113,7 +1131,7 @@ public class AttributeUtils {
      * @param timeZone time zone to use or null to use default time zone (UTC).
      * @return formatted timestamp
      */
-    public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat, DateTimeZone timeZone) {
+    public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat, ZonedDateTime timeZone) {
         switch (timeFormat) {
             case DATE:
                 return AttributeUtils.printDate(timestamp, timeZone);

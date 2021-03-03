@@ -16,6 +16,8 @@
 package org.gephi.graph.impl;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
@@ -34,7 +36,6 @@ import org.gephi.graph.impl.utils.DataInputOutput;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.gephi.graph.api.TimeIndex;
-import org.joda.time.DateTimeZone;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.IntervalSet;
@@ -223,11 +224,11 @@ public class GraphModelTest {
     @Test
     public void testSetTimeZone() {
         GraphModelImpl graphModel = new GraphModelImpl();
-        Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.UTC);// Default
-        graphModel.setTimeZone(DateTimeZone.forID("-02:00"));
-        Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.forID("-02:00"));
-        graphModel.setTimeZone(DateTimeZone.UTC);
-        Assert.assertEquals(graphModel.getTimeZone(), DateTimeZone.UTC);
+        Assert.assertEquals(graphModel.getTimeZone(), ZonedDateTime.now(ZoneId.of("UTC")));// Default
+        graphModel.setTimeZone(ZonedDateTime.now(ZoneId.of("-02:00")));
+        Assert.assertEquals(graphModel.getTimeZone(), ZonedDateTime.now(ZoneId.of("-02:00")));
+        graphModel.setTimeZone(ZonedDateTime.now(ZoneId.of("UTC")));
+        Assert.assertEquals(graphModel.getTimeZone(), ZonedDateTime.now(ZoneId.of("UTC")));
     }
 
     @Test

@@ -15,10 +15,10 @@
  */
 package org.gephi.graph.api.types;
 
+import java.time.ZonedDateTime;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
-import org.joda.time.DateTimeZone;
 
 /**
  * Interface that defines the functionalities both timestamp and interval map
@@ -140,5 +140,5 @@ public interface TimeMap<K, V> {
      * @param timeZone time zone
      * @return map as string
      */
-    public String toString(TimeFormat timeFormat, DateTimeZone timeZone);
+    public String toString(TimeFormat timeFormat, ZonedDateTime timeZone);
 }

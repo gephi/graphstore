@@ -17,11 +17,12 @@ package org.gephi.graph.api.types;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
-import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -641,9 +642,9 @@ public class TimestampMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330473741000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, foo]; [2012-02-29, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("+03:00")), "<[2012-02-29, foo]; [2012-02-29, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("-03:00")), "<[2012-02-28, foo]; [2012-02-28, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZonedDateTime.now(ZoneId.of("UTC"))), "<[2012-02-29, foo]; [2012-02-29, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZonedDateTime.now(ZoneId.of("+03:00"))), "<[2012-02-29, foo]; [2012-02-29, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZonedDateTime.now(ZoneId.of("-03:00"))), "<[2012-02-28, foo]; [2012-02-28, bar]>");
 
         // Test infinity:
         TimestampStringMap mapInf = new TimestampStringMap();
@@ -666,8 +667,8 @@ public class TimestampMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330477844000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.forID("-01:30")), "<[2012-02-28T22:30:00.000-01:30, foo]; [2012-02-28T23:40:44.000-01:30, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZonedDateTime.now(ZoneId.of("UTC"))), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZonedDateTime.now(ZoneId.of("-01:30"))), "<[2012-02-28T22:30:00.000-01:30, foo]; [2012-02-28T23:40:44.000-01:30, bar]>");
 
         // Test with timezone parsing and UTC printing:
         TimestampStringMap map2 = new TimestampStringMap();

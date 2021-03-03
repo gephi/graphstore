@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -91,7 +92,6 @@ import org.gephi.graph.impl.EdgeImpl.EdgePropertiesImpl;
 import org.gephi.graph.impl.NodeImpl.NodePropertiesImpl;
 import org.gephi.graph.impl.utils.DataInputOutput;
 import org.gephi.graph.impl.utils.LongPacker;
-import org.joda.time.DateTimeZone;
 
 // Greatly inspired from JDBM https://github.com/jankotek/JDBM3
 public class Serialization {
@@ -1028,14 +1028,14 @@ public class Serialization {
         return tf;
     }
 
-    private void serializeTimeZone(final DataOutput out, final DateTimeZone timeZone) throws IOException {
-        serialize(out, timeZone.getID());
+    private void serializeTimeZone(final DataOutput out, final ZonedDateTime timeZone) throws IOException {
+        serialize(out, timeZone.getZone());
     }
 
-    private DateTimeZone deserializeTimeZone(final DataInput is) throws IOException, ClassNotFoundException {
+    private ZonedDateTime deserializeTimeZone(final DataInput is) throws IOException, ClassNotFoundException {
         String id = (String) deserialize(is);
 
-        DateTimeZone tz = DateTimeZone.forID(id);
+        ZonedDateTime tz = ZonedDateTime.parse(id);
         model.store.timeZone = tz;
 
         return tz;
@@ -1563,8 +1563,8 @@ public class Serialization {
             TimeFormat b = (TimeFormat) obj;
             out.write(TIME_FORMAT);
             serializeTimeFormat(out, b);
-        } else if (obj instanceof DateTimeZone) {
-            DateTimeZone b = (DateTimeZone) obj;
+        } else if (obj instanceof ZonedDateTime) {
+            ZonedDateTime b = (ZonedDateTime) obj;
             out.write(TIME_ZONE);
             serializeTimeZone(out, b);
         } else if (obj instanceof TimeStore) {
