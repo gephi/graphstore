@@ -1,6 +1,6 @@
 # GraphStore
 
-[![Build Status](https://travis-ci.org/gephi/graphstore.svg?branch=master)](https://travis-ci.org/gephi/graphstore)
+[![Build Status](https://app.travis-ci.com/gephi/graphstore.svg?branch=master)](https://app.travis-ci.com/github/gephi/graphstore)
 [![Coverage Status](https://coveralls.io/repos/gephi/graphstore/badge.svg?branch=master&service=github)](https://coveralls.io/github/gephi/graphstore?branch=master)
 
 GraphStore is an in-memory graph structure implementation written in Java. It is designed to be powerful, efficient and robust. It's powering the Gephi software and supports large graphs in intensive applications.
