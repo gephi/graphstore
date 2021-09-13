@@ -71,7 +71,7 @@ public class EdgeImplTest {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(42.0, new Interval(1.0, 2.0));
-        Assert.assertEquals(e.getWeight(new Interval(2.0, 4.0)), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+        Assert.assertEquals(e.getWeight(new Interval(2.1, 4.0)), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
     }
 
     @Test
@@ -82,6 +82,33 @@ public class EdgeImplTest {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         Assert.assertEquals(e.getWeight(new Interval(2.0, 4.0)), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+    }
+
+    @Test
+    public void testGetWeightInterval() {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
+        Edge e = graphStore.getEdge("0");
+        e.setWeight(42.0, new Interval(1.0, 2.0));
+        Assert.assertEquals(e.getWeight(new Interval(2.0, 4.0)), 42.0);
+    }
+
+    @Test
+    public void testGetWeightIntervalMax() {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
+        Column col = graphStore.edgeTable.store.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        col.setEstimator(Estimator.MAX);
+
+        Edge e = graphStore.getEdge("0");
+        e.setWeight(10.0, new Interval(1.0, 2.0));
+        e.setWeight(20.0, new Interval(2.0, 3.0));
+        Assert.assertEquals(e.getWeight(new Interval(2.0, 2.0)), 20.0);
     }
 
     @Test
@@ -193,18 +220,24 @@ public class EdgeImplTest {
         Assert.assertEquals(e.getWeight(graphStore.getView()), 10.0);
     }
 
-    // @Test
-    // public void testGetIntervalWeightMainGraphView() {
-    // GraphStore graphStore =
-    // GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
-    // Edge e = graphStore.getEdge("0");
-    // Interval i1 = new Interval(1.0, 2.0);
-    // Interval i2 = new Interval(3.0, 4.0);
-    // e.setWeight(42.0, i1);
-    // Assert.assertEquals(e.getWeight(graphStore.getView()), 42.0);
-    // e.setWeight(10.0, i2);
-    // Assert.assertEquals(e.getWeight(graphStore.getView()), 10.0);
-    // }
+    @Test
+    public void testGetWeightGraphViewMax() {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
+        Column col = graphStore.edgeTable.store.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        col.setEstimator(Estimator.MAX);
+
+        Edge e = graphStore.getEdge("0");
+        Interval i1 = new Interval(1.0, 2.0);
+        Interval i2 = new Interval(3.0, 4.0);
+        e.setWeight(10.0, i1);
+        e.setWeight(20.0, i2);
+        Assert.assertEquals(e.getWeight(graphStore.getView()), 20.0);
+    }
+
     @Test
     public void testGetWeightNoValue() {
         Configuration config = new Configuration();
