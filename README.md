@@ -22,6 +22,8 @@ GraphStore is an in-memory graph structure implementation written in Java. It is
 
 Stable releases can be found on [Maven central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.gephi%22%20AND%20a%3A%22graphstore%22).
 
+Development builds can be found on [Sonatype's Snapshot Repository](https://oss.sonatype.org/content/repositories/snapshots/org/gephi/graphstore/).
+
 ## Documentation
 
 API Documentation is available [here](http://gephi.github.com/graphstore/apidocs/index.html).
