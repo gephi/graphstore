@@ -9,11 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./store
     steps:
       - uses: actions/checkout@v2
-      - name: Navigate to the /store folder
-        run: cd store
       - name: Decode GPG keys
         run: |
           openssl aes-256-cbc -k "$GPG_PUBRING_ENCRYPTION" -in src/travis/pubring.gpg.enc -d -a -out src/travis/pubring.gpg
