@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Navigate to the /store folder
+        run: cd store
+      - name: Decode GPG keys
+        run: |
+          openssl aes-256-cbc -k "$GPG_PUBRING_ENCRYPTION" -in src/travis/pubring.gpg.enc -d -a -out src/travis/pubring.gpg
+          openssl aes-256-cbc -k "$GPG_SECRETRING_ENCRYPTION" -in src/travis/secretring.gpg.enc -d -a -out src/travis/secretring.gpg
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          server-id: ossrh
+          server-username: OSSRH_USER
+          server-password: OSSRH_PASS
+      - name: Publish package
+        run: mvn --batch-mode -Djava.awt.headless=true -Dgpg.passphrase=$GPG_PASSPHRASE -Dgpg.defaultKeyring=false -Dgpg-keyname=1481F619 -Dgpg.publicKeyring=src/travis/pubring.gpg -Dgpg.secretKeyring=src/travis/secretring.gpg deploy -P release
+        env:
+          OSSRH_USER: ${{ secrets.OSSRH_USER }}
+          OSSRH_PASS: ${{ secrets.OSSRH_PASS }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PUBRING_ENCRYPTION: ${{ secrets.GPG_PUBRING_ENCRYPTION }}
+          GPG_SECRETRING_ENCRYPTION: ${{ secrets.GPG_SECRETRING_ENCRYPTION }}
