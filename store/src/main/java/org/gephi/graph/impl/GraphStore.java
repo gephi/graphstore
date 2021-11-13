@@ -15,16 +15,7 @@
  */
 package org.gephi.graph.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import org.gephi.graph.api.Configuration;
-import org.gephi.graph.api.Origin;
-import org.gephi.graph.api.TimeFormat;
-import org.gephi.graph.api.Interval;
-import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
@@ -32,39 +23,66 @@ import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Subgraph;
-import org.joda.time.DateTimeZone;
+import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalSet;
+import org.gephi.graph.api.types.TimestampSet;
+import org.joda.time.DateTimeZone;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     protected final GraphModelImpl graphModel;
+
     protected final Configuration configuration;
+
     // Stores
     protected final NodeStore nodeStore;
+
     protected final EdgeStore edgeStore;
+
     protected final EdgeTypeStore edgeTypeStore;
+
     protected final TableImpl<Node> nodeTable;
+
     protected final TableImpl<Edge> edgeTable;
+
     protected final GraphViewStore viewStore;
+
     protected final TimeStore timeStore;
+
     protected final GraphAttributesImpl attributes;
+
     // Factory
     protected final GraphFactoryImpl factory;
+
     // Lock
     protected final GraphLock lock;
+
     // Version
     protected final GraphVersion version;
+
     protected final List<GraphObserverImpl> observers;
+
     // Undirected
     protected final UndirectedDecorator undirectedDecorator;
+
     // Main Graph view
     protected final GraphView mainGraphView;
+
     // TimeFormat
     protected TimeFormat timeFormat;
+
     // Time zone
     protected DateTimeZone timeZone;
 
@@ -822,6 +840,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected class NodeIterableWrapper implements NodeIterable {
 
         protected final Iterator<Node> iterator;
+
         protected final boolean blocking;
 
         public NodeIterableWrapper(Iterator<Node> iterator) {
@@ -842,7 +861,10 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         public Node[] toArray() {
             List<Node> list = new ArrayList<Node>();
             for (; iterator.hasNext();) {
-                list.add(iterator.next());
+                Node node = iterator.next();
+                if (node != null) {
+                    list.add(node);
+                }
             }
             return list.toArray(new Node[0]);
         }
@@ -851,7 +873,10 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         public Collection<Node> toCollection() {
             List<Node> list = new ArrayList<Node>();
             for (; iterator.hasNext();) {
-                list.add(iterator.next());
+                Node node = iterator.next();
+                if (node != null) {
+                    list.add(node);
+                }
             }
             return list;
         }
@@ -867,6 +892,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected class EdgeIterableWrapper implements EdgeIterable {
 
         protected final Iterator<Edge> iterator;
+
         protected final boolean blocking;
 
         public EdgeIterableWrapper(Iterator<Edge> iterator) {
