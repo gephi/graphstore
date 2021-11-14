@@ -26,7 +26,7 @@ Development builds can be found on [Sonatype's Snapshot Repository](https://oss.
 
 ## Documentation
 
-API Documentation is available [here](http://gephi.github.com/graphstore/apidocs/index.html).
+API Documentation is available [here](https://www.javadoc.io/doc/org.gephi/graphstore/latest/index.html).
 
 ## Dependencies
 
