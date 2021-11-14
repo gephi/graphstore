@@ -464,6 +464,23 @@ public interface GraphModel {
     public Index<Edge> getEdgeIndex(GraphView view);
 
     /**
+     * Gets the node or edge index depending on the column provided.
+     *
+     * @param table the table to get the index for
+     * @return element index, either node or edge
+     */
+    public Index<Element> getElementIndex(Table table);
+
+    /**
+     * Gets the node or edge index for the given graph view.
+     *
+     * @param table the table to get the index for
+     * @param view the view to get the index from
+     * @return edge index
+     */
+    public Index<Element> getElementIndex(Table table, GraphView view);
+
+    /**
      * Gets the node time index.
      *
      * @return node time index

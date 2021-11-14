@@ -130,4 +130,18 @@ public interface Table extends ColumnIterable {
      * @return graph
      */
     public Graph getGraph();
+
+    /**
+     * Returns true if this table is the node table.
+     *
+     * @return true if node table, false otherwise
+     */
+    public boolean isNodeTable();
+
+    /**
+     * Returns true if this table is the node table.
+     *
+     * @return true if node table, false otherwise
+     */
+    public boolean isEdgeTable();
 }
