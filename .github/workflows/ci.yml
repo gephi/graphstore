@@ -19,7 +19,6 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          cache: 'maven'
           server-id: ossrh
           server-username: OSSRH_USER
           server-password: OSSRH_PASS
