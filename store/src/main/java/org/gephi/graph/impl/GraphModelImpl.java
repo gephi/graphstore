@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeFormat;
@@ -281,6 +282,21 @@ public class GraphModelImpl implements GraphModel {
                 return indexStore.getIndex(store);
             }
             return indexStore.getIndex(((GraphViewImpl) view).directedDecorator);
+        }
+        return null;
+    }
+
+    @Override
+    public Index<Element> getElementIndex(Table table) {
+        return getElementIndex(table, store.mainGraphView);
+    }
+
+    @Override
+    public Index<Element> getElementIndex(Table table, GraphView view) {
+        if (table.isNodeTable()) {
+            return getNodeIndex(view);
+        } else if (table.isEdgeTable()) {
+            return getEdgeIndex(view);
         }
         return null;
     }
