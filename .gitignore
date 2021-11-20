@@ -5,3 +5,5 @@ nbactions.xml
 /store-benchmark/target/
 /store/graphstore-api/target/
 /store/graphstore/target/
+.idea
+*.iml

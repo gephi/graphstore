@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TableObserver;
@@ -143,6 +145,16 @@ public class TableImpl<T extends Element> implements Table {
     @Override
     public Graph getGraph() {
         return store.graphStore;
+    }
+
+    @Override
+    public boolean isNodeTable() {
+        return Node.class.equals(store.elementType);
+    }
+
+    @Override
+    public boolean isEdgeTable() {
+        return Edge.class.equals(store.elementType);
     }
 
     public void destroyTableObserver(TableObserver observer) {
