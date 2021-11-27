@@ -7,7 +7,7 @@ import java.util.function.Consumer;
  * 
  * @author Eduardo Ramos
  */
-public interface SpatialContext {
+public interface SpatialIndex {
 
     NodeIterable getNodesInArea(Rect2D rect);
 

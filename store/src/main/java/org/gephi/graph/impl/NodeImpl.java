@@ -164,6 +164,14 @@ public class NodeImpl extends ElementImpl implements Node {
         return properties.getTextProperties();
     }
 
+    protected SpatialNodeDataImpl getSpatialData() {
+        return properties.getSpatialData();
+    }
+
+    protected void setSpatialDate(SpatialNodeDataImpl spatialData) {
+        properties.setSpatialData(spatialData);
+    }
+
     private void updateNodeInSpatialIndex() {
         if (storeId != NodeStore.NULL_ID && graphStore != null && graphStore.spatialIndex != null) {
             graphStore.spatialIndex.moveNode(this);
@@ -273,6 +281,7 @@ public class NodeImpl extends ElementImpl implements Node {
         protected float size;
         protected boolean fixed;
         protected LayoutData layoutData;
+        protected SpatialNodeDataImpl spatialData;
 
         public NodePropertiesImpl() {
             this.textProperties = new TextPropertiesImpl();
@@ -417,6 +426,14 @@ public class NodeImpl extends ElementImpl implements Node {
         @Override
         public void setLayoutData(LayoutData layoutData) {
             this.layoutData = layoutData;
+        }
+
+        public SpatialNodeDataImpl getSpatialData() {
+            return spatialData;
+        }
+
+        public void setSpatialData(SpatialNodeDataImpl spatialData) {
+            this.spatialData = spatialData;
         }
 
         public int deepHashCode() {

@@ -425,6 +425,16 @@ public class GraphGenerator {
         return generateTinyGraphStore(config);
     }
 
+    public static GraphStore generateTinyGraphStoreWithSelfLoop() {
+        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphStore graphStore = graphModel.store;
+        NodeImpl n1 = new NodeImpl("1", graphStore);
+        EdgeImpl e = new EdgeImpl("0", graphStore, n1, n1, EdgeTypeStore.NULL_LABEL, 1.0, true);
+        graphStore.addNode(n1);
+        graphStore.addEdge(e);
+        return graphStore;
+    }
+
     public static GraphStore generateSmallGraphStore() {
         int edgeCount = 100;
         GraphStore graphStore = new GraphModelImpl().store;

@@ -61,7 +61,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected final GraphViewStore viewStore;
 
     // Spatial index
-    protected final GraphStoreSpatialContextImpl spatialIndex;
+    protected final SpatialIndexImpl spatialIndex;
 
     public EdgeStore() {
         initStore();
@@ -72,7 +72,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.spatialIndex = null;
     }
 
-    public EdgeStore(final EdgeTypeStore edgeTypeStore, final GraphStoreSpatialContextImpl spatialIndex, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
+    public EdgeStore(final EdgeTypeStore edgeTypeStore, final SpatialIndexImpl spatialIndex, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeTypeStore = edgeTypeStore;
@@ -289,10 +289,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         for (EdgeStoreIterator itr = new EdgeStoreIterator(); itr.hasNext();) {
             EdgeImpl edge = itr.next();
             edge.setStoreId(EdgeStore.NULL_ID);
-        }
-
-        if (this.spatialIndex != null) {
-            this.spatialIndex.clearEdges();
         }
 
         initStore();
@@ -629,10 +625,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 undirectedSize++;
             }
 
-            if (this.spatialIndex != null) {
-                this.spatialIndex.addEdge(e);
-            }
-
             size++;
             return true;
         } else if (isValidIndex(edge.storeId) && get(edge.storeId) == edge) {
@@ -655,10 +647,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             if (viewStore != null) {
                 viewStore.removeEdge(edge);
-            }
-
-            if (this.spatialIndex != null) {
-                this.spatialIndex.removeEdge(edge);
             }
 
             edge.clearAttributes();

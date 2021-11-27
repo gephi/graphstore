@@ -77,6 +77,8 @@ public final class GraphStoreConfiguration {
     public static final Estimator DEFAULT_ESTIMATOR = Estimator.FIRST;
     public static final TimeRepresentation DEFAULT_TIME_REPRESENTATION = TimeRepresentation.TIMESTAMP;
     // Spatial index
+    public static final int SPATIAL_INDEX_MAX_LEVELS = 16;
+    public static final int SPATIAL_INDEX_MAX_OBJECTS_PER_NODE = 5000;
     public static final float SPATIAL_INDEX_DIMENSION_BOUNDARY = 1e6f;
     // Miscellaneous
     public static final double TIMESTAMP_STORE_GROWING_FACTOR = 1.1;
