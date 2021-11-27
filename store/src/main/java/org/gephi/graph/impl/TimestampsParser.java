@@ -159,8 +159,8 @@ public final class TimestampsParser {
     }
 
     /**
-     * Parses a {@link TimestampSet} type with one or more timestamps. Default
-     * time zone is used (UTC).
+     * Parses a {@link TimestampSet} type with one or more timestamps. Default time
+     * zone is used (UTC).
      *
      * @param input Input string to parse
      * @return Resulting {@link TimestampSet}, or null if the input equals
@@ -178,16 +178,16 @@ public final class TimestampsParser {
      * associated values.
      *
      * @param <T> Underlying type of the {@link TimestampMap} values
-     * @param typeClass Simple type or {@link TimestampMap} subtype for the
-     *        result values.
+     * @param typeClass Simple type or {@link TimestampMap} subtype for the result
+     *        values.
      * @param input Input string to parse
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link TimestampMap}, or null if the input equals
      *         '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if type class is not supported,
-     *         any of the timestamps don't have a value or have an invalid
-     *         value, there are no timestamps in the input string or bounds
-     *         cannot be parsed into doubles or dates/datetimes.
+     * @throws IllegalArgumentException Thrown if type class is not supported, any
+     *         of the timestamps don't have a value or have an invalid value, there
+     *         are no timestamps in the input string or bounds cannot be parsed into
+     *         doubles or dates/datetimes.
      */
     public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input, DateTimeZone timeZone) throws IllegalArgumentException {
         if (typeClass == null) {
@@ -261,15 +261,15 @@ public final class TimestampsParser {
      * associated values. Default time zone is used (UTC).
      *
      * @param <T> Underlying type of the {@link TimestampMap} values
-     * @param typeClass Simple type or {@link TimestampMap} subtype for the
-     *        result values.
+     * @param typeClass Simple type or {@link TimestampMap} subtype for the result
+     *        values.
      * @param input Input string to parse
      * @return Resulting {@link TimestampMap}, or null if the input equals
      *         '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if type class is not supported,
-     *         any of the timestamps don't have a value or have an invalid
-     *         value, there are no timestamps in the input string or bounds
-     *         cannot be parsed into doubles or dates/datetimes.
+     * @throws IllegalArgumentException Thrown if type class is not supported, any
+     *         of the timestamps don't have a value or have an invalid value, there
+     *         are no timestamps in the input string or bounds cannot be parsed into
+     *         doubles or dates/datetimes.
      */
     public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input) throws IllegalArgumentException {
         return parseTimestampMap(typeClass, input, null);

@@ -114,8 +114,8 @@ public class IndexStore<T extends Element> {
                 for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                     GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
                     DirectedSubgraph graph = graphView.getDirectedGraph();
-                    boolean inView = element instanceof Node ? graph.contains((Node) element) : graph
-                            .contains((Edge) element);
+                    boolean inView = element instanceof Node ? graph.contains((Node) element)
+                            : graph.contains((Edge) element);
                     if (inView) {
                         entry.getValue().set(column, oldValue, value, element);
                     }
@@ -143,8 +143,8 @@ public class IndexStore<T extends Element> {
                     for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                         GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
                         DirectedSubgraph graph = graphView.getDirectedGraph();
-                        boolean inView = element instanceof Node ? graph.contains((Node) element) : graph
-                                .contains((Edge) element);
+                        boolean inView = element instanceof Node ? graph.contains((Node) element)
+                                : graph.contains((Edge) element);
                         if (inView) {
                             entry.getValue().remove(c, value, element);
                         }

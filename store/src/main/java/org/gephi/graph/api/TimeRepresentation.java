@@ -41,9 +41,8 @@ public enum TimeRepresentation {
     /**
      * Interval representation (continuous).
      * <p>
-     * Time is represented using intervals, with a beginning and an end.
-     * Intervals are always included on both bounds but allows an infinite
-     * bound.
+     * Time is represented using intervals, with a beginning and an end. Intervals
+     * are always included on both bounds but allows an infinite bound.
      */
     INTERVAL;
 }

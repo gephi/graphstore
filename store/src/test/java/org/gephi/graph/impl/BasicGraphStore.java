@@ -211,14 +211,14 @@ public class BasicGraphStore implements DirectedGraph {
 
     @Override
     public NodeIterable getNeighbors(Node node) {
-        return new NodeIterableWrapper(new NeighborsUndirectedIterator((BasicNode) node,
-                edgeStore.inOutIterator((BasicNode) node)));
+        return new NodeIterableWrapper(
+                new NeighborsUndirectedIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node)));
     }
 
     @Override
     public NodeIterable getNeighbors(Node node, int type) {
-        return new NodeIterableWrapper(new NeighborsUndirectedIterator((BasicNode) node,
-                edgeStore.inOutIterator((BasicNode) node, type)));
+        return new NodeIterableWrapper(
+                new NeighborsUndirectedIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node, type)));
     }
 
     @Override
@@ -298,8 +298,8 @@ public class BasicGraphStore implements DirectedGraph {
 
     @Override
     public boolean isIncident(Edge edge1, Edge edge2) {
-        return edge1.getSource() == edge2.getSource() || edge1.getTarget() == edge2.getTarget() || edge1.getSource() == edge2
-                .getTarget() || edge1.getTarget() == edge2.getSource();
+        return edge1.getSource() == edge2.getSource() || edge1.getTarget() == edge2.getTarget() || edge1
+                .getSource() == edge2.getTarget() || edge1.getTarget() == edge2.getSource();
     }
 
     @Override

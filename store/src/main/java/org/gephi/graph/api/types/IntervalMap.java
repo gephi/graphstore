@@ -52,8 +52,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of
-     * timestamps is known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of timestamps
+     * is known in advance as it minimizes array resizes.
      *
      * @param capacity timestamp capacity
      */
@@ -283,8 +283,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
                 if (startValue == intervalStart && endValue > intervalEnd) {
                     return -1;
                 }
-                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2
-                        : 0)) == 0) {
+                if ((shift = (intervalEnd > endValue ? 2
+                        : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2 : 0)) == 0) {
                     if (removeIndex == realSize - 2) {
                         size--;
                     } else {
@@ -337,8 +337,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
                 if (startValue == intervalStart && endValue > intervalEnd) {
                     return -1;
                 }
-                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2
-                        : 0)) == 0) {
+                if ((shift = (intervalEnd > endValue ? 2
+                        : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2 : 0)) == 0) {
                     return foundIndex;
                 }
             }
@@ -418,11 +418,11 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
     /**
      * Returns an array of all intervals in this set.
      * <p>
-     * The intervals are represented in a flat and sorted array (e.g.
-     * {[1.0,2.0], [5.0,6.0]}) returns [1.0,2.0,5.0,6.0]).
+     * The intervals are represented in a flat and sorted array (e.g. {[1.0,2.0],
+     * [5.0,6.0]}) returns [1.0,2.0,5.0,6.0]).
      * <p>
-     * This method may return a reference to the underlying array so clients
-     * should make a copy if the array is written to.
+     * This method may return a reference to the underlying array so clients should
+     * make a copy if the array is written to.
      *
      * @return array of all intervals
      */
@@ -621,7 +621,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
 
             sb.append(", ");
             String stringValue = values[i].toString();
-            if (FormattingAndParsingUtils.containsDynamicSpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
+            if (FormattingAndParsingUtils.containsDynamicSpecialCharacters(stringValue) || stringValue.trim()
+                    .isEmpty()) {
                 sb.append('"');
                 sb.append(stringValue.replace("\\", "\\\\").replace("\"", "\\\""));
                 sb.append('"');

@@ -427,8 +427,10 @@ public class GraphModelImpl implements GraphModel {
 
         store.autoWriteLock();
         try {
-            if (store.getNodeCount() > 0 || !store.attributes.isEmpty() || store.nodeTable.countColumns() != GraphStoreConfiguration.NODE_DEFAULT_COLUMNS || store.edgeTable
-                    .countColumns() != GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS || store.edgeTypeStore.size() > 1) {
+            if (store.getNodeCount() > 0 || !store.attributes.isEmpty() || store.nodeTable
+                    .countColumns() != GraphStoreConfiguration.NODE_DEFAULT_COLUMNS || store.edgeTable
+                            .countColumns() != GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS || store.edgeTypeStore
+                                    .size() > 1) {
                 throw new IllegalStateException("The store should be empty when modifying the configuration");
             }
 
@@ -460,19 +462,19 @@ public class GraphModelImpl implements GraphModel {
                 edgeTable.removeColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID);
 
                 if (config.getTimeRepresentation().equals(TimeRepresentation.TIMESTAMP)) {
-                    nodeTable.store.addColumn(new ColumnImpl(nodeTable,
-                            GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, TimestampSet.class, "Timestamp", null,
-                            Origin.PROPERTY, false, false));
-                    edgeTable.store.addColumn(new ColumnImpl(nodeTable,
-                            GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, TimestampSet.class, "Timestamp", null,
-                            Origin.PROPERTY, false, false));
+                    nodeTable.store
+                            .addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
+                                    TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
+                    edgeTable.store
+                            .addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
+                                    TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
                 } else {
-                    nodeTable.store.addColumn(new ColumnImpl(nodeTable,
-                            GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null,
-                            Origin.PROPERTY, false, false));
-                    edgeTable.store.addColumn(new ColumnImpl(nodeTable,
-                            GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID, IntervalSet.class, "Interval", null,
-                            Origin.PROPERTY, false, false));
+                    nodeTable.store
+                            .addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
+                                    IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
+                    edgeTable.store
+                            .addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
+                                    IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
                 }
                 configuration.setTimeRepresentation(config.getTimeRepresentation());
                 store.timeStore.resetConfiguration();
@@ -484,14 +486,14 @@ public class GraphModelImpl implements GraphModel {
             if (!config.getEdgeWeightColumn().equals(configuration.getEdgeWeightColumn())) {
                 TableImpl<Edge> edgeTable = store.edgeTable;
                 if (config.getEdgeWeightColumn()) {
-                    edgeTable.store.garbageQueue.add(edgeTable.store
-                            .intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
+                    edgeTable.store.garbageQueue
+                            .add(edgeTable.store.intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
                     edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID,
                             config.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, edgeWeightIndexed, false));
                 } else {
                     edgeTable.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
-                    edgeTable.store.garbageQueue.remove(edgeTable.store
-                            .intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
+                    edgeTable.store.garbageQueue
+                            .remove(edgeTable.store.intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
                 }
             }
 

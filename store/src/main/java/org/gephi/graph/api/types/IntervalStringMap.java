@@ -37,8 +37,8 @@ public final class IntervalStringMap extends IntervalMap<String> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of
-     * timestamps is known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of timestamps
+     * is known in advance as it minimizes array resizes.
      *
      * @param capacity timestamp capacity
      */

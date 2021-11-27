@@ -346,7 +346,8 @@ public abstract class ElementImpl implements Element {
                         if (value != null) {
                             timeIndexStore.add((TimeMap) value);
                         }
-                    } else if (TimeSet.class.isAssignableFrom(column.getTypeClass()) && column.getIndex() == GraphStoreConfiguration.ELEMENT_TIMESET_INDEX) {
+                    } else if (TimeSet.class.isAssignableFrom(column.getTypeClass()) && column
+                            .getIndex() == GraphStoreConfiguration.ELEMENT_TIMESET_INDEX) {
                         if (oldValue != null) {
                             timeIndexStore.remove((TimeSet) oldValue);
                         }
@@ -680,7 +681,8 @@ public abstract class ElementImpl implements Element {
 
     protected void checkTimeRepresentationTimestamp() {
         if (!getTimeRepresentation().equals(TimeRepresentation.TIMESTAMP)) {
-            throw new RuntimeException("Can't use timestamps as the configuration is set to " + getTimeRepresentation());
+            throw new RuntimeException(
+                    "Can't use timestamps as the configuration is set to " + getTimeRepresentation());
         }
     }
 
@@ -736,28 +738,30 @@ public abstract class ElementImpl implements Element {
         if (value != null) {
             Class typeClass = column.getTypeClass();
             if (TimestampMap.class.isAssignableFrom(typeClass)) {
-                if ((value instanceof Double && (!typeClass.equals(TimestampDoubleMap.class))) || (value instanceof Float && !typeClass
-                        .equals(TimestampFloatMap.class)) || (value instanceof Boolean && !typeClass
-                        .equals(TimestampBooleanMap.class)) || (value instanceof Integer && !typeClass
-                        .equals(TimestampIntegerMap.class)) || (value instanceof Long && !typeClass
-                        .equals(TimestampLongMap.class)) || (value instanceof Short && !typeClass
-                        .equals(TimestampShortMap.class)) || (value instanceof Byte && !typeClass
-                        .equals(TimestampByteMap.class)) || (value instanceof String && !typeClass
-                        .equals(TimestampStringMap.class)) || (value instanceof Character && !typeClass
-                        .equals(TimestampCharMap.class))) {
+                if ((value instanceof Double && (!typeClass
+                        .equals(TimestampDoubleMap.class))) || (value instanceof Float && !typeClass
+                                .equals(TimestampFloatMap.class)) || (value instanceof Boolean && !typeClass
+                                        .equals(TimestampBooleanMap.class)) || (value instanceof Integer && !typeClass
+                                                .equals(TimestampIntegerMap.class)) || (value instanceof Long && !typeClass
+                                                        .equals(TimestampLongMap.class)) || (value instanceof Short && !typeClass
+                                                                .equals(TimestampShortMap.class)) || (value instanceof Byte && !typeClass
+                                                                        .equals(TimestampByteMap.class)) || (value instanceof String && !typeClass
+                                                                                .equals(TimestampStringMap.class)) || (value instanceof Character && !typeClass
+                                                                                        .equals(TimestampCharMap.class))) {
                     throw new IllegalArgumentException(
                             "The object class does not match with the dynamic type (" + typeClass.getName() + ")");
                 }
             } else if (IntervalMap.class.isAssignableFrom(typeClass)) {
-                if ((value instanceof Double && (!typeClass.equals(IntervalDoubleMap.class))) || (value instanceof Float && !typeClass
-                        .equals(IntervalFloatMap.class)) || (value instanceof Boolean && !typeClass
-                        .equals(IntervalBooleanMap.class)) || (value instanceof Integer && !typeClass
-                        .equals(IntervalIntegerMap.class)) || (value instanceof Long && !typeClass
-                        .equals(IntervalLongMap.class)) || (value instanceof Short && !typeClass
-                        .equals(IntervalShortMap.class)) || (value instanceof Byte && !typeClass
-                        .equals(IntervalByteMap.class)) || (value instanceof String && !typeClass
-                        .equals(IntervalStringMap.class)) || (value instanceof Character && !typeClass
-                        .equals(IntervalCharMap.class))) {
+                if ((value instanceof Double && (!typeClass
+                        .equals(IntervalDoubleMap.class))) || (value instanceof Float && !typeClass
+                                .equals(IntervalFloatMap.class)) || (value instanceof Boolean && !typeClass
+                                        .equals(IntervalBooleanMap.class)) || (value instanceof Integer && !typeClass
+                                                .equals(IntervalIntegerMap.class)) || (value instanceof Long && !typeClass
+                                                        .equals(IntervalLongMap.class)) || (value instanceof Short && !typeClass
+                                                                .equals(IntervalShortMap.class)) || (value instanceof Byte && !typeClass
+                                                                        .equals(IntervalByteMap.class)) || (value instanceof String && !typeClass
+                                                                                .equals(IntervalStringMap.class)) || (value instanceof Character && !typeClass
+                                                                                        .equals(IntervalCharMap.class))) {
                     throw new IllegalArgumentException(
                             "The object class does not match with the dynamic type (" + typeClass.getName() + ")");
                 }

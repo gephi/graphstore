@@ -59,8 +59,7 @@ public enum Estimator {
     }
 
     /**
-     * Returns true if this estimator is any of the given
-     * <code>estimators</code>.
+     * Returns true if this estimator is any of the given <code>estimators</code>.
      *
      * @param estimators estimators to test equality
      * @return true if <code>estimators</code> contains this estimator

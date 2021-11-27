@@ -78,8 +78,8 @@ public class Rect2D {
     }
 
     public String toString(NumberFormat formatter) {
-        return "(" + formatter.format(minX) + " " + formatter.format(minY) + ") < " + "(" + formatter.format(maxX) + " " + formatter
-                .format(maxY) + ")";
+        return "(" + formatter.format(minX) + " " + formatter.format(minY) + ") < " + "(" + formatter
+                .format(maxX) + " " + formatter.format(maxY) + ")";
     }
 
     public boolean contains(Rect2D rect) {

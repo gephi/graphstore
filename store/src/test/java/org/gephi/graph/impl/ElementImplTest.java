@@ -1090,8 +1090,8 @@ public class ElementImplTest {
     }
 
     private Column generateBasicBooleanColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA,
-                true, false));
+        graphStore.nodeTable.store
+                .addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("visible");
     }
 
@@ -1112,14 +1112,14 @@ public class ElementImplTest {
     }
 
     private Column generateTimestampColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA,
-                false, false));
+        graphStore.nodeTable.store
+                .addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA, false, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 
     private Column generateIntervalColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("age", IntervalIntegerMap.class, "Age", null, Origin.DATA,
-                false, false));
+        graphStore.nodeTable.store
+                .addColumn(new ColumnImpl("age", IntervalIntegerMap.class, "Age", null, Origin.DATA, false, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 

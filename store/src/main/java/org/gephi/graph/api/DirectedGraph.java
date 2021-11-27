@@ -34,8 +34,7 @@ public interface DirectedGraph extends Graph {
     public Edge getEdge(Node source, Node target);
 
     /**
-     * Gets the edge adjacent to source and target with an edge of the given
-     * type.
+     * Gets the edge adjacent to source and target with an edge of the given type.
      *
      * @param source the source node
      * @param target the target node

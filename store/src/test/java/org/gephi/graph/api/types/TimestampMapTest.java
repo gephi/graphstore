@@ -625,7 +625,8 @@ public class TimestampMapTest {
 
         map1.put(6.0, " 'test' ");
         map1.put(9.0, " 'test' ");
-        Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1.0, foo]; [5.5, bar]; [6.0, \" 'test' \"]; [9.0, \" 'test' \"]>");
+        Assert.assertEquals(map1
+                .toString(TimeFormat.DOUBLE), "<[1.0, foo]; [5.5, bar]; [6.0, \" 'test' \"]; [9.0, \" 'test' \"]>");
     }
 
     @Test
@@ -642,8 +643,10 @@ public class TimestampMapTest {
 
         // Test with time zone printing:
         Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, foo]; [2012-02-29, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("+03:00")), "<[2012-02-29, foo]; [2012-02-29, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.forID("-03:00")), "<[2012-02-28, foo]; [2012-02-28, bar]>");
+        Assert.assertEquals(map1
+                .toString(TimeFormat.DATE, DateTimeZone.forID("+03:00")), "<[2012-02-29, foo]; [2012-02-29, bar]>");
+        Assert.assertEquals(map1
+                .toString(TimeFormat.DATE, DateTimeZone.forID("-03:00")), "<[2012-02-28, foo]; [2012-02-28, bar]>");
 
         // Test infinity:
         TimestampStringMap mapInf = new TimestampStringMap();
@@ -662,12 +665,15 @@ public class TimestampMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, foo]>");
 
         map1.put(AttributeUtils.parseDateTime("2012-02-29T01:10:44"), "bar");
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
+        Assert.assertEquals(map1
+                .toString(TimeFormat.DATETIME), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330477844000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone.forID("-01:30")), "<[2012-02-28T22:30:00.000-01:30, foo]; [2012-02-28T23:40:44.000-01:30, bar]>");
+        Assert.assertEquals(map1
+                .toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone
+                .forID("-01:30")), "<[2012-02-28T22:30:00.000-01:30, foo]; [2012-02-28T23:40:44.000-01:30, bar]>");
 
         // Test with timezone parsing and UTC printing:
         TimestampStringMap map2 = new TimestampStringMap();
@@ -675,7 +681,8 @@ public class TimestampMapTest {
         Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, foo]>");
 
         map2.put(AttributeUtils.parseDateTime("2012-02-29T01:10:44-01:00"), "bar");
-        Assert.assertEquals(map2.toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, foo]; [2012-02-29T02:10:44.000Z, bar]>");
+        Assert.assertEquals(map2
+                .toString(TimeFormat.DATETIME), "<[2012-02-28T21:30:00.000Z, foo]; [2012-02-29T02:10:44.000Z, bar]>");
         Assert.assertEquals(map2.toString(TimeFormat.DOUBLE), "<[1330464600000.0, foo]; [1330481444000.0, bar]>");
 
         // Test infinity:
@@ -698,10 +705,10 @@ public class TimestampMapTest {
     }
 
     private TimestampMap[] getAllInstances(int capacity) {
-        return new TimestampMap[] { new TimestampDoubleMap(capacity), new TimestampByteMap(capacity), new TimestampFloatMap(
-                capacity), new TimestampIntegerMap(capacity), new TimestampLongMap(capacity), new TimestampShortMap(
-                capacity), new TimestampStringMap(capacity), new TimestampCharMap(capacity), new TimestampBooleanMap(
-                capacity) };
+        return new TimestampMap[] { new TimestampDoubleMap(capacity), new TimestampByteMap(
+                capacity), new TimestampFloatMap(capacity), new TimestampIntegerMap(capacity), new TimestampLongMap(
+                        capacity), new TimestampShortMap(capacity), new TimestampStringMap(
+                                capacity), new TimestampCharMap(capacity), new TimestampBooleanMap(capacity) };
     }
 
     private Object[] getTestValues(TimestampMap set) {
@@ -771,8 +778,10 @@ public class TimestampMapTest {
                             .getMethod("get" + typeClass.getSimpleName(), double.class, getMethod.getReturnType());
 
                     Assert.assertEquals(getMethod.invoke(set, expectedTimestamp[i]), expectedValues[i]);
-                    Assert.assertEquals(getMethodWithDefault.invoke(set, expectedTimestamp[i], getDefaultValue(set)), expectedValues[i]);
-                    Assert.assertEquals(getMethodWithDefault.invoke(set, 999999.0, getDefaultValue(set)), getDefaultValue(set));
+                    Assert.assertEquals(getMethodWithDefault
+                            .invoke(set, expectedTimestamp[i], getDefaultValue(set)), expectedValues[i]);
+                    Assert.assertEquals(getMethodWithDefault
+                            .invoke(set, 999999.0, getDefaultValue(set)), getDefaultValue(set));
 
                     boolean thrown = false;
                     try {

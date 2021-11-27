@@ -82,11 +82,12 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("true", Boolean.class), true);
         Assert.assertEquals(AttributeUtils.parse("1", Boolean.class), true);
         Assert.assertEquals(AttributeUtils.parse("0", Boolean.class), false);
-        Assert.assertEquals(AttributeUtils.parse("123456789123456789123456789123456789", BigInteger.class), new BigInteger(
-                "123456789123456789123456789123456789"));
+        Assert.assertEquals(AttributeUtils
+                .parse("123456789123456789123456789123456789", BigInteger.class), new BigInteger(
+                        "123456789123456789123456789123456789"));
         Assert.assertEquals(AttributeUtils
                 .parse("123456789123456789123456789123456789.123456789123456789123456789123456789", BigDecimal.class), new BigDecimal(
-                "123456789123456789123456789123456789.123456789123456789123456789123456789"));
+                        "123456789123456789123456789123456789.123456789123456789123456789123456789"));
     }
 
     @Test
@@ -105,8 +106,10 @@ public class AttributeUtilsTest {
 
     @Test
     public void testParseArrayTypes() {
-        Assert.assertEquals(AttributeUtils.parse("[true, false, 1, 0, null]", Boolean[].class), new Boolean[] { true, false, true, false, null });
-        Assert.assertEquals(AttributeUtils.parse("[true, false, 1, 0]", boolean[].class), new boolean[] { true, false, true, false });
+        Assert.assertEquals(AttributeUtils
+                .parse("[true, false, 1, 0, null]", Boolean[].class), new Boolean[] { true, false, true, false, null });
+        Assert.assertEquals(AttributeUtils
+                .parse("[true, false, 1, 0]", boolean[].class), new boolean[] { true, false, true, false });
 
         Assert.assertEquals(AttributeUtils.parse("[-1, 3, null]", Integer[].class), new Integer[] { -1, 3, null });
         Assert.assertEquals(AttributeUtils.parse("[-1, 3, null]", Integer[].class).getClass(), Integer[].class);
@@ -121,20 +124,26 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("[-1, 3, null]", Long[].class), new Long[] { -1l, 3l, null });
         Assert.assertEquals(AttributeUtils.parse("[-1, 0, 2]", long[].class), new long[] { -1, 0, 2 });
 
-        Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2000000., null]", Float[].class), new Float[] { -1e6f, 1.0f, .001f, 2e6f, null });
+        Assert.assertEquals(AttributeUtils
+                .parse("[-1e6, 1, .001, 2000000., null]", Float[].class), new Float[] { -1e6f, 1.0f, .001f, 2e6f, null });
         Assert.assertEquals(AttributeUtils.parse("[1]", float[].class).getClass(), float[].class);
-        Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2e6]", float[].class), new float[] { -1e6f, 1.0f, .001f, 2e6f });
+        Assert.assertEquals(AttributeUtils
+                .parse("[-1e6, 1, .001, 2e6]", float[].class), new float[] { -1e6f, 1.0f, .001f, 2e6f });
 
-        Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2000000., null]", Double[].class), new Double[] { -1e6, 1.0, .001, 2e6, null });
-        Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2e6]", double[].class), new double[] { -1e6, 1.0, .001, 2e6 });
+        Assert.assertEquals(AttributeUtils
+                .parse("[-1e6, 1, .001, 2000000., null]", Double[].class), new Double[] { -1e6, 1.0, .001, 2e6, null });
+        Assert.assertEquals(AttributeUtils
+                .parse("[-1e6, 1, .001, 2e6]", double[].class), new double[] { -1e6, 1.0, .001, 2e6 });
         Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2e6]", double[].class).getClass(), double[].class);
 
-        Assert.assertEquals(AttributeUtils.parse("[' true ', 'null', null]", String[].class), new String[] { " true ", "null", null });
-        Assert.assertEquals(AttributeUtils.parse("['123456789123456789123456789123456789']", BigInteger[].class), new BigInteger[] { new BigInteger(
-                "123456789123456789123456789123456789") });
+        Assert.assertEquals(AttributeUtils
+                .parse("[' true ', 'null', null]", String[].class), new String[] { " true ", "null", null });
+        Assert.assertEquals(AttributeUtils
+                .parse("['123456789123456789123456789123456789']", BigInteger[].class), new BigInteger[] { new BigInteger(
+                        "123456789123456789123456789123456789") });
         Assert.assertEquals(AttributeUtils
                 .parse("['123456789123456789123456789123456789.123456789123456789123456789123456789']", BigDecimal[].class), new BigDecimal[] { new BigDecimal(
-                "123456789123456789123456789123456789.123456789123456789123456789123456789") });
+                        "123456789123456789123456789123456789.123456789123456789123456789123456789") });
     }
 
     @Test
@@ -238,35 +247,42 @@ public class AttributeUtilsTest {
                 .parse("<[2015-01-01T01:30:00]>", TimestampSet.class, DateTimeZone.forID("+01:30")));
 
         // Maps
-        Assert.assertEquals(AttributeUtils.parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class), AttributeUtils
-                .parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class, null));
-        Assert.assertEquals(AttributeUtils.parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class), AttributeUtils
-                .parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class, DateTimeZone.UTC));
-        Assert.assertEquals(AttributeUtils.parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class), AttributeUtils
-                .parse("<[2015-01-01T01:30:00, val]>", TimestampStringMap.class, DateTimeZone.forID("+01:30")));
+        Assert.assertEquals(AttributeUtils
+                .parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class), AttributeUtils
+                        .parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class, null));
+        Assert.assertEquals(AttributeUtils
+                .parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class), AttributeUtils
+                        .parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class, DateTimeZone.UTC));
+        Assert.assertEquals(AttributeUtils
+                .parse("<[2015-01-01T00:00:00, val]>", TimestampStringMap.class), AttributeUtils
+                        .parse("<[2015-01-01T01:30:00, val]>", TimestampStringMap.class, DateTimeZone.forID("+01:30")));
     }
 
     @Test
     public void testParseDynamicIntervalTypesWithTimeZone() {
         // Sets
-        Assert.assertEquals(AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class), AttributeUtils
-                .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class, null));
-        Assert.assertEquals(AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class), AttributeUtils
-                .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class, DateTimeZone.UTC));
-        Assert.assertEquals(AttributeUtils.parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class), AttributeUtils
-                .parse("<[2014-12-31T22:00:00, 2015-01-01T00:00:00]>", IntervalSet.class, DateTimeZone.forID("-02:00")));
+        Assert.assertEquals(AttributeUtils
+                .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class), AttributeUtils
+                        .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class, null));
+        Assert.assertEquals(AttributeUtils
+                .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class), AttributeUtils
+                        .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class, DateTimeZone.UTC));
+        Assert.assertEquals(AttributeUtils
+                .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00]>", IntervalSet.class), AttributeUtils
+                        .parse("<[2014-12-31T22:00:00, 2015-01-01T00:00:00]>", IntervalSet.class, DateTimeZone
+                                .forID("-02:00")));
 
         // Maps
         Assert.assertEquals(AttributeUtils
                 .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class), AttributeUtils
-                .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class, null));
+                        .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class, null));
         Assert.assertEquals(AttributeUtils
                 .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class), AttributeUtils
-                .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class, DateTimeZone.UTC));
+                        .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class, DateTimeZone.UTC));
         Assert.assertEquals(AttributeUtils
                 .parse("<[2015-01-01T00:00:00, 2015-01-01T02:00:00, val]>", IntervalStringMap.class), AttributeUtils
-                .parse("<[2014-12-31T22:00:00, 2015-01-01T00:00:00, val]>", IntervalStringMap.class, DateTimeZone
-                        .forID("-02:00")));
+                        .parse("<[2014-12-31T22:00:00, 2015-01-01T00:00:00, val]>", IntervalStringMap.class, DateTimeZone
+                                .forID("-02:00")));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -310,12 +326,14 @@ public class AttributeUtilsTest {
     public void testGetPrimitiveArray() {
         Assert.assertEquals((int[]) AttributeUtils.getPrimitiveArray(new Integer[] { 1, 2 }), new int[] { 1, 2 });
         Assert.assertEquals((float[]) AttributeUtils.getPrimitiveArray(new Float[] { 1f, 2f }), new float[] { 1f, 2f });
-        Assert.assertEquals((double[]) AttributeUtils.getPrimitiveArray(new Double[] { 1.0, 2.0 }), new double[] { 1.0, 2.0 });
+        Assert.assertEquals((double[]) AttributeUtils
+                .getPrimitiveArray(new Double[] { 1.0, 2.0 }), new double[] { 1.0, 2.0 });
         Assert.assertEquals((long[]) AttributeUtils.getPrimitiveArray(new Long[] { 1l, 2l }), new long[] { 1l, 2l });
         Assert.assertEquals((char[]) AttributeUtils.getPrimitiveArray(new Character[] { 1, 2 }), new char[] { 1, 2 });
         Assert.assertEquals((short[]) AttributeUtils.getPrimitiveArray(new Short[] { 1, 2 }), new short[] { 1, 2 });
         Assert.assertEquals((byte[]) AttributeUtils.getPrimitiveArray(new Byte[] { 1, 2 }), new byte[] { 1, 2 });
-        Assert.assertEquals((boolean[]) AttributeUtils.getPrimitiveArray(new Boolean[] { true, false }), new boolean[] { true, false });
+        Assert.assertEquals((boolean[]) AttributeUtils
+                .getPrimitiveArray(new Boolean[] { true, false }), new boolean[] { true, false });
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -579,7 +597,8 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00"), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00", null), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00", DateTimeZone.UTC), 0.0);
-        Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T01:30:00", DateTimeZone.forID("+01:30")), 0.0);
+        Assert.assertEquals(AttributeUtils
+                .parseDateTimeOrTimestamp("1970-01-01T01:30:00", DateTimeZone.forID("+01:30")), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00+00:00"), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00Z"), 0.0);
         Assert.assertEquals(AttributeUtils.parseDateTimeOrTimestamp("1970-01-01T00:00:00.000+00:00"), 0.0);
@@ -622,17 +641,22 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.UTC), dateInUTC);
         Assert.assertEquals(AttributeUtils.printDateTime(d, null), dateInUTC);
         Assert.assertEquals(AttributeUtils.printDateTime(d), "2003-01-01T08:00:00.000Z");
-        Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.forID("+00:30")), "2003-01-01T08:30:00.000+00:30");
-        Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.forID("+12:00")), "2003-01-01T20:00:00.000+12:00");
-        Assert.assertEquals(AttributeUtils.printDateTime(d, DateTimeZone.forID("-12:00")), "2002-12-31T20:00:00.000-12:00");
+        Assert.assertEquals(AttributeUtils
+                .printDateTime(d, DateTimeZone.forID("+00:30")), "2003-01-01T08:30:00.000+00:30");
+        Assert.assertEquals(AttributeUtils
+                .printDateTime(d, DateTimeZone.forID("+12:00")), "2003-01-01T20:00:00.000+12:00");
+        Assert.assertEquals(AttributeUtils
+                .printDateTime(d, DateTimeZone.forID("-12:00")), "2002-12-31T20:00:00.000-12:00");
 
         Assert.assertEquals(AttributeUtils.printDateTime(AttributeUtils
-                .parseDateTime("2003-01-01T16:00:00", DateTimeZone.forID("+00:00")), DateTimeZone.forID("+12:00")), "2003-01-02T04:00:00.000+12:00");
+                .parseDateTime("2003-01-01T16:00:00", DateTimeZone.forID("+00:00")), DateTimeZone
+                        .forID("+12:00")), "2003-01-02T04:00:00.000+12:00");
     }
 
     @Test
     public void testPrintArray() {
-        Assert.assertEquals(AttributeUtils.printArray(new String[] { null, "null", " b ", "\"c" }), "[null, \"null\", \" b \", \"\\\"c\"]");
+        Assert.assertEquals(AttributeUtils
+                .printArray(new String[] { null, "null", " b ", "\"c" }), "[null, \"null\", \" b \", \"\\\"c\"]");
         Assert.assertEquals(AttributeUtils.printArray(new Integer[] { -1, 2, 3, null }), "[-1, 2, 3, null]");
         Assert.assertEquals(AttributeUtils.printArray(new int[] { -1, 2, 3 }), "[-1, 2, 3]");
         Assert.assertEquals(AttributeUtils.printArray(new boolean[] { true, false, true }), "[true, false, true]");
