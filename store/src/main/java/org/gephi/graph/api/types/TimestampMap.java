@@ -52,8 +52,8 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of
-     * timestamps is known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of timestamps
+     * is known in advance as it minimizes array resizes.
      *
      * @param capacity timestamp capacity
      */
@@ -267,8 +267,8 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
     /**
      * Returns an array of all timestamps in this map.
      * <p>
-     * This method may return a reference to the underlying array so clients
-     * should make a copy if the array is written to.
+     * This method may return a reference to the underlying array so clients should
+     * make a copy if the array is written to.
      *
      * @return array of all timestamps
      */
@@ -331,7 +331,8 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
             }
             Object o1 = this.getValue(i);
             Object o2 = other.getValue(i);
-            if ((o1 == null && o2 != null) || (o1 != null && o2 == null) || (o1 != null && o2 != null && !o1.equals(o2))) {
+            if ((o1 == null && o2 != null) || (o1 != null && o2 == null) || (o1 != null && o2 != null && !o1
+                    .equals(o2))) {
                 return false;
             }
         }
@@ -469,7 +470,8 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
 
             sb.append(", ");
             String stringValue = values[i].toString();
-            if (FormattingAndParsingUtils.containsDynamicSpecialCharacters(stringValue) || stringValue.trim().isEmpty()) {
+            if (FormattingAndParsingUtils.containsDynamicSpecialCharacters(stringValue) || stringValue.trim()
+                    .isEmpty()) {
                 sb.append('"');
                 sb.append(stringValue.replace("\\", "\\\\").replace("\"", "\\\""));
                 sb.append('"');

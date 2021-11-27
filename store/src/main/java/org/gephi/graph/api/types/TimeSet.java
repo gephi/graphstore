@@ -67,8 +67,8 @@ public interface TimeSet<K> {
     /**
      * Returns an array of all keys in this set.
      * <p>
-     * This method may return a reference to the underlying array so clients
-     * should make a copy if the array is written to.
+     * This method may return a reference to the underlying array so clients should
+     * make a copy if the array is written to.
      *
      * @return array of all keys
      */

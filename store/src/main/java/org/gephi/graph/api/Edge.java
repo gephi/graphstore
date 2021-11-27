@@ -62,8 +62,8 @@ public interface Edge extends Element, EdgeProperties {
     /**
      * Returns the edge's weight in the given graph view.
      * <p>
-     * Views can configure a time interval and therefore the edge weight over
-     * time may vary.
+     * Views can configure a time interval and therefore the edge weight over time
+     * may vary.
      *
      * @param view graph view
      * @return weight

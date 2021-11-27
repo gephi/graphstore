@@ -140,7 +140,8 @@ public class TimestampsParserTest {
         expected.put(5.0, "Value 3");
         expected.put(6.0, " Value 4 ");
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(String.class, "[1, Value1]; [3, 'Value2']; [5, Value 3]; [6, \" Value 4 \"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(String.class, "[1, Value1]; [3, 'Value2']; [5, Value 3]; [6, \" Value 4 \"]"));
     }
 
     @Test
@@ -151,8 +152,10 @@ public class TimestampsParserTest {
         expected.put(6.0, (byte) 3);
         expected.put(7.0, (byte) 4);
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Byte.class, "[1, 1]; [3, 2]; [6, '3']; [7, \"4\"]"));
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(byte.class, "[1, 1]; [3, 2]; [6, '3']; [7, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(Byte.class, "[1, 1]; [3, 2]; [6, '3']; [7, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(byte.class, "[1, 1]; [3, 2]; [6, '3']; [7, \"4\"]"));
     }
 
     @Test
@@ -163,8 +166,10 @@ public class TimestampsParserTest {
         expected.put(5.0, (short) 3);
         expected.put(6.0, (short) 4);
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Short.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(short.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(Short.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(short.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
 
     @Test
@@ -175,8 +180,10 @@ public class TimestampsParserTest {
         expected.put(5.0, 3);
         expected.put(6.0, 4);
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Integer.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(int.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(Integer.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(int.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
 
     @Test
@@ -187,8 +194,10 @@ public class TimestampsParserTest {
         expected.put(5.0, 3l);
         expected.put(6.0, 4l);
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Long.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(long.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(Long.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(long.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
 
     @Test
@@ -199,8 +208,10 @@ public class TimestampsParserTest {
         expected.put(5.0, 3f);
         expected.put(6.0, 4f);
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Float.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(float.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(Float.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(float.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
 
     @Test
@@ -211,8 +222,10 @@ public class TimestampsParserTest {
         expected.put(5.0, 3d);
         expected.put(6.0, 4d);
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Double.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(double.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(Double.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(double.class, "[1, 1]; [3, 2]; [5, '3']; [6, \"4\"]"));
     }
 
     @Test
@@ -223,8 +236,10 @@ public class TimestampsParserTest {
         expected.put(5.0, false);
         expected.put(6.0, true);
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Boolean.class, "[1, true]; [3, false]; [5, '0']; [6, \"1\"]"));
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(boolean.class, "[1, true]; [3, false]; [5, '0']; [6, \"1\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(Boolean.class, "[1, true]; [3, false]; [5, '0']; [6, \"1\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(boolean.class, "[1, true]; [3, false]; [5, '0']; [6, \"1\"]"));
     }
 
     @Test
@@ -235,8 +250,10 @@ public class TimestampsParserTest {
         expected.put(5.0, 'c');
         expected.put(6.0, 'd');
 
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(Character.class, "[1, a]; [3, b]; [5, 'c']; [6, \"d\"]"));
-        assertEqualTimestampMaps(expected, TimestampsParser.parseTimestampMap(char.class, "[1, a]; [3, b]; [5, 'c']; [6, \"d\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(Character.class, "[1, a]; [3, b]; [5, 'c']; [6, \"d\"]"));
+        assertEqualTimestampMaps(expected, TimestampsParser
+                .parseTimestampMap(char.class, "[1, a]; [3, b]; [5, 'c']; [6, \"d\"]"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

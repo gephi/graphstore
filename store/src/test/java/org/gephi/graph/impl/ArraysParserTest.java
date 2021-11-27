@@ -133,8 +133,9 @@ public class ArraysParserTest {
         BigDecimal[] a1 = ArraysParser
                 .parseArray(BigDecimal[].class, "[123456789123456789123456789.123456789123456789123456789, -123456789123456789123456789.123456789123456789123456789]");
 
-        Assert.assertEquals(new BigDecimal[] { new BigDecimal("123456789123456789123456789.123456789123456789123456789"), new BigDecimal(
-                "-123456789123456789123456789.123456789123456789123456789") }, a1);
+        Assert.assertEquals(new BigDecimal[] { new BigDecimal(
+                "123456789123456789123456789.123456789123456789123456789"), new BigDecimal(
+                        "-123456789123456789123456789.123456789123456789123456789") }, a1);
     }
 
     @Test

@@ -33,8 +33,8 @@ public interface Column {
     public String getId();
 
     /**
-     * Returns the column's integer index, which is the position of the column
-     * in the store.
+     * Returns the column's integer index, which is the position of the column in
+     * the store.
      *
      * @return the column's index
      */
@@ -106,8 +106,7 @@ public interface Column {
     /**
      * Returns true if this column is a property.
      * <p>
-     * This is equivalent to test if the column's origin is
-     * <em>Origin.PROPERTY</em>
+     * This is equivalent to test if the column's origin is <em>Origin.PROPERTY</em>
      *
      * @return true if property, false otherwise
      */

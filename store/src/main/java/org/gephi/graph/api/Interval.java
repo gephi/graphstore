@@ -71,15 +71,15 @@ public final class Interval {
      *
      * <p>
      * Note that if two intervals are equal ({@code i.low = i'.low} and
-     * {@code i.high = i'.high}), they overlap as well. But if they simply
-     * overlap (for instance {@code i.low < i'.low} and {@code i.high >
+     * {@code i.high = i'.high}), they overlap as well. But if they simply overlap
+     * (for instance {@code i.low < i'.low} and {@code i.high >
      * i'.high}) they aren't equal.
      *
      * @param interval the interval to be compared
      *
-     * @return a negative integer, zero, or a positive integer as this interval
-     *         is to the left of, overlaps with, or is to the right of the
-     *         specified interval.
+     * @return a negative integer, zero, or a positive integer as this interval is
+     *         to the left of, overlaps with, or is to the right of the specified
+     *         interval.
      *
      * @throws NullPointerException if {@code interval} is null.
      */
@@ -101,9 +101,9 @@ public final class Interval {
      * Compares this interval to the given timetamp.
      *
      * @param timestamp timestamp
-     * @return a negative integer, zero or a positive integer if this interval
-     *         is to the left of, overlaps with, or is to the right with the
-     *         specified timestamp.
+     * @return a negative integer, zero or a positive integer if this interval is to
+     *         the left of, overlaps with, or is to the right with the specified
+     *         timestamp.
      *
      * @throws NullPointerException if {@code timestamp} is null.
      */

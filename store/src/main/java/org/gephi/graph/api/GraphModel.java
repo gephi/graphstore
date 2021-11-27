@@ -78,8 +78,7 @@ import org.joda.time.DateTimeZone;
  * <p>
  * For performance reasons, edge labels are internally represented as integers
  * and the mapping between arbitrary labels is managed through the
- * {@link #addEdgeType(java.lang.Object)
- * } and
+ * {@link #addEdgeType(java.lang.Object) } and
  * {@link #getEdgeType(java.lang.Object) } methods. By default, edges have a
  * <code>null</code> label, which is internally represented as zero.
  *
@@ -139,10 +138,9 @@ public interface GraphModel {
         }
 
         /**
-         * Read the <code>input</code> and return the read graph model without
-         * an explicit version header in the input. To be used with old
-         * graphstore serialized data prior to version 0.4 (first, that added
-         * the version header).
+         * Read the <code>input</code> and return the read graph model without an
+         * explicit version header in the input. To be used with old graphstore
+         * serialized data prior to version 0.4 (first, that added the version header).
          *
          * @param input data input to read from
          * @param graphStoreVersion Forced version to use
@@ -361,9 +359,8 @@ public interface GraphModel {
     /**
      * Creates a new graph view.
      * <p>
-     * The node and edge parameters allows to restrict the view filtering to
-     * only nodes or only edges. By default, the view applies to both nodes and
-     * edges.
+     * The node and edge parameters allows to restrict the view filtering to only
+     * nodes or only edges. By default, the view applies to both nodes and edges.
      *
      * @param node true to enable node view, false otherwise
      * @param edge true to enable edge view, false otherwise
@@ -382,9 +379,8 @@ public interface GraphModel {
     /**
      * Creates a new graph based on an existing view.
      * <p>
-     * The node and edge parameters allows to restrict the view filtering to
-     * only nodes or only edges. By default, the view applies to both nodes and
-     * edges.
+     * The node and edge parameters allows to restrict the view filtering to only
+     * nodes or only edges. By default, the view applies to both nodes and edges.
      *
      * @param view view to copy
      * @param node true to enable node view, false otherwise
@@ -403,8 +399,7 @@ public interface GraphModel {
     /**
      * Sets the given time interval to the view.
      * <p>
-     * Each view can be configured with a time interval to filter a graph over
-     * time.
+     * Each view can be configured with a time interval to filter a graph over time.
      *
      * @param view the view to configure
      * @param interval the time interval
@@ -412,22 +407,22 @@ public interface GraphModel {
     public void setTimeInterval(GraphView view, Interval interval);
 
     /**
-     * Returns the <b>node</b> table. Contains all the columns associated to
-     * node elements.
+     * Returns the <b>node</b> table. Contains all the columns associated to node
+     * elements.
      * <p>
-     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables
-     * by default.
+     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables by
+     * default.
      *
      * @return node table, contains node columns
      */
     public Table getNodeTable();
 
     /**
-     * Returns the <b>edge</b> table. Contains all the columns associated to
-     * edge elements.
+     * Returns the <b>edge</b> table. Contains all the columns associated to edge
+     * elements.
      * <p>
-     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables
-     * by default.
+     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables by
+     * default.
      *
      * @return edge table, contains edge columns
      */
@@ -513,8 +508,8 @@ public interface GraphModel {
     /**
      * Gets the time bounds.
      * <p>
-     * The time bounds is an interval made of the minimum and maximum time
-     * observed in the entire graph.
+     * The time bounds is an interval made of the minimum and maximum time observed
+     * in the entire graph.
      *
      * @return time bounds
      */
@@ -523,8 +518,8 @@ public interface GraphModel {
     /**
      * Gets the time bounds for the visible graph.
      * <p>
-     * The time bounds is an interval made of the minimum and maximum time
-     * observed in the entire graph.
+     * The time bounds is an interval made of the minimum and maximum time observed
+     * in the entire graph.
      *
      * @return time bounds
      */
@@ -533,8 +528,8 @@ public interface GraphModel {
     /**
      * Gets the time bounds for the given graph view.
      * <p>
-     * The time bounds is an interval made of the minimum and maximum time
-     * observed in the entire graph.
+     * The time bounds is an interval made of the minimum and maximum time observed
+     * in the entire graph.
      *
      * @param view the graph view
      * @return time bounds
@@ -608,8 +603,8 @@ public interface GraphModel {
      * <p>
      * Each node has a unique store identifier which can be retrieved from
      * {@link Node#getStoreId() }. This maximum number can help design algorithms
-     * thar rely on storing nodes in a array. Note that not all consecutive ids
-     * may be assigned.
+     * thar rely on storing nodes in a array. Note that not all consecutive ids may
+     * be assigned.
      *
      * @return maximum node store id
      */
@@ -620,8 +615,8 @@ public interface GraphModel {
      * <p>
      * Each edge has a unique store identifier which can be retrieved from
      * {@link Edge#getStoreId() }. This maximum number can help design algorithms
-     * thar rely on storing edges in a array. Note that not all consecutive ids
-     * may be assigned.
+     * thar rely on storing edges in a array. Note that not all consecutive ids may
+     * be assigned.
      *
      * @return maximum edge store id
      */

@@ -125,8 +125,8 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Parses a value until end is detected either by a comma or a bounds
-     * closing character.
+     * Parses a value until end is detected either by a comma or a bounds closing
+     * character.
      *
      * @param reader Input reader
      * @return Parsed value
@@ -154,9 +154,9 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Converts a string parsed with {@link #parseValue(java.io.StringReader)}
-     * to the target type, taking into account dynamic parsing quirks such as
-     * numbers with/without decimals and infinity values.
+     * Converts a string parsed with {@link #parseValue(java.io.StringReader)} to
+     * the target type, taking into account dynamic parsing quirks such as numbers
+     * with/without decimals and infinity values.
      *
      * @param <T> Target type
      * @param typeClass Target type class
@@ -167,10 +167,10 @@ public final class FormattingAndParsingUtils {
         Object value;
         if (typeClass.equals(Byte.class) || typeClass.equals(byte.class) || typeClass.equals(Short.class) || typeClass
                 .equals(short.class) || typeClass.equals(Integer.class) || typeClass.equals(int.class) || typeClass
-                .equals(Long.class) || typeClass.equals(long.class) || typeClass.equals(BigInteger.class)) {
+                        .equals(Long.class) || typeClass.equals(long.class) || typeClass.equals(BigInteger.class)) {
             value = parseNumberWithoutDecimals((Class<? extends Number>) typeClass, valString);
-        } else if (typeClass.equals(Float.class) || typeClass.equals(float.class) || typeClass.equals(Double.class) || typeClass
-                .equals(double.class) || typeClass.equals(BigDecimal.class)) {
+        } else if (typeClass.equals(Float.class) || typeClass.equals(float.class) || typeClass
+                .equals(Double.class) || typeClass.equals(double.class) || typeClass.equals(BigDecimal.class)) {
             value = parseNumberWithDecimals((Class<? extends Number>) typeClass, valString);
         } else {
             value = AttributeUtils.parse(valString, typeClass);
@@ -184,8 +184,7 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Method for allowing inputs such as "infinity" when parsing decimal
-     * numbers
+     * Method for allowing inputs such as "infinity" when parsing decimal numbers
      *
      * @param value Input String
      * @return Input String with fixed "Infinity" syntax if necessary.
@@ -215,9 +214,9 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Removes anything after the dot of decimal numbers in a string when
-     * necessary. Used for trying to parse decimal numbers as not decimal. For
-     * example BigDecimal to BigInteger.
+     * Removes anything after the dot of decimal numbers in a string when necessary.
+     * Used for trying to parse decimal numbers as not decimal. For example
+     * BigDecimal to BigInteger.
      *
      * @param s String to remove decimal digits
      * @return String without dot and decimal digits.
@@ -288,8 +287,8 @@ public final class FormattingAndParsingUtils {
 
     /**
      * @param value String value
-     * @return True if the string contains special characters for arrays
-     *         intervals syntax
+     * @return True if the string contains special characters for arrays intervals
+     *         syntax
      */
     private static boolean containsArraySpecialCharacters(String value) {
         for (char c : ARRAY_SPECIAL_CHARACTERS) {

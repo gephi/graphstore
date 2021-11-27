@@ -410,8 +410,8 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     /**
      * Returns the interval with the highest right endpoint.
      *
-     * @return the interval with the highest right endpoint or null if the tree
-     *         is empty.
+     * @return the interval with the highest right endpoint or null if the tree is
+     *         empty.
      */
     public Interval maximum() {
         if (root.left == nil) {
@@ -430,8 +430,8 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     }
 
     /**
-     * Returns the leftmost point or {@code Double.NEGATIVE_INFINITY} in case of
-     * no intervals.
+     * Returns the leftmost point or {@code Double.NEGATIVE_INFINITY} in case of no
+     * intervals.
      *
      * @return the leftmost point
      */
@@ -447,8 +447,8 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     }
 
     /**
-     * Returns the rightmost point or {@code Double.POSITIVE_INFINITY} in case
-     * of no intervals.
+     * Returns the rightmost point or {@code Double.POSITIVE_INFINITY} in case of no
+     * intervals.
      *
      * @return the rightmost point
      */
@@ -655,8 +655,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
      * Compares this interval tree with the specified object for equality.
      *
      * <p>
-     * Note that two interval trees are equal if they contain the same
-     * intervals.
+     * Note that two interval trees are equal if they contain the same intervals.
      *
      * @param obj object to which this interval tree is to be compared
      *

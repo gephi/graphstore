@@ -141,8 +141,8 @@ public class Configuration {
      * @throws IllegalArgumentException if the type isn't supported
      */
     public void setEdgeWeightType(Class edgeWeightType) {
-        if (Double.class.equals(edgeWeightType) || TimestampDoubleMap.class.equals(edgeWeightType) || IntervalDoubleMap.class
-                .equals(edgeWeightType)) {
+        if (Double.class.equals(edgeWeightType) || TimestampDoubleMap.class
+                .equals(edgeWeightType) || IntervalDoubleMap.class.equals(edgeWeightType)) {
             this.edgeWeightType = edgeWeightType;
         } else {
             throw new IllegalArgumentException("Unsupported type " + edgeWeightType.getClass().getCanonicalName());

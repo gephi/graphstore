@@ -42,8 +42,8 @@ public final class IntervalSet implements TimeSet<Interval> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of
-     * intervals is known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of intervals is
+     * known in advance as it minimizes array resizes.
      *
      * @param capacity interval capacity
      */
@@ -114,8 +114,8 @@ public final class IntervalSet implements TimeSet<Interval> {
                 if (startValue == interval.getLow() && endValue > interval.getHigh()) {
                     return false;
                 }
-                if ((shift = (interval.getHigh() > endValue ? 2 : interval.getHigh() < endValue ? -2 : interval
-                        .getLow() > startValue ? 2 : 0)) == 0) {
+                if ((shift = (interval.getHigh() > endValue ? 2
+                        : interval.getHigh() < endValue ? -2 : interval.getLow() > startValue ? 2 : 0)) == 0) {
                     return true;
                 }
             }
@@ -126,11 +126,11 @@ public final class IntervalSet implements TimeSet<Interval> {
     /**
      * Returns an array of all intervals in this set in a flat format.
      * <p>
-     * The intervals are represented in a flat and sorted array (e.g.
-     * {[1.0,2.0], [5.0,6.0]}) returns [1.0,2.0,5.0,6.0]).
+     * The intervals are represented in a flat and sorted array (e.g. {[1.0,2.0],
+     * [5.0,6.0]}) returns [1.0,2.0,5.0,6.0]).
      * <p>
-     * This method may return a reference to the underlying array so clients
-     * should make a copy if the array is written to.
+     * This method may return a reference to the underlying array so clients should
+     * make a copy if the array is written to.
      *
      * @return array of all intervals
      */
@@ -262,8 +262,8 @@ public final class IntervalSet implements TimeSet<Interval> {
                 if (startValue == intervalStart && endValue > intervalEnd) {
                     return -1;
                 }
-                if ((shift = (intervalEnd > endValue ? 2 : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2
-                        : 0)) == 0) {
+                if ((shift = (intervalEnd > endValue ? 2
+                        : intervalEnd < endValue ? -2 : intervalStart > startValue ? 2 : 0)) == 0) {
                     if (removeIndex == realSize - 2) {
                         size--;
                     } else {

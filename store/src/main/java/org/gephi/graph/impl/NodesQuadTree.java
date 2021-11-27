@@ -428,7 +428,8 @@ public class NodesQuadTree {
                 }
             }
 
-            if (objects == null || (childTL == null && (level >= maxLevels || objects.size() + 1 <= maxObjectsPerNode))) {
+            if (objects == null || (childTL == null && (level >= maxLevels || objects
+                    .size() + 1 <= maxObjectsPerNode))) {
                 // If there's room to add the object, just add it
                 add(item);
             } else {

@@ -605,8 +605,8 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
                 if (hasNull()) {
                     if (array.length < size()) {
-                        array = (K[]) java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), map
-                                .size() + 1);
+                        array = (K[]) java.lang.reflect.Array
+                                .newInstance(array.getClass().getComponentType(), map.size() + 1);
                     }
                     array[0] = null;
                     System.arraycopy(map.keySet().toArray(), 0, array, 1, map.size());

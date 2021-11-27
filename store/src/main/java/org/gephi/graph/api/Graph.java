@@ -303,14 +303,13 @@ public interface Graph {
     public boolean isAdjacent(Node node1, Node node2);
 
     /**
-     * Returns true if node1 and node2 are adjacent with an edge of the given
-     * type.
+     * Returns true if node1 and node2 are adjacent with an edge of the given type.
      *
      * @param node1 the first node
      * @param node2 the second node
      * @param type the edge type
-     * @return true if node1 and node2 are adjacent with an edge og the given
-     *         type, false otherwise
+     * @return true if node1 and node2 are adjacent with an edge og the given type,
+     *         false otherwise
      */
     public boolean isAdjacent(Node node1, Node node2, int type);
 

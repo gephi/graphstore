@@ -28,8 +28,8 @@ public final class MapDeepEquals {
 
     /**
      * Compares two maps for equality. This is based around the idea that if the
-     * keys are deep equal and the values the keys return are deep equal then
-     * the maps are equal.
+     * keys are deep equal and the values the keys return are deep equal then the
+     * maps are equal.
      *
      * @param m1 - first map
      * @param m2 - second map

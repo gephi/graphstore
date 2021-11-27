@@ -71,7 +71,8 @@ public class EdgeImplTest {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setWeight(42.0, new Interval(1.0, 2.0));
-        Assert.assertEquals(e.getWeight(new Interval(2.1, 4.0)), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+        Assert.assertEquals(e
+                .getWeight(new Interval(2.1, 4.0)), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
     }
 
     @Test
@@ -81,7 +82,8 @@ public class EdgeImplTest {
         config.setEdgeWeightType(IntervalDoubleMap.class);
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
-        Assert.assertEquals(e.getWeight(new Interval(2.0, 4.0)), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+        Assert.assertEquals(e
+                .getWeight(new Interval(2.0, 4.0)), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
     }
 
     @Test
@@ -216,7 +218,8 @@ public class EdgeImplTest {
         config.setEdgeWeightType(TimestampDoubleMap.class);
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
-        Assert.assertEquals(e.getWeight(graphStore.mainGraphView), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+        Assert.assertEquals(e
+                .getWeight(graphStore.mainGraphView), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
     }
 
     @Test
@@ -256,7 +259,8 @@ public class EdgeImplTest {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
         Edge e = graphStore.getEdge("0");
         e.setAttribute("weight", null);
-        Assert.assertEquals(e.getWeight(graphStore.getView()), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
+        Assert.assertEquals(e
+                .getWeight(graphStore.getView()), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
     }
 
     @Test

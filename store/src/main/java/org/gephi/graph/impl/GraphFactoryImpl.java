@@ -37,10 +37,10 @@ public class GraphFactoryImpl implements GraphFactory {
 
     public GraphFactoryImpl(GraphStore store) {
         this.store = store;
-        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration
-                .getNodeIdType()));
-        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration
-                .getEdgeIdType()));
+        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils
+                .getStandardizedType(store.configuration.getNodeIdType()));
+        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils
+                .getStandardizedType(store.configuration.getEdgeIdType()));
     }
 
     @Override
@@ -208,10 +208,10 @@ public class GraphFactoryImpl implements GraphFactory {
     }
 
     public void resetConfiguration() {
-        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration
-                .getNodeIdType()));
-        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils.getStandardizedType(store.configuration
-                .getEdgeIdType()));
+        this.nodeAssignConfiguration = getAssignConfiguration(AttributeUtils
+                .getStandardizedType(store.configuration.getNodeIdType()));
+        this.edgeAssignConfiguration = getAssignConfiguration(AttributeUtils
+                .getStandardizedType(store.configuration.getEdgeIdType()));
     }
 
     protected final AssignConfiguration getAssignConfiguration(Class type) {

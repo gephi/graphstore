@@ -128,13 +128,13 @@ public final class ArraysParser {
     /**
      * Parses an array of any primitive type.
      *
-     * @param <T> Primitive type wrapper. For example Integer for int array or
-     *        Long for long array.
+     * @param <T> Primitive type wrapper. For example Integer for int array or Long
+     *        for long array.
      * @param arrayTypeClass Array type to parse
      * @param input Input string to parse
      * @return Parsed array
-     * @throws IllegalArgumentException Parsing exception, or if any of the
-     *         parsed array values is null
+     * @throws IllegalArgumentException Parsing exception, or if any of the parsed
+     *         array values is null
      */
     public static <T> Object parseArrayAsPrimitiveArray(Class<T[]> arrayTypeClass, String input) throws IllegalArgumentException {
         T[] array = parseArray(arrayTypeClass, input);

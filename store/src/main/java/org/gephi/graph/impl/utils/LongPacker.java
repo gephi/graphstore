@@ -60,8 +60,8 @@ public final class LongPacker {
     }
 
     /**
-     * Pack non-negative long into byte array. It will occupy 1-10 bytes
-     * depending on value (lower values occupy smaller space)
+     * Pack non-negative long into byte array. It will occupy 1-10 bytes depending
+     * on value (lower values occupy smaller space)
      *
      * @param ba the byte array
      * @param value the long value
@@ -136,8 +136,8 @@ public final class LongPacker {
     }
 
     /**
-     * Pack non-negative int into output stream. It will occupy 1-5 bytes
-     * depending on value (lower values occupy smaller space)
+     * Pack non-negative int into output stream. It will occupy 1-5 bytes depending
+     * on value (lower values occupy smaller space)
      *
      * @param os the data output
      * @param value the value

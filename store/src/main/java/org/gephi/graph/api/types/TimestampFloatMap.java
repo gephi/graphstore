@@ -39,8 +39,8 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of
-     * timestamps is known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of timestamps
+     * is known in advance as it minimizes array resizes.
      *
      * @param capacity timestamp capacity
      */
@@ -121,8 +121,8 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
     /**
      * Returns an array of all values in this map.
      * <p>
-     * This method may return a reference to the underlying array so clients
-     * should make a copy if the array is written to.
+     * This method may return a reference to the underlying array so clients should
+     * make a copy if the array is written to.
      *
      * @return array of all values
      */

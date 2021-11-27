@@ -179,8 +179,8 @@ public class ColumnObserverImpl implements ColumnObserver {
         if (bitVector == null) {
             bitVector = new BitVector(sid + 1);
         } else if (sid >= bitVector.size()) {
-            int newSize = Math
-                    .min(Math.max(sid + 1, (int) (sid * GraphStoreConfiguration.COLUMNDIFF_GROWING_FACTOR)), Integer.MAX_VALUE);
+            int newSize = Math.min(Math
+                    .max(sid + 1, (int) (sid * GraphStoreConfiguration.COLUMNDIFF_GROWING_FACTOR)), Integer.MAX_VALUE);
             bitVector = growBitVector(bitVector, newSize);
         }
     }

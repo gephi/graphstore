@@ -86,8 +86,9 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         version = GraphStoreConfiguration.ENABLE_OBSERVERS ? new GraphVersion(this) : null;
         observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<>() : null;
         spatialIndex = GraphStoreConfiguration.ENABLE_SPATIAL_INDEX ? new SpatialIndexImpl(this) : null;
-        edgeStore = new EdgeStore(edgeTypeStore, spatialIndex, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock
-                : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
+        edgeStore = new EdgeStore(edgeTypeStore, spatialIndex,
+                GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore,
+                GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeStore = new NodeStore(edgeStore, spatialIndex, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null,
                 viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeTable = new TableImpl<>(this, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
@@ -102,10 +103,10 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         undirectedDecorator = new UndirectedDecorator(this);
 
         // Default cols
-        nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID, configuration
-                .getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
-        edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID, configuration
-                .getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
+        nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID,
+                configuration.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
+        edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID,
+                configuration.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
             nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_LABEL_COLUMN_ID,
                     String.class, "Label", null, Origin.PROPERTY, false, false));
@@ -785,13 +786,13 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator, boolean blocking) {
-        return new EdgeIterableWrapper(edgeIterator, (blocking && GraphStoreConfiguration.ENABLE_AUTO_LOCKING) ? lock
-                : null);
+        return new EdgeIterableWrapper(edgeIterator,
+                (blocking && GraphStoreConfiguration.ENABLE_AUTO_LOCKING) ? lock : null);
     }
 
     protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator, boolean blocking) {
-        return new NodeIterableWrapper(nodeIterator, (blocking && GraphStoreConfiguration.ENABLE_AUTO_LOCKING) ? lock
-                : null);
+        return new NodeIterableWrapper(nodeIterator,
+                (blocking && GraphStoreConfiguration.ENABLE_AUTO_LOCKING) ? lock : null);
     }
 
     public int deepHashCode() {
