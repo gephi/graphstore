@@ -215,7 +215,7 @@ public class NodesQuadTreeTest {
     }
 
     private void assertSame(NodeIterable iterable, Node... expected) {
-        Assert.assertEquals(iterable.toCollection(), Arrays.asList(expected));
+        Assert.assertEqualsNoOrder(iterable.toArray(), expected);
     }
 
     private void assertEmpty(NodeIterable iterable) {
