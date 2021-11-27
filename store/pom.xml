@@ -279,7 +279,11 @@
                 <artifactId>formatter-maven-plugin</artifactId>
                 <configuration>
                     <configFile>${project.basedir}/formatter-config.xml</configFile>
-
+                    <directories>
+                        <directory>${project.build.sourceDirectory}</directory>
+                        <directory>${project.build.testSourceDirectory}</directory>
+                        <directory>${project.basedir}/src/benchmark/java</directory>
+                    </directories>
                 </configuration>
                 <executions>
                     <execution>

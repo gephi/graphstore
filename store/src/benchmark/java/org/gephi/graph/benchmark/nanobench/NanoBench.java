@@ -23,8 +23,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Lightweight CPU and memory benchmarking utility. <p> Inspired from nanobench
- * (http://code.google.com/p/nanobench/)
+ * Lightweight CPU and memory benchmarking utility.
+ * <p>
+ * Inspired from nanobench (http://code.google.com/p/nanobench/)
  *
  * @author mbastian
  */
@@ -33,6 +34,7 @@ public class NanoBench {
     public static NanoBench create() {
         return new NanoBench();
     }
+
     private static final Logger logger = Logger.getLogger(NanoBench.class.getSimpleName());
     private int numberOfMeasurement = 50;
     private int numberOfWarmUp = 0;
@@ -91,6 +93,7 @@ public class NanoBench {
             logger.log(Level.SEVERE, null, ex);
         }
     }
+
     static int[] arrayStress = new int[10000];
 
     private void stress() {
@@ -107,14 +110,16 @@ public class NanoBench {
 
     private void doMeasure(String label, Runnable task) {
         for (int i = 0; i < this.numberOfMeasurement; i++) {
-            TimeMeasureProxy tmp = new TimeMeasureProxy(new MeasureState(label, i, this.numberOfMeasurement), task, listeners);
+            TimeMeasureProxy tmp = new TimeMeasureProxy(new MeasureState(label, i, this.numberOfMeasurement), task,
+                    listeners);
             tmp.run();
         }
     }
 
     private void doWarmup(Runnable task) {
         for (int i = 0; i < this.numberOfWarmUp; i++) {
-            TimeMeasureProxy tmp = new TimeMeasureProxy(new MeasureState("_warmup_", i, this.numberOfWarmUp), task, listeners);
+            TimeMeasureProxy tmp = new TimeMeasureProxy(new MeasureState("_warmup_", i, this.numberOfWarmUp), task,
+                    listeners);
             tmp.run();
         }
     }
@@ -225,11 +230,11 @@ public class NanoBench {
 
     /**
      * CPU time listener to calculate the average time spent in a measurement.
-     * <p> The listener is called at the end of each measurement and collect the
-     * time spent from the
-     * <code>MeasureState</code> instance. At the last measurement it shows the
-     * average time spent, the total time and the number of measurement per
-     * seconds.
+     * <p>
+     * The listener is called at the end of each measurement and collect the time
+     * spent from the <code>MeasureState</code> instance. At the last measurement it
+     * shows the average time spent, the total time and the number of measurement
+     * per seconds.
      */
     private static class CPUMeasure implements MeasureListener {
 
@@ -257,15 +262,11 @@ public class NanoBench {
                 long total = timeUsed;
 
                 StringBuilder sb = new StringBuilder("\n");
-                sb.append(state.getLabel()).append("\t").append("avg: ").append(
-                        decimalFormat.format(total / state.getMeasurements() / 1000000.0))
-                        .append(" ms\t").append("total: ").append(
-                        integerFormat.format(total / 1000000000.0)).append(" s\t").append(
-                        "   tps: ").append(
-                        integerFormat.format(state.getMeasurements()
-                        / (total / BY_SECONDS))).append("\t")
-                        .append("running: ").append(count)
-                        .append(" times");
+                sb.append(state.getLabel()).append("\t").append("avg: ")
+                        .append(decimalFormat.format(total / state.getMeasurements() / 1000000.0)).append(" ms\t")
+                        .append("total: ").append(integerFormat.format(total / 1000000000.0)).append(" s\t")
+                        .append("   tps: ").append(integerFormat.format(state.getMeasurements() / (total / BY_SECONDS)))
+                        .append("\t").append("running: ").append(count).append(" times");
                 count = 0;
                 timeUsed = 0;
                 if (!state.getLabel().equals("_warmup_")) {
@@ -280,10 +281,11 @@ public class NanoBench {
     }
 
     /**
-     * Memory usage listener to calculate the average memory usage. <p> The
-     * listener is called after each measurement and perform a full GC and
-     * calculate free memory. At the last measurement it shows the average
-     * memory usage.
+     * Memory usage listener to calculate the average memory usage.
+     * <p>
+     * The listener is called after each measurement and perform a full GC and
+     * calculate free memory. At the last measurement it shows the average memory
+     * usage.
      */
     private static class MemoryUsage implements MeasureListener {
 
@@ -309,8 +311,7 @@ public class NanoBench {
             if (isEnd(state)) {
                 StringBuilder sb = new StringBuilder("\n");
                 sb.append("memory-usage: ").append(state.getLabel()).append("\t")
-                        .append(format((memoryUsed / count) / (1024.0 * 1024.0))).append(
-                        " Mb\n");
+                        .append(format((memoryUsed / count) / (1024.0 * 1024.0))).append(" Mb\n");
                 count = 0;
                 memoryUsed = 0;
 
@@ -347,8 +348,7 @@ public class NanoBench {
                 long memUsedNow = memoryUsed();
                 // break early if have no more finalization and get constant mem used
                 if ((ManagementFactory.getMemoryMXBean()
-                        .getObjectPendingFinalizationCount() == 0)
-                        && (memUsedNow >= memUsedPrev)) {
+                        .getObjectPendingFinalizationCount() == 0) && (memUsedNow >= memUsedPrev)) {
                     break;
                 } else {
                     memUsedPrev = memUsedNow;

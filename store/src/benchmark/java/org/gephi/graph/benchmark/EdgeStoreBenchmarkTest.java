@@ -23,61 +23,70 @@ public class EdgeStoreBenchmarkTest {
 
     @Test
     public void testPushStore() {
-        int[] n = {100, 1000, 5000};
-        double[] p = {0.01, 0.1, 0.3};
+        int[] n = { 100, 1000, 5000 };
+        double[] p = { 0.01, 0.1, 0.3 };
         for (int nodes : n) {
             for (double prob : p) {
                 int edges = (int) (nodes * (nodes - 1) * prob);
-                NanoBench
-                    .create().measurements(2).measure("push edge store nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark().pushEdgeStore(nodes, prob));
+                NanoBench.create().measurements(2)
+                        .measure("push edge store nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark()
+                                .pushEdgeStore(nodes, prob));
             }
         }
     }
 
     @Test
     public void testIterateStore() {
-        int[] n = {100, 1000, 5000};
-        double[] p = {0.01, 0.1, 0.3};
+        int[] n = { 100, 1000, 5000 };
+        double[] p = { 0.01, 0.1, 0.3 };
         for (int nodes : n) {
             for (double prob : p) {
                 int edges = (int) (nodes * (nodes - 1) * prob);
-                NanoBench.create().measurements(2).measure("iterate edge store nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark().iterateEdgeStore(nodes, prob));
+                NanoBench.create().measurements(2)
+                        .measure("iterate edge store nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark()
+                                .iterateEdgeStore(nodes, prob));
             }
         }
     }
 
     @Test
     public void testIterateOutNeighbors() {
-        int[] n = {100, 1000, 5000};
-        double[] p = {0.01, 0.1, 0.3};
+        int[] n = { 100, 1000, 5000 };
+        double[] p = { 0.01, 0.1, 0.3 };
         for (int nodes : n) {
             for (double prob : p) {
                 int edges = (int) (nodes * (nodes - 1) * prob);
-                NanoBench.create().measurements(2).measure("iterate neighbors list out nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark().iterateEdgeStoreNeighborsOut(nodes, prob));
+                NanoBench.create().measurements(2)
+                        .measure("iterate neighbors list out nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark()
+                                .iterateEdgeStoreNeighborsOut(nodes, prob));
             }
         }
     }
 
     @Test
     public void testIterateInOutNeighbors() {
-        int[] n = {100, 1000, 5000};
-        double[] p = {0.01, 0.1, 0.3};
+        int[] n = { 100, 1000, 5000 };
+        double[] p = { 0.01, 0.1, 0.3 };
         for (int nodes : n) {
             for (double prob : p) {
                 int edges = (int) (nodes * (nodes - 1) * prob);
-                NanoBench.create().measurements(2).measure("iterate neighbors list in&out nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark().iterateEdgeStoreNeighborsInOut(nodes, prob));
+                NanoBench.create().measurements(2)
+                        .measure("iterate neighbors list in&out nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark()
+                                .iterateEdgeStoreNeighborsInOut(nodes, prob));
             }
         }
     }
 
     @Test
     public void testResetEdgeStore() {
-        int[] n = {100, 1000, 5000};
-        double[] p = {0.01, 0.1, 0.3};
+        int[] n = { 100, 1000, 5000 };
+        double[] p = { 0.01, 0.1, 0.3 };
         for (int nodes : n) {
             for (double prob : p) {
                 int edges = (int) (nodes * (nodes - 1) * prob);
-                NanoBench.create().measurements(2).measure("reset edge store nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark().resetEdgeStore(nodes, prob));
+                NanoBench.create().measurements(2)
+                        .measure("reset edge store nodes=" + nodes + " edges=" + edges, new EdgeStoreBenchmark()
+                                .resetEdgeStore(nodes, prob));
             }
         }
     }

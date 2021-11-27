@@ -40,16 +40,16 @@ public class RandomGraph extends Generator {
     public RandomGraph(int n, double p, Configuration config) {
         super(config);
         numberOfNodes = n;
-        numberOfEdges = (int)(n*(n-1)*p);
+        numberOfEdges = (int) (n * (n - 1) * p);
         wiringProbability = p;
     }
-    
+
     public RandomGraph(int nodes, int edges) {
         this(nodes, edges, new Configuration());
     }
 
     public RandomGraph(int nodes, int edges, Configuration confi) {
-        this(nodes, ((double)edges)/(nodes*(nodes-1)), confi);
+        this(nodes, ((double) edges) / (nodes * (nodes - 1)), confi);
     }
 
     @Override
