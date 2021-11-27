@@ -168,7 +168,7 @@ public class NodeImpl extends ElementImpl implements Node {
         return properties.getSpatialData();
     }
 
-    protected void setSpatialDate(SpatialNodeDataImpl spatialData) {
+    protected void setSpatialData(SpatialNodeDataImpl spatialData) {
         properties.setSpatialData(spatialData);
     }
 

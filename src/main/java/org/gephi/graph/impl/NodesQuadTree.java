@@ -98,7 +98,7 @@ public class NodesQuadTree {
             SpatialNodeDataImpl spatialData = item.getSpatialData();
             if (spatialData == null) {
                 spatialData = new SpatialNodeDataImpl(minX, minY, maxX, maxY);
-                item.setSpatialDate(spatialData);
+                item.setSpatialData(spatialData);
                 quadTreeRoot.insert(item);
                 return true;
             } else {
