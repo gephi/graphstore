@@ -19,6 +19,7 @@ import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Index;
+import org.gephi.graph.api.SpatialIndex;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.Interval;
@@ -351,6 +352,11 @@ public class GraphModelImpl implements GraphModel {
             return timeIndexStore.getIndex(((GraphViewImpl) view).directedDecorator);
         }
         return null;
+    }
+
+    @Override
+    public SpatialIndex getSpatialIndex() {
+        return store.spatialIndex;
     }
 
     @Override

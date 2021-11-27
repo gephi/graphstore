@@ -35,7 +35,6 @@ import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.SpatialContext;
 import org.gephi.graph.api.Subgraph;
 import org.joda.time.DateTimeZone;
 import org.gephi.graph.api.TimeRepresentation;
@@ -70,7 +69,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     // Time zone
     protected DateTimeZone timeZone;
     // Spatial context
-    protected GraphStoreSpatialContextImpl spatialIndex;
+    protected SpatialIndexImpl spatialIndex;
 
     public GraphStore() {
         this(null);
@@ -80,17 +79,13 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         configuration = model != null ? model.configuration : new Configuration();
         graphModel = model;
         lock = new GraphLock();
-        if (GraphStoreConfiguration.ENABLE_SPATIAL_INDEX) {
-            spatialIndex = new GraphStoreSpatialContextImpl(this);
-        } else {
-            spatialIndex = null;
-        }
 
         edgeTypeStore = new EdgeTypeStore();
         mainGraphView = new MainGraphView();
         viewStore = new GraphViewStore(this);
         version = GraphStoreConfiguration.ENABLE_OBSERVERS ? new GraphVersion(this) : null;
         observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<>() : null;
+        spatialIndex = GraphStoreConfiguration.ENABLE_SPATIAL_INDEX ? new SpatialIndexImpl(this) : null;
         edgeStore = new EdgeStore(edgeTypeStore, spatialIndex, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock
                 : null, viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeStore = new NodeStore(edgeStore, spatialIndex, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null,
@@ -782,19 +777,21 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator) {
-        return new EdgeIterableWrapper(edgeIterator);
+        return getEdgeIterableWrapper(edgeIterator, true);
     }
 
     protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator) {
-        return new NodeIterableWrapper(nodeIterator);
+        return getNodeIterableWrapper(nodeIterator, true);
     }
 
     protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator, boolean blocking) {
-        return new EdgeIterableWrapper(edgeIterator, blocking);
+        return new EdgeIterableWrapper(edgeIterator, (blocking && GraphStoreConfiguration.ENABLE_AUTO_LOCKING) ? lock
+                : null);
     }
 
     protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator, boolean blocking) {
-        return new NodeIterableWrapper(nodeIterator, blocking);
+        return new NodeIterableWrapper(nodeIterator, (blocking && GraphStoreConfiguration.ENABLE_AUTO_LOCKING) ? lock
+                : null);
     }
 
     public int deepHashCode() {
@@ -828,101 +825,6 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public SpatialContext getSpatialContext() {
-        return spatialIndex;
-    }
-
-    protected class NodeIterableWrapper implements NodeIterable {
-
-        protected final Iterator<Node> iterator;
-        protected final boolean blocking;
-
-        public NodeIterableWrapper(Iterator<Node> iterator) {
-            this(iterator, true);
-        }
-
-        public NodeIterableWrapper(Iterator<Node> iterator, boolean blocking) {
-            this.iterator = iterator;
-            this.blocking = blocking;
-        }
-
-        @Override
-        public Iterator<Node> iterator() {
-            return iterator;
-        }
-
-        @Override
-        public Node[] toArray() {
-            List<Node> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list.toArray(new Node[0]);
-        }
-
-        @Override
-        public Collection<Node> toCollection() {
-            List<Node> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list;
-        }
-
-        @Override
-        public void doBreak() {
-            if (blocking) {
-                autoReadUnlock();
-            }
-        }
-    }
-
-    protected class EdgeIterableWrapper implements EdgeIterable {
-
-        protected final Iterator<Edge> iterator;
-        protected final boolean blocking;
-
-        public EdgeIterableWrapper(Iterator<Edge> iterator) {
-            this(iterator, true);
-        }
-
-        public EdgeIterableWrapper(Iterator<Edge> iterator, boolean blocking) {
-            this.iterator = iterator;
-            this.blocking = blocking;
-        }
-
-        @Override
-        public Iterator<Edge> iterator() {
-            return iterator;
-        }
-
-        @Override
-        public Edge[] toArray() {
-            List<Edge> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list.toArray(new Edge[0]);
-        }
-
-        @Override
-        public Collection<Edge> toCollection() {
-            List<Edge> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list;
-        }
-
-        @Override
-        public void doBreak() {
-            if (blocking) {
-                autoReadUnlock();
-            }
-        }
     }
 
     private final class MainGraphView implements GraphView {

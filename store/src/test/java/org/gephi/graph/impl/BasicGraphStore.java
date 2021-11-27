@@ -45,7 +45,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.SpatialContext;
+import org.gephi.graph.api.SpatialIndex;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TextProperties;
 import org.gephi.graph.spi.LayoutData;
@@ -1624,10 +1624,5 @@ public class BasicGraphStore implements DirectedGraph {
         public void doBreak() {
             // Not used because no locking
         }
-    }
-
-    @Override
-    public SpatialContext getSpatialContext() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

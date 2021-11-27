@@ -31,7 +31,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected final static int NULL_ID = -1;
     // Store
     protected final EdgeStore edgeStore;
-    protected final GraphStoreSpatialContextImpl spatialIndex;
+    protected final SpatialIndexImpl spatialIndex;
     // Locking (optional)
     protected final GraphLock lock;
     // Version
@@ -56,7 +56,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         this.spatialIndex = null;
     }
 
-    public NodeStore(final EdgeStore edgeStore, final GraphStoreSpatialContextImpl spatialIndex, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
+    public NodeStore(final EdgeStore edgeStore, final SpatialIndexImpl spatialIndex, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeStore = edgeStore;
@@ -261,8 +261,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             }
             node.indexAttributes();
 
-            if (this.spatialIndex != null) {
-                this.spatialIndex.addNode(n);
+            if (spatialIndex != null) {
+                spatialIndex.addNode(node);
             }
 
             size++;
@@ -288,8 +288,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 viewStore.removeNode(node);
             }
 
-            if (this.spatialIndex != null) {
-                this.spatialIndex.removeNode(node);
+            if (spatialIndex != null) {
+                spatialIndex.removeNode(node);
             }
 
             node.clearAttributes();

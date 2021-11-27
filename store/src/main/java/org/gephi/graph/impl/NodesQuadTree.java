@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.gephi.graph.api.Node;
@@ -19,28 +17,26 @@ import org.gephi.graph.api.Rect2D;
  * Adapted from https://bitbucket.org/C3/quadtree/wiki/Home
  *
  * TODO: unit tests!!
+ * 
  * @author Eduardo Ramos
  */
 public class NodesQuadTree {
 
-    private static final int MAX_LEVELS = 16;
-    private static final int MAX_OBJECTS_PER_NODE = 2;
+    protected final GraphLock lock = new GraphLock();
 
-    private final GraphLock lock = new GraphLock();
-    private Map<Node, QuadTreeObject> wrappedDictionary = new LinkedHashMap<>();
-
-    private QuadTreeNode quadTreeRoot;
+    private final QuadTreeNode quadTreeRoot;
+    private final int maxLevels;
+    private final int maxObjectsPerNode;
 
     public NodesQuadTree(Rect2D rect) {
-        quadTreeRoot = new QuadTreeNode(rect);
+        this(rect, GraphStoreConfiguration.SPATIAL_INDEX_MAX_LEVELS,
+                GraphStoreConfiguration.SPATIAL_INDEX_MAX_OBJECTS_PER_NODE);
     }
 
-    public NodesQuadTree(float dimensionMax) {
-        this(-dimensionMax, -dimensionMax, dimensionMax, dimensionMax);
-    }
-
-    public NodesQuadTree(float minX, float minY, float maxX, float maxY) {
-        quadTreeRoot = new QuadTreeNode(new Rect2D(minX, minY, maxX, maxY));
+    public NodesQuadTree(Rect2D rect, int maxLevels, int maxObjectsPerNode) {
+        this.quadTreeRoot = new QuadTreeNode(rect);
+        this.maxLevels = maxLevels;
+        this.maxObjectsPerNode = maxObjectsPerNode;
     }
 
     public Rect2D quadRect() {
@@ -71,13 +67,13 @@ public class NodesQuadTree {
         quadTreeRoot.getAllNodes(callback);
     }
 
-    public boolean updateNode(Node item, float minX, float minY, float maxX, float maxY) {
+    public boolean updateNode(NodeImpl item, float minX, float minY, float maxX, float maxY) {
         writeLock();
         try {
-            final QuadTreeObject obj = wrappedDictionary.get(item);
+            final SpatialNodeDataImpl obj = item.getSpatialData();
             if (obj != null) {
-                obj.updateItemCoords(minX, minY, maxX, maxY);
-                quadTreeRoot.update(obj);
+                obj.updateBoundaries(minX, minY, maxX, maxY);
+                quadTreeRoot.update(item);
                 return true;
             } else {
                 return false;
@@ -87,26 +83,23 @@ public class NodesQuadTree {
         }
     }
 
-    public boolean addNode(Node item) {
-        final float x = item.x();
-        final float y = item.y();
-        final float size = item.size();
-
-        final float minX = x - size;
-        final float minY = y - size;
-        final float maxX = x + size;
-        final float maxY = y + size;
-
-        return addNode(item, minX, minY, maxX, maxY);
-    }
-
-    public boolean addNode(Node item, float minX, float minY, float maxX, float maxY) {
+    public boolean addNode(NodeImpl item) {
         writeLock();
         try {
-            if (!containsNode(item)) {
-                final QuadTreeObject wrappedObject = new QuadTreeObject(item, minX, minY, maxX, maxY);
-                wrappedDictionary.put(item, wrappedObject);
-                quadTreeRoot.insert(wrappedObject);
+            final float x = item.x();
+            final float y = item.y();
+            final float size = item.size();
+
+            final float minX = x - size;
+            final float minY = y - size;
+            final float maxX = x + size;
+            final float maxY = y + size;
+
+            SpatialNodeDataImpl spatialData = item.getSpatialData();
+            if (spatialData == null) {
+                spatialData = new SpatialNodeDataImpl(minX, minY, maxX, maxY);
+                item.setSpatialDate(spatialData);
+                quadTreeRoot.insert(item);
                 return true;
             } else {
                 return false;
@@ -119,45 +112,35 @@ public class NodesQuadTree {
     public void clear() {
         writeLock();
         try {
-            wrappedDictionary.clear();
+            for (Node node : getAllNodes()) {
+                SpatialNodeDataImpl spatialData = ((NodeImpl) node).getSpatialData();
+                spatialData.setQuadTreeNode(null);
+            }
             quadTreeRoot.clear();
         } finally {
             writeUnlock();
         }
     }
 
-    public boolean containsNode(Node item) {
-        readLock();
-        try {
-            return wrappedDictionary.containsKey(item);
-        } finally {
-            readUnlock();
-        }
-    }
-
-    public int count() {
-        readLock();
-        try {
-            return wrappedDictionary.size();
-        } finally {
-            readUnlock();
-        }
-    }
-
-    public boolean removeNode(Node item) {
+    public boolean removeNode(NodeImpl item) {
         writeLock();
         try {
-            final QuadTreeObject obj = wrappedDictionary.get(item);
-            if (obj != null) {
-                quadTreeRoot.delete(obj, true);
-                wrappedDictionary.remove(item);
+            final SpatialNodeDataImpl spatialData = item.getSpatialData();
+            if (spatialData != null && spatialData.quadTreeNode != null) {
+                quadTreeRoot.delete(item, true);
                 return true;
-            } else {
-                return false;
             }
+            return false;
         } finally {
             writeUnlock();
         }
+    }
+
+    public int getObjectCount() {
+        readLock();
+        int count = quadTreeRoot.objectCount();
+        readUnlock();
+        return count;
     }
 
     public void readLock() {
@@ -193,29 +176,16 @@ public class NodesQuadTree {
         return sb.toString();
     }
 
-    private class QuadTreeObject {
-
-        private final Node data;
-        private float minX, minY, maxX, maxY;
-
-        private QuadTreeNode owner;
-
-        public QuadTreeObject(Node data, float minX, float minY, float maxX, float maxY) {
-            this.data = data;
-            updateItemCoords(minX, minY, maxX, maxY);
-        }
-
-        private void updateItemCoords(float minX, float minY, float maxX, float maxY) {
-            this.minX = minX;
-            this.minY = minY;
-            this.maxX = maxX;
-            this.maxY = maxY;
-        }
+    public int getDepth() {
+        readLock();
+        int depth = quadTreeRoot.getDepth();
+        readUnlock();
+        return depth;
     }
 
-    private class QuadTreeNode {
+    protected class QuadTreeNode {
 
-        private Set<QuadTreeObject> objects = null;
+        private Set<NodeImpl> objects = null;
         private final Rect2D rect; // The area this QuadTree represents
 
         private final QuadTreeNode parent; // The parent of this quad
@@ -268,16 +238,16 @@ public class NodesQuadTree {
             this.parent = parent;
         }
 
-        private void add(QuadTreeObject item) {
+        private void add(NodeImpl item) {
             if (objects == null) {
                 objects = new LinkedHashSet<>();
             }
 
-            item.owner = this;
+            item.getSpatialData().setQuadTreeNode(this);
             objects.add(item);
         }
 
-        private void remove(QuadTreeObject item) {
+        private void remove(NodeImpl item) {
             if (objects != null) {
                 objects.remove(item);
             }
@@ -318,9 +288,9 @@ public class NodesQuadTree {
             childBR = new QuadTreeNode(this, level + 1, new Rect2D(halfX, halfY, maxX, maxY));
 
             // If they're completely contained by the quad, bump objects down
-            final Iterator<QuadTreeObject> iterator = objects.iterator();
+            final Iterator<NodeImpl> iterator = objects.iterator();
             while (iterator.hasNext()) {
-                QuadTreeObject obj = iterator.next();
+                NodeImpl obj = iterator.next();
                 QuadTreeNode destTree = getDestinationTree(obj);
                 if (destTree != this) {
                     // Insert to the appropriate tree, remove the object, and
@@ -332,14 +302,15 @@ public class NodesQuadTree {
             }
         }
 
-        private QuadTreeNode getDestinationTree(QuadTreeObject item) {
+        private QuadTreeNode getDestinationTree(NodeImpl item) {
             // If a child can't contain an object, it will live in this Quad
             final QuadTreeNode destTree;
 
-            final float minX = item.minX;
-            final float minY = item.minY;
-            final float maxX = item.maxX;
-            final float maxY = item.maxY;
+            SpatialNodeDataImpl spatialData = item.getSpatialData();
+            final float minX = spatialData.minX;
+            final float minY = spatialData.minY;
+            final float maxX = spatialData.maxX;
+            final float maxY = spatialData.maxY;
 
             if (childTL.quadRect().contains(minX, minY, maxX, maxY)) {
                 destTree = childTL;
@@ -356,18 +327,20 @@ public class NodesQuadTree {
             return destTree;
         }
 
-        private void relocate(QuadTreeObject item) {
+        private void relocate(NodeImpl item) {
+            SpatialNodeDataImpl spatialData = item.getSpatialData();
+
             // Are we still inside our parent?
-            if (quadRect().contains(item.minX, item.minY, item.maxX, item.maxY)) {
+            if (quadRect().contains(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
                 // Good, have we moved inside any of our children?
                 if (childTL != null) {
                     QuadTreeNode dest = getDestinationTree(item);
-                    if (item.owner != dest) {
+                    if (spatialData.quadTreeNode != dest) {
                         // Delete the item from this quad and add it to our
                         // child
                         // Note: Do NOT clean during this call, it can
                         // potentially delete our destination quad
-                        QuadTreeNode formerOwner = item.owner;
+                        QuadTreeNode formerOwner = spatialData.quadTreeNode;
                         delete(item, false);
                         dest.insert(item);
 
@@ -426,23 +399,25 @@ public class NodesQuadTree {
             childBR = null;
         }
 
-        private void delete(QuadTreeObject item, boolean clean) {
-            if (item.owner != null) {
-                if (item.owner == this) {
-                    remove(item);
+        private void delete(NodeImpl node, boolean clean) {
+            SpatialNodeDataImpl spatialData = node.getSpatialData();
+            if (spatialData.quadTreeNode != null) {
+                if (spatialData.quadTreeNode == this) {
+                    remove(node);
                     if (clean) {
                         cleanUpwards();
                     }
                 } else {
-                    item.owner.delete(item, clean);
+                    spatialData.quadTreeNode.delete(node, clean);
                 }
             }
         }
 
-        private void insert(QuadTreeObject item) {
+        private void insert(NodeImpl item) {
+            SpatialNodeDataImpl spatialData = item.getSpatialData();
             // If this quad doesn't contain the items rectangle, do nothing,
             // unless we are the root
-            if (!rect.contains(item.minX, item.minY, item.maxX, item.maxY)) {
+            if (!rect.contains(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
                 if (parent == null) {
                     // This object is outside of the QuadTreeXNA bounds, we
                     // should add it at the root level
@@ -453,7 +428,7 @@ public class NodesQuadTree {
                 }
             }
 
-            if (objects == null || (childTL == null && (level >= MAX_LEVELS || objects.size() + 1 <= MAX_OBJECTS_PER_NODE))) {
+            if (objects == null || (childTL == null && (level >= maxLevels || objects.size() + 1 <= maxObjectsPerNode))) {
                 // If there's room to add the object, just add it
                 add(item);
             } else {
@@ -485,9 +460,11 @@ public class NodesQuadTree {
                 this.getAllNodes(callback);
             } else if (searchRect.intersects(this.rect)) {
                 if (objects != null && !objects.isEmpty()) {
-                    for (QuadTreeObject obj : objects) {
-                        if (searchRect.intersects(obj.minX, obj.minY, obj.maxX, obj.maxY)) {
-                            callback.accept(obj.data);
+                    for (NodeImpl obj : objects) {
+                        SpatialNodeDataImpl spatialData = obj.getSpatialData();
+                        if (searchRect
+                                .intersects(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
+                            callback.accept(obj);
                         }
                     }
                 }
@@ -503,8 +480,8 @@ public class NodesQuadTree {
 
         private void getAllNodes(Consumer<Node> callback) {
             if (objects != null && !objects.isEmpty()) {
-                for (QuadTreeObject obj : objects) {
-                    callback.accept(obj.data);
+                for (NodeImpl obj : objects) {
+                    callback.accept(obj);
                 }
             }
 
@@ -516,12 +493,24 @@ public class NodesQuadTree {
             }
         }
 
-        private void update(QuadTreeObject item) {
-            if (item.owner != null) {
-                item.owner.relocate(item);
+        private void update(NodeImpl item) {
+            SpatialNodeDataImpl spatialData = item.getSpatialData();
+            if (spatialData.quadTreeNode != null) {
+                spatialData.quadTreeNode.relocate(item);
             } else {
                 relocate(item);
             }
+        }
+
+        private int getDepth() {
+            int maxLevel = level;
+            if (childTL != null) {
+                maxLevel = Math.max(maxLevel, childTL.getDepth());
+                maxLevel = Math.max(maxLevel, childBR.getDepth());
+                maxLevel = Math.max(maxLevel, childTR.getDepth());
+                maxLevel = Math.max(maxLevel, childBL.getDepth());
+            }
+            return maxLevel;
         }
 
         public void toString(StringBuilder sb) {
@@ -531,12 +520,12 @@ public class NodesQuadTree {
             sb.append(rect.toString()).append('\n');
 
             if (objects != null) {
-                for (QuadTreeObject object : objects) {
+                for (NodeImpl object : objects) {
                     for (int i = 0; i <= level; i++) {
                         sb.append("  ");
                     }
 
-                    sb.append(object.data.getId()).append('\n');
+                    sb.append(object.getId()).append('\n');
                 }
             }
 
@@ -565,16 +554,15 @@ public class NodesQuadTree {
         @Override
         public Node[] toArray() {
             final Collection<Node> collection = toCollection();
-            return collection.toArray(new Node[collection.size()]);
+            return collection.toArray(new Node[0]);
         }
 
         @Override
         public Collection<Node> toCollection() {
             final List<Node> list = new ArrayList<>();
 
-            final Iterator<Node> iterator = iterator();
-            while (iterator.hasNext()) {
-                list.add(iterator.next());
+            for (Node node : this) {
+                list.add(node);
             }
 
             return list;
@@ -594,11 +582,11 @@ public class NodesQuadTree {
         private final Deque<Boolean> fullyContainedStack = new ArrayDeque<>();
 
         // Current:
-        private Iterator<QuadTreeObject> currentIterator;
-        private boolean currentFullyContained = false;
+        private Iterator<NodeImpl> currentIterator;
+        private boolean currentFullyContained;
         private boolean finished = false;
 
-        private QuadTreeObject next;
+        private NodeImpl next;
 
         public QuadTreeNodesIterator(QuadTreeNode root, Rect2D searchRect) {
             this.searchRect = searchRect;
@@ -642,9 +630,11 @@ public class NodesQuadTree {
             while (currentIterator != null || !nodesStack.isEmpty()) {
                 if (currentIterator != null) {
                     while (currentIterator.hasNext()) {
-                        final QuadTreeObject elem = currentIterator.next();
+                        final NodeImpl elem = currentIterator.next();
+                        final SpatialNodeDataImpl spatialData = elem.getSpatialData();
 
-                        if (currentFullyContained || searchRect.intersects(elem.minX, elem.minY, elem.maxX, elem.maxY)) {
+                        if (currentFullyContained || searchRect
+                                .intersects(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
                             next = elem;
                             return true;
                         }
@@ -671,12 +661,12 @@ public class NodesQuadTree {
         }
 
         @Override
-        public Node next() {
+        public NodeImpl next() {
             if (next == null) {
                 throw new IllegalStateException("No next available!");
             }
 
-            final Node node = next.data;
+            final NodeImpl node = next;
 
             next = null;
 

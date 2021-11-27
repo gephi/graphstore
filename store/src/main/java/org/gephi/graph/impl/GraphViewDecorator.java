@@ -29,11 +29,11 @@ import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Rect2D;
-import org.gephi.graph.api.SpatialContext;
+import org.gephi.graph.api.SpatialIndex;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
-public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph, SpatialContext {
+public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph, SpatialIndex {
 
     protected final boolean undirected;
     protected final GraphViewImpl view;
@@ -757,14 +757,9 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
-    public SpatialContext getSpatialContext() {
-        return this;
-    }
-
-    @Override
     public NodeIterable getNodesInArea(Rect2D rect) {
         Iterator<Node> iterator = graphStore.spatialIndex.getNodesInArea(rect).iterator();
-        return graphStore.spatialIndex.getNodeIterableWrapper(new NodeViewIterator(iterator));
+        return new NodeIterableWrapper(new NodeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
     }
 
     @Override
@@ -782,7 +777,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     @Override
     public EdgeIterable getEdgesInArea(Rect2D rect) {
         Iterator<Edge> iterator = graphStore.spatialIndex.getEdgesInArea(rect).iterator();
-        return graphStore.spatialIndex.getEdgeIterableWrapper(new EdgeViewIterator(iterator));
+        return new EdgeIterableWrapper(new EdgeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
     }
 
     @Override
