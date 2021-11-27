@@ -38,22 +38,22 @@ public class TimeStore {
             timeRepresentation = store.configuration.getTimeRepresentation();
         }
         if (timeRepresentation.equals(TimeRepresentation.INTERVAL)) {
-            nodeIndexStore = new IntervalIndexStore<Node>(Node.class, lock, indexed);
-            edgeIndexStore = new IntervalIndexStore<Edge>(Edge.class, lock, indexed);
+            nodeIndexStore = new IntervalIndexStore<>(Node.class, lock, indexed);
+            edgeIndexStore = new IntervalIndexStore<>(Edge.class, lock, indexed);
         } else {
-            nodeIndexStore = new TimestampIndexStore<Node>(Node.class, lock, indexed);
-            edgeIndexStore = new TimestampIndexStore<Edge>(Edge.class, lock, indexed);
+            nodeIndexStore = new TimestampIndexStore<>(Node.class, lock, indexed);
+            edgeIndexStore = new TimestampIndexStore<>(Edge.class, lock, indexed);
         }
     }
 
     protected void resetConfiguration() {
         if (graphStore != null) {
             if (graphStore.configuration.getTimeRepresentation().equals(TimeRepresentation.INTERVAL)) {
-                nodeIndexStore = new IntervalIndexStore<Node>(Node.class, lock, nodeIndexStore.hasIndex());
-                edgeIndexStore = new IntervalIndexStore<Edge>(Edge.class, lock, edgeIndexStore.hasIndex());
+                nodeIndexStore = new IntervalIndexStore<>(Node.class, lock, nodeIndexStore.hasIndex());
+                edgeIndexStore = new IntervalIndexStore<>(Edge.class, lock, edgeIndexStore.hasIndex());
             } else {
-                nodeIndexStore = new TimestampIndexStore<Node>(Node.class, lock, nodeIndexStore.hasIndex());
-                edgeIndexStore = new TimestampIndexStore<Edge>(Edge.class, lock, edgeIndexStore.hasIndex());
+                nodeIndexStore = new TimestampIndexStore<>(Node.class, lock, nodeIndexStore.hasIndex());
+                edgeIndexStore = new TimestampIndexStore<>(Edge.class, lock, edgeIndexStore.hasIndex());
             }
         }
     }

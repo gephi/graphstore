@@ -512,7 +512,7 @@ public class IndexStoreTest {
     }
 
     private Node[] getIterable(Iterable<Node> itr) {
-        List<Node> list = new ArrayList<Node>();
+        List<Node> list = new ArrayList<>();
         for (Node n : itr) {
             list.add(n);
         }

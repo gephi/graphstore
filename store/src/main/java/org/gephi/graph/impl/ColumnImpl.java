@@ -67,7 +67,7 @@ public class ColumnImpl implements Column {
         this.indexed = indexed;
         this.readOnly = readOnly;
         this.dynamic = TimeMap.class.isAssignableFrom(typeClass) || TimeSet.class.isAssignableFrom(typeClass);
-        this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<ColumnObserverImpl>() : null;
+        this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<>() : null;
         this.estimator = this.dynamic ? Estimator.FIRST : null;
     }
 
@@ -167,9 +167,7 @@ public class ColumnImpl implements Column {
             TimeMap vs = null;
             try {
                 vs = (TimeMap) typeClass.newInstance();
-            } catch (InstantiationException ex) {
-                throw new RuntimeException(ex);
-            } catch (IllegalAccessException ex) {
+            } catch (InstantiationException | IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             }
             if (!vs.isSupported(estimator)) {

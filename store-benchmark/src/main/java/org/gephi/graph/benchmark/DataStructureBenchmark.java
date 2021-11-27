@@ -60,16 +60,13 @@ public class DataStructureBenchmark {
      * Insertion and memory usage for Int2ObjectOpenHashMap
      */
     public Runnable openHashMapMemory() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = NODES;
-                Int2ObjectMap map = new Int2ObjectOpenHashMap(nodes);
-                for (int i = 0; i < nodes; i++) {
-                    map.put(i, new Object());
-                }
-                object = map;
+        return () -> {
+            int nodes = NODES;
+            Int2ObjectMap map = new Int2ObjectOpenHashMap(nodes);
+            for (int i = 0; i < nodes; i++) {
+                map.put(i, new Object());
             }
+            object = map;
         };
     }
 
@@ -78,16 +75,13 @@ public class DataStructureBenchmark {
      * capcity
      */
     public Runnable dynamicOpenHashMapMemory() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = NODES;
-                Int2ObjectMap map = new Int2ObjectOpenHashMap();
-                for (int i = 0; i < nodes; i++) {
-                    map.put(i, new Object());
-                }
-                object = map;
+        return () -> {
+            int nodes = NODES;
+            Int2ObjectMap map = new Int2ObjectOpenHashMap();
+            for (int i = 0; i < nodes; i++) {
+                map.put(i, new Object());
             }
+            object = map;
         };
     }
 
@@ -95,16 +89,13 @@ public class DataStructureBenchmark {
      * Insertion and memory usage for Int2ObjectRBTreeMap
      */
     public Runnable rbHashMapMemory() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = NODES;
-                Int2ObjectMap map = new Int2ObjectRBTreeMap();
-                for (int i = 0; i < nodes; i++) {
-                    map.put(i, new Object());
-                }
-                object = map;
+        return () -> {
+            int nodes = NODES;
+            Int2ObjectMap map = new Int2ObjectRBTreeMap();
+            for (int i = 0; i < nodes; i++) {
+                map.put(i, new Object());
             }
+            object = map;
         };
     }
 
@@ -112,16 +103,13 @@ public class DataStructureBenchmark {
      * Insertion and memory usage for OpenIntObjectHashMap
      */
     public Runnable coltOpenHashMapMemory() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = NODES;
-                OpenIntObjectHashMap map = new OpenIntObjectHashMap(nodes);
-                for (int i = 0; i < nodes; i++) {
-                    map.put(i, new Object());
-                }
-                object = map;
+        return () -> {
+            int nodes = NODES;
+            OpenIntObjectHashMap map = new OpenIntObjectHashMap(nodes);
+            for (int i = 0; i < nodes; i++) {
+                map.put(i, new Object());
             }
+            object = map;
         };
     }
 
@@ -129,16 +117,13 @@ public class DataStructureBenchmark {
      * Insertion and memory usage for basic array
      */
     public Runnable arrayMemory() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = NODES;
-                Object[] array = new Object[nodes];
-                for (int i = 0; i < nodes; i++) {
-                    array[i] = new Object();
-                }
-                object = array;
+        return () -> {
+            int nodes = NODES;
+            Object[] array = new Object[nodes];
+            for (int i = 0; i < nodes; i++) {
+                array[i] = new Object();
             }
+            object = array;
         };
     }
 
@@ -146,30 +131,24 @@ public class DataStructureBenchmark {
      * Insertion and memory usage for object list
      */
     public Runnable objectListMemory() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = NODES;
-                final ObjectList list = new ObjectArrayList(nodes);
-                for (int i = 0; i < nodes; i++) {
-                    list.add(new Integer(1));
-                }
-                object = list;
+        return () -> {
+            int nodes = NODES;
+            final ObjectList list = new ObjectArrayList(nodes);
+            for (int i = 0; i < nodes; i++) {
+                list.add(1);
             }
+            object = list;
         };
     }
 
     public Runnable dynamicObjectListMemory() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                final ObjectList list = new ObjectArrayList();
-                int nodes = NODES;
-                for (int i = 0; i < nodes; i++) {
-                    list.add(new Integer(1));
-                }
-                object = list;
+        return () -> {
+            final ObjectList list = new ObjectArrayList();
+            int nodes = NODES;
+            for (int i = 0; i < nodes; i++) {
+                list.add(1);
             }
+            object = list;
         };
     }
 
@@ -177,16 +156,13 @@ public class DataStructureBenchmark {
      * Insertion and memory usage for object list
      */
     public Runnable objectBigListMemory() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = NODES;
-                final ObjectBigList list = new ObjectBigArrayBigList(nodes);
-                for (int i = 0; i < nodes; i++) {
-                    list.add(new Integer(1));
-                }
-                object = list;
+        return () -> {
+            int nodes = NODES;
+            final ObjectBigList list = new ObjectBigArrayBigList(nodes);
+            for (int i = 0; i < nodes; i++) {
+                list.add(1);
             }
+            object = list;
         };
     }
 
@@ -196,15 +172,12 @@ public class DataStructureBenchmark {
         for (int i = 0; i < nodes; i++) {
             map.put(i, new Integer(1));
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : map.values()) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : map.values()) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -214,15 +187,12 @@ public class DataStructureBenchmark {
         for (int i = 0; i < nodes; i++) {
             map.put(i, new Integer(1));
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : map.values()) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : map.values()) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -231,17 +201,14 @@ public class DataStructureBenchmark {
         int nodes = NODES;
         final Object[] array = new Object[nodes];
         for (int i = 0; i < nodes; i++) {
-            array[i] = new Integer(1);
+            array[i] = 1;
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : array) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : array) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -250,17 +217,14 @@ public class DataStructureBenchmark {
         int nodes = NODES;
         final LinkedList list = new LinkedList<Integer>();
         for (int i = 0; i < nodes; i++) {
-            list.add(new Integer(1));
+            list.add(1);
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : list) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : list) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -268,17 +232,14 @@ public class DataStructureBenchmark {
         int nodes = NODES;
         final ObjectList list = new ObjectArrayList(nodes);
         for (int i = 0; i < nodes; i++) {
-            list.add(new Integer(1));
+            list.add(1);
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : list) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : list) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -286,17 +247,14 @@ public class DataStructureBenchmark {
         int nodes = NODES;
         final ObjectBigList list = new ObjectBigArrayBigList(nodes);
         for (int i = 0; i < nodes; i++) {
-            list.add(new Integer(1));
+            list.add(1);
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : list) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : list) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -306,15 +264,12 @@ public class DataStructureBenchmark {
         for (int i = 0; i < nodes; i++) {
             list.put(new Integer(i), new Integer(1));
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : list.values()) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : list.values()) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -322,17 +277,14 @@ public class DataStructureBenchmark {
         int nodes = NODES;
         final ObjectOpenHashSet list = new ObjectOpenHashSet(nodes);
         for (int i = 0; i < nodes; i++) {
-            list.add(new Integer(i));
+            list.add(i);
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : list) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : list) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -340,17 +292,14 @@ public class DataStructureBenchmark {
         int nodes = NODES;
         final ObjectAVLTreeSet list = new ObjectAVLTreeSet();
         for (int i = 0; i < nodes; i++) {
-            list.add(new Integer(i));
+            list.add(i);
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int sum = 0;
-                for (Object i : list) {
-                    sum += (Integer) i;
-                }
-                object = sum;
+        return () -> {
+            int sum = 0;
+            for (Object i : list) {
+                sum += (Integer) i;
             }
+            object = sum;
         };
     }
 
@@ -360,13 +309,10 @@ public class DataStructureBenchmark {
         for (int i = 0; i < nodes; i++) {
             map.put(i, i);
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = LOW_NODES;
-                for (int i = 0; i < nodes; i++) {
-                    map.put(i, i);
-                }
+        return () -> {
+            int nodes1 = LOW_NODES;
+            for (int i = 0; i < nodes1; i++) {
+                map.put(i, i);
             }
         };
     }
@@ -377,13 +323,10 @@ public class DataStructureBenchmark {
         for (int i = 0; i < nodes; i++) {
             array[i] = i;
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = LOW_NODES;
-                for (int i = 0; i < nodes; i++) {
-                    array[i] = i;
-                }
+        return () -> {
+            int nodes1 = LOW_NODES;
+            for (int i = 0; i < nodes1; i++) {
+                array[i] = i;
             }
         };
     }
@@ -394,58 +337,49 @@ public class DataStructureBenchmark {
         for (int i = 0; i < nodes; i++) {
             list.add(i);
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int nodes = LOW_NODES;
-                for (int i = 0; i < nodes; i++) {
-                    list.set(i, i);
-                }
+        return () -> {
+            int nodes1 = LOW_NODES;
+            for (int i = 0; i < nodes1; i++) {
+                list.set(i, i);
             }
         };
     }
 
     public Runnable fastutilObject2IntIterate() {
         int nodes = NODES;
-        final Object2IntMap<String> map = new Object2IntOpenHashMap<String>();
+        final Object2IntMap<String> map = new Object2IntOpenHashMap<>();
         for (int i = 0; i < nodes; i++) {
             map.put("" + i, i);
         }
         final Random rand = new Random(456);
-        return new Runnable() {
-            @Override
-            public void run() {
-                int matches = 0;
-                for (int i = 0; i < 50000; i++) {
-                    int id = rand.nextInt(NODES - 1);
-                    if (map.containsKey("" + id)) {
-                        matches += id;
-                    }
+        return () -> {
+            int matches = 0;
+            for (int i = 0; i < 50000; i++) {
+                int id = rand.nextInt(NODES - 1);
+                if (map.containsKey("" + id)) {
+                    matches += id;
                 }
-                object = matches;
             }
+            object = matches;
         };
     }
 
     public Runnable javaObject2IntIterate() {
         int nodes = NODES;
-        final Map<String, Integer> map = new HashMap<String, Integer>();
+        final Map<String, Integer> map = new HashMap<>();
         for (int i = 0; i < nodes; i++) {
             map.put("" + i, i);
         }
         final Random rand = new Random(456);
-        return new Runnable() {
-            @Override
-            public void run() {
-                int matches = 0;
-                for (int i = 0; i < 50000; i++) {
-                    int id = rand.nextInt(NODES - 1);
-                    if (map.containsKey("" + id)) {
-                        matches += id;
-                    }
+        return () -> {
+            int matches = 0;
+            for (int i = 0; i < 50000; i++) {
+                int id = rand.nextInt(NODES - 1);
+                if (map.containsKey("" + id)) {
+                    matches += id;
                 }
-                object = matches;
             }
+            object = matches;
         };
     }
 
@@ -455,18 +389,15 @@ public class DataStructureBenchmark {
         for (int i = 0; i < NODES; i++) {
             bitset[i] = rand.nextBoolean();
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int cardinality = 0;
-                for (int i = 0; i < NODES; i++) {
-                    boolean b = bitset[i];
-                    if (b) {
-                        cardinality++;
-                    }
+        return () -> {
+            int cardinality = 0;
+            for (int i = 0; i < NODES; i++) {
+                boolean b = bitset[i];
+                if (b) {
+                    cardinality++;
                 }
-                object = cardinality;
             }
+            object = cardinality;
         };
     }
 
@@ -476,18 +407,15 @@ public class DataStructureBenchmark {
         for (int i = 0; i < NODES; i++) {
             bitset.set(i, rand.nextBoolean());
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int cardinality = 0;
-                for (int i = 0; i < NODES; i++) {
-                    boolean b = bitset.get(i);
-                    if (b) {
-                        cardinality++;
-                    }
+        return () -> {
+            int cardinality = 0;
+            for (int i = 0; i < NODES; i++) {
+                boolean b = bitset.get(i);
+                if (b) {
+                    cardinality++;
                 }
-                object = cardinality;
             }
+            object = cardinality;
         };
     }
 
@@ -499,18 +427,15 @@ public class DataStructureBenchmark {
                 bitset.set(i);
             }
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int cardinality = 0;
-                for (int i = 0; i < NODES; i++) {
-                    boolean b = bitset.get(i);
-                    if (b) {
-                        cardinality++;
-                    }
+        return () -> {
+            int cardinality = 0;
+            for (int i = 0; i < NODES; i++) {
+                boolean b = bitset.get(i);
+                if (b) {
+                    cardinality++;
                 }
-                object = cardinality;
             }
+            object = cardinality;
         };
     }
 
@@ -525,52 +450,42 @@ public class DataStructureBenchmark {
             }
         }
         map.trim();
-        return new Runnable() {
-            @Override
-            public void run() {
-                int cardinality = 0;
-                for (int i = 0; i < NODES; i++) {
-                    boolean b = bitset.get(i);
-                    if (b) {
-                        long rank = map.get(i);
-                        cardinality += rank;
-                    }
+        return () -> {
+            int cardinality = 0;
+            for (int i = 0; i < NODES; i++) {
+                boolean b = bitset.get(i);
+                if (b) {
+                    long rank = map.get(i);
+                    cardinality += rank;
                 }
-                object = cardinality;
-
             }
+            object = cardinality;
         };
     }
 
     public Runnable javaBitVectorMemory() {
 
-        return new Runnable() {
-            @Override
-            public void run() {
-                BitSet bitset = new BitSet(10000000);
-                Random rand = new Random(23);
-                for (int i = 0; i < 10000000; i++) {
-                    bitset.set(i, rand.nextBoolean());
-                }
-                object = bitset;
+        return () -> {
+            BitSet bitset = new BitSet(10000000);
+            Random rand = new Random(23);
+            for (int i = 0; i < 10000000; i++) {
+                bitset.set(i, rand.nextBoolean());
             }
+            object = bitset;
         };
     }
 
     public Runnable coltBitVectorMemory() {
 
-        return new Runnable() {
-            @Override
-            public void run() {
-                BitVector bitset = new BitVector(10000000);
-                Random rand = new Random(23);
-                for (int i = 0; i < 10000000; i++) {
-                    if (rand.nextBoolean()) {
-                        bitset.set(i);
-                    }
+        return () -> {
+            BitVector bitset = new BitVector(10000000);
+            Random rand = new Random(23);
+            for (int i = 0; i < 10000000; i++) {
+                if (rand.nextBoolean()) {
+                    bitset.set(i);
                 }
-                object = bitset;
             }
+            object = bitset;
         };
     }
 
@@ -585,19 +500,16 @@ public class DataStructureBenchmark {
             }
             values[i] = rand2.nextInt(NODES);
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int cardinality = 0;
-                for (int i = 0; i < NODES; i++) {
-                    boolean b = bitset.get(i);
-                    if (b) {
-                        int val = values[i];
-                        cardinality += val;
-                    }
+        return () -> {
+            int cardinality = 0;
+            for (int i = 0; i < NODES; i++) {
+                boolean b = bitset.get(i);
+                if (b) {
+                    int val = values[i];
+                    cardinality += val;
                 }
-                object = cardinality;
             }
+            object = cardinality;
         };
     }
 
@@ -608,17 +520,14 @@ public class DataStructureBenchmark {
         for (int i = 0; i < nodes; i++) {
             values.add(rand2.nextInt(NODES));
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int cardinality = 0;
-                IntIterator itr = values.iterator();
-                while (itr.hasNext()) {
-                    int i = itr.nextInt();
-                    cardinality += i;
-                }
-                object = cardinality;
+        return () -> {
+            int cardinality = 0;
+            IntIterator itr = values.iterator();
+            while (itr.hasNext()) {
+                int i = itr.nextInt();
+                cardinality += i;
             }
+            object = cardinality;
         };
     }
 
@@ -629,17 +538,14 @@ public class DataStructureBenchmark {
         for (int i = 0; i < nodes; i++) {
             values.add(rand2.nextInt(NODES));
         }
-        return new Runnable() {
-            @Override
-            public void run() {
-                int cardinality = 0;
-                IntIterator itr = values.iterator();
-                while (itr.hasNext()) {
-                    int i = itr.nextInt();
-                    cardinality += i;
-                }
-                object = cardinality;
+        return () -> {
+            int cardinality = 0;
+            IntIterator itr = values.iterator();
+            while (itr.hasNext()) {
+                int i = itr.nextInt();
+                cardinality += i;
             }
+            object = cardinality;
         };
     }
 
@@ -647,21 +553,18 @@ public class DataStructureBenchmark {
         final int size = 10000;
         final int timestamps = 100;
 
-        return new Runnable() {
-            @Override
-            public void run() {
-                List<TimestampSet> trees = new ArrayList<TimestampSet>();
-                Random rand = new Random(1234);
-                for (int i = 0; i < size; i++) {
-                    TimestampSet set = new TimestampSet(timestamps);
-                    for (int j = 0; j < timestamps; j++) {
-                        final double val = rand.nextInt(timestamps);
-                        set.add(val);
-                        trees.add(set);
-                    }
+        return () -> {
+            List<TimestampSet> trees = new ArrayList<>();
+            Random rand = new Random(1234);
+            for (int i = 0; i < size; i++) {
+                TimestampSet set = new TimestampSet(timestamps);
+                for (int j = 0; j < timestamps; j++) {
+                    final double val = rand.nextInt(timestamps);
+                    set.add(val);
+                    trees.add(set);
                 }
-                object = trees;
             }
+            object = trees;
         };
     }
 }

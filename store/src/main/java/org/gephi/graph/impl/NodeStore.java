@@ -31,6 +31,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected final static int NULL_ID = -1;
     // Store
     protected final EdgeStore edgeStore;
+    protected final SpatialIndexImpl spatialIndex;
     // Locking (optional)
     protected final GraphLock lock;
     // Version
@@ -52,14 +53,16 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         this.edgeStore = null;
         this.viewStore = null;
         this.version = null;
+        this.spatialIndex = null;
     }
 
-    public NodeStore(final EdgeStore edgeStore, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
+    public NodeStore(final EdgeStore edgeStore, final SpatialIndexImpl spatialIndex, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeStore = edgeStore;
         this.viewStore = viewStore;
         this.version = graphVersion;
+        this.spatialIndex = spatialIndex;
     }
 
     private void initStore() {
@@ -137,6 +140,11 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             NodeImpl node = itr.next();
             node.setStoreId(NodeStore.NULL_ID);
         }
+
+        if (this.spatialIndex != null) {
+            this.spatialIndex.clearNodes();
+        }
+
         initStore();
     }
 
@@ -210,7 +218,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     public Collection<Node> toCollection() {
         readLock();
 
-        List<Node> list = new ArrayList<Node>(size);
+        List<Node> list = new ArrayList<>(size);
 
         NodeStoreIterator itr = iterator();
         while (itr.hasNext()) {
@@ -253,6 +261,10 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             }
             node.indexAttributes();
 
+            if (spatialIndex != null) {
+                spatialIndex.addNode(node);
+            }
+
             size++;
 
             return true;
@@ -274,6 +286,10 @@ public class NodeStore implements Collection<Node>, NodeIterable {
 
             if (viewStore != null) {
                 viewStore.removeNode(node);
+            }
+
+            if (spatialIndex != null) {
+                spatialIndex.removeNode(node);
             }
 
             node.clearAttributes();
@@ -302,6 +318,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                     break;
                 }
             }
+
             return true;
         }
         return false;

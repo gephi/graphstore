@@ -31,57 +31,45 @@ public class LockingBenchmark {
     private final int WRITER_THREADS = 4;
 
     public Runnable readWithoutLock() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < READS; i++) {
-                    struture.read();
-                }
+        return () -> {
+            for (int i = 0; i < READS; i++) {
+                struture.read();
             }
         };
     }
 
     public Runnable readWithLock() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(true);
-        return new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < READS; i++) {
-                    lock.readLock().lock();
-                    struture.read();
-                    lock.readLock().unlock();
-                }
+        return () -> {
+            for (int i = 0; i < READS; i++) {
+                lock.readLock().lock();
+                struture.read();
+                lock.readLock().unlock();
             }
         };
     }
 
     public Runnable fairReadOnly() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(true);
-        return new Runnable() {
-            @Override
-            public void run() {
-                Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < READS; i++) {
-                            lock.readLock().lock();
-                            struture.read();
-                            lock.readLock().unlock();
-                        }
-                    }
-                };
-                Thread[] threads = new Thread[READER_THREADS];
-                for (int i = 0; i < READER_THREADS; i++) {
-                    Thread thread = new Thread(r);
-                    thread.start();
-                    threads[i] = thread;
+        return () -> {
+            Runnable r = () -> {
+                for (int i = 0; i < READS; i++) {
+                    lock.readLock().lock();
+                    struture.read();
+                    lock.readLock().unlock();
                 }
-                for (Thread t : threads) {
-                    try {
-                        t.join();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+            };
+            Thread[] threads = new Thread[READER_THREADS];
+            for (int i = 0; i < READER_THREADS; i++) {
+                Thread thread = new Thread(r);
+                thread.start();
+                threads[i] = thread;
+            }
+            for (Thread t : threads) {
+                try {
+                    t.join();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
@@ -89,31 +77,25 @@ public class LockingBenchmark {
 
     public Runnable unfairReadOnly() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(false);
-        return new Runnable() {
-            @Override
-            public void run() {
-                Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < READS; i++) {
-                            lock.readLock().lock();
-                            struture.read();
-                            lock.readLock().unlock();
-                        }
-                    }
-                };
-                Thread[] threads = new Thread[READER_THREADS];
-                for (int i = 0; i < READER_THREADS; i++) {
-                    Thread thread = new Thread(r);
-                    thread.start();
-                    threads[i] = thread;
+        return () -> {
+            Runnable r = () -> {
+                for (int i = 0; i < READS; i++) {
+                    lock.readLock().lock();
+                    struture.read();
+                    lock.readLock().unlock();
                 }
-                for (Thread t : threads) {
-                    try {
-                        t.join();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+            };
+            Thread[] threads = new Thread[READER_THREADS];
+            for (int i = 0; i < READER_THREADS; i++) {
+                Thread thread = new Thread(r);
+                thread.start();
+                threads[i] = thread;
+            }
+            for (Thread t : threads) {
+                try {
+                    t.join();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
@@ -121,31 +103,25 @@ public class LockingBenchmark {
 
     public Runnable fairWriteOnly() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(true);
-        return new Runnable() {
-            @Override
-            public void run() {
-                Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < WRITES; i++) {
-                            lock.writeLock().lock();
-                            struture.write();
-                            lock.writeLock().unlock();
-                        }
-                    }
-                };
-                Thread[] threads = new Thread[READER_THREADS];
-                for (int i = 0; i < READER_THREADS; i++) {
-                    Thread thread = new Thread(r);
-                    thread.start();
-                    threads[i] = thread;
+        return () -> {
+            Runnable r = () -> {
+                for (int i = 0; i < WRITES; i++) {
+                    lock.writeLock().lock();
+                    struture.write();
+                    lock.writeLock().unlock();
                 }
-                for (Thread t : threads) {
-                    try {
-                        t.join();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+            };
+            Thread[] threads = new Thread[READER_THREADS];
+            for (int i = 0; i < READER_THREADS; i++) {
+                Thread thread = new Thread(r);
+                thread.start();
+                threads[i] = thread;
+            }
+            for (Thread t : threads) {
+                try {
+                    t.join();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
@@ -153,31 +129,25 @@ public class LockingBenchmark {
 
     public Runnable unfairWriteOnly() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(false);
-        return new Runnable() {
-            @Override
-            public void run() {
-                Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < WRITES; i++) {
-                            lock.writeLock().lock();
-                            struture.write();
-                            lock.writeLock().unlock();
-                        }
-                    }
-                };
-                Thread[] threads = new Thread[READER_THREADS];
-                for (int i = 0; i < READER_THREADS; i++) {
-                    Thread thread = new Thread(r);
-                    thread.start();
-                    threads[i] = thread;
+        return () -> {
+            Runnable r = () -> {
+                for (int i = 0; i < WRITES; i++) {
+                    lock.writeLock().lock();
+                    struture.write();
+                    lock.writeLock().unlock();
                 }
-                for (Thread t : threads) {
-                    try {
-                        t.join();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+            };
+            Thread[] threads = new Thread[READER_THREADS];
+            for (int i = 0; i < READER_THREADS; i++) {
+                Thread thread = new Thread(r);
+                thread.start();
+                threads[i] = thread;
+            }
+            for (Thread t : threads) {
+                try {
+                    t.join();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
@@ -185,47 +155,38 @@ public class LockingBenchmark {
 
     public Runnable fairReadWrites() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(true);
-        return new Runnable() {
-            @Override
-            public void run() {
-                Runnable reader = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < READS; i++) {
-                            lock.readLock().lock();
-                            struture.read();
-                            lock.readLock().unlock();
-                        }
-                    }
-                };
-                Runnable writer = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < WRITES; i++) {
-                            lock.writeLock().lock();
-                            struture.write();
-                            lock.writeLock().unlock();
-                        }
-                    }
-                };
-                Thread[] threads = new Thread[READER_THREADS + WRITER_THREADS];
-                for (int i = 0; i < READER_THREADS; i++) {
-                    Thread thread = new Thread(reader);
-                    threads[i] = thread;
+        return () -> {
+            Runnable reader = () -> {
+                for (int i = 0; i < READS; i++) {
+                    lock.readLock().lock();
+                    struture.read();
+                    lock.readLock().unlock();
                 }
-                for (int i = 0; i < WRITER_THREADS; i++) {
-                    Thread thread = new Thread(writer);
-                    threads[READER_THREADS + i] = thread;
+            };
+            Runnable writer = () -> {
+                for (int i = 0; i < WRITES; i++) {
+                    lock.writeLock().lock();
+                    struture.write();
+                    lock.writeLock().unlock();
                 }
-                for (Thread thread : threads) {
-                    thread.start();
-                }
-                for (Thread t : threads) {
-                    try {
-                        t.join();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+            };
+            Thread[] threads = new Thread[READER_THREADS + WRITER_THREADS];
+            for (int i = 0; i < READER_THREADS; i++) {
+                Thread thread = new Thread(reader);
+                threads[i] = thread;
+            }
+            for (int i = 0; i < WRITER_THREADS; i++) {
+                Thread thread = new Thread(writer);
+                threads[READER_THREADS + i] = thread;
+            }
+            for (Thread thread : threads) {
+                thread.start();
+            }
+            for (Thread t : threads) {
+                try {
+                    t.join();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
@@ -233,47 +194,38 @@ public class LockingBenchmark {
 
     public Runnable unfairReadWrites() {
         final ReadWriteLock lock = new ReentrantReadWriteLock(false);
-        return new Runnable() {
-            @Override
-            public void run() {
-                Runnable reader = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < READS; i++) {
-                            lock.readLock().lock();
-                            struture.read();
-                            lock.readLock().unlock();
-                        }
-                    }
-                };
-                Runnable writer = new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < WRITES; i++) {
-                            lock.writeLock().lock();
-                            struture.write();
-                            lock.writeLock().unlock();
-                        }
-                    }
-                };
-                Thread[] threads = new Thread[READER_THREADS + WRITER_THREADS];
-                for (int i = 0; i < READER_THREADS; i++) {
-                    Thread thread = new Thread(reader);
-                    threads[i] = thread;
+        return () -> {
+            Runnable reader = () -> {
+                for (int i = 0; i < READS; i++) {
+                    lock.readLock().lock();
+                    struture.read();
+                    lock.readLock().unlock();
                 }
-                for (int i = 0; i < WRITER_THREADS; i++) {
-                    Thread thread = new Thread(writer);
-                    threads[READER_THREADS + i] = thread;
+            };
+            Runnable writer = () -> {
+                for (int i = 0; i < WRITES; i++) {
+                    lock.writeLock().lock();
+                    struture.write();
+                    lock.writeLock().unlock();
                 }
-                for (Thread thread : threads) {
-                    thread.start();
-                }
-                for (Thread t : threads) {
-                    try {
-                        t.join();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+            };
+            Thread[] threads = new Thread[READER_THREADS + WRITER_THREADS];
+            for (int i = 0; i < READER_THREADS; i++) {
+                Thread thread = new Thread(reader);
+                threads[i] = thread;
+            }
+            for (int i = 0; i < WRITER_THREADS; i++) {
+                Thread thread = new Thread(writer);
+                threads[READER_THREADS + i] = thread;
+            }
+            for (Thread thread : threads) {
+                thread.start();
+            }
+            for (Thread t : threads) {
+                try {
+                    t.join();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(LockingBenchmark.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };

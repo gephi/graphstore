@@ -39,7 +39,7 @@ public class NanoBench {
     private List<MeasureListener> listeners;
 
     public NanoBench() {
-        listeners = new ArrayList<MeasureListener>(2);
+        listeners = new ArrayList<>(2);
         listeners.add(new CPUMeasure(logger));
         listeners.add(new MemoryUsage(logger));
     }
@@ -55,7 +55,7 @@ public class NanoBench {
     }
 
     public NanoBench cpuAndMemory() {
-        listeners = new ArrayList<MeasureListener>(2);
+        listeners = new ArrayList<>(2);
         listeners.add(new CPUMeasure(logger));
         listeners.add(new MemoryUsage(logger));
         return this;
@@ -66,13 +66,13 @@ public class NanoBench {
     }
 
     public NanoBench cpuOnly() {
-        listeners = new ArrayList<MeasureListener>(1);
+        listeners = new ArrayList<>(1);
         listeners.add(new CPUMeasure(logger));
         return this;
     }
 
     public NanoBench memoryOnly() {
-        listeners = new ArrayList<MeasureListener>(1);
+        listeners = new ArrayList<>(1);
         listeners.add(new MemoryUsage(logger));
         return this;
     }

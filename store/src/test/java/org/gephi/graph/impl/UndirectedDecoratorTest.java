@@ -205,7 +205,7 @@ public class UndirectedDecoratorTest {
 
     // UTILITY
     private void testEdgeIterable(EdgeIterable iterable, Edge[] edges) {
-        Set<Edge> edgeSet = new HashSet<Edge>(iterable.toCollection());
+        Set<Edge> edgeSet = new HashSet<>(iterable.toCollection());
         for (Edge n : edges) {
             Assert.assertTrue(edgeSet.remove(n));
         }

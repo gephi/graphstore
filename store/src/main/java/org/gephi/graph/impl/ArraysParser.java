@@ -64,7 +64,7 @@ public final class ArraysParser {
             return result;
         }
 
-        ArrayList<String> values = new ArrayList<String>();
+        ArrayList<String> values = new ArrayList<>();
         try {
             StringReader reader = new StringReader(input + ' ');// Add 1 space
                                                                 // so

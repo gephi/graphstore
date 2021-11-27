@@ -33,13 +33,13 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testEmpty() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         Assert.assertTrue(store.size() == 0);
     }
 
     @Test
     public void testAddOne() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         int a = store.add(1.0);
 
         Assert.assertEquals(a, 0);
@@ -50,7 +50,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testAddTwiceSame() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         int a = store.add(1.0);
         int b = store.add(1.0);
 
@@ -62,31 +62,31 @@ public class TimestampIndexStoreTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddInfinityTimestamp() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.add(Double.POSITIVE_INFINITY);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testAddNaNTimestamp() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.add(Double.NaN);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testContainsNaN() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.contains(Double.NaN);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testContainsInfinity() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.contains(Double.POSITIVE_INFINITY);
     }
 
     @Test
     public void testRemove() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.add(1.0);
         store.remove(1.0);
 
@@ -96,7 +96,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testRemoveWithCount() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.add(1.0);
         store.add(1.0);
         store.remove(1.0);
@@ -112,7 +112,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testRemoveUnknown() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.remove(1.0);
 
         Assert.assertTrue(store.size() == 0);
@@ -121,25 +121,25 @@ public class TimestampIndexStoreTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRemoveNaN() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.remove(Double.NaN);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRemoveInfinity() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.remove(Double.POSITIVE_INFINITY);
     }
 
     @Test
     public void testNotContains() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         Assert.assertFalse(store.contains(1.0));
     }
 
     @Test
     public void testAddAfterRemove() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.add(1.0);
         store.remove(1.0);
         int a = store.add(2.0);
@@ -150,7 +150,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testContains() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
 
         Assert.assertFalse(store.contains(1.0));
 
@@ -165,7 +165,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testGarbage() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
 
         store.add(1.0);
         int pos = store.add(2.0);
@@ -185,7 +185,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testClear() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         store.clear();
 
         store.add(1.0);
@@ -197,41 +197,41 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testDeepEqualsEmpty() {
-        TimestampIndexStore<Node> store1 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store1 = new TimestampIndexStore<>(Node.class, null, false);
         Assert.assertFalse(store1.deepEquals(null));
         Assert.assertTrue(store1.deepEquals(store1));
 
-        TimestampIndexStore<Node> store2 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store2 = new TimestampIndexStore<>(Node.class, null, false);
         Assert.assertTrue(store1.deepEquals(store2));
     }
 
     @Test
     public void testDeepHashCodeEmpty() {
-        TimestampIndexStore<Node> store1 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store1 = new TimestampIndexStore<>(Node.class, null, false);
         Assert.assertEquals(store1.deepHashCode(), store1.deepHashCode());
 
-        TimestampIndexStore<Node> store2 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store2 = new TimestampIndexStore<>(Node.class, null, false);
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
     }
 
     @Test
     public void testDeepEquals() {
-        TimestampIndexStore<Node> store1 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store1 = new TimestampIndexStore<>(Node.class, null, false);
         store1.add(1.0);
         store1.add(2.0);
         store1.add(3.0);
         store1.remove(1.0);
 
-        TimestampIndexStore<Node> store2 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store2 = new TimestampIndexStore<>(Node.class, null, false);
         store2.add(1.0);
         store2.add(2.0);
         store2.add(3.0);
         store2.remove(1.0);
 
-        TimestampIndexStore<Node> store3 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store3 = new TimestampIndexStore<>(Node.class, null, false);
         store3.add(1.0);
 
-        TimestampIndexStore<Node> store4 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store4 = new TimestampIndexStore<>(Node.class, null, false);
         store4.add(1.0);
         store4.add(1.0);
 
@@ -242,22 +242,22 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testDeepHashCode() {
-        TimestampIndexStore<Node> store1 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store1 = new TimestampIndexStore<>(Node.class, null, false);
         store1.add(1.0);
         store1.add(2.0);
         store1.add(3.0);
         store1.remove(1.0);
 
-        TimestampIndexStore<Node> store2 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store2 = new TimestampIndexStore<>(Node.class, null, false);
         store2.add(1.0);
         store2.add(2.0);
         store2.add(3.0);
         store2.remove(1.0);
 
-        TimestampIndexStore<Node> store3 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store3 = new TimestampIndexStore<>(Node.class, null, false);
         store3.add(1.0);
 
-        TimestampIndexStore<Node> store4 = new TimestampIndexStore<Node>(Node.class, null, false);
+        TimestampIndexStore<Node> store4 = new TimestampIndexStore<>(Node.class, null, false);
         store4.add(1.0);
         store4.add(1.0);
 
@@ -268,7 +268,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testAddElement() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, true);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, true);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 
@@ -279,7 +279,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testRemoveElement() {
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, true);
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, true);
 
         NodeImpl nodeImpl = new NodeImpl(0);
 
@@ -645,7 +645,7 @@ public class TimestampIndexStoreTest {
 
     // UTILITY
     private <T> Object[] getArrayFromIterable(Iterable<T> iterable) {
-        List<T> list = new ArrayList<T>();
+        List<T> list = new ArrayList<>();
         for (T t : iterable) {
             list.add(t);
         }

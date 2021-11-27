@@ -226,7 +226,7 @@ public class NodeStoreTest {
         boolean b = nodeStore.addAll(Arrays.asList(nodes));
         Assert.assertFalse(b);
 
-        boolean c = nodeStore.addAll(new ArrayList<Node>());
+        boolean c = nodeStore.addAll(new ArrayList<>());
         Assert.assertFalse(c);
     }
 
@@ -509,7 +509,7 @@ public class NodeStoreTest {
         }
         Assert.assertEquals(store.size(), list.size());
 
-        Set<Node> set = new HashSet<Node>(list);
+        Set<Node> set = new HashSet<>(list);
         for (Node n : store) {
             Assert.assertTrue(set.remove(n));
         }
@@ -538,7 +538,7 @@ public class NodeStoreTest {
         int size = store.size;
         int s = (int) (size * ratio);
         int[] randomIndexes = generateRandomUniqueInts(s, size);
-        List<NodeImpl> nodes = new ArrayList<NodeImpl>(s);
+        List<NodeImpl> nodes = new ArrayList<>(s);
         for (int index : randomIndexes) {
             NodeImpl node = store.get(index);
             if (store.remove(node)) {

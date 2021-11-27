@@ -209,7 +209,7 @@ public class IntervalTreeMapTest {
         final int min = 5;
         final int max = 200;
         for (int i = 0; i < 100; i++) {
-            Set<Interval> intervals = new HashSet<Interval>();
+            Set<Interval> intervals = new HashSet<>();
             Interval2IntTreeMap map = new Interval2IntTreeMap();
             double minTree = Double.POSITIVE_INFINITY;
             double maxTree = Double.NEGATIVE_INFINITY;
@@ -234,7 +234,7 @@ public class IntervalTreeMapTest {
             Assert.assertEquals(map.getHigh(), maxTree);
             Assert.assertEquals(map.minimum().getLow(), minTree);
             Assert.assertEquals(map.maximum().getHigh(), maxTree);
-            Set<Interval> intervalsNotInSet = new HashSet<Interval>();
+            Set<Interval> intervalsNotInSet = new HashSet<>();
             while (intervalsNotInSet.size() < 100) {
                 int start = random.nextInt(min + max) - min;
                 int end = random.nextInt(min + max) - min;

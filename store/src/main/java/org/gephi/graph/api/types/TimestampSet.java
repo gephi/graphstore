@@ -190,6 +190,7 @@ public final class TimestampSet implements TimeSet<Double> {
         return true;
     }
 
+    @Override
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
@@ -209,6 +210,7 @@ public final class TimestampSet implements TimeSet<Double> {
         return sb.toString();
     }
 
+    @Override
     public String toString(TimeFormat timeFormat) {
         return toString(timeFormat, null);
     }

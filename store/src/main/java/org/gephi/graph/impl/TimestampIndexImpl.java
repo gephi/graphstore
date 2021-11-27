@@ -109,7 +109,7 @@ public class TimestampIndexImpl<T extends Element> extends TimeIndexImpl<T, Doub
         checkDouble(interval.getHigh());
 
         readLock();
-        ObjectSet<Element> elements = new ObjectOpenHashSet<Element>();
+        ObjectSet<Element> elements = new ObjectOpenHashSet<>();
         Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
         if (!sortedMap.isEmpty()) {
             for (Double2IntMap.Entry entry : sortedMap.tailMap(interval.getLow()).double2IntEntrySet()) {

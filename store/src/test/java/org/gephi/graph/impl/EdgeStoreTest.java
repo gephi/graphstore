@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import org.gephi.graph.api.Edge;
-import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -272,7 +271,7 @@ public class EdgeStoreTest {
         boolean b = edgeStore.addAll(Arrays.asList(edges));
         Assert.assertFalse(b);
 
-        boolean c = edgeStore.addAll(new ArrayList<Edge>());
+        boolean c = edgeStore.addAll(new ArrayList<>());
         Assert.assertFalse(c);
     }
 
@@ -682,7 +681,7 @@ public class EdgeStoreTest {
     public void testOutIteratorAfterRemove() {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
-        List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>(Arrays.asList(edges));
+        List<EdgeImpl> edgeList = new ArrayList<>(Arrays.asList(edges));
         edgeStore.addAll(edgeList);
         List<EdgeImpl> deletedEdges = removeSomeEdges(edgeStore);
         edgeList.removeAll(deletedEdges);
@@ -755,7 +754,7 @@ public class EdgeStoreTest {
     public void testInIteratorAfterRemove() {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
-        List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>(Arrays.asList(edges));
+        List<EdgeImpl> edgeList = new ArrayList<>(Arrays.asList(edges));
         edgeStore.addAll(edgeList);
         List<EdgeImpl> deletedEdges = removeSomeEdges(edgeStore);
         edgeList.removeAll(deletedEdges);
@@ -838,7 +837,7 @@ public class EdgeStoreTest {
     public void testInOutIteratorAfterRemove() {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
-        List<EdgeImpl> edgeList = new ArrayList<EdgeImpl>(Arrays.asList(edges));
+        List<EdgeImpl> edgeList = new ArrayList<>(Arrays.asList(edges));
         edgeStore.addAll(edgeList);
         List<EdgeImpl> deletedEdges = removeSomeEdges(edgeStore);
         edgeList.removeAll(deletedEdges);
@@ -1219,7 +1218,7 @@ public class EdgeStoreTest {
         EdgeStore edgeStore = new EdgeStore();
         edgeStore.addAll(Arrays.asList(edges));
 
-        Long2ObjectOpenHashMap<EdgeImpl> map = new Long2ObjectOpenHashMap<EdgeImpl>();
+        Long2ObjectOpenHashMap<EdgeImpl> map = new Long2ObjectOpenHashMap<>();
         for (EdgeImpl e : edges) {
             map.put(e.getLongId(), e);
         }
@@ -1437,10 +1436,10 @@ public class EdgeStoreTest {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
-        Set<EdgeImpl> edgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
+        Set<EdgeImpl> edgeSet = new ObjectOpenHashSet<>(edges);
 
         for (NodeImpl node : getNodes(edges)) {
-            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
+            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<>();
 
             for (EdgeStore.NeighborsIterator itr = edgeStore.neighborOutIterator(node); itr.hasNext();) {
                 NodeImpl neighbor = (NodeImpl) itr.next();
@@ -1458,10 +1457,10 @@ public class EdgeStoreTest {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
-        Set<EdgeImpl> edgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
+        Set<EdgeImpl> edgeSet = new ObjectOpenHashSet<>(edges);
 
         for (NodeImpl node : getNodes(edges)) {
-            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
+            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<>();
 
             for (EdgeStore.NeighborsIterator itr = edgeStore.neighborInIterator(node); itr.hasNext();) {
                 NodeImpl neighbor = (NodeImpl) itr.next();
@@ -1479,12 +1478,12 @@ public class EdgeStoreTest {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
-        Set<EdgeImpl> inEdgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
-        Set<EdgeImpl> outEdgeSet = new ObjectOpenHashSet<EdgeImpl>(edges);
+        Set<EdgeImpl> inEdgeSet = new ObjectOpenHashSet<>(edges);
+        Set<EdgeImpl> outEdgeSet = new ObjectOpenHashSet<>(edges);
         int mutualEdges = 0;
 
         for (NodeImpl node : getNodes(edges)) {
-            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<NodeImpl>();
+            Set<NodeImpl> nodeSet = new ObjectOpenHashSet<>();
             for (EdgeStore.NeighborsIterator itr = edgeStore.neighborIterator(node); itr.hasNext();) {
                 NodeImpl neighbor = (NodeImpl) itr.next();
                 boolean out = ((EdgeStore.EdgeInOutIterator) itr.itr).out;
@@ -1624,7 +1623,7 @@ public class EdgeStoreTest {
     @Test
     public void testTypeCounting() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null);
         EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
 
         Int2IntMap counts = new Int2IntOpenHashMap();
@@ -1703,7 +1702,7 @@ public class EdgeStoreTest {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         edgeStore.addAll(Arrays.asList(edges));
 
-        ObjectSet<EdgeImpl> edgeSet = new ObjectOpenHashSet<EdgeImpl>();
+        ObjectSet<EdgeImpl> edgeSet = new ObjectOpenHashSet<>();
         for (EdgeImpl e : edges) {
             if (e.isSelfLoop() || !e.isMutual() || e.source.storeId > e.target.storeId) {
                 edgeSet.add(e);
@@ -1861,7 +1860,7 @@ public class EdgeStoreTest {
         }
         Assert.assertEquals(store.size(), list.size());
 
-        Set<Edge> set = new HashSet<Edge>(list);
+        Set<Edge> set = new HashSet<>(list);
         for (Edge n : store) {
             Assert.assertTrue(set.remove(n));
         }
@@ -1890,7 +1889,7 @@ public class EdgeStoreTest {
         int size = store.size;
         int s = (int) (size * ratio);
         int[] randomIndexes = generateRandomUniqueInts(s, size);
-        List<EdgeImpl> edges = new ArrayList<EdgeImpl>(s);
+        List<EdgeImpl> edges = new ArrayList<>(s);
         for (int index : randomIndexes) {
             EdgeImpl edge = store.get(index);
             if (store.remove(edge)) {
@@ -1901,17 +1900,17 @@ public class EdgeStoreTest {
     }
 
     private Object2ObjectMap<NodeImpl, Set<EdgeImpl>> getNeighboursMap(EdgeImpl[] edges, int type, boolean undirected) {
-        Object2ObjectMap<NodeImpl, Set<EdgeImpl>> neighbours = new Object2ObjectOpenHashMap<NodeImpl, Set<EdgeImpl>>();
+        Object2ObjectMap<NodeImpl, Set<EdgeImpl>> neighbours = new Object2ObjectOpenHashMap<>();
         for (EdgeImpl e : edges) {
             if (type == e.type) {
                 Set<EdgeImpl> sourceSet = neighbours.get(e.source);
                 Set<EdgeImpl> targetSet = neighbours.get(e.target);
                 if (sourceSet == null) {
-                    sourceSet = new ObjectOpenHashSet<EdgeImpl>();
+                    sourceSet = new ObjectOpenHashSet<>();
                     neighbours.put(e.source, sourceSet);
                 }
                 if (!e.isSelfLoop() && targetSet == null) {
-                    targetSet = new ObjectOpenHashSet<EdgeImpl>();
+                    targetSet = new ObjectOpenHashSet<>();
                     neighbours.put(e.target, targetSet);
                 }
                 if (e.isSelfLoop()) {
@@ -1943,7 +1942,7 @@ public class EdgeStoreTest {
     }
 
     private Object2ObjectMap<Object, EdgeImpl> getObjectMap(EdgeImpl[] edges) {
-        Object2ObjectMap<Object, EdgeImpl> edgeMap = new Object2ObjectOpenHashMap<Object, EdgeImpl>();
+        Object2ObjectMap<Object, EdgeImpl> edgeMap = new Object2ObjectOpenHashMap<>();
         for (EdgeImpl e : edges) {
             edgeMap.put(e.getId(), e);
         }
@@ -1951,7 +1950,7 @@ public class EdgeStoreTest {
     }
 
     private NodeImpl[] getNodes(EdgeImpl[] edges) {
-        ObjectSet<NodeImpl> nodes = new ObjectOpenHashSet<NodeImpl>();
+        ObjectSet<NodeImpl> nodes = new ObjectOpenHashSet<>();
         for (EdgeImpl e : edges) {
             nodes.add(e.source);
             nodes.add(e.target);
@@ -1960,7 +1959,7 @@ public class EdgeStoreTest {
     }
 
     public List<EdgeImpl> iteratorToArray(Iterator<EdgeImpl> edgeIterator) {
-        List<EdgeImpl> list = new ArrayList<EdgeImpl>();
+        List<EdgeImpl> list = new ArrayList<>();
         for (; edgeIterator.hasNext();) {
             EdgeImpl e = edgeIterator.next();
             list.add(e);

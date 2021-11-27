@@ -26,13 +26,10 @@ public class EdgeStoreBenchmark {
         final List<Edge> edgeList = graph.getEdges();
         graph.getStore().addAllNodes(nodeList);
         
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                edgeStore.clear();
-                for(Edge edge : edgeList) {
-                    edgeStore.add(edge);
-                }
+        Runnable runnable = () -> {
+            edgeStore.clear();
+            for(Edge edge : edgeList) {
+                edgeStore.add(edge);
             }
         };
         return runnable;
@@ -45,13 +42,10 @@ public class EdgeStoreBenchmark {
         final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Iterator<Edge> itr = edgeStore.iterator();
-                for (; itr.hasNext();) {
-                    object = itr.next();
-                }
+        Runnable runnable = () -> {
+            Iterator<Edge> itr = edgeStore.iterator();
+            for (; itr.hasNext();) {
+                object = itr.next();
             }
         };
         return runnable;
@@ -65,14 +59,11 @@ public class EdgeStoreBenchmark {
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Node> nodeList = graph.getNodes();
         
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                for (Node node : nodeList) {
-                    Iterator<Edge> itr = edgeStore.edgeOutIterator(node);
-                    for (; itr.hasNext();) {
-                        object = itr.next();
-                    }
+        Runnable runnable = () -> {
+            for (Node node : nodeList) {
+                Iterator<Edge> itr = edgeStore.edgeOutIterator(node);
+                for (; itr.hasNext();) {
+                    object = itr.next();
                 }
             }
         };
@@ -87,14 +78,11 @@ public class EdgeStoreBenchmark {
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Node> nodeList = graph.getNodes();
         
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                for (Node node : nodeList) {
-                    Iterator<Edge> itr = edgeStore.edgeIterator(node);
-                    for (; itr.hasNext();) {
-                        object = itr.next();
-                    }
+        Runnable runnable = () -> {
+            for (Node node : nodeList) {
+                Iterator<Edge> itr = edgeStore.edgeIterator(node);
+                for (; itr.hasNext();) {
+                    object = itr.next();
                 }
             }
         };
@@ -109,15 +97,12 @@ public class EdgeStoreBenchmark {
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Edge> edgeList = graph.getEdges();
         
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                for (Edge e : edgeList) {
-                    edgeStore.remove(e);
-                }
-                for (Edge e : edgeList) {
-                    edgeStore.add(e);
-                }
+        Runnable runnable = () -> {
+            for (Edge e : edgeList) {
+                edgeStore.remove(e);
+            }
+            for (Edge e : edgeList) {
+                edgeStore.add(e);
             }
         };
         return runnable;

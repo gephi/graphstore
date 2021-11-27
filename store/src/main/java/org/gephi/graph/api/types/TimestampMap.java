@@ -453,6 +453,7 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         return result / period;
     }
 
+    @Override
     public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
@@ -487,6 +488,7 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         return sb.toString();
     }
 
+    @Override
     public String toString(TimeFormat timeFormat) {
         return toString(timeFormat, null);
     }

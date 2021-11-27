@@ -108,9 +108,9 @@ public class TableObserverImpl implements TableObserver {
         protected final ObjectList<Column> modifiedColumns;
 
         public TableDiffImpl(Column[] currentColumns, Column[] columnCache, int[] columnHashCache) {
-            addedColumns = new ObjectArrayList<Column>();
-            removedColumns = new ObjectArrayList<Column>();
-            modifiedColumns = new ObjectArrayList<Column>();
+            addedColumns = new ObjectArrayList<>();
+            removedColumns = new ObjectArrayList<>();
+            modifiedColumns = new ObjectArrayList<>();
 
             for (Column currentColumn : currentColumns) {
                 if (!isContained(currentColumn, columnCache)) {

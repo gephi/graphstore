@@ -64,17 +64,6 @@ public class EdgeImplTest {
     }
 
     @Test
-    public void testGetDefaultIntervalWeight() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
-        config.setEdgeWeightType(IntervalDoubleMap.class);
-        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
-        Edge e = graphStore.getEdge("0");
-        e.setWeight(42.0, new Interval(1.0, 2.0));
-        Assert.assertEquals(e.getWeight(new Interval(2.0, 4.0)), GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
-    }
-
-    @Test
     public void testGetDefaultIntervalWeightWhenNotSet() {
         Configuration config = new Configuration();
         config.setTimeRepresentation(TimeRepresentation.INTERVAL);
@@ -111,6 +100,17 @@ public class EdgeImplTest {
         e.setWeight(10.0, i2);
         Assert.assertEquals(e.getWeight(i1), 42.0);
         Assert.assertEquals(e.getWeight(i2), 10.0);
+    }
+
+    @Test
+    public void testIntervalWeightUsesFirstValueInOverlappingIntervalsEstimator() {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        config.setEdgeWeightType(IntervalDoubleMap.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
+        Edge e = graphStore.getEdge("0");
+        e.setWeight(42.0, new Interval(1.0, 2.0));
+        Assert.assertEquals(e.getWeight(new Interval(2.0, 4.0)), 42.0);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
