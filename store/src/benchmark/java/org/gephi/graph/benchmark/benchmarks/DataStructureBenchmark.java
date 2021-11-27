@@ -71,8 +71,7 @@ public class DataStructureBenchmark {
     }
 
     /**
-     * Insertion and memory usage for Int2ObjectOpenHashMap without original
-     * capcity
+     * Insertion and memory usage for Int2ObjectOpenHashMap without original capcity
      */
     public Runnable dynamicOpenHashMapMemory() {
         return () -> {
@@ -197,7 +196,7 @@ public class DataStructureBenchmark {
     }
 
     public Runnable arrayIteration() {
-        //Create array
+        // Create array
         int nodes = NODES;
         final Object[] array = new Object[nodes];
         for (int i = 0; i < nodes; i++) {
@@ -213,7 +212,7 @@ public class DataStructureBenchmark {
     }
 
     public Runnable linkedListIteration() {
-        //Create array
+        // Create array
         int nodes = NODES;
         final LinkedList list = new LinkedList<Integer>();
         for (int i = 0; i < nodes; i++) {

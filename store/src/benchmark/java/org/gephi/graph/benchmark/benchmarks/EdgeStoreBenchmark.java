@@ -15,7 +15,7 @@ import org.gephi.graph.impl.EdgeStore;
 public class EdgeStoreBenchmark {
 
     private Object object;
-    
+
     public Runnable pushEdgeStore(int nodes, double prob) {
         final Configuration config = new Configuration();
         config.setEdgeIdType(Integer.class);
@@ -25,10 +25,10 @@ public class EdgeStoreBenchmark {
         final List<Node> nodeList = graph.getNodes();
         final List<Edge> edgeList = graph.getEdges();
         graph.getStore().addAllNodes(nodeList);
-        
+
         Runnable runnable = () -> {
             edgeStore.clear();
-            for(Edge edge : edgeList) {
+            for (Edge edge : edgeList) {
                 edgeStore.add(edge);
             }
         };
@@ -41,7 +41,7 @@ public class EdgeStoreBenchmark {
         config.setNodeIdType(Integer.class);
         final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
-        
+
         Runnable runnable = () -> {
             Iterator<Edge> itr = edgeStore.iterator();
             for (; itr.hasNext();) {
@@ -58,7 +58,7 @@ public class EdgeStoreBenchmark {
         final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Node> nodeList = graph.getNodes();
-        
+
         Runnable runnable = () -> {
             for (Node node : nodeList) {
                 Iterator<Edge> itr = edgeStore.edgeOutIterator(node);
@@ -77,7 +77,7 @@ public class EdgeStoreBenchmark {
         final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Node> nodeList = graph.getNodes();
-        
+
         Runnable runnable = () -> {
             for (Node node : nodeList) {
                 Iterator<Edge> itr = edgeStore.edgeIterator(node);
@@ -96,7 +96,7 @@ public class EdgeStoreBenchmark {
         final RandomGraph graph = new RandomGraph(nodes, prob, config).generate().commit();
         final EdgeStore edgeStore = graph.getStore().getEdgeStore();
         final List<Edge> edgeList = graph.getEdges();
-        
+
         Runnable runnable = () -> {
             for (Edge e : edgeList) {
                 edgeStore.remove(e);

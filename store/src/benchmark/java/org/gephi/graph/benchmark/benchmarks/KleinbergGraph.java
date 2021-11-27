@@ -43,8 +43,8 @@ public class KleinbergGraph extends Generator {
     private boolean torusBased;
 
     /**
-     * User defined Kleinberg Graph no*no = number of nodes local = local
-     * contacts Long = long range contacts
+     * User defined Kleinberg Graph no*no = number of nodes local = local contacts
+     * Long = long range contacts
      */
     KleinbergGraph(int no, int local, int longRange) {
         super();
@@ -73,9 +73,10 @@ public class KleinbergGraph extends Generator {
             for (int j = 0; j < n; ++j) {
                 for (int k = i - p; k <= i + p; ++k) {
                     for (int l = j - p; l <= j + p; ++l) {
-                        if ((isTorusBased() || !isTorusBased() && k >= 0 && k < n && l >= 0 && l < n)
-                                && d(i, j, k, l) <= p && nodes.get(i * n + j) != nodes.get(((k + n) % n) * n + ((l + n) % n))) {
-                            Edge edge = factory.newEdge(nodes.get(i * n + j), nodes.get(((k + n) % n) * n + ((l + n) % n)), 0, true);
+                        if ((isTorusBased() || !isTorusBased() && k >= 0 && k < n && l >= 0 && l < n) && d(i, j, k, l) <= p && nodes
+                                .get(i * n + j) != nodes.get(((k + n) % n) * n + ((l + n) % n))) {
+                            Edge edge = factory.newEdge(nodes.get(i * n + j), nodes
+                                    .get(((k + n) % n) * n + ((l + n) % n)), 0, true);
                             Object id = edge.getId();
                             if (id instanceof Number) {
                                 edges.add(edge);

@@ -23,25 +23,28 @@ public class NodeStoreBenchmarkTest {
 
     @Test
     public void testPushStore() {
-        int[] n = {100, 1000, 10000, 100000};
+        int[] n = { 100, 1000, 10000, 100000 };
         for (int nodes : n) {
-            NanoBench.create().measurements(10).measure("push node store " + nodes, new NodeStoreBenchmark().pushStore(nodes));
+            NanoBench.create().measurements(10)
+                    .measure("push node store " + nodes, new NodeStoreBenchmark().pushStore(nodes));
         }
     }
 
     @Test
     public void testIterateStore() {
-        int[] n = {100, 1000, 10000, 100000};
+        int[] n = { 100, 1000, 10000, 100000 };
         for (int nodes : n) {
-            NanoBench.create().cpuOnly().measurements(10).measure("iterate node store " + nodes, new NodeStoreBenchmark().iterateStore(nodes));
+            NanoBench.create().cpuOnly().measurements(10)
+                    .measure("iterate node store " + nodes, new NodeStoreBenchmark().iterateStore(nodes));
         }
     }
 
     @Test
     public void testResetNodeStore() {
-        int[] n = {100, 1000, 10000, 100000};
+        int[] n = { 100, 1000, 10000, 100000 };
         for (int nodes : n) {
-            NanoBench.create().measurements(10).measure("reset node store "+nodes, new NodeStoreBenchmark().resetNodeStore(nodes));
+            NanoBench.create().measurements(10)
+                    .measure("reset node store " + nodes, new NodeStoreBenchmark().resetNodeStore(nodes));
         }
     }
 }
