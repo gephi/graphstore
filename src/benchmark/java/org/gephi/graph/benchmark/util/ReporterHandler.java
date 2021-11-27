@@ -37,7 +37,7 @@ public class ReporterHandler extends Handler {
         } else if (record.getLevel().equals(Level.SEVERE)) {
             prefix = "[SEVERE] ";
         }
-        Reporter.log(prefix + record.getMessage() + "<br>", true);
+        Reporter.log(prefix + record.getMessage(), true);
     }
 
     @Override
