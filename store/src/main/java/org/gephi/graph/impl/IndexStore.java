@@ -36,8 +36,8 @@ public class IndexStore<T extends Element> {
 
     public IndexStore(ColumnStore<T> columnStore) {
         this.columnStore = columnStore;
-        this.mainIndex = new IndexImpl<T>(columnStore);
-        this.viewIndexes = new Object2ObjectOpenHashMap<GraphView, IndexImpl<T>>();
+        this.mainIndex = new IndexImpl<>(columnStore);
+        this.viewIndexes = new Object2ObjectOpenHashMap<>();
         this.lock = columnStore.lock;
     }
 
@@ -80,7 +80,7 @@ public class IndexStore<T extends Element> {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't create a view index for the main view");
         }
-        IndexImpl viewIndex = new IndexImpl<T>(columnStore);
+        IndexImpl viewIndex = new IndexImpl<>(columnStore);
         ColumnImpl[] columns = columnStore.toArray();
         viewIndex.addAllColumns(columns);
         viewIndexes.put(graph.getView(), viewIndex);

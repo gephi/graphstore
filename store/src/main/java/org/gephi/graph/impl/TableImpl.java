@@ -37,7 +37,7 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     public TableImpl(GraphStore graphStore, Class<T> elementType, boolean indexed) {
-        store = new ColumnStore<T>(graphStore, elementType, indexed);
+        store = new ColumnStore<>(graphStore, elementType, indexed);
     }
 
     @Override

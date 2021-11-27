@@ -410,9 +410,7 @@ public abstract class ElementImpl implements Element {
             if (oldValue == null) {
                 try {
                     attributes[index] = dynamicValue = (TimeMap) column.getTypeClass().newInstance();
-                } catch (InstantiationException ex) {
-                    throw new RuntimeException(ex);
-                } catch (IllegalAccessException ex) {
+                } catch (InstantiationException | IllegalAccessException ex) {
                     throw new RuntimeException(ex);
                 }
             } else {

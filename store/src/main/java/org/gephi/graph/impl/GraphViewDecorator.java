@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -27,10 +28,12 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.Rect2D;
+import org.gephi.graph.api.SpatialIndex;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 
-public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph {
+public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph, SpatialIndex {
 
     protected final boolean undirected;
     protected final GraphViewImpl view;
@@ -751,6 +754,42 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph 
             }
         }
         return false;
+    }
+
+    @Override
+    public NodeIterable getNodesInArea(Rect2D rect) {
+        Iterator<Node> iterator = graphStore.spatialIndex.getNodesInArea(rect).iterator();
+        return new NodeIterableWrapper(new NodeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
+    }
+
+    @Override
+    public void getNodesInArea(Rect2D rect, final Consumer<Node> callback) {
+        graphStore.spatialIndex.getNodesInArea(rect, new Consumer<Node>() {
+            @Override
+            public void accept(Node node) {
+                if (view.containsNode((NodeImpl) node)) {
+                    callback.accept(node);
+                }
+            }
+        });
+    }
+
+    @Override
+    public EdgeIterable getEdgesInArea(Rect2D rect) {
+        Iterator<Edge> iterator = graphStore.spatialIndex.getEdgesInArea(rect).iterator();
+        return new EdgeIterableWrapper(new EdgeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
+    }
+
+    @Override
+    public void getEdgesInArea(Rect2D rect, final Consumer<Edge> callback) {
+        graphStore.spatialIndex.getEdgesInArea(rect, new Consumer<Edge>() {
+            @Override
+            public void accept(Edge edge) {
+                if (view.containsEdge((EdgeImpl) edge)) {
+                    callback.accept(edge);
+                }
+            }
+        });
     }
 
     protected final class NodeViewIterator implements Iterator<Node> {

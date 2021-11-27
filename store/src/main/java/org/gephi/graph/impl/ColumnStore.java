@@ -70,12 +70,12 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         this.configuration = graphStore != null ? graphStore.configuration : new Configuration();
         this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLock() : null;
         this.garbageQueue = new ShortRBTreeSet();
-        this.idMap = new Object2ShortOpenHashMap<String>(MAX_SIZE);
+        this.idMap = new Object2ShortOpenHashMap<>(MAX_SIZE);
         this.columns = new ColumnImpl[MAX_SIZE];
         this.elementType = elementType;
-        this.indexStore = indexed ? new IndexStore<T>(this) : null;
+        this.indexStore = indexed ? new IndexStore<>(this) : null;
         idMap.defaultReturnValue(NULL_SHORT);
-        this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<TableObserverImpl>() : null;
+        this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<>() : null;
     }
 
     private void updateConfiguration(Column changedColumn) {
@@ -271,7 +271,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     public List<Column> toList() {
         lock();
         try {
-            List<Column> cols = new ArrayList<Column>(size());
+            List<Column> cols = new ArrayList<>(size());
             for (int i = 0; i < length; i++) {
                 ColumnImpl c = columns[i];
                 if (c != null) {
@@ -292,7 +292,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     public Set<String> getColumnKeys() {
         lock();
         try {
-            return new ObjectOpenHashSet<String>(idMap.keySet());
+            return new ObjectOpenHashSet<>(idMap.keySet());
         } finally {
             unlock();
         }

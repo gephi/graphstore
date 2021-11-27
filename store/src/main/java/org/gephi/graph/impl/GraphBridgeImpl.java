@@ -59,7 +59,7 @@ public class GraphBridgeImpl implements GraphBridge {
 
         // Verify edges and add to edges list
         Set<Integer> edgeTypeIds = new IntOpenHashSet();
-        List<EdgeImpl> edges = new ArrayList<EdgeImpl>();
+        List<EdgeImpl> edges = new ArrayList<>();
         for (Node node : nodes) {
             for (Edge edge : sourceStore.getEdges(node)) {
                 Node oppositeNode = sourceStore.getOpposite(node, edge);

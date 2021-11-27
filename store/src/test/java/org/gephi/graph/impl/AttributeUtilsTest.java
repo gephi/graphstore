@@ -447,7 +447,7 @@ public class AttributeUtilsTest {
 
     @Test
     public void testStandardizeValue() {
-        Assert.assertEquals(AttributeUtils.standardizeValue(new Integer(1)), 1);
+        Assert.assertEquals(AttributeUtils.standardizeValue(1), 1);
         Assert.assertEquals((int[]) AttributeUtils.standardizeValue(new Integer[] { 1, 2 }), new int[] { 1, 2 });
         Assert.assertEquals((int[]) AttributeUtils.standardizeValue(new int[] { 1, 2 }), new int[] { 1, 2 });
         Assert.assertEquals((String[]) AttributeUtils.standardizeValue(new String[] { "foo" }), new String[] { "foo" });
@@ -643,7 +643,7 @@ public class AttributeUtilsTest {
     @Test
     public void testPrint() {
         Assert.assertEquals(AttributeUtils.print(null), "null");
-        Assert.assertEquals(Integer.toString(42), AttributeUtils.print(new Integer(42)));
+        Assert.assertEquals(Integer.toString(42), AttributeUtils.print(42));
         Assert.assertEquals("foo", AttributeUtils.print("foo"));
         Assert.assertEquals("[-1, 2, 3]", AttributeUtils.print(new int[] { -1, 2, 3 }));
 

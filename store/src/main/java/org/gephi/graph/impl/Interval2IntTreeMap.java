@@ -498,7 +498,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
      * @return all intervals
      */
     public List<Interval> getIntervals() {
-        List<Interval> list = new ArrayList<Interval>();
+        List<Interval> list = new ArrayList<>();
         inorderTreeWalk(root.left, list);
         return list;
     }
@@ -564,13 +564,13 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     }
 
     private List<Node> searchNodes(Interval interval) {
-        List<Node> result = new ArrayList<Node>();
+        List<Node> result = new ArrayList<>();
         searchNodes(root.left, interval, result);
         return result;
     }
 
     private List<Node> searchNodes(double point) {
-        List<Node> result = new ArrayList<Node>();
+        List<Node> result = new ArrayList<>();
         searchNodes(root.left, point, result);
         return result;
     }

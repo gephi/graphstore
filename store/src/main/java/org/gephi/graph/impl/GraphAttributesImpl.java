@@ -26,7 +26,7 @@ import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public class GraphAttributesImpl {
 
-    protected final Map<String, Object> attributes = new HashMap<String, Object>();
+    protected final Map<String, Object> attributes = new HashMap<>();
 
     public synchronized Set<String> getKeys() {
         return attributes.keySet();

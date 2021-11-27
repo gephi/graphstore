@@ -244,7 +244,7 @@ public final class IntervalsParser {
 
         input = input.trim();
 
-        List<IntervalWithValue<T>> intervals = new ArrayList<IntervalWithValue<T>>();
+        List<IntervalWithValue<T>> intervals = new ArrayList<>();
 
         if (input.equalsIgnoreCase(EMPTY_VALUE)) {
             return intervals;
@@ -280,7 +280,7 @@ public final class IntervalsParser {
     }
 
     private static <T> IntervalWithValue<T> parseInterval(Class<T> typeClass, StringReader reader, DateTimeZone timeZone) throws IOException {
-        ArrayList<String> values = new ArrayList<String>();
+        ArrayList<String> values = new ArrayList<>();
 
         int r;
         char c;

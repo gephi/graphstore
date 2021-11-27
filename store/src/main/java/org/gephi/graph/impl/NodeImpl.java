@@ -164,6 +164,20 @@ public class NodeImpl extends ElementImpl implements Node {
         return properties.getTextProperties();
     }
 
+    protected SpatialNodeDataImpl getSpatialData() {
+        return properties.getSpatialData();
+    }
+
+    protected void setSpatialDate(SpatialNodeDataImpl spatialData) {
+        properties.setSpatialData(spatialData);
+    }
+
+    private void updateNodeInSpatialIndex() {
+        if (storeId != NodeStore.NULL_ID && graphStore != null && graphStore.spatialIndex != null) {
+            graphStore.spatialIndex.moveNode(this);
+        }
+    }
+
     protected void setNodeProperties(NodePropertiesImpl nodeProperties) {
         properties.x = nodeProperties.x;
         properties.y = nodeProperties.y;
@@ -174,31 +188,38 @@ public class NodeImpl extends ElementImpl implements Node {
         if (properties.textProperties != null) {
             properties.setTextProperties(nodeProperties.textProperties);
         }
+
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setX(float x) {
         properties.setX(x);
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setY(float y) {
         properties.setY(y);
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setZ(float z) {
         properties.setZ(z);
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setPosition(float x, float y) {
         properties.setPosition(x, y);
+        updateNodeInSpatialIndex();
     }
 
     @Override
     public void setPosition(float x, float y, float z) {
         properties.setPosition(x, y, z);
+        updateNodeInSpatialIndex();
     }
 
     @Override
@@ -229,6 +250,7 @@ public class NodeImpl extends ElementImpl implements Node {
     @Override
     public void setSize(float size) {
         properties.setSize(size);
+        updateNodeInSpatialIndex();
     }
 
     @Override
@@ -259,6 +281,7 @@ public class NodeImpl extends ElementImpl implements Node {
         protected float size;
         protected boolean fixed;
         protected LayoutData layoutData;
+        protected SpatialNodeDataImpl spatialData;
 
         public NodePropertiesImpl() {
             this.textProperties = new TextPropertiesImpl();
@@ -403,6 +426,14 @@ public class NodeImpl extends ElementImpl implements Node {
         @Override
         public void setLayoutData(LayoutData layoutData) {
             this.layoutData = layoutData;
+        }
+
+        public SpatialNodeDataImpl getSpatialData() {
+            return spatialData;
+        }
+
+        public void setSpatialData(SpatialNodeDataImpl spatialData) {
+            this.spatialData = spatialData;
         }
 
         public int deepHashCode() {

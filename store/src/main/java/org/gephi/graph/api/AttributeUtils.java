@@ -115,7 +115,7 @@ public class AttributeUtils {
     private static final Set<Class> TYPED_MAP_TYPES;
 
     static {
-        final Set<Class> supportedTypes = new HashSet<Class>();
+        final Set<Class> supportedTypes = new HashSet<>();
 
         // Primitives
         supportedTypes.add(Boolean.class);
@@ -196,7 +196,7 @@ public class AttributeUtils {
         SUPPORTED_TYPES = Collections.unmodifiableSet(supportedTypes);
 
         // Primitive types standardization
-        final Map<Class, Class> typesStandardization = new HashMap<Class, Class>();
+        final Map<Class, Class> typesStandardization = new HashMap<>();
         typesStandardization.put(boolean.class, Boolean.class);
         typesStandardization.put(int.class, Integer.class);
         typesStandardization.put(short.class, Short.class);
@@ -225,9 +225,9 @@ public class AttributeUtils {
         DATE_PRINTER = ISODateTimeFormat.date().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
         DATE_TIME_PRINTER = ISODateTimeFormat.dateTime().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
 
-        DATE_PRINTERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
-        DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
-        DATE_TIME_PARSERS_BY_TIMEZONE = new HashMap<DateTimeZone, DateTimeFormatter>();
+        DATE_PRINTERS_BY_TIMEZONE = new HashMap<>();
+        DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<>();
+        DATE_TIME_PARSERS_BY_TIMEZONE = new HashMap<>();
 
         DATE_PRINTERS_BY_TIMEZONE.put(DATE_PRINTER.getZone(), DATE_PRINTER);
         DATE_TIME_PRINTERS_BY_TIMEZONE.put(DATE_TIME_PRINTER.getZone(), DATE_TIME_PRINTER);
@@ -239,7 +239,7 @@ public class AttributeUtils {
         TIMESTAMP_PRINTER = new DecimalFormat("0.0###", decimalFormatSymbols);
 
         // List types
-        TYPED_LIST_TYPES = new HashSet<Class>();
+        TYPED_LIST_TYPES = new HashSet<>();
         TYPED_LIST_TYPES.add(IntArrayList.class);
         TYPED_LIST_TYPES.add(FloatArrayList.class);
         TYPED_LIST_TYPES.add(DoubleArrayList.class);
@@ -250,7 +250,7 @@ public class AttributeUtils {
         TYPED_LIST_TYPES.add(CharArrayList.class);
 
         // Set types
-        TYPED_SET_TYPES = new HashSet<Class>();
+        TYPED_SET_TYPES = new HashSet<>();
         TYPED_SET_TYPES.add(IntOpenHashSet.class);
         TYPED_SET_TYPES.add(FloatOpenHashSet.class);
         TYPED_SET_TYPES.add(DoubleOpenHashSet.class);
@@ -261,7 +261,7 @@ public class AttributeUtils {
         TYPED_SET_TYPES.add(CharOpenHashSet.class);
 
         // Map types
-        TYPED_MAP_TYPES = new HashSet<Class>();
+        TYPED_MAP_TYPES = new HashSet<>();
         TYPED_MAP_TYPES.add(Int2ObjectOpenHashMap.class);
         TYPED_MAP_TYPES.add(Float2ObjectOpenHashMap.class);
         TYPED_MAP_TYPES.add(Double2ObjectOpenHashMap.class);

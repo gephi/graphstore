@@ -104,7 +104,7 @@ public final class TimestampsParser {
             return new TimestampSet();
         }
 
-        ArrayList<String> values = new ArrayList<String>();
+        ArrayList<String> values = new ArrayList<>();
         try {
             StringReader reader = new StringReader(input + ' ');// Add 1 space
                                                                 // so
@@ -276,7 +276,7 @@ public final class TimestampsParser {
     }
 
     private static <T> void parseTimestampAndValue(Class<T> typeClass, StringReader reader, TimestampMap<T> result, DateTimeZone timeZone) throws IOException {
-        ArrayList<String> values = new ArrayList<String>();
+        ArrayList<String> values = new ArrayList<>();
 
         int r;
         char c;
