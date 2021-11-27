@@ -151,7 +151,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
             }
 
             if (dynamicValue instanceof IntervalMap) {
-                return (Double) ((IntervalMap) dynamicValue)
+                return (Double) dynamicValue
                         .get(new Interval(timestamp, timestamp), DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
             } else {
                 return (Double) dynamicValue.get(timestamp, DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
