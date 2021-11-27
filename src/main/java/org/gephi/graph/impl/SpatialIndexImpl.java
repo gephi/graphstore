@@ -11,7 +11,7 @@ import org.gephi.graph.api.SpatialIndex;
 
 /**
  * Graph spatial indexing interface.
- * 
+ *
  * @author Eduardo Ramos
  */
 public class SpatialIndexImpl implements SpatialIndex {
@@ -42,7 +42,11 @@ public class SpatialIndexImpl implements SpatialIndex {
 
     @Override
     public void getEdgesInArea(Rect2D rect, Consumer<Edge> callback) {
-        // TODO
+        final EdgeIterable iterable = getEdgesInArea(rect);
+
+        for (Edge edge : iterable) {
+            callback.accept(edge);
+        }
     }
 
     protected void clearNodes() {
