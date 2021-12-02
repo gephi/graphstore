@@ -11,9 +11,5 @@ public interface SpatialIndex {
 
     NodeIterable getNodesInArea(Rect2D rect);
 
-    void getNodesInArea(Rect2D rect, Consumer<Node> callback);
-
     EdgeIterable getEdgesInArea(Rect2D rect);
-
-    void getEdgesInArea(Rect2D rect, Consumer<Edge> callback);
 }
