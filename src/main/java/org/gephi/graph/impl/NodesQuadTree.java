@@ -47,24 +47,12 @@ public class NodesQuadTree {
         return quadTreeRoot.getNodes(searchRect);
     }
 
-    public void getNodes(Rect2D searchRect, Consumer<Node> callback) {
-        quadTreeRoot.getNodes(searchRect, callback);
-    }
-
     public NodeIterable getNodes(float minX, float minY, float maxX, float maxY) {
         return quadTreeRoot.getNodes(new Rect2D(minX, minY, maxX, maxY));
     }
 
-    public void getNodes(float minX, float minY, float maxX, float maxY, Consumer<Node> callback) {
-        quadTreeRoot.getNodes(new Rect2D(minX, minY, maxX, maxY), callback);
-    }
-
     public NodeIterable getAllNodes() {
         return quadTreeRoot.getAllNodes();
-    }
-
-    public void getAllNodes(Consumer<Node> callback) {
-        quadTreeRoot.getAllNodes(callback);
     }
 
     public boolean updateNode(NodeImpl item, float minX, float minY, float maxX, float maxY) {
@@ -454,44 +442,6 @@ public class NodesQuadTree {
 
         private NodeIterable getAllNodes() {
             return new QuadTreeNodesIterable(null);
-        }
-
-        private void getNodes(Rect2D searchRect, Consumer<Node> callback) {
-            if (searchRect.contains(this.rect)) {
-                this.getAllNodes(callback);
-            } else if (searchRect.intersects(this.rect)) {
-                if (objects != null && !objects.isEmpty()) {
-                    for (NodeImpl obj : objects) {
-                        SpatialNodeDataImpl spatialData = obj.getSpatialData();
-                        if (searchRect
-                                .intersects(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
-                            callback.accept(obj);
-                        }
-                    }
-                }
-
-                if (childTL != null) {
-                    childTL.getNodes(searchRect, callback);
-                    childTR.getNodes(searchRect, callback);
-                    childBL.getNodes(searchRect, callback);
-                    childBR.getNodes(searchRect, callback);
-                }
-            }
-        }
-
-        private void getAllNodes(Consumer<Node> callback) {
-            if (objects != null && !objects.isEmpty()) {
-                for (NodeImpl obj : objects) {
-                    callback.accept(obj);
-                }
-            }
-
-            if (childTL != null) {
-                childTL.getAllNodes(callback);
-                childTR.getAllNodes(callback);
-                childBL.getAllNodes(callback);
-                childBR.getAllNodes(callback);
-            }
         }
 
         private void update(NodeImpl item) {
