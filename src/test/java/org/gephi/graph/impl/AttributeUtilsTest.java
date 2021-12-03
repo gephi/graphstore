@@ -300,6 +300,13 @@ public class AttributeUtilsTest {
         Assert.assertNull(AttributeUtils.parse("", Integer.class));
     }
 
+    @Test
+    public void testParseInfinity() {
+        Assert.assertEquals(AttributeUtils.parse("Infinity", Double.class), Double.POSITIVE_INFINITY);
+        Assert.assertEquals(AttributeUtils.parse("+Infinity", Double.class), Double.POSITIVE_INFINITY);
+        Assert.assertEquals(AttributeUtils.parse("-Infinity", Double.class), Double.NEGATIVE_INFINITY);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseUnsupportedType() {
         AttributeUtils.parse("test", Color.class);
@@ -689,6 +696,12 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.print(tm, TimeFormat.DATE, null), tm.toString(TimeFormat.DATE, null));
         Assert.assertEquals(AttributeUtils.print(tm, TimeFormat.DATETIME, DateTimeZone.forID("+00:30")), tm
                 .toString(TimeFormat.DATETIME, DateTimeZone.forID("+00:30")));
+    }
+
+    @Test
+    public void testPrintInfinity() {
+        Assert.assertEquals(AttributeUtils.print(Double.POSITIVE_INFINITY), "Infinity");
+        Assert.assertEquals(AttributeUtils.print(Double.NEGATIVE_INFINITY), "-Infinity");
     }
 
     @Test
