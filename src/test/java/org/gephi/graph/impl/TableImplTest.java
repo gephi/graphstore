@@ -29,6 +29,8 @@ public class TableImplTest {
     public void testTable() {
         TableImpl<Node> table = new TableImpl<>(Node.class, false);
         Assert.assertEquals(table.countColumns(), 0);
+        Assert.assertEquals(table.size(), 0);
+        Assert.assertTrue(table.isEmpty());
     }
 
     @Test
@@ -146,6 +148,14 @@ public class TableImplTest {
         Assert.assertTrue(table.hasColumn("iD"));
     }
 
+    @Test
+    public void testContains() {
+        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        Column col = table.addColumn("Id", Integer.class);
+
+        Assert.assertTrue(table.contains(col));
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetColumnBadIndex() {
         TableImpl<Node> table = new TableImpl<>(Node.class, false);
@@ -212,6 +222,15 @@ public class TableImplTest {
     }
 
     @Test
+    public void testRemove() {
+        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        Column col = table.addColumn("Id", Integer.class);
+
+        table.remove(col);
+        Assert.assertFalse(table.contains(col));
+    }
+
+    @Test
     public void testRemoveColumnString() {
         TableImpl<Node> table = new TableImpl<>(Node.class, false);
         table.addColumn("Id", Integer.class);
@@ -223,6 +242,14 @@ public class TableImplTest {
         table.addColumn("Id", Integer.class);
         table.removeColumn("id");
         Assert.assertFalse(table.hasColumn("Id"));
+    }
+
+    @Test
+    public void testClear() {
+        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        table.addColumn("Id", Integer.class);
+        table.clear();
+        Assert.assertTrue(table.isEmpty());
     }
 
     @Test
@@ -246,6 +273,13 @@ public class TableImplTest {
         TableImpl<Node> table = new TableImpl<>(Node.class, false);
         Column col = table.addColumn("Id", Integer.class);
         Assert.assertEquals(table.toArray(), new Column[] { col });
+    }
+
+    @Test
+    public void testToArrayFromCollection() {
+        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        Column col = table.addColumn("Id", Integer.class);
+        Assert.assertEquals(table.toArray(new Column[0]), new Column[] { col });
     }
 
     @Test

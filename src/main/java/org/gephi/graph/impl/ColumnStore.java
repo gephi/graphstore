@@ -127,7 +127,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 }
                 updateConfiguration(column);
             } else {
-                throw new IllegalArgumentException("The column already exist");
+                throw new IllegalArgumentException("The column " + column.getId() + " already exist");
             }
         } finally {
             unlock();

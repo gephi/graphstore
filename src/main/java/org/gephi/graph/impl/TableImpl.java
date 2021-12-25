@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
@@ -28,7 +29,7 @@ import org.gephi.graph.api.TableObserver;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
 
-public class TableImpl<T extends Element> implements Table {
+public class TableImpl<T extends Element> implements Collection<Column>, Table {
 
     // Store
     protected final ColumnStore<T> store;
@@ -84,8 +85,25 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
+    public boolean add(Column column) {
+        store.checkNonNullColumnObject(column);
+        store.addColumn(column);
+        return true;
+    }
+
+    @Override
     public int countColumns() {
         return store.size();
+    }
+
+    @Override
+    public int size() {
+        return countColumns();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return countColumns() == 0;
     }
 
     @Override
@@ -101,6 +119,21 @@ public class TableImpl<T extends Element> implements Table {
     @Override
     public Column[] toArray() {
         return store.toArray();
+    }
+
+    @Override
+    public <K> K[] toArray(K[] array) {
+        store.checkNonNullObject(array);
+
+        ColumnImpl[] columns = store.toArray();
+
+        if (array.length < size()) {
+            array = (K[]) java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), size());
+        }
+        for (int i = 0; i < columns.length; i++) {
+            array[i] = (K) columns[i];
+        }
+        return array;
     }
 
     @Override
@@ -124,6 +157,14 @@ public class TableImpl<T extends Element> implements Table {
     }
 
     @Override
+    public boolean contains(Object o) {
+        store.checkNonNullColumnObject(o);
+
+        ColumnImpl column = (ColumnImpl) o;
+        return hasColumn(column.getId());
+    }
+
+    @Override
     public void removeColumn(Column column) {
         store.removeColumn(column);
     }
@@ -131,6 +172,38 @@ public class TableImpl<T extends Element> implements Table {
     @Override
     public void removeColumn(String id) {
         store.removeColumn(id.toLowerCase());
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        store.checkNonNullColumnObject(o);
+        removeColumn((ColumnImpl) o);
+        return true;
+    }
+
+    @Override
+    public void clear() {
+        store.clear();
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        throw new UnsupportedOperationException("This method from Collection isn't implemented");
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends Column> c) {
+        throw new UnsupportedOperationException("This method from Collection isn't implemented");
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException("This method from Collection isn't implemented");
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException("This method from Collection isn't implemented");
     }
 
     @Override
@@ -197,6 +270,12 @@ public class TableImpl<T extends Element> implements Table {
     private void checkSupportedTypes(Class type) {
         if (!AttributeUtils.isSupported(type)) {
             throw new IllegalArgumentException("Unknown type " + type.getName());
+        }
+    }
+
+    private void checkCollection(final Collection<?> collection) {
+        if (collection == this) {
+            throw new IllegalArgumentException("Can't pass itself");
         }
     }
 
