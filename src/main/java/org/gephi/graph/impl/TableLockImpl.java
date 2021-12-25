@@ -16,20 +16,28 @@
 package org.gephi.graph.impl;
 
 import java.util.concurrent.locks.ReentrantLock;
+import org.gephi.graph.api.TableLock;
 
-public class TableLock {
+public class TableLockImpl implements TableLock {
 
     protected final ReentrantLock lock;
 
-    public TableLock() {
+    public TableLockImpl() {
         lock = new ReentrantLock();
     }
 
+    @Override
     public void lock() {
         lock.lock();
     }
 
+    @Override
     public void unlock() {
         lock.unlock();
+    }
+
+    @Override
+    public int getHoldCount() {
+        return lock.getHoldCount();
     }
 }

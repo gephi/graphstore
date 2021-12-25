@@ -35,7 +35,7 @@ import org.gephi.graph.impl.utils.MapDeepEquals;
 public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>, M extends TimeMap<K, ?>> {
 
     // Lock
-    protected final GraphLock graphLock;
+    protected final GraphLockImpl graphLock;
     // Element
     protected final Class<T> elementType;
     // Timestamp index managament
@@ -47,7 +47,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     protected TimeIndexImpl mainIndex;
     protected final Map<GraphView, TimeIndexImpl> viewIndexes;
 
-    protected TimeIndexStore(Class<T> type, GraphLock lock, boolean indexed, Map<K, Integer> sortedMap) {
+    protected TimeIndexStore(Class<T> type, GraphLockImpl lock, boolean indexed, Map<K, Integer> sortedMap) {
         elementType = type;
         graphLock = lock;
 

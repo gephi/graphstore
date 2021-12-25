@@ -10,7 +10,7 @@ public class NodeIterableWrapper extends ElementIterableWrapper<Node> implements
         super(iterator);
     }
 
-    public NodeIterableWrapper(Iterator<Node> iterator, GraphLock lock) {
+    public NodeIterableWrapper(Iterator<Node> iterator, GraphLockImpl lock) {
         super(iterator, lock);
     }
 

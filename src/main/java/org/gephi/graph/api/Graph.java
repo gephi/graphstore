@@ -497,4 +497,12 @@ public interface Graph {
      * Closes a write lock for the current thread.
      */
     public void writeUnlock();
+
+    /**
+     * Returns the graph lock, in case locking is enabled. The graph lock controls
+     * the multi-thread access to the graph structure.
+     *
+     * @return graph lock
+     */
+    GraphLock getLock();
 }

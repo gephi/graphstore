@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Rect2D;
@@ -22,7 +21,7 @@ import org.gephi.graph.api.Rect2D;
  */
 public class NodesQuadTree {
 
-    protected final GraphLock lock = new GraphLock();
+    protected final GraphLockImpl lock = new GraphLockImpl();
 
     private final QuadTreeNode quadTreeRoot;
     private final int maxLevels;

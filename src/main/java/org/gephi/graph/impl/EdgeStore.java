@@ -52,7 +52,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected int mutualEdgesSize;
     protected int[] mutualEdgesTypeSize;
     // Locking (optional)
-    protected final GraphLock lock;
+    protected final GraphLockImpl lock;
     // Version
     protected final GraphVersion version;
     // Types counting (optional)
@@ -72,7 +72,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.spatialIndex = null;
     }
 
-    public EdgeStore(final EdgeTypeStore edgeTypeStore, final SpatialIndexImpl spatialIndex, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
+    public EdgeStore(final EdgeTypeStore edgeTypeStore, final SpatialIndexImpl spatialIndex, final GraphLockImpl lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeTypeStore = edgeTypeStore;

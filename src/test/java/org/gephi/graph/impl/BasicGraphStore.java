@@ -40,6 +40,7 @@ import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.GraphLock;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
@@ -366,6 +367,11 @@ public class BasicGraphStore implements DirectedGraph {
 
     @Override
     public void writeUnlock() {
+    }
+
+    @Override
+    public GraphLock getLock() {
+        return null;
     }
 
     @Override

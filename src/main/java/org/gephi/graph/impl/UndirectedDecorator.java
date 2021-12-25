@@ -20,6 +20,7 @@ import java.util.Set;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphLock;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
@@ -342,6 +343,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     @Override
     public void writeUnlock() {
         store.autoWriteUnlock();
+    }
+
+    @Override
+    public GraphLockImpl getLock() {
+        return store.getLock();
     }
 
     @Override

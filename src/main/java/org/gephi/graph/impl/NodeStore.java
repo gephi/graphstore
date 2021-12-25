@@ -33,7 +33,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected final EdgeStore edgeStore;
     protected final SpatialIndexImpl spatialIndex;
     // Locking (optional)
-    protected final GraphLock lock;
+    protected final GraphLockImpl lock;
     // Version
     protected final GraphVersion version;
     // Data
@@ -56,7 +56,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         this.spatialIndex = null;
     }
 
-    public NodeStore(final EdgeStore edgeStore, final SpatialIndexImpl spatialIndex, final GraphLock lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
+    public NodeStore(final EdgeStore edgeStore, final SpatialIndexImpl spatialIndex, final GraphLockImpl lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeStore = edgeStore;

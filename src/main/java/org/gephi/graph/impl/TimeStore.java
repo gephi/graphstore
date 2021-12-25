@@ -24,12 +24,12 @@ public class TimeStore {
 
     protected final GraphStore graphStore;
     // Lock (optional
-    protected final GraphLock lock;
+    protected final GraphLockImpl lock;
     // Store
     protected TimeIndexStore nodeIndexStore;
     protected TimeIndexStore edgeIndexStore;
 
-    public TimeStore(GraphStore store, GraphLock graphLock, boolean indexed) {
+    public TimeStore(GraphStore store, GraphLockImpl graphLock, boolean indexed) {
         lock = graphLock;
         graphStore = store;
 

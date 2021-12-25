@@ -18,27 +18,31 @@ package org.gephi.graph.impl;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import org.gephi.graph.api.GraphLock;
 
-public class GraphLock {
+public class GraphLockImpl implements GraphLock {
 
     protected final ReentrantReadWriteLock readWriteLock;
     protected final ReadLock readLock;
     protected final WriteLock writeLock;
 
-    public GraphLock() {
+    public GraphLockImpl() {
         readWriteLock = new ReentrantReadWriteLock();
         readLock = readWriteLock.readLock();
         writeLock = readWriteLock.writeLock();
     }
 
+    @Override
     public void readLock() {
         readLock.lock();
     }
 
+    @Override
     public void readUnlock() {
         readLock.unlock();
     }
 
+    @Override
     public void readUnlockAll() {
         final int nReadLocks = readWriteLock.getReadHoldCount();
         for (int n = 0; n < nReadLocks; n++) {
@@ -46,6 +50,7 @@ public class GraphLock {
         }
     }
 
+    @Override
     public void writeLock() {
         if (readWriteLock.getReadHoldCount() > 0 && !readWriteLock.isWriteLockedByCurrentThread()) {
             throw new IllegalMonitorStateException(
@@ -54,8 +59,19 @@ public class GraphLock {
         writeLock.lock();
     }
 
+    @Override
     public void writeUnlock() {
         writeLock.unlock();
+    }
+
+    @Override
+    public int getReadHoldCount() {
+        return readWriteLock.getReadHoldCount();
+    }
+
+    @Override
+    public int getWriteHoldCount() {
+        return readWriteLock.getWriteHoldCount();
     }
 
     public void checkHoldWriteLock() {

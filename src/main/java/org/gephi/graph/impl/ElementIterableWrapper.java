@@ -10,13 +10,13 @@ import org.gephi.graph.api.ElementIterable;
 public abstract class ElementIterableWrapper<T extends Element> implements ElementIterable<T> {
 
     protected final Iterator<T> iterator;
-    protected final GraphLock lock;
+    protected final GraphLockImpl lock;
 
     public ElementIterableWrapper(Iterator<T> iterator) {
         this(iterator, null);
     }
 
-    public ElementIterableWrapper(Iterator<T> iterator, GraphLock lock) {
+    public ElementIterableWrapper(Iterator<T> iterator, GraphLockImpl lock) {
         this.iterator = iterator;
         this.lock = lock;
     }

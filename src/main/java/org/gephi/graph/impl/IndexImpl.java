@@ -47,7 +47,7 @@ import org.gephi.graph.api.Element;
 
 public class IndexImpl<T extends Element> implements Index<T> {
 
-    protected final TableLock lock;
+    protected final TableLockImpl lock;
     protected final ColumnStore<T> columnStore;
     protected AbstractIndex[] columns;
     protected int columnsCount;

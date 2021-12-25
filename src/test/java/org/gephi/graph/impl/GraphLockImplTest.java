@@ -18,11 +18,11 @@ package org.gephi.graph.impl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class GraphLockTest {
+public class GraphLockImplTest {
 
     @Test
     public void testReadUnlockAll() {
-        GraphLock lock = new GraphLock();
+        GraphLockImpl lock = new GraphLockImpl();
         lock.readLock();
         lock.readLock();
         Assert.assertEquals(lock.readWriteLock.getReadHoldCount(), 2);
@@ -32,7 +32,7 @@ public class GraphLockTest {
 
     @Test
     public void testWriteLockBeforeReadLock() {
-        GraphLock lock = new GraphLock();
+        GraphLockImpl lock = new GraphLockImpl();
         lock.writeLock();
         lock.readLock();
         lock.readLock();
@@ -40,21 +40,35 @@ public class GraphLockTest {
 
     @Test(expectedExceptions = IllegalMonitorStateException.class)
     public void testWriteLockAfterReadLock() {
-        GraphLock lock = new GraphLock();
+        GraphLockImpl lock = new GraphLockImpl();
         lock.readLock();
         lock.writeLock();
     }
 
     @Test
     public void testCheckHoldWriteLock() {
-        GraphLock lock = new GraphLock();
+        GraphLockImpl lock = new GraphLockImpl();
         lock.writeLock();
         lock.checkHoldWriteLock();
     }
 
     @Test(expectedExceptions = IllegalMonitorStateException.class)
     public void testCheckHoldWriteLockFail() {
-        GraphLock lock = new GraphLock();
+        GraphLockImpl lock = new GraphLockImpl();
         lock.checkHoldWriteLock();
+    }
+
+    @Test
+    public void testHoldersCount() {
+        GraphLockImpl lock = new GraphLockImpl();
+        lock.readLock();
+        Assert.assertEquals(lock.getReadHoldCount(), 1);
+        lock.readUnlock();
+        Assert.assertEquals(lock.getReadHoldCount(), 0);
+        lock.writeLock();
+        Assert.assertEquals(lock.getWriteHoldCount(), 1);
+        lock.writeUnlock();
+        Assert.assertEquals(lock.getWriteHoldCount(), 0);
+
     }
 }

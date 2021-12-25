@@ -54,7 +54,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     // Version
     protected final List<TableObserverImpl> observers;
     // Locking (optional)
-    protected final TableLock lock;
+    protected final TableLockImpl lock;
     // Variables
     protected int length;
 
@@ -68,7 +68,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         }
         this.graphStore = graphStore;
         this.configuration = graphStore != null ? graphStore.configuration : new Configuration();
-        this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLock() : null;
+        this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLockImpl() : null;
         this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<>(MAX_SIZE);
         this.columns = new ColumnImpl[MAX_SIZE];

@@ -31,7 +31,7 @@ import org.gephi.graph.api.types.TimeSet;
 public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, M extends TimeMap<K, ?>> implements TimeIndex<T> {
 
     // Data
-    protected final GraphLock lock;
+    protected final GraphLockImpl lock;
     protected final TimeIndexStore<T, K, S, M> timestampIndexStore;
     protected final boolean mainIndex;
     protected TimeIndexEntry[] timestamps;

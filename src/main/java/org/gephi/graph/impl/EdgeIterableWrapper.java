@@ -10,7 +10,7 @@ public class EdgeIterableWrapper extends ElementIterableWrapper<Edge> implements
         super(iterator);
     }
 
-    public EdgeIterableWrapper(Iterator<Edge> iterator, GraphLock lock) {
+    public EdgeIterableWrapper(Iterator<Edge> iterator, GraphLockImpl lock) {
         super(iterator, lock);
     }
 
