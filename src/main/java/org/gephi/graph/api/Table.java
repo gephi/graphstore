@@ -144,4 +144,11 @@ public interface Table extends ColumnIterable {
      * @return true if node table, false otherwise
      */
     public boolean isEdgeTable();
+
+    /**
+     * Returns the table lock, which controls the multi-thread access to the table.
+     *
+     * @return table lock
+     */
+    TableLock getLock();
 }

@@ -30,7 +30,7 @@ import org.gephi.graph.api.Node;
 public class IndexStore<T extends Element> {
 
     protected final ColumnStore<T> columnStore;
-    protected final TableLock lock;
+    protected final TableLockImpl lock;
     protected final IndexImpl<T> mainIndex;
     protected final Map<GraphView, IndexImpl<T>> viewIndexes;
 

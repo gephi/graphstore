@@ -56,7 +56,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     // Factory
     protected final GraphFactoryImpl factory;
     // Lock
-    protected final GraphLock lock;
+    protected final GraphLockImpl lock;
     // Version
     protected final GraphVersion version;
     protected final List<GraphObserverImpl> observers;
@@ -78,7 +78,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public GraphStore(GraphModelImpl model) {
         configuration = model != null ? model.configuration : new Configuration();
         graphModel = model;
-        lock = new GraphLock();
+        lock = new GraphLockImpl();
 
         edgeTypeStore = new EdgeTypeStore();
         mainGraphView = new MainGraphView();
@@ -661,6 +661,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     @Override
     public void writeUnlock() {
         lock.writeUnlock();
+    }
+
+    @Override
+    public GraphLockImpl getLock() {
+        return lock;
     }
 
     protected void autoReadLock() {

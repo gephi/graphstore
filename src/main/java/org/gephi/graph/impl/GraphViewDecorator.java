@@ -23,6 +23,7 @@ import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphLock;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
@@ -628,6 +629,11 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     @Override
     public void writeLock() {
         graphStore.lock.writeLock();
+    }
+
+    @Override
+    public GraphLockImpl getLock() {
+        return graphStore.lock;
     }
 
     @Override
