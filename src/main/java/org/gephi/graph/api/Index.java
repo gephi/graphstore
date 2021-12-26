@@ -21,7 +21,8 @@ import java.util.Collection;
  * An index is associated with each table and keeps track of each unique value
  * in indexed columns.
  * <p>
- * 
+ * Each column is associated with a @{{@link ColumnIndex}}.
+ *
  * @param <T> Element class
  */
 public interface Index<T extends Element> {
@@ -115,4 +116,12 @@ public interface Index<T extends Element> {
      * @return the index name
      */
     public String getIndexName();
+
+    /**
+     * Returns the column index for the given column.
+     *
+     * @param column the column to get the index for
+     * @return the column index
+     */
+    public ColumnIndex getColumnIndex(Column column);
 }

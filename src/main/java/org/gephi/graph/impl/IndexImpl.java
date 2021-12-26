@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.ColumnIndex;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Index;
 
@@ -44,6 +45,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
     @Override
     public String getIndexName() {
         return "index_" + columnStore.elementType.getCanonicalName();
+    }
+
+    @Override
+    public ColumnIndex getColumnIndex(Column column) {
+        return getIndex(column);
     }
 
     @Override
