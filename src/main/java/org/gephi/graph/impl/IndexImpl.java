@@ -58,7 +58,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         lock();
         try {
-            return getIndex(column).getCount(value);
+            return getIndex(column).count(value);
         } finally {
             unlock();
         }
@@ -157,7 +157,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         checkNonNullColumnObject(column);
         lock();
         try {
-            return getIndex(column).elements;
+            return getIndex(column).countElements();
         } finally {
             unlock();
         }
@@ -210,7 +210,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
     protected void addColumn(ColumnImpl col) {
         if (col.isIndexed()) {
             ensureColumnSize(col.storeId);
-            ColumnIndexImpl index = createIndex(col);
+            ColumnStandardIndexImpl index = createStandardIndex(col);
             columns[col.storeId] = index;
             columnsCount++;
         }
@@ -220,7 +220,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         ensureColumnSize(cols.length);
         for (ColumnImpl col : cols) {
             if (col.isIndexed()) {
-                ColumnIndexImpl index = createIndex(col);
+                ColumnStandardIndexImpl index = createStandardIndex(col);
                 columns[col.storeId] = index;
                 columnsCount++;
             }
@@ -239,7 +239,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
     protected boolean hasColumn(ColumnImpl col) {
         if (col.isIndexed()) {
             int id = col.storeId;
-            if (id != ColumnStore.NULL_ID && columns.length > id && columns[id].column == col) {
+            if (id != ColumnStore.NULL_ID && columns.length > id && columns[id].getColumn() == col) {
                 return true;
             }
         }
@@ -251,7 +251,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
             int id = col.getIndex();
             if (id != ColumnStore.NULL_ID && columns.length > id) {
                 ColumnIndexImpl index = columns[id];
-                if (index != null && index.column == col) {
+                if (index != null && index.getColumn() == col) {
                     return index;
                 }
             }
@@ -277,69 +277,69 @@ public class IndexImpl<T extends Element> implements Index<T> {
         return columnsCount;
     }
 
-    ColumnIndexImpl createIndex(ColumnImpl column) {
+    ColumnStandardIndexImpl createStandardIndex(ColumnImpl column) {
         if (column.getTypeClass().equals(Byte.class)) {
             // Byte
-            return new ColumnIndexImpl.ByteIndex<T>(column);
+            return new ColumnStandardIndexImpl.ByteStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(Short.class)) {
             // Short
-            return new ColumnIndexImpl.ShortIndex<T>(column);
+            return new ColumnStandardIndexImpl.ShortStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(Integer.class)) {
             // Integer
-            return new ColumnIndexImpl.IntegerIndex<T>(column);
+            return new ColumnStandardIndexImpl.IntegerStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(Long.class)) {
             // Long
-            return new ColumnIndexImpl.LongIndex<T>(column);
+            return new ColumnStandardIndexImpl.LongStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(Float.class)) {
             // Float
-            return new ColumnIndexImpl.FloatIndex<T>(column);
+            return new ColumnStandardIndexImpl.FloatStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(Double.class)) {
             // Double
-            return new ColumnIndexImpl.DoubleIndex<T>(column);
+            return new ColumnStandardIndexImpl.DoubleStandardIndex<T>(column);
         } else if (Number.class.isAssignableFrom(column.getTypeClass())) {
             // Other numbers
-            return new ColumnIndexImpl.GenericNumberIndex<T>(column);
+            return new ColumnStandardIndexImpl.GenericNumberStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(Boolean.class)) {
             // Boolean
-            return new ColumnIndexImpl.BooleanIndex<T>(column);
+            return new ColumnStandardIndexImpl.BooleanStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(Character.class)) {
             // Char
-            return new ColumnIndexImpl.CharIndex<T>(column);
+            return new ColumnStandardIndexImpl.CharStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(String.class)) {
             // String
-            return new ColumnIndexImpl.DefaultIndex<T>(column);
+            return new ColumnStandardIndexImpl.DefaultStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(byte[].class)) {
             // Byte Array
-            return new ColumnIndexImpl.ByteArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.ByteArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(short[].class)) {
             // Short Array
-            return new ColumnIndexImpl.ShortArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.ShortArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(int[].class)) {
             // Integer Array
-            return new ColumnIndexImpl.IntegerArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.IntegerArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(long[].class)) {
             // Long Array
-            return new ColumnIndexImpl.LongArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.LongArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(float[].class)) {
             // Float array
-            return new ColumnIndexImpl.FloatArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.FloatArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(double[].class)) {
             // Double array
-            return new ColumnIndexImpl.DoubleArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.DoubleArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(boolean[].class)) {
             // Boolean array
-            return new ColumnIndexImpl.BooleanArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.BooleanArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(char[].class)) {
             // Char array
-            return new ColumnIndexImpl.CharArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.CharArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().equals(String[].class)) {
             // String array
-            return new ColumnIndexImpl.DefaultArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.DefaultArrayStandardIndex<T>(column);
         } else if (column.getTypeClass().isArray()) {
             // Default Array
-            return new ColumnIndexImpl.DefaultArrayIndex<T>(column);
+            return new ColumnStandardIndexImpl.DefaultArrayStandardIndex<T>(column);
         }
-        return new ColumnIndexImpl.DefaultIndex<T>(column);
+        return new ColumnStandardIndexImpl.DefaultStandardIndex<T>(column);
     }
 
     private void ensureColumnSize(int index) {
