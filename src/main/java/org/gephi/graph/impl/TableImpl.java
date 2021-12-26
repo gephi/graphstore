@@ -147,7 +147,7 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
     }
 
     @Override
-    public Column getColumn(String id) {
+    public ColumnImpl getColumn(String id) {
         return store.getColumn(id.toLowerCase());
     }
 
