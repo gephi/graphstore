@@ -314,7 +314,7 @@ public class IndexImplTest {
         index.put(fooColumn, null, n1);
         index.put(fooColumn, "bar", n3);
 
-        ColumnIndex withNullIndex = index.getIndex("foo");
+        ColumnIndexImpl withNullIndex = index.getIndex("foo");
         Collection withNullCollection = withNullIndex.values();
         Assert.assertEquals(withNullCollection.size(), 2);
         Assert.assertFalse(withNullCollection.isEmpty());
@@ -332,7 +332,7 @@ public class IndexImplTest {
         Assert.assertEquals(withNullItr.next(), "bar");
         Assert.assertFalse(withNullItr.hasNext());
 
-        ColumnIndex withoutNullIndex = index.getIndex("age");
+        ColumnIndexImpl withoutNullIndex = index.getIndex("age");
         Collection withoutNullCollection = withoutNullIndex.values();
         Assert.assertEquals(withoutNullCollection.size(), 2);
         Assert.assertFalse(withoutNullCollection.isEmpty());
