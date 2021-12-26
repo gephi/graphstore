@@ -27,7 +27,7 @@ import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
 
-public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndex<K, T> {
+public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<K, T> {
 
     // Data
     protected final ColumnImpl column;
@@ -164,6 +164,31 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndex<K, T
     public Iterator<Map.Entry<K, ? extends Set<T>>> iterator() {
         // TODO
         throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public void clear() {
+        // Nothing to clear
+    }
+
+    @Override
+    public void destroy() {
+        // Nothing to destroy
+    }
+
+    @Override
+    public K putValue(T element, K value) {
+        return value;
+    }
+
+    @Override
+    public K replaceValue(T element, K oldValue, K newValue) {
+        return newValue;
+    }
+
+    @Override
+    public void removeValue(T element, K value) {
+        // Nothing to remove
     }
 
     private class ElementWithValueIterable implements Iterable<T> {
