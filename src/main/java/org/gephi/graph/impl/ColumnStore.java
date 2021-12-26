@@ -220,7 +220,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         }
     }
 
-    public Column getColumn(final String key) {
+    public ColumnImpl getColumn(final String key) {
         checkNonNullObject(key);
         lock();
         try {

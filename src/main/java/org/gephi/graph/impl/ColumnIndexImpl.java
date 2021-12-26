@@ -20,18 +20,22 @@ import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import org.gephi.graph.api.ColumnIndex;
 import org.gephi.graph.api.Element;
 
-public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.Entry<K, ? extends Set<T>>> {
+public abstract class ColumnIndexImpl<K, T extends Element> implements ColumnIndex<K, T> {
 
     // Const
     public static final boolean TRIMMING_ENABLED = false;
     public static final int TRIMMING_FREQUENCY = 30;
+    // Lock (optional)
+    protected final TableLockImpl lock;
     // Data
     protected final ColumnImpl column;
     protected final ValueSet<K, T> nullSet;
@@ -39,12 +43,17 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
     // Variable
     protected int elements;
 
-    public ColumnIndex(ColumnImpl column) {
+    protected ColumnIndexImpl(ColumnImpl column) {
         this.column = column;
         this.nullSet = new ValueSet<>(null);
+        if (column.table != null) {
+            lock = column.table.getLock();
+        } else {
+            lock = null;
+        }
     }
 
-    public K putValue(T element, K value) {
+    protected K putValue(T element, K value) {
         if (value == null) {
             if (nullSet.add(element)) {
                 elements++;
@@ -63,7 +72,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         return value;
     }
 
-    public void removeValue(T element, K value) {
+    protected void removeValue(T element, K value) {
         if (value == null) {
             if (nullSet.remove(element)) {
                 elements--;
@@ -79,31 +88,64 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    public K replaceValue(T element, K oldValue, K newValue) {
+    protected K replaceValue(T element, K oldValue, K newValue) {
         removeValue(element, oldValue);
         return putValue(element, newValue);
     }
 
-    public int getCount(K value) {
-        if (value == null) {
-            return nullSet.size();
-        }
-        ValueSet<K, T> valueSet = getValueSet(value);
-        if (valueSet != null) {
-            return valueSet.size();
-        } else {
-            return 0;
+    protected int getCount(K value) {
+        lock();
+        try {
+            if (value == null) {
+                return nullSet.size();
+            }
+            ValueSet<K, T> valueSet = getValueSet(value);
+            if (valueSet != null) {
+                return valueSet.size();
+            } else {
+                return 0;
+            }
+        } finally {
+            unlock();
         }
     }
 
-    public Collection values() {
-        return new WithNullDecorator();
+    @Override
+    public int count(K value) {
+        return getCount(value);
     }
 
+    @Override
+    public Collection<K> values() {
+        lock();
+        try {
+            return new ArrayList<>(new WithNullDecorator());
+        } finally {
+            unlock();
+        }
+    }
+
+    @Override
     public int countValues() {
-        return (nullSet.isEmpty() ? 0 : 1) + map.size();
+        lock();
+        try {
+            return (nullSet.isEmpty() ? 0 : 1) + map.size();
+        } finally {
+            unlock();
+        }
     }
 
+    @Override
+    public int countElements() {
+        lock();
+        try {
+            return elements;
+        } finally {
+            unlock();
+        }
+    }
+
+    @Override
     public Number getMinValue() {
         if (isSortable()) {
             if (map.isEmpty()) {
@@ -117,6 +159,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
+    @Override
     public Number getMaxValue() {
         if (isSortable()) {
             if (map.isEmpty()) {
@@ -147,6 +190,16 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         return new EntryIterator();
     }
 
+    @Override
+    public Iterable<T> get(K value) {
+        lock();
+        ValueSet<K, T> valueSet = getValueSet(value);
+        if (valueSet == null) {
+            return ValueSet.EMPTY;
+        }
+        return new LockableIterable<>(valueSet.set);
+    }
+
     protected ValueSet<K, T> getValueSet(K value) {
         if (value == null) {
             return nullSet;
@@ -164,11 +217,29 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         return valueSet;
     }
 
-    protected boolean isSortable() {
+    @Override
+    public boolean isSortable() {
         return Number.class.isAssignableFrom(column.getTypeClass()) && map instanceof SortedMap;
     }
 
-    protected static class DefaultIndex<T extends Element> extends ColumnIndex<Object, T> {
+    @Override
+    public ColumnImpl getColumn() {
+        return column;
+    }
+
+    void lock() {
+        if (lock != null) {
+            lock.lock();
+        }
+    }
+
+    void unlock() {
+        if (lock != null) {
+            lock.unlock();
+        }
+    }
+
+    protected static class DefaultIndex<T extends Element> extends ColumnIndexImpl<Object, T> {
 
         public DefaultIndex(ColumnImpl column) {
             super(column);
@@ -177,7 +248,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class BooleanIndex<T extends Element> extends ColumnIndex<Boolean, T> {
+    protected static class BooleanIndex<T extends Element> extends ColumnIndexImpl<Boolean, T> {
 
         public BooleanIndex(ColumnImpl column) {
             super(column);
@@ -186,7 +257,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class DoubleIndex<T extends Element> extends ColumnIndex<Double, T> {
+    protected static class DoubleIndex<T extends Element> extends ColumnIndexImpl<Double, T> {
 
         public DoubleIndex(ColumnImpl column) {
             super(column);
@@ -195,7 +266,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class IntegerIndex<T extends Element> extends ColumnIndex<Integer, T> {
+    protected static class IntegerIndex<T extends Element> extends ColumnIndexImpl<Integer, T> {
 
         public IntegerIndex(ColumnImpl column) {
             super(column);
@@ -204,7 +275,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class FloatIndex<T extends Element> extends ColumnIndex<Float, T> {
+    protected static class FloatIndex<T extends Element> extends ColumnIndexImpl<Float, T> {
 
         public FloatIndex(ColumnImpl column) {
             super(column);
@@ -213,7 +284,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class LongIndex<T extends Element> extends ColumnIndex<Long, T> {
+    protected static class LongIndex<T extends Element> extends ColumnIndexImpl<Long, T> {
 
         public LongIndex(ColumnImpl column) {
             super(column);
@@ -222,7 +293,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class ShortIndex<T extends Element> extends ColumnIndex<Short, T> {
+    protected static class ShortIndex<T extends Element> extends ColumnIndexImpl<Short, T> {
 
         public ShortIndex(ColumnImpl column) {
             super(column);
@@ -231,7 +302,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class ByteIndex<T extends Element> extends ColumnIndex<Byte, T> {
+    protected static class ByteIndex<T extends Element> extends ColumnIndexImpl<Byte, T> {
 
         public ByteIndex(ColumnImpl column) {
             super(column);
@@ -240,7 +311,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class GenericNumberIndex<T extends Element> extends ColumnIndex<Number, T> {
+    protected static class GenericNumberIndex<T extends Element> extends ColumnIndexImpl<Number, T> {
 
         public GenericNumberIndex(ColumnImpl column) {
             super(column);
@@ -249,7 +320,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class CharIndex<T extends Element> extends ColumnIndex<Character, T> {
+    protected static class CharIndex<T extends Element> extends ColumnIndexImpl<Character, T> {
 
         public CharIndex(ColumnImpl column) {
             super(column);
@@ -258,7 +329,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class DefaultArrayIndex<T extends Element> extends ColumnIndex<Object[], T> {
+    protected static class DefaultArrayIndex<T extends Element> extends ColumnIndexImpl<Object[], T> {
 
         public DefaultArrayIndex(ColumnImpl column) {
             super(column);
@@ -267,7 +338,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class BooleanArrayIndex<T extends Element> extends ColumnIndex<boolean[], T> {
+    protected static class BooleanArrayIndex<T extends Element> extends ColumnIndexImpl<boolean[], T> {
 
         public BooleanArrayIndex(ColumnImpl column) {
             super(column);
@@ -276,7 +347,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class DoubleArrayIndex<T extends Element> extends ColumnIndex<double[], T> {
+    protected static class DoubleArrayIndex<T extends Element> extends ColumnIndexImpl<double[], T> {
 
         public DoubleArrayIndex(ColumnImpl column) {
             super(column);
@@ -285,7 +356,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class IntegerArrayIndex<T extends Element> extends ColumnIndex<int[], T> {
+    protected static class IntegerArrayIndex<T extends Element> extends ColumnIndexImpl<int[], T> {
 
         public IntegerArrayIndex(ColumnImpl column) {
             super(column);
@@ -294,7 +365,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class FloatArrayIndex<T extends Element> extends ColumnIndex<float[], T> {
+    protected static class FloatArrayIndex<T extends Element> extends ColumnIndexImpl<float[], T> {
 
         public FloatArrayIndex(ColumnImpl column) {
             super(column);
@@ -303,7 +374,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class LongArrayIndex<T extends Element> extends ColumnIndex<long[], T> {
+    protected static class LongArrayIndex<T extends Element> extends ColumnIndexImpl<long[], T> {
 
         public LongArrayIndex(ColumnImpl column) {
             super(column);
@@ -312,7 +383,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class ShortArrayIndex<T extends Element> extends ColumnIndex<short[], T> {
+    protected static class ShortArrayIndex<T extends Element> extends ColumnIndexImpl<short[], T> {
 
         public ShortArrayIndex(ColumnImpl column) {
             super(column);
@@ -321,7 +392,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class ByteArrayIndex<T extends Element> extends ColumnIndex<byte[], T> {
+    protected static class ByteArrayIndex<T extends Element> extends ColumnIndexImpl<byte[], T> {
 
         public ByteArrayIndex(ColumnImpl column) {
             super(column);
@@ -330,7 +401,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         }
     }
 
-    protected static class CharArrayIndex<T extends Element> extends ColumnIndex<char[], T> {
+    protected static class CharArrayIndex<T extends Element> extends ColumnIndexImpl<char[], T> {
 
         public CharArrayIndex(ColumnImpl column) {
             super(column);
@@ -341,6 +412,7 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
 
     protected static final class ValueSet<K, T> implements Set<T> {
 
+        protected static ValueSet EMPTY = new ValueSet(null);
         protected final K value;
         private final Set<T> set;
 
@@ -611,6 +683,48 @@ public abstract class ColumnIndex<K, T extends Element> implements Iterable<Map.
         @Override
         public Set<T> setValue(Set<T> v) {
             throw new UnsupportedOperationException("Not supported operation.");
+        }
+    }
+
+    private class LockableIterable<T> implements Iterable<T> {
+
+        private final Iterable<T> ite;
+
+        public LockableIterable(Iterable<T> ite) {
+            this.ite = ite;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new LockableIterator<>(ite.iterator());
+        }
+    }
+
+    private class LockableIterator<T> implements Iterator<T> {
+
+        private final Iterator<T> itr;
+
+        public LockableIterator(Iterator<T> itr) {
+            this.itr = itr;
+        }
+
+        @Override
+        public boolean hasNext() {
+            boolean n = itr.hasNext();
+            if (!n && lock != null) {
+                lock.unlock();
+            }
+            return n;
+        }
+
+        @Override
+        public T next() {
+            return itr.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
         }
     }
 }
