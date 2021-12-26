@@ -40,7 +40,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Element;
@@ -49,12 +48,12 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     protected final TableLockImpl lock;
     protected final ColumnStore<T> columnStore;
-    protected AbstractIndex[] columns;
+    protected ColumnIndex<?, T>[] columns;
     protected int columnsCount;
 
     public IndexImpl(ColumnStore<T> columnStore) {
         this.columnStore = columnStore;
-        this.columns = new AbstractIndex[0];
+        this.columns = new ColumnIndex[0];
         this.lock = columnStore.lock;
     }
 
@@ -74,7 +73,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         lock();
         try {
-            AbstractIndex index = getIndex((ColumnImpl) column);
+            ColumnIndex index = getIndex((ColumnImpl) column);
             return index.getCount(value);
         } finally {
             unlock();
@@ -84,14 +83,14 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public int count(String key, Object value) {
         checkNonNullObject(key);
 
-        AbstractIndex index = getIndex(key);
+        ColumnIndex index = getIndex(key);
         return index.getCount(value);
     }
 
     public Iterable<T> get(String key, Object value) {
         checkNonNullObject(key);
 
-        AbstractIndex index = getIndex(key);
+        ColumnIndex index = getIndex(key);
         return index.getValueSet(value);
     }
 
@@ -101,11 +100,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         if (lock != null) {
             lock.lock();
-            AbstractIndex index = getIndex((ColumnImpl) column);
+            ColumnIndex index = getIndex((ColumnImpl) column);
             Set<T> valueSet = index.getValueSet(value);
             return valueSet == null ? null : new LockableIterable<>(index.getValueSet(value));
         }
-        AbstractIndex index = getIndex((ColumnImpl) column);
+        ColumnIndex index = getIndex((ColumnImpl) column);
         return index.getValueSet(value);
     }
 
@@ -115,7 +114,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         lock();
         try {
-            AbstractIndex index = getIndex((ColumnImpl) column);
+            ColumnIndex index = getIndex((ColumnImpl) column);
 
             return index.isSortable();
         } finally {
@@ -129,7 +128,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         lock();
         try {
-            AbstractIndex index = getIndex((ColumnImpl) column);
+            ColumnIndex index = getIndex((ColumnImpl) column);
             return index.getMinValue();
         } finally {
             unlock();
@@ -141,7 +140,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         checkNonNullColumnObject(column);
         lock();
         try {
-            AbstractIndex index = getIndex((ColumnImpl) column);
+            ColumnIndex index = getIndex((ColumnImpl) column);
             return index.getMaxValue();
         } finally {
             unlock();
@@ -151,7 +150,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Iterable<Map.Entry<Object, Set<T>>> get(Column column) {
         checkNonNullColumnObject(column);
 
-        AbstractIndex index = getIndex((ColumnImpl) column);
+        ColumnIndex index = getIndex((ColumnImpl) column);
         return index;
     }
 
@@ -161,7 +160,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         lock();
         try {
-            AbstractIndex index = getIndex((ColumnImpl) column);
+            ColumnIndex index = getIndex((ColumnImpl) column);
             return new ArrayList(index.values());
         } finally {
             unlock();
@@ -173,7 +172,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         checkNonNullColumnObject(column);
         lock();
         try {
-            AbstractIndex index = getIndex((ColumnImpl) column);
+            ColumnIndex index = getIndex((ColumnImpl) column);
             return index.countValues();
         } finally {
             unlock();
@@ -185,7 +184,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         checkNonNullColumnObject(column);
         lock();
         try {
-            AbstractIndex index = getIndex((ColumnImpl) column);
+            ColumnIndex index = getIndex((ColumnImpl) column);
             return index.elements;
         } finally {
             unlock();
@@ -195,47 +194,47 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Object put(String key, Object value, T element) {
         checkNonNullObject(key);
 
-        AbstractIndex index = getIndex(key);
+        ColumnIndex index = getIndex(key);
         return index.putValue(element, value);
     }
 
     public Object put(Column column, Object value, T element) {
         checkNonNullColumnObject(column);
 
-        AbstractIndex index = getIndex((ColumnImpl) column);
+        ColumnIndex index = getIndex((ColumnImpl) column);
         return index.putValue(element, value);
     }
 
     public void remove(String key, Object value, T element) {
         checkNonNullObject(key);
 
-        AbstractIndex index = getIndex(key);
+        ColumnIndex index = getIndex(key);
         index.removeValue(element, value);
     }
 
     public void remove(Column column, Object value, T element) {
         checkNonNullColumnObject(column);
 
-        AbstractIndex index = getIndex((ColumnImpl) column);
+        ColumnIndex index = getIndex((ColumnImpl) column);
         index.removeValue(element, value);
     }
 
     public Object set(String key, Object oldValue, Object value, T element) {
         checkNonNullObject(key);
 
-        AbstractIndex index = getIndex(key);
+        ColumnIndex index = getIndex(key);
         return index.replaceValue(element, oldValue, value);
     }
 
     public Object set(Column column, Object oldValue, Object value, T element) {
         checkNonNullColumnObject(column);
 
-        AbstractIndex index = getIndex((ColumnImpl) column);
+        ColumnIndex index = getIndex((ColumnImpl) column);
         return index.replaceValue(element, oldValue, value);
     }
 
     public void clear() {
-        for (AbstractIndex ai : columns) {
+        for (ColumnIndex ai : columns) {
             if (ai != null) {
                 ai.clear();
             }
@@ -245,7 +244,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
     protected void addColumn(ColumnImpl col) {
         if (col.isIndexed()) {
             ensureColumnSize(col.storeId);
-            AbstractIndex index = createIndex(col);
+            ColumnIndex index = createIndex(col);
             columns[col.storeId] = index;
             columnsCount++;
         }
@@ -255,7 +254,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         ensureColumnSize(cols.length);
         for (ColumnImpl col : cols) {
             if (col.isIndexed()) {
-                AbstractIndex index = createIndex(col);
+                ColumnIndex index = createIndex(col);
                 columns[col.storeId] = index;
                 columnsCount++;
             }
@@ -264,7 +263,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     protected void removeColumn(ColumnImpl col) {
         if (col.isIndexed()) {
-            AbstractIndex index = columns[col.storeId];
+            ColumnIndex index = columns[col.storeId];
             index.destroy();
             columns[col.storeId] = null;
             columnsCount--;
@@ -281,11 +280,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
         return false;
     }
 
-    protected AbstractIndex getIndex(ColumnImpl col) {
+    protected ColumnIndex getIndex(ColumnImpl col) {
         if (col.isIndexed()) {
             int id = col.storeId;
             if (id != ColumnStore.NULL_ID && columns.length > id) {
-                AbstractIndex index = columns[id];
+                ColumnIndex index = columns[id];
                 if (index != null && index.column == col) {
                     return index;
                 }
@@ -294,7 +293,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         return null;
     }
 
-    protected AbstractIndex getIndex(String key) {
+    protected ColumnIndex getIndex(String key) {
         int id = columnStore.getColumnIndex(key);
         if (id != ColumnStore.NULL_ID && columns.length > id) {
             return columns[id];
@@ -303,12 +302,12 @@ public class IndexImpl<T extends Element> implements Index<T> {
     }
 
     protected void destroy() {
-        for (AbstractIndex ai : columns) {
+        for (ColumnIndex ai : columns) {
             if (ai != null) {
                 ai.destroy();
             }
         }
-        columns = new AbstractIndex[0];
+        columns = new ColumnIndex[0];
         columnsCount = 0;
     }
 
@@ -316,74 +315,74 @@ public class IndexImpl<T extends Element> implements Index<T> {
         return columnsCount;
     }
 
-    AbstractIndex createIndex(ColumnImpl column) {
+    ColumnIndex createIndex(ColumnImpl column) {
         if (column.getTypeClass().equals(Byte.class)) {
             // Byte
-            return new ByteIndex(column);
+            return new ColumnIndex.ByteIndex<T>(column);
         } else if (column.getTypeClass().equals(Short.class)) {
             // Short
-            return new ShortIndex(column);
+            return new ColumnIndex.ShortIndex<T>(column);
         } else if (column.getTypeClass().equals(Integer.class)) {
             // Integer
-            return new IntegerIndex(column);
+            return new ColumnIndex.IntegerIndex<T>(column);
         } else if (column.getTypeClass().equals(Long.class)) {
             // Long
-            return new LongIndex(column);
+            return new ColumnIndex.LongIndex<T>(column);
         } else if (column.getTypeClass().equals(Float.class)) {
             // Float
-            return new FloatIndex(column);
+            return new ColumnIndex.FloatIndex<T>(column);
         } else if (column.getTypeClass().equals(Double.class)) {
             // Double
-            return new DoubleIndex(column);
+            return new ColumnIndex.DoubleIndex<T>(column);
         } else if (Number.class.isAssignableFrom(column.getTypeClass())) {
             // Other numbers
-            return new GenericNumberIndex(column);
+            return new ColumnIndex.GenericNumberIndex<T>(column);
         } else if (column.getTypeClass().equals(Boolean.class)) {
             // Boolean
-            return new BooleanIndex(column);
+            return new ColumnIndex.BooleanIndex<T>(column);
         } else if (column.getTypeClass().equals(Character.class)) {
             // Char
-            return new CharIndex(column);
+            return new ColumnIndex.CharIndex<T>(column);
         } else if (column.getTypeClass().equals(String.class)) {
             // String
-            return new DefaultIndex(column);
+            return new ColumnIndex.DefaultIndex<T>(column);
         } else if (column.getTypeClass().equals(byte[].class)) {
             // Byte Array
-            return new ByteArrayIndex(column);
+            return new ColumnIndex.ByteArrayIndex<T>(column);
         } else if (column.getTypeClass().equals(short[].class)) {
             // Short Array
-            return new ShortArrayIndex(column);
+            return new ColumnIndex.ShortArrayIndex<T>(column);
         } else if (column.getTypeClass().equals(int[].class)) {
             // Integer Array
-            return new IntegerArrayIndex(column);
+            return new ColumnIndex.IntegerArrayIndex<T>(column);
         } else if (column.getTypeClass().equals(long[].class)) {
             // Long Array
-            return new LongArrayIndex(column);
+            return new ColumnIndex.LongArrayIndex<T>(column);
         } else if (column.getTypeClass().equals(float[].class)) {
             // Float array
-            return new FloatArrayIndex(column);
+            return new ColumnIndex.FloatArrayIndex<T>(column);
         } else if (column.getTypeClass().equals(double[].class)) {
             // Double array
-            return new DoubleArrayIndex(column);
+            return new ColumnIndex.DoubleArrayIndex<T>(column);
         } else if (column.getTypeClass().equals(boolean[].class)) {
             // Boolean array
-            return new BooleanArrayIndex(column);
+            return new ColumnIndex.BooleanArrayIndex<T>(column);
         } else if (column.getTypeClass().equals(char[].class)) {
             // Char array
-            return new CharArrayIndex(column);
+            return new ColumnIndex.CharArrayIndex<T>(column);
         } else if (column.getTypeClass().equals(String[].class)) {
             // String array
-            return new DefaultArrayIndex(column);
+            return new ColumnIndex.DefaultArrayIndex<T>(column);
         } else if (column.getTypeClass().isArray()) {
             // Default Array
-            return new DefaultArrayIndex(column);
+            return new ColumnIndex.DefaultArrayIndex<T>(column);
         }
-        return new DefaultIndex(column);
+        return new ColumnIndex.DefaultIndex<T>(column);
     }
 
     private void ensureColumnSize(int index) {
         if (index >= columns.length) {
-            AbstractIndex[] newArray = new AbstractIndex[index + 1];
+            ColumnIndex[] newArray = new ColumnIndex[index + 1];
             System.arraycopy(columns, 0, newArray, 0, columns.length);
             columns = newArray;
         }
@@ -413,594 +412,6 @@ public class IndexImpl<T extends Element> implements Index<T> {
         }
         if (!(o instanceof ColumnImpl)) {
             throw new ClassCastException("Must be ColumnImpl object");
-        }
-    }
-
-    protected abstract class AbstractIndex<K> implements Iterable<Map.Entry<K, Set<T>>> {
-
-        // Const
-        public static final boolean TRIMMING_ENABLED = false;
-        public static final int TRIMMING_FREQUENCY = 30;
-        // Data
-        protected final ColumnImpl column;
-        protected final Set<T> nullSet;
-        protected Map<K, Set<T>> map;
-        // Variable
-        protected int elements;
-
-        public AbstractIndex(ColumnImpl column) {
-            this.column = column;
-            this.nullSet = new ObjectOpenHashSet<>();
-        }
-
-        public Object putValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                }
-            } else {
-                Set<T> set = getValueSet((K) value);
-                if (set == null) {
-                    set = addValue((K) value);
-                }
-                value = ((ValueSet) set).value;
-
-                if (set.add(element)) {
-                    elements++;
-                }
-            }
-            return value;
-        }
-
-        public void removeValue(T element, Object value) {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                }
-            } else {
-                Set<T> set = getValueSet((K) value);
-                if (set.remove(element)) {
-                    elements--;
-                }
-                if (set.isEmpty()) {
-                    removeValue((K) value);
-                }
-            }
-        }
-
-        public Object replaceValue(T element, K oldValue, K newValue) {
-            removeValue(element, oldValue);
-            return putValue(element, newValue);
-        }
-
-        public int getCount(K value) {
-            if (value == null) {
-                return nullSet.size();
-            }
-            Set<T> valueSet = getValueSet(value);
-            if (valueSet != null) {
-                return valueSet.size();
-            } else {
-                return 0;
-            }
-        }
-
-        public Collection values() {
-            return new WithNullDecorator();
-        }
-
-        public int countValues() {
-            return (nullSet.isEmpty() ? 0 : 1) + map.size();
-        }
-
-        public Number getMinValue() {
-            if (isSortable()) {
-                if (map.isEmpty()) {
-                    return null;
-                } else {
-                    return (Number) ((SortedMap) map).firstKey();
-                }
-            } else {
-                throw new UnsupportedOperationException("'" + column.getId() + "' is not a sortable column (" + column
-                        .getTypeClass().getSimpleName() + ").");
-            }
-        }
-
-        public Number getMaxValue() {
-            if (isSortable()) {
-                if (map.isEmpty()) {
-                    return null;
-                } else {
-                    return (Number) ((SortedMap) map).lastKey();
-                }
-            } else {
-                throw new UnsupportedOperationException("'" + column.getId() + "' is not a sortable column (" + column
-                        .getTypeClass().getSimpleName() + ").");
-            }
-        }
-
-        protected void destroy() {
-            map = null;
-            nullSet.clear();
-            elements = 0;
-        }
-
-        protected void clear() {
-            map.clear();
-            nullSet.clear();
-            elements = 0;
-        }
-
-        @Override
-        public Iterator<Map.Entry<K, Set<T>>> iterator() {
-            return new EntryIterator();
-        }
-
-        protected Set<T> getValueSet(K value) {
-            if (value == null) {
-                return nullSet;
-            }
-            return map.get(value);
-        }
-
-        protected void removeValue(K value) {
-            map.remove(value);
-        }
-
-        protected Set<T> addValue(K value) {
-            ValueSet valueSet = new ValueSet(value);
-            map.put(value, valueSet);
-            return valueSet;
-        }
-
-        protected boolean isSortable() {
-            return Number.class.isAssignableFrom(column.getTypeClass()) && map instanceof SortedMap;
-        }
-
-        protected final class WithNullDecorator implements Collection<K> {
-
-            private boolean hasNull() {
-                return !nullSet.isEmpty();
-            }
-
-            @Override
-            public int size() {
-                return (hasNull() ? 1 : 0) + map.size();
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return !hasNull() && map.isEmpty();
-            }
-
-            @Override
-            public boolean contains(Object o) {
-                if (o == null && hasNull()) {
-                    return true;
-                } else if (o != null) {
-                    return map.containsKey((K) o);
-                }
-                return false;
-            }
-
-            @Override
-            public Iterator iterator() {
-                return new WithNullIterator();
-            }
-
-            @Override
-            public Object[] toArray() {
-                if (hasNull()) {
-                    Object[] res = new Object[map.size() + 1];
-                    res[0] = null;
-                    System.arraycopy(map.keySet().toArray(), 0, res, 1, map.size());
-                    return res;
-                } else {
-                    return map.keySet().toArray();
-                }
-            }
-
-            @Override
-            public Object[] toArray(Object[] array) {
-
-                if (hasNull()) {
-                    if (array.length < size()) {
-                        array = (K[]) java.lang.reflect.Array
-                                .newInstance(array.getClass().getComponentType(), map.size() + 1);
-                    }
-                    array[0] = null;
-                    System.arraycopy(map.keySet().toArray(), 0, array, 1, map.size());
-                    return array;
-                } else {
-                    return map.keySet().toArray(array);
-                }
-            }
-
-            @Override
-            public boolean add(Object e) {
-                throw new UnsupportedOperationException("Not supported");
-            }
-
-            @Override
-            public boolean remove(Object o) {
-                throw new UnsupportedOperationException("Not supported");
-            }
-
-            @Override
-            public boolean containsAll(Collection clctn) {
-                for (Object o : clctn) {
-                    if (o == null && nullSet.isEmpty()) {
-                        return false;
-                    } else if (o != null && !map.containsKey((K) o)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            public boolean addAll(Collection clctn) {
-                throw new UnsupportedOperationException("Not supported");
-            }
-
-            @Override
-            public boolean removeAll(Collection clctn) {
-                throw new UnsupportedOperationException("Not supported");
-            }
-
-            @Override
-            public boolean retainAll(Collection clctn) {
-                throw new UnsupportedOperationException("Not supported");
-            }
-
-            @Override
-            public void clear() {
-                throw new UnsupportedOperationException("Not supported");
-            }
-
-            private final class WithNullIterator implements Iterator<K> {
-
-                private final Iterator<K> mapIterator;
-                private boolean hasNull;
-
-                public WithNullIterator() {
-                    hasNull = hasNull();
-                    mapIterator = map.keySet().iterator();
-                }
-
-                @Override
-                public boolean hasNext() {
-                    if (hasNull) {
-                        return true;
-                    }
-                    return mapIterator.hasNext();
-                }
-
-                @Override
-                public K next() {
-                    if (hasNull) {
-                        hasNull = false;
-                        return null;
-                    }
-                    return mapIterator.next();
-                }
-
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException("Not supported operation.");
-                }
-            }
-        }
-
-        private final class EntryIterator implements Iterator<Map.Entry<K, Set<T>>> {
-
-            private final Iterator<Map.Entry<K, Set<T>>> mapIterator;
-            private NullEntry nullEntry;
-
-            public EntryIterator() {
-                if (!nullSet.isEmpty()) {
-                    nullEntry = new NullEntry();
-                }
-                mapIterator = map.entrySet().iterator();
-            }
-
-            @Override
-            public boolean hasNext() {
-                if (nullEntry != null) {
-                    return true;
-                }
-                return mapIterator.hasNext();
-            }
-
-            @Override
-            public Map.Entry<K, Set<T>> next() {
-                if (nullEntry != null) {
-                    NullEntry ne = nullEntry;
-                    nullEntry = null;
-                    return ne;
-                }
-                return mapIterator.next();
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException("Not supported operation.");
-            }
-        }
-
-        private class NullEntry implements Map.Entry<K, Set<T>> {
-
-            @Override
-            public K getKey() {
-                return null;
-            }
-
-            @Override
-            public Set<T> getValue() {
-                return nullSet;
-            }
-
-            @Override
-            public Set<T> setValue(Set<T> v) {
-                throw new UnsupportedOperationException("Not supported operation.");
-            }
-        }
-    }
-
-    private static final class ValueSet<K, T> implements Set<T> {
-
-        private final K value;
-        private final Set<T> set;
-
-        public ValueSet(K value) {
-            this.value = value;
-            this.set = new ObjectOpenHashSet<>();
-        }
-
-        @Override
-        public int size() {
-            return set.size();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return set.isEmpty();
-        }
-
-        @Override
-        public boolean contains(Object o) {
-            return set.contains(o);
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return set.iterator();
-        }
-
-        @Override
-        public Object[] toArray() {
-            return set.toArray();
-        }
-
-        @Override
-        public <T> T[] toArray(T[] ts) {
-            return set.toArray(ts);
-        }
-
-        @Override
-        public boolean add(T e) {
-            return set.add(e);
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            return set.remove(o);
-        }
-
-        @Override
-        public boolean containsAll(Collection<?> clctn) {
-            return set.containsAll(clctn);
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends T> clctn) {
-            throw new UnsupportedOperationException("Not supported operation.");
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> clctn) {
-            throw new UnsupportedOperationException("Not supported operation.");
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> clctn) {
-            throw new UnsupportedOperationException("Not supported operation.");
-        }
-
-        @Override
-        public void clear() {
-            throw new UnsupportedOperationException("Not supported operation.");
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return set.equals(o);
-        }
-
-        @Override
-        public int hashCode() {
-            return set.hashCode();
-        }
-    }
-
-    protected class DefaultIndex extends AbstractIndex<Object> {
-
-        public DefaultIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenHashMap<>();
-        }
-    }
-
-    protected class BooleanIndex extends AbstractIndex<Boolean> {
-
-        public BooleanIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenHashMap<>();
-        }
-    }
-
-    protected class DoubleIndex extends AbstractIndex<Double> {
-
-        public DoubleIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Double2ObjectAVLTreeMap<>();
-        }
-    }
-
-    protected class IntegerIndex extends AbstractIndex<Integer> {
-
-        public IntegerIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Int2ObjectAVLTreeMap<>();
-        }
-    }
-
-    protected class FloatIndex extends AbstractIndex<Float> {
-
-        public FloatIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Float2ObjectAVLTreeMap<>();
-        }
-    }
-
-    protected class LongIndex extends AbstractIndex<Long> {
-
-        public LongIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Long2ObjectAVLTreeMap<>();
-        }
-    }
-
-    protected class ShortIndex extends AbstractIndex<Short> {
-
-        public ShortIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Short2ObjectAVLTreeMap<>();
-        }
-    }
-
-    protected class ByteIndex extends AbstractIndex<Byte> {
-
-        public ByteIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Byte2ObjectAVLTreeMap<>();
-        }
-    }
-
-    protected class GenericNumberIndex extends AbstractIndex<Number> {
-
-        public GenericNumberIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectAVLTreeMap<>();
-        }
-    }
-
-    protected class CharIndex extends AbstractIndex<Character> {
-
-        public CharIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Char2ObjectAVLTreeMap<>();
-        }
-    }
-
-    protected class DefaultArrayIndex extends AbstractIndex<Object[]> {
-
-        public DefaultArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(ObjectArrays.HASH_STRATEGY);
-        }
-    }
-
-    protected class BooleanArrayIndex extends AbstractIndex<boolean[]> {
-
-        public BooleanArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(BooleanArrays.HASH_STRATEGY);
-        }
-    }
-
-    protected class DoubleArrayIndex extends AbstractIndex<double[]> {
-
-        public DoubleArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(DoubleArrays.HASH_STRATEGY);
-        }
-    }
-
-    protected class IntegerArrayIndex extends AbstractIndex<int[]> {
-
-        public IntegerArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(IntArrays.HASH_STRATEGY);
-        }
-    }
-
-    protected class FloatArrayIndex extends AbstractIndex<float[]> {
-
-        public FloatArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(FloatArrays.HASH_STRATEGY);
-        }
-    }
-
-    protected class LongArrayIndex extends AbstractIndex<long[]> {
-
-        public LongArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(LongArrays.HASH_STRATEGY);
-        }
-    }
-
-    protected class ShortArrayIndex extends AbstractIndex<short[]> {
-
-        public ShortArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(ShortArrays.HASH_STRATEGY);
-        }
-    }
-
-    protected class ByteArrayIndex extends AbstractIndex<byte[]> {
-
-        public ByteArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(ByteArrays.HASH_STRATEGY);
-        }
-    }
-
-    protected class CharArrayIndex extends AbstractIndex<char[]> {
-
-        public CharArrayIndex(ColumnImpl column) {
-            super(column);
-
-            map = new Object2ObjectOpenCustomHashMap<>(CharArrays.HASH_STRATEGY);
         }
     }
 
