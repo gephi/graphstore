@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import java.util.ArrayList;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
@@ -60,6 +61,15 @@ public class ColumnNoIndexTest {
         Assert.assertEquals(index.count(null), 0);
         Assert.assertEquals(index.count("foo"), 0);
         Assert.assertFalse(index.get(null).iterator().hasNext());
+        Assert.assertFalse(index.get("foo").iterator().hasNext());
+    }
+
+    @Test
+    public void testEmptyEdgeInstead() {
+        ColumnNoIndexImpl<String, Edge> index = createEdgeIndex(graphStore, "id");
+
+        Assert.assertEquals(index.countElements(), 0);
+        Assert.assertTrue(index.values().isEmpty());
         Assert.assertFalse(index.get("foo").iterator().hasNext());
     }
 
@@ -169,6 +179,10 @@ public class ColumnNoIndexTest {
 
     private <K, T extends Element> ColumnNoIndexImpl<K, T> createIndex(GraphStore graphStore, String id) {
         return new ColumnNoIndexImpl(graphStore.nodeTable.getColumn(id), graphStore, Node.class);
+    }
+
+    private <K, T extends Element> ColumnNoIndexImpl<K, T> createEdgeIndex(GraphStore graphStore, String id) {
+        return new ColumnNoIndexImpl(graphStore.nodeTable.getColumn(id), graphStore, Edge.class);
     }
 
     private Node addNodeWithAttribute(GraphStore store, Column column, String id, Object val) {
