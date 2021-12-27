@@ -97,6 +97,11 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
     }
 
     @Override
+    public int countColumns(Origin origin) {
+        return store.size(origin);
+    }
+
+    @Override
     public int size() {
         return countColumns();
     }

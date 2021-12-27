@@ -32,6 +32,7 @@ import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Origin;
 
 public class ColumnStore<T extends Element> implements ColumnIterable {
 
@@ -339,6 +340,23 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
 
     public int size() {
         return length - garbageQueue.size();
+    }
+
+    public int size(Origin origin) {
+        checkNonNullObject(origin);
+        lock();
+        try {
+            int res = 0;
+            for (int i = 0; i < length; i++) {
+                ColumnImpl c = columns[i];
+                if (c != null && c.origin.equals(origin)) {
+                    res++;
+                }
+            }
+            return res;
+        } finally {
+            unlock();
+        }
     }
 
     protected TableObserverImpl createTableObserver(TableImpl table, boolean withDiff) {
