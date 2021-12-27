@@ -103,7 +103,8 @@ public class TableImplTest {
 
     @Test
     public void testIsIndexed() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, true);
+        GraphStore graphStore = new GraphStore();
+        TableImpl<Node> table = new TableImpl<>(graphStore, Node.class, true);
         Column col1 = table.addColumn("Id", null, Integer.class, Origin.DATA, null, false);
         Column col2 = table.addColumn("1", null, Integer.class, Origin.DATA, null, true);
 
