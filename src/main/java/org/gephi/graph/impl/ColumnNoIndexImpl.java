@@ -25,6 +25,7 @@ import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphLock;
 import org.gephi.graph.api.Node;
 
 public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<K, T> {
@@ -35,11 +36,13 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
     protected final Class<T> elementClass;
     // Graph
     protected final Graph graph;
+    protected final GraphLock graphLock;
 
     protected ColumnNoIndexImpl(ColumnImpl column, Graph graph, Class<T> elementClass) {
         this.column = column;
         this.elementClass = elementClass;
         this.graph = graph;
+        this.graphLock = graph.getLock();
     }
 
     private Iterator<T> getElementIterator() {
@@ -53,20 +56,25 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
 
     @Override
     public int count(K value) {
-        Iterator<T> elementIterator = getElementIterator();
-        int count = 0;
-        if (elementIterator != null) {
-            while (elementIterator.hasNext()) {
-                ElementImpl element = (ElementImpl) elementIterator.next();
-                K obj = (K) element.getAttribute(column);
-                if (value == null && obj == null) {
-                    count++;
-                } else if (value != null && value.equals(obj)) {
-                    count++;
+        lock();
+        try {
+            Iterator<T> elementIterator = getElementIterator();
+            int count = 0;
+            if (elementIterator != null) {
+                while (elementIterator.hasNext()) {
+                    ElementImpl element = (ElementImpl) elementIterator.next();
+                    K obj = (K) element.getAttribute(column);
+                    if (value == null && obj == null) {
+                        count++;
+                    } else if (value != null && value.equals(obj)) {
+                        count++;
+                    }
                 }
             }
+            return count;
+        } finally {
+            unlock();
         }
-        return count;
     }
 
     @Override
@@ -76,16 +84,21 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
 
     @Override
     public Collection<K> values() {
-        Iterator<T> elementIterator = getElementIterator();
-        Set<K> set = new ObjectOpenHashSet<>();
-        if (elementIterator != null) {
-            while (elementIterator.hasNext()) {
-                ElementImpl element = (ElementImpl) elementIterator.next();
-                K obj = (K) element.getAttribute(column);
-                set.add(obj);
+        lock();
+        try {
+            Iterator<T> elementIterator = getElementIterator();
+            Set<K> set = new ObjectOpenHashSet<>();
+            if (elementIterator != null) {
+                while (elementIterator.hasNext()) {
+                    ElementImpl element = (ElementImpl) elementIterator.next();
+                    K obj = (K) element.getAttribute(column);
+                    set.add(obj);
+                }
             }
+            return set;
+        } finally {
+            unlock();
         }
-        return set;
     }
 
     @Override
@@ -113,22 +126,27 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         if (!isSortable()) {
             throw new UnsupportedOperationException("Only supported for sortable columns");
         }
-        Number min = null;
-        Iterator<T> elementIterator = getElementIterator();
-        if (elementIterator != null) {
-            double minN = Double.POSITIVE_INFINITY;
-            while (elementIterator.hasNext()) {
-                ElementImpl element = (ElementImpl) elementIterator.next();
-                Number num = (Number) element.getAttribute(column);
-                if (min == null || (num != null && num.doubleValue() < minN)) {
-                    if (num != null) {
-                        minN = num.doubleValue();
+        lock();
+        try {
+            Number min = null;
+            Iterator<T> elementIterator = getElementIterator();
+            if (elementIterator != null) {
+                double minN = Double.POSITIVE_INFINITY;
+                while (elementIterator.hasNext()) {
+                    ElementImpl element = (ElementImpl) elementIterator.next();
+                    Number num = (Number) element.getAttribute(column);
+                    if (min == null || (num != null && num.doubleValue() < minN)) {
+                        if (num != null) {
+                            minN = num.doubleValue();
+                        }
+                        min = num;
                     }
-                    min = num;
                 }
             }
+            return min;
+        } finally {
+            unlock();
         }
-        return min;
     }
 
     @Override
@@ -136,23 +154,28 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         if (!isSortable()) {
             throw new UnsupportedOperationException("Only supported for sortable columns");
         }
-        Number max = null;
-        Iterator<T> elementIterator = getElementIterator();
-        if (elementIterator != null) {
-            double maxN = Double.NEGATIVE_INFINITY;
+        lock();
+        try {
+            Number max = null;
+            Iterator<T> elementIterator = getElementIterator();
+            if (elementIterator != null) {
+                double maxN = Double.NEGATIVE_INFINITY;
 
-            while (elementIterator.hasNext()) {
-                ElementImpl element = (ElementImpl) elementIterator.next();
-                Number num = (Number) element.getAttribute(column);
-                if (max == null || (num != null && num.doubleValue() > maxN)) {
-                    if (num != null) {
-                        maxN = num.doubleValue();
+                while (elementIterator.hasNext()) {
+                    ElementImpl element = (ElementImpl) elementIterator.next();
+                    Number num = (Number) element.getAttribute(column);
+                    if (max == null || (num != null && num.doubleValue() > maxN)) {
+                        if (num != null) {
+                            maxN = num.doubleValue();
+                        }
+                        max = num;
                     }
-                    max = num;
                 }
             }
+            return max;
+        } finally {
+            unlock();
         }
-        return max;
     }
 
     @Override
@@ -216,6 +239,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         public ElementWithValueIterator(Iterator<T> itr, K value) {
             this.itr = itr;
             this.value = value;
+            lock();
         }
 
         @Override
@@ -227,7 +251,11 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
                     pointer = element;
                 }
             }
-            return pointer != null;
+            if (pointer != null) {
+                return true;
+            }
+            unlock();
+            return false;
         }
 
         @Override
@@ -240,6 +268,18 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         @Override
         public void remove() {
             throw new UnsupportedOperationException("Not supported.");
+        }
+    }
+
+    private void lock() {
+        if (graphLock != null) {
+            graphLock.readLock();
+        }
+    }
+
+    private void unlock() {
+        if (graphLock != null) {
+            graphLock.readUnlock();
         }
     }
 }
