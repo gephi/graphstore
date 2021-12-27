@@ -80,7 +80,7 @@ public class IndexStore<T extends Element> {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't create a view index for the main view");
         }
-        IndexImpl viewIndex = new IndexImpl<>(columnStore);
+        IndexImpl viewIndex = new IndexImpl<>(columnStore, graph);
         ColumnImpl[] columns = columnStore.toArray();
         viewIndex.addAllColumns(columns);
         viewIndexes.put(graph.getView(), viewIndex);

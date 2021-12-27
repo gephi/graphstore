@@ -22,17 +22,25 @@ import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIndex;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Index;
 
 public class IndexImpl<T extends Element> implements Index<T> {
 
     protected final TableLockImpl lock;
     protected final ColumnStore<T> columnStore;
+    protected final Graph graph;
     protected ColumnIndexImpl[] columns;
     protected int columnsCount;
 
     public IndexImpl(ColumnStore<T> columnStore) {
+        this(columnStore, columnStore.graphStore);
+    }
+
+    public IndexImpl(ColumnStore<T> columnStore, Graph graph) {
         this.columnStore = columnStore;
+        this.graph = graph;
         this.columns = new ColumnIndexImpl[0];
         this.lock = columnStore.lock;
     }
@@ -208,52 +216,39 @@ public class IndexImpl<T extends Element> implements Index<T> {
     }
 
     protected void addColumn(ColumnImpl col) {
-        if (col.isIndexed()) {
-            ensureColumnSize(col.storeId);
-            ColumnStandardIndexImpl index = createStandardIndex(col);
-            columns[col.storeId] = index;
-            columnsCount++;
-        }
+        ensureColumnSize(col.storeId);
+        ColumnIndexImpl index = createIndex(col);
+        columns[col.storeId] = index;
+        columnsCount++;
     }
 
     protected void addAllColumns(ColumnImpl[] cols) {
         ensureColumnSize(cols.length);
         for (ColumnImpl col : cols) {
-            if (col.isIndexed()) {
-                ColumnStandardIndexImpl index = createStandardIndex(col);
-                columns[col.storeId] = index;
-                columnsCount++;
-            }
+            ColumnIndexImpl index = createIndex(col);
+            columns[col.storeId] = index;
+            columnsCount++;
         }
     }
 
     protected void removeColumn(ColumnImpl col) {
-        if (col.isIndexed()) {
-            ColumnIndexImpl index = columns[col.storeId];
-            index.destroy();
-            columns[col.storeId] = null;
-            columnsCount--;
-        }
+        ColumnIndexImpl index = columns[col.storeId];
+        index.destroy();
+        columns[col.storeId] = null;
+        columnsCount--;
     }
 
     protected boolean hasColumn(ColumnImpl col) {
-        if (col.isIndexed()) {
-            int id = col.storeId;
-            if (id != ColumnStore.NULL_ID && columns.length > id && columns[id].getColumn() == col) {
-                return true;
-            }
-        }
-        return false;
+        int id = col.storeId;
+        return id != ColumnStore.NULL_ID && columns.length > id && columns[id].getColumn() == col;
     }
 
     protected ColumnIndexImpl getIndex(Column col) {
-        if (col.isIndexed()) {
-            int id = col.getIndex();
-            if (id != ColumnStore.NULL_ID && columns.length > id) {
-                ColumnIndexImpl index = columns[id];
-                if (index != null && index.getColumn() == col) {
-                    return index;
-                }
+        int id = col.getIndex();
+        if (id != ColumnStore.NULL_ID && columns.length > id) {
+            ColumnIndexImpl index = columns[id];
+            if (index != null && index.getColumn() == col) {
+                return index;
             }
         }
         return null;
@@ -275,6 +270,14 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
     protected int size() {
         return columnsCount;
+    }
+
+    ColumnIndexImpl createIndex(ColumnImpl col) {
+        return col.isIndexed() ? createStandardIndex(col) : createNoIndex(col, graph);
+    }
+
+    ColumnNoIndexImpl createNoIndex(ColumnImpl column, Graph graph) {
+        return new ColumnNoIndexImpl(column, graph, columnStore.elementType);
     }
 
     ColumnStandardIndexImpl createStandardIndex(ColumnImpl column) {

@@ -34,7 +34,7 @@ public class IndexStoreTest {
         ColumnStore<Node> columnStore = graphStore.nodeTable.store;
         IndexStore<Node> indexStore = columnStore.indexStore;
         IndexImpl<Node> mainIndex = indexStore.mainIndex;
-        Assert.assertEquals(mainIndex.size(), 0);
+        Assert.assertEquals(mainIndex.size(), GraphStoreConfiguration.NODE_DEFAULT_COLUMNS);
     }
 
     @Test
