@@ -83,8 +83,16 @@ public final class GraphStoreConfiguration {
     // Miscellaneous
     public static final double TIMESTAMP_STORE_GROWING_FACTOR = 1.1;
     public static final double INTERVAL_STORE_GROWING_FACTOR = 1.1;
+
+    /**
+     * Default number of node property columns.
+     */
     public static final int NODE_DEFAULT_COLUMNS = 1 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIME_SET ? 1
             : 0);
+
+    /**
+     * Default number of edge property columns.
+     */
     public static final int EDGE_DEFAULT_COLUMNS = 2 + (ENABLE_ELEMENT_LABEL ? 1 : 0) + (ENABLE_ELEMENT_TIME_SET ? 1
             : 0);
 }

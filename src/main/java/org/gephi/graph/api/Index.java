@@ -19,7 +19,7 @@ import java.util.Collection;
 
 /**
  * An index is associated with each table and keeps track of each unique value
- * in indexed columns.
+ * in columns.
  * <p>
  * Each column is associated with a @{{@link ColumnIndex}}.
  *

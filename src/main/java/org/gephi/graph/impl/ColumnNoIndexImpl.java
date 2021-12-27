@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -21,7 +22,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
-import org.gephi.graph.api.ColumnIndex;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.booleans.BooleanArrays;
@@ -41,14 +42,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import org.gephi.graph.api.ColumnIndex;
 import org.gephi.graph.api.Element;
 
 public abstract class ColumnStandardIndexImpl<K, T extends Element> implements ColumnIndexImpl<K, T> {
 
-    // Const
-    public static final boolean TRIMMING_ENABLED = false;
-    public static final int TRIMMING_FREQUENCY = 30;
     // Lock (optional)
     protected final TableLockImpl lock;
     // Data
