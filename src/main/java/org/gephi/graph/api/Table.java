@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.api;
 
 /**
@@ -108,6 +109,14 @@ public interface Table extends ColumnIterable {
      * @return the number of columns
      */
     public int countColumns();
+
+    /**
+     * Counts the columns of the given origin.
+     *
+     * @param origin the origin
+     * @return the number of columns set with this origin
+     */
+    public int countColumns(Origin origin);
 
     /**
      * The element class of this column.

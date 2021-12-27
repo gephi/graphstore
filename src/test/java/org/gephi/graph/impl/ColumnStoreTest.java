@@ -267,6 +267,19 @@ public class ColumnStoreTest {
     }
 
     @Test
+    public void testSizeByOrigin() {
+        ColumnStore<Node> store = new ColumnStore(Node.class, false);
+        ColumnImpl col1 = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
+        store.addColumn(col1);
+
+        ColumnImpl col2 = new ColumnImpl("1", Integer.class, null, null, Origin.PROPERTY, false, false);
+        store.addColumn(col2);
+
+        Assert.assertEquals(store.size(Origin.DATA), 1);
+        Assert.assertEquals(store.size(Origin.PROPERTY), 1);
+    }
+
+    @Test
     public void testHasColumnDifferentCase() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
         ColumnImpl col = new ColumnImpl("A", Integer.class, null, null, Origin.DATA, false, false);
