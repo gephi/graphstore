@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -160,7 +161,7 @@ public abstract class ElementImpl implements Element {
             return getAttribute(column);
         } else {
             Interval interval = view.getTimeInterval();
-            checkViewExist((GraphView) view);
+            checkViewExist(view);
 
             int index = column.getIndex();
             synchronized (this) {
@@ -407,11 +408,13 @@ public abstract class ElementImpl implements Element {
                 oldValue = attributes[index];
             }
 
-            TimeMap dynamicValue = null;
+            TimeMap dynamicValue;
             if (oldValue == null) {
                 try {
-                    attributes[index] = dynamicValue = (TimeMap) column.getTypeClass().newInstance();
-                } catch (InstantiationException | IllegalAccessException ex) {
+                    attributes[index] = dynamicValue = (TimeMap) column.getTypeClass().getDeclaredConstructor()
+                            .newInstance();
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                        | InvocationTargetException ex) {
                     throw new RuntimeException(ex);
                 }
             } else {
@@ -669,10 +672,7 @@ public abstract class ElementImpl implements Element {
             return false;
         }
         final ElementImpl other = (ElementImpl) obj;
-        if (!this.getId().equals(other.getId())) {
-            return false;
-        }
-        return true;
+        return this.getId().equals(other.getId());
     }
 
     protected GraphStore getGraphStore() {
