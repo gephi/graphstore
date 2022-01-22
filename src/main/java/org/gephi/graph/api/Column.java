@@ -97,6 +97,13 @@ public interface Column {
     public boolean isDynamic();
 
     /**
+     * Returns true if this column is dynamic and has a <em>TimeMap</em> type.
+     *
+     * @return true if dynamic attribute type, false otherwise
+     */
+    public boolean isDynamicAttribute();
+
+    /**
      * Returns true if this column has a number type.
      *
      * @return true if number type, false otherwise
