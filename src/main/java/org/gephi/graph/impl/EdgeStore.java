@@ -244,7 +244,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             EdgeImpl[] headOutArray = source.headOut;
             headOutArray[type] = nextOutEdge;
             if (nextOutEdge == null && type > GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT - 1 && type == headOutArray.length - 1) {
-                trimHeadOutCapacity(source, type - 1);
+                trimHeadOutCapacity(source, headOutArray.length - 1);
             }
         } else {
             EdgeImpl previousOutEdge = get(previousOutEdgeId);
@@ -271,7 +271,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             EdgeImpl[] headInArray = target.headIn;
             headInArray[type] = nextInEdge;
             if (nextInEdge == null && type > GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT - 1 && type == headInArray.length - 1) {
-                trimHeadInCapacity(target, type - 1);
+                trimHeadInCapacity(target, headInArray.length - 1);
             }
         } else {
             EdgeImpl previousInEdge = get(previousInEdgeId);
