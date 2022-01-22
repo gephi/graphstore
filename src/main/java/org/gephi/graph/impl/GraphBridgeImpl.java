@@ -97,6 +97,9 @@ public class GraphBridgeImpl implements GraphBridge {
             if (store.getNode(node.getId()) == null) {
                 Node nodeCopy = factory.newNode(node.getId());
 
+                // Time set
+                copyTimeSet(node, nodeCopy);
+
                 // Properties
                 copyNodeProperties(node, nodeCopy);
 
@@ -118,6 +121,9 @@ public class GraphBridgeImpl implements GraphBridge {
                 Node target = store.getNode(edge.getTarget().getId());
 
                 Edge edgeCopy = factory.newEdge(edge.getId(), source, target, edge.getType(), 0.0, edge.isDirected());
+
+                // Time set
+                copyTimeSet(edge, edgeCopy);
 
                 // Weight
                 copyEdgeWeight(edge, edgeCopy);
@@ -171,6 +177,12 @@ public class GraphBridgeImpl implements GraphBridge {
         textCopy.setColor(text.getColor());
         textCopy.setSize(text.getSize());
         textCopy.setVisible(text.isVisible());
+    }
+
+    private void copyTimeSet(Element element, Element elementCopy) {
+        Column sourceColumn = element.getTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
+        Column destColumn = elementCopy.getTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
+        elementCopy.setAttribute(destColumn, element.getAttribute(sourceColumn));
     }
 
     private void copyColumns(TableImpl sourceTable, TableImpl destTable) {
