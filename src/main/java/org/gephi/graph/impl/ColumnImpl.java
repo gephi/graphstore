@@ -126,6 +126,11 @@ public class ColumnImpl implements Column {
     }
 
     @Override
+    public boolean isDynamicAttribute() {
+        return dynamic && TimeMap.class.isAssignableFrom(typeClass);
+    }
+
+    @Override
     public boolean isReadOnly() {
         return readOnly;
     }

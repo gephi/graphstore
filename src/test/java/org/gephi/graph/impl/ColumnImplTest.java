@@ -55,18 +55,23 @@ public class ColumnImplTest {
     public void testColumnIsDynamic() {
         ColumnImpl col1 = new ColumnImpl("0", String.class, null, null, Origin.DATA, false, false);
         Assert.assertFalse(col1.isDynamic());
+        Assert.assertFalse(col1.isDynamicAttribute());
 
         ColumnImpl col2 = new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col2.isDynamic());
+        Assert.assertTrue(col2.isDynamicAttribute());
 
         ColumnImpl col3 = new ColumnImpl("0", IntervalDoubleMap.class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col3.isDynamic());
+        Assert.assertTrue(col3.isDynamicAttribute());
 
         ColumnImpl col4 = new ColumnImpl("0", IntervalSet.class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col4.isDynamic());
+        Assert.assertFalse(col4.isDynamicAttribute());
 
         ColumnImpl col5 = new ColumnImpl("0", TimestampSet.class, null, null, Origin.DATA, false, false);
         Assert.assertTrue(col5.isDynamic());
+        Assert.assertFalse(col5.isDynamicAttribute());
     }
 
     @Test
