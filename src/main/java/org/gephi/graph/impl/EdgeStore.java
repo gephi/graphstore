@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
@@ -845,6 +847,21 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         readUnlock();
         return list;
+    }
+
+    @Override
+    public Set<Edge> toSet() {
+        readLock();
+
+        Set<Edge> set = new HashSet<>(size);
+        EdgeStoreIterator itr = iterator();
+        while (itr.hasNext()) {
+            EdgeImpl n = itr.next();
+            set.add(n);
+        }
+
+        readUnlock();
+        return set;
     }
 
     @Override

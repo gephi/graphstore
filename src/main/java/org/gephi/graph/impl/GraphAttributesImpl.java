@@ -21,7 +21,6 @@ import java.util.Set;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.types.TimeMap;
-import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public class GraphAttributesImpl {

@@ -20,8 +20,10 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 
@@ -229,6 +231,23 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         readUnlock();
 
         return list;
+    }
+
+    @Override
+    public Set<Node> toSet() {
+        readLock();
+
+        Set<Node> set = new HashSet<>(size);
+
+        NodeStoreIterator itr = iterator();
+        while (itr.hasNext()) {
+            NodeImpl n = itr.next();
+            set.add(n);
+        }
+
+        readUnlock();
+
+        return set;
     }
 
     @Override

@@ -178,7 +178,7 @@ public class IndexStore<T extends Element> {
     }
 
     public void indexView(Graph graph) {
-        IndexImpl viewIndex = viewIndexes.get(graph.getView());
+        final IndexImpl viewIndex = viewIndexes.get(graph.getView());
         if (viewIndex != null) {
             graph.readLock();
             try {
@@ -224,8 +224,10 @@ public class IndexStore<T extends Element> {
                 for (int i = 0; i < length; i++) {
                     Column c = cols[i];
                     if (c != null && c.isIndexed()) {
-                        Object value = elementImpl.attributes[c.getIndex()];
-                        index.put(c, value, element);
+                        synchronized (elementImpl) {
+                            Object value = elementImpl.attributes[c.getIndex()];
+                            index.put(c, value, element);
+                        }
                     }
                 }
             }
@@ -245,8 +247,10 @@ public class IndexStore<T extends Element> {
                 for (int i = 0; i < length; i++) {
                     Column c = cols[i];
                     if (c != null && c.isIndexed()) {
-                        Object value = elementImpl.attributes[c.getIndex()];
-                        index.remove(c, value, element);
+                        synchronized (elementImpl) {
+                            Object value = elementImpl.attributes[c.getIndex()];
+                            index.remove(c, value, element);
+                        }
                     }
                 }
             }

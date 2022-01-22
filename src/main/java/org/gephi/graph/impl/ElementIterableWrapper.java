@@ -17,8 +17,10 @@ package org.gephi.graph.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 
@@ -42,16 +44,26 @@ public abstract class ElementIterableWrapper<T extends Element> implements Eleme
     }
 
     protected T[] toArray(T[] a) {
+        // TODO This can be improved
         return toCollection().toArray(a);
     }
 
     @Override
     public Collection<T> toCollection() {
         List<T> list = new ArrayList<>();
-        for (; iterator.hasNext();) {
+        while (iterator.hasNext()) {
             list.add(iterator.next());
         }
         return list;
+    }
+
+    @Override
+    public Set<T> toSet() {
+        Set<T> set = new HashSet<>();
+        while (iterator.hasNext()) {
+            set.add(iterator.next());
+        }
+        return set;
     }
 
     @Override

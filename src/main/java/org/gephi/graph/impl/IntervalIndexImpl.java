@@ -32,104 +32,119 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
 
     @Override
     public double getMinTimestamp() {
-        if (mainIndex) {
+        lock();
+        try {
             Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
-            if (!sortedMap.isEmpty()) {
-                return sortedMap.getLow();
-            }
-        } else {
-            Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
-            if (!sortedMap.isEmpty()) {
-                for (Map.Entry<Interval, Integer> entry : sortedMap.entrySet()) {
-                    int index = entry.getValue();
-                    if (index < timestamps.length) {
-                        TimeIndexEntry intervalEntry = timestamps[index];
-                        if (intervalEntry != null) {
-                            return entry.getKey().getLow();
+            if (mainIndex) {
+                if (!sortedMap.isEmpty()) {
+                    return sortedMap.getLow();
+                }
+            } else {
+                if (!sortedMap.isEmpty()) {
+                    for (Map.Entry<Interval, Integer> entry : sortedMap.entrySet()) {
+                        int index = entry.getValue();
+                        if (index < timestamps.length) {
+                            TimeIndexEntry intervalEntry = timestamps[index];
+                            if (intervalEntry != null) {
+                                return entry.getKey().getLow();
+                            }
                         }
                     }
                 }
             }
+            return Double.NEGATIVE_INFINITY;
+        } finally {
+            unlock();
         }
-        return Double.NEGATIVE_INFINITY;
     }
 
     @Override
     public double getMaxTimestamp() {
-        if (mainIndex) {
-            Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
-            if (!sortedMap.isEmpty()) {
-                return sortedMap.getHigh();
+        lock();
+        try {
+            if (mainIndex) {
+                Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
+                if (!sortedMap.isEmpty()) {
+                    return sortedMap.getHigh();
+                }
+            } else {
+                // TODO Better algorithm to find max
+                Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
+                if (!sortedMap.isEmpty()) {
+                    double max = Double.NEGATIVE_INFINITY;
+                    boolean found = false;
+                    for (Map.Entry<Interval, Integer> entry : sortedMap.entrySet()) {
+                        int index = entry.getValue();
+                        if (index < timestamps.length) {
+                            TimeIndexEntry intervalEntry = timestamps[index];
+                            if (intervalEntry != null) {
+                                found = true;
+                                max = Math.max(max, entry.getKey().getHigh());
+                            }
+                        }
+                    }
+                    if (found) {
+                        return max;
+                    }
+                }
+
             }
-        } else {
-            // TODO Better algorithm to find max
+            return Double.POSITIVE_INFINITY;
+        } finally {
+            unlock();
+        }
+    }
+
+    @Override
+    public ElementIterable<T> get(double timestamp) {
+        checkDouble(timestamp);
+
+        lock();
+        try {
+            ObjectSet<Element> elements = new ObjectOpenHashSet<>();
             Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
             if (!sortedMap.isEmpty()) {
-                double max = Double.NEGATIVE_INFINITY;
-                boolean found = false;
-                for (Map.Entry<Interval, Integer> entry : sortedMap.entrySet()) {
-                    int index = entry.getValue();
+                for (Integer index : sortedMap.values(timestamp)) {
                     if (index < timestamps.length) {
-                        TimeIndexEntry intervalEntry = timestamps[index];
-                        if (intervalEntry != null) {
-                            found = true;
-                            max = Math.max(max, entry.getKey().getHigh());
+                        TimeIndexEntry ts = timestamps[index];
+                        if (ts != null) {
+                            elements.addAll(ts.elementSet);
                         }
                     }
                 }
-                if (found) {
-                    return max;
-                }
             }
-
+            if (!elements.isEmpty()) {
+                return new ElementSetWrapperIterable(elements);
+            }
+            return ElementIterable.EMPTY;
+        } finally {
+            unlock();
         }
-        return Double.POSITIVE_INFINITY;
     }
 
     @Override
-    public ElementIterable get(double timestamp) {
-        checkDouble(timestamp);
+    public ElementIterable<T> get(Interval interval) {
 
-        readLock();
-        ObjectSet<Element> elements = new ObjectOpenHashSet<>();
-        Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
-        if (!sortedMap.isEmpty()) {
-            for (Integer index : sortedMap.values(timestamp)) {
-                if (index < timestamps.length) {
-                    TimeIndexEntry ts = timestamps[index];
-                    if (ts != null) {
-                        elements.addAll(ts.elementSet);
+        lock();
+        try {
+            ObjectSet<Element> elements = new ObjectOpenHashSet<>();
+            Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
+            if (!sortedMap.isEmpty()) {
+                for (Integer index : sortedMap.values(interval)) {
+                    if (index < timestamps.length) {
+                        TimeIndexEntry ts = timestamps[index];
+                        if (ts != null) {
+                            elements.addAll(ts.elementSet);
+                        }
                     }
                 }
             }
-        }
-        if (!elements.isEmpty()) {
-            return new ElementIterableImpl(new ElementIteratorImpl(elements.iterator()));
-        }
-        readUnlock();
-        return ElementIterable.EMPTY;
-    }
-
-    @Override
-    public ElementIterable get(Interval interval) {
-
-        readLock();
-        ObjectSet<Element> elements = new ObjectOpenHashSet<>();
-        Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
-        if (!sortedMap.isEmpty()) {
-            for (Integer index : sortedMap.values(interval)) {
-                if (index < timestamps.length) {
-                    TimeIndexEntry ts = timestamps[index];
-                    if (ts != null) {
-                        elements.addAll(ts.elementSet);
-                    }
-                }
+            if (!elements.isEmpty()) {
+                return new ElementSetWrapperIterable(elements);
             }
+            return ElementIterable.EMPTY;
+        } finally {
+            unlock();
         }
-        if (!elements.isEmpty()) {
-            return new ElementIterableImpl(new ElementIteratorImpl(elements.iterator()));
-        }
-        readUnlock();
-        return ElementIterable.EMPTY;
     }
 }

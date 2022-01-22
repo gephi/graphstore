@@ -93,8 +93,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
                 viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
         nodeTable = new TableImpl<>(this, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
         edgeTable = new TableImpl<>(this, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
-        timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null,
-                GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
+        timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
         timeFormat = GraphStoreConfiguration.DEFAULT_TIME_FORMAT;

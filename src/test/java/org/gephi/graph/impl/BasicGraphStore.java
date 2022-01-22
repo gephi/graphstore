@@ -30,10 +30,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.DirectedGraph;
@@ -1112,6 +1114,11 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
+        public Set<Node> toSet() {
+            return new HashSet<>(idToNodeMap.values());
+        }
+
+        @Override
         public boolean add(Node node) {
             if (((BasicNode) node).getId() == null) {
                 throw new NullPointerException("Node id is null");
@@ -1574,7 +1581,7 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public Node[] toArray() {
             List<Node> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
+            while (iterator.hasNext()) {
                 list.add(iterator.next());
             }
             return list.toArray(new Node[0]);
@@ -1583,10 +1590,19 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public Collection<Node> toCollection() {
             List<Node> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
+            while (iterator.hasNext()) {
                 list.add(iterator.next());
             }
             return list;
+        }
+
+        @Override
+        public Set<Node> toSet() {
+            Set<Node> set = new HashSet<>();
+            while (iterator.hasNext()) {
+                set.add(iterator.next());
+            }
+            return set;
         }
 
         @Override
@@ -1611,7 +1627,7 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public Edge[] toArray() {
             List<Edge> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
+            while (iterator.hasNext()) {
                 list.add(iterator.next());
             }
             return list.toArray(new Edge[0]);
@@ -1620,10 +1636,19 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public Collection<Edge> toCollection() {
             List<Edge> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
+            while (iterator.hasNext()) {
                 list.add(iterator.next());
             }
             return list;
+        }
+
+        @Override
+        public Set<Edge> toSet() {
+            Set<Edge> set = new HashSet<>();
+            while (iterator.hasNext()) {
+                set.add(iterator.next());
+            }
+            return set;
         }
 
         @Override
