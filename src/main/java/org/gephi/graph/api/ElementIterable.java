@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * Element iterable.
@@ -53,6 +54,13 @@ public interface ElementIterable<T extends Element> extends Iterable<T> {
      * @return element collection
      */
     public Collection<T> toCollection();
+
+    /**
+     * Returns the iterator content as a set.
+     *
+     * @return element set
+     */
+    public Set<T> toSet();
 
     /**
      * Break the iterator and release read lock (if any).
@@ -92,6 +100,11 @@ public interface ElementIterable<T extends Element> extends Iterable<T> {
         @Override
         public Collection<Element> toCollection() {
             return Collections.EMPTY_LIST;
+        }
+
+        @Override
+        public Set<Element> toSet() {
+            return Collections.EMPTY_SET;
         }
 
         @Override

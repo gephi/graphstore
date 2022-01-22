@@ -45,6 +45,14 @@ public class EdgeImplTest {
     }
 
     @Test
+    public void testZeroWeight() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Edge e = graphStore.getEdge("0");
+        e.setWeight(0.0);
+        Assert.assertEquals(e.getWeight(), 0.0);
+    }
+
+    @Test
     public void testGetDefaultTimestampWeight() {
         Configuration config = new Configuration();
         config.setEdgeWeightType(TimestampDoubleMap.class);

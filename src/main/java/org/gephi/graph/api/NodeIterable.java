@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * A node iterable.
@@ -55,6 +56,14 @@ public interface NodeIterable extends ElementIterable<Node> {
     public Collection<Node> toCollection();
 
     /**
+     * Returns the iterator content as a set.
+     *
+     * @return node set
+     */
+    @Override
+    public Set<Node> toSet();
+
+    /**
      * Empty node iterable.
      */
     static final class NodeIterableEmpty implements Iterator<Node>, NodeIterable {
@@ -87,6 +96,11 @@ public interface NodeIterable extends ElementIterable<Node> {
         @Override
         public Collection<Node> toCollection() {
             return Collections.EMPTY_LIST;
+        }
+
+        @Override
+        public Set<Node> toSet() {
+            return Collections.EMPTY_SET;
         }
 
         @Override

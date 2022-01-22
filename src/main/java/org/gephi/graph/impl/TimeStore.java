@@ -23,15 +23,15 @@ import org.gephi.graph.api.TimeRepresentation;
 public class TimeStore {
 
     protected final GraphStore graphStore;
-    // Lock (optional
-    protected final GraphLockImpl lock;
+    // Lock (optional)
+    protected final TableLockImpl lock;
     // Store
     protected TimeIndexStore nodeIndexStore;
     protected TimeIndexStore edgeIndexStore;
 
-    public TimeStore(GraphStore store, GraphLockImpl graphLock, boolean indexed) {
-        lock = graphLock;
-        graphStore = store;
+    public TimeStore(GraphStore store, boolean indexed) {
+        this.graphStore = store;
+        this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLockImpl() : null;
 
         TimeRepresentation timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
         if (store != null) {

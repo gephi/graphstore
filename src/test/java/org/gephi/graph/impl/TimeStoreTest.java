@@ -26,14 +26,14 @@ public class TimeStoreTest {
 
     @Test
     public void testEmpty() {
-        TimeStore store = new TimeStore(null, null, false);
+        TimeStore store = new TimeStore(null, false);
         Assert.assertTrue(store.isEmpty());
     }
 
     @Test
     public void testDeepEqualsEmpty() {
-        TimeStore store1 = new TimeStore(null, null, false);
-        TimeStore store2 = new TimeStore(null, null, false);
+        TimeStore store1 = new TimeStore(null, false);
+        TimeStore store2 = new TimeStore(null, false);
 
         Assert.assertTrue(store1.deepEquals(store2));
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
@@ -42,21 +42,21 @@ public class TimeStoreTest {
     @Test
     public void testGetMinNull() {
         GraphStore graphStore = new GraphStore();
-        TimeStore store = new TimeStore(graphStore, null, true);
+        TimeStore store = new TimeStore(graphStore, true);
         Assert.assertEquals(store.getMin(graphStore), Double.NEGATIVE_INFINITY);
     }
 
     @Test
     public void testGetMaxNull() {
         GraphStore graphStore = new GraphStore();
-        TimeStore store = new TimeStore(graphStore, null, true);
+        TimeStore store = new TimeStore(graphStore, true);
         Assert.assertEquals(store.getMax(graphStore), Double.POSITIVE_INFINITY);
     }
 
     @Test
     public void testGetMin() {
         GraphStore graphStore = new GraphStore();
-        TimeStore store = new TimeStore(graphStore, null, true);
+        TimeStore store = new TimeStore(graphStore, true);
         store.nodeIndexStore.add(1.0);
         store.nodeIndexStore.add(2.0);
         Assert.assertEquals(store.getMin(graphStore), 1.0);
@@ -65,7 +65,7 @@ public class TimeStoreTest {
     @Test
     public void testGetMax() {
         GraphStore graphStore = new GraphStore();
-        TimeStore store = new TimeStore(graphStore, null, true);
+        TimeStore store = new TimeStore(graphStore, true);
         store.nodeIndexStore.add(1.0);
         store.nodeIndexStore.add(2.0);
         Assert.assertEquals(store.getMax(graphStore), 2.0);
@@ -73,7 +73,7 @@ public class TimeStoreTest {
 
     @Test
     public void testClearEdges() {
-        TimeStore store = new TimeStore(null, null, true);
+        TimeStore store = new TimeStore(null, true);
         store.nodeIndexStore.add(1.0);
         store.edgeIndexStore.add(2.0);
         store.clearEdges();
@@ -84,7 +84,7 @@ public class TimeStoreTest {
 
     @Test
     public void testClear() {
-        TimeStore store = new TimeStore(null, null, true);
+        TimeStore store = new TimeStore(null, true);
         store.nodeIndexStore.add(1.0);
         store.edgeIndexStore.add(2.0);
         store.clear();
@@ -95,8 +95,8 @@ public class TimeStoreTest {
 
     @Test
     public void testDeepEquals() {
-        TimeStore store1 = new TimeStore(null, null, true);
-        TimeStore store2 = new TimeStore(null, null, true);
+        TimeStore store1 = new TimeStore(null, true);
+        TimeStore store2 = new TimeStore(null, true);
         store1.nodeIndexStore.add(1.0);
         store1.edgeIndexStore.add(2.0);
         store2.nodeIndexStore.add(1.0);

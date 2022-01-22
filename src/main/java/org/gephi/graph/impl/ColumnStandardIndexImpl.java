@@ -58,47 +58,53 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     protected ColumnStandardIndexImpl(ColumnImpl column) {
         this.column = column;
         this.nullSet = new ValueSet<>(null);
-        if (column.table != null) {
-            lock = column.table.getLock();
-        } else {
-            lock = null;
-        }
+        this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLockImpl() : null;
     }
 
     @Override
     public K putValue(T element, K value) {
-        if (value == null) {
-            if (nullSet.add(element)) {
-                elements++;
-            }
-        } else {
-            ValueSet<K, T> set = getValueSet(value);
-            if (set == null) {
-                set = addValue(value);
-            }
-            value = set.value;
+        lock();
+        try {
+            if (value == null) {
+                if (nullSet.add(element)) {
+                    elements++;
+                }
+            } else {
+                ValueSet<K, T> set = getValueSet(value);
+                if (set == null) {
+                    set = addValue(value);
+                }
+                value = set.value;
 
-            if (set.add(element)) {
-                elements++;
+                if (set.add(element)) {
+                    elements++;
+                }
             }
+        } finally {
+            unlock();
         }
         return value;
     }
 
     @Override
     public void removeValue(T element, K value) {
-        if (value == null) {
-            if (nullSet.remove(element)) {
-                elements--;
+        lock();
+        try {
+            if (value == null) {
+                if (nullSet.remove(element)) {
+                    elements--;
+                }
+            } else {
+                ValueSet<K, T> set = getValueSet(value);
+                if (set.remove(element)) {
+                    elements--;
+                }
+                if (set.isEmpty()) {
+                    removeValue(value);
+                }
             }
-        } else {
-            ValueSet<K, T> set = getValueSet(value);
-            if (set.remove(element)) {
-                elements--;
-            }
-            if (set.isEmpty()) {
-                removeValue(value);
-            }
+        } finally {
+            unlock();
         }
     }
 
@@ -142,64 +148,68 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
     @Override
     public int countValues() {
-        lock();
-        try {
-            return (nullSet.isEmpty() ? 0 : 1) + map.size();
-        } finally {
-            unlock();
-        }
+        return (nullSet.isEmpty() ? 0 : 1) + map.size();
     }
 
     @Override
     public int countElements() {
-        lock();
-        try {
-            return elements;
-        } finally {
-            unlock();
-        }
+        return elements;
     }
 
     @Override
     public Number getMinValue() {
-        if (isSortable()) {
-            if (map.isEmpty()) {
-                return null;
+        lock();
+        try {
+            if (isSortable()) {
+                if (map.isEmpty()) {
+                    return null;
+                } else {
+                    return (Number) ((SortedMap) map).firstKey();
+                }
             } else {
-                return (Number) ((SortedMap) map).firstKey();
+                throw new UnsupportedOperationException("'" + column.getId() + "' is not a sortable column (" + column
+                        .getTypeClass().getSimpleName() + ").");
             }
-        } else {
-            throw new UnsupportedOperationException("'" + column.getId() + "' is not a sortable column (" + column
-                    .getTypeClass().getSimpleName() + ").");
+        } finally {
+            unlock();
         }
     }
 
     @Override
     public Number getMaxValue() {
-        if (isSortable()) {
-            if (map.isEmpty()) {
-                return null;
+        lock();
+        try {
+            if (isSortable()) {
+                if (map.isEmpty()) {
+                    return null;
+                } else {
+                    return (Number) ((SortedMap) map).lastKey();
+                }
             } else {
-                return (Number) ((SortedMap) map).lastKey();
+                throw new UnsupportedOperationException("'" + column.getId() + "' is not a sortable column (" + column
+                        .getTypeClass().getSimpleName() + ").");
             }
-        } else {
-            throw new UnsupportedOperationException("'" + column.getId() + "' is not a sortable column (" + column
-                    .getTypeClass().getSimpleName() + ").");
+        } finally {
+            unlock();
         }
     }
 
     @Override
     public void destroy() {
+        lock();
         map = null;
         nullSet.clear();
         elements = 0;
+        unlock();
     }
 
     @Override
     public void clear() {
+        lock();
         map.clear();
         nullSet.clear();
         elements = 0;
+        unlock();
     }
 
     @Override
@@ -559,7 +569,6 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
         @Override
         public <V> V[] toArray(V[] array) {
-
             if (hasNull()) {
                 if (array.length < size()) {
                     array = (V[]) java.lang.reflect.Array
@@ -703,25 +712,25 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         }
     }
 
-    private class LockableIterable<T> implements Iterable<T> {
+    private class LockableIterable<E> implements Iterable<E> {
 
-        private final Iterable<T> ite;
+        private final Iterable<E> ite;
 
-        public LockableIterable(Iterable<T> ite) {
+        public LockableIterable(Iterable<E> ite) {
             this.ite = ite;
         }
 
         @Override
-        public Iterator<T> iterator() {
+        public Iterator<E> iterator() {
             return new LockableIterator<>(ite.iterator());
         }
     }
 
-    private class LockableIterator<T> implements Iterator<T> {
+    private class LockableIterator<E> implements Iterator<E> {
 
-        private final Iterator<T> itr;
+        private final Iterator<E> itr;
 
-        public LockableIterator(Iterator<T> itr) {
+        public LockableIterator(Iterator<E> itr) {
             this.itr = itr;
         }
 
@@ -735,7 +744,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         }
 
         @Override
-        public T next() {
+        public E next() {
             return itr.next();
         }
 

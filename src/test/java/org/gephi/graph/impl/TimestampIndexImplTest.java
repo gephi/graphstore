@@ -29,7 +29,7 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testGetMin() {
-        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimeStore timestampStore = new TimeStore(null, true);
         TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         Assert.assertEquals(store.mainIndex.getMinTimestamp(), Double.NEGATIVE_INFINITY);
 
@@ -70,7 +70,7 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testGetMax() {
-        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimeStore timestampStore = new TimeStore(null, true);
         TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         Assert.assertEquals(store.mainIndex.getMaxTimestamp(), Double.POSITIVE_INFINITY);
 
@@ -86,7 +86,7 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testGetElements() {
-        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimeStore timestampStore = new TimeStore(null, true);
         TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         store.add(1.0);
         store.add(2.0);
@@ -130,14 +130,14 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testHasNodesEdgesEmpty() {
-        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimeStore timestampStore = new TimeStore(null, true);
         TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         Assert.assertFalse(store.mainIndex.hasElements());
     }
 
     @Test
     public void testHasNodes() {
-        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimeStore timestampStore = new TimeStore(null, true);
         TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         Assert.assertFalse(store.mainIndex.hasElements());
 
@@ -158,7 +158,7 @@ public class TimestampIndexImplTest {
 
     @Test
     public void testHasNodesClear() {
-        TimeStore timestampStore = new TimeStore(null, null, true);
+        TimeStore timestampStore = new TimeStore(null, true);
         TimestampIndexStore store = (TimestampIndexStore) timestampStore.nodeIndexStore;
         store.add(1.0);
 

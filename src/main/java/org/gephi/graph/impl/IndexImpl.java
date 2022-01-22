@@ -23,7 +23,6 @@ import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIndex;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
-import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Index;
 
 public class IndexImpl<T extends Element> implements Index<T> {

@@ -35,10 +35,10 @@ import org.gephi.graph.impl.utils.MapDeepEquals;
 public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>, M extends TimeMap<K, ?>> {
 
     // Lock
-    protected final GraphLockImpl graphLock;
+    protected final TableLockImpl lock;
     // Element
     protected final Class<T> elementType;
-    // Timestamp index managament
+    // Timestamp index management
     protected final Map<K, Integer> timeSortedMap;
     protected final IntSortedSet garbageQueue;
     protected int[] countMap;
@@ -47,9 +47,9 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     protected TimeIndexImpl mainIndex;
     protected final Map<GraphView, TimeIndexImpl> viewIndexes;
 
-    protected TimeIndexStore(Class<T> type, GraphLockImpl lock, boolean indexed, Map<K, Integer> sortedMap) {
-        elementType = type;
-        graphLock = lock;
+    protected TimeIndexStore(Class<T> type, TableLockImpl lock, boolean indexed, Map<K, Integer> sortedMap) {
+        this.elementType = type;
+        this.lock = lock;
 
         garbageQueue = new IntRBTreeSet();
         // Subclass
@@ -68,44 +68,54 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     public Integer add(K k) {
         checkK(k);
 
-        Integer id = timeSortedMap.get(k);
-        if (id == null) {
-            if (!garbageQueue.isEmpty()) {
-                id = garbageQueue.firstInt();
-                garbageQueue.remove(id);
+        lock();
+        try {
+            Integer id = timeSortedMap.get(k);
+            if (id == null) {
+                if (!garbageQueue.isEmpty()) {
+                    id = garbageQueue.firstInt();
+                    garbageQueue.remove(id);
+                } else {
+                    id = length++;
+                }
+                timeSortedMap.put(k, id);
+                ensureArraySize(id);
+                countMap[id] = 1;
             } else {
-                id = length++;
+                countMap[id]++;
             }
-            timeSortedMap.put(k, id);
-            ensureArraySize(id);
-            countMap[id] = 1;
-        } else {
-            countMap[id]++;
-        }
 
-        return id;
+            return id;
+        } finally {
+            unlock();
+        }
     }
 
     public int add(K k, Element element) {
-        int timeIndex = add(k);
+        lock();
+        try {
+            int timeIndex = add(k);
 
-        if (mainIndex != null) {
-            mainIndex.add(timeIndex, element);
+            if (mainIndex != null) {
+                mainIndex.add(timeIndex, element);
 
-            if (!viewIndexes.isEmpty()) {
-                for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
-                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                    DirectedSubgraph graph = graphView.getDirectedGraph();
-                    boolean node = element instanceof Node;
-                    if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
-                        entry.getValue().add(timeIndex, element);
+                if (!viewIndexes.isEmpty()) {
+                    for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
+                        GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                        DirectedSubgraph graph = graphView.getDirectedGraph();
+                        boolean node = element instanceof Node;
+                        if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
+                            entry.getValue().add(timeIndex, element);
+                        }
                     }
+
                 }
-
             }
-        }
 
-        return timeIndex;
+            return timeIndex;
+        } finally {
+            unlock();
+        }
     }
 
     public void add(TimeMap<K, ?> timeMap) {
@@ -121,41 +131,51 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     }
 
     public Integer remove(K k) {
-        checkK(k);
+        lock();
+        try {
+            checkK(k);
 
-        Integer id = timeSortedMap.get(k);
-        if (id != null) {
-            if (--countMap[id] == 0) {
-                garbageQueue.add(id);
-                timeSortedMap.remove(k);
+            Integer id = timeSortedMap.get(k);
+            if (id != null) {
+                if (--countMap[id] == 0) {
+                    garbageQueue.add(id);
+                    timeSortedMap.remove(k);
+                }
             }
+            return id;
+        } finally {
+            unlock();
         }
-        return id;
     }
 
     public int remove(K k, Element element) {
-        Integer timeIndex = remove(k);
-        checkTimeIndex(timeIndex);
+        lock();
+        try {
+            Integer timeIndex = remove(k);
+            checkTimeIndex(timeIndex);
 
-        if (mainIndex != null) {
-            mainIndex.remove(timeIndex, element);
+            if (mainIndex != null) {
+                mainIndex.remove(timeIndex, element);
 
-            if (!viewIndexes.isEmpty()) {
-                for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
-                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                    DirectedSubgraph graph = graphView.getDirectedGraph();
-                    if (element instanceof Node) {
-                        if (graph.contains((Node) element)) {
+                if (!viewIndexes.isEmpty()) {
+                    for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
+                        GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                        DirectedSubgraph graph = graphView.getDirectedGraph();
+                        if (element instanceof Node) {
+                            if (graph.contains((Node) element)) {
+                                entry.getValue().remove(timeIndex, element);
+                            }
+                        } else if (graph.contains((Edge) element)) {
                             entry.getValue().remove(timeIndex, element);
                         }
-                    } else if (graph.contains((Edge) element)) {
-                        entry.getValue().remove(timeIndex, element);
                     }
                 }
             }
-        }
 
-        return timeIndex;
+            return timeIndex;
+        } finally {
+            unlock();
+        }
     }
 
     public void remove(M timeMap) {
@@ -173,85 +193,109 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     public boolean contains(K k) {
         checkK(k);
 
-        return timeSortedMap.containsKey(k);
+        lock();
+        try {
+            return timeSortedMap.containsKey(k);
+        } finally {
+            unlock();
+        }
     }
 
     public void index(Element element) {
-        S timeSet = getTimeSet(element);
+        lock();
+        try {
+            S timeSet = getTimeSet(element);
 
-        if (timeSet != null) {
-            add(timeSet);
-        }
-
-        for (Object val : element.getAttributes()) {
-            if (val != null && val instanceof TimeMap) {
-                TimeMap dynamicValue = (TimeMap) val;
-                add(dynamicValue);
+            if (timeSet != null) {
+                add(timeSet);
             }
-        }
 
-        if (timeSet != null && mainIndex != null) {
-            K[] ts = timeSet.toArray();
-            int tsLength = ts.length;
-            for (int i = 0; i < tsLength; i++) {
-                int timestampIndex = timeSortedMap.get(ts[i]);
-                mainIndex.add(timestampIndex, element);
+            synchronized (element) {
+                for (Object val : element.getAttributes()) {
+                    if (val instanceof TimeMap) {
+                        TimeMap dynamicValue = (TimeMap) val;
+                        add(dynamicValue);
+                    }
+                }
             }
+
+            if (timeSet != null && mainIndex != null) {
+                K[] ts = timeSet.toArray();
+                int tsLength = ts.length;
+                for (int i = 0; i < tsLength; i++) {
+                    int timestampIndex = timeSortedMap.get(ts[i]);
+                    mainIndex.add(timestampIndex, element);
+                }
+            }
+        } finally {
+            unlock();
         }
     }
 
     public void clear(Element element) {
-        S timeSet = getTimeSet(element);
+        lock();
+        try {
+            S timeSet = getTimeSet(element);
 
-        if (timeSet != null && mainIndex != null) {
-            K[] ts = timeSet.toArray();
-            int tsLength = ts.length;
-            for (int i = 0; i < tsLength; i++) {
-                int timestampIndex = timeSortedMap.get(ts[i]);
-                mainIndex.remove(timestampIndex, element);
-            }
+            if (timeSet != null && mainIndex != null) {
+                K[] ts = timeSet.toArray();
+                int tsLength = ts.length;
+                for (int i = 0; i < tsLength; i++) {
+                    int timestampIndex = timeSortedMap.get(ts[i]);
+                    mainIndex.remove(timestampIndex, element);
+                }
 
-            if (!viewIndexes.isEmpty()) {
-                for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
-                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                    DirectedSubgraph graph = graphView.getDirectedGraph();
-                    boolean node = element instanceof Node;
-                    if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
-                        for (int i = 0; i < tsLength; i++) {
-                            int timestampIndex = timeSortedMap.get(ts[i]);
-                            entry.getValue().remove(timestampIndex, element);
+                if (!viewIndexes.isEmpty()) {
+                    for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
+                        GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                        DirectedSubgraph graph = graphView.getDirectedGraph();
+                        boolean node = element instanceof Node;
+                        if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
+                            for (int i = 0; i < tsLength; i++) {
+                                int timestampIndex = timeSortedMap.get(ts[i]);
+                                entry.getValue().remove(timestampIndex, element);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (timeSet != null) {
-            remove(timeSet);
-        }
-
-        for (Object val : element.getAttributes()) {
-            if (val != null && val instanceof TimeMap) {
-                TimeMap dynamicValue = (TimeMap) val;
-                remove((M) dynamicValue);
+            if (timeSet != null) {
+                remove(timeSet);
             }
+
+            synchronized (element) {
+                for (Object val : element.getAttributes()) {
+                    if (val != null && val instanceof TimeMap) {
+                        TimeMap dynamicValue = (TimeMap) val;
+                        remove((M) dynamicValue);
+                    }
+                }
+            }
+        } finally {
+            unlock();
         }
     }
 
     public void clear() {
-        timeSortedMap.clear();
-        garbageQueue.clear();
-        countMap = new int[0];
-        length = 0;
+        lock();
+        try {
+            timeSortedMap.clear();
+            garbageQueue.clear();
+            countMap = new int[0];
+            length = 0;
 
-        if (mainIndex != null) {
-            mainIndex.clear();
+            if (mainIndex != null) {
+                mainIndex.clear();
 
-            if (!viewIndexes.isEmpty()) {
-                for (TimeIndexImpl index : viewIndexes.values()) {
-                    index.clear();
+                if (!viewIndexes.isEmpty()) {
+                    for (TimeIndexImpl index : viewIndexes.values()) {
+                        index.clear();
+                    }
                 }
             }
+        } finally {
+            unlock();
         }
     }
 
@@ -264,13 +308,17 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         if (view.isMainView()) {
             return mainIndex;
         }
-        TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
-        if (viewIndex == null) {
-            // TODO Make the auto-creation optional?
-            viewIndex = createViewIndex(graph);
-            viewIndexes.put(graph.getView(), viewIndex);
+        lock();
+        try {
+            TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
+            if (viewIndex == null) {
+                // TODO Make the auto-creation optional?
+                viewIndex = createViewIndex(graph);
+            }
+            return viewIndex;
+        } finally {
+            unlock();
         }
-        return viewIndex;
     }
 
     protected TimeIndexImpl createViewIndex(Graph graph) {
@@ -291,9 +339,14 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't delete a view index for the main view");
         }
-        TimeIndexImpl index = viewIndexes.remove(graph.getView());
-        if (index != null) {
-            index.clear();
+        lock();
+        try {
+            TimeIndexImpl index = viewIndexes.remove(graph.getView());
+            if (index != null) {
+                index.clear();
+            }
+        } finally {
+            unlock();
         }
     }
 
@@ -301,6 +354,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
         if (viewIndex != null) {
             graph.readLock();
+            lock();
             try {
                 Iterator<T> iterator = null;
 
@@ -326,6 +380,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                 }
             } finally {
                 graph.readUnlock();
+                unlock();
             }
         }
     }
@@ -333,30 +388,39 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     public void indexInView(T element, GraphView view) {
         TimeIndexImpl viewIndex = viewIndexes.get(view);
         if (viewIndex != null) {
-            S set = getTimeSet(element);
-            if (set != null) {
-                K[] ts = set.toArray();
-                int tsLength = ts.length;
-                for (int i = 0; i < tsLength; i++) {
-                    int timestampIndex = timeSortedMap.get(ts[i]);
-                    viewIndex.add(timestampIndex, element);
+            lock();
+            try {
+                S set = getTimeSet(element);
+                if (set != null) {
+                    K[] ts = set.toArray();
+                    int tsLength = ts.length;
+                    for (int i = 0; i < tsLength; i++) {
+                        int timestampIndex = timeSortedMap.get(ts[i]);
+                        viewIndex.add(timestampIndex, element);
+                    }
                 }
+            } finally {
+                unlock();
             }
         }
     }
 
     public void clearInView(T element, GraphView view) {
-        ElementImpl elementImpl = (ElementImpl) element;
         TimeIndexImpl viewIndex = viewIndexes.get(view);
         if (viewIndex != null) {
-            S set = getTimeSet(element);
-            if (set != null) {
-                K[] ts = set.toArray();
-                int tsLength = ts.length;
-                for (int i = 0; i < tsLength; i++) {
-                    int timestampIndex = timeSortedMap.get(ts[i]);
-                    viewIndex.remove(timestampIndex, elementImpl);
+            lock();
+            try {
+                S set = getTimeSet(element);
+                if (set != null) {
+                    K[] ts = set.toArray();
+                    int tsLength = ts.length;
+                    for (int i = 0; i < tsLength; i++) {
+                        int timestampIndex = timeSortedMap.get(ts[i]);
+                        viewIndex.remove(timestampIndex, element);
+                    }
                 }
+            } finally {
+                unlock();
             }
         }
     }
@@ -428,5 +492,17 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
             }
         }
         return true;
+    }
+
+    private void lock() {
+        if (lock != null) {
+            lock.lock();
+        }
+    }
+
+    private void unlock() {
+        if (lock != null) {
+            lock.unlock();
+        }
     }
 }

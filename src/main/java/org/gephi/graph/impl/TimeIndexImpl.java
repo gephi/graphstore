@@ -20,8 +20,10 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.TimeIndex;
@@ -31,7 +33,7 @@ import org.gephi.graph.api.types.TimeSet;
 public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, M extends TimeMap<K, ?>> implements TimeIndex<T> {
 
     // Data
-    protected final GraphLockImpl lock;
+    protected final TableLockImpl lock;
     protected final TimeIndexStore<T, K, S, M> timestampIndexStore;
     protected final boolean mainIndex;
     protected TimeIndexEntry[] timestamps;
@@ -41,7 +43,7 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
         timestampIndexStore = store;
         mainIndex = main;
         timestamps = new TimeIndexEntry[0];
-        lock = store.graphLock;
+        lock = store.lock;
     }
 
     public boolean hasElements() {
@@ -49,32 +51,44 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
     }
 
     public void clear() {
+        lock();
         timestamps = new TimeIndexEntry[0];
         elementCount = 0;
+        unlock();
     }
 
     protected void add(int timestampIndex, Element element) {
-        ensureArraySize(timestampIndex);
-        TimeIndexEntry entry = timestamps[timestampIndex];
-        if (entry == null) {
-            entry = addTimestamp(timestampIndex);
-        }
-        if (entry.add(element)) {
-            elementCount++;
+        lock();
+        try {
+            ensureArraySize(timestampIndex);
+            TimeIndexEntry entry = timestamps[timestampIndex];
+            if (entry == null) {
+                entry = addTimestamp(timestampIndex);
+            }
+            if (entry.add(element)) {
+                elementCount++;
+            }
+        } finally {
+            unlock();
         }
     }
 
     protected void remove(int timestampIndex, Element element) {
-        TimeIndexEntry entry = timestamps[timestampIndex];
-        if (entry.remove(element)) {
-            elementCount--;
-            if (entry.isEmpty()) {
-                clearEntry(timestampIndex);
+        lock();
+        try {
+            TimeIndexEntry entry = timestamps[timestampIndex];
+            if (entry.remove(element)) {
+                elementCount--;
+                if (entry.isEmpty()) {
+                    clearEntry(timestampIndex);
+                }
             }
+        } finally {
+            unlock();
         }
     }
 
-    protected TimeIndexEntry addTimestamp(final int index) {
+    private TimeIndexEntry addTimestamp(final int index) {
         ensureArraySize(index);
         TimeIndexEntry entry = new TimeIndexEntry();
         timestamps[index] = entry;
@@ -99,27 +113,15 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
         }
     }
 
-    protected void readLock() {
+    protected void lock() {
         if (lock != null) {
-            lock.readLock();
+            lock.lock();
         }
     }
 
-    protected void readUnlock() {
+    protected void unlock() {
         if (lock != null) {
-            lock.readUnlock();
-        }
-    }
-
-    protected void writeLock() {
-        if (lock != null) {
-            lock.writeLock();
-        }
-    }
-
-    protected void writeUnlock() {
-        if (lock != null) {
-            lock.writeUnlock();
+            lock.unlock();
         }
     }
 
@@ -144,68 +146,36 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
         }
     }
 
-    protected class ElementIteratorImpl implements Iterator<Element> {
+    protected class ElementSetWrapperIterable implements ElementIterable {
 
-        private final ObjectIterator<Element> itr;
+        protected final Set<Element> set;
 
-        public ElementIteratorImpl(ObjectIterator<Element> itr) {
-            this.itr = itr;
-        }
-
-        @Override
-        public boolean hasNext() {
-            final boolean hasNext = itr.hasNext();
-            if (!hasNext) {
-                readUnlock();
-            }
-            return hasNext;
-        }
-
-        @Override
-        public Element next() {
-            return itr.next();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
-    }
-
-    protected class ElementIterableImpl implements ElementIterable {
-
-        protected final Iterator<Element> iterator;
-
-        public ElementIterableImpl(Iterator<Element> iterator) {
-            this.iterator = iterator;
+        public ElementSetWrapperIterable(Set<Element> set) {
+            this.set = set;
         }
 
         @Override
         public Iterator<Element> iterator() {
-            return iterator;
+            return set.iterator();
         }
 
         @Override
         public Element[] toArray() {
-            List<Element> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list.toArray(new Element[0]);
+            return set.toArray(new Element[0]);
         }
 
         @Override
         public Collection<Element> toCollection() {
-            List<Element> list = new ArrayList<>();
-            for (; iterator.hasNext();) {
-                list.add(iterator.next());
-            }
-            return list;
+            return set;
+        }
+
+        @Override
+        public Set<Element> toSet() {
+            return set;
         }
 
         @Override
         public void doBreak() {
-            readUnlock();
         }
     }
 }

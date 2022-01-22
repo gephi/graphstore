@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * An edge iterable.
@@ -55,6 +56,14 @@ public interface EdgeIterable extends ElementIterable<Edge> {
     public Collection<Edge> toCollection();
 
     /**
+     * Returns the iterator content as a set.
+     *
+     * @return edge set
+     */
+    @Override
+    public Set<Edge> toSet();
+
+    /**
      * Empty edge iterable.
      */
     static final class EdgeIterableEmpty implements Iterator<Edge>, EdgeIterable {
@@ -87,6 +96,11 @@ public interface EdgeIterable extends ElementIterable<Edge> {
         @Override
         public Collection<Edge> toCollection() {
             return Collections.EMPTY_LIST;
+        }
+
+        @Override
+        public Set<Edge> toSet() {
+            return Collections.EMPTY_SET;
         }
 
         @Override

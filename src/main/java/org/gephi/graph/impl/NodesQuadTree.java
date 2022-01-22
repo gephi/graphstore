@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -516,6 +517,17 @@ public class NodesQuadTree {
             }
 
             return list;
+        }
+
+        @Override
+        public Set<Node> toSet() {
+            final Set<Node> set = new HashSet<>();
+
+            for (Node node : this) {
+                set.add(node);
+            }
+
+            return set;
         }
 
         @Override
