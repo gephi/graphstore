@@ -647,6 +647,24 @@ public class EdgeStoreTest {
     }
 
     @Test
+    public void testRemoveMultitypesReverseOrder() {
+        NodeStore nodeStore = new NodeStore();
+        NodeImpl n1 = new NodeImpl("0");
+        NodeImpl n2 = new NodeImpl("1");
+        nodeStore.add(n1);
+        nodeStore.add(n2);
+
+        EdgeImpl e1 = new EdgeImpl("0", n1, n2, 0, 1.0, true);
+        EdgeImpl e2 = new EdgeImpl("1", n1, n2, 1, 1.0, true);
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.add(e1);
+        edgeStore.add(e2);
+
+        edgeStore.remove(e2);
+        edgeStore.remove(e1);
+    }
+
+    @Test
     public void testOutIterator() {
         EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
         EdgeStore edgeStore = new EdgeStore();
