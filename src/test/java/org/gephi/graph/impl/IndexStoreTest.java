@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
@@ -35,6 +36,15 @@ public class IndexStoreTest {
         IndexStore<Node> indexStore = columnStore.indexStore;
         IndexImpl<Node> mainIndex = indexStore.mainIndex;
         Assert.assertEquals(mainIndex.size(), GraphStoreConfiguration.NODE_DEFAULT_COLUMNS);
+    }
+
+    @Test
+    public void testEmptyForEdge() {
+        GraphStore graphStore = new GraphStore();
+        ColumnStore<Edge> columnStore = graphStore.edgeTable.store;
+        IndexStore<Edge> indexStore = columnStore.indexStore;
+        IndexImpl<Edge> mainIndex = indexStore.mainIndex;
+        Assert.assertEquals(mainIndex.size(), GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS);
     }
 
     @Test
@@ -240,6 +250,54 @@ public class IndexStoreTest {
 
         Assert.assertEquals(mainIndex.count(col, 1), 0);
         Assert.assertTrue(mainIndex.values(col).isEmpty());
+    }
+
+    @Test
+    public void testNodePropertyIndices() {
+        GraphStore graphStore = new GraphStore();
+        ColumnStore<Node> columnStore = graphStore.nodeTable.store;
+        IndexImpl<Node> mainIndex = columnStore.indexStore.mainIndex;
+
+        Column idCol = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_ID_INDEX);
+        Column labelCol = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_LABEL_INDEX);
+
+        ColumnIndexImpl idIndex = mainIndex.getIndex(idCol);
+        ColumnIndexImpl labelIndex = mainIndex.getIndex(labelCol);
+
+        Assert.assertNotNull(idIndex);
+        Assert.assertNotNull(labelIndex);
+
+        NodeImpl n1 = new NodeImpl("0");
+        graphStore.addNode(n1);
+        Assert.assertEquals(mainIndex.count(idCol, "0"), 1);
+
+        n1.setLabel("foo");
+        Assert.assertEquals(mainIndex.count(labelCol, "foo"), 1);
+    }
+
+    @Test
+    public void testEdgePropertyIndices() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        ColumnStore<Edge> columnStore = graphStore.edgeTable.store;
+        IndexImpl<Edge> mainIndex = columnStore.indexStore.mainIndex;
+
+        Column idCol = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_ID_INDEX);
+        Column labelCol = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_LABEL_INDEX);
+        Column weigthCol = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+
+        ColumnIndexImpl idIndex = mainIndex.getIndex(idCol);
+        ColumnIndexImpl labelIndex = mainIndex.getIndex(labelCol);
+        ColumnIndexImpl weightIndex = mainIndex.getIndex(weigthCol);
+
+        Assert.assertNotNull(idIndex);
+        Assert.assertNotNull(labelIndex);
+        Assert.assertNotNull(weightIndex);
+
+        Assert.assertEquals(mainIndex.count(idCol, "0"), 1);
+        Edge e0 = graphStore.getEdge("0");
+        e0.setLabel("foo");
+        Assert.assertEquals(mainIndex.count(labelCol, "foo"), 1);
+        Assert.assertEquals(mainIndex.count(weigthCol, 1.0), 1);
     }
 
     @Test
