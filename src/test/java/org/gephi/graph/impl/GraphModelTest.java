@@ -116,6 +116,32 @@ public class GraphModelTest {
         GraphModelImpl graphModel = new GraphModelImpl();
         graphModel.addEdgeType("foo");
         Assert.assertEquals(graphModel.getEdgeTypeLabels(), new Object[] { null, "foo" });
+        Assert.assertEquals(graphModel.getEdgeTypeLabels(true), new Object[] { null, "foo" });
+    }
+
+    @Test
+    public void testGetEdgeTypeLabelsEmpty() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        graphModel.addEdgeType("foo");
+        Assert.assertEquals(graphModel.getEdgeTypeLabels(false), new Object[] {});
+    }
+
+    @Test
+    public void testGetEdgeTypeLabelsNotEmpty() {
+        GraphModelImpl graphModel = GraphGenerator.generateTinyGraphStore().graphModel;
+        Assert.assertEquals(graphModel.getEdgeTypeLabels(false), new Object[] { null });
+    }
+
+    @Test
+    public void testGetEdgeTypeLabelsNotEmptyMultiGraph() {
+        GraphModelImpl graphModel = GraphGenerator.generateTinyGraphStore().graphModel;
+        Node n1 = graphModel.store.getNode("1");
+        Node n2 = graphModel.store.getNode("2");
+        graphModel.addEdgeType("bar");
+        int type = graphModel.addEdgeType("foo");
+        Edge e1 = graphModel.store.factory.newEdge("1", n1, n2, type, 1.0, false);
+        graphModel.store.addEdge(e1);
+        Assert.assertEquals(graphModel.getEdgeTypeLabels(false), new Object[] { null, "foo" });
     }
 
     @Test

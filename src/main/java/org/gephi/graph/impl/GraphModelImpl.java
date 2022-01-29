@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Element;
@@ -181,6 +182,20 @@ public class GraphModelImpl implements GraphModel {
         store.autoReadLock();
         try {
             return store.edgeTypeStore.getLabels();
+        } finally {
+            store.autoReadUnlock();
+        }
+    }
+
+    @Override
+    public Object[] getEdgeTypeLabels(boolean includeEmpty) {
+        if (includeEmpty) {
+            return getEdgeTypeLabels();
+        }
+        store.autoReadLock();
+        try {
+            return Arrays.stream(store.edgeTypeStore.getLabels())
+                    .filter(l -> store.getEdgeCount(store.edgeTypeStore.getId(l)) > 0).toArray();
         } finally {
             store.autoReadUnlock();
         }
