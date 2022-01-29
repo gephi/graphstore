@@ -315,6 +315,15 @@ public interface GraphModel {
     public Object[] getEdgeTypeLabels();
 
     /**
+     * Returns the edge type labels.
+     *
+     * @param includeEmpty true to include labels without edges
+     *
+     * @return edge type labels
+     */
+    public Object[] getEdgeTypeLabels(boolean includeEmpty);
+
+    /**
      * Returns true if the graph is directed.
      *
      * @return true if directed, false otherwise
