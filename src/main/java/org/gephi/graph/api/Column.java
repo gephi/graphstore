@@ -111,6 +111,13 @@ public interface Column {
     public boolean isNumber();
 
     /**
+     * Returns true if this column exists and belong to a table.
+     *
+     * @return true if exists, false otherwise
+     */
+    public boolean exists();
+
+    /**
      * Returns true if this column is a property.
      * <p>
      * This is equivalent to test if the column's origin is <em>Origin.PROPERTY</em>

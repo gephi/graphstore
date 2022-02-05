@@ -151,6 +151,11 @@ public class ColumnStoreTest {
             public void setEstimator(Estimator estimator) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            @Override
+            public boolean exists() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         });
     }
 
