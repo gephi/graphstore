@@ -153,4 +153,10 @@ public class ColumnImplTest {
         col2.setEstimator(Estimator.MIN);
         Assert.assertNotEquals(col1.deepHashCode(), col2.deepHashCode());
     }
+
+    @Test
+    public void testColumnDoesNotExist() {
+        ColumnImpl col1 = new ColumnImpl("0", int.class, null, null, Origin.DATA, false, false);
+        Assert.assertFalse(col1.exists());
+    }
 }

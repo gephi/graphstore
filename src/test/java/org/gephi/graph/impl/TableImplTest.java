@@ -41,6 +41,7 @@ public class TableImplTest {
         Assert.assertEquals(table.countColumns(), 1);
         Assert.assertEquals(table.getColumn("Id"), col);
         Assert.assertEquals(table.getColumn("id"), col);
+        Assert.assertTrue(col.exists());
     }
 
     @Test

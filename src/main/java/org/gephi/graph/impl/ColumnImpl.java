@@ -154,6 +154,11 @@ public class ColumnImpl implements Column {
     }
 
     @Override
+    public boolean exists() {
+        return storeId != ColumnStore.NULL_ID;
+    }
+
+    @Override
     public String toString() {
         return title + " (" + typeClass.toString() + ")";
     }
