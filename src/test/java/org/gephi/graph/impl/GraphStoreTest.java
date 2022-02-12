@@ -449,6 +449,11 @@ public class GraphStoreTest {
             }
 
             @Override
+            public Interval getTimeBounds() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
             public Iterable<Map.Entry> getAttributes(Column column) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }

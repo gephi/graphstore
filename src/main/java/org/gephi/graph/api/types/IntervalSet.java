@@ -85,6 +85,38 @@ public final class IntervalSet implements TimeSet<Interval> {
         return size == 0;
     }
 
+    @Override
+    public Interval getMax() {
+        if (size > 0) {
+            return new Interval(array[array.length - 2], array[array.length - 1]);
+        }
+        return null;
+    }
+
+    @Override
+    public Interval getMin() {
+        if (size > 0) {
+            return new Interval(array[0], array[1]);
+        }
+        return null;
+    }
+
+    @Override
+    public Double getMaxDouble() {
+        if (size > 0) {
+            return array[array.length - 1];
+        }
+        return null;
+    }
+
+    @Override
+    public Double getMinDouble() {
+        if (size > 0) {
+            return array[0];
+        }
+        return null;
+    }
+
     /**
      * Returns true if this set contains an interval that starts or ends at
      * <code>timestamp</code>.

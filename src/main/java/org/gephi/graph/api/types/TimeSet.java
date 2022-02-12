@@ -65,6 +65,34 @@ public interface TimeSet<K> {
     public boolean contains(K key);
 
     /**
+     * Returns the minimum key in the set
+     *
+     * @return minimum key, or null if the set is empty.
+     */
+    public K getMin();
+
+    /**
+     * Returns the maximum key in the set
+     *
+     * @return maximum key, or null if the set is empty.
+     */
+    public K getMax();
+
+    /**
+     * Returns the minimum timestamp in the set
+     *
+     * @return minimum timestamp, or null if the set is empty.
+     */
+    public Double getMinDouble();
+
+    /**
+     * Returns the maximum timestamp in the set
+     *
+     * @return maximum timestamp, or null if the set is empty.
+     */
+    public Double getMaxDouble();
+
+    /**
      * Returns an array of all keys in this set.
      * <p>
      * This method may return a reference to the underlying array so clients should
@@ -76,7 +104,7 @@ public interface TimeSet<K> {
 
     /**
      * Returns the same result as {@link #toArray() } but in a primitive array if
-     * the underlying storage is in a primtive form.
+     * the underlying storage is in a primitive form.
      *
      * @return array of all keys
      */

@@ -85,6 +85,32 @@ public final class TimestampSet implements TimeSet<Double> {
     }
 
     @Override
+    public Double getMax() {
+        if (size > 0) {
+            return array[array.length - 1];
+        }
+        return null;
+    }
+
+    @Override
+    public Double getMin() {
+        if (size > 0) {
+            return array[0];
+        }
+        return null;
+    }
+
+    @Override
+    public Double getMaxDouble() {
+        return getMax();
+    }
+
+    @Override
+    public Double getMinDouble() {
+        return getMin();
+    }
+
+    @Override
     public boolean contains(Double timestamp) {
         int index = Arrays.binarySearch(array, timestamp);
         return index >= 0 && index < size;

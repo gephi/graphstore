@@ -320,6 +320,16 @@ public interface Element extends ElementProperties {
     public Interval[] getIntervals();
 
     /**
+     * Gets the time bounds.
+     * <p>
+     * The time bounds is an interval made of the minimum and maximum time observed
+     * in this element.
+     *
+     * @return time bounds
+     */
+    public Interval getTimeBounds();
+
+    /**
      * Clears all attribute values.
      */
     public void clearAttributes();

@@ -93,7 +93,7 @@ public class IntervalSetTest {
     }
 
     @Test
-    public void testContinous() {
+    public void testContinuous() {
         IntervalSet set = new IntervalSet();
         Assert.assertTrue(set.add(new Interval(0.0, 1.0)));
         Assert.assertTrue(set.add(new Interval(1.0, 2.0)));
@@ -107,6 +107,32 @@ public class IntervalSetTest {
         Assert.assertTrue(set.contains(new Interval(0.0, 1.0)));
         Assert.assertTrue(set.contains(new Interval(1.0, 2.0)));
         Assert.assertTrue(set.contains(new Interval(1.0, 1.0)));
+    }
+
+    @Test
+    public void testSorted() {
+        IntervalSet set = new IntervalSet();
+        set.add(new Interval(4.0, 5.0));
+        set.add(new Interval(1.0, 4.0));
+
+        Assert.assertEquals(1.0, set.toArray()[0].getLow());
+        Assert.assertEquals(5.0, set.toArray()[1].getHigh());
+    }
+
+    @Test
+    public void testMinMax() {
+        IntervalSet set = new IntervalSet();
+        Assert.assertNull(set.getMax());
+        Assert.assertNull(set.getMin());
+        Assert.assertNull(set.getMaxDouble());
+        Assert.assertNull(set.getMinDouble());
+
+        set.add(new Interval(4.0, 5.0));
+        set.add(new Interval(1.0, 4.0));
+        Assert.assertEquals(set.getMin().getLow(), 1.0);
+        Assert.assertEquals(set.getMax().getHigh(), 5.0);
+        Assert.assertEquals(set.getMinDouble(), 1.0);
+        Assert.assertEquals(set.getMaxDouble(), 5.0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
