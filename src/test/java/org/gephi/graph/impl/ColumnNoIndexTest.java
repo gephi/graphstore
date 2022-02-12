@@ -177,6 +177,15 @@ public class ColumnNoIndexTest {
         fooIndex.getMinValue();
     }
 
+    @Test
+    public void testVersion() {
+        int version = fooIndex.getVersion();
+        Node node = graphStore.factory.newNode("1");
+        fooIndex.putValue(node, "bar");
+
+        Assert.assertTrue(fooIndex.getVersion() > version);
+    }
+
     private <K, T extends Element> ColumnNoIndexImpl<K, T> createIndex(GraphStore graphStore, String id) {
         return new ColumnNoIndexImpl(graphStore.nodeTable.getColumn(id), graphStore, Node.class);
     }

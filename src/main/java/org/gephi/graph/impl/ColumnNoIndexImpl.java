@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
@@ -37,6 +38,8 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
     // Graph
     protected final Graph graph;
     protected final GraphLock graphLock;
+    // Version
+    protected final AtomicInteger version = new AtomicInteger(Integer.MIN_VALUE);
 
     protected ColumnNoIndexImpl(ColumnImpl column, Graph graph, Class<T> elementClass) {
         this.column = column;
@@ -184,6 +187,11 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
     }
 
     @Override
+    public int getVersion() {
+        return version.get();
+    }
+
+    @Override
     public Iterator<Map.Entry<K, ? extends Set<T>>> iterator() {
         // TODO
         throw new UnsupportedOperationException("Not implemented yet");
@@ -192,26 +200,31 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
     @Override
     public void clear() {
         // Nothing to clear
+        version.incrementAndGet();
     }
 
     @Override
     public void destroy() {
         // Nothing to destroy
+        version.incrementAndGet();
     }
 
     @Override
     public K putValue(T element, K value) {
+        version.incrementAndGet();
         return value;
     }
 
     @Override
     public K replaceValue(T element, K oldValue, K newValue) {
+        version.incrementAndGet();
         return newValue;
     }
 
     @Override
     public void removeValue(T element, K value) {
         // Nothing to remove
+        version.incrementAndGet();
     }
 
     private class ElementWithValueIterable implements Iterable<T> {
