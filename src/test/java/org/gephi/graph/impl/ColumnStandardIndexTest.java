@@ -577,6 +577,17 @@ public class ColumnStandardIndexTest {
         }
     }
 
+    @Test
+    public void testVersion() {
+        IndexImpl<Node> index = generateEmptyIndex();
+        Column column = index.columnStore.getColumn("age");
+        int version = index.getColumnIndex(column).getVersion();
+
+        NodeImpl n = new NodeImpl(0);
+        index.put(column, 12, n);
+        Assert.assertTrue(index.getColumnIndex(column).getVersion() > version);
+    }
+
     // UTILITIES
     private NodeImpl[] generateNodesWithUniqueAttributes(IndexImpl<Node> index, boolean withNulls) {
         int count = 100;

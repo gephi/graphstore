@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.gephi.graph.api.Element;
 
 public abstract class ColumnStandardIndexImpl<K, T extends Element> implements ColumnIndexImpl<K, T> {
@@ -54,6 +55,8 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     protected Map<K, ValueSet<K, T>> map;
     // Variable
     protected int elements;
+    // Version
+    protected final AtomicInteger version = new AtomicInteger(Integer.MIN_VALUE);
 
     protected ColumnStandardIndexImpl(ColumnImpl column) {
         this.column = column;
@@ -68,6 +71,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
             if (value == null) {
                 if (nullSet.add(element)) {
                     elements++;
+                    version.incrementAndGet();
                 }
             } else {
                 ValueSet<K, T> set = getValueSet(value);
@@ -78,6 +82,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
                 if (set.add(element)) {
                     elements++;
+                    version.incrementAndGet();
                 }
             }
         } finally {
@@ -93,11 +98,13 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
             if (value == null) {
                 if (nullSet.remove(element)) {
                     elements--;
+                    version.incrementAndGet();
                 }
             } else {
                 ValueSet<K, T> set = getValueSet(value);
                 if (set.remove(element)) {
                     elements--;
+                    version.incrementAndGet();
                 }
                 if (set.isEmpty()) {
                     removeValue(value);
@@ -200,6 +207,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         map = null;
         nullSet.clear();
         elements = 0;
+        version.incrementAndGet();
         unlock();
     }
 
@@ -209,6 +217,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         map.clear();
         nullSet.clear();
         elements = 0;
+        version.incrementAndGet();
         unlock();
     }
 
@@ -252,6 +261,11 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     @Override
     public ColumnImpl getColumn() {
         return column;
+    }
+
+    @Override
+    public int getVersion() {
+        return version.get();
     }
 
     void lock() {

@@ -99,4 +99,12 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
      * @return the column
      */
     Column getColumn();
+
+    /**
+     * Returns the index's version. The version is incremented every time the index
+     * is modified.
+     *
+     * @return index's version
+     */
+    int getVersion();
 }
