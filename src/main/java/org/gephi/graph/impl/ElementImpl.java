@@ -551,6 +551,19 @@ public abstract class ElementImpl implements Element {
         return (Interval[]) res;
     }
 
+    @Override
+    public Interval getTimeBounds() {
+        TimeSet timeSet = getTimeSet();
+        if (timeSet != null) {
+            Double min = timeSet.getMinDouble();
+            Double max = timeSet.getMaxDouble();
+            if (min != null) {
+                return new Interval(min, max);
+            }
+        }
+        return null;
+    }
+
     private Object getTimeSetArray() {
         checkEnabledTimeSet();
 

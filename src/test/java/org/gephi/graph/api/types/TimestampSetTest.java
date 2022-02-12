@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
 import it.unimi.dsi.fastutil.doubles.DoubleSet;
 import java.util.Random;
 import org.gephi.graph.api.AttributeUtils;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.NumberGenerator;
 import org.joda.time.DateTimeZone;
@@ -167,6 +168,34 @@ public class TimestampSetTest {
 
         testDoubleArrayEquals(set.toPrimitiveArray(), NumberGenerator
                 .sortAndRemoveDuplicates(doubleSet.toDoubleArray()));
+    }
+
+    @Test
+    public void testSorted() {
+        TimestampSet set = new TimestampSet();
+        set.add(3.0);
+        set.add(1.0);
+        set.add(2.0);
+
+        testDoubleArrayEquals(set.toPrimitiveArray(), new double[] { 1.0, 2.0, 3.0 });
+        set.remove(1.0);
+        testDoubleArrayEquals(set.toPrimitiveArray(), new double[] { 2.0, 3.0 });
+    }
+
+    @Test
+    public void testMinMax() {
+        TimestampSet set = new TimestampSet();
+        Assert.assertNull(set.getMax());
+        Assert.assertNull(set.getMin());
+        Assert.assertNull(set.getMaxDouble());
+        Assert.assertNull(set.getMinDouble());
+
+        set.add(3.0);
+        set.add(1.0);
+        Assert.assertEquals(set.getMin(), 1.0);
+        Assert.assertEquals(set.getMax(), 3.0);
+        Assert.assertEquals(set.getMinDouble(), 1.0);
+        Assert.assertEquals(set.getMaxDouble(), 3.0);
     }
 
     @Test

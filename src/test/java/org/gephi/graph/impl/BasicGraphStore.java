@@ -696,6 +696,11 @@ public class BasicGraphStore implements DirectedGraph {
         }
 
         @Override
+        public Interval getTimeBounds() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
         public void setAttribute(Column column, Object value, Interval interval) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
