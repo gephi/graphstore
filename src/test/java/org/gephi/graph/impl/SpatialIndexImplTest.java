@@ -7,12 +7,22 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Rect2D;
 import org.testng.Assert;
+import org.testng.SkipException;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class SpatialIndexImplTest {
 
     private static final float BOUNDS = 1000f;
     private static final Rect2D BOUNDS_RECT = new Rect2D(-BOUNDS, -BOUNDS, BOUNDS, BOUNDS);
+
+    @BeforeMethod
+    public void setUp() {
+        if (!GraphStoreConfiguration.ENABLE_SPATIAL_INDEX) {
+            throw new SkipException("Skip spatial index tests because feature is disabled");
+        }
+    }
 
     @Test
     public void testGetEdgesEmpty() {
