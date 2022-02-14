@@ -751,6 +751,7 @@ public abstract class ElementImpl implements Element {
         if (value != null) {
             Class typeClass = column.getTypeClass();
             if (TimestampMap.class.isAssignableFrom(typeClass)) {
+                checkTimeRepresentationTimestamp();
                 if ((value instanceof Double && (!typeClass
                         .equals(TimestampDoubleMap.class))) || (value instanceof Float && !typeClass
                                 .equals(TimestampFloatMap.class)) || (value instanceof Boolean && !typeClass
@@ -765,6 +766,7 @@ public abstract class ElementImpl implements Element {
                             "The object class does not match with the dynamic type (" + typeClass.getName() + ")");
                 }
             } else if (IntervalMap.class.isAssignableFrom(typeClass)) {
+                checkTimeRepresentationInterval();
                 if ((value instanceof Double && (!typeClass
                         .equals(IntervalDoubleMap.class))) || (value instanceof Float && !typeClass
                                 .equals(IntervalFloatMap.class)) || (value instanceof Boolean && !typeClass

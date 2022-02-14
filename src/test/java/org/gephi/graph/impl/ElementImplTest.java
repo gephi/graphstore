@@ -200,6 +200,23 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testSetAttributeInterval() {
+        GraphStore store = getIntervalGraphStore();
+        Column column = generateIntervalColumn(store);
+
+        IntervalIntegerMap ti = new IntervalIntegerMap();
+        ti.put(new Interval(1.0, 2.0), 42);
+        ti.put(new Interval(2.0, 3.0), 10);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, ti);
+
+        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], ti);
+        Assert.assertEquals(node.getAttribute(column), ti);
+    }
+
+    @Test
     public void testSetAttributeTimeset() {
         GraphStore store = new GraphStore();
         Column column = store.nodeTable.getColumn("timeset");
@@ -1054,6 +1071,29 @@ public class ElementImplTest {
         node.checkType(new ColumnImpl("0", TimestampCharMap.class, null, null, Origin.DATA, false, false), 'a');
         node.checkType(new ColumnImpl("0", TimestampBooleanMap.class, null, null, Origin.DATA, false, false), true);
         node.checkType(new ColumnImpl("0", TimestampStringMap.class, null, null, Origin.DATA, false, false), "foo");
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testCheckTypeWithWrongIntervalConfiguration() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.checkType(new ColumnImpl("0", IntervalIntegerMap.class, null, null, Origin.DATA, false, false), 1);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testCheckTypeWithWrongTimestampConfiguration() {
+        GraphStore store = getIntervalGraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.checkType(new ColumnImpl("0", TimestampIntegerMap.class, null, null, Origin.DATA, false, false), 1);
+    }
+
+    @Test
+    public void testCheckTypeInterval() {
+        GraphStore store = getIntervalGraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
         node.checkType(new ColumnImpl("0", IntervalIntegerMap.class, null, null, Origin.DATA, false, false), 1);
         node.checkType(new ColumnImpl("0", IntervalDoubleMap.class, null, null, Origin.DATA, false, false), 1.0);
         node.checkType(new ColumnImpl("0", IntervalFloatMap.class, null, null, Origin.DATA, false, false), 1f);
@@ -1063,7 +1103,6 @@ public class ElementImplTest {
         node.checkType(new ColumnImpl("0", IntervalCharMap.class, null, null, Origin.DATA, false, false), 'a');
         node.checkType(new ColumnImpl("0", IntervalBooleanMap.class, null, null, Origin.DATA, false, false), true);
         node.checkType(new ColumnImpl("0", IntervalStringMap.class, null, null, Origin.DATA, false, false), "foo");
-
     }
 
     @Test
