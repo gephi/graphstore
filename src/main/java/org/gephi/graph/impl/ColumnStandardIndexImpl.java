@@ -64,6 +64,10 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLockImpl() : null;
     }
 
+    protected static boolean isSupportedType(ColumnImpl col) {
+        return !col.isDynamicAttribute();
+    }
+
     @Override
     public K putValue(T element, K value) {
         lock();

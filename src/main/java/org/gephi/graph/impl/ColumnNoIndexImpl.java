@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
@@ -66,7 +67,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
             if (elementIterator != null) {
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
-                    K obj = (K) element.getAttribute(column);
+                    K obj = (K) element.getAttribute(column, graph.getView());
                     if (value == null && obj == null) {
                         count++;
                     } else if (value != null && value.equals(obj)) {
@@ -94,7 +95,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
             if (elementIterator != null) {
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
-                    K obj = (K) element.getAttribute(column);
+                    K obj = (K) element.getAttribute(column, graph.getView());
                     set.add(obj);
                 }
             }
@@ -121,7 +122,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
 
     @Override
     public boolean isSortable() {
-        return Number.class.isAssignableFrom(column.getTypeClass());
+        return AttributeUtils.isNumberType(column.getTypeClass()) && !AttributeUtils.isArrayType(column.getTypeClass());
     }
 
     @Override
@@ -137,7 +138,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
                 double minN = Double.POSITIVE_INFINITY;
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
-                    Number num = (Number) element.getAttribute(column);
+                    Number num = (Number) element.getAttribute(column, graph.getView());
                     if (min == null || (num != null && num.doubleValue() < minN)) {
                         if (num != null) {
                             minN = num.doubleValue();
@@ -166,7 +167,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
 
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
-                    Number num = (Number) element.getAttribute(column);
+                    Number num = (Number) element.getAttribute(column, graph.getView());
                     if (max == null || (num != null && num.doubleValue() > maxN)) {
                         if (num != null) {
                             maxN = num.doubleValue();
@@ -259,7 +260,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         public boolean hasNext() {
             while (pointer == null && itr.hasNext()) {
                 T element = itr.next();
-                K val = (K) element.getAttribute(column);
+                K val = (K) element.getAttribute(column, graph.getView());
                 if ((value == null && val == null) || (val != null && val.equals(value))) {
                     pointer = element;
                 }
