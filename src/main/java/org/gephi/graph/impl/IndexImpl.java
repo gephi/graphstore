@@ -272,7 +272,8 @@ public class IndexImpl<T extends Element> implements Index<T> {
     }
 
     ColumnIndexImpl createIndex(ColumnImpl col) {
-        return col.isIndexed() ? createStandardIndex(col) : createNoIndex(col, graph);
+        return col.isIndexed() && ColumnStandardIndexImpl.isSupportedType(col) ? createStandardIndex(col)
+                : createNoIndex(col, graph);
     }
 
     ColumnNoIndexImpl createNoIndex(ColumnImpl column, Graph graph) {

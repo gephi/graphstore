@@ -20,6 +20,7 @@ import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -108,9 +109,13 @@ public class TableImplTest {
         TableImpl<Node> table = new TableImpl<>(graphStore, Node.class, true);
         Column col1 = table.addColumn("Id", null, Integer.class, Origin.DATA, null, false);
         Column col2 = table.addColumn("1", null, Integer.class, Origin.DATA, null, true);
+        Column col3 = table.addColumn("2", null, TimestampIntegerMap.class, Origin.DATA, null, true);
+        Column col4 = table.addColumn("3", null, Integer[].class, Origin.DATA, null, true);
 
         Assert.assertFalse(col1.isIndexed());
         Assert.assertTrue(col2.isIndexed());
+        Assert.assertTrue(col3.isIndexed());
+        Assert.assertTrue(col4.isIndexed());
     }
 
     @Test
