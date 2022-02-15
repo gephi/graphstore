@@ -316,6 +316,11 @@ public class BasicGraphStore implements DirectedGraph {
     }
 
     @Override
+    public int getVersion() {
+        return 0;
+    }
+
+    @Override
     public void clearEdges(Node node) {
         BasicNode basicNode = (BasicNode) node;
         Iterator<Edge> itr = edgeStore.inOutIterator(basicNode);

@@ -871,6 +871,19 @@ public class GraphStoreTest {
         Assert.assertEquals(edgeCollection, expected);
     }
 
+    @Test
+    public void testVersion() {
+        GraphStore graphStore = new GraphStore();
+        int version = graphStore.getVersion();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addNode(nodes[0]);
+        Assert.assertNotEquals(graphStore.getVersion(), version);
+        graphStore.addNode(nodes[1]);
+        version = graphStore.getVersion();
+        graphStore.addEdge(graphStore.factory.newEdge(nodes[0], nodes[1]));
+        Assert.assertNotEquals(graphStore.getVersion(), version);
+    }
+
     // UTILITY
     private void testNodeIterable(NodeIterable iterable, NodeImpl[] nodes) {
         Set<Node> nodeSet = new HashSet<>(iterable.toCollection());

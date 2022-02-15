@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
@@ -597,6 +598,10 @@ public class GraphViewImpl implements GraphView {
     @Override
     public boolean isDestroyed() {
         return storeId == GraphViewStore.NULL_VIEW;
+    }
+
+    protected int getVersion() {
+        return Objects.hash(version.nodeVersion, version.edgeVersion);
     }
 
     protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {

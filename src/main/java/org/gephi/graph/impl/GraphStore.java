@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Configuration;
@@ -755,6 +756,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     @Override
     public Graph getRootGraph() {
         return this;
+    }
+
+    @Override
+    public int getVersion() {
+        return Objects.hash(version.nodeVersion, version.edgeVersion);
     }
 
     protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {

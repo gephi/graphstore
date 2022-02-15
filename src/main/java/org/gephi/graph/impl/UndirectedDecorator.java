@@ -356,6 +356,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public int getVersion() {
+        return store.getVersion();
+    }
+
+    @Override
     public boolean isDirected() {
         return false;
     }

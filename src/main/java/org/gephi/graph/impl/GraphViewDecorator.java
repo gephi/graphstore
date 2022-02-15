@@ -597,6 +597,11 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
+    public int getVersion() {
+        return view.getVersion();
+    }
+
+    @Override
     public boolean isDirected() {
         return graphStore.isDirected();
     }
