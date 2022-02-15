@@ -453,6 +453,16 @@ public interface Graph {
     public GraphModel getModel();
 
     /**
+     * Returns a version number for this graph.
+     * <p>
+     * The version gets altered when the graph structure changes.
+     *
+     * @see GraphObserver for a more sophisticated way to track changes
+     * @return graph version
+     */
+    public int getVersion();
+
+    /**
      * Returns true if this graph is directed.
      *
      * @return true if directed, false otherwise
