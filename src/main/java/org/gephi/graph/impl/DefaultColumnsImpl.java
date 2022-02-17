@@ -35,7 +35,7 @@ public class DefaultColumnsImpl implements GraphModel.DefaultColumns {
 
     @Override
     public Column edgeId() {
-        return store.nodeTable.getColumn(GraphStoreConfiguration.ELEMENT_LABEL_INDEX);
+        return store.edgeTable.getColumn(GraphStoreConfiguration.ELEMENT_ID_INDEX);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class DefaultColumnsImpl implements GraphModel.DefaultColumns {
 
     @Override
     public Column edgeLabel() {
-        return store.edgeTable.getColumn(GraphStoreConfiguration.ELEMENT_ID_INDEX);
+        return store.edgeTable.getColumn(GraphStoreConfiguration.ELEMENT_LABEL_INDEX);
     }
 
     @Override

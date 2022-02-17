@@ -16,6 +16,7 @@
 
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 import org.testng.Assert;
@@ -110,9 +111,27 @@ public class IndexImplTest {
         Assert.assertNull(index.getIndex(col2));
     }
 
+    @Test
+    public void testDefaultColumns() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore();
+        IndexImpl<Node> nodeIndex = graphStore.nodeTable.store.indexStore.mainIndex;
+        IndexImpl<Edge> edgeIndex = graphStore.edgeTable.store.indexStore.mainIndex;
+
+        Assert.assertNotNull(nodeIndex.getIndex(graphStore.getModel().defaultColumns().degree()));
+        Assert.assertNotNull(nodeIndex.getIndex(graphStore.getModel().defaultColumns().inDegree()));
+        Assert.assertNotNull(nodeIndex.getIndex(graphStore.getModel().defaultColumns().outDegree()));
+        Assert.assertNotNull(nodeIndex.getIndex(graphStore.getModel().defaultColumns().nodeId()));
+        Assert.assertNotNull(nodeIndex.getIndex(graphStore.getModel().defaultColumns().nodeLabel()));
+        Assert.assertNotNull(nodeIndex.getIndex(graphStore.getModel().defaultColumns().nodeTimeSet()));
+
+        Assert.assertNotNull(edgeIndex.getIndex(graphStore.getModel().defaultColumns().edgeId()));
+        Assert.assertNotNull(edgeIndex.getIndex(graphStore.getModel().defaultColumns().edgeLabel()));
+        Assert.assertNotNull(edgeIndex.getIndex(graphStore.getModel().defaultColumns().edgeType()));
+        Assert.assertNotNull(edgeIndex.getIndex(graphStore.getModel().defaultColumns().edgeTimeSet()));
+    }
+
     private ColumnStore<Node> generateEmptyNodeStore() {
-        GraphStore graphStore = new GraphStore();
-        ColumnStore<Node> columnStore = graphStore.nodeTable.store;
-        return columnStore;
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore();
+        return graphStore.nodeTable.store;
     }
 }
