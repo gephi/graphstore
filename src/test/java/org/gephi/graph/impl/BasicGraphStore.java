@@ -213,6 +213,11 @@ public class BasicGraphStore implements DirectedGraph {
     }
 
     @Override
+    public EdgeIterable getEdges(int type) {
+        return new EdgeIterableWrapper(edgeStore.typeIterator(type));
+    }
+
+    @Override
     public NodeIterable getNeighbors(Node node) {
         return new NodeIterableWrapper(
                 new NeighborsUndirectedIterator((BasicNode) node, edgeStore.inOutIterator((BasicNode) node)));
@@ -1280,6 +1285,11 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public Iterator<Edge> iterator() {
             return new BasicEdgeIterator(idToEdgeMap.values().iterator());
+        }
+
+        public Iterator<Edge> typeIterator(int type) {
+            ObjectSet<BasicEdge> set = new ObjectLinkedOpenHashSet<>();
+            return new BasicEdgeIterator(idToEdgeMap.values().stream().filter(e -> e.type == type).iterator());
         }
 
         public Iterator<Edge> outIterator(BasicNode node) {

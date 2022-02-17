@@ -159,14 +159,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public boolean addEdge(final Edge edge) {
         autoWriteLock();
         try {
-            int type = edge.getType();
-            if (edgeTypeStore != null && !edgeTypeStore.contains(type)) {
-                if (GraphStoreConfiguration.ENABLE_AUTO_TYPE_REGISTRATION) {
-                    edgeTypeStore.addType(String.valueOf(type), type);
-                } else {
-                    throw new RuntimeException("The type doesn't exist");
-                }
-            }
+            registerEdgeType(edge);
             return edgeStore.add(edge);
         } finally {
             autoWriteUnlock();
@@ -177,9 +170,23 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public boolean addAllEdges(Collection<? extends Edge> edges) {
         autoWriteLock();
         try {
+            for (Edge edge : edges) {
+                registerEdgeType(edge);
+            }
             return edgeStore.addAll(edges);
         } finally {
             autoWriteUnlock();
+        }
+    }
+
+    private void registerEdgeType(Edge edge) {
+        int type = edge.getType();
+        if (edgeTypeStore != null && !edgeTypeStore.contains(type)) {
+            if (GraphStoreConfiguration.ENABLE_AUTO_TYPE_REGISTRATION) {
+                edgeTypeStore.addType(String.valueOf(type), type);
+            } else {
+                throw new RuntimeException("The type doesn't exist");
+            }
         }
     }
 
@@ -231,6 +238,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     @Override
     public EdgeIterable getEdges() {
         return edgeStore;
+    }
+
+    @Override
+    public EdgeIterable getEdges(int type) {
+        return new EdgeIterableWrapper(edgeStore.iteratorType(type, false));
     }
 
     @Override

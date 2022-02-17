@@ -21,10 +21,12 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -484,6 +486,47 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testAddEdgeTypeRegistration() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeTypeStore typeStore = graphStore.edgeTypeStore;
+        Assert.assertFalse(typeStore.contains(1));
+
+        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 1, 1.0, true);
+        graphStore.addEdge(edge);
+
+        Assert.assertTrue(typeStore.contains(1));
+        Assert.assertTrue(typeStore.contains("1"));
+    }
+
+    @Test
+    public void testAddAllEdges() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
+        graphStore.addAllEdges(Collections.singletonList(edge));
+
+        Assert.assertTrue(graphStore.contains(edge));
+    }
+
+    @Test
+    public void testAddAllEdgesTypeRegistration() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 1, 1.0, true);
+        graphStore.addAllEdges(Collections.singletonList(edge));
+
+        Assert.assertTrue(graphStore.edgeTypeStore.contains(1));
+        Assert.assertTrue(graphStore.edgeTypeStore.contains("1"));
+    }
+
+    @Test
     public void testRemoveNodeWithEdges() {
         GraphStore graphStore = new GraphStore();
         NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
@@ -586,6 +629,30 @@ public class GraphStoreTest {
         graphStore.addAllEdges(Arrays.asList(edges));
         EdgeIterable edgeIterable = graphStore.getEdges();
         testEdgeIterable(edgeIterable, edges);
+    }
+
+    @Test
+    public void testGetEdgesDefaultType() {
+        GraphStore graphStore = new GraphStore();
+        NodeStore nodeStore = GraphGenerator.generateNodeStore(5);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 4, 0, true, true, false);
+        graphStore.addAllEdges(Arrays.asList(edges));
+        EdgeIterable edgeIterable = graphStore.getEdges(0);
+        testEdgeIterable(edgeIterable, edges);
+    }
+
+    @Test
+    public void testGetEdgesByType() {
+        GraphStore graphStore = new GraphStore();
+        NodeStore nodeStore = GraphGenerator.generateNodeStore(15);
+        EdgeImpl[] edges = GraphGenerator.generateMultiTypeEdgeList(nodeStore, 4, 3, true, true);
+        graphStore.addAllEdges(Arrays.asList(edges));
+        testEdgeIterable(graphStore.getEdges(0), Arrays.stream(edges).filter(e -> e.getType() == 0)
+                .toArray(EdgeImpl[]::new));
+        testEdgeIterable(graphStore.getEdges(1), Arrays.stream(edges).filter(e -> e.getType() == 1)
+                .toArray(EdgeImpl[]::new));
+        testEdgeIterable(graphStore.getEdges(2), Arrays.stream(edges).filter(e -> e.getType() == 2)
+                .toArray(EdgeImpl[]::new));
     }
 
     @Test

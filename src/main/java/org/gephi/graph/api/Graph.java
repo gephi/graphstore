@@ -198,6 +198,14 @@ public interface Graph {
     public EdgeIterable getEdges();
 
     /**
+     * Gets all the edges of a particular type in the graph.
+     *
+     * @param type edge type
+     * @return an edge iterable over all edges of this type
+     */
+    public EdgeIterable getEdges(int type);
+
+    /**
      * Gets all the self-loop edges in the graph.
      *
      * @return an edge iterable over all self-loops

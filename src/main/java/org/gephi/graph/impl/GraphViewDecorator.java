@@ -339,6 +339,12 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
+    public EdgeIterable getEdges(int type) {
+        return graphStore.getEdgeIterableWrapper(new UndirectedEdgeViewIterator(
+                graphStore.edgeStore.iteratorType(type, undirected)));
+    }
+
+    @Override
     public EdgeIterable getSelfLoops() {
         return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.iteratorSelfLoop()));
     }
