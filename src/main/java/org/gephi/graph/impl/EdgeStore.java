@@ -37,7 +37,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     // Const
     protected final static int NULL_ID = -1;
     protected final static int NODE_BITS = 31;
-    protected static final Iterator<Edge> EMPTY_EDGE_ITERATOR = Collections.<Edge> emptyList().iterator();
+    protected static final Iterator<Edge> EMPTY_EDGE_ITERATOR = Collections.emptyIterator();
 
     // Data
     protected int size;
@@ -335,6 +335,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     public SelfLoopIterator iteratorSelfLoop() {
         return new SelfLoopIterator();
+    }
+
+    public EdgeTypeIterator iteratorType(final int type, final boolean undirected) {
+        return new EdgeTypeIterator(type, undirected);
     }
 
     public EdgeOutIterator edgeOutIterator(final Node node) {
@@ -754,6 +758,16 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     public boolean containsId(final Object id) {
         return dictionary.containsKey(id);
+    }
+
+    public boolean containsAnyType(NodeImpl source, NodeImpl target) {
+        int typeLength = longDictionary.length;
+        for (int i = 0; i < typeLength; i++) {
+            if (contains(source, target, i)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean contains(NodeImpl source, NodeImpl target, int type) {
@@ -1281,6 +1295,37 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 throw new UnsupportedOperationException(
                         "Removing directed edges from undirected iterator is not supported");
             }
+            EdgeStore.this.remove(pointer);
+        }
+    }
+
+    protected final class EdgeTypeIterator extends EdgeStoreIterator {
+
+        private final int type;
+        private final boolean undirected;
+
+        public EdgeTypeIterator(int type, boolean undirected) {
+            super();
+            this.type = type;
+            this.undirected = undirected;
+        }
+
+        @Override
+        public boolean hasNext() {
+            pointer = null;
+            while (pointer == null) {
+                if (!super.hasNext()) {
+                    return false;
+                }
+                if (pointer.getType() != type || (undirected && isUndirectedToIgnore(pointer))) {
+                    pointer = null;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public void remove() {
             EdgeStore.this.remove(pointer);
         }
     }

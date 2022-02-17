@@ -158,6 +158,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public EdgeIterable getEdges(int type) {
+        return store.getEdgeIterableWrapper(store.edgeStore.iteratorType(type, true));
+    }
+
+    @Override
     public EdgeIterable getSelfLoops() {
         return store.getEdgeIterableWrapper(store.edgeStore.iteratorSelfLoop());
     }
