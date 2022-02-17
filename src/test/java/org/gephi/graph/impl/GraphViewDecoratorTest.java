@@ -371,9 +371,7 @@ public class GraphViewDecoratorTest {
         for (Edge e : graphStore.getEdges()) {
             Assert.assertFalse(graph.contains(e));
         }
-        for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
-            Assert.assertEquals(graph.getEdgeCount(i), 0);
-        }
+        Assert.assertEquals(graph.getEdgeCount(0), 0);
     }
 
     @Test
@@ -391,9 +389,7 @@ public class GraphViewDecoratorTest {
         for (Edge e : graphStore.getEdges()) {
             Assert.assertFalse(graph.contains(e));
         }
-        for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
-            Assert.assertEquals(graph.getEdgeCount(i), 0);
-        }
+        Assert.assertEquals(graph.getEdgeCount(0), 0);
     }
 
     @Test
@@ -415,9 +411,8 @@ public class GraphViewDecoratorTest {
         for (Node n : graphStore.getNodes()) {
             Assert.assertFalse(graph.contains(n));
         }
-        for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
-            Assert.assertEquals(graph.getEdgeCount(i), 0);
-        }
+
+        Assert.assertEquals(graph.getEdgeCount(0), 0);
     }
 
     @Test
@@ -439,9 +434,7 @@ public class GraphViewDecoratorTest {
         for (Node n : graphStore.getNodes()) {
             Assert.assertFalse(graph.contains(n));
         }
-        for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
-            Assert.assertEquals(graph.getEdgeCount(i), 0);
-        }
+        Assert.assertEquals(graph.getEdgeCount(0), 0);
     }
 
     @Test

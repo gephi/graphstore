@@ -103,7 +103,8 @@ public class EdgeTypeStore {
         if (foundId != NULL_SHORT && foundId != givenId) {
             throw new RuntimeException("This label '" + label + "' is already assigned to a different id");
         } else if (idMap.containsKey(givenId)) {
-            if ((label == null && idMap.get(givenId) == null) || idMap.get(givenId).equals(label)) {
+            if ((label == null && idMap.get(givenId) == null) || (idMap.get(givenId) != null && idMap.get(givenId)
+                    .equals(label))) {
                 return false;
             } else {
                 throw new RuntimeException("This id '" + id + "' is already assigned to a different label");

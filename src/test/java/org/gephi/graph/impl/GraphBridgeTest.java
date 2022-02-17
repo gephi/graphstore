@@ -242,7 +242,9 @@ public class GraphBridgeTest {
             }
         }
         for (Integer typeId : typeIds) {
-            source.edgeTypeStore.addType(String.valueOf(typeId), typeId);
+            if (typeId != EdgeTypeStore.NULL_LABEL) {
+                source.edgeTypeStore.addType(String.valueOf(typeId), typeId);
+            }
         }
 
         new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
