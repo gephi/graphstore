@@ -51,6 +51,7 @@ public class GraphModelImpl implements GraphModel {
     protected final Configuration configuration;
     protected final GraphStore store;
     protected final GraphBridgeImpl graphBridge;
+    protected final DefaultColumnsImpl defaultColumns;
 
     public GraphModelImpl() {
         this(new Configuration());
@@ -62,6 +63,7 @@ public class GraphModelImpl implements GraphModel {
         configuration = config.copy();
         store = new GraphStore(this);
         graphBridge = new GraphBridgeImpl(store);
+        defaultColumns = new DefaultColumnsImpl(store);
     }
 
     @Override
@@ -135,6 +137,11 @@ public class GraphModelImpl implements GraphModel {
         } finally {
             store.autoWriteUnlock();
         }
+    }
+
+    @Override
+    public DefaultColumns defaultColumns() {
+        return defaultColumns;
     }
 
     @Override

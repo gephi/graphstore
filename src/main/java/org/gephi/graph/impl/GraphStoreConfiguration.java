@@ -63,6 +63,10 @@ public final class GraphStoreConfiguration {
     public static final String ELEMENT_LABEL_COLUMN_ID = "label";
     public static final String ELEMENT_TIMESET_COLUMN_ID = "timeset";
     public static final String EDGE_WEIGHT_COLUMN_ID = "weight";
+    public static final String NODE_DEGREE_COLUMN_ID = "degree";
+    public static final String NODE_IN_DEGREE_COLUMN_ID = "indegree";
+    public static final String NODE_OUT_DEGREE_COLUMN_ID = "outdegree";
+    public static final String EDGE_TYPE_COLUMN_ID = "type";
     // Properties index
     public static final int ELEMENT_ID_INDEX = 0;
     public static final int ELEMENT_LABEL_INDEX = 1;
