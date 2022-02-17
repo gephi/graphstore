@@ -435,6 +435,21 @@ public class ElementImplTest {
         Assert.assertEquals(res, 1);
     }
 
+    @Test
+    public void testGetAttributeDefaultColumns() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        Node node = store.getNode("1");
+        Edge edge = store.getEdge("0");
+
+        Assert.assertEquals(node.getAttribute(store.getModel().defaultColumns().nodeId()), "1");
+        Assert.assertNull(node.getAttribute(store.getModel().defaultColumns().nodeLabel()));
+        Assert.assertNull(node.getAttribute(store.getModel().defaultColumns().nodeTimeSet()));
+
+        Assert.assertEquals(edge.getAttribute(store.getModel().defaultColumns().edgeId()), "0");
+        Assert.assertNull(edge.getAttribute(store.getModel().defaultColumns().edgeLabel()));
+        Assert.assertNull(edge.getAttribute(store.getModel().defaultColumns().edgeTimeSet()));
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetAttributeKeyUnknown() {
         GraphStore store = new GraphStore();

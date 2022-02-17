@@ -250,6 +250,20 @@ public class IndexImpl<T extends Element> implements Index<T> {
                 return index;
             }
         }
+
+        // TODO: Make this more robust
+        if (col.isProperty()) {
+            DefaultColumnsImpl defaultColumns = columnStore.graphStore.graphModel.defaultColumns;
+            if (col == defaultColumns.degreeColumn) {
+                return new DegreeNoIndexImpl(graph, DegreeNoIndexImpl.DegreeType.DEGREE);
+            } else if (col == defaultColumns.inDegreeColumn) {
+                return new DegreeNoIndexImpl(graph, DegreeNoIndexImpl.DegreeType.IN_DEGREE);
+            } else if (col == defaultColumns.outDegreeColumn) {
+                return new DegreeNoIndexImpl(graph, DegreeNoIndexImpl.DegreeType.OUT_DEGREE);
+            } else if (col == defaultColumns.typeColumn) {
+                return new EdgeTypeNoIndexImpl(graph);
+            }
+        }
         return null;
     }
 
