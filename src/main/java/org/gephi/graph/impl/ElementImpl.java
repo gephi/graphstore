@@ -357,7 +357,9 @@ public abstract class ElementImpl implements Element {
                         }
                     }
                 }
-            } else if (column.isIndexed() && columnStore != null && isValid()) {
+            }
+
+            if (column.isIndexed() && columnStore != null && isValid()) {
                 value = columnStore.indexStore.set(column, oldValue, value, this);
             }
             attributes[index] = value;
@@ -397,6 +399,7 @@ public abstract class ElementImpl implements Element {
         checkType(column, value);
 
         int index = column.getIndex();
+        ColumnStore columnStore = getColumnStore();
         Object oldValue = null;
         boolean res;
         synchronized (this) {
@@ -422,12 +425,16 @@ public abstract class ElementImpl implements Element {
             }
 
             res = dynamicValue.put(timeObject, value);
-        }
 
-        if (res && isValid()) {
-            TimeIndexStore timeIndexStore = getTimeIndexStore();
-            if (timeIndexStore != null) {
-                timeIndexStore.add(timeObject);
+            if (res && isValid()) {
+                TimeIndexStore timeIndexStore = getTimeIndexStore();
+                if (timeIndexStore != null) {
+                    timeIndexStore.add(timeObject);
+                }
+
+                if (column.isIndexed() && columnStore != null) {
+                    columnStore.indexStore.set(column, oldValue, dynamicValue, this);
+                }
             }
         }
         if (isValid()) {
