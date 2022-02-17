@@ -25,6 +25,8 @@ public class EdgeTypeStoreTest {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
 
         Assert.assertEquals(edgeTypeStore.size(), 1);
+        Assert.assertTrue(edgeTypeStore.contains(0));
+        Assert.assertTrue(edgeTypeStore.contains(null));
     }
 
     @Test

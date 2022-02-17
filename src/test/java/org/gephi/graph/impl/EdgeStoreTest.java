@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -39,7 +40,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- *
  * @author mbastian
  */
 public class EdgeStoreTest {
@@ -1588,9 +1588,9 @@ public class EdgeStoreTest {
 
         for (EdgeImpl edge : edges) {
             Assert.assertTrue(edgeStore.isAdjacent(edge.source, edge.target));
-            if (!edge.isSelfLoop() && !edge.isMutual()) {
+            if (!edge.isSelfLoop() && !edgeStore.containsAnyType(edge.target, edge.source)) {
                 Assert.assertFalse(edgeStore.isAdjacent(edge.target, edge.source));
-            } else if (edge.isMutual()) {
+            } else if (edgeStore.containsAnyType(edge.target, edge.source)) {
                 Assert.assertTrue(edgeStore.isAdjacent(edge.target, edge.source));
             }
         }

@@ -141,7 +141,7 @@ public class GraphGenerator {
             graphStore = nodeStore.viewStore.graphStore;
         }
 
-        int c = 0;
+        int c = type * edgeCount;
         while (idSet.size() < edgeCount) {
             int sourceId = r.nextInt(nodeCount);
             int targetId = r.nextInt(nodeCount);
@@ -317,7 +317,7 @@ public class GraphGenerator {
                 res[i] = edgeCount - total;
                 assert res[i] > 0;
             } else {
-                res[i] = (int) (ratio[i] / sum);
+                res[i] = (int) (edgeCount * ratio[i] / sum);
                 total += res[i];
             }
         }
@@ -398,6 +398,10 @@ public class GraphGenerator {
         return generateTinyGraphStore(GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION);
     }
 
+    public static GraphStore generateEmptyGraphStore() {
+        return generateEmptyGraphStore(GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION);
+    }
+
     public static GraphStore generateTinyUndirectedGraphStore() {
         GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
         GraphStore graphStore = graphModel.store;
@@ -419,6 +423,17 @@ public class GraphGenerator {
         graphStore.addNode(n2);
         graphStore.addEdge(e);
         return graphStore;
+    }
+
+    public static GraphStore generateEmptyGraphStore(Configuration configuration) {
+        GraphModelImpl graphModel = new GraphModelImpl(configuration);
+        return graphModel.store;
+    }
+
+    public static GraphStore generateEmptyGraphStore(TimeRepresentation timeRepresentation) {
+        Configuration config = new Configuration();
+        config.setTimeRepresentation(timeRepresentation);
+        return generateEmptyGraphStore(config);
     }
 
     public static GraphStore generateTinyGraphStore(TimeRepresentation timeRepresentation) {

@@ -247,9 +247,7 @@ public class GraphViewStoreTest {
 
         Assert.assertEquals(graph.getNodeCount(), 0);
         Assert.assertEquals(graph.getEdgeCount(), 0);
-        for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
-            Assert.assertEquals(graph.getEdgeCount(i), 0);
-        }
+        Assert.assertEquals(graph.getEdgeCount(0), 0);
 
         Assert.assertFalse(graph.getNodes().iterator().hasNext());
         Assert.assertFalse(graph.getEdges().iterator().hasNext());
@@ -266,9 +264,7 @@ public class GraphViewStoreTest {
 
         Assert.assertEquals(graph.getNodeCount(), 0);
         Assert.assertEquals(graph.getEdgeCount(), 0);
-        for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
-            Assert.assertEquals(graph.getEdgeCount(i), 0);
-        }
+        Assert.assertEquals(graph.getEdgeCount(0), 0);
 
         Assert.assertFalse(graph.getNodes().iterator().hasNext());
         Assert.assertFalse(graph.getEdges().iterator().hasNext());
