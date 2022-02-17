@@ -170,6 +170,92 @@ public interface GraphModel {
     }
 
     /**
+     * Default columns utility.
+     */
+    public static interface DefaultColumns {
+
+        /**
+         * Return node identifier column.
+         * <p>
+         * This is a read-only column.
+         *
+         * @return node id column
+         */
+        public Column nodeId();
+
+        /**
+         * Return edge identifier column.
+         * <p>
+         * This is a read-only column.
+         *
+         * @return edge id column
+         */
+        public Column edgeId();
+
+        /**
+         * Return node label column.
+         *
+         * @return node label column
+         */
+        public Column nodeLabel();
+
+        /**
+         * Return edge label column.
+         *
+         * @return edge label column
+         */
+        public Column edgeLabel();
+
+        /**
+         * Return node time-set (timestamp or interval) column.
+         *
+         * @return node time-set column
+         */
+        public Column nodeTimeSet();
+
+        /**
+         * Return edge time-set (timestamp or interval) column.
+         *
+         * @return edge time-set column
+         */
+        public Column edgeTimeSet();
+
+        /**
+         * Return node degree column.
+         *
+         * @return node degree column
+         */
+        public Column degree();
+
+        /**
+         * Return node in-degree column.
+         * <p>
+         * Only for directed graphs.
+         *
+         * @return node in-degree column
+         */
+        public Column inDegree();
+
+        /**
+         * Return node out-degree column.
+         * <p>
+         * Only for directed graphs.
+         *
+         * @return node out-degree column
+         */
+        public Column outDegree();
+
+        /**
+         * Return edge type column.
+         * <p>
+         * Only for multi-graphs.
+         *
+         * @return node in-degree column
+         */
+        public Column edgeType();
+    }
+
+    /**
      * Returns the graph factory.
      *
      * @return graph factory
@@ -266,6 +352,15 @@ public interface GraphModel {
      * @param view view
      */
     public void setVisibleView(GraphView view);
+
+    /**
+     * Returns the default columns.
+     * <p>
+     * Default columns are always available for each element.
+     *
+     * @return default columns
+     */
+    public DefaultColumns defaultColumns();
 
     /**
      * Adds a new edge type and returns the integer identifier.

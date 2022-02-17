@@ -722,4 +722,23 @@ public class GraphModelTest {
 
         Assert.assertNull(n1.getAttribute(col2));
     }
+
+    @Test
+    public void testDefaultColumns() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphModel.DefaultColumns defaultColumns = graphModel.defaultColumns();
+        Assert.assertNotNull(defaultColumns);
+
+        Assert.assertNotNull(defaultColumns.degree());
+        Assert.assertNotNull(defaultColumns.inDegree());
+        Assert.assertNotNull(defaultColumns.outDegree());
+        Assert.assertNotNull(defaultColumns.nodeId());
+        Assert.assertNotNull(defaultColumns.edgeId());
+        Assert.assertNotNull(defaultColumns.nodeLabel());
+        Assert.assertNotNull(defaultColumns.edgeLabel());
+        Assert.assertNotNull(defaultColumns.nodeTimeSet());
+        Assert.assertNotNull(defaultColumns.edgeTimeSet());
+        Assert.assertNotNull(defaultColumns.edgeType());
+
+    }
 }
