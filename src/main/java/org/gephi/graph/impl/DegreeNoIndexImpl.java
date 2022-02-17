@@ -8,7 +8,6 @@ import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Graph;
-import org.gephi.graph.api.GraphLock;
 import org.gephi.graph.api.Node;
 
 public class DegreeNoIndexImpl implements ColumnIndexImpl<Integer, Node> {
@@ -22,11 +21,9 @@ public class DegreeNoIndexImpl implements ColumnIndexImpl<Integer, Node> {
     protected final DegreeType degreeType;
     // Graph
     protected final Graph graph;
-    protected final GraphLock graphLock;
 
     protected DegreeNoIndexImpl(Graph graph, DegreeType degreeType) {
         this.graph = graph;
-        this.graphLock = graph.getLock();
         this.degreeType = degreeType;
     }
 
@@ -113,6 +110,14 @@ public class DegreeNoIndexImpl implements ColumnIndexImpl<Integer, Node> {
 
     @Override
     public Column getColumn() {
+        switch (degreeType) {
+            case DEGREE:
+                return graph.getModel().defaultColumns().degree();
+            case IN_DEGREE:
+                return graph.getModel().defaultColumns().inDegree();
+            case OUT_DEGREE:
+                return graph.getModel().defaultColumns().outDegree();
+        }
         return null;
     }
 

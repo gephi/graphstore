@@ -1,6 +1,5 @@
 package org.gephi.graph.impl;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import org.gephi.graph.api.Edge;
@@ -13,14 +12,14 @@ public class DegreeNoIndexTest {
 
     @Test
     public void testEmpty() {
-        GraphStore store = new GraphStore();
+        GraphStore store = GraphGenerator.generateEmptyGraphStore();
         DegreeNoIndexImpl index = new DegreeNoIndexImpl(store, DegreeNoIndexImpl.DegreeType.DEGREE);
         Assert.assertEquals(index.countElements(), 0);
         Assert.assertEquals(index.countValues(), 0);
         Assert.assertEquals(index.count(0), 0);
         Assert.assertFalse(index.get(0).iterator().hasNext());
         Assert.assertTrue(index.isSortable());
-        Assert.assertNull(index.getColumn());
+        Assert.assertSame(index.getColumn(), store.getModel().defaultColumns().degree());
         Assert.assertNull(index.getMinValue());
         Assert.assertNull(index.getMaxValue());
         Assert.assertTrue(index.values().isEmpty());
