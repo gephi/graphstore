@@ -463,7 +463,7 @@ public class AttributeUtils {
             return ArraysParser.parseArray(typeClass, str);
         }
 
-        throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
+        throw new IllegalArgumentException("Unsupported type " + typeClass.getCanonicalName());
     }
 
     /**
