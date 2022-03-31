@@ -717,7 +717,6 @@ public class GraphModelTest {
         n1.setAttribute(col1, "bar");
         graphModel.getStore().addNode(n1);
 
-        ((TableImpl) table).store.clear();
         Column col2 = table.addColumn("foo2", String.class);
 
         Assert.assertNull(n1.getAttribute(col2));

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -38,6 +39,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected final GraphLockImpl lock;
     // Version
     protected final GraphVersion version;
+    // View store
+    protected final GraphViewStore viewStore;
     // Data
     protected int size;
     protected int garbageSize;
@@ -46,8 +49,6 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected NodeBlock blocks[];
     protected NodeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
-    // View store
-    protected final GraphViewStore viewStore;
 
     public NodeStore() {
         initStore();
@@ -311,7 +312,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 spatialIndex.removeNode(node);
             }
 
-            node.clearAttributes();
+            node.destroyAttributes();
 
             incrementVersion();
 

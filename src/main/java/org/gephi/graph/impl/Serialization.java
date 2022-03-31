@@ -350,7 +350,7 @@ public class Serialization {
     private void serializeNode(DataOutput out, NodeImpl node) throws IOException {
         serialize(out, node.getId());
         serialize(out, node.storeId);
-        serialize(out, node.attributes);
+        serialize(out, node.attributes.attributes);
         serialize(out, node.properties);
     }
 
@@ -365,7 +365,7 @@ public class Serialization {
             serialize(out, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT);
         }
         serialize(out, edge.isDirected());
-        serialize(out, edge.attributes);
+        serialize(out, edge.attributes.attributes);
         serialize(out, edge.properties);
     }
 
@@ -376,7 +376,7 @@ public class Serialization {
         NodePropertiesImpl properties = (NodePropertiesImpl) deserialize(is);
 
         NodeImpl node = (NodeImpl) model.store.factory.newNode(id);
-        node.attributes = attributes;
+        node.attributes.setBackingArray(attributes);
         if (node.properties != null) {
             node.setNodeProperties(properties);
         }
@@ -408,7 +408,7 @@ public class Serialization {
         NodeImpl target = model.store.nodeStore.get(targetNewId);
 
         EdgeImpl edge = (EdgeImpl) model.store.factory.newEdge(id, source, target, type, weight, directed);
-        edge.attributes = attributes;
+        edge.attributes.setBackingArray(attributes);
         if (edge.properties != null) {
             edge.setEdgeProperties(properties);
         }

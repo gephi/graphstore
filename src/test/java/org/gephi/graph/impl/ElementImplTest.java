@@ -84,8 +84,8 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, 1);
 
-        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], 1);
+        Assert.assertEquals(node.getAttributes().length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.getAttributes()[getFirstNonPropertyIndex()], 1);
         Assert.assertEquals(node.getAttribute(column), 1);
     }
 
@@ -97,8 +97,8 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute("age", 1);
 
-        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], 1);
+        Assert.assertEquals(node.getAttributes().length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.getAttributes()[getFirstNonPropertyIndex()], 1);
         Assert.assertEquals(node.getAttribute(column), 1);
     }
 
@@ -194,8 +194,8 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, ti);
 
-        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], ti);
+        Assert.assertEquals(node.getAttributes().length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.getAttributes()[getFirstNonPropertyIndex()], ti);
         Assert.assertEquals(node.getAttribute(column), ti);
     }
 
@@ -211,8 +211,8 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, ti);
 
-        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()], ti);
+        Assert.assertEquals(node.getAttributes().length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.getAttributes()[getFirstNonPropertyIndex()], ti);
         Assert.assertEquals(node.getAttribute(column), ti);
     }
 
@@ -278,8 +278,8 @@ public class ElementImplTest {
         NodeImpl node = new NodeImpl("0", store);
         node.setAttribute(column, null);
 
-        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertNull(node.attributes[getFirstNonPropertyIndex()]);
+        Assert.assertEquals(node.getAttributes().length, 1 + getElementPropertiesLength());
+        Assert.assertNull(node.getAttributes()[getFirstNonPropertyIndex()]);
         Assert.assertNull(node.getAttribute(column));
     }
 
@@ -292,8 +292,8 @@ public class ElementImplTest {
         node.setAttribute(column, 1, 2.0);
         node.setAttribute(column, 2, 1.0);
 
-        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()].getClass(), TimestampIntegerMap.class);
+        Assert.assertEquals(node.getAttributes().length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.getAttributes()[getFirstNonPropertyIndex()].getClass(), TimestampIntegerMap.class);
         Assert.assertEquals(node.getAttribute(column, 2.0), 1);
         Assert.assertEquals(node.getAttribute(column, 1.0), 2);
     }
@@ -307,8 +307,8 @@ public class ElementImplTest {
         node.setAttribute(column, 1, new Interval(3.0, 4.0));
         node.setAttribute(column, 2, new Interval(1.0, 2.0));
 
-        Assert.assertEquals(node.attributes.length, 1 + getElementPropertiesLength());
-        Assert.assertEquals(node.attributes[getFirstNonPropertyIndex()].getClass(), IntervalIntegerMap.class);
+        Assert.assertEquals(node.getAttributes().length, 1 + getElementPropertiesLength());
+        Assert.assertEquals(node.getAttributes()[getFirstNonPropertyIndex()].getClass(), IntervalIntegerMap.class);
         Assert.assertEquals(node.getAttribute(column, new Interval(3.0, 4.0)), 1);
         Assert.assertEquals(node.getAttribute(column, new Interval(1.0, 2.0)), 2);
     }
@@ -580,11 +580,15 @@ public class ElementImplTest {
 
         node.setAttribute(column, null);
         res = node.getAttribute(column.getId());
-        Assert.assertEquals(res, defaultValue);
+        Assert.assertNull(res);
 
         node.setAttribute(column, 1);
         res = node.getAttribute(column.getId());
         Assert.assertEquals(res, 1);
+
+        node.removeAttribute(column);
+        res = node.getAttribute(column.getId());
+        Assert.assertEquals(res, defaultValue);
     }
 
     @Test
@@ -1128,6 +1132,35 @@ public class ElementImplTest {
         }
     }
 
+    @Test
+    public void testRemoveColumn() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 1);
+        store.addNode(node);
+
+        int index = column.getIndex();
+        column.getTable().removeColumn(column);
+        Assert.assertNull(node.getAttributes()[index]);
+    }
+
+    @Test
+    public void testRemoveColumnDefaultValue() {
+        GraphStore store = new GraphStore();
+        Column column = new ColumnImpl(store.nodeTable, "age", Integer.class, "Age", 25, Origin.DATA, true, false);
+        store.nodeTable.store.addColumn(column);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, 1);
+        store.addNode(node);
+
+        int index = column.getIndex();
+        column.getTable().removeColumn(column);
+        Assert.assertNull(node.getAttributes()[index]);
+    }
+
     // Utility
     private GraphStore getIntervalGraphStore() {
         Configuration config = new Configuration();
@@ -1138,42 +1171,44 @@ public class ElementImplTest {
     }
 
     private Column generateBasicColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store
-                .addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "age", Integer.class, "Age", null,
+                Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 
     private Column generateBasicBooleanColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store
-                .addColumn(new ColumnImpl("visible", Boolean.class, "Visible", null, Origin.DATA, true, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "visible", Boolean.class, "Visible",
+                null, Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("visible");
     }
 
     private Column generateBasicListColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store
-                .addColumn(new ColumnImpl("list", List.class, "List", null, Origin.DATA, true, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "list", List.class, "List", null,
+                Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("list");
     }
 
     private Column generateBasicSetColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("set", Set.class, "Set", null, Origin.DATA, true, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "set", Set.class, "Set", null,
+                Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("set");
     }
 
     private Column generateBasicMapColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store.addColumn(new ColumnImpl("map", Map.class, "Map", null, Origin.DATA, true, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "map", Map.class, "Map", null,
+                Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("map");
     }
 
     private Column generateTimestampColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store
-                .addColumn(new ColumnImpl("age", TimestampIntegerMap.class, "Age", null, Origin.DATA, false, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "age", TimestampIntegerMap.class,
+                "Age", null, Origin.DATA, false, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 
     private Column generateIntervalColumn(GraphStore graphStore) {
-        graphStore.nodeTable.store
-                .addColumn(new ColumnImpl("age", IntervalIntegerMap.class, "Age", null, Origin.DATA, false, false));
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "age", IntervalIntegerMap.class,
+                "Age", null, Origin.DATA, false, false));
         return graphStore.nodeTable.store.getColumn("age");
     }
 

@@ -13,30 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
-import org.gephi.graph.api.Estimator;
-import org.gephi.graph.api.Interval;
-import org.gephi.graph.api.types.TimestampBooleanMap;
-import org.gephi.graph.api.types.TimestampByteMap;
-import org.gephi.graph.api.types.TimestampCharMap;
-import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampFloatMap;
-import org.gephi.graph.api.types.TimestampIntegerMap;
-import org.gephi.graph.api.types.TimestampLongMap;
-import org.gephi.graph.api.types.TimestampSet;
-import org.gephi.graph.api.types.TimestampShortMap;
-import org.gephi.graph.api.types.TimestampStringMap;
-import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
@@ -46,24 +35,35 @@ import org.gephi.graph.api.types.IntervalFloatMap;
 import org.gephi.graph.api.types.IntervalIntegerMap;
 import org.gephi.graph.api.types.IntervalLongMap;
 import org.gephi.graph.api.types.IntervalMap;
-import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimeSet;
+import org.gephi.graph.api.types.TimestampBooleanMap;
+import org.gephi.graph.api.types.TimestampByteMap;
+import org.gephi.graph.api.types.TimestampCharMap;
+import org.gephi.graph.api.types.TimestampDoubleMap;
+import org.gephi.graph.api.types.TimestampFloatMap;
+import org.gephi.graph.api.types.TimestampIntegerMap;
+import org.gephi.graph.api.types.TimestampLongMap;
+import org.gephi.graph.api.types.TimestampMap;
+import org.gephi.graph.api.types.TimestampShortMap;
+import org.gephi.graph.api.types.TimestampStringMap;
 
 public abstract class ElementImpl implements Element {
 
     // Reference to store
     protected final GraphStore graphStore;
     // Attributes
-    protected Object[] attributes;
+    protected final AttributesImpl attributes;
 
     public ElementImpl(Object id, GraphStore graphStore) {
         if (id == null) {
             throw new NullPointerException();
         }
         this.graphStore = graphStore;
+        this.attributes = new AttributesImpl(getColumnStore());
+        this.attributes.setId(id);
     }
 
     abstract ColumnStore getColumnStore();
@@ -74,15 +74,19 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object getId() {
-        return attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX];
+        return attributes.getId();
     }
 
     @Override
     public String getLabel() {
-        if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL && attributes.length > GraphStoreConfiguration.ELEMENT_LABEL_INDEX) {
-            return (String) attributes[GraphStoreConfiguration.ELEMENT_LABEL_INDEX];
+        return attributes.getLabel();
+    }
+
+    @Override
+    public void setLabel(String label) {
+        if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
+            setAttribute(getColumnStore().getColumnByIndex(GraphStoreConfiguration.ELEMENT_LABEL_INDEX), label);
         }
-        return null;
     }
 
     @Override
@@ -94,18 +98,7 @@ public abstract class ElementImpl implements Element {
     public Object getAttribute(Column column) {
         checkColumn(column);
 
-        int index = column.getIndex();
-        Object res = null;
-        synchronized (this) {
-            if (index < attributes.length) {
-                res = attributes[index];
-            }
-        }
-
-        if (res == null) {
-            return column.getDefaultValue();
-        }
-        return res;
+        return attributes.getAttribute(column);
     }
 
     @Override
@@ -117,7 +110,9 @@ public abstract class ElementImpl implements Element {
     public Object getAttribute(Column column, double timestamp) {
         checkTimeRepresentationTimestamp();
         checkDouble(timestamp);
-        return getTimeAttribute(column, timestamp);
+        checkColumn(column);
+        checkColumnDynamic(column);
+        return attributes.getAttribute(column, timestamp, null);
     }
 
     @Override
@@ -128,24 +123,9 @@ public abstract class ElementImpl implements Element {
     @Override
     public Object getAttribute(Column column, Interval interval) {
         checkTimeRepresentationInterval();
-        return getTimeAttribute(column, interval);
-    }
-
-    private Object getTimeAttribute(Column column, Object timeObject) {
         checkColumn(column);
         checkColumnDynamic(column);
-
-        int index = column.getIndex();
-        synchronized (this) {
-            TimeMap dynamicValue = null;
-            if (index < attributes.length) {
-                dynamicValue = (TimeMap) attributes[index];
-            }
-            if (dynamicValue != null) {
-                return dynamicValue.get(timeObject, column.getDefaultValue());
-            }
-        }
-        return null;
+        return attributes.getAttribute(column, interval, null);
     }
 
     @Override
@@ -162,29 +142,13 @@ public abstract class ElementImpl implements Element {
         } else {
             Interval interval = view.getTimeInterval();
             checkViewExist(view);
-
-            int index = column.getIndex();
-            synchronized (this) {
-                TimeMap dynamicValue = null;
-                if (index < attributes.length) {
-                    dynamicValue = (TimeMap) attributes[index];
-                }
-                if (dynamicValue != null && !dynamicValue.isEmpty()) {
-                    Estimator estimator = column.getEstimator();
-                    if (estimator == null) {
-                        estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
-                    }
-                    return dynamicValue.get(interval, estimator);
-                }
-            }
+            return attributes.getAttribute(column, interval, getEstimator(column));
         }
-
-        return null;
     }
 
     @Override
     public Object[] getAttributes() {
-        return attributes;
+        return attributes.getBackingArray();
     }
 
     @Override
@@ -207,37 +171,9 @@ public abstract class ElementImpl implements Element {
         checkColumn(column);
         checkReadOnlyColumn(column);
 
-        int index = column.getIndex();
-        Object oldValue = null;
-        synchronized (this) {
-            if (index >= attributes.length) {
-                Object[] newArray = new Object[index + 1];
-                System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-                attributes = newArray;
-            } else {
-                oldValue = attributes[index];
-            }
+        Object oldValue = attributes.setAttribute(column, column.getDefaultValue());
+        updateIndex(column, oldValue, column.getDefaultValue());
 
-            attributes[index] = null;
-        }
-
-        if (isValid()) {
-            ColumnStore columnStore = getColumnStore();
-            ColumnImpl columnImpl = (ColumnImpl) column;
-            if (columnImpl.isDynamic() && oldValue != null) {
-                TimeIndexStore timeIndexStore = getTimeIndexStore();
-                if (timeIndexStore != null) {
-                    if (TimeMap.class.isAssignableFrom(columnImpl.getTypeClass())) {
-                        timeIndexStore.remove((TimeMap) oldValue);
-                    } else if (TimeSet.class.isAssignableFrom(columnImpl.getTypeClass())) {
-                        timeIndexStore.remove((TimeSet) oldValue);
-                    }
-                }
-            } else if (column.isIndexed() && columnStore != null && isValid()) {
-                columnStore.indexStore.set(column, oldValue, column.getDefaultValue(), this);
-            }
-            columnImpl.incrementVersion(this);
-        }
         return oldValue;
     }
 
@@ -269,19 +205,10 @@ public abstract class ElementImpl implements Element {
         checkColumnDynamic(column);
         checkReadOnlyColumn(column);
 
-        int index = column.getIndex();
-        Object oldValue = null;
-        boolean res = false;
-        synchronized (this) {
-            TimeMap dynamicValue = (TimeMap) attributes[index];
-            if (dynamicValue != null) {
-                oldValue = dynamicValue.get(timeObject, null);
+        Object oldValue = attributes.removeTimeAttribute(column, timeObject);
 
-                res = dynamicValue.remove(timeObject);
-            }
-        }
-
-        if (res && isValid()) {
+        // TODO
+        if (oldValue != null && isValid()) {
             TimeIndexStore timeIndexStore = getTimeIndexStore();
             if (timeIndexStore != null) {
                 timeIndexStore.remove(timeObject);
@@ -289,26 +216,6 @@ public abstract class ElementImpl implements Element {
             ((ColumnImpl) column).incrementVersion(this);
         }
         return oldValue;
-    }
-
-    @Override
-    public void setLabel(String label) {
-        if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
-            int index = GraphStoreConfiguration.ELEMENT_LABEL_INDEX;
-            synchronized (this) {
-                if (index >= attributes.length) {
-                    Object[] newArray = new Object[index + 1];
-                    System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-                    attributes = newArray;
-                }
-                attributes[index] = label;
-            }
-            ColumnStore columnStore = getColumnStore();
-            if (columnStore != null && isValid()) {
-                Column col = columnStore.getColumnByIndex(index);
-                ((ColumnImpl) col).incrementVersion(this);
-            }
-        }
     }
 
     @Override
@@ -324,49 +231,8 @@ public abstract class ElementImpl implements Element {
         value = AttributeUtils.standardizeValue(value);
         checkType(column, value);
 
-        int index = column.getIndex();
-        ColumnStore columnStore = getColumnStore();
-        Object oldValue = null;
-
-        synchronized (this) {
-            if (index >= attributes.length) {
-                Object[] newArray = new Object[index + 1];
-                System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-                attributes = newArray;
-            } else {
-                oldValue = attributes[index];
-            }
-
-            if (column.isDynamic() && isValid()) {
-                TimeIndexStore timeIndexStore = getTimeIndexStore();
-                if (timeIndexStore != null) {
-                    if (TimeMap.class.isAssignableFrom(column.getTypeClass())) {
-                        if (oldValue != null && oldValue instanceof TimeMap) {
-                            timeIndexStore.remove((TimeMap) oldValue);
-                        }
-                        if (value != null) {
-                            timeIndexStore.add((TimeMap) value);
-                        }
-                    } else if (TimeSet.class.isAssignableFrom(column.getTypeClass()) && column
-                            .getIndex() == GraphStoreConfiguration.ELEMENT_TIMESET_INDEX) {
-                        if (oldValue != null) {
-                            timeIndexStore.remove((TimeSet) oldValue);
-                        }
-                        if (value != null) {
-                            timeIndexStore.add((TimeSet) value);
-                        }
-                    }
-                }
-            }
-
-            if (column.isIndexed() && columnStore != null && isValid()) {
-                value = columnStore.indexStore.set(column, oldValue, value, this);
-            }
-            attributes[index] = value;
-        }
-        if (isValid()) {
-            ((ColumnImpl) column).incrementVersion(this);
-        }
+        Object oldValue = attributes.setAttribute(column, value);
+        updateIndex(column, oldValue, value);
     }
 
     @Override
@@ -398,47 +264,47 @@ public abstract class ElementImpl implements Element {
         checkReadOnlyColumn(column);
         checkType(column, value);
 
-        int index = column.getIndex();
-        ColumnStore columnStore = getColumnStore();
-        Object oldValue = null;
-        boolean res;
-        synchronized (this) {
-            if (index >= attributes.length) {
-                Object[] newArray = new Object[index + 1];
-                System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-                attributes = newArray;
-            } else {
-                oldValue = attributes[index];
-            }
+        Object newValue = attributes.setAttribute(column, value, timeObject);
+        updateIndex(column, null, newValue);
+    }
 
-            TimeMap dynamicValue;
-            if (oldValue == null) {
-                try {
-                    attributes[index] = dynamicValue = (TimeMap) column.getTypeClass().getDeclaredConstructor()
-                            .newInstance();
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
-                        | InvocationTargetException ex) {
-                    throw new RuntimeException(ex);
-                }
-            } else {
-                dynamicValue = (TimeMap) oldValue;
-            }
-
-            res = dynamicValue.put(timeObject, value);
-
-            if (res && isValid()) {
+    private void updateIndex(Column column, Object oldValue, Object newValue) {
+        // Update index
+        if (isValid()) {
+            ColumnStore columnStore = getColumnStore();
+            ColumnImpl columnImpl = (ColumnImpl) column;
+            if (columnImpl.isDynamic()) {
                 TimeIndexStore timeIndexStore = getTimeIndexStore();
                 if (timeIndexStore != null) {
-                    timeIndexStore.add(timeObject);
-                }
-
-                if (column.isIndexed() && columnStore != null) {
-                    columnStore.indexStore.set(column, oldValue, dynamicValue, this);
+                    if (TimeMap.class.isAssignableFrom(columnImpl.getTypeClass())) {
+                        if (oldValue instanceof TimeMap) {
+                            timeIndexStore.remove((TimeMap) oldValue);
+                        } else if (oldValue != null) {
+                            timeIndexStore.remove(oldValue, this);
+                        }
+                        if (newValue instanceof TimeMap) {
+                            timeIndexStore.add((TimeMap) newValue);
+                        } else if (newValue != null) {
+                            timeIndexStore.add(newValue, this);
+                        }
+                    } else if (TimeSet.class.isAssignableFrom(columnImpl.getTypeClass())) {
+                        if (oldValue instanceof TimeSet) {
+                            timeIndexStore.remove((TimeSet) oldValue);
+                        } else if (oldValue != null) {
+                            timeIndexStore.remove(oldValue, this);
+                        }
+                        if (newValue instanceof TimeSet) {
+                            timeIndexStore.add((TimeSet) newValue);
+                        } else if (newValue != null) {
+                            timeIndexStore.add(newValue, this);
+                        }
+                    }
                 }
             }
-        }
-        if (isValid()) {
-            ((ColumnImpl) column).incrementVersion(this);
+            if (columnStore != null) {
+                columnStore.indexStore.set(column, oldValue, newValue, this);
+            }
+            columnImpl.incrementVersion(this);
         }
     }
 
@@ -458,44 +324,11 @@ public abstract class ElementImpl implements Element {
     private boolean addTime(Object timeObject) {
         checkEnabledTimeSet();
 
-        boolean res;
-        synchronized (this) {
-            TimeSet timeSet = getTimeSet();
-            if (timeSet == null) {
-                TimeRepresentation timeRepresentation = getTimeRepresentation();
-                switch (timeRepresentation) {
-                    case INTERVAL:
-                        timeSet = new IntervalSet();
-                        break;
-                    case TIMESTAMP:
-                        timeSet = new TimestampSet();
-                        break;
-                    default:
-                        throw new RuntimeException("Unrecognized time representation");
-                }
-                int index = GraphStoreConfiguration.ELEMENT_TIMESET_INDEX;
-                if (index >= attributes.length) {
-                    Object[] newArray = new Object[index + 1];
-                    System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-                    attributes = newArray;
-                }
-                attributes[index] = timeSet;
-            }
-            res = timeSet.add(timeObject);
+        boolean res = attributes.addTime(timeObject);
+        if (res) {
+            Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
+            updateIndex(column, null, timeObject);
         }
-
-        if (res && isValid()) {
-            TimeIndexStore timeIndexStore = getTimeIndexStore();
-            if (timeIndexStore != null) {
-                timeIndexStore.add(timeObject, this);
-            }
-            ColumnStore columnStore = getColumnStore();
-            if (columnStore != null) {
-                Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
-                ((ColumnImpl) column).incrementVersion(this);
-            }
-        }
-
         return res;
     }
 
@@ -515,33 +348,19 @@ public abstract class ElementImpl implements Element {
     private boolean removeTime(Object timeObject) {
         checkEnabledTimeSet();
 
-        boolean res = false;
-        synchronized (this) {
-            TimeSet timeSet = getTimeSet();
-            if (timeSet != null) {
-                res = timeSet.remove(timeObject);
-            }
+        boolean res = attributes.removeTime(timeObject);
+        if (res) {
+            Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
+            updateIndex(column, timeObject, null);
         }
-
-        if (res && isValid()) {
-            TimeIndexStore timeIndexStore = getTimeIndexStore();
-            if (timeIndexStore != null) {
-                timeIndexStore.remove(timeObject, this);
-            }
-            ColumnStore columnStore = getColumnStore();
-            if (columnStore != null) {
-                Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
-                ((ColumnImpl) column).incrementVersion(this);
-            }
-        }
-
         return res;
     }
 
     @Override
     public double[] getTimestamps() {
         checkTimeRepresentationTimestamp();
-        Object res = getTimeSetArray();
+        checkEnabledTimeSet();
+        Object res = attributes.getTimeSetArray();
         if (res == null) {
             return new double[0];
         }
@@ -551,7 +370,8 @@ public abstract class ElementImpl implements Element {
     @Override
     public Interval[] getIntervals() {
         checkTimeRepresentationInterval();
-        Object res = getTimeSetArray();
+        checkEnabledTimeSet();
+        Object res = attributes.getTimeSetArray();
         if (res == null) {
             return new Interval[0];
         }
@@ -560,7 +380,8 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Interval getTimeBounds() {
-        TimeSet timeSet = getTimeSet();
+        checkEnabledTimeSet();
+        TimeSet timeSet = attributes.getTimeSet();
         if (timeSet != null) {
             Double min = timeSet.getMinDouble();
             Double max = timeSet.getMaxDouble();
@@ -571,40 +392,18 @@ public abstract class ElementImpl implements Element {
         return null;
     }
 
-    private Object getTimeSetArray() {
-        checkEnabledTimeSet();
-
-        synchronized (this) {
-            TimeSet timeSet = getTimeSet();
-            if (timeSet != null) {
-                return timeSet.toPrimitiveArray();
-            }
-        }
-        return null;
-    }
-
     @Override
     public boolean hasTimestamp(double timestamp) {
         checkTimeRepresentationTimestamp();
-        return hasTime(timestamp);
+        checkEnabledTimeSet();
+        return attributes.hasTime(timestamp);
     }
 
     @Override
     public boolean hasInterval(Interval interval) {
         checkTimeRepresentationInterval();
-        return hasTime(interval);
-    }
-
-    private boolean hasTime(Object timeObject) {
         checkEnabledTimeSet();
-
-        synchronized (this) {
-            TimeSet timeSet = getTimeSet();
-            if (timeSet != null) {
-                return timeSet.contains(timeObject);
-            }
-        }
-        return false;
+        return attributes.hasTime(interval);
     }
 
     @Override
@@ -612,32 +411,11 @@ public abstract class ElementImpl implements Element {
         checkColumn(column);
         checkColumnDynamic(column);
 
-        int index = column.getIndex();
-        TimeMap dynamicValue = null;
-        synchronized (this) {
-            if (index < attributes.length) {
-                dynamicValue = (TimeMap) attributes[index];
-            }
-            if (dynamicValue != null) {
-                Object[] values = dynamicValue.toValuesArray();
-                if (dynamicValue instanceof TimestampMap) {
-                    return new TimeAttributeIterable(((TimestampMap) dynamicValue).getTimestamps(), values);
-                } else if (dynamicValue instanceof IntervalMap) {
-                    return new TimeAttributeIterable(((IntervalMap) dynamicValue).toKeysArray(), values);
-                }
-            }
-
-        }
-        return TimeAttributeIterable.EMPTY_ITERABLE;
+        return attributes.getAttributes(column);
     }
 
-    private TimeSet getTimeSet() {
-        if (GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET && GraphStoreConfiguration.ELEMENT_TIMESET_INDEX < attributes.length) {
-            return (TimeSet) attributes[GraphStoreConfiguration.ELEMENT_TIMESET_INDEX];
-        }
-        return null;
-    }
-
+    // Called when elements are added
+    // TODO
     protected void indexAttributes() {
         synchronized (this) {
             ColumnStore columnStore = getColumnStore();
@@ -655,24 +433,31 @@ public abstract class ElementImpl implements Element {
     @Override
     public void clearAttributes() {
         synchronized (this) {
-            if (isValid()) {
-                ColumnStore columnStore = getColumnStore();
-                if (columnStore != null) {
-                    columnStore.indexStore.clear(this);
-                }
-                TimeIndexStore timeIndexStore = getTimeIndexStore();
-                if (timeIndexStore != null) {
-                    timeIndexStore.clear(this);
+            ColumnStore columnStore = getColumnStore();
+            if (columnStore != null) {
+                final int length = columnStore.length;
+                final ColumnImpl[] cols = columnStore.columns;
+                for (int i = 0; i < length; i++) {
+                    Column c = cols[i];
+                    if (!c.isProperty() && !c.isReadOnly()) {
+                        removeAttribute(c);
+                    }
                 }
             }
-            TimeSet timeSet = getTimeSet();
-            if (timeSet != null) {
-                timeSet.clear();
+        }
+    }
+
+    protected void destroyAttributes() {
+        synchronized (this) {
+            ColumnStore columnStore = getColumnStore();
+            if (columnStore != null) {
+                columnStore.indexStore.clear(this);
             }
 
-            Object[] newAttributes = new Object[GraphStoreConfiguration.ELEMENT_ID_INDEX + 1];
-            newAttributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX];
-            attributes = newAttributes;
+            TimeIndexStore timeIndexStore = getTimeIndexStore();
+            if (timeIndexStore != null) {
+                timeIndexStore.clear(this);
+            }
         }
     }
 
@@ -693,6 +478,14 @@ public abstract class ElementImpl implements Element {
         }
         final ElementImpl other = (ElementImpl) obj;
         return this.getId().equals(other.getId());
+    }
+
+    protected Estimator getEstimator(Column column) {
+        Estimator estimator = column.getEstimator();
+        if (estimator == null) {
+            return GraphStoreConfiguration.DEFAULT_ESTIMATOR;
+        }
+        return estimator;
     }
 
     protected GraphStore getGraphStore() {

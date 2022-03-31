@@ -188,7 +188,7 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
 
     @Override
     public void clear() {
-        store.clear();
+        throw new UnsupportedOperationException("This method from Collection isn't implemented");
     }
 
     @Override

@@ -198,7 +198,7 @@ public class SerializationTest {
         ser = new Serialization(graphModel);
         NodeImpl l = (NodeImpl) ser.deserialize(buf);
         Assert.assertTrue(node.equals(l));
-        Assert.assertTrue(Arrays.deepEquals(l.attributes, node.attributes));
+        Assert.assertTrue(Arrays.deepEquals(l.getAttributes(), node.getAttributes()));
     }
 
     @Test

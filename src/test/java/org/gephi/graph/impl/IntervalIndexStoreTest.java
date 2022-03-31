@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -609,7 +610,7 @@ public class IntervalIndexStoreTest {
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
         TimeIndexImpl index = store.createViewIndex(graph);
-        n1.clearAttributes();
+        n1.destroyAttributes();
         Assert.assertFalse(index.hasElements());
     }
 

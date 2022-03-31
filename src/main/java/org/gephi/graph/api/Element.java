@@ -109,7 +109,7 @@ public interface Element extends ElementProperties {
 
     /**
      * Returns an iterable over all the keys and values over time for the given
-     * column.
+     * (dynamic) column.
      *
      * @param column column
      * @return time attribute iterable

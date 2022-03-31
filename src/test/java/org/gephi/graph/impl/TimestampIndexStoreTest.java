@@ -622,7 +622,7 @@ public class TimestampIndexStoreTest {
         Graph graph = graphStore.viewStore.getGraph(view);
         view.fill();
         TimeIndexImpl index = store.createViewIndex(graph);
-        n1.clearAttributes();
+        n1.destroyAttributes();
         Assert.assertFalse(index.hasElements());
     }
 
