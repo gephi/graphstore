@@ -126,7 +126,15 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 if (indexStore != null) {
                     indexStore.addColumn(columnImpl);
                 }
+
                 updateConfiguration(column);
+
+                // Index attributes
+                if (graphStore != null && columnImpl.table != null) {
+                    for (Element e : graphStore.getElements(columnImpl.table)) {
+                        e.setAttribute(column, column.getDefaultValue());
+                    }
+                }
             } else {
                 throw new IllegalArgumentException("The column " + column.getId() + " already exist");
             }
@@ -145,20 +153,8 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
 
             // Clean attributes
             if (graphStore != null && columnImpl.table != null) {
-                if (AttributeUtils.isNodeColumn(columnImpl)) {
-                    for (Node n : graphStore.nodeStore) {
-                        Object[] attributes = ((NodeImpl) n).attributes;
-                        if (attributes.length > columnImpl.getIndex()) {
-                            attributes[columnImpl.getIndex()] = null;
-                        }
-                    }
-                } else {
-                    for (Edge e : graphStore.edgeStore) {
-                        Object[] attributes = ((EdgeImpl) e).attributes;
-                        if (attributes.length > columnImpl.getIndex()) {
-                            attributes[columnImpl.getIndex()] = null;
-                        }
-                    }
+                for (Element e : graphStore.getElements(columnImpl.table)) {
+                    ((ElementImpl) e).attributes.setAttribute(column, null);
                 }
             }
 
@@ -294,45 +290,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         lock();
         try {
             return new ObjectOpenHashSet<>(idMap.keySet());
-        } finally {
-            unlock();
-        }
-    }
-
-    public void clear() {
-        lock();
-        try {
-            // Clean attributes
-            if (graphStore != null) {
-                List<Column> cols = toList();
-                int[] indices = new int[cols.size()];
-                for (int i = 0; i < indices.length; i++) {
-                    indices[i] = cols.get(i).getIndex();
-                }
-                if (graphStore.nodeTable.store == this) {
-                    for (Node n : graphStore.nodeStore) {
-                        Object[] atts = ((NodeImpl) n).attributes;
-                        for (int i = 0; i < indices.length; i++) {
-                            atts[indices[i]] = null;
-                        }
-                    }
-                } else {
-                    for (Edge e : graphStore.edgeStore) {
-                        Object[] atts = ((EdgeImpl) e).attributes;
-                        for (int i = 0; i < indices.length; i++) {
-                            atts[indices[i]] = null;
-                        }
-                    }
-                }
-            }
-
-            garbageQueue.clear();
-            idMap.clear();
-            length = 0;
-            Arrays.fill(columns, null);
-            if (indexStore != null) {
-                indexStore.clear();
-            }
         } finally {
             unlock();
         }

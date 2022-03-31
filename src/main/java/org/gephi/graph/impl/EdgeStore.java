@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenCustomHashMap;
@@ -38,7 +39,16 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected final static int NULL_ID = -1;
     protected final static int NODE_BITS = 31;
     protected static final Iterator<Edge> EMPTY_EDGE_ITERATOR = Collections.emptyIterator();
-
+    // Locking (optional)
+    protected final GraphLockImpl lock;
+    // Version
+    protected final GraphVersion version;
+    // Types counting (optional)
+    protected final EdgeTypeStore edgeTypeStore;
+    // View store
+    protected final GraphViewStore viewStore;
+    // Spatial index
+    protected final SpatialIndexImpl spatialIndex;
     // Data
     protected int size;
     protected int garbageSize;
@@ -48,22 +58,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected EdgeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
     protected Long2ObjectOpenCustomHashMap<int[]>[] longDictionary;
-
     // Stats
     protected int undirectedSize;
     protected int mutualEdgesSize;
     protected int[] mutualEdgesTypeSize;
-    // Locking (optional)
-    protected final GraphLockImpl lock;
-    // Version
-    protected final GraphVersion version;
-    // Types counting (optional)
-    protected final EdgeTypeStore edgeTypeStore;
-    // View store
-    protected final GraphViewStore viewStore;
-
-    // Spatial index
-    protected final SpatialIndexImpl spatialIndex;
 
     public EdgeStore() {
         initStore();
@@ -81,6 +79,18 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.viewStore = viewStore;
         this.version = graphVersion;
         this.spatialIndex = spatialIndex;
+    }
+
+    protected static long getLongId(NodeImpl source, NodeImpl target, boolean directed) {
+        if (directed) {
+            long edgeId = ((long) source.storeId) << NODE_BITS;
+            edgeId = edgeId | (long) (target.storeId);
+            return edgeId;
+        } else {
+            long edgeId = ((long) (source.storeId > target.storeId ? source.storeId : target.storeId)) << NODE_BITS;
+            edgeId = edgeId | (long) (source.storeId > target.storeId ? target.storeId : source.storeId);
+            return edgeId;
+        }
     }
 
     private void initStore() {
@@ -655,7 +665,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 viewStore.removeEdge(edge);
             }
 
-            edge.clearAttributes();
+            edge.destroyAttributes();
 
             int storeIndex = id / GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE;
             EdgeBlock block = blocks[storeIndex];
@@ -1156,18 +1166,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return currentBlock.offset + currentBlock.nodeLength;
     }
 
-    protected static long getLongId(NodeImpl source, NodeImpl target, boolean directed) {
-        if (directed) {
-            long edgeId = ((long) source.storeId) << NODE_BITS;
-            edgeId = edgeId | (long) (target.storeId);
-            return edgeId;
-        } else {
-            long edgeId = ((long) (source.storeId > target.storeId ? source.storeId : target.storeId)) << NODE_BITS;
-            edgeId = edgeId | (long) (source.storeId > target.storeId ? target.storeId : source.storeId);
-            return edgeId;
-        }
-    }
-
     protected static class EdgeBlock {
 
         protected final int offset;
@@ -1219,6 +1217,19 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         public void clear() {
             nodeLength = 0;
             garbageLength = 0;
+        }
+    }
+
+    private static class DictionaryHashStrategy implements LongHash.Strategy {
+
+        @Override
+        public int hashCode(long l) {
+            return (int) (l ^ (l >>> 32));
+        }
+
+        @Override
+        public boolean equals(long l1, long l2) {
+            return l1 == l2;
         }
     }
 
@@ -1861,19 +1872,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                         "Removing directed edges from undirected iterator is not supported");
             }
             EdgeStore.this.remove(pointer);
-        }
-    }
-
-    private static class DictionaryHashStrategy implements LongHash.Strategy {
-
-        @Override
-        public int hashCode(long l) {
-            return (int) (l ^ (l >>> 32));
-        }
-
-        @Override
-        public boolean equals(long l1, long l2) {
-            return l1 == l2;
         }
     }
 }

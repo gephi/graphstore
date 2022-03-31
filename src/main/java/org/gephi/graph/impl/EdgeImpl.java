@@ -57,10 +57,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
         this.flags = (byte) (directed ? 1 : 0);
         this.type = type;
         this.properties = GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES ? new EdgePropertiesImpl() : null;
-        this.attributes = new Object[GraphStoreConfiguration.EDGE_WEIGHT_INDEX + 1];
-        this.attributes[GraphStoreConfiguration.ELEMENT_ID_INDEX] = id;
         if (graphStore == null || graphStore.configuration.getEdgeWeightType().equals(Double.class)) {
-            this.attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
+            this.attributes.setAttribute(GraphStoreConfiguration.EDGE_WEIGHT_INDEX, weight);
         }
     }
 
@@ -81,7 +79,7 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     public double getWeight() {
         synchronized (this) {
-            Object weightObject = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
+            Object weightObject = attributes.getAttribute(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
             if (weightObject instanceof Double) {
                 return (Double) weightObject;
             } else {
@@ -97,134 +95,48 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     @Override
     public void setWeight(double weight, double timestamp) {
-        checkTimeRepresentationTimestamp();
-        setTimeWeight(weight, timestamp);
+        checkWeightDynamicType();
+        setAttribute(graphStore.graphModel.defaultColumns.edgeWeight(), weight, timestamp);
     }
 
     @Override
     public void setWeight(double weight, Interval interval) {
-        checkTimeRepresentationInterval();
-        setTimeWeight(weight, interval);
-    }
-
-    private void setTimeWeight(double weight, Object timeObject) {
         checkWeightDynamicType();
-
-        boolean res;
-        synchronized (this) {
-            Object oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-            TimeMap dynamicValue = null;
-            if (oldValue == null) {
-                try {
-                    attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = dynamicValue = (TimeMap) graphStore.configuration
-                            .getEdgeWeightType().newInstance();
-                } catch (InstantiationException | IllegalAccessException ex) {
-                    throw new RuntimeException(ex);
-                }
-            } else {
-                dynamicValue = (TimeMap) oldValue;
-            }
-            res = dynamicValue.put(timeObject, weight);
-        }
-        TimeIndexStore timeIndexStore = getTimeIndexStore();
-        if (res && timeIndexStore != null && isValid()) {
-            timeIndexStore.add(timeObject);
-        }
-        ColumnStore columnStore = getColumnStore();
-        if (res && columnStore != null && isValid()) {
-            Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
-            ((ColumnImpl) column).incrementVersion(this);
-        }
+        setAttribute(graphStore.graphModel.defaultColumns.edgeWeight(), weight, interval);
     }
 
     @Override
     public double getWeight(double timestamp) {
-        synchronized (this) {
-            Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-            if (weightValue instanceof Double) {
-                throw new IllegalStateException("The weight is static, call getWeight() instead");
-            }
-
-            TimeMap dynamicValue = (TimeMap) weightValue;
-            if (dynamicValue == null) {
-                return DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
-            }
-
-            if (dynamicValue instanceof IntervalMap) {
-                return (Double) dynamicValue
-                        .get(new Interval(timestamp, timestamp), DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
-            } else {
-                return (Double) dynamicValue.get(timestamp, DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING);
-            }
-        }
+        Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        checkStaticWeight(column);
+        Double doubleVal = (Double) attributes.getAttribute(column, timestamp, null);
+        return doubleVal != null ? doubleVal : DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
     }
 
     @Override
     public double getWeight(Interval interval) {
-        synchronized (this) {
-            Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-            if (weightValue instanceof Double) {
-                throw new IllegalStateException("The weight is static, call getWeight() instead");
-            }
-
-            TimeMap dynamicValue = (TimeMap) weightValue;
-            if (dynamicValue == null) {
-                return DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
-            }
-
-            Estimator estimator = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
-                    .getEstimator();
-            if (estimator == null) {
-                estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
-            }
-
-            Double doubleVal = (Double) dynamicValue.get(interval, estimator);
-            return doubleVal != null ? doubleVal : DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
-        }
+        Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        checkStaticWeight(column);
+        Double doubleVal = (Double) attributes.getAttribute(column, interval, getEstimator(column));
+        return doubleVal != null ? doubleVal : DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
     }
 
     @Override
     public double getWeight(GraphView view) {
-        synchronized (this) {
-            Object value = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-            if (value instanceof TimeMap) {
-                Interval interval = view.getTimeInterval();
-                checkViewExist((GraphView) view);
-
-                TimeMap dynamicValue = (TimeMap) value;
-                Estimator estimator = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
-                        .getEstimator();
-                if (estimator == null) {
-                    estimator = GraphStoreConfiguration.DEFAULT_ESTIMATOR;
-                }
-
-                Double doubleVal = (Double) dynamicValue.get(interval, estimator);
-                return doubleVal != null ? doubleVal : DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
-            } else if (value == null) {
-                return DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
-            } else {
-                // Must be double
-                return (Double) value;
-            }
+        checkViewExist(view);
+        Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        if (column.isDynamicAttribute()) {
+            return getWeight(view.getTimeInterval());
+        } else {
+            return (Double) attributes.getAttribute(column);
         }
     }
 
     @Override
     public Iterable<Map.Entry> getWeights() {
-        synchronized (this) {
-            Object weightValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-            if (weightValue instanceof Double) {
-                throw new IllegalStateException("The weight is static, call getWeight() instead");
-            }
-            TimeMap dynamicValue = (TimeMap) weightValue;
-            Object[] values = dynamicValue.toValuesArray();
-            if (dynamicValue instanceof TimestampMap) {
-                return new TimeAttributeIterable(((TimestampMap) dynamicValue).getTimestamps(), values);
-            } else if (dynamicValue instanceof IntervalMap) {
-                return new TimeAttributeIterable(((IntervalMap) dynamicValue).toKeysArray(), values);
-            }
-        }
-        return TimeAttributeIterable.EMPTY_ITERABLE;
+        Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        checkStaticWeight(column);
+        return attributes.getAttributes(column);
     }
 
     @Override
@@ -246,20 +158,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
     public void setWeight(double weight) {
         checkWeightStaticType();
 
-        final Object oldValue;
-        synchronized (this) {
-            oldValue = attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX];
-            attributes[GraphStoreConfiguration.EDGE_WEIGHT_INDEX] = weight;
-        }
-
-        ColumnStore columnStore = getColumnStore();
-        if (columnStore != null && isValid()) {
-            Column column = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
-            ((ColumnImpl) column).incrementVersion(this);
-            if (column.isIndexed()) {
-                columnStore.indexStore.set(column, oldValue, weight, this);
-            }
-        }
+        Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+        setAttribute(column, weight);
     }
 
     public int getNextOutEdge() {
@@ -432,6 +332,12 @@ public class EdgeImpl extends ElementImpl implements Edge {
             throw new IllegalArgumentException(
                     "The weight class does not match with the expected type (" + graphStore.configuration
                             .getEdgeWeightType().getName() + ")");
+        }
+    }
+
+    final void checkStaticWeight(Column column) {
+        if (!column.isDynamicAttribute()) {
+            throw new IllegalStateException("The weight is static, call getWeight() instead");
         }
     }
 

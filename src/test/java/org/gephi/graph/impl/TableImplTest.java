@@ -252,14 +252,6 @@ public class TableImplTest {
     }
 
     @Test
-    public void testClear() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
-        table.addColumn("Id", Integer.class);
-        table.clear();
-        Assert.assertTrue(table.isEmpty());
-    }
-
-    @Test
     public void testCountColumns() {
         TableImpl<Node> table = new TableImpl<>(Node.class, false);
         table.addColumn("Id", Integer.class);

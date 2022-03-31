@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -137,8 +138,8 @@ public class IndexStore<T extends Element> {
             final ColumnImpl[] cols = columnStore.columns;
             for (int i = 0; i < length; i++) {
                 Column c = cols[i];
-                if (c != null && c.isIndexed() && elementImpl.attributes.length > c.getIndex()) {
-                    Object value = elementImpl.attributes[c.getIndex()];
+                if (c != null && c.isIndexed()) {
+                    Object value = elementImpl.getAttribute(c);
                     mainIndex.remove(c, value, element);
                     for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                         GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
@@ -160,16 +161,15 @@ public class IndexStore<T extends Element> {
         ElementImpl elementImpl = (ElementImpl) element;
         lock();
         try {
-            ensureAttributeArrayLength(elementImpl, columnStore.length);
 
             final int length = columnStore.length;
             final ColumnImpl[] cols = columnStore.columns;
             for (int i = 0; i < length; i++) {
                 Column c = cols[i];
                 if (c != null && c.isIndexed()) {
-                    Object value = elementImpl.attributes[c.getIndex()];
+                    Object value = elementImpl.getAttribute(c);
                     value = mainIndex.put(c, value, element);
-                    elementImpl.attributes[c.getIndex()] = value;
+                    elementImpl.setAttribute(c, value);
                 }
             }
         } finally {
@@ -192,7 +192,6 @@ public class IndexStore<T extends Element> {
                 if (iterator != null) {
                     while (iterator.hasNext()) {
                         ElementImpl element = (ElementImpl) iterator.next();
-                        ensureAttributeArrayLength(element, columnStore.length);
 
                         final ColumnImpl[] cols = columnStore.columns;
                         synchronized (element) {
@@ -200,7 +199,7 @@ public class IndexStore<T extends Element> {
                             for (int i = 0; i < length; i++) {
                                 Column c = cols[i];
                                 if (c != null && c.isIndexed()) {
-                                    Object value = element.attributes[c.getIndex()];
+                                    Object value = element.getAttribute(c);
                                     viewIndex.put(c, value, element);
                                 }
                             }
@@ -225,7 +224,7 @@ public class IndexStore<T extends Element> {
                     Column c = cols[i];
                     if (c != null && c.isIndexed()) {
                         synchronized (elementImpl) {
-                            Object value = elementImpl.attributes[c.getIndex()];
+                            Object value = elementImpl.getAttribute(c);
                             index.put(c, value, element);
                         }
                     }
@@ -248,7 +247,7 @@ public class IndexStore<T extends Element> {
                     Column c = cols[i];
                     if (c != null && c.isIndexed()) {
                         synchronized (elementImpl) {
-                            Object value = elementImpl.attributes[c.getIndex()];
+                            Object value = elementImpl.getAttribute(c);
                             index.remove(c, value, element);
                         }
                     }
@@ -281,18 +280,6 @@ public class IndexStore<T extends Element> {
         } finally {
             unlock();
         }
-    }
-
-    private void ensureAttributeArrayLength(ElementImpl element, int size) {
-        synchronized (element) {
-            final Object[] attributes = element.attributes;
-            if (size > attributes.length) {
-                Object[] newArray = new Object[size];
-                System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-                element.attributes = newArray;
-            }
-        }
-
     }
 
     private void lock() {

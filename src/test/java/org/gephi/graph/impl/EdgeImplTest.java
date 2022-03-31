@@ -311,6 +311,18 @@ public class EdgeImplTest {
     }
 
     @Test
+    public void testGetWeightWithViewStatic() {
+        Configuration config = new Configuration();
+        config.setEdgeWeightType(Double.class);
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
+        Edge e = graphStore.getEdge("0");
+        e.setWeight(10.0);
+        GraphViewImpl view = graphStore.viewStore.createView();
+
+        Assert.assertEquals(e.getWeight(view), 10.0);
+    }
+
+    @Test
     public void testGetWeightsTimestamp() {
         Configuration config = new Configuration();
         config.setEdgeWeightType(TimestampDoubleMap.class);

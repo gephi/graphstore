@@ -13,16 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
-import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Subgraph;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -82,7 +83,7 @@ public class IndexStoreTest {
         NodeImpl n = new NodeImpl("0");
         indexStore.index(n);
 
-        Assert.assertEquals(n.attributes.length, indexStore.columnStore.length);
+        Assert.assertEquals(n.getAttributes().length, indexStore.columnStore.length);
     }
 
     @Test
@@ -267,7 +268,7 @@ public class IndexStoreTest {
         Assert.assertNotNull(idIndex);
         Assert.assertNotNull(labelIndex);
 
-        NodeImpl n1 = new NodeImpl("0");
+        Node n1 = graphStore.factory.newNode("0");
         graphStore.addNode(n1);
         Assert.assertEquals(mainIndex.count(idCol, "0"), 1);
 
@@ -494,9 +495,9 @@ public class IndexStoreTest {
 
         n1.clearAttributes();
 
-        Assert.assertEquals(index.countElements(column), 0);
-        Assert.assertEquals(index.countValues(column), 0);
-        Assert.assertEquals(index.count(column, "bar"), 0);
+        Assert.assertEquals(index.countElements(column), 1);
+        Assert.assertEquals(index.countValues(column), 1);
+        Assert.assertEquals(index.count(column, null), 1);
     }
 
     @Test
@@ -519,6 +520,38 @@ public class IndexStoreTest {
         Assert.assertEquals(index.countElements(column), 0);
         Assert.assertEquals(index.countValues(column), 0);
         Assert.assertEquals(index.count(column, "bar"), 0);
+    }
+
+    @Test
+    public void testNullAddColumn() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+
+        ColumnImpl column = new ColumnImpl(graphStore.nodeTable, "foo", String.class, "Foo", null, Origin.DATA, true,
+                false);
+        graphStore.nodeTable.store.addColumn(column);
+
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        IndexImpl index = indexStore.mainIndex;
+
+        Assert.assertEquals(index.countElements(column), graphStore.getNodeCount());
+        Assert.assertEquals(index.countValues(column), 1);
+        Assert.assertEquals(index.count(column, null), graphStore.getNodeCount());
+    }
+
+    @Test
+    public void testDefaultAddColumn() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+
+        ColumnImpl column = new ColumnImpl(graphStore.nodeTable, "foo", String.class, "Foo", "bar", Origin.DATA, true,
+                false);
+        graphStore.nodeTable.store.addColumn(column);
+
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        IndexImpl index = indexStore.mainIndex;
+
+        Assert.assertEquals(index.countElements(column), graphStore.getNodeCount());
+        Assert.assertEquals(index.countValues(column), 1);
+        Assert.assertEquals(index.count(column, "bar"), graphStore.getNodeCount());
     }
 
     // UTILITY

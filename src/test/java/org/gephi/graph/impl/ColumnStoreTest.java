@@ -311,18 +311,6 @@ public class ColumnStoreTest {
     }
 
     @Test
-    public void testClear() {
-        ColumnStore<Node> store = new ColumnStore(Node.class, false);
-        ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
-
-        store.addColumn(col);
-        store.clear();
-
-        Assert.assertFalse(store.hasColumn("0"));
-        Assert.assertEquals(store.size(), 0);
-    }
-
-    @Test
     public void testGarbage() {
         ColumnStore<Node> store = new ColumnStore(Node.class, false);
         ColumnImpl col = new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false);
