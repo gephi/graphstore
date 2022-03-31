@@ -207,6 +207,13 @@ public interface GraphModel {
         public Column edgeLabel();
 
         /**
+         * Return edge weigth column.
+         *
+         * @return edge weight column
+         */
+        public Column edgeWeight();
+
+        /**
          * Return node time-set (timestamp or interval) column.
          *
          * @return node time-set column
