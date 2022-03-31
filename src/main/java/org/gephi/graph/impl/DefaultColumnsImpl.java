@@ -38,6 +38,10 @@ public class DefaultColumnsImpl implements GraphModel.DefaultColumns {
         return store.edgeTable.getColumn(GraphStoreConfiguration.ELEMENT_ID_INDEX);
     }
 
+    public Column edgeWeight() {
+        return store.edgeTable.getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+    }
+
     @Override
     public Column nodeLabel() {
         return store.nodeTable.getColumn(GraphStoreConfiguration.ELEMENT_LABEL_INDEX);
