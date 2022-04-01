@@ -1161,6 +1161,21 @@ public class ElementImplTest {
         Assert.assertNull(node.getAttributes()[index]);
     }
 
+    @Test
+    public void testEnsureCapacity() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        Assert.assertTrue(n1.getAttributes().length < 100);
+        for (int i = 0; i < 100; i++) {
+            Column col = new ColumnImpl(graphStore.nodeTable, "col" + i, Integer.class, "Age", null, Origin.DATA, true,
+                    false);
+            graphStore.nodeTable.store.addColumn(col);
+            Assert.assertNull(n1.getAttribute(col));
+            n1.setAttribute(col, i);
+            Assert.assertEquals(i, n1.getAttribute(col));
+        }
+    }
+
     // Utility
     private GraphStore getIntervalGraphStore() {
         Configuration config = new Configuration();
