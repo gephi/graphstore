@@ -105,7 +105,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         checkIndexStatus(column);
 
         lock();
-        graphWriteLock();
         try {
             final ColumnImpl columnImpl = (ColumnImpl) column;
             short id = idMap.getShort(columnImpl.getId());
@@ -140,7 +139,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 throw new IllegalArgumentException("The column " + column.getId() + " already exist");
             }
         } finally {
-            graphWriteUnlock();
             unlock();
         }
     }
