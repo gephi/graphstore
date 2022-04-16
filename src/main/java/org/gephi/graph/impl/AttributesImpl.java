@@ -118,14 +118,16 @@ public class AttributesImpl {
 
     public Object setAttribute(int index, Object value) {
         Object oldValue = null;
-        if (index >= attributes.length) {
-            Object[] newArray = new Object[index + 1];
-            System.arraycopy(attributes, 0, newArray, 0, attributes.length);
-            attributes = newArray;
-        } else {
-            oldValue = attributes[index];
+        synchronized (this) {
+            if (index >= attributes.length) {
+                Object[] newArray = new Object[index + 1];
+                System.arraycopy(attributes, 0, newArray, 0, attributes.length);
+                attributes = newArray;
+            } else {
+                oldValue = attributes[index];
+            }
+            attributes[index] = value;
         }
-        attributes[index] = value;
         return oldValue;
     }
 

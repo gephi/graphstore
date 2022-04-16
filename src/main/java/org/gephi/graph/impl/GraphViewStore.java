@@ -217,7 +217,6 @@ public class GraphViewStore {
 
     public void destroyGraphObserver(GraphObserverImpl graphObserver) {
         GraphViewImpl graphViewImpl = (GraphViewImpl) graphObserver.graph.getView();
-        checkViewExist(graphViewImpl);
 
         graphViewImpl.destroyGraphObserver(graphObserver);
     }
