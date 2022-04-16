@@ -217,6 +217,9 @@ public class GraphViewStore {
 
     public void destroyGraphObserver(GraphObserverImpl graphObserver) {
         GraphViewImpl graphViewImpl = (GraphViewImpl) graphObserver.graph.getView();
+        if (graphObserver.graphStore != this.graphStore) {
+            throw new RuntimeException("This observer doesn't belong to this store");
+        }
 
         graphViewImpl.destroyGraphObserver(graphObserver);
     }
