@@ -280,21 +280,21 @@ public abstract class ElementImpl implements Element {
                         if (oldValue instanceof TimeMap) {
                             timeIndexStore.remove((TimeMap) oldValue);
                         } else if (oldValue != null) {
-                            timeIndexStore.remove(oldValue, this);
+                            timeIndexStore.remove(oldValue);
                         }
                         if (newValue instanceof TimeMap) {
                             timeIndexStore.add((TimeMap) newValue);
                         } else if (newValue != null) {
-                            timeIndexStore.add(newValue, this);
+                            timeIndexStore.add(newValue);
                         }
                     } else if (TimeSet.class.isAssignableFrom(columnImpl.getTypeClass())) {
                         if (oldValue instanceof TimeSet) {
-                            timeIndexStore.remove((TimeSet) oldValue);
+                            timeIndexStore.remove((TimeSet) oldValue, this);
                         } else if (oldValue != null) {
                             timeIndexStore.remove(oldValue, this);
                         }
                         if (newValue instanceof TimeSet) {
-                            timeIndexStore.add((TimeSet) newValue);
+                            timeIndexStore.add((TimeSet) newValue, this);
                         } else if (newValue != null) {
                             timeIndexStore.add(newValue, this);
                         }

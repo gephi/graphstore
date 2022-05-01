@@ -65,7 +65,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
 
     protected abstract TimeIndexImpl createIndex(boolean main);
 
-    public Integer add(K k) {
+    protected Integer add(K k) {
         checkK(k);
 
         lock();
@@ -91,7 +91,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         }
     }
 
-    public int add(K k, Element element) {
+    public void add(K k, Element element) {
         lock();
         try {
             int timeIndex = add(k);
@@ -111,8 +111,6 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
 
                 }
             }
-
-            return timeIndex;
         } finally {
             unlock();
         }
@@ -124,13 +122,13 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         }
     }
 
-    public void add(TimeSet<K> timeSet) {
+    public void add(TimeSet<K> timeSet, Element element) {
         for (K timeKey : timeSet.toArray()) {
-            add(timeKey);
+            add(timeKey, element);
         }
     }
 
-    public Integer remove(K k) {
+    protected Integer remove(K k) {
         lock();
         try {
             checkK(k);
@@ -148,11 +146,13 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         }
     }
 
-    public int remove(K k, Element element) {
+    public void remove(K k, Element element) {
         lock();
         try {
             Integer timeIndex = remove(k);
-            checkTimeIndex(timeIndex);
+            if (timeIndex == null) {
+                return;
+            }
 
             if (mainIndex != null) {
                 mainIndex.remove(timeIndex, element);
@@ -172,7 +172,6 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                 }
             }
 
-            return timeIndex;
         } finally {
             unlock();
         }
@@ -184,9 +183,9 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         }
     }
 
-    public void remove(S timeSet) {
+    public void remove(S timeSet, Element element) {
         for (K timeKey : timeSet.toArray()) {
-            remove(timeKey);
+            remove(timeKey, element);
         }
     }
 
@@ -207,7 +206,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
             S timeSet = getTimeSet(element);
 
             if (timeSet != null) {
-                add(timeSet);
+                add(timeSet, element);
             }
 
             synchronized (element) {
@@ -216,15 +215,6 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                         TimeMap dynamicValue = (TimeMap) val;
                         add(dynamicValue);
                     }
-                }
-            }
-
-            if (timeSet != null && mainIndex != null) {
-                K[] ts = timeSet.toArray();
-                int tsLength = ts.length;
-                for (int i = 0; i < tsLength; i++) {
-                    int timestampIndex = timeSortedMap.get(ts[i]);
-                    mainIndex.add(timestampIndex, element);
                 }
             }
         } finally {
@@ -237,36 +227,13 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         try {
             S timeSet = getTimeSet(element);
 
-            if (timeSet != null && mainIndex != null) {
-                K[] ts = timeSet.toArray();
-                int tsLength = ts.length;
-                for (int i = 0; i < tsLength; i++) {
-                    int timestampIndex = timeSortedMap.get(ts[i]);
-                    mainIndex.remove(timestampIndex, element);
-                }
-
-                if (!viewIndexes.isEmpty()) {
-                    for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
-                        GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                        DirectedSubgraph graph = graphView.getDirectedGraph();
-                        boolean node = element instanceof Node;
-                        if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
-                            for (int i = 0; i < tsLength; i++) {
-                                int timestampIndex = timeSortedMap.get(ts[i]);
-                                entry.getValue().remove(timestampIndex, element);
-                            }
-                        }
-                    }
-                }
-            }
-
             if (timeSet != null) {
-                remove(timeSet);
+                remove(timeSet, element);
             }
 
             synchronized (element) {
                 for (Object val : element.getAttributes()) {
-                    if (val != null && val instanceof TimeMap) {
+                    if (val instanceof TimeMap) {
                         TimeMap dynamicValue = (TimeMap) val;
                         remove((M) dynamicValue);
                     }
