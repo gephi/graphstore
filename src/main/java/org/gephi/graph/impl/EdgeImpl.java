@@ -96,13 +96,13 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     public void setWeight(double weight, double timestamp) {
         checkWeightDynamicType();
-        setAttribute(graphStore.graphModel.defaultColumns.edgeWeight(), weight, timestamp);
+        setAttribute(graphStore.defaultColumns.edgeWeight(), weight, timestamp);
     }
 
     @Override
     public void setWeight(double weight, Interval interval) {
         checkWeightDynamicType();
-        setAttribute(graphStore.graphModel.defaultColumns.edgeWeight(), weight, interval);
+        setAttribute(graphStore.defaultColumns.edgeWeight(), weight, interval);
     }
 
     @Override
@@ -227,6 +227,14 @@ public class EdgeImpl extends ElementImpl implements Edge {
     ColumnStore getColumnStore() {
         if (graphStore != null) {
             return graphStore.edgeTable.store;
+        }
+        return null;
+    }
+
+    @Override
+    DefaultColumnsImpl.TableDefaultColumns getDefaultColumns() {
+        if (graphStore != null) {
+            return graphStore.defaultColumns.edgeDefaultColumns;
         }
         return null;
     }

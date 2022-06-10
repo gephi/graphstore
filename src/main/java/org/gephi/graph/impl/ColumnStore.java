@@ -147,7 +147,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         checkNonNullColumnObject(column);
 
         lock();
-        graphWriteLock();
         try {
             final ColumnImpl columnImpl = (ColumnImpl) column;
 
@@ -172,73 +171,47 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
             columnImpl.setStoreId(NULL_ID);
             updateConfiguration(column);
         } finally {
-            graphWriteUnlock();
             unlock();
         }
     }
 
     public void removeColumn(final String key) {
         checkNonNullObject(key);
-        lock();
-        try {
-            removeColumn(getColumn(key));
-        } finally {
-            unlock();
-        }
+        removeColumn(getColumn(key));
     }
 
     public int getColumnIndex(final String key) {
         checkNonNullObject(key);
-        lock();
-        try {
-            short id = idMap.getShort(key.toLowerCase());
-            if (id == NULL_SHORT) {
-                throw new IllegalArgumentException("The column doesnt exist");
-            }
-            return shortToInt(id);
-        } finally {
-            unlock();
+        short id = idMap.getShort(key.toLowerCase());
+        if (id == NULL_SHORT) {
+            throw new IllegalArgumentException("The column doesnt exist");
         }
+        return shortToInt(id);
     }
 
-    public Column getColumnByIndex(final int index) {
-        lock();
-        try {
-            if (index < 0 || index >= columns.length) {
-                throw new IllegalArgumentException("The column doesnt exist");
-            }
-            ColumnImpl a = columns[index];
-            if (a == null) {
-                throw new IllegalArgumentException("The column doesnt exist");
-            }
-            return a;
-        } finally {
-            unlock();
+    public ColumnImpl getColumnByIndex(final int index) {
+        if (index < 0 || index >= columns.length) {
+            throw new IllegalArgumentException("The column doesnt exist");
         }
+        ColumnImpl a = columns[index];
+        if (a == null) {
+            throw new IllegalArgumentException("The column doesnt exist");
+        }
+        return a;
     }
 
     public ColumnImpl getColumn(final String key) {
         checkNonNullObject(key);
-        lock();
-        try {
-            short id = idMap.getShort(key.toLowerCase());
-            if (id == NULL_SHORT) {
-                return null;
-            }
-            return columns[shortToInt(id)];
-        } finally {
-            unlock();
+        short id = idMap.getShort(key.toLowerCase());
+        if (id == NULL_SHORT) {
+            return null;
         }
+        return columns[shortToInt(id)];
     }
 
     public boolean hasColumn(String key) {
         checkNonNullObject(key);
-        lock();
-        try {
-            return idMap.containsKey(key.toLowerCase());
-        } finally {
-            unlock();
-        }
+        return idMap.containsKey(key.toLowerCase());
     }
 
     @Override
@@ -360,18 +333,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     void unlock() {
         if (lock != null) {
             lock.unlock();
-        }
-    }
-
-    void graphWriteLock() {
-        if (graphStore != null) {
-            graphStore.autoWriteLock();
-        }
-    }
-
-    void graphWriteUnlock() {
-        if (graphStore != null) {
-            graphStore.autoWriteUnlock();
         }
     }
 
