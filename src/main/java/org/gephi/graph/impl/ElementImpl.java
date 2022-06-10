@@ -72,6 +72,8 @@ public abstract class ElementImpl implements Element {
 
     abstract boolean isValid();
 
+    abstract DefaultColumnsImpl.TableDefaultColumns getDefaultColumns();
+
     @Override
     public Object getId() {
         return attributes.getId();
@@ -85,7 +87,7 @@ public abstract class ElementImpl implements Element {
     @Override
     public void setLabel(String label) {
         if (GraphStoreConfiguration.ENABLE_ELEMENT_LABEL) {
-            setAttribute(getColumnStore().getColumnByIndex(GraphStoreConfiguration.ELEMENT_LABEL_INDEX), label);
+            setAttribute(getDefaultColumns().label, label);
         }
     }
 
@@ -326,8 +328,7 @@ public abstract class ElementImpl implements Element {
 
         boolean res = attributes.addTime(timeObject);
         if (res) {
-            Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
-            updateIndex(column, null, timeObject);
+            updateIndex(getDefaultColumns().timeset, null, timeObject);
         }
         return res;
     }
@@ -350,8 +351,7 @@ public abstract class ElementImpl implements Element {
 
         boolean res = attributes.removeTime(timeObject);
         if (res) {
-            Column column = getColumnStore().getColumnByIndex(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
-            updateIndex(column, timeObject, null);
+            updateIndex(getDefaultColumns().timeset, timeObject, null);
         }
         return res;
     }

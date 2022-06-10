@@ -42,6 +42,7 @@ public class IndexStore<T extends Element> {
         this.lock = columnStore.lock;
     }
 
+    // Table locked
     protected void addColumn(ColumnImpl col) {
         mainIndex.addColumn(col);
         for (IndexImpl<T> index : viewIndexes.values()) {
@@ -49,6 +50,7 @@ public class IndexStore<T extends Element> {
         }
     }
 
+    // Table locked
     protected void removeColumn(ColumnImpl col) {
         mainIndex.removeColumn(col);
         for (IndexImpl<T> index : viewIndexes.values()) {
@@ -65,15 +67,12 @@ public class IndexStore<T extends Element> {
         if (view.isMainView()) {
             return mainIndex;
         }
-        lock();
-        try {
+        synchronized (viewIndexes) {
             IndexImpl<T> viewIndex = viewIndexes.get(graph.getView());
             if (viewIndex == null) {
                 viewIndex = createViewIndex(graph);
             }
             return viewIndex;
-        } finally {
-            unlock();
         }
     }
 
@@ -81,14 +80,19 @@ public class IndexStore<T extends Element> {
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't create a view index for the main view");
         }
-        IndexImpl viewIndex = new IndexImpl<>(columnStore, graph);
-        ColumnImpl[] columns = columnStore.toArray();
-        viewIndex.addAllColumns(columns);
-        viewIndexes.put(graph.getView(), viewIndex);
+        lock();
+        try {
+            IndexImpl viewIndex = new IndexImpl<>(columnStore, graph);
+            ColumnImpl[] columns = columnStore.toArray();
+            viewIndex.addAllColumns(columns);
+            viewIndexes.put(graph.getView(), viewIndex);
 
-        indexView(graph);
+            indexView(graph);
 
-        return viewIndex;
+            return viewIndex;
+        } finally {
+            unlock();
+        }
     }
 
     protected void deleteViewIndex(Graph graph) {
@@ -107,11 +111,10 @@ public class IndexStore<T extends Element> {
     }
 
     public Object set(Column column, Object oldValue, Object value, T element) {
-        lock();
-        try {
-            value = mainIndex.set(column, oldValue, value, element);
+        value = mainIndex.set(column, oldValue, value, element);
 
-            if (!viewIndexes.isEmpty()) {
+        if (!viewIndexes.isEmpty()) {
+            synchronized (viewIndexes) {
                 for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                     GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
                     DirectedSubgraph graph = graphView.getDirectedGraph();
@@ -122,11 +125,9 @@ public class IndexStore<T extends Element> {
                     }
                 }
             }
-
-            return value;
-        } finally {
-            unlock();
         }
+
+        return value;
     }
 
     public void clear(T element) {
@@ -141,13 +142,17 @@ public class IndexStore<T extends Element> {
                 if (c != null && c.isIndexed()) {
                     Object value = elementImpl.getAttribute(c);
                     mainIndex.remove(c, value, element);
-                    for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
-                        GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                        DirectedSubgraph graph = graphView.getDirectedGraph();
-                        boolean inView = element instanceof Node ? graph.contains((Node) element)
-                                : graph.contains((Edge) element);
-                        if (inView) {
-                            entry.getValue().remove(c, value, element);
+                    if (!viewIndexes.isEmpty()) {
+                        synchronized (viewIndexes) {
+                            for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
+                                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                                DirectedSubgraph graph = graphView.getDirectedGraph();
+                                boolean inView = element instanceof Node ? graph.contains((Node) element)
+                                        : graph.contains((Edge) element);
+                                if (inView) {
+                                    entry.getValue().remove(c, value, element);
+                                }
+                            }
                         }
                     }
                 }
@@ -194,14 +199,12 @@ public class IndexStore<T extends Element> {
                         ElementImpl element = (ElementImpl) iterator.next();
 
                         final ColumnImpl[] cols = columnStore.columns;
-                        synchronized (element) {
-                            int length = columnStore.length;
-                            for (int i = 0; i < length; i++) {
-                                Column c = cols[i];
-                                if (c != null && c.isIndexed()) {
-                                    Object value = element.getAttribute(c);
-                                    viewIndex.put(c, value, element);
-                                }
+                        int length = columnStore.length;
+                        for (int i = 0; i < length; i++) {
+                            Column c = cols[i];
+                            if (c != null && c.isIndexed()) {
+                                Object value = element.getAttribute(c);
+                                viewIndex.put(c, value, element);
                             }
                         }
                     }
@@ -223,10 +226,8 @@ public class IndexStore<T extends Element> {
                 for (int i = 0; i < length; i++) {
                     Column c = cols[i];
                     if (c != null && c.isIndexed()) {
-                        synchronized (elementImpl) {
-                            Object value = elementImpl.getAttribute(c);
-                            index.put(c, value, element);
-                        }
+                        Object value = elementImpl.getAttribute(c);
+                        index.put(c, value, element);
                     }
                 }
             }
@@ -246,10 +247,8 @@ public class IndexStore<T extends Element> {
                 for (int i = 0; i < length; i++) {
                     Column c = cols[i];
                     if (c != null && c.isIndexed()) {
-                        synchronized (elementImpl) {
-                            Object value = elementImpl.getAttribute(c);
-                            index.remove(c, value, element);
-                        }
+                        Object value = elementImpl.getAttribute(c);
+                        index.remove(c, value, element);
                     }
                 }
             }

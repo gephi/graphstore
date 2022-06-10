@@ -77,6 +77,14 @@ public class NodeImpl extends ElementImpl implements Node {
     }
 
     @Override
+    DefaultColumnsImpl.TableDefaultColumns getDefaultColumns() {
+        if (graphStore != null) {
+            return graphStore.defaultColumns.nodeDefaultColumns;
+        }
+        return null;
+    }
+
+    @Override
     public Table getTable() {
         if (graphStore != null) {
             return graphStore.nodeTable;

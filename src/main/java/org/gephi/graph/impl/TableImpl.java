@@ -147,7 +147,7 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
     }
 
     @Override
-    public Column getColumn(int index) {
+    public ColumnImpl getColumn(int index) {
         return store.getColumnByIndex(index);
     }
 

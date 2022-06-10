@@ -74,6 +74,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected DateTimeZone timeZone;
     // Spatial context
     protected SpatialIndexImpl spatialIndex;
+    // Default columns
+    protected final DefaultColumnsImpl defaultColumns;
 
     public GraphStore() {
         this(null);
@@ -136,6 +138,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         } else {
             edgeTable.store.length++;
         }
+        defaultColumns = new DefaultColumnsImpl(this);
     }
 
     @Override

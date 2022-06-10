@@ -17,6 +17,7 @@
 package org.gephi.graph.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
@@ -27,7 +28,6 @@ import org.gephi.graph.api.Index;
 
 public class IndexImpl<T extends Element> implements Index<T> {
 
-    protected final TableLockImpl lock;
     protected final ColumnStore<T> columnStore;
     protected final Graph graph;
     protected ColumnIndexImpl[] columns;
@@ -41,7 +41,6 @@ public class IndexImpl<T extends Element> implements Index<T> {
         this.columnStore = columnStore;
         this.graph = graph;
         this.columns = new ColumnIndexImpl[0];
-        this.lock = columnStore.lock;
     }
 
     @Override
@@ -63,12 +62,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public int count(Column column, Object value) {
         checkNonNullColumnObject(column);
 
-        lock();
-        try {
-            return getIndex(column).count(value);
-        } finally {
-            unlock();
+        ColumnIndexImpl index = getIndex(column);
+        if (index != null) {
+            return index.count(value);
         }
+        return 0;
     }
 
     public int count(String key, Object value) {
@@ -81,12 +79,11 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Iterable<T> get(Column column, Object value) {
         checkNonNullColumnObject(column);
 
-        lock();
-        try {
-            return getIndex(column).get(value);
-        } finally {
-            unlock();
+        ColumnIndexImpl index = getIndex(column);
+        if (index != null) {
+            return index.get(value);
         }
+        return Collections.EMPTY_LIST;
     }
 
     public Iterable<T> get(String key, Object value) {
@@ -99,35 +96,33 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public boolean isSortable(Column column) {
         checkNonNullColumnObject(column);
 
-        lock();
-        try {
-            return getIndex(column).isSortable();
-        } finally {
-            unlock();
+        ColumnIndexImpl index = getIndex(column);
+        if (index != null) {
+            return index.isSortable();
         }
+        return false;
     }
 
     @Override
     public Number getMinValue(Column column) {
         checkNonNullColumnObject(column);
 
-        lock();
-        try {
-            return getIndex(column).getMinValue();
-        } finally {
-            unlock();
+        ColumnIndexImpl index = getIndex(column);
+        if (index != null) {
+            return index.getMinValue();
         }
+        return null;
     }
 
     @Override
     public Number getMaxValue(Column column) {
         checkNonNullColumnObject(column);
-        lock();
-        try {
-            return getIndex(column).getMaxValue();
-        } finally {
-            unlock();
+
+        ColumnIndexImpl index = getIndex(column);
+        if (index != null) {
+            return index.getMaxValue();
         }
+        return null;
     }
 
     public Iterable<Map.Entry<Object, Set<T>>> get(Column column) {
@@ -140,34 +135,31 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Collection values(Column column) {
         checkNonNullColumnObject(column);
 
-        lock();
-        try {
-            return getIndex(column).values();
-        } finally {
-            unlock();
+        ColumnIndexImpl index = getIndex(column);
+        if (index != null) {
+            return index.values();
         }
+        return Collections.EMPTY_LIST;
     }
 
     @Override
     public int countValues(Column column) {
         checkNonNullColumnObject(column);
-        lock();
-        try {
-            return getIndex(column).countValues();
-        } finally {
-            unlock();
+        ColumnIndexImpl index = getIndex(column);
+        if (index != null) {
+            return index.countValues();
         }
+        return 0;
     }
 
     @Override
     public int countElements(Column column) {
         checkNonNullColumnObject(column);
-        lock();
-        try {
-            return getIndex(column).countElements();
-        } finally {
-            unlock();
+        ColumnIndexImpl index = getIndex(column);
+        if (index != null) {
+            return index.countElements();
         }
+        return 0;
     }
 
     public Object put(String key, Object value, T element) {
@@ -253,7 +245,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
 
         // TODO: Make this more robust
         if (col.isProperty()) {
-            DefaultColumnsImpl defaultColumns = columnStore.graphStore.graphModel.defaultColumns;
+            DefaultColumnsImpl defaultColumns = columnStore.graphStore.defaultColumns;
             if (col == defaultColumns.degreeColumn) {
                 return new DegreeNoIndexImpl(graph, DegreeNoIndexImpl.DegreeType.DEGREE);
             } else if (col == defaultColumns.inDegreeColumn) {
@@ -364,18 +356,6 @@ public class IndexImpl<T extends Element> implements Index<T> {
             ColumnIndexImpl[] newArray = new ColumnIndexImpl[index + 1];
             System.arraycopy(columns, 0, newArray, 0, columns.length);
             columns = newArray;
-        }
-    }
-
-    void lock() {
-        if (lock != null) {
-            lock.lock();
-        }
-    }
-
-    void unlock() {
-        if (lock != null) {
-            lock.unlock();
         }
     }
 
