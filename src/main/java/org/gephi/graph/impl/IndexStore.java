@@ -174,7 +174,7 @@ public class IndexStore<T extends Element> {
                 if (c != null && c.isIndexed()) {
                     Object value = elementImpl.getAttribute(c);
                     value = mainIndex.put(c, value, element);
-                    elementImpl.setAttribute(c, value);
+                    elementImpl.attributes.setAttribute(c, value);
                 }
             }
         } finally {
