@@ -630,6 +630,28 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testSetConfigurationDefaultColumns() {
+        Configuration config = new Configuration();
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
+
+        Configuration newConfig = new Configuration();
+        newConfig.setNodeIdType(Integer.class);
+        newConfig.setEdgeIdType(Integer.class);
+        newConfig.setTimeRepresentation(TimeRepresentation.TIMESTAMP);
+        newConfig.setEdgeWeightType(TimestampDoubleMap.class);
+        graphModelImpl.setConfiguration(newConfig);
+
+        Assert.assertSame(graphModelImpl.defaultColumns().nodeId(), graphModelImpl.getNodeTable().getColumn("id"));
+        Assert.assertSame(graphModelImpl.defaultColumns().edgeId(), graphModelImpl.getEdgeTable().getColumn("id"));
+        Assert.assertSame(graphModelImpl.defaultColumns().nodeTimeSet(), graphModelImpl.getNodeTable()
+                .getColumn("timeset"));
+        Assert.assertSame(graphModelImpl.defaultColumns().edgeTimeSet(), graphModelImpl.getEdgeTable()
+                .getColumn("timeset"));
+        Assert.assertSame(graphModelImpl.defaultColumns().edgeWeight(), graphModelImpl.getEdgeTable()
+                .getColumn("weight"));
+    }
+
+    @Test
     public void testNodeAttributesAddAndRemoveColumns1() {
         GraphModelImpl graphModel = new GraphModelImpl();
         Table table = graphModel.getNodeTable();

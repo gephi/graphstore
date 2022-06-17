@@ -533,6 +533,7 @@ public class GraphModelImpl implements GraphModel {
             }
 
             store.factory.resetConfiguration();
+            store.defaultColumns.resetConfiguration();
         } finally {
             store.autoWriteUnlock();
         }
