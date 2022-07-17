@@ -243,6 +243,7 @@ public class Serialization {
         Configuration config = (Configuration) deserialize(is);
         model = new GraphModelImpl(config);
         deserialize(is);
+        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
@@ -251,6 +252,7 @@ public class Serialization {
         Configuration config = (Configuration) deserialize(is);
         model = new GraphModelImpl(config);
         deserialize(is);
+        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
