@@ -37,7 +37,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
     // Final Data
     protected final NodeImpl source;
     protected final NodeImpl target;
-    protected final int type;
+    // Edge type
+    protected int type;
     // Pointers
     protected int storeId = EdgeStore.NULL_ID;
     protected int nextOutEdge = EdgeStore.NULL_ID;
@@ -142,6 +143,16 @@ public class EdgeImpl extends ElementImpl implements Edge {
     @Override
     public int getType() {
         return type;
+    }
+
+    @Override
+    public void setType(int type) {
+        graphStore.autoWriteLock();
+        try {
+            graphStore.edgeStore.setEdgeType(this, type);
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
     }
 
     @Override

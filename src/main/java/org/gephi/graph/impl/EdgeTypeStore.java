@@ -76,6 +76,16 @@ public class EdgeTypeStore {
         return idMap.get(intToShort(id));
     }
 
+    public void registerEdgeType(int type) {
+        if (!contains(type)) {
+            if (GraphStoreConfiguration.ENABLE_AUTO_TYPE_REGISTRATION) {
+                addType(String.valueOf(type), type);
+            } else {
+                throw new RuntimeException("The type doesn't exist");
+            }
+        }
+    }
+
     public int addType(final Object label) {
         checkType(label);
 

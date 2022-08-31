@@ -486,6 +486,24 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testAddEdgeWithSameType() {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeImpl edge1 = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge2 = new EdgeImpl("1", nodes[0], nodes[1], 0, 1.0, true);
+        boolean a = graphStore.addEdge(edge1);
+        boolean b = graphStore.addEdge(edge2);
+
+        Assert.assertTrue(a);
+        Assert.assertTrue(b);
+
+        Assert.assertTrue(graphStore.contains(edge1));
+        Assert.assertTrue(graphStore.contains(edge2));
+    }
+
+    @Test
     public void testAddEdgeTypeRegistration() {
         GraphStore graphStore = new GraphStore();
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);

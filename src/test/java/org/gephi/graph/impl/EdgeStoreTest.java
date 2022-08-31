@@ -1299,6 +1299,17 @@ public class EdgeStoreTest {
     }
 
     @Test
+    public void testRemoveMutualEdge() {
+        EdgeImpl[] edges = GraphGenerator.generateMutualEdges(1);
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null);
+        edgeStore.addAll(Arrays.asList(edges));
+        edgeStore.remove(edges[0]);
+        Assert.assertFalse(edges[0].isMutual());
+        Assert.assertFalse(edges[1].isMutual());
+    }
+
+    @Test
     public void testAddSelfLoop() {
         EdgeStore edgeStore = new EdgeStore();
         EdgeImpl edge = GraphGenerator.generateSelfLoop(0, true);
@@ -1866,6 +1877,60 @@ public class EdgeStoreTest {
         }
 
         Assert.assertEquals(count, selfLoops);
+    }
+
+    @Test
+    public void testSetSameType() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
+        edgeStore.add(edge);
+        Assert.assertFalse(edgeStore.setEdgeType(edge, 4));
+    }
+
+    @Test
+    public void testSetTypeBeforeAdd() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
+        Assert.assertEquals(4, edge.getType());
+        edgeStore.setEdgeType(edge, 1);
+        Assert.assertEquals(1, edge.getType());
+    }
+
+    @Test
+    public void testSetType() {
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
+        edgeStore.add(edge);
+        edgeStore.setEdgeType(edge, 1);
+        Assert.assertEquals(1, edge.getType());
+        Assert.assertSame(edge, edgeStore.get(edge.source, edge.target, 1, false));
+        Assert.assertTrue(edgeStore.contains(edge.source, edge.target, 1));
+        Assert.assertFalse(edgeStore.contains(edge.source, edge.target, 4));
+        Assert.assertEquals(0, edgeStore.size(4));
+        Assert.assertEquals(1, edgeStore.size(1));
+    }
+
+    @Test
+    public void testSetTypeWithMutualEdge() {
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        EdgeImpl[] edges = GraphGenerator.generateMutualEdges(4);
+        edgeStore.addAll(Arrays.asList(edges));
+        Assert.assertTrue(edges[0].isMutual());
+        Assert.assertTrue(edges[1].isMutual());
+        edgeStore.setEdgeType(edges[0], 1);
+        Assert.assertFalse(edges[0].isMutual());
+        Assert.assertFalse(edges[1].isMutual());
+    }
+
+    // Can only run when GraphStoreConfiguration.ENABLE_PARALLEL_EDGES = false
+    @Test(enabled = false)
+    public void testReturnFalseWithoutParallelEdges() {
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge(1);
+        EdgeImpl edge2 = new EdgeImpl('0', edge.graphStore, edge.source, edge.target, 2, 1.0, true);
+        Assert.assertTrue(edgeStore.add(edge));
+        Assert.assertTrue(edgeStore.add(edge2));
+        Assert.assertFalse(edgeStore.setEdgeType(edge, 2));
     }
 
     /*

@@ -660,6 +660,25 @@ public class GraphViewImpl implements GraphView {
         }
     }
 
+    protected void setEdgeType(EdgeImpl edgeImpl, int oldType, boolean wasMutual) {
+        ensureTypeCountArrayCapacity(edgeImpl.type);
+        typeCounts[oldType]--;
+        typeCounts[edgeImpl.type]++;
+
+        if (!edgeImpl.isSelfLoop()) {
+            if (wasMutual && containsEdge(graphStore.edgeStore.get(edgeImpl.target, edgeImpl.source, oldType, false))) {
+                mutualEdgeTypeCounts[oldType]--;
+                mutualEdgesCount--;
+            }
+
+            if (edgeImpl.isMutual() && containsEdge(graphStore.edgeStore
+                    .get(edgeImpl.target, edgeImpl.source, edgeImpl.type, false))) {
+                mutualEdgeTypeCounts[edgeImpl.type]++;
+                mutualEdgesCount++;
+            }
+        }
+    }
+
     private void addEdge(EdgeImpl edgeImpl) {
         incrementEdgeVersion();
 
@@ -671,7 +690,8 @@ public class GraphViewImpl implements GraphView {
 
         typeCounts[type]++;
 
-        if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
+        if (edgeImpl.isMutual() && !edgeImpl.isSelfLoop() && containsEdge(graphStore.edgeStore
+                .get(edgeImpl.target, edgeImpl.source, edgeImpl.type, false))) {
             mutualEdgeTypeCounts[type]++;
             mutualEdgesCount++;
         }
@@ -693,7 +713,8 @@ public class GraphViewImpl implements GraphView {
         edgeCount--;
         typeCounts[edgeImpl.type]--;
 
-        if (edgeImpl.isMutual() && edgeImpl.source.storeId < edgeImpl.target.storeId) {
+        if (edgeImpl.isMutual() && !edgeImpl.isSelfLoop() && containsEdge(graphStore.edgeStore
+                .get(edgeImpl.target, edgeImpl.source, edgeImpl.type, false))) {
             mutualEdgeTypeCounts[edgeImpl.type]--;
             mutualEdgesCount--;
         }

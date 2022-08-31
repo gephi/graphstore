@@ -559,6 +559,121 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return get(edge.target, edge.source, edge.type, false);
     }
 
+    public boolean setEdgeType(final Edge e, int type) {
+        checkNonNullEdgeObject(e);
+
+        if (e.getType() == type) {
+            return false;
+        }
+
+        int oldType = e.getType();
+        EdgeImpl edge = (EdgeImpl) e;
+        if (edge.storeId != EdgeStore.NULL_ID) {
+            ensureLongDictionaryCapacity(type);
+            Long2ObjectOpenCustomHashMap<int[]> newDico = longDictionary[type];
+
+            long longId = getLongId(edge.source, edge.target, edge.isDirected());
+            int[] newDicoValue = newDico.get(longId);
+            if (newDicoValue != null && !GraphStoreConfiguration.ENABLE_PARALLEL_EDGES) {
+                return false;
+            }
+
+            edgeTypeStore.registerEdgeType(type);
+            boolean wasMutual = edge.isMutual();
+            removeFromDico(edge, edge.storeId);
+
+            removeOutEdge(edge);
+            removeInEdge(edge);
+            edge.type = type;
+            insertOutEdge(edge);
+            insertInEdge(edge);
+
+            addToDico(newDico, newDicoValue, edge, longId);
+
+            if (viewStore != null) {
+                viewStore.setEdgeType(edge, oldType, wasMutual);
+            }
+
+            incrementVersion();
+        } else {
+            edge.type = type;
+        }
+
+        return true;
+    }
+
+    private void removeFromDico(EdgeImpl edge, int id) {
+        int type = edge.type;
+        NodeImpl source = edge.source;
+        NodeImpl target = edge.target;
+        boolean directed = edge.isDirected();
+
+        Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
+        long longId = getLongId(source, target, directed);
+        int[] dicoValue = dico.get(longId);
+        if (dicoValue.length == 1) {
+            dico.remove(longId);
+        } else {
+            int[] newDicoValue = new int[dicoValue.length - 1];
+            int j = 0;
+            for (int i = 0; i < dicoValue.length; i++) {
+                int v = dicoValue[i];
+                if (v != id) {
+                    newDicoValue[j++] = v;
+                }
+            }
+            dico.put(longId, newDicoValue);
+        }
+
+        if (directed && !edge.isSelfLoop()) {
+            int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
+            if (index != null) {
+                for (int i = 0; i < index.length; i++) {
+                    EdgeImpl mutual = get(index[i]);
+                    if (mutual.isMutual()) {
+                        edge.setMutual(false);
+
+                        mutual.setMutual(false);
+                        source.mutualDegree--;
+                        target.mutualDegree--;
+                        mutualEdgesSize--;
+                        mutualEdgesTypeSize[type]--;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void addToDico(Long2ObjectOpenCustomHashMap<int[]> dico, int[] dicoValue, EdgeImpl edge, long longId) {
+        if (dicoValue == null) {
+            dicoValue = new int[] { edge.storeId };
+        } else {
+            dicoValue = Arrays.copyOf(dicoValue, dicoValue.length + 1);
+            dicoValue[dicoValue.length - 1] = edge.storeId;
+        }
+        dico.put(longId, dicoValue);
+
+        if (edge.isDirected() && !edge.isSelfLoop()) {
+            int type = edge.type;
+            int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
+            if (index != null) {
+                for (int i = 0; i < index.length; i++) {
+                    EdgeImpl mutual = get(index[i]);
+                    if (!mutual.isMutual()) {
+                        mutual.setMutual(true);
+                        edge.setMutual(true);
+                        edge.source.mutualDegree++;
+                        edge.target.mutualDegree++;
+                        mutualEdgesSize++;
+                        mutualEdgesTypeSize[type]++;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public boolean add(final Edge e) {
         checkNonNullEdgeObject(e);
@@ -606,36 +721,12 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             source.outDegree++;
             target.inDegree++;
 
-            if (dicoValue == null) {
-                dicoValue = new int[] { edge.storeId };
-            } else {
-                dicoValue = Arrays.copyOf(dicoValue, dicoValue.length + 1);
-                dicoValue[dicoValue.length - 1] = edge.storeId;
-            }
-            dico.put(longId, dicoValue);
+            addToDico(dico, dicoValue, edge, longId);
 
             if (viewStore != null) {
                 viewStore.addEdge(edge);
             }
             edge.indexAttributes();
-
-            if (directed && !edge.isSelfLoop()) {
-                int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
-                if (index != null) {
-                    for (int i = 0; i < index.length; i++) {
-                        EdgeImpl mutual = get(index[i]);
-                        if (!mutual.isMutual()) {
-                            mutual.setMutual(true);
-                            edge.setMutual(true);
-                            source.mutualDegree++;
-                            target.mutualDegree++;
-                            mutualEdgesSize++;
-                            mutualEdgesTypeSize[type]++;
-                            break;
-                        }
-                    }
-                }
-            }
 
             if (!directed) {
                 undirectedSize++;
@@ -701,43 +792,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 }
             }
 
-            int type = edge.type;
-
-            Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
-            long longId = getLongId(source, target, directed);
-            int[] dicoValue = dico.get(longId);
-            if (dicoValue.length == 1) {
-                dico.remove(longId);
-            } else {
-                int[] newDicoValue = new int[dicoValue.length - 1];
-                int j = 0;
-                for (int i = 0; i < dicoValue.length; i++) {
-                    int v = dicoValue[i];
-                    if (v != id) {
-                        newDicoValue[j++] = v;
-                    }
-                }
-                dico.put(longId, newDicoValue);
-            }
-
-            if (directed && !edge.isSelfLoop()) {
-                int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
-                if (index != null) {
-                    for (int i = 0; i < index.length; i++) {
-                        EdgeImpl mutual = get(index[i]);
-                        if (mutual.isMutual()) {
-                            edge.setMutual(true);
-
-                            mutual.setMutual(false);
-                            source.mutualDegree--;
-                            target.mutualDegree--;
-                            mutualEdgesSize--;
-                            mutualEdgesTypeSize[type]--;
-                            break;
-                        }
-                    }
-                }
-            }
+            removeFromDico(edge, id);
 
             if (!directed) {
                 undirectedSize--;

@@ -258,6 +258,18 @@ public class GraphViewStore {
         }
     }
 
+    protected void setEdgeType(EdgeImpl edge, int oldType, boolean wasMutual) {
+        if (views.length > 0) {
+            for (GraphViewImpl view : views) {
+                if (view != null) {
+                    if ((view.nodeView && !view.edgeView) || (view.edgeView && view.containsEdge(edge))) {
+                        view.setEdgeType(edge, oldType, wasMutual);
+                    }
+                }
+            }
+        }
+    }
+
     protected void removeEdge(EdgeImpl edge) {
         if (views.length > 0) {
             for (GraphViewImpl view : views) {
