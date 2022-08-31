@@ -458,4 +458,53 @@ public class GraphViewImplTest {
         Assert.assertNotNull(view);
         Assert.assertEquals(view, graphStore.mainGraphView);
     }
+
+    @Test
+    public void testMutualCounts() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true);
+        view.fill();
+        Assert.assertEquals(view.getUndirectedEdgeCount(), 1);
+        Assert.assertEquals(view.getEdgeCount(), 2);
+        view.removeEdge(graphStore.getEdge("1"));
+        Assert.assertEquals(view.getUndirectedEdgeCount(), 1);
+    }
+
+    @Test
+    public void testEdgeViewSetEdgeType() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true);
+
+        EdgeImpl e0 = graphStore.getEdge("0");
+        Assert.assertEquals(view.getEdgeCount(0), 0);
+        view.addEdge(e0);
+        Assert.assertEquals(view.getEdgeCount(0), 1);
+        e0.setType(1);
+        Assert.assertEquals(view.getEdgeCount(0), 0);
+        Assert.assertEquals(view.getEdgeCount(1), 1);
+    }
+
+    @Test
+    public void testEdgeViewSetEdgeTypeMutualEdges() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(true, false);
+        view.fill();
+
+        EdgeImpl e0 = graphStore.getEdge("0");
+        e0.setType(1);
+        Assert.assertEquals(view.getEdgeCount(0), 1);
+        Assert.assertEquals(view.getEdgeCount(1), 1);
+        Assert.assertEquals(view.getUndirectedEdgeCount(0), 1);
+        Assert.assertEquals(view.getUndirectedEdgeCount(1), 1);
+
+        EdgeImpl e1 = graphStore.getEdge("1");
+        e1.setType(1);
+        Assert.assertEquals(view.getEdgeCount(0), 0);
+        Assert.assertEquals(view.getEdgeCount(1), 2);
+        Assert.assertEquals(view.getUndirectedEdgeCount(0), 0);
+        Assert.assertEquals(view.getUndirectedEdgeCount(1), 1);
+    }
 }

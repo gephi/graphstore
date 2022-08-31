@@ -101,8 +101,8 @@ public class GraphViewDecoratorTest {
             Assert.assertTrue(a);
             Assert.assertFalse(b);
             Assert.assertTrue(graph.contains(e));
-            boolean mutualToIgnore = graphStore.edgeStore.isUndirectedToIgnore((EdgeImpl) e);
-            if (!mutualToIgnore) {
+            EdgeImpl mutualEdge = graphStore.edgeStore.getMutualEdge(e);
+            if (!(mutualEdge != null && !e.isSelfLoop() && graph.contains(mutualEdge))) {
                 Assert.assertEquals(graph.getEdgeCount(), ++count);
             }
         }
@@ -234,8 +234,8 @@ public class GraphViewDecoratorTest {
             Assert.assertTrue(a);
             Assert.assertFalse(b);
             Assert.assertFalse(graph.contains(e));
-            boolean mutualToIgnore = graphStore.edgeStore.isUndirectedToIgnore((EdgeImpl) e);
-            if (!mutualToIgnore) {
+            EdgeImpl mutualEdge = graphStore.edgeStore.getMutualEdge(e);
+            if (!(mutualEdge != null && !e.isSelfLoop() && graph.contains(mutualEdge))) {
                 Assert.assertEquals(graph.getEdgeCount(), --count);
             }
         }

@@ -916,7 +916,7 @@ public class BasicGraphStore implements DirectedGraph {
 
         protected final BasicNode source;
         protected final BasicNode target;
-        protected final int type;
+        protected int type;
         protected final boolean directed;
         protected double weight;
 
@@ -957,6 +957,11 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public int getType() {
             return type;
+        }
+
+        @Override
+        public void setType(int type) {
+            this.type = type;
         }
 
         @Override
