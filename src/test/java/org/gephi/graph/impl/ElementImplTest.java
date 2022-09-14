@@ -29,6 +29,7 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.types.TimeSet;
 import org.gephi.graph.api.types.TimestampBooleanMap;
 import org.gephi.graph.api.types.TimestampByteMap;
 import org.gephi.graph.api.types.TimestampCharMap;
@@ -229,6 +230,22 @@ public class ElementImplTest {
         node.setAttribute(column, ti);
 
         Assert.assertEquals(node.getAttribute(column), ti);
+    }
+
+    @Test
+    public void testSetAttributeTimestampSet() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimesetColumn(store);
+
+        TimestampSet ti = new TimestampSet();
+        ti.add(1.0);
+        ti.add(2.0);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(column, ti);
+
+        Assert.assertEquals(node.getAttribute(column), ti);
+        Assert.assertEquals(node.getAttribute(column, store.mainGraphView), ti);
     }
 
     @Test
@@ -1225,6 +1242,12 @@ public class ElementImplTest {
         graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "age", IntervalIntegerMap.class,
                 "Age", null, Origin.DATA, false, false));
         return graphStore.nodeTable.store.getColumn("age");
+    }
+
+    private Column generateTimesetColumn(GraphStore graphStore) {
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "events", TimestampSet.class,
+            "Events", null, Origin.DATA, false, false));
+        return graphStore.nodeTable.store.getColumn("events");
     }
 
     // Properties size

@@ -81,15 +81,20 @@ public class AttributesImpl {
     protected Object getAttribute(Column column, Object timeObject, Estimator estimator) {
         int index = column.getIndex();
         synchronized (this) {
-            TimeMap dynamicValue = null;
+            Object dynamicValue = null;
             if (index < attributes.length) {
-                dynamicValue = (TimeMap) attributes[index];
+                dynamicValue = attributes[index];
             }
-            if (dynamicValue != null && !dynamicValue.isEmpty()) {
-                if (estimator == null) {
-                    return dynamicValue.get(timeObject, column.getDefaultValue());
-                } else {
-                    return dynamicValue.get((Interval) timeObject, estimator);
+            if (TimeSet.class.isAssignableFrom(column.getTypeClass())) {
+                return dynamicValue;
+            } else {
+                TimeMap timeMap = (TimeMap) dynamicValue;
+                if (timeMap != null && !timeMap.isEmpty()) {
+                    if (estimator == null) {
+                        return timeMap.get(timeObject, column.getDefaultValue());
+                    } else {
+                        return timeMap.get((Interval) timeObject, estimator);
+                    }
                 }
             }
         }
