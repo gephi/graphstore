@@ -74,7 +74,9 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("foo", String.class), "foo");
         Assert.assertEquals(AttributeUtils.parse("0", Integer.class), 0);
         Assert.assertEquals(AttributeUtils.parse("0", Float.class), 0f);
+        Assert.assertEquals(AttributeUtils.parse("0.5", Float.class), 0.5f);
         Assert.assertEquals(AttributeUtils.parse("0", Double.class), 0.0);
+        Assert.assertEquals(AttributeUtils.parse("0.5", Double.class), 0.5);
         Assert.assertEquals(AttributeUtils.parse("0", Long.class), 0l);
         Assert.assertEquals(AttributeUtils.parse("0", Short.class), (short) 0);
         Assert.assertEquals(AttributeUtils.parse("0", Byte.class), (byte) 0);
@@ -94,7 +96,9 @@ public class AttributeUtilsTest {
     public void testParsePrimitiveTypes() {
         Assert.assertEquals(AttributeUtils.parse("0", int.class), 0);
         Assert.assertEquals(AttributeUtils.parse("0", float.class), 0f);
+        Assert.assertEquals(AttributeUtils.parse("0.5", float.class), 0.5f);
         Assert.assertEquals(AttributeUtils.parse("0", double.class), 0.0);
+        Assert.assertEquals(AttributeUtils.parse("0.5", double.class), 0.5);
         Assert.assertEquals(AttributeUtils.parse("0", long.class), 0l);
         Assert.assertEquals(AttributeUtils.parse("0", short.class), (short) 0);
         Assert.assertEquals(AttributeUtils.parse("0", byte.class), (byte) 0);
