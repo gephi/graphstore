@@ -1246,7 +1246,7 @@ public class ElementImplTest {
 
     private Column generateTimesetColumn(GraphStore graphStore) {
         graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "events", TimestampSet.class,
-            "Events", null, Origin.DATA, false, false));
+                "Events", null, Origin.DATA, false, false));
         return graphStore.nodeTable.store.getColumn("events");
     }
 

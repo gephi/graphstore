@@ -137,6 +137,11 @@ public abstract class ElementImpl implements Element {
 
     @Override
     public Object getAttribute(Column column, GraphView view) {
+        Estimator estimator = column.getEstimator();
+        return getAttribute(column, view, estimator);
+    }
+
+    protected Object getAttribute(Column column, GraphView view, Estimator estimator) {
         checkColumn(column);
 
         if (!column.isDynamic()) {
@@ -144,7 +149,7 @@ public abstract class ElementImpl implements Element {
         } else {
             Interval interval = view.getTimeInterval();
             checkViewExist(view);
-            return attributes.getAttribute(column, interval, getEstimator(column));
+            return attributes.getAttribute(column, interval, estimator);
         }
     }
 
