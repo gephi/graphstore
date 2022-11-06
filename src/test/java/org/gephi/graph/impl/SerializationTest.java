@@ -55,6 +55,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
@@ -1222,6 +1223,20 @@ public class SerializationTest {
         Assert.assertSame(read.defaultColumns().nodeId(), read.getNodeTable().getColumn("id"));
         Assert.assertSame(read.defaultColumns().nodeLabel(), read.getNodeTable().getColumn("label"));
         Assert.assertSame(read.defaultColumns().edgeId(), read.getEdgeTable().getColumn("id"));
+    }
+
+    @Test
+    public void testDeserializeWithGraphModel() throws Exception {
+        GraphModelImpl gm = GraphGenerator.generateSmallUndirectedGraphStore().graphModel;
+        Serialization ser = new Serialization(gm);
+
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, gm);
+        byte[] bytes = dio.toByteArray();
+
+        GraphModelImpl read = GraphModel.Factory.newInstance();
+        read = ser.deserializeGraphModel(dio.reset(bytes), read);
+        Assert.assertTrue(read.deepEquals(gm));
     }
 
     @Test

@@ -58,6 +58,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
@@ -242,6 +243,16 @@ public class Serialization {
         readVersion = (Float) deserialize(is);
         Configuration config = (Configuration) deserialize(is);
         model = new GraphModelImpl(config);
+        deserialize(is);
+        model.store.defaultColumns.resetConfiguration();
+        return model;
+    }
+
+    public GraphModelImpl deserializeGraphModel(DataInput is, GraphModel graphModel) throws IOException, ClassNotFoundException {
+        model = (GraphModelImpl) graphModel;
+        readVersion = (Float) deserialize(is);
+        Configuration config = (Configuration) deserialize(is);
+        model.setConfiguration(config);
         deserialize(is);
         model.store.defaultColumns.resetConfiguration();
         return model;
