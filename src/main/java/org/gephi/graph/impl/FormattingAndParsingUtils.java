@@ -176,10 +176,6 @@ public final class FormattingAndParsingUtils {
             value = AttributeUtils.parse(valString, typeClass);
         }
 
-        if (value == null) {
-            throw new IllegalArgumentException("Invalid value for type: " + valString);
-        }
-
         return (T) value;
     }
 
