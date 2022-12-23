@@ -359,6 +359,8 @@
                             <nohelp>true</nohelp>
                             <detectLinks>true</detectLinks>
                             <detectOfflineLinks>true</detectOfflineLinks>
+                            <doclint>none</doclint>
+                            <source>11</source>
                         </configuration>
                     </plugin>
                 </plugins>
