@@ -88,6 +88,16 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public boolean retainNodes(Collection<? extends Node> nodes) {
+        return store.retainNodes(nodes);
+    }
+
+    @Override
+    public boolean retainEdges(Collection<? extends Edge> edges) {
+        return store.retainEdges(edges);
+    }
+
+    @Override
     public boolean contains(Node node) {
         return store.contains(node);
     }

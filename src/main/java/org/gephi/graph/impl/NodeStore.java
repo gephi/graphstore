@@ -443,8 +443,9 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 }
             }
             return changed;
-        } else {
+        } else if (size > 0) {
             clear();
+            return true;
         }
         return false;
     }

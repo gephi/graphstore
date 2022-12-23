@@ -1021,8 +1021,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 }
             }
             return changed;
-        } else {
+        } else if (size > 0) {
             clear();
+            return true;
         }
         return false;
     }
