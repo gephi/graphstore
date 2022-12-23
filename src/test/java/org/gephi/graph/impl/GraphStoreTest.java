@@ -773,6 +773,40 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testRetainNodes() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        Node[] nodes = graphStore.getNodes().toArray();
+        Assert.assertFalse(graphStore.retainNodes(Arrays.asList(nodes)));
+        Assert.assertEquals(graphStore.getNodeCount(), nodes.length);
+
+        Assert.assertTrue(graphStore.retainNodes(Collections.EMPTY_LIST));
+        Assert.assertEquals(graphStore.getNodeCount(), 0);
+
+        graphStore = GraphGenerator.generateSmallGraphStore();
+        nodes = graphStore.getNodes().toArray();
+        graphStore.retainNodes(Collections.singletonList(nodes[0]));
+        Assert.assertEquals(graphStore.getNodeCount(), 1);
+        Assert.assertTrue(graphStore.contains(nodes[0]));
+    }
+
+    @Test
+    public void testRetainEdges() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        Edge[] edges = graphStore.getEdges().toArray();
+        Assert.assertFalse(graphStore.retainEdges(Arrays.asList(edges)));
+        Assert.assertEquals(graphStore.getEdgeCount(), edges.length);
+
+        Assert.assertTrue(graphStore.retainEdges(Collections.EMPTY_LIST));
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+
+        graphStore = GraphGenerator.generateSmallGraphStore();
+        edges = graphStore.getEdges().toArray();
+        graphStore.retainEdges(Collections.singletonList(edges[0]));
+        Assert.assertEquals(graphStore.getEdgeCount(), 1);
+        Assert.assertTrue(graphStore.contains(edges[0]));
+    }
+
+    @Test
     public void testGetOpposite() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         Node n1 = graphStore.getNode("1");

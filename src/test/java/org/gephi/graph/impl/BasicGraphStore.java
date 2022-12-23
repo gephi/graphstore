@@ -173,6 +173,28 @@ public class BasicGraphStore implements DirectedGraph {
     }
 
     @Override
+    public boolean retainNodes(Collection<? extends Node> nodes) {
+        Set<Node> nodeSet = new HashSet<>(nodes);
+        for (Node n : nodes) {
+            if (!nodeSet.contains(n)) {
+                removeNode(n);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean retainEdges(Collection<? extends Edge> edges) {
+        Set<Edge> edgeSet = new HashSet<>(edges);
+        for (Edge e : edges) {
+            if (!edgeSet.contains(e)) {
+                removeEdge(e);
+            }
+        }
+        return true;
+    }
+
+    @Override
     public boolean contains(Node node) {
         return nodeStore.contains(node);
     }

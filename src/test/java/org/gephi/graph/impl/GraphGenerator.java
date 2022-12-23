@@ -477,12 +477,20 @@ public class GraphGenerator {
     }
 
     public static GraphStore generateSmallGraphStore() {
+        return generateSmallGraphStore(true);
+    }
+
+    public static GraphStore generateSmallGraphStoreWithoutSelfLoop() {
+        return generateSmallGraphStore(false);
+    }
+
+    private static GraphStore generateSmallGraphStore(boolean allowSelfLoops) {
         int edgeCount = 100;
         GraphStore graphStore = new GraphModelImpl().store;
         NodeImpl[] nodes = generateNodeList(Math
                 .max((int) Math.ceil(Math.sqrt(edgeCount * 2)), (int) (edgeCount / 10.0)), graphStore);
         graphStore.addAllNodes(Arrays.asList(nodes));
-        EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, true, true, false);
+        EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, edgeCount, 0, true, allowSelfLoops, false);
         graphStore.addAllEdges(Arrays.asList(edges));
         return graphStore;
     }

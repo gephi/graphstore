@@ -16,6 +16,7 @@
 
 package org.gephi.graph.impl;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -298,10 +299,30 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public boolean retainNodes(Collection<? extends Node> nodes) {
+        autoWriteLock();
+        try {
+            return nodeStore.retainAll(nodes);
+        } finally {
+            autoWriteUnlock();
+        }
+    }
+
+    @Override
     public boolean removeAllEdges(Collection<? extends Edge> edges) {
         autoWriteLock();
         try {
             return edgeStore.removeAll(edges);
+        } finally {
+            autoWriteUnlock();
+        }
+    }
+
+    @Override
+    public boolean retainEdges(Collection<? extends Edge> edges) {
+        autoWriteLock();
+        try {
+            return edgeStore.retainAll(edges);
         } finally {
             autoWriteUnlock();
         }

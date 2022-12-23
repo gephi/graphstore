@@ -17,6 +17,9 @@ package org.gephi.graph.impl;
 
 import cern.colt.bitvector.BitVector;
 import cern.colt.bitvector.QuickBitVector;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -260,6 +263,61 @@ public class GraphViewImpl implements GraphView {
                 }
             }
             return changed;
+        }
+        return false;
+    }
+
+    public boolean retainNodes(final Collection<? extends Node> c) {
+        if (nodeView) {
+            if (!c.isEmpty()) {
+                IntOpenHashSet set = new IntOpenHashSet(c.size());
+                for (Node o : c) {
+                    checkValidNodeObject(o);
+                    set.add(o.getStoreId());
+                }
+
+                boolean changed = false;
+                int nodeSize = nodeBitVector.size();
+                for (int i = 0; i < nodeSize; i++) {
+                    boolean t = nodeBitVector.get(i);
+                    if (t && !set.contains(i)) {
+                        if (removeNode(getNode(i))) {
+                            changed = true;
+                        }
+                    }
+                }
+                return changed;
+            } else if (nodeCount != 0) {
+                clear();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean retainEdges(final Collection<? extends Edge> c) {
+        if (edgeView) {
+            if (!c.isEmpty()) {
+                IntOpenHashSet set = new IntOpenHashSet(c.size());
+                for (Edge o : c) {
+                    checkValidEdgeObject(o);
+                    set.add(o.getStoreId());
+                }
+
+                boolean changed = false;
+                int edgeSize = edgeBitVector.size();
+                for (int i = 0; i < edgeSize; i++) {
+                    boolean t = edgeBitVector.get(i);
+                    if (t && !set.contains(i)) {
+                        removeEdge(getEdge(i));
+                        changed = true;
+                    }
+                }
+                return changed;
+            } else if (edgeCount != 0) {
+                clearEdges();
+                return true;
+            }
         }
         return false;
     }

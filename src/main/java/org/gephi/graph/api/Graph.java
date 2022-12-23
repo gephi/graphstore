@@ -90,6 +90,24 @@ public interface Graph {
     public boolean removeAllNodes(Collection<? extends Node> nodes);
 
     /**
+     * Retains only nodes in this graph that are contained in the specified
+     * collection.
+     *
+     * @param nodes the node collection
+     * @return true if at least one node has been removed, false otherwise
+     */
+    public boolean retainNodes(Collection<? extends Node> nodes);
+
+    /**
+     * Retains only edges in this graph that are contained in the specified
+     * collection.
+     *
+     * @param edges the edge collection
+     * @return true if at least one edge has been removed, false otherwise
+     */
+    public boolean retainEdges(Collection<? extends Edge> edges);
+
+    /**
      * Returns true if <em>node</em> is contained in this graph.
      *
      * @param node the node to test
