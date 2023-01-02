@@ -115,6 +115,13 @@ public interface Edge extends Element, EdgeProperties {
     public int getType();
 
     /**
+     * Sets the edge's type.
+     *
+     * @param type the type
+     */
+    public void setType(int type);
+
+    /**
      * Returns the edge's type label.
      *
      * @return type label

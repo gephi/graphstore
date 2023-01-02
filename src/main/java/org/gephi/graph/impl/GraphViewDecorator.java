@@ -265,6 +265,26 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
+    public boolean retainNodes(Collection<? extends Node> nodes) {
+        graphStore.autoWriteLock();
+        try {
+            return view.retainNodes(nodes);
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
+    @Override
+    public boolean retainEdges(Collection<? extends Edge> edges) {
+        graphStore.autoWriteLock();
+        try {
+            return view.retainEdges(edges);
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
+    }
+
+    @Override
     public boolean contains(Node node) {
         checkValidNodeObject(node);
         graphStore.autoReadLock();

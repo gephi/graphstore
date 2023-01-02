@@ -74,7 +74,9 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("foo", String.class), "foo");
         Assert.assertEquals(AttributeUtils.parse("0", Integer.class), 0);
         Assert.assertEquals(AttributeUtils.parse("0", Float.class), 0f);
+        Assert.assertEquals(AttributeUtils.parse("0.5", Float.class), 0.5f);
         Assert.assertEquals(AttributeUtils.parse("0", Double.class), 0.0);
+        Assert.assertEquals(AttributeUtils.parse("0.5", Double.class), 0.5);
         Assert.assertEquals(AttributeUtils.parse("0", Long.class), 0l);
         Assert.assertEquals(AttributeUtils.parse("0", Short.class), (short) 0);
         Assert.assertEquals(AttributeUtils.parse("0", Byte.class), (byte) 0);
@@ -94,7 +96,9 @@ public class AttributeUtilsTest {
     public void testParsePrimitiveTypes() {
         Assert.assertEquals(AttributeUtils.parse("0", int.class), 0);
         Assert.assertEquals(AttributeUtils.parse("0", float.class), 0f);
+        Assert.assertEquals(AttributeUtils.parse("0.5", float.class), 0.5f);
         Assert.assertEquals(AttributeUtils.parse("0", double.class), 0.0);
+        Assert.assertEquals(AttributeUtils.parse("0.5", double.class), 0.5);
         Assert.assertEquals(AttributeUtils.parse("0", long.class), 0l);
         Assert.assertEquals(AttributeUtils.parse("0", short.class), (short) 0);
         Assert.assertEquals(AttributeUtils.parse("0", byte.class), (byte) 0);
@@ -137,7 +141,9 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2e6]", double[].class).getClass(), double[].class);
 
         Assert.assertEquals(AttributeUtils
-                .parse("[' true ', 'null', null]", String[].class), new String[] { " true ", "null", null });
+                .parse("[' true ', 'null', null]", String[].class), new String[] { " true ", null, null });
+        Assert.assertEquals(AttributeUtils.parse("['null']", Integer[].class), new Integer[] { null });
+        Assert.assertEquals(AttributeUtils.parse("['null']", Double[].class), new Double[] { null });
         Assert.assertEquals(AttributeUtils
                 .parse("['123456789123456789123456789123456789']", BigInteger[].class), new BigInteger[] { new BigInteger(
                         "123456789123456789123456789123456789") });
@@ -293,6 +299,7 @@ public class AttributeUtilsTest {
     @Test
     public void testParseNull() {
         Assert.assertNull(AttributeUtils.parse(null, Integer.class));
+        Assert.assertNull(AttributeUtils.parse("null", Integer.class));
     }
 
     @Test

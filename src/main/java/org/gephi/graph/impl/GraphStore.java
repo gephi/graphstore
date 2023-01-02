@@ -16,6 +16,7 @@
 
 package org.gephi.graph.impl;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -165,7 +166,9 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public boolean addEdge(final Edge edge) {
         autoWriteLock();
         try {
-            registerEdgeType(edge);
+            if (edgeTypeStore != null) {
+                edgeTypeStore.registerEdgeType(edge.getType());
+            }
             return edgeStore.add(edge);
         } finally {
             autoWriteUnlock();
@@ -177,22 +180,13 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         autoWriteLock();
         try {
             for (Edge edge : edges) {
-                registerEdgeType(edge);
+                if (edgeTypeStore != null) {
+                    edgeTypeStore.registerEdgeType(edge.getType());
+                }
             }
             return edgeStore.addAll(edges);
         } finally {
             autoWriteUnlock();
-        }
-    }
-
-    private void registerEdgeType(Edge edge) {
-        int type = edge.getType();
-        if (edgeTypeStore != null && !edgeTypeStore.contains(type)) {
-            if (GraphStoreConfiguration.ENABLE_AUTO_TYPE_REGISTRATION) {
-                edgeTypeStore.addType(String.valueOf(type), type);
-            } else {
-                throw new RuntimeException("The type doesn't exist");
-            }
         }
     }
 
@@ -305,10 +299,30 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public boolean retainNodes(Collection<? extends Node> nodes) {
+        autoWriteLock();
+        try {
+            return nodeStore.retainAll(nodes);
+        } finally {
+            autoWriteUnlock();
+        }
+    }
+
+    @Override
     public boolean removeAllEdges(Collection<? extends Edge> edges) {
         autoWriteLock();
         try {
             return edgeStore.removeAll(edges);
+        } finally {
+            autoWriteUnlock();
+        }
+    }
+
+    @Override
+    public boolean retainEdges(Collection<? extends Edge> edges) {
+        autoWriteLock();
+        try {
+            return edgeStore.retainAll(edges);
         } finally {
             autoWriteUnlock();
         }

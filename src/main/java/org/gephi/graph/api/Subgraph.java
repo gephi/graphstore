@@ -111,6 +111,17 @@ public interface Subgraph extends Graph {
     public boolean removeAllNodes(Collection<? extends Node> nodes);
 
     /**
+     * Retains only nodes in this subgraph that are contained in the specified
+     * collection.
+     * <p>
+     * The nodes should be part of the root graph.
+     *
+     * @param nodes the node collection
+     * @return true if at least one node has been removed, false otherwise
+     */
+    public boolean retainNodes(Collection<? extends Node> nodes);
+
+    /**
      * Removes an edge from this subgraph.
      * <p>
      * The edge should be part of the root graph.
@@ -131,6 +142,17 @@ public interface Subgraph extends Graph {
      */
     @Override
     public boolean removeAllEdges(Collection<? extends Edge> edges);
+
+    /**
+     * Retains only edges in this subgraph that are contained in the specified
+     * collection.
+     * <p>
+     * The edges should be part of the root graph.
+     *
+     * @param edges the edge collection
+     * @return true if at least one edge has been removed, false otherwise
+     */
+    public boolean retainEdges(Collection<? extends Edge> edges);
 
     /**
      * Fills the subgraph so all elements in the graph are in the subgraph.

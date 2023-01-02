@@ -351,6 +351,10 @@ public class AttributeUtils {
             return null;
         }
 
+        if (str.equalsIgnoreCase("null")) {
+            return null;
+        }
+
         if (typeClass.isPrimitive()) {
             typeClass = getStandardizedType(typeClass);// For primitives we can
                                                        // use auto-unboxing

@@ -144,7 +144,7 @@ public class ArraysParserTest {
         String[] a2 = ArraysParser.parseArray(String[].class, "[\"null\", null, 'null', value]");
 
         Assert.assertEquals(new Boolean[] { false, null, false }, a1);
-        Assert.assertEquals(new String[] { "null", null, "null", "value" }, a2);
+        Assert.assertEquals(new String[] { null, null, null, "value" }, a2);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

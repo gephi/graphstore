@@ -101,7 +101,7 @@ public interface GraphModel {
          *
          * @return new instance
          */
-        public static GraphModel newInstance() {
+        public static GraphModelImpl newInstance() {
             return new GraphModelImpl();
         }
 
@@ -111,7 +111,7 @@ public interface GraphModel {
          * @param config configuration
          * @return new instance
          */
-        public static GraphModel newInstance(Configuration config) {
+        public static GraphModelImpl newInstance(Configuration config) {
             return new GraphModelImpl(config);
         }
     }
@@ -132,6 +132,23 @@ public interface GraphModel {
             try {
                 org.gephi.graph.impl.Serialization s = new org.gephi.graph.impl.Serialization();
                 return s.deserializeGraphModel(input);
+            } catch (ClassNotFoundException e) {
+                throw new IOException(e);
+            }
+        }
+
+        /**
+         * Read the <code>input</code> into the given graph model. The provided graph
+         * model should be empty.
+         *
+         * @param input data input to read from
+         * @return the graphmodel passed as parameter
+         * @throws IOException if an io error occurs
+         */
+        public static GraphModel read(DataInput input, GraphModel graphModel) throws IOException {
+            try {
+                org.gephi.graph.impl.Serialization s = new org.gephi.graph.impl.Serialization();
+                return s.deserializeGraphModel(input, graphModel);
             } catch (ClassNotFoundException e) {
                 throw new IOException(e);
             }

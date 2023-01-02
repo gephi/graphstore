@@ -26,6 +26,7 @@ import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphLock;
 import org.gephi.graph.api.Node;
@@ -138,7 +139,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
                 double minN = Double.POSITIVE_INFINITY;
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
-                    Number num = (Number) element.getAttribute(column, graph.getView());
+                    Number num = (Number) element.getAttribute(column, graph.getView(), Estimator.MIN);
                     if (min == null || (num != null && num.doubleValue() < minN)) {
                         if (num != null) {
                             minN = num.doubleValue();
@@ -167,7 +168,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
 
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
-                    Number num = (Number) element.getAttribute(column, graph.getView());
+                    Number num = (Number) element.getAttribute(column, graph.getView(), Estimator.MAX);
                     if (max == null || (num != null && num.doubleValue() > maxN)) {
                         if (num != null) {
                             maxN = num.doubleValue();

@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
@@ -195,7 +196,7 @@ public class ColumnNoIndexTest {
 
         Assert.assertTrue(priceIndex.isSortable());
         Assert.assertEquals(priceIndex.getMinValue(), 100);
-        Assert.assertEquals(priceIndex.getMaxValue(), 100);
+        Assert.assertEquals(priceIndex.getMaxValue(), 150);
         Assert.assertEquals(priceIndex.values(), Collections.singletonList(100));
         Assert.assertEquals(priceIndex.count(100), 1);
         Assert.assertEquals(priceIndex.countElements(), 1);
@@ -211,8 +212,9 @@ public class ColumnNoIndexTest {
         addNodeWithAttribute(graphStore, priceIndex.column, "1", t);
         priceIndex.column.setEstimator(Estimator.AVERAGE);
 
-        Assert.assertEquals(priceIndex.getMinValue(), 125.0);
-        Assert.assertEquals(priceIndex.getMaxValue(), 125.0);
+        Assert.assertEquals(priceIndex.getMinValue(), 100);
+        Assert.assertEquals(priceIndex.getMaxValue(), 150);
+        Assert.assertEquals(priceIndex.values(), Collections.singletonList(125.0));
     }
 
     @Test

@@ -17,6 +17,8 @@ package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
@@ -101,8 +103,8 @@ public class GraphViewDecoratorTest {
             Assert.assertTrue(a);
             Assert.assertFalse(b);
             Assert.assertTrue(graph.contains(e));
-            boolean mutualToIgnore = graphStore.edgeStore.isUndirectedToIgnore((EdgeImpl) e);
-            if (!mutualToIgnore) {
+            EdgeImpl mutualEdge = graphStore.edgeStore.getMutualEdge(e);
+            if (!(mutualEdge != null && !e.isSelfLoop() && graph.contains(mutualEdge))) {
                 Assert.assertEquals(graph.getEdgeCount(), ++count);
             }
         }
@@ -234,8 +236,8 @@ public class GraphViewDecoratorTest {
             Assert.assertTrue(a);
             Assert.assertFalse(b);
             Assert.assertFalse(graph.contains(e));
-            boolean mutualToIgnore = graphStore.edgeStore.isUndirectedToIgnore((EdgeImpl) e);
-            if (!mutualToIgnore) {
+            EdgeImpl mutualEdge = graphStore.edgeStore.getMutualEdge(e);
+            if (!(mutualEdge != null && !e.isSelfLoop() && graph.contains(mutualEdge))) {
                 Assert.assertEquals(graph.getEdgeCount(), --count);
             }
         }
@@ -354,6 +356,53 @@ public class GraphViewDecoratorTest {
         graph.writeUnlock();
 
         Assert.assertEquals(graph.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testDirectedRetainNodes() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStoreWithoutSelfLoop();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        view.fill();
+
+        Assert.assertFalse(graph.retainNodes(graphStore.getNodes().toCollection()));
+        Assert.assertEquals(graph.getNodeCount(), graphStore.getNodeCount());
+
+        Assert.assertTrue(graph.retainNodes(Collections.EMPTY_LIST));
+        Assert.assertEquals(graph.getNodeCount(), 0);
+
+        view.fill();
+        Edge edge = graphStore.getEdges().toArray()[0];
+        Assert.assertTrue(graph.retainNodes(Arrays.asList(edge.getSource(), edge.getTarget())));
+        Assert.assertEquals(graph.getNodeCount(), 2);
+        Assert.assertTrue(graph.contains(edge.getSource()));
+        Assert.assertTrue(graph.contains(edge.getTarget()));
+        Assert.assertTrue(graph.contains(edge));
+    }
+
+    @Test
+    public void testDirectedRetainEdges() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStoreWithoutSelfLoop();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        view.fill();
+
+        Assert.assertFalse(graph.retainEdges(graphStore.getEdges().toCollection()));
+        Assert.assertEquals(graph.getEdgeCount(), graphStore.getEdgeCount());
+
+        Assert.assertTrue(graph.retainEdges(Collections.EMPTY_LIST));
+        Assert.assertEquals(graph.getEdgeCount(), 0);
+
+        view.fill();
+        Edge edge = graphStore.getEdges().toArray()[0];
+        Assert.assertTrue(graph.retainEdges(Collections.singletonList(edge)));
+        Assert.assertEquals(graph.getNodeCount(), graphStore.getNodeCount());
+        Assert.assertEquals(graph.getEdgeCount(), 1);
+        Assert.assertTrue(graph.contains(edge));
     }
 
     @Test
