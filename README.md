@@ -51,10 +51,6 @@ GraphStore uses Maven for building.
 
 	> mvn jacoco:report
 
-## How to run the benchmark code
-
-	> mvn integration-test
-
 ## Contribute
 
 The source code is available under the Apache 2.0 license. Contributions are welcome.
