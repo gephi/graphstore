@@ -159,26 +159,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Add benchmark folder to sources -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-benchmark-test-source</id>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/benchmark/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- Tests configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -198,22 +178,8 @@
                         <phase>test</phase>
                         <configuration>
                             <skip>false</skip>
-                            <excludes>**/benchmark/**</excludes>
                             <parallel>methods</parallel>
                             <threadCount>4</threadCount>
-                        </configuration>
-                    </execution>
-                    <!-- Benchmark tests in / benchmark folder - to run via `mvn integration-test` -->
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <phase>integration-test</phase>
-                        <configuration>
-                            <skip>false</skip>
-                            <includes>**/benchmark/**</includes>
-                            <argLine>-Xmx2g</argLine>
                         </configuration>
                     </execution>
                 </executions>
@@ -282,7 +248,6 @@
                     <directories>
                         <directory>${project.build.sourceDirectory}</directory>
                         <directory>${project.build.testSourceDirectory}</directory>
-                        <directory>${project.basedir}/src/benchmark/java</directory>
                     </directories>
                 </configuration>
                 <executions>
