@@ -45,7 +45,10 @@ public class Configuration {
 
     /**
      * Default constructor.
+     *
+     * @deprecated Use the <code>builder()</code> method instead.
      */
+    @Deprecated
     public Configuration() {
         nodeIdType = GraphStoreConfiguration.DEFAULT_NODE_ID_TYPE;
         edgeIdType = GraphStoreConfiguration.DEFAULT_EDGE_ID_TYPE;
@@ -53,6 +56,117 @@ public class Configuration {
         edgeWeightType = GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT_TYPE;
         timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
         edgeWeightColumn = true;
+    }
+
+    /**
+     * Creates a new builder.
+     *
+     * @return a new builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private final Configuration configuration;
+
+        private Builder() {
+            configuration = new Configuration();
+        }
+
+        /**
+         * Builds the configuration.
+         *
+         * @return the configuration
+         */
+        public Configuration build() {
+            return configuration;
+        }
+
+        /**
+         * Sets the node id type.
+         * <p>
+         * Only simple types such as primitives, wrappers and String are supported.
+         * <p>
+         * Default is <code>String.class</code>.
+         *
+         * @param nodeIdType node id type
+         * @throws IllegalArgumentException if the type isn't supported
+         */
+        public Builder nodeIdType(Class nodeIdType) {
+            configuration.setNodeIdType(nodeIdType);
+            return this;
+        }
+
+
+        /**
+         * Sets the edge id type.
+         * <p>
+         * Only simple types such as primitives, wrappers and String are supported.
+         * <p>
+         * Default is <code>String.class</code>.
+         *
+         * @param edgeIdType edge id type
+         * @throws IllegalArgumentException if the type isn't supported
+         */
+        public Builder edgeIdType(Class edgeIdType) {
+            configuration.setEdgeIdType(edgeIdType);
+            return this;
+        }
+
+        /**
+         * Sets the edge label type.
+         * <p>
+         * Only simple types such as primitives, wrappers and String are supported.
+         * <p>
+         * Default is <code>String.class</code>.
+         *
+         * @param edgeLabelType edge label type
+         * @throws IllegalArgumentException if the type isn't supported
+         */
+        public Builder setEdgeLabelType(Class edgeLabelType) {
+            configuration.setEdgeLabelType(edgeLabelType);
+            return this;
+        }
+
+        /**
+         * Sets the edge weight type.
+         * <p>
+         * <code>Double</code>, <code>IntervalDoubleMap</code> and <code>TimestampDoubleMap</code> are supported.
+         * <p>
+         * Default is <code>Double.class</code>.
+         *
+         * @param edgeWeightType edge weight type
+         * @throws IllegalArgumentException if the type isn't supported
+         */
+        public Builder edgeWeightType(Class edgeWeightType) {
+            configuration.setEdgeWeightType(edgeWeightType);
+            return this;
+        }
+
+        /**
+         * Sets the time representation.
+         * <p>
+         * Default is <code>TIMESTAMP</code>.
+         *
+         * @param timeRepresentation time representation
+         */
+        public Builder timeRepresentation(TimeRepresentation timeRepresentation) {
+            configuration.setTimeRepresentation(timeRepresentation);
+            return this;
+        }
+
+        /**
+         * Sets whether to create an edge weight column.
+         * <p>
+         * Default is <code>true</code>.
+         *
+         * @param edgeWeightColumn edge weight column
+         */
+        public void edgeWeightColumn(Boolean edgeWeightColumn) {
+            configuration.setEdgeWeightColumn(edgeWeightColumn);
+        }
     }
 
     /**
@@ -69,9 +183,12 @@ public class Configuration {
      * <p>
      * Only simple types such as primitives, wrappers and String are supported.
      *
+     * @deprecated Use {@link #builder()} instead.
+     *
      * @param nodeIdType node id type
      * @throws IllegalArgumentException if the type isn't supported
      */
+    @Deprecated
     public void setNodeIdType(Class nodeIdType) {
         if (!AttributeUtils.isSimpleType(nodeIdType)) {
             throw new IllegalArgumentException("Unsupported type " + nodeIdType.getClass().getCanonicalName());
@@ -93,9 +210,12 @@ public class Configuration {
      * <p>
      * Only simple types such as primitives, wrappers and String are supported.
      *
+     * @deprecated Use {@link #builder()} instead.
+     *
      * @param edgeIdType edge id type
      * @throws IllegalArgumentException if the type isn't supported
      */
+    @Deprecated
     public void setEdgeIdType(Class edgeIdType) {
         if (!AttributeUtils.isSimpleType(edgeIdType)) {
             throw new IllegalArgumentException("Unsupported type " + edgeIdType.getClass().getCanonicalName());
@@ -115,9 +235,12 @@ public class Configuration {
     /**
      * Sets the edge label type.
      *
+     * @deprecated Use {@link #builder()} instead.
+     *
      * @param edgeLabelType edge label type
      * @throws IllegalArgumentException if the type isn't supported
      */
+    @Deprecated
     public void setEdgeLabelType(Class edgeLabelType) {
         if (!AttributeUtils.isSimpleType(edgeLabelType)) {
             throw new IllegalArgumentException("Unsupported type " + edgeLabelType.getClass().getCanonicalName());
@@ -137,9 +260,12 @@ public class Configuration {
     /**
      * Sets the edge weight type.
      *
+     * @deprecated Use {@link #builder()} instead.
+     *
      * @param edgeWeightType edge weight type
      * @throws IllegalArgumentException if the type isn't supported
      */
+    @Deprecated
     public void setEdgeWeightType(Class edgeWeightType) {
         if (Double.class.equals(edgeWeightType) || TimestampDoubleMap.class
                 .equals(edgeWeightType) || IntervalDoubleMap.class.equals(edgeWeightType)) {
@@ -161,8 +287,11 @@ public class Configuration {
     /**
      * Sets the time representation.
      *
+     * @deprecated Use {@link #builder()} instead.
+     *
      * @param timeRepresentation time representation
      */
+    @Deprecated
     public void setTimeRepresentation(TimeRepresentation timeRepresentation) {
         if (timeRepresentation == null) {
             throw new IllegalArgumentException("timeRepresentation cannot be null");
@@ -181,9 +310,12 @@ public class Configuration {
 
     /**
      * Sets whether to create an edge weight column.
+     * <p>
+     * @deprecated Use {@link #builder()} instead.
      *
      * @param edgeWeightColumn edge weight column
      */
+    @Deprecated
     public void setEdgeWeightColumn(Boolean edgeWeightColumn) {
         this.edgeWeightColumn = edgeWeightColumn;
     }
