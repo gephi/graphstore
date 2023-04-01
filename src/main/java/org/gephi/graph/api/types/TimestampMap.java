@@ -19,12 +19,12 @@ import java.lang.reflect.Array;
 import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
-import org.joda.time.DateTimeZone;
 
 /**
  * Abstract class that implement a sorted map between timestamp and attribute
@@ -455,7 +455,7 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
     }
 
     @Override
-    public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
+    public String toString(TimeFormat timeFormat, ZonedDateTime timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
         }

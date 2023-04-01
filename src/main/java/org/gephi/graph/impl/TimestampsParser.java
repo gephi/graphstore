@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import org.gephi.graph.api.AttributeUtils;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
@@ -37,7 +38,6 @@ import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
-import org.joda.time.DateTimeZone;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
 
 /**
@@ -95,7 +95,7 @@ public final class TimestampsParser {
      *         input string or bounds cannot be parsed into doubles or
      *         dates/datetimes.
      */
-    public static TimestampSet parseTimestampSet(String input, DateTimeZone timeZone) throws IllegalArgumentException {
+    public static TimestampSet parseTimestampSet(String input, ZonedDateTime timeZone) throws IllegalArgumentException {
         if (input == null) {
             return null;
         }
@@ -189,7 +189,7 @@ public final class TimestampsParser {
      *         are no timestamps in the input string or bounds cannot be parsed into
      *         doubles or dates/datetimes.
      */
-    public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input, DateTimeZone timeZone) throws IllegalArgumentException {
+    public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input, ZonedDateTime timeZone) throws IllegalArgumentException {
         if (typeClass == null) {
             throw new IllegalArgumentException("typeClass required");
         }
@@ -275,7 +275,7 @@ public final class TimestampsParser {
         return parseTimestampMap(typeClass, input, null);
     }
 
-    private static <T> void parseTimestampAndValue(Class<T> typeClass, StringReader reader, TimestampMap<T> result, DateTimeZone timeZone) throws IOException {
+    private static <T> void parseTimestampAndValue(Class<T> typeClass, StringReader reader, TimestampMap<T> result, ZonedDateTime timeZone) throws IOException {
         ArrayList<String> values = new ArrayList<>();
 
         int r;
@@ -309,7 +309,7 @@ public final class TimestampsParser {
         addTimestampAndValue(typeClass, values, result, timeZone);
     }
 
-    private static <T> void addTimestampAndValue(Class<T> typeClass, ArrayList<String> values, TimestampMap<T> result, DateTimeZone timeZone) {
+    private static <T> void addTimestampAndValue(Class<T> typeClass, ArrayList<String> values, TimestampMap<T> result, ZonedDateTime timeZone) {
         if (values.size() != 2) {
             throw new IllegalArgumentException("Each timestamp and value array must have 2 values");
         }
