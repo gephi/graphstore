@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
@@ -319,16 +320,20 @@ public final class IntervalsParser {
             throw new IllegalArgumentException("Each interval must have 3 values");
         }
 
-        double low = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
-        double high = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(1), timeZone);
+        try {
+            double low = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
+            double high = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(1), timeZone);
 
-        if (typeClass == null) {
-            return new IntervalWithValue(low, high, null);
-        } else {
-            String valString = values.get(2);
-            Object value = FormattingAndParsingUtils.convertValue(typeClass, valString);
+            if (typeClass == null) {
+                return new IntervalWithValue(low, high, null);
+            } else {
+                String valString = values.get(2);
+                Object value = FormattingAndParsingUtils.convertValue(typeClass, valString);
 
-            return new IntervalWithValue(low, high, value);
+                return new IntervalWithValue(low, high, value);
+            }
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Invalid date/time/timestamp value", ex);
         }
     }
 

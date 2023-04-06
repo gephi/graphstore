@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import org.gephi.graph.api.AttributeUtils;
 
 /**
@@ -50,8 +51,9 @@ public final class FormattingAndParsingUtils {
      * @param timeStr Date or timestamp string
      * @param timeZone Time zone to use or null to use default time zone (UTC)
      * @return Timestamp
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTimeOrTimestamp(String timeStr, ZonedDateTime timeZone) {
+    public static double parseDateTimeOrTimestamp(String timeStr, ZonedDateTime timeZone) throws DateTimeParseException {
         double value;
         try {
             // Try first to parse as a single double:
@@ -73,8 +75,9 @@ public final class FormattingAndParsingUtils {
      *
      * @param timeStr Date or timestamp string
      * @return Timestamp
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTimeOrTimestamp(String timeStr) {
+    public static double parseDateTimeOrTimestamp(String timeStr) throws DateTimeParseException {
         return parseDateTimeOrTimestamp(timeStr, null);
     }
 

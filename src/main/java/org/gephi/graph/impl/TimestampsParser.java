@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import org.gephi.graph.api.AttributeUtils;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
@@ -151,8 +152,12 @@ public final class TimestampsParser {
 
         TimestampSet result = new TimestampSet(values.size());
 
-        for (String value : values) {
-            result.add(FormattingAndParsingUtils.parseDateTimeOrTimestamp(value, timeZone));
+        try {
+            for (String value : values) {
+                result.add(FormattingAndParsingUtils.parseDateTimeOrTimestamp(value, timeZone));
+            }
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Invalid timestamp value: " + ex.getMessage(), ex);
         }
 
         return result;
@@ -314,11 +319,15 @@ public final class TimestampsParser {
             throw new IllegalArgumentException("Each timestamp and value array must have 2 values");
         }
 
-        double timestamp = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
+        try {
+            double timestamp = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
 
-        String valString = values.get(1);
-        T value = FormattingAndParsingUtils.convertValue(typeClass, valString);
+            String valString = values.get(1);
+            T value = FormattingAndParsingUtils.convertValue(typeClass, valString);
 
-        result.put(timestamp, value);
+            result.put(timestamp, value);
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Invalid timestamp value: " + values.get(0), ex);
+        }
     }
 }

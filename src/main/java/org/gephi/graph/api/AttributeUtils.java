@@ -41,6 +41,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
+import java.time.format.DateTimeParseException;
 import org.gephi.graph.impl.TimestampsParser;
 import org.gephi.graph.impl.IntervalsParser;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
@@ -244,9 +245,6 @@ public class AttributeUtils {
                 .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
                 .parseDefaulting(ChronoField.NANO_OF_SECOND, 0).appendOffset("+HH:MM", "Z").toFormatter()
                 .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
-        // DATE_TIME_PRINTER =
-        // DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSxxx")
-        // .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE.getZone());
 
         DATE_PRINTERS_BY_TIMEZONE = new HashMap<>();
         DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<>();
@@ -1040,13 +1038,10 @@ public class AttributeUtils {
      * @param dateTime type to parse
      * @param zonedDateTime time zone to use or null to use default time zone (UTC)
      * @return milliseconds representation
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTime(String dateTime, ZonedDateTime zonedDateTime) {
+    public static double parseDateTime(String dateTime, ZonedDateTime zonedDateTime) throws DateTimeParseException {
         DateTimeFormatter dateTimeParserByTimeZone = getDateTimeParserByTimeZone(zonedDateTime);
-        // TemporalAccessor temporalAccessor =
-        // dateTimeParserByTimeZone.parseBest(dateTime, ZonedDateTime::from,
-        // LocalDateTime::from,
-        // LocalDate::from);
         Instant instant = dateTimeParserByTimeZone.parse(dateTime, Instant::from);
         return (double) instant.toEpochMilli();
     }
@@ -1057,8 +1052,9 @@ public class AttributeUtils {
      *
      * @param dateTime the type to parse
      * @return milliseconds representation
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTime(String dateTime) {
+    public static double parseDateTime(String dateTime) throws DateTimeParseException {
         return parseDateTime(dateTime, null);
     }
 
@@ -1069,8 +1065,9 @@ public class AttributeUtils {
      * @param timeStr Date or timestamp string
      * @param zonedDateTime Time zone to use or null to use default time zone (UTC)
      * @return Timestamp
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTimeOrTimestamp(String timeStr, ZonedDateTime zonedDateTime) {
+    public static double parseDateTimeOrTimestamp(String timeStr, ZonedDateTime zonedDateTime) throws DateTimeParseException {
         return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr, zonedDateTime);
     }
 
@@ -1081,9 +1078,10 @@ public class AttributeUtils {
      *
      * @param timeStr Date or timestamp string
      * @return Timestamp
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTimeOrTimestamp(String timeStr) {
-        return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr, null);
+    public static double parseDateTimeOrTimestamp(String timeStr) throws DateTimeParseException {
+        return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr);
     }
 
     /**
