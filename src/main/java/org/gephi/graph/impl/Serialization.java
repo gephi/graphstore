@@ -97,7 +97,7 @@ import org.joda.time.DateTimeZone;
 // Greatly inspired from JDBM https://github.com/jankotek/JDBM3
 public class Serialization {
 
-    final static float VERSION = 0.5f;
+    final static float VERSION = 0.7f;
     final static int NULL_ID = -1;
     final static int NULL = 0;
     final static int NORMAL = 1;
@@ -244,7 +244,6 @@ public class Serialization {
         Configuration config = (Configuration) deserialize(is);
         model = new GraphModelImpl(config);
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
@@ -252,9 +251,8 @@ public class Serialization {
         model = (GraphModelImpl) graphModel;
         readVersion = (Float) deserialize(is);
         Configuration config = (Configuration) deserialize(is);
-        model.setConfiguration(config);
+        // TODO Check compatibility
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
@@ -263,7 +261,6 @@ public class Serialization {
         Configuration config = (Configuration) deserialize(is);
         model = new GraphModelImpl(config);
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
@@ -559,19 +556,6 @@ public class Serialization {
             column.setEstimator(estimator);
         }
 
-        // Make sure configured types match the deserialized column types:
-        if (Edge.class.equals(table.getElementClass())) {
-            if (id.equals(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID)) {
-                table.store.configuration.setEdgeWeightType(typeClass);
-            } else if (id.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
-                table.store.configuration.setEdgeIdType(typeClass);
-            }
-        } else if (Node.class.equals(table.getElementClass())) {
-            if (id.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
-                table.store.configuration.setNodeIdType(typeClass);
-            }
-        }
-
         return column;
     }
 
@@ -689,18 +673,18 @@ public class Serialization {
         out.write(GRAPH_STORE_CONFIGURATION);
         serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_LABEL);
         serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET);
-        serialize(out, GraphStoreConfiguration.ENABLE_NODE_PROPERTIES);
-        serialize(out, GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES);
     }
 
     private GraphStoreConfigurationVersion deserializeGraphStoreConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
         boolean enableElementLabel = (Boolean) deserialize(is);
         boolean enableElementTimestamp = (Boolean) deserialize(is);
-        boolean enableNodeProperties = (Boolean) deserialize(is);
-        boolean enableEdgeProperties = (Boolean) deserialize(is);
+        if (readVersion < 0.7f) {
+            // Enable node and edge properties, was removed in version 0.7
+            deserialize(is);
+            deserialize(is);
+        }
 
-        graphStoreConfigurationVersion = new GraphStoreConfigurationVersion(enableElementLabel, enableElementTimestamp,
-                enableNodeProperties, enableEdgeProperties);
+        graphStoreConfigurationVersion = new GraphStoreConfigurationVersion(enableElementLabel, enableElementTimestamp);
         return graphStoreConfigurationVersion;
     }
 
@@ -1082,14 +1066,14 @@ public class Serialization {
     }
 
     private void serializeConfiguration(final DataOutput out) throws IOException {
-        Configuration config = model.store.configuration;
+        ConfigurationImpl config = model.store.configuration;
 
         serialize(out, config.getNodeIdType());
         serialize(out, config.getEdgeIdType());
         serialize(out, config.getEdgeLabelType());
         serialize(out, config.getEdgeWeightType());
         serialize(out, config.getTimeRepresentation());
-        serialize(out, config.getEdgeWeightColumn());
+        serialize(out, config.isEdgeWeightColumn());
     }
 
     private Configuration deserializeConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
@@ -2313,14 +2297,10 @@ public class Serialization {
 
         protected final boolean enableElementLabel;
         protected final boolean enableElementTimestamp;
-        protected final boolean enableNodeProperties;
-        protected final boolean enableEdgeProperties;
 
-        public GraphStoreConfigurationVersion(boolean enableElementLabel, boolean enableElementTimestamp, boolean enableNodeProperties, boolean enableEdgeProperties) {
+        public GraphStoreConfigurationVersion(boolean enableElementLabel, boolean enableElementTimestamp) {
             this.enableElementLabel = enableElementLabel;
             this.enableElementTimestamp = enableElementTimestamp;
-            this.enableNodeProperties = enableNodeProperties;
-            this.enableEdgeProperties = enableEdgeProperties;
         }
     }
 }

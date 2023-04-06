@@ -26,12 +26,12 @@ public class TimeStore {
     // Lock (optional)
     protected final TableLockImpl lock;
     // Store
-    protected TimeIndexStore nodeIndexStore;
-    protected TimeIndexStore edgeIndexStore;
+    protected final TimeIndexStore nodeIndexStore;
+    protected final TimeIndexStore edgeIndexStore;
 
     public TimeStore(GraphStore store, boolean indexed) {
         this.graphStore = store;
-        this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLockImpl() : null;
+        this.lock = store.configuration.isEnableAutoLocking() ? new TableLockImpl() : null;
 
         TimeRepresentation timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
         if (store != null) {
@@ -43,18 +43,6 @@ public class TimeStore {
         } else {
             nodeIndexStore = new TimestampIndexStore<>(Node.class, lock, indexed);
             edgeIndexStore = new TimestampIndexStore<>(Edge.class, lock, indexed);
-        }
-    }
-
-    protected void resetConfiguration() {
-        if (graphStore != null) {
-            if (graphStore.configuration.getTimeRepresentation().equals(TimeRepresentation.INTERVAL)) {
-                nodeIndexStore = new IntervalIndexStore<>(Node.class, lock, nodeIndexStore.hasIndex());
-                edgeIndexStore = new IntervalIndexStore<>(Edge.class, lock, edgeIndexStore.hasIndex());
-            } else {
-                nodeIndexStore = new TimestampIndexStore<>(Node.class, lock, nodeIndexStore.hasIndex());
-                edgeIndexStore = new TimestampIndexStore<>(Edge.class, lock, edgeIndexStore.hasIndex());
-            }
         }
     }
 

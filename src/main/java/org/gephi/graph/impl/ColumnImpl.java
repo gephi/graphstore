@@ -67,7 +67,7 @@ public class ColumnImpl implements Column {
         this.indexed = indexed;
         this.readOnly = readOnly;
         this.dynamic = TimeMap.class.isAssignableFrom(typeClass) || TimeSet.class.isAssignableFrom(typeClass);
-        this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<>() : null;
+        this.observers = table != null && table.store.graphStore.configuration.isEnableObservers() ? new ArrayList<>() : null;
         this.estimator = this.dynamic ? Estimator.FIRST : null;
     }
 
@@ -194,14 +194,14 @@ public class ColumnImpl implements Column {
             synchronized (observers) {
                 observers.add(observer);
             }
-
             return observer;
+        } else {
+            throw new UnsupportedOperationException("Observers are disabled. Enable them in Configuration");
         }
-        return null;
     }
 
     protected void destroyColumnObserver(ColumnObserverImpl observer) {
-        if (observers != null) {
+        if (observers != null && !observers.isEmpty()) {
             synchronized (observers) {
                 observers.remove(observer);
             }

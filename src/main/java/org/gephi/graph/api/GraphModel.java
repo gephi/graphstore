@@ -718,12 +718,14 @@ public interface GraphModel {
 
     /**
      * Sets a new configuration for this graph model.
-     * <p>
-     * Note that this method only works if the graph model is empty.
+     *
+     * @deprecated setting configuration after graph model creation is no longer supported. Best is to use the
+     * {@link Configuration#builder()} to create a new configuration and then use it at graph model creation from
+     * {@link GraphModel.Factory#newInstance(Configuration)}.
      *
      * @param configuration new configuration
-     * @throws IllegalStateException if the graph model isn't empty
      */
+    @Deprecated
     public void setConfiguration(Configuration configuration);
 
     /**

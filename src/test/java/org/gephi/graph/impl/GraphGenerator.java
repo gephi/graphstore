@@ -452,14 +452,18 @@ public class GraphGenerator {
         return generateTinyGraphStore(config);
     }
 
-    public static GraphStore generateTinyGraphStoreWithSelfLoop() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+    public static GraphStore generateTinyGraphStoreWithSelfLoop(Configuration configuration) {
+        GraphModelImpl graphModel = new GraphModelImpl(configuration);
         GraphStore graphStore = graphModel.store;
         NodeImpl n1 = new NodeImpl("1", graphStore);
         EdgeImpl e = new EdgeImpl("0", graphStore, n1, n1, EdgeTypeStore.NULL_LABEL, 1.0, true);
         graphStore.addNode(n1);
         graphStore.addEdge(e);
         return graphStore;
+    }
+
+    public static GraphStore generateTinyGraphStoreWithSelfLoop() {
+        return generateTinyGraphStoreWithSelfLoop(Configuration.builder().build());
     }
 
     public static GraphStore generateTinyGraphStoreWithMutualEdge() {

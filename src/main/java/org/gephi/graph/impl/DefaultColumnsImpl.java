@@ -12,8 +12,8 @@ public class DefaultColumnsImpl implements GraphModel.DefaultColumns {
     protected final GraphStore store;
 
     // Default columns (initialised at store creation)
-    protected TableDefaultColumns<Node> nodeDefaultColumns;
-    protected TableDefaultColumns<Edge> edgeDefaultColumns;
+    protected final TableDefaultColumns<Node> nodeDefaultColumns;
+    protected final TableDefaultColumns<Edge> edgeDefaultColumns;
 
     // Extra columns (temporary solution, until they are fully added as normal
     // columns)
@@ -35,11 +35,6 @@ public class DefaultColumnsImpl implements GraphModel.DefaultColumns {
                 Integer.class, "Out-Degree", null, Origin.PROPERTY, false, true);
         typeColumn = new ColumnImpl(store.edgeTable, GraphStoreConfiguration.EDGE_TYPE_COLUMN_ID, Integer.class, "Type",
                 null, Origin.PROPERTY, false, true);
-    }
-
-    public void resetConfiguration() {
-        this.nodeDefaultColumns = new TableDefaultColumns<>(store.nodeTable);
-        this.edgeDefaultColumns = new TableDefaultColumns<>(store.edgeTable);
     }
 
     @Override

@@ -48,18 +48,18 @@ import org.gephi.graph.api.types.TimestampSet;
 
 public class GraphModelImpl implements GraphModel {
 
-    protected final Configuration configuration;
+    protected final ConfigurationImpl configuration;
     protected final GraphStore store;
     protected final GraphBridgeImpl graphBridge;
 
     public GraphModelImpl() {
-        this(new Configuration());
+        this(Configuration.builder().build());
     }
 
     public GraphModelImpl(Configuration config) {
         checkValidConfiguration(config);
 
-        configuration = config.copy();
+        configuration = new ConfigurationImpl(config);
         store = new GraphStore(this);
         graphBridge = new GraphBridgeImpl(store);
     }
@@ -376,6 +376,9 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public SpatialIndex getSpatialIndex() {
+        if (!configuration.isEnableSpatialIndex()) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
         return store.spatialIndex;
     }
 
@@ -438,105 +441,12 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Configuration getConfiguration() {
-        return configuration.copy();
+        return configuration.toConfiguration();
     }
 
     @Override
     public void setConfiguration(Configuration config) {
-        checkValidConfiguration(config);
-
-        store.autoWriteLock();
-        try {
-            if (store.getNodeCount() > 0 || !store.attributes.isEmpty() || store.nodeTable
-                    .countColumns() != GraphStoreConfiguration.NODE_DEFAULT_COLUMNS || store.edgeTable
-                            .countColumns() != GraphStoreConfiguration.EDGE_DEFAULT_COLUMNS || store.edgeTypeStore
-                                    .size() > 1) {
-                throw new IllegalStateException("The store should be empty when modifying the configuration");
-            }
-
-            if (!config.getNodeIdType().equals(configuration.getNodeIdType())) {
-                TableImpl<Node> nodeTable = store.nodeTable;
-                nodeTable.store.removeColumn(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID);
-                nodeTable.store.addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID,
-                        config.getNodeIdType(), "Id", null, Origin.PROPERTY, false, true));
-                configuration.setNodeIdType(config.getNodeIdType());
-            }
-
-            if (!config.getEdgeIdType().equals(configuration.getEdgeIdType())) {
-                TableImpl<Edge> edgeTable = store.edgeTable;
-                edgeTable.store.removeColumn(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID);
-                edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID,
-                        config.getEdgeIdType(), "Id", null, Origin.PROPERTY, false, true));
-                configuration.setEdgeIdType(config.getEdgeIdType());
-            }
-
-            if (!config.getEdgeLabelType().equals(configuration.getEdgeLabelType())) {
-                configuration.setEdgeLabelType(config.getEdgeLabelType());
-            }
-
-            // Replace dynamic timeset columns if time representation changes:
-            if (!config.getTimeRepresentation().equals(configuration.getTimeRepresentation())) {
-                TableImpl<Node> nodeTable = store.nodeTable;
-                nodeTable.removeColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID);
-                TableImpl<Edge> edgeTable = store.edgeTable;
-                edgeTable.removeColumn(GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID);
-
-                if (config.getTimeRepresentation().equals(TimeRepresentation.TIMESTAMP)) {
-                    nodeTable.store
-                            .addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
-                                    TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
-                    edgeTable.store
-                            .addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
-                                    TimestampSet.class, "Timestamp", null, Origin.PROPERTY, false, false));
-                } else {
-                    nodeTable.store
-                            .addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
-                                    IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
-                    edgeTable.store
-                            .addColumn(new ColumnImpl(nodeTable, GraphStoreConfiguration.ELEMENT_TIMESET_COLUMN_ID,
-                                    IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
-                }
-                configuration.setTimeRepresentation(config.getTimeRepresentation());
-                store.timeStore.resetConfiguration();
-            }
-
-            // Change whether edge weight column
-            final boolean edgeWeightIndexed = AttributeUtils.isSimpleType(config.getEdgeWeightType());
-
-            if (!config.getEdgeWeightColumn().equals(configuration.getEdgeWeightColumn())) {
-                TableImpl<Edge> edgeTable = store.edgeTable;
-                if (config.getEdgeWeightColumn()) {
-                    edgeTable.store.garbageQueue
-                            .add(edgeTable.store.intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
-                    edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID,
-                            config.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, edgeWeightIndexed, false));
-                } else {
-                    edgeTable.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
-                    edgeTable.store.garbageQueue
-                            .remove(edgeTable.store.intToShort(GraphStoreConfiguration.EDGE_WEIGHT_INDEX));
-                }
-            }
-
-            // Change weight column type:
-            if (!config.getEdgeWeightType().equals(configuration.getEdgeWeightType())) {
-                TableImpl<Edge> edgeTable = store.edgeTable;
-
-                Class newWeightType = config.getEdgeWeightType();
-                if (config.getEdgeWeightColumn()) {
-                    edgeTable.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
-
-                    edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID,
-                            newWeightType, "Weight", null, Origin.PROPERTY, edgeWeightIndexed, false));
-                }
-
-                configuration.setEdgeWeightType(newWeightType);
-            }
-
-            store.factory.resetConfiguration();
-            store.defaultColumns.resetConfiguration();
-        } finally {
-            store.autoWriteUnlock();
-        }
+        throw new UnsupportedOperationException("No longer supported. Configuration is immutable and needs to be passed at GraphModel creation time");
     }
 
     @Override
@@ -595,6 +505,9 @@ public class GraphModelImpl implements GraphModel {
     }
 
     private void checkValidConfiguration(Configuration config) {
+        if (config == null) {
+            throw new NullPointerException("Configuration cannot be null, use Configuration.builder().build() instead");
+        }
         Class edgeWeightType = config.getEdgeWeightType();
         if (edgeWeightType.equals(Double.class)) {
             return;// Double is always allowed

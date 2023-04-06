@@ -23,16 +23,16 @@ import org.joda.time.DateTimeZone;
 public final class GraphStoreConfiguration {
 
     // Features
-    public static final boolean ENABLE_AUTO_LOCKING = true;
-    public static final boolean ENABLE_AUTO_TYPE_REGISTRATION = true;
-    public static final boolean ENABLE_INDEX_NODES = true;
-    public static final boolean ENABLE_INDEX_EDGES = true;
-    public static final boolean ENABLE_INDEX_TIMESTAMP = true;
-    public static final boolean ENABLE_OBSERVERS = true;
-    public static final boolean ENABLE_NODE_PROPERTIES = true;
-    public static final boolean ENABLE_EDGE_PROPERTIES = true;
-    public static final boolean ENABLE_PARALLEL_EDGES = true;
-    public static final boolean ENABLE_SPATIAL_INDEX = false;
+    public static final boolean DEFAULT_ENABLE_AUTO_LOCKING = true;
+    public static final boolean DEFAULT_ENABLE_AUTO_EDGE_TYPE_REGISTRATION = true;
+    public static final boolean DEFAULT_ENABLE_INDEX_NODES = true;
+    public static final boolean DEFAULT_ENABLE_INDEX_EDGES = true;
+    public static final boolean DEFAULT_ENABLE_INDEX_TIMESTAMP = true;
+    public static final boolean DEFAULT_ENABLE_OBSERVERS = true;
+    public static final boolean DEFAULT_ENABLE_NODE_PROPERTIES = true;
+    public static final boolean DEFAULT_ENABLE_EDGE_PROPERTIES = true;
+    public static final boolean DEFAULT_ENABLE_SPATIAL_INDEX = false;
+    public static final boolean DEFAULT_ENABLE_EDGE_WEIGHT_COLUMN = true;
     // NodeStore
     public final static int NODESTORE_BLOCK_SIZE = 5000;
     public final static int NODESTORE_DEFAULT_BLOCKS = 10;

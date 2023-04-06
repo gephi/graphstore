@@ -17,6 +17,7 @@ package org.gephi.graph.api;
 
 import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.TimestampDoubleMap;
+import org.gephi.graph.impl.ConfigurationImpl;
 import org.gephi.graph.impl.GraphStoreConfiguration;
 
 /**
@@ -36,12 +37,7 @@ import org.gephi.graph.impl.GraphStoreConfiguration;
  */
 public class Configuration {
 
-    private Class nodeIdType;
-    private Class edgeIdType;
-    private Class edgeLabelType;
-    private Class edgeWeightType;
-    private TimeRepresentation timeRepresentation;
-    private Boolean edgeWeightColumn;
+    private ConfigurationImpl delegate;
 
     /**
      * Default constructor.
@@ -50,12 +46,11 @@ public class Configuration {
      */
     @Deprecated
     public Configuration() {
-        nodeIdType = GraphStoreConfiguration.DEFAULT_NODE_ID_TYPE;
-        edgeIdType = GraphStoreConfiguration.DEFAULT_EDGE_ID_TYPE;
-        edgeLabelType = GraphStoreConfiguration.DEFAULT_EDGE_LABEL_TYPE;
-        edgeWeightType = GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT_TYPE;
-        timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
-        edgeWeightColumn = true;
+        this.delegate = new ConfigurationImpl();
+    }
+
+    protected Configuration(ConfigurationImpl delegate) {
+        this.delegate = delegate;
     }
 
     /**
@@ -69,10 +64,14 @@ public class Configuration {
 
     public static class Builder {
 
-        private final Configuration configuration;
+        private ConfigurationImpl configuration;
 
         private Builder() {
-            configuration = new Configuration();
+            configuration = new ConfigurationImpl();
+        }
+
+        private Builder(ConfigurationImpl configuration) {
+            this.configuration = configuration;
         }
 
         /**
@@ -81,7 +80,7 @@ public class Configuration {
          * @return the configuration
          */
         public Configuration build() {
-            return configuration;
+            return new Configuration(configuration);
         }
 
         /**
@@ -92,10 +91,17 @@ public class Configuration {
          * Default is <code>String.class</code>.
          *
          * @param nodeIdType node id type
+         * @return this builder
          * @throws IllegalArgumentException if the type isn't supported
          */
-        public Builder nodeIdType(Class nodeIdType) {
-            configuration.setNodeIdType(nodeIdType);
+        public Builder nodeIdType(final Class nodeIdType) {
+            checkSimpleType(nodeIdType);
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public Class getNodeIdType() {
+                    return nodeIdType;
+                }
+            });
             return this;
         }
 
@@ -108,10 +114,17 @@ public class Configuration {
          * Default is <code>String.class</code>.
          *
          * @param edgeIdType edge id type
+         * @return this builder
          * @throws IllegalArgumentException if the type isn't supported
          */
-        public Builder edgeIdType(Class edgeIdType) {
-            configuration.setEdgeIdType(edgeIdType);
+        public Builder edgeIdType(final Class edgeIdType) {
+            checkSimpleType(edgeIdType);
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public Class getEdgeIdType() {
+                    return edgeIdType;
+                }
+            });
             return this;
         }
 
@@ -123,10 +136,17 @@ public class Configuration {
          * Default is <code>String.class</code>.
          *
          * @param edgeLabelType edge label type
+         * @return this builder
          * @throws IllegalArgumentException if the type isn't supported
          */
-        public Builder setEdgeLabelType(Class edgeLabelType) {
-            configuration.setEdgeLabelType(edgeLabelType);
+        public Builder edgeLabelType(final Class edgeLabelType) {
+            checkSimpleType(edgeLabelType);
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public Class getEdgeLabelType() {
+                    return edgeLabelType;
+                }
+            });
             return this;
         }
 
@@ -138,10 +158,20 @@ public class Configuration {
          * Default is <code>Double.class</code>.
          *
          * @param edgeWeightType edge weight type
+         * @return this builder
          * @throws IllegalArgumentException if the type isn't supported
          */
-        public Builder edgeWeightType(Class edgeWeightType) {
-            configuration.setEdgeWeightType(edgeWeightType);
+        public Builder edgeWeightType(final Class edgeWeightType) {
+            if (!(Double.class.equals(edgeWeightType) || TimestampDoubleMap.class
+                .equals(edgeWeightType) || IntervalDoubleMap.class.equals(edgeWeightType))) {
+                throw new IllegalArgumentException("Unsupported type " + edgeWeightType.getCanonicalName() + ", should be Double, IntervalDoubleMap or TimestampDoubleMap");
+            }
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public Class getEdgeWeightType() {
+                    return edgeWeightType;
+                }
+            });
             return this;
         }
 
@@ -151,9 +181,18 @@ public class Configuration {
          * Default is <code>TIMESTAMP</code>.
          *
          * @param timeRepresentation time representation
+         * @return this builder
          */
-        public Builder timeRepresentation(TimeRepresentation timeRepresentation) {
-            configuration.setTimeRepresentation(timeRepresentation);
+        public Builder timeRepresentation(final TimeRepresentation timeRepresentation) {
+            if (timeRepresentation == null) {
+                throw new IllegalArgumentException("timeRepresentation cannot be null");
+            }
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public TimeRepresentation getTimeRepresentation() {
+                    return timeRepresentation;
+                }
+            });
             return this;
         }
 
@@ -163,9 +202,166 @@ public class Configuration {
          * Default is <code>true</code>.
          *
          * @param edgeWeightColumn edge weight column
+         * @return this builder
          */
-        public void edgeWeightColumn(Boolean edgeWeightColumn) {
-            configuration.setEdgeWeightColumn(edgeWeightColumn);
+        public Builder edgeWeightColumn(final boolean edgeWeightColumn) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public Boolean getEdgeWeightColumn() {
+                    return edgeWeightColumn;
+                }
+            });
+            return this;
+        }
+
+        /**
+         * Sets whether to enable observers on tables and columns.
+         * <p>
+         * Default is <code>true</code>.
+         *
+         * @param enableObservers enable observers
+         * @return this builder
+         */
+        public Builder enableObservers(final boolean enableObservers) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableObservers() {
+                    return enableObservers;
+                }
+            });
+            return this;
+        }
+
+        /**
+         * Sets whether to enable auto edge type registration.
+         * <p>
+         * If enabled, edge types are automatically registered when edges are added. If disabled, one needs to call
+         * {@link GraphModel#addEdgeType(Object)} explicitly for each type.
+         * <p>
+         * Default is <code>true</code>.
+         * @param enableAutoEdgeTypeRegistration enable auto edge type registration
+         * @return this builder
+         */
+        public Builder enableAutoEdgeTypeRegistration(final boolean enableAutoEdgeTypeRegistration) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableAutoEdgeTypeRegistration() {
+                    return enableAutoEdgeTypeRegistration;
+                }
+            });
+            return this;
+        }
+
+        /**
+         * Sets whether to enable node properties.
+         * <p>
+         * If enabled, {@link NodeProperties} are created for each node. If those properties aren't needed, disabling them
+         * can save memory.
+         * <p>
+         * Default is <code>true</code>.
+         * @param enableNodeProperties enable node properties
+         * @return this builder
+         */
+        public Builder enableNodeProperties(final boolean enableNodeProperties) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableNodeProperties() {
+                    return enableNodeProperties;
+                }
+            });
+            return this;
+        }
+
+        /**
+         * Sets whether to enable edge properties.
+         * <p>
+         * If enabled, {@link EdgeProperties} are created for each edge. If those properties aren't needed, disabling them
+         * can save memory.
+         * <p>
+         * Default is <code>true</code>.
+         * @param enableEdgeProperties enable edge properties
+         * @return this builder
+         */
+        public Builder enableEdgeProperties(final boolean enableEdgeProperties) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableEdgeProperties() {
+                    return enableEdgeProperties;
+                }
+            });
+            return this;
+        }
+
+        /**
+         * Sets whether to enable the {@link SpatialIndex}.
+         * <p>
+         * If enabled, the spatial index is updated while node positions are updated. If unused, disabling it is
+         * recommended as it adds some overhead.
+         * <p>
+         * The spatial index can be retrieved from {@link GraphModel#getSpatialIndex()}.
+         * <p>
+         * Default is <code>false</code>.
+         * @param enableSpatialIndex enable edge properties
+         * @return this builder
+         */
+        public Builder enableSpatialIndex(final boolean enableSpatialIndex) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableSpatialIndex() {
+                    return enableSpatialIndex;
+                }
+            });
+            return this;
+        }
+
+        /**
+         * Sets whether to enable the reverse indexing of node attributes.
+         * <p>
+         * If enabled, the reverse index is updated while node attributes are updated.
+         * This powers {@link GraphModel#getNodeIndex()} but has a negative impact on memory usage (as any reverse index does).
+         * When disabled, the features of {@link Index<Node>} are still available but need to iterate over all nodes
+         * to return results.
+         * <p>
+         * Default is <code>true</code>.
+         * @param enableIndexNodes enable node attribute indexing
+         * @return this builder
+         */
+        public Builder enableIndexNodes(final boolean enableIndexNodes) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableIndexNodes() {
+                    return enableIndexNodes;
+                }
+            });
+            return this;
+        }
+
+        /**
+         * Sets whether to enable the reverse indexing of edge attributes.
+         * <p>
+         * If enabled, the reverse index is updated while node attributes are updated.
+         * This powers {@link GraphModel#getEdgeIndex()} but has a negative impact on memory usage (as any reverse index does).
+         * When disabled, the features of {@link Index<Edge>} are still available but need to iterate over all nodes
+         * to return results.
+         * <p>
+         * Default is <code>true</code>.
+         * @param enableIndexEdges enable edge attribute indexing
+         * @return this builder
+         */
+        public Builder enableIndexEdges(final boolean enableIndexEdges) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableIndexEdges() {
+                    return enableIndexEdges;
+                }
+            });
+            return this;
+        }
+
+        private static void checkSimpleType(Class type) {
+            if (!AttributeUtils.isSimpleType(type)) {
+                throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
+            }
         }
     }
 
@@ -175,7 +371,7 @@ public class Configuration {
      * @return node id type
      */
     public Class getNodeIdType() {
-        return nodeIdType;
+        return delegate.getNodeIdType();
     }
 
     /**
@@ -190,10 +386,7 @@ public class Configuration {
      */
     @Deprecated
     public void setNodeIdType(Class nodeIdType) {
-        if (!AttributeUtils.isSimpleType(nodeIdType)) {
-            throw new IllegalArgumentException("Unsupported type " + nodeIdType.getClass().getCanonicalName());
-        }
-        this.nodeIdType = nodeIdType;
+        this.delegate = new Builder(this.delegate).nodeIdType(nodeIdType).configuration;
     }
 
     /**
@@ -202,7 +395,7 @@ public class Configuration {
      * @return edge id type
      */
     public Class getEdgeIdType() {
-        return edgeIdType;
+        return delegate.getEdgeIdType();
     }
 
     /**
@@ -217,10 +410,7 @@ public class Configuration {
      */
     @Deprecated
     public void setEdgeIdType(Class edgeIdType) {
-        if (!AttributeUtils.isSimpleType(edgeIdType)) {
-            throw new IllegalArgumentException("Unsupported type " + edgeIdType.getClass().getCanonicalName());
-        }
-        this.edgeIdType = edgeIdType;
+        this.delegate = new Builder(this.delegate).edgeIdType(edgeIdType).configuration;
     }
 
     /**
@@ -229,7 +419,7 @@ public class Configuration {
      * @return edge label type
      */
     public Class getEdgeLabelType() {
-        return edgeLabelType;
+        return delegate.getEdgeLabelType();
     }
 
     /**
@@ -242,10 +432,7 @@ public class Configuration {
      */
     @Deprecated
     public void setEdgeLabelType(Class edgeLabelType) {
-        if (!AttributeUtils.isSimpleType(edgeLabelType)) {
-            throw new IllegalArgumentException("Unsupported type " + edgeLabelType.getClass().getCanonicalName());
-        }
-        this.edgeLabelType = edgeLabelType;
+        this.delegate = new Builder(this.delegate).edgeLabelType(edgeLabelType).configuration;
     }
 
     /**
@@ -254,7 +441,7 @@ public class Configuration {
      * @return edge weight type
      */
     public Class getEdgeWeightType() {
-        return edgeWeightType;
+        return delegate.getEdgeWeightType();
     }
 
     /**
@@ -267,12 +454,7 @@ public class Configuration {
      */
     @Deprecated
     public void setEdgeWeightType(Class edgeWeightType) {
-        if (Double.class.equals(edgeWeightType) || TimestampDoubleMap.class
-                .equals(edgeWeightType) || IntervalDoubleMap.class.equals(edgeWeightType)) {
-            this.edgeWeightType = edgeWeightType;
-        } else {
-            throw new IllegalArgumentException("Unsupported type " + edgeWeightType.getClass().getCanonicalName());
-        }
+        this.delegate = new Builder(this.delegate).edgeWeightType(edgeWeightType).configuration;
     }
 
     /**
@@ -281,7 +463,7 @@ public class Configuration {
      * @return time representation
      */
     public TimeRepresentation getTimeRepresentation() {
-        return timeRepresentation;
+        return delegate.getTimeRepresentation();
     }
 
     /**
@@ -293,10 +475,7 @@ public class Configuration {
      */
     @Deprecated
     public void setTimeRepresentation(TimeRepresentation timeRepresentation) {
-        if (timeRepresentation == null) {
-            throw new IllegalArgumentException("timeRepresentation cannot be null");
-        }
-        this.timeRepresentation = timeRepresentation;
+        this.delegate = new Builder(this.delegate).timeRepresentation(timeRepresentation).configuration;
     }
 
     /**
@@ -305,7 +484,7 @@ public class Configuration {
      * @return edge weight column
      */
     public Boolean getEdgeWeightColumn() {
-        return edgeWeightColumn;
+        return delegate.isEdgeWeightColumn();
     }
 
     /**
@@ -317,7 +496,43 @@ public class Configuration {
      */
     @Deprecated
     public void setEdgeWeightColumn(Boolean edgeWeightColumn) {
-        this.edgeWeightColumn = edgeWeightColumn;
+        this.delegate = new Builder(this.delegate).edgeWeightColumn(edgeWeightColumn).configuration;
+    }
+
+    public boolean isEnableAutoLocking() {
+        return delegate.isEnableAutoLocking();
+    }
+
+    public boolean isEnableAutoEdgeTypeRegistration() {
+        return delegate.isEnableAutoEdgeTypeRegistration();
+    }
+
+    public boolean isEnableIndexNodes() {
+        return delegate.isEnableIndexNodes();
+    }
+
+    public boolean isEnableIndexEdges() {
+        return delegate.isEnableIndexEdges();
+    }
+
+    public boolean isEnableIndexTimestamps() {
+        return delegate.isEnableIndexTimestamps();
+    }
+
+    public boolean isEnableObservers() {
+        return delegate.isEnableObservers();
+    }
+
+    public boolean isEnableNodeProperties() {
+        return delegate.isEnableNodeProperties();
+    }
+
+    public boolean isEnableEdgeProperties() {
+        return delegate.isEnableEdgeProperties();
+    }
+
+    public boolean isEnableSpatialIndex() {
+        return delegate.isEnableSpatialIndex();
     }
 
     /**
@@ -326,64 +541,25 @@ public class Configuration {
      * @return a copy of this configuration
      */
     public Configuration copy() {
-        Configuration copy = new Configuration();
-        copy.nodeIdType = nodeIdType;
-        copy.edgeIdType = edgeIdType;
-        copy.edgeLabelType = edgeLabelType;
-        copy.edgeWeightType = edgeWeightType;
-        copy.timeRepresentation = timeRepresentation;
-        copy.edgeWeightColumn = edgeWeightColumn;
-        return copy;
+        return new Configuration(delegate);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Configuration)) {
+            return false;
+        }
+
+        Configuration that = (Configuration) o;
+
+        return delegate.equals(that.delegate);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 19 * hash + (this.nodeIdType != null ? this.nodeIdType.hashCode() : 0);
-        hash = 19 * hash + (this.edgeIdType != null ? this.edgeIdType.hashCode() : 0);
-        hash = 19 * hash + (this.edgeLabelType != null ? this.edgeLabelType.hashCode() : 0);
-        hash = 19 * hash + (this.edgeWeightType != null ? this.edgeWeightType.hashCode() : 0);
-        hash = 19 * hash + (this.timeRepresentation != null ? this.timeRepresentation.hashCode() : 0);
-        hash = 19 * hash + (this.edgeWeightColumn != null ? this.edgeWeightColumn.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Configuration other = (Configuration) obj;
-        if (this.nodeIdType != other.nodeIdType && (this.nodeIdType == null || !this.nodeIdType
-                .equals(other.nodeIdType))) {
-            return false;
-        }
-        if (this.edgeIdType != other.edgeIdType && (this.edgeIdType == null || !this.edgeIdType
-                .equals(other.edgeIdType))) {
-            return false;
-        }
-        if (this.edgeLabelType != other.edgeLabelType && (this.edgeLabelType == null || !this.edgeLabelType
-                .equals(other.edgeLabelType))) {
-            return false;
-        }
-        if (this.edgeWeightType != other.edgeWeightType && (this.edgeWeightType == null || !this.edgeWeightType
-                .equals(other.edgeWeightType))) {
-            return false;
-        }
-        if (this.timeRepresentation != other.timeRepresentation && (this.timeRepresentation == null || !this.timeRepresentation
-                .equals(other.timeRepresentation))) {
-            return false;
-        }
-        if (this.edgeWeightColumn != other.edgeWeightColumn && (this.edgeWeightColumn == null || !this.edgeWeightColumn
-                .equals(other.edgeWeightColumn))) {
-            return false;
-        }
-        return true;
+        return delegate.hashCode();
     }
 }

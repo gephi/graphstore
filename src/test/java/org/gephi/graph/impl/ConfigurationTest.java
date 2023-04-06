@@ -25,7 +25,24 @@ import org.testng.annotations.Test;
 public class ConfigurationTest {
 
     @Test
-    public void testDefault() {
+    public void testDefaultBuilder() {
+        Configuration c = Configuration.builder().build();
+        Assert.assertNotNull(c);
+        Assert.assertNotNull(c.getNodeIdType());
+        Assert.assertEquals(c, Configuration.builder().build());
+        Assert.assertEquals(c.hashCode(), Configuration.builder().build().hashCode());
+    }
+
+    @Test
+    public void testBuilderMultipleSet() {
+        Configuration.Builder b = Configuration.builder();
+        Assert.assertEquals(b.build().getNodeIdType(), String.class);
+        b.nodeIdType(Integer.class);
+        Assert.assertEquals(b.build().getNodeIdType(), Integer.class);
+    }
+
+    @Test
+    public void testDefaultDeprecated() {
         Configuration c = new Configuration();
         Assert.assertNotNull(c.getNodeIdType());
         Assert.assertNotNull(c.getEdgeIdType());
@@ -35,6 +52,12 @@ public class ConfigurationTest {
 
     @Test
     public void testSetNodeIdType() {
+        Configuration c = Configuration.builder().nodeIdType(Float.class).build();
+        Assert.assertEquals(c.getNodeIdType(), Float.class);
+    }
+
+    @Test
+    public void testSetNodeIdTypeDeprecated() {
         Configuration c = new Configuration();
         c.setNodeIdType(Float.class);
         Assert.assertEquals(c.getNodeIdType(), Float.class);
@@ -42,6 +65,12 @@ public class ConfigurationTest {
 
     @Test
     public void testSetEdgeIdType() {
+        Configuration c = Configuration.builder().edgeIdType(Float.class).build();
+        Assert.assertEquals(c.getEdgeIdType(), Float.class);
+    }
+
+    @Test
+    public void testSetEdgeIdTypeDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeIdType(Float.class);
         Assert.assertEquals(c.getEdgeIdType(), Float.class);
@@ -49,6 +78,12 @@ public class ConfigurationTest {
 
     @Test
     public void testSetEdgeLabelType() {
+        Configuration c = Configuration.builder().edgeLabelType(Float.class).build();
+        Assert.assertEquals(c.getEdgeLabelType(), Float.class);
+    }
+
+    @Test
+    public void testSetEdgeLabelTypeDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeLabelType(Float.class);
         Assert.assertEquals(c.getEdgeLabelType(), Float.class);
@@ -56,6 +91,16 @@ public class ConfigurationTest {
 
     @Test
     public void testSetEdgeWeightType() {
+        Configuration c = Configuration.builder().edgeWeightType(IntervalDoubleMap.class).build();
+        Assert.assertEquals(c.getEdgeWeightType(), IntervalDoubleMap.class);
+        c = Configuration.builder().edgeWeightType(TimestampDoubleMap.class).build();
+        Assert.assertEquals(c.getEdgeWeightType(), TimestampDoubleMap.class);
+        c = Configuration.builder().edgeWeightType(Double.class).build();
+        Assert.assertEquals(c.getEdgeWeightType(), Double.class);
+    }
+
+    @Test
+    public void testSetEdgeWeightTypeDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeWeightType(IntervalDoubleMap.class);
         Assert.assertEquals(c.getEdgeWeightType(), IntervalDoubleMap.class);
@@ -67,6 +112,12 @@ public class ConfigurationTest {
 
     @Test
     public void testSetTimeRepresentation() {
+        Configuration c = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
+        Assert.assertEquals(c.getTimeRepresentation(), TimeRepresentation.INTERVAL);
+    }
+
+    @Test
+    public void testSetTimeRepresentationDeprecated() {
         Configuration c = new Configuration();
         c.setTimeRepresentation(TimeRepresentation.INTERVAL);
         Assert.assertEquals(c.getTimeRepresentation(), TimeRepresentation.INTERVAL);
@@ -74,6 +125,12 @@ public class ConfigurationTest {
 
     @Test
     public void testSetEdgeWeightColumn() {
+        Configuration c = Configuration.builder().edgeWeightColumn(false).build();
+        Assert.assertEquals(c.getEdgeWeightColumn(), Boolean.FALSE);
+    }
+
+    @Test
+    public void testSetEdgeWeightColumnDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeWeightColumn(Boolean.FALSE);
         Assert.assertEquals(c.getEdgeWeightColumn(), Boolean.FALSE);
@@ -81,61 +138,118 @@ public class ConfigurationTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetNodeIdTypeUnsupported() {
+        Configuration.builder().nodeIdType(int[].class).build();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetNodeIdTypeUnsupportedDeprecated() {
         Configuration c = new Configuration();
         c.setNodeIdType(int[].class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetEdgeIdTypeUnsupported() {
+        Configuration.builder().edgeIdType(int[].class).build();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetEdgeIdTypeUnsupportedDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeIdType(int[].class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetEdgeWeightTypeFloatUnsupported() {
+        Configuration.builder().edgeWeightType(Float.class).build();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetEdgeWeightTypeFloatUnsupportedDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeWeightType(Float.class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetEdgeWeightTypeNotNumberUnsupported() {
+        Configuration.builder().edgeWeightType(String.class).build();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetEdgeWeightTypeNotNumberUnsupportedDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeWeightType(String.class);
     }
 
     @Test
-    public void testDefaultEquals() {
-        Assert.assertTrue(new Configuration().equals(new Configuration()));
+    public void testDefaultEqualsDeprecated() {
+        Assert.assertEquals(new Configuration(), new Configuration());
     }
 
     @Test
-    public void testDefaultHashCode() {
+    public void testDefaultHashCodeDeprecated() {
         Assert.assertEquals(new Configuration().hashCode(), new Configuration().hashCode());
     }
 
     @Test
     public void testEquals() {
+        Configuration c1 = Configuration.builder().nodeIdType(Float.class).build();
+        Configuration c2 = Configuration.builder().build();
+        Assert.assertNotEquals(c2, c1);
+    }
+
+    @Test
+    public void testEqualsDeprecated() {
         Configuration c1 = new Configuration();
         Configuration c2 = new Configuration();
+        Assert.assertEquals(c2, c1);
         c2.setNodeIdType(Float.class);
-        Assert.assertFalse(c1.equals(c2));
+        Assert.assertNotEquals(c2, c1);
     }
 
     @Test
     public void testHashCode() {
+        Configuration c1 = Configuration.builder().nodeIdType(Float.class).build();
+        Configuration c2 = Configuration.builder().build();
+        Assert.assertNotEquals(c2.hashCode(), c1.hashCode());
+    }
+
+    @Test
+    public void testHashCodeDeprecated() {
         Configuration c1 = new Configuration();
         Configuration c2 = new Configuration();
+        Assert.assertEquals(c1.hashCode(), c2.hashCode());
         c2.setNodeIdType(Float.class);
         Assert.assertNotEquals(c1.hashCode(), c2.hashCode());
     }
 
     @Test
     public void testCopy() {
+        Configuration c1 = Configuration.builder().build();
+        Configuration c2 = c1.copy();
+        Assert.assertEquals(c2, c1);
+        Assert.assertNotSame(c2, c1);
+
+        Configuration c3 = Configuration.builder().nodeIdType(Float.class).build();
+        Assert.assertNotEquals(c3, c1);
+        Configuration c4 = c3.copy();
+        Assert.assertEquals(c4, c3);
+        Assert.assertEquals(Float.class, c4.getNodeIdType());
+    }
+
+    @Test
+    public void testCopyDeprecated() {
         Configuration c1 = new Configuration();
         Configuration c2 = c1.copy();
-        Assert.assertTrue(c1.equals(c2));
+        Assert.assertEquals(c2, c1);
         c1.setNodeIdType(Float.class);
         Assert.assertNotEquals(c2.getNodeIdType(), Float.class);
-        Assert.assertFalse(c1.equals(c2));
+        Assert.assertNotEquals(c2, c1);
+    }
+
+    @Test
+    public void testToConfiguration() {
+        Configuration c1 = Configuration.builder().nodeIdType(Float.class).build();
+        Configuration c2 = new ConfigurationImpl(c1).toConfiguration();
+        Assert.assertEquals(c1, c2);
     }
 }

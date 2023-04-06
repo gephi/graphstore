@@ -574,7 +574,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             long longId = getLongId(edge.source, edge.target, edge.isDirected());
             int[] newDicoValue = newDico.get(longId);
-            if (newDicoValue != null && !GraphStoreConfiguration.ENABLE_PARALLEL_EDGES) {
+            if (newDicoValue != null) {
                 return false;
             }
 
@@ -693,7 +693,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
             long longId = getLongId(source, target, directed);
             int[] dicoValue = dico.get(longId);
-            if (dicoValue != null && !GraphStoreConfiguration.ENABLE_PARALLEL_EDGES) {
+            if (dicoValue != null) {
                 return false;
             }
 

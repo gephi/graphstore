@@ -402,7 +402,7 @@ public class EdgeImplTest {
 
     @Test
     public void testGetTypeLabelCustom() {
-        GraphStore graphStore = new GraphStore(null);
+        GraphStore graphStore = new GraphStore();
         EdgeTypeStore edgeTypeStore = graphStore.edgeTypeStore;
         int typeId = edgeTypeStore.addType("foo");
 

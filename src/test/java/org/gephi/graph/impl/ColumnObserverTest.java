@@ -19,6 +19,7 @@ import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnDiff;
 import org.gephi.graph.api.ColumnObserver;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.types.TimestampIntegerMap;
@@ -43,6 +44,15 @@ public class ColumnObserverTest {
         Assert.assertSame(observer.getColumn(), column);
         Assert.assertFalse(observer.isDestroyed());
         Assert.assertFalse(observer.hasColumnChanged());
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testCreateObserverWhenDisabled() {
+        GraphStore store = new GraphStore(null, Configuration.builder().enableObservers(false).build());
+        TableImpl table = store.nodeTable;
+        Column column = table.addColumn("0", Integer.class);
+
+        column.createColumnObserver(false);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -255,7 +265,8 @@ public class ColumnObserverTest {
 
     @Test
     public void testDestroyObserver() {
-        TableImpl table = new TableImpl(Node.class, false);
+        GraphStore store = new GraphStore();
+        TableImpl table = store.nodeTable;
         Column column = table.addColumn("0", Integer.class);
 
         ColumnObserver observer = column.createColumnObserver(false);

@@ -737,20 +737,18 @@ public class SerializationTest {
 
     @Test
     public void testConfiguration() throws IOException, ClassNotFoundException {
-        GraphModelImpl graphModel = new GraphModelImpl();
-        Configuration configuration = graphModel.configuration;
-
-        configuration.setNodeIdType(Float.class);
-        configuration.setEdgeIdType(Long.class);
-        configuration.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder()
+            .nodeIdType(Float.class)
+            .edgeIdType(Long.class)
+            .timeRepresentation(TimeRepresentation.INTERVAL).build());
 
         Serialization ser = new Serialization(graphModel);
-        byte[] buf = ser.serialize(configuration);
+        byte[] buf = ser.serialize(graphModel.configuration);
 
         graphModel = new GraphModelImpl();
         ser = new Serialization(graphModel);
         Configuration l = (Configuration) ser.deserialize(buf);
-        Assert.assertTrue(configuration.equals(l));
+        Assert.assertTrue(graphModel.configuration.equals(l));
     }
 
     @Test

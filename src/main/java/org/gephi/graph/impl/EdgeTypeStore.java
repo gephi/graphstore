@@ -34,17 +34,17 @@ public class EdgeTypeStore {
     // Config
     public final static int MAX_SIZE = 65534;
     // Data
-    protected final Configuration configuration;
+    protected final ConfigurationImpl configuration;
     protected final Object2ShortMap labelMap;
     protected final Short2ObjectMap idMap;
     protected final ShortSortedSet garbageQueue;
     protected int length;
 
     public EdgeTypeStore() {
-        this(new Configuration());
+        this(new ConfigurationImpl());
     }
 
-    public EdgeTypeStore(Configuration config) {
+    public EdgeTypeStore(ConfigurationImpl config) {
         if (MAX_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE + 1) {
             throw new RuntimeException("Edge Type Store size can't exceed 65534");
         }
@@ -78,10 +78,10 @@ public class EdgeTypeStore {
 
     public void registerEdgeType(int type) {
         if (!contains(type)) {
-            if (GraphStoreConfiguration.ENABLE_AUTO_TYPE_REGISTRATION) {
+            if (configuration.isEnableAutoEdgeTypeRegistration()) {
                 addType(String.valueOf(type), type);
             } else {
-                throw new RuntimeException("The type doesn't exist");
+                throw new UnsupportedOperationException("The type "+type+" doesn't exist, and edge type auto registration is disabled (from Configuration)");
             }
         }
     }
