@@ -45,6 +45,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -83,7 +84,6 @@ import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.impl.utils.DataInputOutput;
-import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -681,12 +681,12 @@ public class SerializationTest {
     public void testTimeZone() throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore store = graphModel.store;
-        store.timeZone = DateTimeZone.forID("+01:30");
+        store.timeZone = ZoneId.of("+01:30");
 
         Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(store.timeZone);
-        DateTimeZone l = (DateTimeZone) ser.deserialize(buf);
-        Assert.assertEquals(DateTimeZone.forID("+01:30"), l);
+        ZoneId l = (ZoneId) ser.deserialize(buf);
+        Assert.assertEquals(ZoneId.of("+01:30"), l);
     }
 
     @Test
