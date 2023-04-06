@@ -31,7 +31,7 @@ API Documentation is available [here](https://www.javadoc.io/doc/org.gephi/graph
 
 ## Dependencies
 
-GraphStore depends on FastUtil >= 6.0, Colt 1.2.0 and Joda-Time 2.2.
+GraphStore depends on FastUtil >= 6.0 and Colt 1.2.0.
 
 For a complete list of dependencies, consult the `pom.xml` file.
 

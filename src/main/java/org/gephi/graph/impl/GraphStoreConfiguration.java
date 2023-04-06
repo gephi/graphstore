@@ -15,10 +15,11 @@
  */
 package org.gephi.graph.impl;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimeRepresentation;
-import org.joda.time.DateTimeZone;
 
 public final class GraphStoreConfiguration {
 
@@ -76,7 +77,7 @@ public final class GraphStoreConfiguration {
     // TimeFormat
     public static final TimeFormat DEFAULT_TIME_FORMAT = TimeFormat.DOUBLE;
     // Time zone
-    public static final DateTimeZone DEFAULT_TIME_ZONE = DateTimeZone.UTC;
+    public static final ZoneId DEFAULT_TIME_ZONE = ZoneId.of("UTC");
     // Dynamics
     public static final Estimator DEFAULT_ESTIMATOR = Estimator.FIRST;
     public static final TimeRepresentation DEFAULT_TIME_REPRESENTATION = TimeRepresentation.TIMESTAMP;

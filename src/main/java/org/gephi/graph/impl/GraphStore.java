@@ -17,6 +17,7 @@
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -43,7 +44,6 @@ import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.TimestampSet;
-import org.joda.time.DateTimeZone;
 
 public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
@@ -72,7 +72,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     // TimeFormat
     protected TimeFormat timeFormat;
     // Time zone
-    protected DateTimeZone timeZone;
+    protected ZoneId timeZone;
     // Spatial context
     protected SpatialIndexImpl spatialIndex;
     // Default columns
