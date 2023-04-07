@@ -101,7 +101,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         version = configuration.isEnableObservers() ? new GraphVersion(this) : null;
         observers = configuration.isEnableObservers() ? new ArrayList<>() : null;
         spatialIndex = configuration.isEnableSpatialIndex() ? new SpatialIndexImpl(this) : null;
-        edgeStore = new EdgeStore(edgeTypeStore, spatialIndex,
+        edgeStore = new EdgeStore(edgeTypeStore, spatialIndex, configuration,
                 configuration.isEnableAutoLocking() ? lock : null, viewStore,
             configuration.isEnableObservers() ? version : null);
         nodeStore = new NodeStore(edgeStore, spatialIndex, configuration.isEnableAutoLocking() ? lock : null,

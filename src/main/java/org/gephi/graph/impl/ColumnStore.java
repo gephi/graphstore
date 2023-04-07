@@ -42,6 +42,8 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     protected final static int NULL_ID = -1;
     protected final static short NULL_SHORT = Short.MIN_VALUE;
     // Configuration
+    protected final ConfigurationImpl configuration;
+    // GraphStore
     protected final GraphStore graphStore;
     // Element
     protected final Class<T> elementType;
@@ -67,7 +69,13 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
             throw new RuntimeException("Column Store size can't exceed 65534");
         }
         this.graphStore = graphStore;
-        this.lock = graphStore != null && graphStore.configuration.isEnableAutoLocking() ? new TableLockImpl() : null;
+        if (graphStore == null) {
+            // Used for testing only
+            configuration = new ConfigurationImpl();
+        } else {
+            configuration = graphStore.configuration;
+        }
+        this.lock = configuration.isEnableAutoLocking() ? new TableLockImpl() : null;
         this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<>(MAX_SIZE);
         this.columns = new ColumnImpl[MAX_SIZE];

@@ -49,6 +49,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected final GraphViewStore viewStore;
     // Spatial index
     protected final SpatialIndexImpl spatialIndex;
+    // Configuration
+    protected final ConfigurationImpl configuration;
     // Data
     protected int size;
     protected int garbageSize;
@@ -70,15 +72,17 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.viewStore = null;
         this.version = null;
         this.spatialIndex = null;
+        this.configuration = new ConfigurationImpl();
     }
 
-    public EdgeStore(final EdgeTypeStore edgeTypeStore, final SpatialIndexImpl spatialIndex, final GraphLockImpl lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
+    public EdgeStore(final EdgeTypeStore edgeTypeStore, final SpatialIndexImpl spatialIndex, final ConfigurationImpl configuration, final GraphLockImpl lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeTypeStore = edgeTypeStore;
         this.viewStore = viewStore;
         this.version = graphVersion;
         this.spatialIndex = spatialIndex;
+        this.configuration = configuration == null ? new ConfigurationImpl() : configuration;
     }
 
     protected static long getLongId(NodeImpl source, NodeImpl target, boolean directed) {
@@ -574,7 +578,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             long longId = getLongId(edge.source, edge.target, edge.isDirected());
             int[] newDicoValue = newDico.get(longId);
-            if (newDicoValue != null) {
+            if (newDicoValue != null && !configuration.isEnableParallelEdgesSameType()) {
                 return false;
             }
 
@@ -693,7 +697,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
             long longId = getLongId(source, target, directed);
             int[] dicoValue = dico.get(longId);
-            if (dicoValue != null) {
+            if (dicoValue != null && !configuration.isEnableParallelEdgesSameType()) {
                 return false;
             }
 

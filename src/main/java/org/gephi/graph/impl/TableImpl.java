@@ -33,6 +33,8 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
 
     // Store
     protected final ColumnStore<T> store;
+    // Configuration
+    protected final ConfigurationImpl configuration;
 
     public TableImpl(Class<T> elementType) {
         this(null, elementType);
@@ -40,6 +42,12 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
 
     public TableImpl(GraphStore graphStore, Class<T> elementType) {
         store = new ColumnStore<>(graphStore, elementType);
+        if (graphStore == null) {
+            // Used for testing only
+            configuration = new ConfigurationImpl();
+        } else {
+            configuration = graphStore.configuration;
+        }
     }
 
     @Override
@@ -294,7 +302,7 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
     }
 
     private void checkCanIndex(boolean indexed) {
-        if (indexed) {
+        if (indexed && store.graphStore != null) {
             if (!store.graphStore.configuration.isEnableIndexNodes() && isNodeTable()) {
                 throw new IllegalArgumentException("Can't use reverse index as node indexing is disabled (from Configuration)");
             }

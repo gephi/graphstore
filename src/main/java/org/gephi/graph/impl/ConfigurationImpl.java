@@ -33,6 +33,8 @@ public class ConfigurationImpl {
     private final boolean enableEdgeProperties;
     // Enable spatial index (default False)
     private final boolean enableSpatialIndex;
+    // Enable parallel edges of the same type
+    private final boolean enableParallelEdgesSameType;
 
     public ConfigurationImpl() {
         nodeIdType = GraphStoreConfiguration.DEFAULT_NODE_ID_TYPE;
@@ -50,6 +52,7 @@ public class ConfigurationImpl {
         enableNodeProperties = GraphStoreConfiguration.DEFAULT_ENABLE_NODE_PROPERTIES;
         enableEdgeProperties = GraphStoreConfiguration.DEFAULT_ENABLE_EDGE_PROPERTIES;
         enableSpatialIndex = GraphStoreConfiguration.DEFAULT_ENABLE_SPATIAL_INDEX;
+        enableParallelEdgesSameType = GraphStoreConfiguration.DEFAULT_ENABLE_PARALLEL_EDGES_SAME_TYPE;
     }
 
     public ConfigurationImpl(Configuration configuration) {
@@ -68,6 +71,7 @@ public class ConfigurationImpl {
         enableNodeProperties = configuration.isEnableNodeProperties();
         enableEdgeProperties = configuration.isEnableEdgeProperties();
         enableSpatialIndex = configuration.isEnableSpatialIndex();
+        enableParallelEdgesSameType = configuration.isEnableParallelEdgesSameType();
     }
 
     public Configuration toConfiguration() {
@@ -134,6 +138,10 @@ public class ConfigurationImpl {
         return enableSpatialIndex;
     }
 
+    public boolean isEnableParallelEdgesSameType() {
+        return enableParallelEdgesSameType;
+    }
+
     // Used to return a Configuration instance
     private static class ConfigurationProxy extends Configuration {
 
@@ -183,6 +191,9 @@ public class ConfigurationImpl {
         if (isEnableSpatialIndex() != that.isEnableSpatialIndex()) {
             return false;
         }
+        if (isEnableParallelEdgesSameType() != that.isEnableParallelEdgesSameType()) {
+            return false;
+        }
         if (!getNodeIdType().equals(that.getNodeIdType())) {
             return false;
         }
@@ -215,6 +226,7 @@ public class ConfigurationImpl {
         result = 31 * result + (isEnableNodeProperties() ? 1 : 0);
         result = 31 * result + (isEnableEdgeProperties() ? 1 : 0);
         result = 31 * result + (isEnableSpatialIndex() ? 1 : 0);
+        result = 31 * result + (isEnableParallelEdgesSameType() ? 1 : 0);
         return result;
     }
 }

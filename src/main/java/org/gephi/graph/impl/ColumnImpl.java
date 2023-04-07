@@ -67,7 +67,7 @@ public class ColumnImpl implements Column {
         this.indexed = indexed;
         this.readOnly = readOnly;
         this.dynamic = TimeMap.class.isAssignableFrom(typeClass) || TimeSet.class.isAssignableFrom(typeClass);
-        this.observers = table != null && table.store.graphStore.configuration.isEnableObservers() ? new ArrayList<>() : null;
+        this.observers = table != null && table.configuration.isEnableObservers() ? new ArrayList<>() : null;
         this.estimator = this.dynamic ? Estimator.FIRST : null;
     }
 

@@ -65,10 +65,10 @@ public class IndexImplTest {
     @Test
     public void testHasColumnDifferentIndex() {
         TableImpl<Node> nodeTable = generateEmptyNodeTable();
-        IndexImpl<Node> index1 = columnStore1.indexStore.mainIndex;
+        IndexImpl<Node> index1 = nodeTable.store.indexStore.mainIndex;
 
-        ColumnStore<Node> columnStore2 = generateEmptyNodeStore();
-        IndexImpl<Node> index2 = columnStore2.indexStore.mainIndex;
+        TableImpl<Node> nodeTable2 = generateEmptyNodeTable();
+        IndexImpl<Node> index2 = nodeTable2.store.indexStore.mainIndex;
 
         ColumnImpl col1 = new ColumnImpl("foo", String.class, "foo", null, Origin.DATA, true, false);
         ColumnImpl col2 = new ColumnImpl("bar", String.class, "bar", null, Origin.DATA, true, false);
@@ -84,7 +84,7 @@ public class IndexImplTest {
     @Test
     public void testAddAllColumns() {
         TableImpl<Node> nodeTable = generateEmptyNodeTable();
-        IndexImpl<Node> index = columnStore.indexStore.mainIndex;
+        IndexImpl<Node> index = nodeTable.store.indexStore.mainIndex;
         ColumnImpl col1 = new ColumnImpl("1", String.class, "1", null, Origin.DATA, true, false);
         ColumnImpl col2 = new ColumnImpl("2", String.class, "2", null, Origin.DATA, false, false);
         ColumnImpl col3 = new ColumnImpl("3", String.class, "3", null, Origin.DATA, true, false);
@@ -99,7 +99,7 @@ public class IndexImplTest {
     @Test
     public void testDestroy() {
         TableImpl<Node> nodeTable = generateEmptyNodeTable();
-        IndexImpl<Node> index = columnStore.indexStore.mainIndex;
+        IndexImpl<Node> index = nodeTable.store.indexStore.mainIndex;
         ColumnImpl col1 = new ColumnImpl("1", String.class, "1", null, Origin.DATA, true, false);
         ColumnImpl col2 = new ColumnImpl("2", String.class, "2", null, Origin.DATA, false, false);
         col1.setStoreId(0);

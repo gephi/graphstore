@@ -61,7 +61,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     protected ColumnStandardIndexImpl(ColumnImpl column) {
         this.column = column;
         this.nullSet = new ValueSet<>(null);
-        this.lock = column.table.store.graphStore.configuration.isEnableAutoLocking() ? new TableLockImpl() : null;
+        this.lock = column.table != null && column.table.configuration.isEnableAutoLocking() ? new TableLockImpl() : null;
     }
 
     protected static boolean isSupportedType(ColumnImpl col) {

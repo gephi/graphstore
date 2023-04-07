@@ -31,7 +31,7 @@ public class TimeStore {
 
     public TimeStore(GraphStore store, boolean indexed) {
         this.graphStore = store;
-        this.lock = store.configuration.isEnableAutoLocking() ? new TableLockImpl() : null;
+        this.lock = store != null && store.configuration.isEnableAutoLocking() ? new TableLockImpl() : null;
 
         TimeRepresentation timeRepresentation = GraphStoreConfiguration.DEFAULT_TIME_REPRESENTATION;
         if (store != null) {

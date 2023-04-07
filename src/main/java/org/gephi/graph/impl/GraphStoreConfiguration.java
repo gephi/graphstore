@@ -34,6 +34,7 @@ public final class GraphStoreConfiguration {
     public static final boolean DEFAULT_ENABLE_EDGE_PROPERTIES = true;
     public static final boolean DEFAULT_ENABLE_SPATIAL_INDEX = false;
     public static final boolean DEFAULT_ENABLE_EDGE_WEIGHT_COLUMN = true;
+    public static final boolean DEFAULT_ENABLE_PARALLEL_EDGES_SAME_TYPE = true;
     // NodeStore
     public final static int NODESTORE_BLOCK_SIZE = 5000;
     public final static int NODESTORE_DEFAULT_BLOCKS = 10;

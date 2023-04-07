@@ -358,6 +358,25 @@ public class Configuration {
             return this;
         }
 
+        /**
+         * Sets whether to enable multiple edges of the same type between two nodes.
+         * <p>
+         * If disabled, only a single edge of a given type can exist between two nodes.
+         * <p>
+         * Default is <code>false</code>.
+         * @param enableParallelEdgesSameType enable parallel edges of the same type
+         * @return this builder
+         */
+        public Builder enableParallelEdgesSameType(final boolean enableParallelEdgesSameType) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableParallelEdgesSameType() {
+                    return enableParallelEdgesSameType;
+                }
+            });
+            return this;
+        }
+
         private static void checkSimpleType(Class type) {
             if (!AttributeUtils.isSimpleType(type)) {
                 throw new IllegalArgumentException("Unsupported type " + type.getCanonicalName());
@@ -533,6 +552,10 @@ public class Configuration {
 
     public boolean isEnableSpatialIndex() {
         return delegate.isEnableSpatialIndex();
+    }
+
+    public boolean isEnableParallelEdgesSameType() {
+        return delegate.isEnableParallelEdgesSameType();
     }
 
     /**
