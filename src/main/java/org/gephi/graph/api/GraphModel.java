@@ -18,8 +18,8 @@ package org.gephi.graph.api;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.time.ZoneId;
 import org.gephi.graph.impl.GraphModelImpl;
-import org.joda.time.DateTimeZone;
 
 /**
  * Graph API's entry point.
@@ -700,14 +700,14 @@ public interface GraphModel {
      *
      * @return time zone
      */
-    public DateTimeZone getTimeZone();
+    public ZoneId getTimeZone();
 
     /**
      * Sets the time zone used to display time.
      *
      * @param timeZone time zone
      */
-    public void setTimeZone(DateTimeZone timeZone);
+    public void setTimeZone(ZoneId timeZone);
 
     /**
      * Returns the current configuration.
