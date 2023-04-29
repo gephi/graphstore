@@ -173,9 +173,6 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public boolean addEdge(final Edge edge) {
         autoWriteLock();
         try {
-            if (edgeTypeStore != null) {
-                edgeTypeStore.registerEdgeType(edge.getType());
-            }
             return edgeStore.add(edge);
         } finally {
             autoWriteUnlock();
@@ -186,11 +183,6 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public boolean addAllEdges(Collection<? extends Edge> edges) {
         autoWriteLock();
         try {
-            for (Edge edge : edges) {
-                if (edgeTypeStore != null) {
-                    edgeTypeStore.registerEdgeType(edge.getType());
-                }
-            }
             return edgeStore.addAll(edges);
         } finally {
             autoWriteUnlock();

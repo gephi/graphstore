@@ -701,6 +701,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 return false;
             }
 
+            if (edgeTypeStore != null) {
+                edgeTypeStore.registerEdgeType(type);
+            }
             incrementVersion();
 
             if (garbageSize > 0) {

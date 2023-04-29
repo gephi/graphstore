@@ -1911,6 +1911,23 @@ public class EdgeStoreTest {
         Assert.assertEquals(1, edgeStore.size(1));
     }
 
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testAddWithoutAutoRegistration() {
+        ConfigurationImpl config = new ConfigurationImpl(Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(config), null, config, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
+        edgeStore.add(edge);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testSetTypeWithoutAutoRegistration() {
+        ConfigurationImpl config = new ConfigurationImpl(Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(config), null, config, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
+        edgeStore.add(edge);
+        edgeStore.setEdgeType(edge, 1);
+    }
+
     @Test
     public void testSetTypeWithMutualEdge() {
         EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null, null);
