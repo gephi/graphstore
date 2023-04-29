@@ -1926,7 +1926,7 @@ public class EdgeStoreTest {
     @Test
     public void testReturnFalseWithoutParallelEdges() {
         ConfigurationImpl configuration = new ConfigurationImpl(
-            Configuration.builder().enableParallelEdgesSameType(false).build());
+                Configuration.builder().enableParallelEdgesSameType(false).build());
         EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, configuration, null, null, null);
         EdgeImpl edge = GraphGenerator.generateSingleEdge(1);
         EdgeImpl edge2 = new EdgeImpl('0', edge.graphStore, edge.source, edge.target, 2, 1.0, true);

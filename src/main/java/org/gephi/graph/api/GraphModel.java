@@ -139,8 +139,8 @@ public interface GraphModel {
 
         /**
          * Read the <code>input</code> into the given graph model. The provided graph
-         * model should be empty and the configurations should match between the provided model and
-         * the one being read.
+         * model should be empty and the configurations should match between the
+         * provided model and the one being read.
          *
          * @param input data input to read from
          * @return the graphmodel passed as parameter
@@ -720,9 +720,11 @@ public interface GraphModel {
     /**
      * Sets a new configuration for this graph model.
      *
-     * @deprecated setting configuration after graph model creation is no longer supported. Best is to use the
-     * {@link Configuration#builder()} to create a new configuration and then use it at graph model creation from
-     * {@link GraphModel.Factory#newInstance(Configuration)}.
+     * @deprecated setting configuration after graph model creation is no longer
+     *             supported. Best is to use the {@link Configuration#builder()} to
+     *             create a new configuration and then use it at graph model
+     *             creation from
+     *             {@link GraphModel.Factory#newInstance(Configuration)}.
      *
      * @param configuration new configuration
      */

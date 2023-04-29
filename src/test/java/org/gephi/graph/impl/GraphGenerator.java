@@ -465,7 +465,7 @@ public class GraphGenerator {
     }
 
     public static GraphStore generateTinyGraphStoreWithMutualEdge() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore graphStore = graphModel.store;
         NodeImpl n1 = new NodeImpl("1", graphStore);
         NodeImpl n2 = new NodeImpl("2", graphStore);

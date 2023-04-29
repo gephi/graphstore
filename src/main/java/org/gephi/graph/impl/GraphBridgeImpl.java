@@ -258,32 +258,40 @@ public class GraphBridgeImpl implements GraphBridge {
 
         // Time representation
         if (!destConfig.getTimeRepresentation().equals(sourceConfig.getTimeRepresentation())) {
-            throw new RuntimeException("The time representations doesn't match, source: " + sourceConfig.getTimeRepresentation() + ", destination: " + destConfig.getTimeRepresentation());
+            throw new RuntimeException("The time representations doesn't match, source: " + sourceConfig
+                    .getTimeRepresentation() + ", destination: " + destConfig.getTimeRepresentation());
         }
 
         // Node id type
         if (!destConfig.getNodeIdType().equals(sourceConfig.getNodeIdType())) {
-            throw new RuntimeException("The node id type doesn't match, source: " + sourceConfig.getNodeIdType() + ", destination: " + destConfig.getNodeIdType());
+            throw new RuntimeException("The node id type doesn't match, source: " + sourceConfig
+                    .getNodeIdType() + ", destination: " + destConfig.getNodeIdType());
         }
 
         // Edge id type
         if (!destConfig.getEdgeIdType().equals(sourceConfig.getEdgeIdType())) {
-            throw new RuntimeException("The edge id type doesn't match, source: " + sourceConfig.getEdgeIdType() + ", destination: " + destConfig.getEdgeIdType());
+            throw new RuntimeException("The edge id type doesn't match, source: " + sourceConfig
+                    .getEdgeIdType() + ", destination: " + destConfig.getEdgeIdType());
         }
 
         // Edge weight type
         if (!destConfig.getEdgeWeightType().equals(sourceConfig.getEdgeWeightType())) {
-            throw new RuntimeException("The edge weight type doesn't match, source: " + sourceConfig.getEdgeWeightType() + ", destination: " + destConfig.getEdgeWeightType());
+            throw new RuntimeException("The edge weight type doesn't match, source: " + sourceConfig
+                    .getEdgeWeightType() + ", destination: " + destConfig.getEdgeWeightType());
         }
 
         // Edge label type
         if (!destConfig.getEdgeLabelType().equals(sourceConfig.getEdgeLabelType())) {
-            throw new RuntimeException("The edge label type doesn't match, source: " + sourceConfig.getEdgeLabelType() + ", destination: " + destConfig.getEdgeLabelType());
+            throw new RuntimeException("The edge label type doesn't match, source: " + sourceConfig
+                    .getEdgeLabelType() + ", destination: " + destConfig.getEdgeLabelType());
         }
 
         // Parallel edges
         if (destConfig.isEnableParallelEdgesSameType() != sourceConfig.isEnableParallelEdgesSameType()) {
-            throw new RuntimeException("The parallel edges of same type configuration doesn't match, source: " + sourceConfig.isEnableParallelEdgesSameType() + ", destination: " + destConfig.isEnableParallelEdgesSameType());
+            throw new RuntimeException(
+                    "The parallel edges of same type configuration doesn't match, source: " + sourceConfig
+                            .isEnableParallelEdgesSameType() + ", destination: " + destConfig
+                                    .isEnableParallelEdgesSameType());
         }
 
         // Verify node table

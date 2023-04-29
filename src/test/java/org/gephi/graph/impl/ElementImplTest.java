@@ -106,9 +106,10 @@ public class ElementImplTest {
     @Test
     public void testSetAttributeStandardizedType() {
         GraphStore store = new GraphStore();
-        store.nodeTable.store
-                .addColumn(new ColumnImpl(store.nodeTable, "arr1", Integer[].class, "Array", null, Origin.DATA, true, false));
-        store.nodeTable.store.addColumn(new ColumnImpl(store.nodeTable, "arr2", int[].class, "Array", null, Origin.DATA, true, false));
+        store.nodeTable.store.addColumn(new ColumnImpl(store.nodeTable, "arr1", Integer[].class, "Array", null,
+                Origin.DATA, true, false));
+        store.nodeTable.store.addColumn(new ColumnImpl(store.nodeTable, "arr2", int[].class, "Array", null, Origin.DATA,
+                true, false));
         Column column1 = store.nodeTable.store.getColumn("arr1");
         Column column2 = store.nodeTable.store.getColumn("arr2");
 
@@ -588,7 +589,8 @@ public class ElementImplTest {
     public void testGetDefaultValue() {
         GraphStore store = new GraphStore();
         Integer defaultValue = 25;
-        Column column = new ColumnImpl(store.nodeTable,"age", Integer.class, "Age", defaultValue, Origin.DATA, true, false);
+        Column column = new ColumnImpl(store.nodeTable, "age", Integer.class, "Age", defaultValue, Origin.DATA, true,
+                false);
         store.nodeTable.store.addColumn(column);
 
         NodeImpl node = new NodeImpl("0", store);
@@ -1195,8 +1197,7 @@ public class ElementImplTest {
 
     // Utility
     private GraphStore getIntervalGraphStore() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphStore store = graphModel.store;
         return store;

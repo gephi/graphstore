@@ -17,7 +17,8 @@ public class ConfigurationImpl {
     private final TimeRepresentation timeRepresentation;
     // Use edge weight column, or just double (default True)
     private final boolean edgeWeightColumn;
-    // Automatically use read/write locks when iterating/writing graph elements (default True)
+    // Automatically use read/write locks when iterating/writing graph elements
+    // (default True)
     private final boolean enableAutoLocking;
     // Automatically register edge types when adding elements (default True)
     private final boolean enableAutoEdgeTypeRegistration;
@@ -25,7 +26,9 @@ public class ConfigurationImpl {
     private final boolean enableIndexNodes;
     // Enable reverse index for edge attributes (default True)
     private final boolean enableIndexEdges;
+    // Enable reverse index for timestamps (default True)
     private final boolean enableIndexTimestamps;
+    // Enable observers (default True)
     private final boolean enableObservers;
     // Node properties are X, Y, Color etc. (default True)
     private final boolean enableNodeProperties;
@@ -33,7 +36,7 @@ public class ConfigurationImpl {
     private final boolean enableEdgeProperties;
     // Enable spatial index (default False)
     private final boolean enableSpatialIndex;
-    // Enable parallel edges of the same type
+    // Enable parallel edges of the same type (default True)
     private final boolean enableParallelEdgesSameType;
 
     public ConfigurationImpl() {

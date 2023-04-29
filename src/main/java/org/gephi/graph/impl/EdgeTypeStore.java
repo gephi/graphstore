@@ -81,7 +81,8 @@ public class EdgeTypeStore {
             if (configuration.isEnableAutoEdgeTypeRegistration()) {
                 addType(String.valueOf(type), type);
             } else {
-                throw new UnsupportedOperationException("The type "+type+" doesn't exist, and edge type auto registration is disabled (from Configuration)");
+                throw new UnsupportedOperationException(
+                        "The type " + type + " doesn't exist, and edge type auto registration is disabled (from Configuration)");
             }
         }
     }

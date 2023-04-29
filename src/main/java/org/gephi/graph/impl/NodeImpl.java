@@ -36,8 +36,8 @@ public class NodeImpl extends ElementImpl implements Node {
     public NodeImpl(Object id, GraphStore graphStore) {
         super(id, graphStore);
         checkIdType(id);
-        this.properties = graphStore == null
-            || graphStore.configuration.isEnableNodeProperties() ? new NodePropertiesImpl() : null;
+        this.properties = graphStore == null || graphStore.configuration.isEnableNodeProperties()
+                ? new NodePropertiesImpl() : null;
     }
 
     public NodeImpl(Object id) {

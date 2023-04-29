@@ -713,8 +713,7 @@ public class SerializationTest {
 
     @Test
     public void testIntervalStore() throws IOException, ClassNotFoundException {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphStore store = graphModel.store;
         TimeStore timestampStore = store.timeStore;
@@ -737,10 +736,8 @@ public class SerializationTest {
 
     @Test
     public void testConfiguration() throws IOException, ClassNotFoundException {
-        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder()
-            .nodeIdType(Float.class)
-            .edgeIdType(Long.class)
-            .timeRepresentation(TimeRepresentation.INTERVAL).build());
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().nodeIdType(Float.class)
+                .edgeIdType(Long.class).timeRepresentation(TimeRepresentation.INTERVAL).build());
 
         Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphModel.configuration);

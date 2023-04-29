@@ -285,8 +285,7 @@ public class EdgeTypeStoreTest {
     @Test
     public void testAddDifferentType() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore(
-            new ConfigurationImpl(Configuration.builder().edgeLabelType(Integer.class).build())
-        );
+                new ConfigurationImpl(Configuration.builder().edgeLabelType(Integer.class).build()));
         int id = edgeTypeStore.addType(42);
         Assert.assertEquals(id, 1);
         Assert.assertEquals(edgeTypeStore.getLabel(1), 42);

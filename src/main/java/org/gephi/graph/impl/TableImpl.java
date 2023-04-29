@@ -304,10 +304,12 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
     private void checkCanIndex(boolean indexed) {
         if (indexed && store.graphStore != null) {
             if (!store.graphStore.configuration.isEnableIndexNodes() && isNodeTable()) {
-                throw new IllegalArgumentException("Can't use reverse index as node indexing is disabled (from Configuration)");
+                throw new IllegalArgumentException(
+                        "Can't use reverse index as node indexing is disabled (from Configuration)");
             }
             if (!store.graphStore.configuration.isEnableIndexEdges() && isEdgeTable()) {
-                throw new IllegalArgumentException("Can't index edge table as edge indexing is disabled (from Configuration)");
+                throw new IllegalArgumentException(
+                        "Can't index edge table as edge indexing is disabled (from Configuration)");
             }
         }
     }

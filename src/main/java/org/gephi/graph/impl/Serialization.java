@@ -259,27 +259,32 @@ public class Serialization {
     private void verifyCompatibility(ConfigurationImpl readConfig, ConfigurationImpl modelConfig) {
         // Time representation
         if (!readConfig.getTimeRepresentation().equals(modelConfig.getTimeRepresentation())) {
-            throw new RuntimeException("The time representations doesn't match, read: " + readConfig.getTimeRepresentation() + ", model: " + modelConfig.getTimeRepresentation());
+            throw new RuntimeException("The time representations doesn't match, read: " + readConfig
+                    .getTimeRepresentation() + ", model: " + modelConfig.getTimeRepresentation());
         }
 
         // Node id type
         if (!readConfig.getNodeIdType().equals(modelConfig.getNodeIdType())) {
-            throw new RuntimeException("The node id type doesn't match, read: " + readConfig.getNodeIdType() + ", model: " + modelConfig.getNodeIdType());
+            throw new RuntimeException("The node id type doesn't match, read: " + readConfig
+                    .getNodeIdType() + ", model: " + modelConfig.getNodeIdType());
         }
 
         // Edge id type
         if (!readConfig.getEdgeIdType().equals(modelConfig.getEdgeIdType())) {
-            throw new RuntimeException("The edge id type doesn't match, read: " + readConfig.getEdgeIdType() + ", model: " + modelConfig.getEdgeIdType());
+            throw new RuntimeException("The edge id type doesn't match, read: " + readConfig
+                    .getEdgeIdType() + ", model: " + modelConfig.getEdgeIdType());
         }
 
         // Edge weight type
         if (!readConfig.getEdgeWeightType().equals(modelConfig.getEdgeWeightType())) {
-            throw new RuntimeException("The edge weight type doesn't match, read: " + readConfig.getEdgeWeightType() + ", model: " + modelConfig.getEdgeWeightType());
+            throw new RuntimeException("The edge weight type doesn't match, read: " + readConfig
+                    .getEdgeWeightType() + ", model: " + modelConfig.getEdgeWeightType());
         }
 
         // Edge label type
         if (!readConfig.getEdgeLabelType().equals(modelConfig.getEdgeLabelType())) {
-            throw new RuntimeException("The edge label type doesn't match, read: " + readConfig.getEdgeLabelType() + ", model: " + modelConfig.getEdgeLabelType());
+            throw new RuntimeException("The edge label type doesn't match, read: " + readConfig
+                    .getEdgeLabelType() + ", model: " + modelConfig.getEdgeLabelType());
         }
     }
 
@@ -578,8 +583,7 @@ public class Serialization {
 
         ColumnImpl column = model.store.defaultColumns.getColumn(table, storeId);
         if (column == null) {
-            column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed,
-                readOnly);
+            column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed, readOnly);
             column.storeId = storeId;
         }
 
@@ -717,7 +721,7 @@ public class Serialization {
         boolean enableEdgeProperties = (Boolean) deserialize(is);
 
         graphStoreConfigurationVersion = new GraphStoreConfigurationVersion(enableElementLabel, enableElementTimestamp,
-            enableNodeProperties, enableEdgeProperties);
+                enableNodeProperties, enableEdgeProperties);
         return graphStoreConfigurationVersion;
     }
 

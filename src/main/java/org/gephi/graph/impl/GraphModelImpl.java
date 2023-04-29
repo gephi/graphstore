@@ -446,7 +446,8 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public void setConfiguration(Configuration config) {
-        throw new UnsupportedOperationException("No longer supported. Configuration is immutable and needs to be passed at GraphModel creation time");
+        throw new UnsupportedOperationException(
+                "No longer supported. Configuration is immutable and needs to be passed at GraphModel creation time");
     }
 
     @Override

@@ -42,6 +42,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testDefaultDeprecated() {
         Configuration c = new Configuration();
         Assert.assertNotNull(c.getNodeIdType());
@@ -57,6 +58,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testSetNodeIdTypeDeprecated() {
         Configuration c = new Configuration();
         c.setNodeIdType(Float.class);
@@ -70,6 +72,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testSetEdgeIdTypeDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeIdType(Float.class);
@@ -83,6 +86,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testSetEdgeLabelTypeDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeLabelType(Float.class);
@@ -100,6 +104,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testSetEdgeWeightTypeDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeWeightType(IntervalDoubleMap.class);
@@ -117,6 +122,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testSetTimeRepresentationDeprecated() {
         Configuration c = new Configuration();
         c.setTimeRepresentation(TimeRepresentation.INTERVAL);
@@ -130,6 +136,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testSetEdgeWeightColumnDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeWeightColumn(Boolean.FALSE);
@@ -153,6 +160,7 @@ public class ConfigurationTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
+    @SuppressWarnings("deprecation")
     public void testSetEdgeIdTypeUnsupportedDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeIdType(int[].class);
@@ -164,6 +172,7 @@ public class ConfigurationTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
+    @SuppressWarnings("deprecation")
     public void testSetEdgeWeightTypeFloatUnsupportedDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeWeightType(Float.class);
@@ -175,17 +184,20 @@ public class ConfigurationTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
+    @SuppressWarnings("deprecation")
     public void testSetEdgeWeightTypeNotNumberUnsupportedDeprecated() {
         Configuration c = new Configuration();
         c.setEdgeWeightType(String.class);
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testDefaultEqualsDeprecated() {
         Assert.assertEquals(new Configuration(), new Configuration());
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testDefaultHashCodeDeprecated() {
         Assert.assertEquals(new Configuration().hashCode(), new Configuration().hashCode());
     }
@@ -198,6 +210,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testEqualsDeprecated() {
         Configuration c1 = new Configuration();
         Configuration c2 = new Configuration();
@@ -214,6 +227,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testHashCodeDeprecated() {
         Configuration c1 = new Configuration();
         Configuration c2 = new Configuration();
@@ -237,6 +251,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testCopyDeprecated() {
         Configuration c1 = new Configuration();
         Configuration c2 = c1.copy();

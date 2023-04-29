@@ -53,8 +53,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
         this.target = target;
         this.flags = (byte) (directed ? 1 : 0);
         this.type = type;
-        this.properties = graphStore == null
-            || graphStore.configuration.isEnableEdgeProperties() ? new EdgePropertiesImpl() : null;
+        this.properties = graphStore == null || graphStore.configuration.isEnableEdgeProperties()
+                ? new EdgePropertiesImpl() : null;
         if (graphStore == null || graphStore.configuration.getEdgeWeightType().equals(Double.class)) {
             this.attributes.setAttribute(GraphStoreConfiguration.EDGE_WEIGHT_INDEX, weight);
         }

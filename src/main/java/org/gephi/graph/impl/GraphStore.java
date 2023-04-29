@@ -103,9 +103,9 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         spatialIndex = configuration.isEnableSpatialIndex() ? new SpatialIndexImpl(this) : null;
         edgeStore = new EdgeStore(edgeTypeStore, spatialIndex, configuration,
                 configuration.isEnableAutoLocking() ? lock : null, viewStore,
-            configuration.isEnableObservers() ? version : null);
-        nodeStore = new NodeStore(edgeStore, spatialIndex, configuration.isEnableAutoLocking() ? lock : null,
-                viewStore, configuration.isEnableObservers() ? version : null);
+                configuration.isEnableObservers() ? version : null);
+        nodeStore = new NodeStore(edgeStore, spatialIndex, configuration.isEnableAutoLocking() ? lock : null, viewStore,
+                configuration.isEnableObservers() ? version : null);
         nodeTable = new TableImpl<>(this, Node.class);
         edgeTable = new TableImpl<>(this, Edge.class);
         timeStore = new TimeStore(this, configuration.isEnableIndexTimestamps());
@@ -839,13 +839,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator, boolean blocking) {
-        return new EdgeIterableWrapper(edgeIterator,
-                (blocking && configuration.isEnableAutoLocking()) ? lock : null);
+        return new EdgeIterableWrapper(edgeIterator, (blocking && configuration.isEnableAutoLocking()) ? lock : null);
     }
 
     protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator, boolean blocking) {
-        return new NodeIterableWrapper(nodeIterator,
-                (blocking && configuration.isEnableAutoLocking()) ? lock : null);
+        return new NodeIterableWrapper(nodeIterator, (blocking && configuration.isEnableAutoLocking()) ? lock : null);
     }
 
     public int deepHashCode() {

@@ -105,7 +105,6 @@ public class Configuration {
             return this;
         }
 
-
         /**
          * Sets the edge id type.
          * <p>
@@ -153,7 +152,8 @@ public class Configuration {
         /**
          * Sets the edge weight type.
          * <p>
-         * <code>Double</code>, <code>IntervalDoubleMap</code> and <code>TimestampDoubleMap</code> are supported.
+         * <code>Double</code>, <code>IntervalDoubleMap</code> and
+         * <code>TimestampDoubleMap</code> are supported.
          * <p>
          * Default is <code>Double.class</code>.
          *
@@ -163,8 +163,9 @@ public class Configuration {
          */
         public Builder edgeWeightType(final Class edgeWeightType) {
             if (!(Double.class.equals(edgeWeightType) || TimestampDoubleMap.class
-                .equals(edgeWeightType) || IntervalDoubleMap.class.equals(edgeWeightType))) {
-                throw new IllegalArgumentException("Unsupported type " + edgeWeightType.getCanonicalName() + ", should be Double, IntervalDoubleMap or TimestampDoubleMap");
+                    .equals(edgeWeightType) || IntervalDoubleMap.class.equals(edgeWeightType))) {
+                throw new IllegalArgumentException("Unsupported type " + edgeWeightType
+                        .getCanonicalName() + ", should be Double, IntervalDoubleMap or TimestampDoubleMap");
             }
             this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
                 @Override
@@ -235,10 +236,12 @@ public class Configuration {
         /**
          * Sets whether to enable auto edge type registration.
          * <p>
-         * If enabled, edge types are automatically registered when edges are added. If disabled, one needs to call
-         * {@link GraphModel#addEdgeType(Object)} explicitly for each type.
+         * If enabled, edge types are automatically registered when edges are added. If
+         * disabled, one needs to call {@link GraphModel#addEdgeType(Object)} explicitly
+         * for each type.
          * <p>
          * Default is <code>true</code>.
+         * 
          * @param enableAutoEdgeTypeRegistration enable auto edge type registration
          * @return this builder
          */
@@ -255,10 +258,11 @@ public class Configuration {
         /**
          * Sets whether to enable node properties.
          * <p>
-         * If enabled, {@link NodeProperties} are created for each node. If those properties aren't needed, disabling them
-         * can save memory.
+         * If enabled, {@link NodeProperties} are created for each node. If those
+         * properties aren't needed, disabling them can save memory.
          * <p>
          * Default is <code>true</code>.
+         * 
          * @param enableNodeProperties enable node properties
          * @return this builder
          */
@@ -275,10 +279,11 @@ public class Configuration {
         /**
          * Sets whether to enable edge properties.
          * <p>
-         * If enabled, {@link EdgeProperties} are created for each edge. If those properties aren't needed, disabling them
-         * can save memory.
+         * If enabled, {@link EdgeProperties} are created for each edge. If those
+         * properties aren't needed, disabling them can save memory.
          * <p>
          * Default is <code>true</code>.
+         * 
          * @param enableEdgeProperties enable edge properties
          * @return this builder
          */
@@ -295,12 +300,13 @@ public class Configuration {
         /**
          * Sets whether to enable the {@link SpatialIndex}.
          * <p>
-         * If enabled, the spatial index is updated while node positions are updated. If unused, disabling it is
-         * recommended as it adds some overhead.
+         * If enabled, the spatial index is updated while node positions are updated. If
+         * unused, disabling it is recommended as it adds some overhead.
          * <p>
          * The spatial index can be retrieved from {@link GraphModel#getSpatialIndex()}.
          * <p>
          * Default is <code>false</code>.
+         * 
          * @param enableSpatialIndex enable edge properties
          * @return this builder
          */
@@ -318,11 +324,13 @@ public class Configuration {
          * Sets whether to enable the reverse indexing of node attributes.
          * <p>
          * If enabled, the reverse index is updated while node attributes are updated.
-         * This powers {@link GraphModel#getNodeIndex()} but has a negative impact on memory usage (as any reverse index does).
-         * When disabled, the features of {@link Index<Node>} are still available but need to iterate over all nodes
-         * to return results.
+         * This powers {@link GraphModel#getNodeIndex()} but has a negative impact on
+         * memory usage (as any reverse index does). When disabled, the features of
+         * {@link Index<Node>} are still available but need to iterate over all nodes to
+         * return results.
          * <p>
          * Default is <code>true</code>.
+         * 
          * @param enableIndexNodes enable node attribute indexing
          * @return this builder
          */
@@ -340,11 +348,13 @@ public class Configuration {
          * Sets whether to enable the reverse indexing of edge attributes.
          * <p>
          * If enabled, the reverse index is updated while node attributes are updated.
-         * This powers {@link GraphModel#getEdgeIndex()} but has a negative impact on memory usage (as any reverse index does).
-         * When disabled, the features of {@link Index<Edge>} are still available but need to iterate over all nodes
-         * to return results.
+         * This powers {@link GraphModel#getEdgeIndex()} but has a negative impact on
+         * memory usage (as any reverse index does). When disabled, the features of
+         * {@link Index<Edge>} are still available but need to iterate over all nodes to
+         * return results.
          * <p>
          * Default is <code>true</code>.
+         * 
          * @param enableIndexEdges enable edge attribute indexing
          * @return this builder
          */
@@ -364,6 +374,7 @@ public class Configuration {
          * If disabled, only a single edge of a given type can exist between two nodes.
          * <p>
          * Default is <code>false</code>.
+         * 
          * @param enableParallelEdgesSameType enable parallel edges of the same type
          * @return this builder
          */
@@ -509,6 +520,7 @@ public class Configuration {
     /**
      * Sets whether to create an edge weight column.
      * <p>
+     * 
      * @deprecated Use {@link #builder()} instead.
      *
      * @param edgeWeightColumn edge weight column
