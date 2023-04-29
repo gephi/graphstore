@@ -29,6 +29,8 @@ Development builds can be found on [Sonatype's Snapshot Repository](https://oss.
 
 API Documentation is available [here](https://www.javadoc.io/doc/org.gephi/graphstore/latest/index.html).
 
+Follow [this QuickStart](https://github.com/gephi/graphstore/wiki/Quick-Start) to get started.
+
 ## Dependencies
 
 GraphStore depends on FastUtil >= 6.0 and Colt 1.2.0.
@@ -42,6 +44,8 @@ For a complete list of dependencies, consult the `pom.xml` file.
 GraphStore uses Maven for building. 
 
 	> mvn clean install
+
+Note that code formatting is automatically applied at that time.
 		
 ### How to test
 
