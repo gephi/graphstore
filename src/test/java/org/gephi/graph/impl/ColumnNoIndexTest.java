@@ -244,10 +244,12 @@ public class ColumnNoIndexTest {
     private GraphStore generateGraphStoreWithColumns() {
         GraphStore graphStore = new GraphStore();
         ColumnStore<Node> columnStore = graphStore.nodeTable.store;
-        columnStore.addColumn(new ColumnImpl("foo", String.class, "foo", null, Origin.DATA, false, false));
-        columnStore.addColumn(new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false));
-        columnStore
-                .addColumn(new ColumnImpl("price", TimestampIntegerMap.class, "Price", null, Origin.DATA, true, false));
+        columnStore.addColumn(new ColumnImpl(graphStore.nodeTable, "foo", String.class, "foo", null, Origin.DATA, false,
+                false));
+        columnStore.addColumn(new ColumnImpl(graphStore.nodeTable, "age", Integer.class, "Age", null, Origin.DATA, true,
+                false));
+        columnStore.addColumn(new ColumnImpl(graphStore.nodeTable, "price", TimestampIntegerMap.class, "Price", null,
+                Origin.DATA, true, false));
 
         return graphStore;
     }

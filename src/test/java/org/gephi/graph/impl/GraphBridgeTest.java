@@ -36,8 +36,16 @@ public class GraphBridgeTest {
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testVerifyConfiguration() {
-        Configuration destConfig = new Configuration();
-        destConfig.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration destConfig = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
+        GraphModelImpl dest = new GraphModelImpl(destConfig);
+
+        new GraphBridgeImpl(dest.store).copyNodes(GraphGenerator.generateTinyGraphStore().getNodes().toArray());
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testVerifyConfigurationParallelEdges() {
+        Configuration destConfig = Configuration.builder()
+                .enableParallelEdgesSameType(!GraphStoreConfiguration.DEFAULT_ENABLE_PARALLEL_EDGES_SAME_TYPE).build();
         GraphModelImpl dest = new GraphModelImpl(destConfig);
 
         new GraphBridgeImpl(dest.store).copyNodes(GraphGenerator.generateTinyGraphStore().getNodes().toArray());
@@ -182,8 +190,7 @@ public class GraphBridgeTest {
 
     @Test
     public void testCopyEdgeWeightTimestamp() {
-        Configuration config = new Configuration();
-        config.setEdgeWeightType(TimestampDoubleMap.class);
+        Configuration config = Configuration.builder().edgeWeightType(TimestampDoubleMap.class).build();
         GraphStore source = GraphGenerator.generateTinyGraphStore(config);
         EdgeImpl e0 = source.getEdge("0");
         e0.setWeight(42.0, 1.0);
@@ -200,9 +207,8 @@ public class GraphBridgeTest {
 
     @Test
     public void testCopyEdgeWeightInterval() {
-        Configuration config = new Configuration();
-        config.setEdgeWeightType(IntervalDoubleMap.class);
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL)
+                .edgeWeightType(IntervalDoubleMap.class).build();
         GraphStore source = GraphGenerator.generateTinyGraphStore(config);
         EdgeImpl e0 = source.getEdge("0");
         e0.setWeight(42.0, new Interval(1.0, 2.0));
@@ -300,8 +306,7 @@ public class GraphBridgeTest {
         n1.setAttribute(c2, 10, new Interval(1.0, 2.0));
         n1.setAttribute(c2, 20, new Interval(3.0, 4.0));
 
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl model = new GraphModelImpl(config);
         GraphStore dest = model.store;
         new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
@@ -353,8 +358,7 @@ public class GraphBridgeTest {
         Node n1 = source.getNode("1");
         n1.addInterval(new Interval(1.0, 2.0));
 
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl model = new GraphModelImpl(config);
         GraphStore dest = model.store;
         new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());

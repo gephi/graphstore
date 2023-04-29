@@ -47,7 +47,7 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         this.column = column;
         this.elementClass = elementClass;
         this.graph = graph;
-        this.graphLock = graph.getLock();
+        this.graphLock = graph != null ? graph.getLock() : null;
     }
 
     private Iterator<T> getElementIterator() {

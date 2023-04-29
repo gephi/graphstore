@@ -132,8 +132,7 @@ public class GraphFactoryTest {
 
     @Test
     public void testIntegerNodeId() {
-        Configuration config = new Configuration();
-        config.setNodeIdType(Integer.class);
+        Configuration config = Configuration.builder().nodeIdType(Integer.class).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
         Node node = graphFactory.newNode();
@@ -142,8 +141,7 @@ public class GraphFactoryTest {
 
     @Test
     public void testIntegerEdgeId() {
-        Configuration config = new Configuration();
-        config.setEdgeIdType(Integer.class);
+        Configuration config = Configuration.builder().edgeIdType(Integer.class).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
 
@@ -156,8 +154,7 @@ public class GraphFactoryTest {
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testUnsupportedNodeId() {
-        Configuration config = new Configuration();
-        config.setNodeIdType(Float.class);
+        Configuration config = Configuration.builder().nodeIdType(Float.class).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
         graphFactory.newNode();
@@ -165,8 +162,7 @@ public class GraphFactoryTest {
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testUnsupportedEdgeId() {
-        Configuration config = new Configuration();
-        config.setEdgeIdType(Float.class);
+        Configuration config = Configuration.builder().edgeIdType(Float.class).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
 
@@ -178,8 +174,7 @@ public class GraphFactoryTest {
 
     @Test
     public void testAutoIncrementNodeInt() {
-        Configuration config = new Configuration();
-        config.setNodeIdType(Integer.class);
+        Configuration config = Configuration.builder().nodeIdType(Integer.class).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
         graphFactory.newNode(10);
@@ -192,8 +187,7 @@ public class GraphFactoryTest {
 
     @Test
     public void testAutoIncrementEdgeInt() {
-        Configuration config = new Configuration();
-        config.setEdgeIdType(Integer.class);
+        Configuration config = Configuration.builder().edgeIdType(Integer.class).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
         Node n1 = graphFactory.newNode();
@@ -210,7 +204,7 @@ public class GraphFactoryTest {
 
     @Test
     public void testAutoIncrementNodeString() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphModelImpl graphModel = new GraphModelImpl();
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
         graphFactory.newNode("10");
         Assert.assertEquals(graphFactory.newNode().getId(), "11");
@@ -224,7 +218,7 @@ public class GraphFactoryTest {
 
     @Test
     public void testAutoIncrementNotInteger() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphModelImpl graphModel = new GraphModelImpl();
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
         graphFactory.newNode("3543543523242");
         Assert.assertEquals(graphFactory.newNode().getId(), "0");
@@ -232,7 +226,7 @@ public class GraphFactoryTest {
 
     @Test
     public void testAutoIncrementEdgeString() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphModelImpl graphModel = new GraphModelImpl();
         GraphFactoryImpl graphFactory = new GraphFactoryImpl(graphModel.store);
         Node n1 = graphFactory.newNode();
         Node n2 = graphFactory.newNode();

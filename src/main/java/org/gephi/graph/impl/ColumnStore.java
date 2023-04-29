@@ -42,8 +42,9 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     protected final static int NULL_ID = -1;
     protected final static short NULL_SHORT = Short.MIN_VALUE;
     // Configuration
+    protected final ConfigurationImpl configuration;
+    // GraphStore
     protected final GraphStore graphStore;
-    protected final Configuration configuration;
     // Element
     protected final Class<T> elementType;
     // Columns
@@ -60,44 +61,28 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     protected int length;
 
     public ColumnStore(Class<T> elementType, boolean indexed) {
-        this(null, elementType, indexed);
+        this(null, elementType);
     }
 
-    public ColumnStore(GraphStore graphStore, Class<T> elementType, boolean indexed) {
+    public ColumnStore(GraphStore graphStore, Class<T> elementType) {
         if (MAX_SIZE >= Short.MAX_VALUE - Short.MIN_VALUE + 1) {
             throw new RuntimeException("Column Store size can't exceed 65534");
         }
         this.graphStore = graphStore;
-        this.configuration = graphStore != null ? graphStore.configuration : new Configuration();
-        this.lock = GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? new TableLockImpl() : null;
+        if (graphStore == null) {
+            // Used for testing only
+            configuration = new ConfigurationImpl();
+        } else {
+            configuration = graphStore.configuration;
+        }
+        this.lock = configuration.isEnableAutoLocking() ? new TableLockImpl() : null;
         this.garbageQueue = new ShortRBTreeSet();
         this.idMap = new Object2ShortOpenHashMap<>(MAX_SIZE);
         this.columns = new ColumnImpl[MAX_SIZE];
         this.elementType = elementType;
-        this.indexStore = indexed ? new IndexStore<>(this) : null;
+        this.indexStore = new IndexStore<>(this);
         idMap.defaultReturnValue(NULL_SHORT);
-        this.observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<>() : null;
-    }
-
-    private void updateConfiguration(Column changedColumn) {
-        String columnId = changedColumn.getId();
-        if (Edge.class.equals(elementType)) {
-            if (columnId.equals(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID)) {
-                if (hasColumn(columnId)) {
-                    Class edgeWeightColumnClass = getColumn(columnId).getTypeClass();
-                    configuration.setEdgeWeightType(edgeWeightColumnClass);
-                    configuration.setEdgeWeightColumn(true);
-                } else {
-                    configuration.setEdgeWeightColumn(false);
-                }
-            } else if (columnId.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
-                configuration.setEdgeIdType(changedColumn.getTypeClass());
-            }
-        } else if (Node.class.equals(elementType)) {
-            if (columnId.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
-                configuration.setNodeIdType(changedColumn.getTypeClass());
-            }
-        }
+        this.observers = new ArrayList<>();
     }
 
     public void addColumn(final Column column) {
@@ -126,8 +111,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 if (indexStore != null) {
                     indexStore.addColumn(columnImpl);
                 }
-
-                updateConfiguration(column);
 
                 // Index attributes
                 if (graphStore != null && columnImpl.table != null) {
@@ -169,7 +152,6 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 indexStore.removeColumn((ColumnImpl) column);
             }
             columnImpl.setStoreId(NULL_ID);
-            updateConfiguration(column);
         } finally {
             unlock();
         }

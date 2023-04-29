@@ -31,8 +31,7 @@ public class IntervalIndexImplTest {
 
     @Test
     public void testGetMin() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         TimeStore timeStore = graphModel.store.timeStore;
         IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
@@ -73,8 +72,7 @@ public class IntervalIndexImplTest {
 
     @Test
     public void testGetMax() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         TimeStore timeStore = graphModel.store.timeStore;
         IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
@@ -92,8 +90,7 @@ public class IntervalIndexImplTest {
 
     @Test
     public void testGetMinWithInfinite() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         TimeStore timeStore = graphModel.store.timeStore;
         IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
@@ -107,8 +104,7 @@ public class IntervalIndexImplTest {
 
     @Test
     public void testGetMaxWithInfinite() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         TimeStore timeStore = graphModel.store.timeStore;
         IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
@@ -122,8 +118,7 @@ public class IntervalIndexImplTest {
 
     @Test
     public void testGetElements() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         TimeStore timeStore = graphModel.store.timeStore;
         IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
@@ -170,8 +165,7 @@ public class IntervalIndexImplTest {
 
     @Test
     public void testHasNodesEdgesEmpty() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         TimeStore timeStore = graphModel.store.timeStore;
         IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
@@ -180,8 +174,7 @@ public class IntervalIndexImplTest {
 
     @Test
     public void testHasNodes() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         TimeStore timeStore = graphModel.store.timeStore;
         IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;
@@ -204,8 +197,7 @@ public class IntervalIndexImplTest {
 
     @Test
     public void testHasNodesClear() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         TimeStore timeStore = graphModel.store.timeStore;
         IntervalIndexStore store = (IntervalIndexStore) timeStore.nodeIndexStore;

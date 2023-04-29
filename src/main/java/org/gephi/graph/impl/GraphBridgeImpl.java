@@ -97,14 +97,17 @@ public class GraphBridgeImpl implements GraphBridge {
             if (store.getNode(node.getId()) == null) {
                 Node nodeCopy = factory.newNode(node.getId());
 
+                // Label
+                copyLabel(node, nodeCopy);
+
                 // Time set
                 copyTimeSet(node, nodeCopy);
 
                 // Properties
-                copyNodeProperties(node, nodeCopy);
-
-                // Text properties
-                copyTextProperties(node.getTextProperties(), nodeCopy.getTextProperties());
+                if (store.configuration.isEnableNodeProperties()) {
+                    copyNodeProperties(node, nodeCopy);
+                    copyTextProperties(node.getTextProperties(), nodeCopy.getTextProperties());
+                }
 
                 // Attributes
                 copyAttributes(sourceStore.nodeTable, nodeTable, node, nodeCopy);
@@ -122,6 +125,9 @@ public class GraphBridgeImpl implements GraphBridge {
 
                 Edge edgeCopy = factory.newEdge(edge.getId(), source, target, edge.getType(), 0.0, edge.isDirected());
 
+                // Label
+                copyLabel(edge, edgeCopy);
+
                 // Time set
                 copyTimeSet(edge, edgeCopy);
 
@@ -129,10 +135,10 @@ public class GraphBridgeImpl implements GraphBridge {
                 copyEdgeWeight(edge, edgeCopy);
 
                 // Properties
-                copyEdgeProperties(edge, edgeCopy);
-
-                // Text properties
-                copyTextProperties(edge.getTextProperties(), edgeCopy.getTextProperties());
+                if (store.configuration.isEnableEdgeProperties()) {
+                    copyEdgeProperties(edge, edgeCopy);
+                    copyTextProperties(edge.getTextProperties(), edgeCopy.getTextProperties());
+                }
 
                 // Attributes
                 copyAttributes(sourceStore.edgeTable, edgeTable, edge, edgeCopy);
@@ -164,13 +170,15 @@ public class GraphBridgeImpl implements GraphBridge {
         nodeCopy.setPosition(node.x(), node.y(), node.z());
         nodeCopy.setColor(node.getColor());
         nodeCopy.setFixed(node.isFixed());
-        nodeCopy.setLabel(node.getLabel());
         nodeCopy.setSize(node.size());
+    }
+
+    private void copyLabel(Element element, Element elementCopy) {
+        elementCopy.setLabel(element.getLabel());
     }
 
     private void copyEdgeProperties(Edge edge, Edge edgeCopy) {
         edgeCopy.setColor(edge.getColor());
-        edgeCopy.setLabel(edge.getLabel());
     }
 
     private void copyTextProperties(TextProperties text, TextProperties textCopy) {
@@ -195,7 +203,7 @@ public class GraphBridgeImpl implements GraphBridge {
     }
 
     private void copyAttributes(TableImpl sourceTable, TableImpl destTable, Element element, Element elementCopy) {
-        TimeRepresentation tr = sourceTable.store.configuration.getTimeRepresentation();
+        TimeRepresentation tr = sourceTable.store.graphStore.configuration.getTimeRepresentation();
         for (Column col : sourceTable.toArray()) {
             if (!col.isProperty()) {
                 Column colCopy = destTable.getColumn(col.getId());
@@ -245,10 +253,45 @@ public class GraphBridgeImpl implements GraphBridge {
 
     private void verifyCompatibility(GraphStore sourceStore) {
         // Verify configuration
-        Configuration destConfig = store.configuration;
-        Configuration sourceConfig = sourceStore.configuration;
-        if (!destConfig.equals(sourceConfig)) {
-            throw new RuntimeException("The configurations don't match");
+        ConfigurationImpl destConfig = store.configuration;
+        ConfigurationImpl sourceConfig = sourceStore.configuration;
+
+        // Time representation
+        if (!destConfig.getTimeRepresentation().equals(sourceConfig.getTimeRepresentation())) {
+            throw new RuntimeException("The time representations doesn't match, source: " + sourceConfig
+                    .getTimeRepresentation() + ", destination: " + destConfig.getTimeRepresentation());
+        }
+
+        // Node id type
+        if (!destConfig.getNodeIdType().equals(sourceConfig.getNodeIdType())) {
+            throw new RuntimeException("The node id type doesn't match, source: " + sourceConfig
+                    .getNodeIdType() + ", destination: " + destConfig.getNodeIdType());
+        }
+
+        // Edge id type
+        if (!destConfig.getEdgeIdType().equals(sourceConfig.getEdgeIdType())) {
+            throw new RuntimeException("The edge id type doesn't match, source: " + sourceConfig
+                    .getEdgeIdType() + ", destination: " + destConfig.getEdgeIdType());
+        }
+
+        // Edge weight type
+        if (!destConfig.getEdgeWeightType().equals(sourceConfig.getEdgeWeightType())) {
+            throw new RuntimeException("The edge weight type doesn't match, source: " + sourceConfig
+                    .getEdgeWeightType() + ", destination: " + destConfig.getEdgeWeightType());
+        }
+
+        // Edge label type
+        if (!destConfig.getEdgeLabelType().equals(sourceConfig.getEdgeLabelType())) {
+            throw new RuntimeException("The edge label type doesn't match, source: " + sourceConfig
+                    .getEdgeLabelType() + ", destination: " + destConfig.getEdgeLabelType());
+        }
+
+        // Parallel edges
+        if (destConfig.isEnableParallelEdgesSameType() != sourceConfig.isEnableParallelEdgesSameType()) {
+            throw new RuntimeException(
+                    "The parallel edges of same type configuration doesn't match, source: " + sourceConfig
+                            .isEnableParallelEdgesSameType() + ", destination: " + destConfig
+                                    .isEnableParallelEdgesSameType());
         }
 
         // Verify node table

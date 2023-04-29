@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -1302,7 +1303,7 @@ public class EdgeStoreTest {
     public void testRemoveMutualEdge() {
         EdgeImpl[] edges = GraphGenerator.generateMutualEdges(1);
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null, null);
         edgeStore.addAll(Arrays.asList(edges));
         edgeStore.remove(edges[0]);
         Assert.assertFalse(edges[0].isMutual());
@@ -1652,7 +1653,7 @@ public class EdgeStoreTest {
     @Test
     public void testTypeCounting() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null, null);
         EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
 
         Int2IntMap counts = new Int2IntOpenHashMap();
@@ -1898,7 +1899,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testSetType() {
-        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null, null);
         EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
         edgeStore.add(edge);
         edgeStore.setEdgeType(edge, 1);
@@ -1910,9 +1911,28 @@ public class EdgeStoreTest {
         Assert.assertEquals(1, edgeStore.size(1));
     }
 
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testAddWithoutAutoRegistration() {
+        ConfigurationImpl config = new ConfigurationImpl(
+                Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(config), null, config, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
+        edgeStore.add(edge);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testSetTypeWithoutAutoRegistration() {
+        ConfigurationImpl config = new ConfigurationImpl(
+                Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(config), null, config, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
+        edgeStore.add(edge);
+        edgeStore.setEdgeType(edge, 1);
+    }
+
     @Test
     public void testSetTypeWithMutualEdge() {
-        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null, null);
         EdgeImpl[] edges = GraphGenerator.generateMutualEdges(4);
         edgeStore.addAll(Arrays.asList(edges));
         Assert.assertTrue(edges[0].isMutual());
@@ -1922,10 +1942,11 @@ public class EdgeStoreTest {
         Assert.assertFalse(edges[1].isMutual());
     }
 
-    // Can only run when GraphStoreConfiguration.ENABLE_PARALLEL_EDGES = false
-    @Test(enabled = false)
+    @Test
     public void testReturnFalseWithoutParallelEdges() {
-        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        ConfigurationImpl configuration = new ConfigurationImpl(
+                Configuration.builder().enableParallelEdgesSameType(false).build());
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, configuration, null, null, null);
         EdgeImpl edge = GraphGenerator.generateSingleEdge(1);
         EdgeImpl edge2 = new EdgeImpl('0', edge.graphStore, edge.source, edge.target, 2, 1.0, true);
         Assert.assertTrue(edgeStore.add(edge));

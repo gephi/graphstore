@@ -241,29 +241,58 @@ public class Serialization {
 
     public GraphModelImpl deserializeGraphModel(DataInput is) throws IOException, ClassNotFoundException {
         readVersion = (Float) deserialize(is);
-        Configuration config = (Configuration) deserialize(is);
-        model = new GraphModelImpl(config);
+        ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
+        model = new GraphModelImpl(config.toConfiguration());
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
     public GraphModelImpl deserializeGraphModel(DataInput is, GraphModel graphModel) throws IOException, ClassNotFoundException {
         model = (GraphModelImpl) graphModel;
         readVersion = (Float) deserialize(is);
-        Configuration config = (Configuration) deserialize(is);
-        model.setConfiguration(config);
+        ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
+        verifyCompatibility(config, model.configuration);
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
+    }
+
+    private void verifyCompatibility(ConfigurationImpl readConfig, ConfigurationImpl modelConfig) {
+        // Time representation
+        if (!readConfig.getTimeRepresentation().equals(modelConfig.getTimeRepresentation())) {
+            throw new RuntimeException("The time representations doesn't match, read: " + readConfig
+                    .getTimeRepresentation() + ", model: " + modelConfig.getTimeRepresentation());
+        }
+
+        // Node id type
+        if (!readConfig.getNodeIdType().equals(modelConfig.getNodeIdType())) {
+            throw new RuntimeException("The node id type doesn't match, read: " + readConfig
+                    .getNodeIdType() + ", model: " + modelConfig.getNodeIdType());
+        }
+
+        // Edge id type
+        if (!readConfig.getEdgeIdType().equals(modelConfig.getEdgeIdType())) {
+            throw new RuntimeException("The edge id type doesn't match, read: " + readConfig
+                    .getEdgeIdType() + ", model: " + modelConfig.getEdgeIdType());
+        }
+
+        // Edge weight type
+        if (!readConfig.getEdgeWeightType().equals(modelConfig.getEdgeWeightType())) {
+            throw new RuntimeException("The edge weight type doesn't match, read: " + readConfig
+                    .getEdgeWeightType() + ", model: " + modelConfig.getEdgeWeightType());
+        }
+
+        // Edge label type
+        if (!readConfig.getEdgeLabelType().equals(modelConfig.getEdgeLabelType())) {
+            throw new RuntimeException("The edge label type doesn't match, read: " + readConfig
+                    .getEdgeLabelType() + ", model: " + modelConfig.getEdgeLabelType());
+        }
     }
 
     public GraphModelImpl deserializeGraphModelWithoutVersionPrefix(DataInput is, float version) throws IOException, ClassNotFoundException {
         readVersion = version;
-        Configuration config = (Configuration) deserialize(is);
-        model = new GraphModelImpl(config);
+        ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
+        model = new GraphModelImpl(config.toConfiguration());
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
@@ -552,24 +581,14 @@ public class Serialization {
         boolean readOnly = (Boolean) deserialize(is);
         Estimator estimator = (Estimator) deserialize(is);
 
-        ColumnImpl column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed,
-                readOnly);
-        column.storeId = storeId;
-        if (estimator != null) {
-            column.setEstimator(estimator);
+        ColumnImpl column = model.store.defaultColumns.getColumn(table, storeId);
+        if (column == null) {
+            column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed, readOnly);
+            column.storeId = storeId;
         }
 
-        // Make sure configured types match the deserialized column types:
-        if (Edge.class.equals(table.getElementClass())) {
-            if (id.equals(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID)) {
-                table.store.configuration.setEdgeWeightType(typeClass);
-            } else if (id.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
-                table.store.configuration.setEdgeIdType(typeClass);
-            }
-        } else if (Node.class.equals(table.getElementClass())) {
-            if (id.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
-                table.store.configuration.setNodeIdType(typeClass);
-            }
+        if (estimator != null) {
+            column.setEstimator(estimator);
         }
 
         return column;
@@ -689,8 +708,10 @@ public class Serialization {
         out.write(GRAPH_STORE_CONFIGURATION);
         serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_LABEL);
         serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET);
-        serialize(out, GraphStoreConfiguration.ENABLE_NODE_PROPERTIES);
-        serialize(out, GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES);
+        // Was GraphStoreConfiguration.ENABLE_NODE_PROPERTIES
+        serialize(out, true);
+        // Was GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES
+        serialize(out, true);
     }
 
     private GraphStoreConfigurationVersion deserializeGraphStoreConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
@@ -1082,18 +1103,18 @@ public class Serialization {
     }
 
     private void serializeConfiguration(final DataOutput out) throws IOException {
-        Configuration config = model.store.configuration;
+        ConfigurationImpl config = model.configuration;
 
         serialize(out, config.getNodeIdType());
         serialize(out, config.getEdgeIdType());
         serialize(out, config.getEdgeLabelType());
         serialize(out, config.getEdgeWeightType());
         serialize(out, config.getTimeRepresentation());
-        serialize(out, config.getEdgeWeightColumn());
+        serialize(out, config.isEdgeWeightColumn());
     }
 
-    private Configuration deserializeConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
-        Configuration config = new Configuration();
+    private ConfigurationImpl deserializeConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
+        Configuration.Builder config = Configuration.builder();
 
         Class nodeIdType = (Class) deserialize(is);
         Class edgeIdType = (Class) deserialize(is);
@@ -1101,17 +1122,17 @@ public class Serialization {
         Class edgeWeightType = (Class) deserialize(is);
         TimeRepresentation timeRepresentation = (TimeRepresentation) deserialize(is);
 
-        config.setNodeIdType(nodeIdType);
-        config.setEdgeIdType(edgeIdType);
-        config.setEdgeLabelType(edgeLabelType);
-        config.setEdgeWeightType(edgeWeightType);
-        config.setTimeRepresentation(timeRepresentation);
+        config.nodeIdType(nodeIdType);
+        config.edgeIdType(edgeIdType);
+        config.edgeLabelType(edgeLabelType);
+        config.edgeWeightType(edgeWeightType);
+        config.timeRepresentation(timeRepresentation);
         if (readVersion >= 0.5) {
             Boolean edgeColumn = (Boolean) deserialize(is);
-            config.setEdgeWeightColumn(edgeColumn);
+            config.edgeWeightColumn(edgeColumn);
         }
 
-        return config;
+        return new ConfigurationImpl(config.build());
     }
 
     private void serializeList(final DataOutput out, final List list) throws IOException {
@@ -1584,8 +1605,8 @@ public class Serialization {
             TimeStore b = (TimeStore) obj;
             out.write(TIME_STORE);
             serializeTimeStore(out);
-        } else if (obj instanceof Configuration) {
-            Configuration b = (Configuration) obj;
+        } else if (obj instanceof ConfigurationImpl) {
+            ConfigurationImpl b = (ConfigurationImpl) obj;
             out.write(CONFIGURATION);
             serializeConfiguration(out);
         } else if (obj instanceof Interval) {
