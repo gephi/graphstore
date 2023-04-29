@@ -42,10 +42,17 @@ import org.gephi.graph.impl.GraphModelImpl;
  * <pre>
  * GraphModel model = GraphModel.Factory.newInstance();
  * </pre>
+ *
+ * A <code>Configuration</code> object can be passed to the factory:
+ *
+ * <pre>
+ * Configuration configuration = Configuration.builder().build();
+ * GraphModel model = GraphModel.Factory.newInstance(configuration);
+ * </pre>
  * 
  * This API revolves around a set of simple concepts. A <code>GraphModel</code>
  * encapsulate all elements and metadata associated with a graph structure. In
- * other words its a single graph but it also contains configuration, indices,
+ * other words it's a single graph, but it also contains configuration, indices,
  * views and other less important services such as observers.
  * <p>
  * Then, <code>GraphModel</code> gives access to the <code>Graph</code>
@@ -83,6 +90,7 @@ import org.gephi.graph.impl.GraphModelImpl;
  * <code>null</code> label, which is internally represented as zero.
  *
  * @see Graph
+ * @see Configuration
  * @see Element
  * @see Table
  * @see Column

@@ -26,13 +26,21 @@ import org.gephi.graph.impl.ConfigurationImpl;
  * {@link GraphModel.Factory#newInstance(org.gephi.graph.api.Configuration)} to
  * create a <em>GraphModel</em> with custom configuration.
  * <p>
+ * Create instances by using the builder:
+ * <pre>
+ * Configuration config = Configuration.builder().build();
+ * </pre>
+ * <p>
  * Note that setting configurations after the <em>GraphModel</em> has been
  * created won't have any effect.
  * <p>
  * By default, both node and edge id types are <code>String.class</code> and the
  * time representation is <code>TIMESTAMP</code>.
+ * <p>
+ * See the builder documentation for more information on default values.
  *
  * @see GraphModel
+ * @see Builder
  */
 public class Configuration {
 
