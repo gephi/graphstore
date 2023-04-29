@@ -267,4 +267,9 @@ public class ConfigurationTest {
         Configuration c2 = new ConfigurationImpl(c1).toConfiguration();
         Assert.assertEquals(c1, c2);
     }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testExceptionSpatialIndexWithDisabledNodeProperties() {
+        Configuration.builder().enableSpatialIndex(true).enableNodeProperties(false).build();
+    }
 }

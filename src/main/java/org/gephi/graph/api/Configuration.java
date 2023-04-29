@@ -80,6 +80,11 @@ public class Configuration {
          * @return the configuration
          */
         public Configuration build() {
+            // Check for potential inconsistencies
+            if (!configuration.isEnableNodeProperties() && configuration.isEnableSpatialIndex()) {
+                throw new IllegalStateException("Spatial index can't be enabled if node properties are disabled");
+            }
+
             return new Configuration(configuration);
         }
 

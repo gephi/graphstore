@@ -426,4 +426,21 @@ public class EdgeImplTest {
             Assert.assertSame(e.getTable(), graphStore.getModel().getEdgeTable());
         }
     }
+
+    @Test
+    public void testProperties() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Edge e = graphStore.getEdge("0");
+        Assert.assertNotNull(e.getTextProperties());
+        Assert.assertNotNull(e.getColor());
+        Assert.assertEquals(e.alpha(), 1f);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testPropertiesDisabled() {
+        GraphStore graphStore = GraphGenerator
+                .generateTinyGraphStore(Configuration.builder().enableEdgeProperties(false).build());
+        Edge e = graphStore.getEdge("0");
+        Assert.assertNull(e.getColor());
+    }
 }

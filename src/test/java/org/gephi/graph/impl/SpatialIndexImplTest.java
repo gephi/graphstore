@@ -16,6 +16,12 @@ public class SpatialIndexImplTest {
     private static final Rect2D BOUNDS_RECT = new Rect2D(-BOUNDS, -BOUNDS, BOUNDS, BOUNDS);
 
     @Test
+    public void testDisabled() {
+        GraphStore store = GraphGenerator.generateEmptyGraphStore();
+        Assert.assertNull(store.spatialIndex);
+    }
+
+    @Test
     public void testGetEdgesEmpty() {
         SpatialIndexImpl spatialIndex = new GraphStore(null, getConfig()).spatialIndex;
         Assert.assertTrue(spatialIndex.getEdgesInArea(BOUNDS_RECT).toCollection().isEmpty());

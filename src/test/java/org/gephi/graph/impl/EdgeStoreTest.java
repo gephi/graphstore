@@ -1913,7 +1913,8 @@ public class EdgeStoreTest {
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testAddWithoutAutoRegistration() {
-        ConfigurationImpl config = new ConfigurationImpl(Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        ConfigurationImpl config = new ConfigurationImpl(
+                Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
         EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(config), null, config, null, null, null);
         EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
         edgeStore.add(edge);
@@ -1921,7 +1922,8 @@ public class EdgeStoreTest {
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testSetTypeWithoutAutoRegistration() {
-        ConfigurationImpl config = new ConfigurationImpl(Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        ConfigurationImpl config = new ConfigurationImpl(
+                Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
         EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(config), null, config, null, null, null);
         EdgeImpl edge = GraphGenerator.generateSingleEdge();
         edgeStore.add(edge);
