@@ -385,17 +385,17 @@ public class AttributeUtils {
         if (typeClass.equals(String.class)) {
             return str;
         } else if (typeClass.equals(Byte.class)) {
-            return new Byte(str);
+            return Byte.valueOf(str);
         } else if (typeClass.equals(Short.class)) {
-            return new Short(str);
+            return Short.valueOf(str);
         } else if (typeClass.equals(Integer.class)) {
-            return new Integer(str);
+            return Integer.valueOf(str);
         } else if (typeClass.equals(Long.class)) {
-            return new Long(str);
+            return Long.valueOf(str);
         } else if (typeClass.equals(Float.class)) {
-            return new Float(str);
+            return Float.valueOf(str);
         } else if (typeClass.equals(Double.class)) {
-            return new Double(str);
+            return Double.valueOf(str);
         } else if (typeClass.equals(BigInteger.class)) {
             return new BigInteger(str);
         } else if (typeClass.equals(BigDecimal.class)) {
