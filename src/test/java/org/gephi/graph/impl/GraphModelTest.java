@@ -548,7 +548,7 @@ public class GraphModelTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testBadEdgeWeightTypeConfigurationTimestamps() {
         Configuration config = Configuration.builder()
-            .timeRepresentation(TimeRepresentation.INTERVAL).edgeWeightType(IntervalDoubleMap.class).build();
+            .timeRepresentation(TimeRepresentation.TIMESTAMP).edgeWeightType(IntervalDoubleMap.class).build();
         new GraphModelImpl(config);
     }
 

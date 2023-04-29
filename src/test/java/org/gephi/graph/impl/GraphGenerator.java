@@ -413,7 +413,7 @@ public class GraphGenerator {
     }
 
     public static GraphStore generateTinyUndirectedGraphStore() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().build());
         GraphStore graphStore = graphModel.store;
         Node n1 = graphStore.factory.newNode("1");
         Node n2 = graphStore.factory.newNode("2");
@@ -441,14 +441,12 @@ public class GraphGenerator {
     }
 
     public static GraphStore generateEmptyGraphStore(TimeRepresentation timeRepresentation) {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(timeRepresentation);
+        Configuration config = Configuration.builder().timeRepresentation(timeRepresentation).build();
         return generateEmptyGraphStore(config);
     }
 
     public static GraphStore generateTinyGraphStore(TimeRepresentation timeRepresentation) {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(timeRepresentation);
+        Configuration config = Configuration.builder().timeRepresentation(timeRepresentation).build();
         return generateTinyGraphStore(config);
     }
 

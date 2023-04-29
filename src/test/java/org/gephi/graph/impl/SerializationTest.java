@@ -745,9 +745,8 @@ public class SerializationTest {
         Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphModel.configuration);
 
-        graphModel = new GraphModelImpl();
-        ser = new Serialization(graphModel);
-        Configuration l = (Configuration) ser.deserialize(buf);
+        ser = new Serialization(new GraphModelImpl());
+        ConfigurationImpl l = (ConfigurationImpl) ser.deserialize(buf);
         Assert.assertTrue(graphModel.configuration.equals(l));
     }
 
@@ -1211,6 +1210,7 @@ public class SerializationTest {
     @Test
     public void testDefaultColumns() throws Exception {
         GraphModelImpl gm = GraphGenerator.generateSmallUndirectedGraphStore().graphModel;
+
         Serialization ser = new Serialization(gm);
 
         DataInputOutput dio = new DataInputOutput();
@@ -1221,6 +1221,8 @@ public class SerializationTest {
         Assert.assertSame(read.defaultColumns().nodeId(), read.getNodeTable().getColumn("id"));
         Assert.assertSame(read.defaultColumns().nodeLabel(), read.getNodeTable().getColumn("label"));
         Assert.assertSame(read.defaultColumns().edgeId(), read.getEdgeTable().getColumn("id"));
+        Assert.assertSame(read.defaultColumns().edgeLabel(), read.getEdgeTable().getColumn("label"));
+        Assert.assertSame(read.defaultColumns().edgeWeight(), read.getEdgeTable().getColumn("weight"));
     }
 
     @Test

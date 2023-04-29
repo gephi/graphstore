@@ -37,6 +37,25 @@ public class DefaultColumnsImpl implements GraphModel.DefaultColumns {
                 null, Origin.PROPERTY, false, true);
     }
 
+    // Used by serialization
+    protected ColumnImpl getColumn(TableImpl table, int storeId) {
+        TableDefaultColumns<? extends Element> defaultColumns = table.isNodeTable() ? nodeDefaultColumns
+                : edgeDefaultColumns;
+        switch (storeId) {
+            case GraphStoreConfiguration.ELEMENT_ID_INDEX:
+                return defaultColumns.id;
+            case GraphStoreConfiguration.ELEMENT_LABEL_INDEX:
+                return defaultColumns.label;
+            case GraphStoreConfiguration.ELEMENT_TIMESET_INDEX:
+                return defaultColumns.timeset;
+        }
+
+        if (table.isEdgeTable() && storeId == GraphStoreConfiguration.EDGE_WEIGHT_INDEX) {
+            return store.edgeTable.getColumn(storeId);
+        }
+        return null;
+    }
+
     @Override
     public Column nodeId() {
         return nodeDefaultColumns.id;

@@ -139,7 +139,8 @@ public interface GraphModel {
 
         /**
          * Read the <code>input</code> into the given graph model. The provided graph
-         * model should be empty.
+         * model should be empty and the configurations should match between the provided model and
+         * the one being read.
          *
          * @param input data input to read from
          * @return the graphmodel passed as parameter

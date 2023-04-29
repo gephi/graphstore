@@ -36,8 +36,15 @@ public class GraphBridgeTest {
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testVerifyConfiguration() {
-        Configuration destConfig = new Configuration();
-        destConfig.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration destConfig = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
+        GraphModelImpl dest = new GraphModelImpl(destConfig);
+
+        new GraphBridgeImpl(dest.store).copyNodes(GraphGenerator.generateTinyGraphStore().getNodes().toArray());
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testVerifyConfigurationParallelEdges() {
+        Configuration destConfig = Configuration.builder().enableParallelEdgesSameType(!GraphStoreConfiguration.DEFAULT_ENABLE_PARALLEL_EDGES_SAME_TYPE).build();
         GraphModelImpl dest = new GraphModelImpl(destConfig);
 
         new GraphBridgeImpl(dest.store).copyNodes(GraphGenerator.generateTinyGraphStore().getNodes().toArray());

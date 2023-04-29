@@ -257,7 +257,7 @@ public class GraphBridgeImpl implements GraphBridge {
         ConfigurationImpl sourceConfig = sourceStore.configuration;
 
         // Time representation
-        if (sourceStore.graphModel.isDynamic() && !destConfig.getTimeRepresentation().equals(sourceConfig.getTimeRepresentation())) {
+        if (!destConfig.getTimeRepresentation().equals(sourceConfig.getTimeRepresentation())) {
             throw new RuntimeException("The time representations doesn't match, source: " + sourceConfig.getTimeRepresentation() + ", destination: " + destConfig.getTimeRepresentation());
         }
 
@@ -279,6 +279,11 @@ public class GraphBridgeImpl implements GraphBridge {
         // Edge label type
         if (!destConfig.getEdgeLabelType().equals(sourceConfig.getEdgeLabelType())) {
             throw new RuntimeException("The edge label type doesn't match, source: " + sourceConfig.getEdgeLabelType() + ", destination: " + destConfig.getEdgeLabelType());
+        }
+
+        // Parallel edges
+        if (destConfig.isEnableParallelEdgesSameType() != sourceConfig.isEnableParallelEdgesSameType()) {
+            throw new RuntimeException("The parallel edges of same type configuration doesn't match, source: " + sourceConfig.isEnableParallelEdgesSameType() + ", destination: " + destConfig.isEnableParallelEdgesSameType());
         }
 
         // Verify node table
