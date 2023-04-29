@@ -27,7 +27,7 @@ public class ConfigurationImpl {
     // Enable reverse index for edge attributes (default True)
     private final boolean enableIndexEdges;
     // Enable reverse index for timestamps (default True)
-    private final boolean enableIndexTimestamps;
+    private final boolean enableIndexTime;
     // Enable observers (default True)
     private final boolean enableObservers;
     // Node properties are X, Y, Color etc. (default True)
@@ -50,7 +50,7 @@ public class ConfigurationImpl {
         enableAutoEdgeTypeRegistration = GraphStoreConfiguration.DEFAULT_ENABLE_AUTO_EDGE_TYPE_REGISTRATION;
         enableIndexNodes = GraphStoreConfiguration.DEFAULT_ENABLE_INDEX_NODES;
         enableIndexEdges = GraphStoreConfiguration.DEFAULT_ENABLE_INDEX_EDGES;
-        enableIndexTimestamps = GraphStoreConfiguration.DEFAULT_ENABLE_INDEX_TIMESTAMP;
+        enableIndexTime = GraphStoreConfiguration.DEFAULT_ENABLE_INDEX_TIME;
         enableObservers = GraphStoreConfiguration.DEFAULT_ENABLE_OBSERVERS;
         enableNodeProperties = GraphStoreConfiguration.DEFAULT_ENABLE_NODE_PROPERTIES;
         enableEdgeProperties = GraphStoreConfiguration.DEFAULT_ENABLE_EDGE_PROPERTIES;
@@ -69,7 +69,7 @@ public class ConfigurationImpl {
         enableAutoEdgeTypeRegistration = configuration.isEnableAutoEdgeTypeRegistration();
         enableIndexNodes = configuration.isEnableIndexNodes();
         enableIndexEdges = configuration.isEnableIndexEdges();
-        enableIndexTimestamps = configuration.isEnableIndexTimestamps();
+        enableIndexTime = configuration.isEnableIndexTime();
         enableObservers = configuration.isEnableObservers();
         enableNodeProperties = configuration.isEnableNodeProperties();
         enableEdgeProperties = configuration.isEnableEdgeProperties();
@@ -121,8 +121,8 @@ public class ConfigurationImpl {
         return enableIndexEdges;
     }
 
-    public boolean isEnableIndexTimestamps() {
-        return enableIndexTimestamps;
+    public boolean isEnableIndexTime() {
+        return enableIndexTime;
     }
 
     public boolean isEnableObservers() {
@@ -179,7 +179,7 @@ public class ConfigurationImpl {
         if (isEnableIndexEdges() != that.isEnableIndexEdges()) {
             return false;
         }
-        if (isEnableIndexTimestamps() != that.isEnableIndexTimestamps()) {
+        if (isEnableIndexTime() != that.isEnableIndexTime()) {
             return false;
         }
         if (isEnableObservers() != that.isEnableObservers()) {
@@ -224,7 +224,7 @@ public class ConfigurationImpl {
         result = 31 * result + (isEnableAutoEdgeTypeRegistration() ? 1 : 0);
         result = 31 * result + (isEnableIndexNodes() ? 1 : 0);
         result = 31 * result + (isEnableIndexEdges() ? 1 : 0);
-        result = 31 * result + (isEnableIndexTimestamps() ? 1 : 0);
+        result = 31 * result + (isEnableIndexTime() ? 1 : 0);
         result = 31 * result + (isEnableObservers() ? 1 : 0);
         result = 31 * result + (isEnableNodeProperties() ? 1 : 0);
         result = 31 * result + (isEnableEdgeProperties() ? 1 : 0);

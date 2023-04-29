@@ -136,6 +136,18 @@ public class ConfigurationTest {
     }
 
     @Test
+    public void testDisableAutoLocking() {
+        Configuration c = Configuration.builder().enableAutoLocking(false).build();
+        Assert.assertEquals(c.isEnableAutoLocking(), Boolean.FALSE);
+    }
+
+    @Test
+    public void testDisableTimeIndexing() {
+        Configuration c = Configuration.builder().enableIndexTime(false).build();
+        Assert.assertEquals(c.isEnableIndexTime(), Boolean.FALSE);
+    }
+
+    @Test
     @SuppressWarnings("deprecation")
     public void testSetEdgeWeightColumnDeprecated() {
         Configuration c = new Configuration();

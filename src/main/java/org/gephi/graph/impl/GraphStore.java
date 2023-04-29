@@ -16,7 +16,6 @@
 
 package org.gephi.graph.impl;
 
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -108,7 +106,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
                 configuration.isEnableObservers() ? version : null);
         nodeTable = new TableImpl<>(this, Node.class);
         edgeTable = new TableImpl<>(this, Edge.class);
-        timeStore = new TimeStore(this, configuration.isEnableIndexTimestamps());
+        timeStore = new TimeStore(this, configuration.isEnableIndexTime());
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
         timeFormat = GraphStoreConfiguration.DEFAULT_TIME_FORMAT;

@@ -18,7 +18,6 @@ package org.gephi.graph.api;
 import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.impl.ConfigurationImpl;
-import org.gephi.graph.impl.GraphStoreConfiguration;
 
 /**
  * Global configuration set at initialization.
@@ -62,6 +61,12 @@ public class Configuration {
         return new Builder();
     }
 
+    /**
+     * Configuration builder.
+     * <p>
+     *
+     * Note that this class is not thread-safe.
+     */
     public static class Builder {
 
         private ConfigurationImpl configuration;
@@ -374,6 +379,29 @@ public class Configuration {
         }
 
         /**
+         * Sets whether to enable the reverse indexing of timestamps and intervals.
+         * <p>
+         * If enabled, the reverse index is updated while element's time set is updated.
+         * This powers {@link GraphModel#getNodeTimeIndex()} and
+         * {@link GraphModel#getEdgeTimeIndex()} ()} but has a negative impact on memory
+         * usage (as any reverse index does).
+         * <p>
+         * Default is <code>true</code>.
+         *
+         * @param enableIndexTime enable time indexing
+         * @return this builder
+         */
+        public Builder enableIndexTime(final boolean enableIndexTime) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableIndexTime() {
+                    return enableIndexTime;
+                }
+            });
+            return this;
+        }
+
+        /**
          * Sets whether to enable multiple edges of the same type between two nodes.
          * <p>
          * If disabled, only a single edge of a given type can exist between two nodes.
@@ -388,6 +416,30 @@ public class Configuration {
                 @Override
                 public boolean isEnableParallelEdgesSameType() {
                     return enableParallelEdgesSameType;
+                }
+            });
+            return this;
+        }
+
+        /**
+         * Sets whether to enable auto locking when using read/write APIs.
+         * <p>
+         * If disabled, the client is responsible for handling multithreading themselves
+         * or calling methods such as {@link Graph#readLock()} or
+         * {@link Graph#writeLock()}. If enabled, each read methods (including
+         * iterators) handle locking. Similarly, each write method handle locking.
+         * <p>
+         * Default is <code>true</code>.
+         *
+         * @param enableAutoLocking enable auto locking for read/write operations
+         * @see GraphLock
+         * @return this builder
+         */
+        public Builder enableAutoLocking(final boolean enableAutoLocking) {
+            this.configuration = new ConfigurationImpl(new Configuration(this.configuration) {
+                @Override
+                public boolean isEnableAutoLocking() {
+                    return enableAutoLocking;
                 }
             });
             return this;
@@ -551,8 +603,8 @@ public class Configuration {
         return delegate.isEnableIndexEdges();
     }
 
-    public boolean isEnableIndexTimestamps() {
-        return delegate.isEnableIndexTimestamps();
+    public boolean isEnableIndexTime() {
+        return delegate.isEnableIndexTime();
     }
 
     public boolean isEnableObservers() {

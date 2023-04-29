@@ -344,6 +344,14 @@ public class GraphModelTest {
 
         Index index = graphModel.getNodeIndex();
         Assert.assertEquals(index.count(col, "bar"), 1);
+        Assert.assertSame(graphModel.getElementIndex(table), index);
+    }
+
+    @Test
+    public void testGetNodeIndexWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexNodes(false).build());
+        Assert.assertNotNull(graphModel.getNodeIndex());
+        Assert.assertNotNull(graphModel.getNodeIndex().getColumnIndex(graphModel.defaultColumns().nodeId()));
     }
 
     @Test
@@ -360,6 +368,7 @@ public class GraphModelTest {
 
         Index index = graphModel.getNodeIndex(view);
         Assert.assertEquals(index.count(col, "bar"), 1);
+        Assert.assertSame(graphModel.getElementIndex(table, view), index);
     }
 
     @Test
@@ -376,6 +385,14 @@ public class GraphModelTest {
 
         Index index = graphModel.getEdgeIndex();
         Assert.assertEquals(index.count(col, "bar"), 1);
+        Assert.assertSame(graphModel.getElementIndex(table), index);
+    }
+
+    @Test
+    public void testGetEdgeIndexWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexEdges(false).build());
+        Assert.assertNotNull(graphModel.getEdgeIndex());
+        Assert.assertNotNull(graphModel.getEdgeIndex().getColumnIndex(graphModel.defaultColumns().edgeId()));
     }
 
     @Test
@@ -395,6 +412,7 @@ public class GraphModelTest {
 
         Index index = graphModel.getEdgeIndex(view);
         Assert.assertEquals(index.count(col, "bar"), 1);
+        Assert.assertSame(graphModel.getElementIndex(table, view), index);
     }
 
     @Test
@@ -410,6 +428,12 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testGetNodeTimeIndexWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexTime(false).build());
+        Assert.assertNull(graphModel.getNodeTimeIndex());
+    }
+
+    @Test
     public void testGetEdgeTimestampIndex() {
         GraphModelImpl graphModel = new GraphModelImpl();
         Node n = graphModel.factory().newNode("1");
@@ -421,6 +445,12 @@ public class GraphModelTest {
         TimeIndex<Edge> index = graphModel.getEdgeTimeIndex();
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 1.0);
+    }
+
+    @Test
+    public void testGetEdgeTimeIndexWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexTime(false).build());
+        Assert.assertNull(graphModel.getEdgeTimeIndex());
     }
 
     @Test

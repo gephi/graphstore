@@ -16,7 +16,6 @@
 package org.gephi.graph.impl;
 
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimeRepresentation;
@@ -28,7 +27,7 @@ public final class GraphStoreConfiguration {
     public static final boolean DEFAULT_ENABLE_AUTO_EDGE_TYPE_REGISTRATION = true;
     public static final boolean DEFAULT_ENABLE_INDEX_NODES = true;
     public static final boolean DEFAULT_ENABLE_INDEX_EDGES = true;
-    public static final boolean DEFAULT_ENABLE_INDEX_TIMESTAMP = true;
+    public static final boolean DEFAULT_ENABLE_INDEX_TIME = true;
     public static final boolean DEFAULT_ENABLE_OBSERVERS = true;
     public static final boolean DEFAULT_ENABLE_NODE_PROPERTIES = true;
     public static final boolean DEFAULT_ENABLE_EDGE_PROPERTIES = true;
