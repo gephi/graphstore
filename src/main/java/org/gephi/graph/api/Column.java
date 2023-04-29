@@ -152,6 +152,8 @@ public interface Column {
      *
      * @param withDiff true if column observer should provide column differences
      * @return the column observer
+     * @throws UnsupportedOperationException if observers are disabled (from
+     *         Configuration)
      */
     public ColumnObserver createColumnObserver(boolean withDiff);
 }

@@ -12,8 +12,8 @@ public class DefaultColumnsImpl implements GraphModel.DefaultColumns {
     protected final GraphStore store;
 
     // Default columns (initialised at store creation)
-    protected TableDefaultColumns<Node> nodeDefaultColumns;
-    protected TableDefaultColumns<Edge> edgeDefaultColumns;
+    protected final TableDefaultColumns<Node> nodeDefaultColumns;
+    protected final TableDefaultColumns<Edge> edgeDefaultColumns;
 
     // Extra columns (temporary solution, until they are fully added as normal
     // columns)
@@ -37,9 +37,23 @@ public class DefaultColumnsImpl implements GraphModel.DefaultColumns {
                 null, Origin.PROPERTY, false, true);
     }
 
-    public void resetConfiguration() {
-        this.nodeDefaultColumns = new TableDefaultColumns<>(store.nodeTable);
-        this.edgeDefaultColumns = new TableDefaultColumns<>(store.edgeTable);
+    // Used by serialization
+    protected ColumnImpl getColumn(TableImpl table, int storeId) {
+        TableDefaultColumns<? extends Element> defaultColumns = table.isNodeTable() ? nodeDefaultColumns
+                : edgeDefaultColumns;
+        switch (storeId) {
+            case GraphStoreConfiguration.ELEMENT_ID_INDEX:
+                return defaultColumns.id;
+            case GraphStoreConfiguration.ELEMENT_LABEL_INDEX:
+                return defaultColumns.label;
+            case GraphStoreConfiguration.ELEMENT_TIMESET_INDEX:
+                return defaultColumns.timeset;
+        }
+
+        if (table.isEdgeTable() && storeId == GraphStoreConfiguration.EDGE_WEIGHT_INDEX) {
+            return store.edgeTable.getColumn(storeId);
+        }
+        return null;
     }
 
     @Override

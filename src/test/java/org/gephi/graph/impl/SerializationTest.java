@@ -713,8 +713,7 @@ public class SerializationTest {
 
     @Test
     public void testIntervalStore() throws IOException, ClassNotFoundException {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphStore store = graphModel.store;
         TimeStore timestampStore = store.timeStore;
@@ -737,20 +736,15 @@ public class SerializationTest {
 
     @Test
     public void testConfiguration() throws IOException, ClassNotFoundException {
-        GraphModelImpl graphModel = new GraphModelImpl();
-        Configuration configuration = graphModel.configuration;
-
-        configuration.setNodeIdType(Float.class);
-        configuration.setEdgeIdType(Long.class);
-        configuration.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().nodeIdType(Float.class)
+                .edgeIdType(Long.class).timeRepresentation(TimeRepresentation.INTERVAL).build());
 
         Serialization ser = new Serialization(graphModel);
-        byte[] buf = ser.serialize(configuration);
+        byte[] buf = ser.serialize(graphModel.configuration);
 
-        graphModel = new GraphModelImpl();
-        ser = new Serialization(graphModel);
-        Configuration l = (Configuration) ser.deserialize(buf);
-        Assert.assertTrue(configuration.equals(l));
+        ser = new Serialization(new GraphModelImpl());
+        ConfigurationImpl l = (ConfigurationImpl) ser.deserialize(buf);
+        Assert.assertTrue(graphModel.configuration.equals(l));
     }
 
     @Test
@@ -1213,6 +1207,7 @@ public class SerializationTest {
     @Test
     public void testDefaultColumns() throws Exception {
         GraphModelImpl gm = GraphGenerator.generateSmallUndirectedGraphStore().graphModel;
+
         Serialization ser = new Serialization(gm);
 
         DataInputOutput dio = new DataInputOutput();
@@ -1223,6 +1218,8 @@ public class SerializationTest {
         Assert.assertSame(read.defaultColumns().nodeId(), read.getNodeTable().getColumn("id"));
         Assert.assertSame(read.defaultColumns().nodeLabel(), read.getNodeTable().getColumn("label"));
         Assert.assertSame(read.defaultColumns().edgeId(), read.getEdgeTable().getColumn("id"));
+        Assert.assertSame(read.defaultColumns().edgeLabel(), read.getEdgeTable().getColumn("label"));
+        Assert.assertSame(read.defaultColumns().edgeWeight(), read.getEdgeTable().getColumn("weight"));
     }
 
     @Test

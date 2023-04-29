@@ -16,7 +16,6 @@
 
 package org.gephi.graph.impl;
 
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -48,7 +46,7 @@ import org.gephi.graph.api.types.TimestampSet;
 public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     protected final GraphModelImpl graphModel;
-    protected final Configuration configuration;
+    protected final ConfigurationImpl configuration;
     // Stores
     protected final NodeStore nodeStore;
     protected final EdgeStore edgeStore;
@@ -79,28 +77,36 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected final DefaultColumnsImpl defaultColumns;
 
     public GraphStore() {
-        this(null);
+        this(null, new ConfigurationImpl());
     }
 
     public GraphStore(GraphModelImpl model) {
-        configuration = model != null ? model.configuration : new Configuration();
+        this(model, model.configuration);
+    }
+
+    protected GraphStore(GraphModelImpl model, Configuration config) {
+        this(model, new ConfigurationImpl(config));
+    }
+
+    protected GraphStore(GraphModelImpl model, ConfigurationImpl config) {
+        configuration = config;
         graphModel = model;
         lock = new GraphLockImpl();
 
         edgeTypeStore = new EdgeTypeStore();
         mainGraphView = new MainGraphView();
         viewStore = new GraphViewStore(this);
-        version = GraphStoreConfiguration.ENABLE_OBSERVERS ? new GraphVersion(this) : null;
-        observers = GraphStoreConfiguration.ENABLE_OBSERVERS ? new ArrayList<>() : null;
-        spatialIndex = GraphStoreConfiguration.ENABLE_SPATIAL_INDEX ? new SpatialIndexImpl(this) : null;
-        edgeStore = new EdgeStore(edgeTypeStore, spatialIndex,
-                GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null, viewStore,
-                GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
-        nodeStore = new NodeStore(edgeStore, spatialIndex, GraphStoreConfiguration.ENABLE_AUTO_LOCKING ? lock : null,
-                viewStore, GraphStoreConfiguration.ENABLE_OBSERVERS ? version : null);
-        nodeTable = new TableImpl<>(this, Node.class, GraphStoreConfiguration.ENABLE_INDEX_NODES);
-        edgeTable = new TableImpl<>(this, Edge.class, GraphStoreConfiguration.ENABLE_INDEX_EDGES);
-        timeStore = new TimeStore(this, GraphStoreConfiguration.ENABLE_INDEX_TIMESTAMP);
+        version = configuration.isEnableObservers() ? new GraphVersion(this) : null;
+        observers = configuration.isEnableObservers() ? new ArrayList<>() : null;
+        spatialIndex = configuration.isEnableSpatialIndex() ? new SpatialIndexImpl(this) : null;
+        edgeStore = new EdgeStore(edgeTypeStore, spatialIndex, configuration,
+                configuration.isEnableAutoLocking() ? lock : null, viewStore,
+                configuration.isEnableObservers() ? version : null);
+        nodeStore = new NodeStore(edgeStore, spatialIndex, configuration.isEnableAutoLocking() ? lock : null, viewStore,
+                configuration.isEnableObservers() ? version : null);
+        nodeTable = new TableImpl<>(this, Node.class);
+        edgeTable = new TableImpl<>(this, Edge.class);
+        timeStore = new TimeStore(this, configuration.isEnableIndexTime());
         attributes = new GraphAttributesImpl();
         factory = new GraphFactoryImpl(this);
         timeFormat = GraphStoreConfiguration.DEFAULT_TIME_FORMAT;
@@ -132,10 +138,9 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
                         IntervalSet.class, "Interval", null, Origin.PROPERTY, false, false));
             }
         }
-        if (configuration.getEdgeWeightColumn()) {
-            final boolean edgeWeightIndexed = AttributeUtils.isSimpleType(configuration.getEdgeWeightType());
+        if (configuration.isEdgeWeightColumn()) {
             edgeTable.store.addColumn(new ColumnImpl(edgeTable, GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID,
-                    configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, edgeWeightIndexed, false));
+                    configuration.getEdgeWeightType(), "Weight", null, Origin.PROPERTY, false, false));
         } else {
             edgeTable.store.length++;
         }
@@ -166,9 +171,6 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public boolean addEdge(final Edge edge) {
         autoWriteLock();
         try {
-            if (edgeTypeStore != null) {
-                edgeTypeStore.registerEdgeType(edge.getType());
-            }
             return edgeStore.add(edge);
         } finally {
             autoWriteUnlock();
@@ -179,11 +181,6 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public boolean addAllEdges(Collection<? extends Edge> edges) {
         autoWriteLock();
         try {
-            for (Edge edge : edges) {
-                if (edgeTypeStore != null) {
-                    edgeTypeStore.registerEdgeType(edge.getType());
-                }
-            }
             return edgeStore.addAll(edges);
         } finally {
             autoWriteUnlock();
@@ -705,31 +702,31 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     protected void autoReadLock() {
-        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
+        if (configuration.isEnableAutoLocking()) {
             readLock();
         }
     }
 
     protected void autoReadUnlock() {
-        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
+        if (configuration.isEnableAutoLocking()) {
             readUnlock();
         }
     }
 
     protected void autoReadUnlockAll() {
-        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
+        if (configuration.isEnableAutoLocking()) {
             readUnlockAll();
         }
     }
 
     protected void autoWriteLock() {
-        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
+        if (configuration.isEnableAutoLocking()) {
             writeLock();
         }
     }
 
     protected void autoWriteUnlock() {
-        if (GraphStoreConfiguration.ENABLE_AUTO_LOCKING) {
+        if (configuration.isEnableAutoLocking()) {
             writeUnlock();
         }
     }
@@ -832,13 +829,11 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator, boolean blocking) {
-        return new EdgeIterableWrapper(edgeIterator,
-                (blocking && GraphStoreConfiguration.ENABLE_AUTO_LOCKING) ? lock : null);
+        return new EdgeIterableWrapper(edgeIterator, (blocking && configuration.isEnableAutoLocking()) ? lock : null);
     }
 
     protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator, boolean blocking) {
-        return new NodeIterableWrapper(nodeIterator,
-                (blocking && GraphStoreConfiguration.ENABLE_AUTO_LOCKING) ? lock : null);
+        return new NodeIterableWrapper(nodeIterator, (blocking && configuration.isEnableAutoLocking()) ? lock : null);
     }
 
     public int deepHashCode() {

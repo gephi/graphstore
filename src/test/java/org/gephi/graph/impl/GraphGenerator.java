@@ -413,7 +413,7 @@ public class GraphGenerator {
     }
 
     public static GraphStore generateTinyUndirectedGraphStore() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().build());
         GraphStore graphStore = graphModel.store;
         Node n1 = graphStore.factory.newNode("1");
         Node n2 = graphStore.factory.newNode("2");
@@ -441,19 +441,17 @@ public class GraphGenerator {
     }
 
     public static GraphStore generateEmptyGraphStore(TimeRepresentation timeRepresentation) {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(timeRepresentation);
+        Configuration config = Configuration.builder().timeRepresentation(timeRepresentation).build();
         return generateEmptyGraphStore(config);
     }
 
     public static GraphStore generateTinyGraphStore(TimeRepresentation timeRepresentation) {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(timeRepresentation);
+        Configuration config = Configuration.builder().timeRepresentation(timeRepresentation).build();
         return generateTinyGraphStore(config);
     }
 
-    public static GraphStore generateTinyGraphStoreWithSelfLoop() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+    public static GraphStore generateTinyGraphStoreWithSelfLoop(Configuration configuration) {
+        GraphModelImpl graphModel = new GraphModelImpl(configuration);
         GraphStore graphStore = graphModel.store;
         NodeImpl n1 = new NodeImpl("1", graphStore);
         EdgeImpl e = new EdgeImpl("0", graphStore, n1, n1, EdgeTypeStore.NULL_LABEL, 1.0, true);
@@ -462,8 +460,12 @@ public class GraphGenerator {
         return graphStore;
     }
 
+    public static GraphStore generateTinyGraphStoreWithSelfLoop() {
+        return generateTinyGraphStoreWithSelfLoop(Configuration.builder().build());
+    }
+
     public static GraphStore generateTinyGraphStoreWithMutualEdge() {
-        GraphModelImpl graphModel = new GraphModelImpl(new Configuration());
+        GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore graphStore = graphModel.store;
         NodeImpl n1 = new NodeImpl("1", graphStore);
         NodeImpl n2 = new NodeImpl("2", graphStore);

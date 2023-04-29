@@ -28,7 +28,7 @@ public class TableObserverTest {
 
     @Test
     public void testDefaultObserver() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
 
         Assert.assertFalse(tableObserver.destroyed);
@@ -40,7 +40,7 @@ public class TableObserverTest {
 
     @Test
     public void testObserverAddColumn() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
 
         table.addColumn("0", Integer.class);
@@ -51,7 +51,7 @@ public class TableObserverTest {
 
     @Test
     public void testObserverRemoveColumn() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         table.addColumn("0", Integer.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
         table.removeColumn("0");
@@ -62,7 +62,7 @@ public class TableObserverTest {
 
     @Test
     public void testObserverModifyColumn() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         Column col = table.addColumn("0", TimestampIntegerMap.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
         col.setEstimator(Estimator.MAX);
@@ -73,7 +73,7 @@ public class TableObserverTest {
 
     @Test
     public void testDestroyObserver() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
 
         tableObserver.destroy();
@@ -84,21 +84,21 @@ public class TableObserverTest {
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testGetDiffWithoutSetting() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(false);
         tableObserver.getDiff();
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
     public void testGetDiffWithoutHasGraphChanged() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(true);
         tableObserver.getDiff();
     }
 
     @Test
     public void testDiffRemoveColumn() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         table.addColumn("0", Integer.class);
         Column[] columns = table.toArray();
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(true);
@@ -115,7 +115,7 @@ public class TableObserverTest {
 
     @Test
     public void testDiffAddColumn() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(true);
         table.addColumn("0", Integer.class);
         Column[] columns = table.toArray();
@@ -131,7 +131,7 @@ public class TableObserverTest {
 
     @Test
     public void testDiffModifyColumn() {
-        TableImpl table = new TableImpl(Node.class, false);
+        TableImpl table = new TableImpl(Node.class);
         Column col = table.addColumn("0", TimestampIntegerMap.class);
         TableObserverImpl tableObserver = (TableObserverImpl) table.createTableObserver(true);
         col.setEstimator(Estimator.AVERAGE);

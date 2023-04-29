@@ -344,6 +344,14 @@ public class GraphModelTest {
 
         Index index = graphModel.getNodeIndex();
         Assert.assertEquals(index.count(col, "bar"), 1);
+        Assert.assertSame(graphModel.getElementIndex(table), index);
+    }
+
+    @Test
+    public void testGetNodeIndexWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexNodes(false).build());
+        Assert.assertNotNull(graphModel.getNodeIndex());
+        Assert.assertNotNull(graphModel.getNodeIndex().getColumnIndex(graphModel.defaultColumns().nodeId()));
     }
 
     @Test
@@ -360,6 +368,7 @@ public class GraphModelTest {
 
         Index index = graphModel.getNodeIndex(view);
         Assert.assertEquals(index.count(col, "bar"), 1);
+        Assert.assertSame(graphModel.getElementIndex(table, view), index);
     }
 
     @Test
@@ -376,6 +385,14 @@ public class GraphModelTest {
 
         Index index = graphModel.getEdgeIndex();
         Assert.assertEquals(index.count(col, "bar"), 1);
+        Assert.assertSame(graphModel.getElementIndex(table), index);
+    }
+
+    @Test
+    public void testGetEdgeIndexWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexEdges(false).build());
+        Assert.assertNotNull(graphModel.getEdgeIndex());
+        Assert.assertNotNull(graphModel.getEdgeIndex().getColumnIndex(graphModel.defaultColumns().edgeId()));
     }
 
     @Test
@@ -395,6 +412,7 @@ public class GraphModelTest {
 
         Index index = graphModel.getEdgeIndex(view);
         Assert.assertEquals(index.count(col, "bar"), 1);
+        Assert.assertSame(graphModel.getElementIndex(table, view), index);
     }
 
     @Test
@@ -410,6 +428,12 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testGetNodeTimeIndexWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexTime(false).build());
+        Assert.assertNull(graphModel.getNodeTimeIndex());
+    }
+
+    @Test
     public void testGetEdgeTimestampIndex() {
         GraphModelImpl graphModel = new GraphModelImpl();
         Node n = graphModel.factory().newNode("1");
@@ -421,6 +445,12 @@ public class GraphModelTest {
         TimeIndex<Edge> index = graphModel.getEdgeTimeIndex();
         Assert.assertEquals(index.getMinTimestamp(), 1.0);
         Assert.assertEquals(index.getMaxTimestamp(), 1.0);
+    }
+
+    @Test
+    public void testGetEdgeTimeIndexWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexTime(false).build());
+        Assert.assertNull(graphModel.getEdgeTimeIndex());
     }
 
     @Test
@@ -478,16 +508,15 @@ public class GraphModelTest {
 
     @Test
     public void testGetConfiguration() {
-        Configuration config = new Configuration();
-        config.setNodeIdType(Long.class);
+        Configuration config = Configuration.builder().nodeIdType(Long.class).build();
         GraphModelImpl graphModelImpl = new GraphModelImpl(config);
         Assert.assertEquals(graphModelImpl.getConfiguration(), config);
     }
 
     @Test
+    @SuppressWarnings("deprecated")
     public void testGetConfigurationCopy() {
-        Configuration config = new Configuration();
-        config.setNodeIdType(Long.class);
+        Configuration config = Configuration.builder().nodeIdType(Long.class).build();
         GraphModelImpl graphModelImpl = new GraphModelImpl(config);
         Assert.assertEquals(graphModelImpl.getConfiguration(), config);
         config.setNodeIdType(Float.class);
@@ -496,12 +525,9 @@ public class GraphModelTest {
 
     @Test
     public void testSetConfigurationIntervals() {
-        Configuration config = new Configuration();
+        Configuration config = Configuration.builder().nodeIdType(Integer.class).edgeIdType(Byte.class)
+                .timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModelImpl = new GraphModelImpl(config);
-        config.setNodeIdType(Integer.class);
-        config.setEdgeIdType(Byte.class);
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
-        graphModelImpl.setConfiguration(config);
         Assert.assertEquals(graphModelImpl.getConfiguration(), config);
         Assert.assertEquals(graphModelImpl.getNodeTable().getColumn("id").getTypeClass(), Integer.class);
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("id").getTypeClass(), Byte.class);
@@ -516,20 +542,13 @@ public class GraphModelTest {
 
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
                 .getTypeClass(), Double.class);
-        config.setEdgeWeightType(IntervalDoubleMap.class);
-        graphModelImpl.setConfiguration(config);
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
-                .getTypeClass(), IntervalDoubleMap.class);
     }
 
     @Test
     public void testSetConfigurationTimestamps() {
-        Configuration config = new Configuration();
+        Configuration config = Configuration.builder().nodeIdType(Integer.class).edgeIdType(Byte.class)
+                .timeRepresentation(TimeRepresentation.TIMESTAMP).build();
         GraphModelImpl graphModelImpl = new GraphModelImpl(config);
-        config.setNodeIdType(Integer.class);
-        config.setEdgeIdType(Byte.class);
-        config.setTimeRepresentation(TimeRepresentation.TIMESTAMP);
-        graphModelImpl.setConfiguration(config);
         Assert.assertEquals(graphModelImpl.getConfiguration(), config);
         Assert.assertEquals(graphModelImpl.getNodeTable().getColumn("id").getTypeClass(), Integer.class);
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn("id").getTypeClass(), Byte.class);
@@ -544,72 +563,33 @@ public class GraphModelTest {
 
         Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
                 .getTypeClass(), Double.class);
-        config.setEdgeWeightType(TimestampDoubleMap.class);
-        graphModelImpl.setConfiguration(config);
-        Assert.assertEquals(graphModelImpl.getEdgeTable().getColumn(GraphStoreConfiguration.EDGE_WEIGHT_INDEX)
-                .getTypeClass(), TimestampDoubleMap.class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testBadEdgeWeightTypeConfigurationIntervals() {
-        Configuration config = new Configuration();
-        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
-        config.setEdgeWeightType(TimestampDoubleMap.class);
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
-        graphModelImpl.setConfiguration(config);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL)
+                .edgeWeightType(TimestampDoubleMap.class).build();
+        new GraphModelImpl(config);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testBadEdgeWeightTypeConfigurationTimestamps() {
-        Configuration config = new Configuration();
-        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
-        config.setEdgeWeightType(IntervalDoubleMap.class);
-        config.setTimeRepresentation(TimeRepresentation.TIMESTAMP);
-        graphModelImpl.setConfiguration(config);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.TIMESTAMP)
+                .edgeWeightType(IntervalDoubleMap.class).build();
+        new GraphModelImpl(config);
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void testSetConfigurationWithNodes() {
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testSetConfiguration() {
         GraphModelImpl graphModelImpl = new GraphModelImpl();
-        graphModelImpl.store.addNode(graphModelImpl.factory().newNode());
-        graphModelImpl.setConfiguration(new Configuration());
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void testSetConfigurationWithGraphAttributes() {
-        GraphModelImpl graphModelImpl = new GraphModelImpl();
-        graphModelImpl.getGraph().setAttribute("foo", "bar");
-        graphModelImpl.setConfiguration(new Configuration());
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void testSetConfigurationWithNodeColumns() {
-        GraphModelImpl graphModelImpl = new GraphModelImpl();
-        graphModelImpl.store.nodeTable.addColumn("foo", Integer.class);
-        graphModelImpl.setConfiguration(new Configuration());
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void testSetConfigurationWithEdgeColumns() {
-        GraphModelImpl graphModelImpl = new GraphModelImpl();
-        graphModelImpl.store.edgeTable.addColumn("foo", Integer.class);
-        graphModelImpl.setConfiguration(new Configuration());
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void testSetConfigurationWithEdgeType() {
-        GraphModelImpl graphModelImpl = new GraphModelImpl();
-        graphModelImpl.store.edgeTypeStore.addType("foo");
-        graphModelImpl.setConfiguration(new Configuration());
+        graphModelImpl.setConfiguration(Configuration.builder().build());
     }
 
     @Test
     public void testSetConfigurationEdgeWeightColumnFalse() {
-        GraphModelImpl graphModelImpl = new GraphModelImpl();
+        Configuration config = Configuration.builder().edgeWeightColumn(false).build();
+        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
 
-        Configuration config = new Configuration();
-        config.setEdgeWeightColumn(Boolean.FALSE);
-        graphModelImpl.setConfiguration(config);
         Assert.assertFalse(graphModelImpl.store.edgeTable.hasColumn("weight"));
         Assert.assertNotEquals(graphModelImpl.store.edgeTable.addColumn("foo", Integer.class)
                 .getIndex(), GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
@@ -617,38 +597,12 @@ public class GraphModelTest {
 
     @Test
     public void testSetConfigurationEdgeWeightColumnTrue() {
-        Configuration config = new Configuration();
-        config.setEdgeWeightColumn(Boolean.FALSE);
+        Configuration config = Configuration.builder().edgeWeightColumn(true).build();
         GraphModelImpl graphModelImpl = new GraphModelImpl(config);
 
-        config = new Configuration();
-        config.setEdgeWeightColumn(Boolean.TRUE);
-        graphModelImpl.setConfiguration(config);
         Assert.assertTrue(graphModelImpl.store.edgeTable.hasColumn("weight"));
         Assert.assertEquals(graphModelImpl.store.edgeTable.getColumn("weight")
                 .getIndex(), GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
-    }
-
-    @Test
-    public void testSetConfigurationDefaultColumns() {
-        Configuration config = new Configuration();
-        GraphModelImpl graphModelImpl = new GraphModelImpl(config);
-
-        Configuration newConfig = new Configuration();
-        newConfig.setNodeIdType(Integer.class);
-        newConfig.setEdgeIdType(Integer.class);
-        newConfig.setTimeRepresentation(TimeRepresentation.TIMESTAMP);
-        newConfig.setEdgeWeightType(TimestampDoubleMap.class);
-        graphModelImpl.setConfiguration(newConfig);
-
-        Assert.assertSame(graphModelImpl.defaultColumns().nodeId(), graphModelImpl.getNodeTable().getColumn("id"));
-        Assert.assertSame(graphModelImpl.defaultColumns().edgeId(), graphModelImpl.getEdgeTable().getColumn("id"));
-        Assert.assertSame(graphModelImpl.defaultColumns().nodeTimeSet(), graphModelImpl.getNodeTable()
-                .getColumn("timeset"));
-        Assert.assertSame(graphModelImpl.defaultColumns().edgeTimeSet(), graphModelImpl.getEdgeTable()
-                .getColumn("timeset"));
-        Assert.assertSame(graphModelImpl.defaultColumns().edgeWeight(), graphModelImpl.getEdgeTable()
-                .getColumn("weight"));
     }
 
     @Test
@@ -686,34 +640,6 @@ public class GraphModelTest {
         Column col2 = table.addColumn("foo2", String.class);
 
         n1.setAttribute(col2, "test");
-    }
-
-    @Test
-    public void testReplaceEdgeWeightColumnUpdatesConfiguration() {
-        GraphModelImpl graphModel = new GraphModelImpl();
-        Graph graph = graphModel.getGraph();
-
-        Table table = graphModel.getEdgeTable();
-
-        Node n1 = graphModel.factory().newNode("1");
-        Node n2 = graphModel.factory().newNode("2");
-        Edge edge = graphModel.factory().newEdge(n1, n2);
-        graph.addNode(n1);
-        graph.addNode(n2);
-        graph.addEdge(edge);
-
-        Assert.assertTrue(graphModel.getConfiguration().getEdgeWeightColumn());
-        Assert.assertEquals(graphModel.getConfiguration().getEdgeWeightType(), Double.class);
-        Assert.assertFalse(edge.hasDynamicWeight());
-
-        table.removeColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID);
-        Assert.assertFalse(graphModel.getConfiguration().getEdgeWeightColumn());
-
-        table.addColumn(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID, IntervalDoubleMap.class, Origin.PROPERTY);
-
-        Assert.assertTrue(graphModel.getConfiguration().getEdgeWeightColumn());
-        Assert.assertEquals(graphModel.getConfiguration().getEdgeWeightType(), IntervalDoubleMap.class);
-        Assert.assertTrue(edge.hasDynamicWeight());
     }
 
     @Test

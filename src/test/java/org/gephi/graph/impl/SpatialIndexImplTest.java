@@ -1,15 +1,13 @@
 package org.gephi.graph.impl;
 
 import java.util.Arrays;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Rect2D;
 import org.testng.Assert;
-import org.testng.SkipException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class SpatialIndexImplTest {
@@ -17,22 +15,21 @@ public class SpatialIndexImplTest {
     private static final float BOUNDS = 1000f;
     private static final Rect2D BOUNDS_RECT = new Rect2D(-BOUNDS, -BOUNDS, BOUNDS, BOUNDS);
 
-    @BeforeMethod
-    public void setUp() {
-        if (!GraphStoreConfiguration.ENABLE_SPATIAL_INDEX) {
-            throw new SkipException("Skip spatial index tests because feature is disabled");
-        }
+    @Test
+    public void testDisabled() {
+        GraphStore store = GraphGenerator.generateEmptyGraphStore();
+        Assert.assertNull(store.spatialIndex);
     }
 
     @Test
     public void testGetEdgesEmpty() {
-        SpatialIndexImpl spatialIndex = new GraphStore().spatialIndex;
+        SpatialIndexImpl spatialIndex = new GraphStore(null, getConfig()).spatialIndex;
         Assert.assertTrue(spatialIndex.getEdgesInArea(BOUNDS_RECT).toCollection().isEmpty());
     }
 
     @Test
     public void testGetElementsBothNodesVisible() {
-        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphStore store = GraphGenerator.generateTinyGraphStore(getConfig());
 
         NodeImpl n1 = store.getNode("1");
         NodeImpl n2 = store.getNode("2");
@@ -45,7 +42,7 @@ public class SpatialIndexImplTest {
 
     @Test
     public void testGetElementsOneNodeVisible() {
-        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphStore store = GraphGenerator.generateTinyGraphStore(getConfig());
 
         NodeImpl n1 = store.getNode("1");
         n1.setPosition(300000f, 300000f);
@@ -59,7 +56,7 @@ public class SpatialIndexImplTest {
 
     @Test
     public void testGetElementsWithoutNodeVisible() {
-        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphStore store = GraphGenerator.generateTinyGraphStore(getConfig());
 
         NodeImpl n1 = store.getNode("1");
         n1.setPosition(300000f, 300000f);
@@ -74,7 +71,7 @@ public class SpatialIndexImplTest {
 
     @Test
     public void testGetElementsWithSelfLoop() {
-        GraphStore store = GraphGenerator.generateTinyGraphStoreWithSelfLoop();
+        GraphStore store = GraphGenerator.generateTinyGraphStoreWithSelfLoop(getConfig());
 
         NodeImpl n1 = store.getNode("1");
         EdgeImpl e = store.getEdge("0");
@@ -90,5 +87,10 @@ public class SpatialIndexImplTest {
 
     private void assertSame(EdgeIterable iterable, Edge... expected) {
         Assert.assertEquals(iterable.toCollection(), Arrays.asList(expected));
+    }
+
+    // Configuration with spatial index
+    private Configuration getConfig() {
+        return Configuration.builder().enableSpatialIndex(true).build();
     }
 }

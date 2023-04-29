@@ -473,7 +473,7 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 0, 1.0, true);
         boolean a = graphStore.addEdge(edge);
         boolean b = graphStore.addEdge(edge);
 
@@ -491,8 +491,8 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge1 = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
-        EdgeImpl edge2 = new EdgeImpl("1", nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge1 = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge2 = new EdgeImpl("1", graphStore, nodes[0], nodes[1], 0, 1.0, true);
         boolean a = graphStore.addEdge(edge1);
         boolean b = graphStore.addEdge(edge2);
 
@@ -512,7 +512,7 @@ public class GraphStoreTest {
         EdgeTypeStore typeStore = graphStore.edgeTypeStore;
         Assert.assertFalse(typeStore.contains(1));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 1, 1.0, true);
+        EdgeImpl edge = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 1, 1.0, true);
         graphStore.addEdge(edge);
 
         Assert.assertTrue(typeStore.contains(1));
@@ -525,7 +525,7 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 0, 1.0, true);
         graphStore.addAllEdges(Collections.singletonList(edge));
 
         Assert.assertTrue(graphStore.contains(edge));
@@ -537,7 +537,7 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 1, 1.0, true);
+        EdgeImpl edge = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 1, 1.0, true);
         graphStore.addAllEdges(Collections.singletonList(edge));
 
         Assert.assertTrue(graphStore.edgeTypeStore.contains(1));

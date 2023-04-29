@@ -18,15 +18,11 @@ package org.gephi.graph.impl;
 import java.awt.Color;
 import java.util.Map;
 import org.gephi.graph.api.Column;
-import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Table;
-import org.gephi.graph.api.types.IntervalMap;
-import org.gephi.graph.api.types.TimeMap;
-import org.gephi.graph.api.types.TimestampMap;
 import static org.gephi.graph.impl.GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
 
 public class EdgeImpl extends ElementImpl implements Edge {
@@ -57,7 +53,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
         this.target = target;
         this.flags = (byte) (directed ? 1 : 0);
         this.type = type;
-        this.properties = GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES ? new EdgePropertiesImpl() : null;
+        this.properties = graphStore == null || graphStore.configuration.isEnableEdgeProperties()
+                ? new EdgePropertiesImpl() : null;
         if (graphStore == null || graphStore.configuration.getEdgeWeightType().equals(Double.class)) {
             this.attributes.setAttribute(GraphStoreConfiguration.EDGE_WEIGHT_INDEX, weight);
         }
