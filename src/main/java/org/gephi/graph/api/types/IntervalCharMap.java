@@ -64,6 +64,15 @@ public final class IntervalCharMap extends IntervalMap<Character> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public IntervalCharMap(IntervalCharMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given interval.
      *
      * @param interval interval

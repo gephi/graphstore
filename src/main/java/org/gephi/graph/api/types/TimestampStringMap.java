@@ -61,6 +61,15 @@ public final class TimestampStringMap extends TimestampMap<String> {
         System.arraycopy(vals, 0, values, 0, vals.length);
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampStringMap(TimestampStringMap source) {
+        this(source.array, source.values);
+    }
+
     @Override
     public Class<String> getTypeClass() {
         return String.class;

@@ -64,6 +64,15 @@ public final class TimestampLongMap extends TimestampMap<Long> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampLongMap(TimestampLongMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp

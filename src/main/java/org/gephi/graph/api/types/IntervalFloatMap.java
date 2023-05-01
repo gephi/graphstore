@@ -65,6 +65,15 @@ public final class IntervalFloatMap extends IntervalMap<Float> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public IntervalFloatMap(IntervalFloatMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given interval.
      *
      * @param interval interval

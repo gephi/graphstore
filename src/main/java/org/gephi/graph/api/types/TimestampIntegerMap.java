@@ -64,6 +64,15 @@ public final class TimestampIntegerMap extends TimestampMap<Integer> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampIntegerMap(TimestampIntegerMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp
