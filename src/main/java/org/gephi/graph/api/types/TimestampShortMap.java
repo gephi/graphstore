@@ -64,6 +64,15 @@ public final class TimestampShortMap extends TimestampMap<Short> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampShortMap(TimestampShortMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp

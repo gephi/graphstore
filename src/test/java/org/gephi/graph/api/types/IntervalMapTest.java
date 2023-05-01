@@ -592,12 +592,41 @@ public class IntervalMapTest {
         Assert.assertEquals(mapInf.toString(TimeFormat.DATETIME), "<[-Infinity, Infinity, value]>");
     }
 
+    @Test
+    public void testCopy() {
+        IntervalStringMap strMap = new IntervalStringMap(new double[] { 1.0, 2.0 }, new String[] { "foo" });
+        IntervalByteMap byteMap = new IntervalByteMap(new double[] { 1.0, 2.0 }, new byte[] { 1 });
+        IntervalShortMap shortMap = new IntervalShortMap(new double[] { 1.0, 2.0 }, new short[] { 1 });
+        IntervalIntegerMap intMap = new IntervalIntegerMap(new double[] { 1.0, 2.0 }, new int[] { 1 });
+        IntervalLongMap longMap = new IntervalLongMap(new double[] { 1.0, 2.0 }, new long[] { 1 });
+        IntervalFloatMap floatMap = new IntervalFloatMap(new double[] { 1.0, 2.0 }, new float[] { 1 });
+        IntervalDoubleMap doubleMap = new IntervalDoubleMap(new double[] { 1.0, 2.0 }, new double[] { 1 });
+        IntervalBooleanMap boolMap = new IntervalBooleanMap(new double[] { 1.0, 2.0 }, new boolean[] { true });
+        IntervalCharMap charMap = new IntervalCharMap(new double[] { 1.0, 2.0 }, new char[] { 'a' });
+
+        testEqualsButNotSameUnderlyingArrays(new IntervalStringMap(strMap), strMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalByteMap(byteMap), byteMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalShortMap(shortMap), shortMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalIntegerMap(intMap), intMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalLongMap(longMap), longMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalFloatMap(floatMap), floatMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalDoubleMap(doubleMap), doubleMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalBooleanMap(boolMap), boolMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalCharMap(charMap), charMap);
+    }
+
     // UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);
         for (int i = 0; i < a.length; i++) {
             Assert.assertEquals(a[i], b[i]);
         }
+    }
+
+    private void testEqualsButNotSameUnderlyingArrays(IntervalMap a, IntervalMap b) {
+        Assert.assertEquals(a, b);
+        Assert.assertNotSame(a.array, b.array);
+        Assert.assertNotSame(a.getValuesArray(), b.getValuesArray());
     }
 
     private IntervalMap[] getAllInstances() {

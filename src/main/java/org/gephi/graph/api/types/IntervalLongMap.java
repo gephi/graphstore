@@ -64,6 +64,15 @@ public final class IntervalLongMap extends IntervalMap<Long> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public IntervalLongMap(IntervalLongMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given interval.
      *
      * @param interval interval

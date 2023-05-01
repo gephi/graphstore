@@ -1058,6 +1058,15 @@ public class ElementImplTest {
         node.getAttributes(column);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetDynamicAttributesTimeset() {
+        GraphStore store = new GraphStore();
+        Column column = store.defaultColumns.nodeTimeSet();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.getAttributes(column);
+    }
+
     @Test
     public void testGetAttributeInView() {
         GraphStore store = new GraphStore();

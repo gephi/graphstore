@@ -65,6 +65,15 @@ public final class IntervalSet implements TimeSet<Interval> {
         size = arr.length / 2;
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param source set to copy
+     */
+    public IntervalSet(IntervalSet source) {
+        this(source.array);
+    }
+
     @Override
     public boolean add(Interval interval) {
         return addInner(interval.getLow(), interval.getHigh()) >= 0;
