@@ -887,4 +887,86 @@ public class AttributeUtilsTest {
         Assert.assertFalse(AttributeUtils.isSimpleType(TimestampBooleanMap.class));
         Assert.assertFalse(AttributeUtils.isSimpleType(IntervalBooleanMap.class));
     }
+
+    @Test
+    public void testCopyPrimitive() {
+        String str = "foo";
+        Assert.assertSame(AttributeUtils.copy(str), str);
+        int bar = 42;
+        Assert.assertSame(AttributeUtils.copy(bar), bar);
+    }
+
+    @Test
+    public void testCopyIntervalSet() {
+        IntervalStringMap strMap = new IntervalStringMap(new double[] { 1.0, 2.0 }, new String[] { "foo" });
+        IntervalByteMap byteMap = new IntervalByteMap(new double[] { 1.0, 2.0 }, new byte[] { 1 });
+        IntervalShortMap shortMap = new IntervalShortMap(new double[] { 1.0, 2.0 }, new short[] { 1 });
+        IntervalIntegerMap intMap = new IntervalIntegerMap(new double[] { 1.0, 2.0 }, new int[] { 1 });
+        IntervalLongMap longMap = new IntervalLongMap(new double[] { 1.0, 2.0 }, new long[] { 1 });
+        IntervalFloatMap floatMap = new IntervalFloatMap(new double[] { 1.0, 2.0 }, new float[] { 1 });
+        IntervalDoubleMap doubleMap = new IntervalDoubleMap(new double[] { 1.0, 2.0 }, new double[] { 1 });
+        IntervalBooleanMap boolMap = new IntervalBooleanMap(new double[] { 1.0, 2.0 }, new boolean[] { true });
+        IntervalCharMap charMap = new IntervalCharMap(new double[] { 1.0, 2.0 }, new char[] { 'a' });
+
+        assertCopyIsEqualsButNotSame(strMap);
+        assertCopyIsEqualsButNotSame(byteMap);
+        assertCopyIsEqualsButNotSame(shortMap);
+        assertCopyIsEqualsButNotSame(intMap);
+        assertCopyIsEqualsButNotSame(longMap);
+        assertCopyIsEqualsButNotSame(floatMap);
+        assertCopyIsEqualsButNotSame(doubleMap);
+        assertCopyIsEqualsButNotSame(boolMap);
+        assertCopyIsEqualsButNotSame(charMap);
+    }
+
+    @Test
+    public void testCopyTimestampSet() {
+        TimestampStringMap strMap = new TimestampStringMap(new double[] { 1.0 }, new String[] { "foo" });
+        TimestampByteMap byteMap = new TimestampByteMap(new double[] { 1.0 }, new byte[] { 1 });
+        TimestampShortMap shortMap = new TimestampShortMap(new double[] { 1.0 }, new short[] { 1 });
+        TimestampIntegerMap intMap = new TimestampIntegerMap(new double[] { 1.0 }, new int[] { 1 });
+        TimestampLongMap longMap = new TimestampLongMap(new double[] { 1.0 }, new long[] { 1 });
+        TimestampFloatMap floatMap = new TimestampFloatMap(new double[] { 1.0 }, new float[] { 1 });
+        TimestampDoubleMap doubleMap = new TimestampDoubleMap(new double[] { 1.0 }, new double[] { 1 });
+        TimestampCharMap charMap = new TimestampCharMap(new double[] { 1.0 }, new char[] { 'a' });
+        TimestampBooleanMap boolMap = new TimestampBooleanMap(new double[] { 1.0 }, new boolean[] { true });
+
+        assertCopyIsEqualsButNotSame(strMap);
+        assertCopyIsEqualsButNotSame(byteMap);
+        assertCopyIsEqualsButNotSame(shortMap);
+        assertCopyIsEqualsButNotSame(intMap);
+        assertCopyIsEqualsButNotSame(longMap);
+        assertCopyIsEqualsButNotSame(floatMap);
+        assertCopyIsEqualsButNotSame(doubleMap);
+        assertCopyIsEqualsButNotSame(charMap);
+        assertCopyIsEqualsButNotSame(boolMap);
+    }
+
+    @Test
+    public void testCopyList() {
+        List<String> list = new ArrayList<String>();
+        list.add("foo");
+        assertCopyIsEqualsButNotSame(list);
+    }
+
+    @Test
+    public void testCopySet() {
+        Set<String> set = new HashSet<String>();
+        set.add("foo");
+        assertCopyIsEqualsButNotSame(set);
+    }
+
+    @Test
+    public void testCopyMap() {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("foo", "bar");
+        assertCopyIsEqualsButNotSame(map);
+    }
+
+    // Utility
+    private void assertCopyIsEqualsButNotSame(Object o) {
+        Object copy = AttributeUtils.copy(o);
+        Assert.assertEquals(copy, o);
+        Assert.assertNotSame(copy, o);
+    }
 }

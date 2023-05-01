@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.api;
 
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
@@ -41,21 +42,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
-import java.time.format.DateTimeParseException;
-import org.gephi.graph.impl.TimestampsParser;
-import org.gephi.graph.impl.IntervalsParser;
-import org.gephi.graph.impl.FormattingAndParsingUtils;
-import org.gephi.graph.api.types.TimestampMap;
-import org.gephi.graph.api.types.TimestampShortMap;
-import org.gephi.graph.api.types.TimestampLongMap;
-import org.gephi.graph.api.types.TimestampSet;
-import org.gephi.graph.api.types.TimestampCharMap;
-import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampBooleanMap;
-import org.gephi.graph.api.types.TimestampFloatMap;
-import org.gephi.graph.api.types.TimestampStringMap;
-import org.gephi.graph.api.types.TimestampByteMap;
-import org.gephi.graph.api.types.TimestampIntegerMap;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -67,6 +53,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.Collections;
 import java.util.HashMap;
@@ -88,8 +75,22 @@ import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimeSet;
+import org.gephi.graph.api.types.TimestampBooleanMap;
+import org.gephi.graph.api.types.TimestampByteMap;
+import org.gephi.graph.api.types.TimestampCharMap;
+import org.gephi.graph.api.types.TimestampDoubleMap;
+import org.gephi.graph.api.types.TimestampFloatMap;
+import org.gephi.graph.api.types.TimestampIntegerMap;
+import org.gephi.graph.api.types.TimestampLongMap;
+import org.gephi.graph.api.types.TimestampMap;
+import org.gephi.graph.api.types.TimestampSet;
+import org.gephi.graph.api.types.TimestampShortMap;
+import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.impl.ArraysParser;
+import org.gephi.graph.impl.FormattingAndParsingUtils;
 import org.gephi.graph.impl.GraphStoreConfiguration;
+import org.gephi.graph.impl.IntervalsParser;
+import org.gephi.graph.impl.TimestampsParser;
 
 /**
  * Set of utility methods to manipulate supported attribute types.
@@ -1214,5 +1215,146 @@ public class AttributeUtils {
      */
     public static boolean isEdgeColumn(Column colum) {
         return colum.getTable().getElementClass().equals(Edge.class);
+    }
+
+    /**
+     * Returns a copy of the provided object.
+     * <p>
+     * The copy is a deep copy for arrays, {@link IntervalSet},
+     * {@link TimestampSet}, sets and lists
+     *
+     * @param obj object to copy
+     * @return copy of the provided object
+     */
+    public static Object copy(Object obj) {
+        Class typeClass = obj.getClass();
+        if (!isSupported(typeClass)) {
+            throw new IllegalArgumentException("Unsupported type " + typeClass.getCanonicalName());
+        }
+        typeClass = getStandardizedType(typeClass);
+        obj = standardizeValue(obj);
+
+        // Primitive
+        if (isSimpleType(typeClass)) {
+            return obj;
+        }
+
+        // Interval types:
+        if (typeClass.equals(IntervalSet.class)) {
+            return new IntervalSet((IntervalSet) obj);
+        } else if (typeClass.equals(IntervalStringMap.class)) {
+            return new IntervalStringMap((IntervalStringMap) obj);
+        } else if (typeClass.equals(IntervalByteMap.class)) {
+            return new IntervalByteMap((IntervalByteMap) obj);
+        } else if (typeClass.equals(IntervalShortMap.class)) {
+            return new IntervalShortMap((IntervalShortMap) obj);
+        } else if (typeClass.equals(IntervalIntegerMap.class)) {
+            return new IntervalIntegerMap((IntervalIntegerMap) obj);
+        } else if (typeClass.equals(IntervalLongMap.class)) {
+            return new IntervalLongMap((IntervalLongMap) obj);
+        } else if (typeClass.equals(IntervalFloatMap.class)) {
+            return new IntervalFloatMap((IntervalFloatMap) obj);
+        } else if (typeClass.equals(IntervalDoubleMap.class)) {
+            return new IntervalDoubleMap((IntervalDoubleMap) obj);
+        } else if (typeClass.equals(IntervalBooleanMap.class)) {
+            return new IntervalBooleanMap((IntervalBooleanMap) obj);
+        } else if (typeClass.equals(IntervalCharMap.class)) {
+            return new IntervalCharMap((IntervalCharMap) obj);
+        }
+
+        // Timestamp types:
+        if (typeClass.equals(TimestampSet.class)) {
+            return new TimestampSet((TimestampSet) obj);
+        } else if (typeClass.equals(TimestampStringMap.class)) {
+            return new TimestampStringMap((TimestampStringMap) obj);
+        } else if (typeClass.equals(TimestampByteMap.class)) {
+            return new TimestampByteMap((TimestampByteMap) obj);
+        } else if (typeClass.equals(TimestampShortMap.class)) {
+            return new TimestampShortMap((TimestampShortMap) obj);
+        } else if (typeClass.equals(TimestampIntegerMap.class)) {
+            return new TimestampIntegerMap((TimestampIntegerMap) obj);
+        } else if (typeClass.equals(TimestampLongMap.class)) {
+            return new TimestampLongMap((TimestampLongMap) obj);
+        } else if (typeClass.equals(TimestampFloatMap.class)) {
+            return new TimestampFloatMap((TimestampFloatMap) obj);
+        } else if (typeClass.equals(TimestampDoubleMap.class)) {
+            return new TimestampDoubleMap((TimestampDoubleMap) obj);
+        } else if (typeClass.equals(TimestampBooleanMap.class)) {
+            return new TimestampBooleanMap((TimestampBooleanMap) obj);
+        } else if (typeClass.equals(TimestampCharMap.class)) {
+            return new TimestampCharMap((TimestampCharMap) obj);
+        }
+
+        // Array
+        if (isArrayType(typeClass)) {
+            Class componentType = typeClass.getComponentType();
+            int length = Array.getLength(obj);
+            Object dest = Array.newInstance(componentType, length);
+            System.arraycopy(obj, 0, dest, 0, length);
+            return dest;
+        }
+
+        // List
+        if (obj instanceof CharArrayList) {
+            return new CharArrayList((CharArrayList) obj);
+        } else if (obj instanceof BooleanArrayList) {
+            return new BooleanArrayList((BooleanArrayList) obj);
+        } else if (obj instanceof ByteArrayList) {
+            return new ByteArrayList((ByteArrayList) obj);
+        } else if (obj instanceof ShortArrayList) {
+            return new ShortArrayList((ShortArrayList) obj);
+        } else if (obj instanceof IntArrayList) {
+            return new IntArrayList((IntArrayList) obj);
+        } else if (obj instanceof LongArrayList) {
+            return new LongArrayList((LongArrayList) obj);
+        } else if (obj instanceof FloatArrayList) {
+            return new FloatArrayList((FloatArrayList) obj);
+        } else if (obj instanceof DoubleArrayList) {
+            return new DoubleArrayList((DoubleArrayList) obj);
+        } else if (obj instanceof ObjectArrayList) {
+            return new ObjectArrayList((ObjectArrayList) obj);
+        }
+
+        // Map
+        if (obj instanceof Char2ObjectOpenHashMap) {
+            return new Char2ObjectOpenHashMap((Char2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Byte2ObjectOpenHashMap) {
+            return new Byte2ObjectOpenHashMap((Byte2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Short2ObjectOpenHashMap) {
+            return new Short2ObjectOpenHashMap((Short2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Int2ObjectOpenHashMap) {
+            return new Int2ObjectOpenHashMap((Int2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Long2ObjectOpenHashMap) {
+            return new Long2ObjectOpenHashMap((Long2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Float2ObjectOpenHashMap) {
+            return new Float2ObjectOpenHashMap((Float2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Double2ObjectOpenHashMap) {
+            return new Double2ObjectOpenHashMap((Double2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Object2ObjectOpenHashMap) {
+            return new Object2ObjectOpenHashMap((Object2ObjectOpenHashMap) obj);
+        }
+
+        // Set
+        if (obj instanceof CharOpenHashSet) {
+            return new CharOpenHashSet((CharOpenHashSet) obj);
+        } else if (obj instanceof BooleanOpenHashSet) {
+            return new BooleanOpenHashSet((BooleanOpenHashSet) obj);
+        } else if (obj instanceof ByteOpenHashSet) {
+            return new ByteOpenHashSet((ByteOpenHashSet) obj);
+        } else if (obj instanceof ShortOpenHashSet) {
+            return new ShortOpenHashSet((ShortOpenHashSet) obj);
+        } else if (obj instanceof IntOpenHashSet) {
+            return new IntOpenHashSet((IntOpenHashSet) obj);
+        } else if (obj instanceof LongOpenHashSet) {
+            return new LongOpenHashSet((LongOpenHashSet) obj);
+        } else if (obj instanceof FloatOpenHashSet) {
+            return new FloatOpenHashSet((FloatOpenHashSet) obj);
+        } else if (obj instanceof DoubleOpenHashSet) {
+            return new DoubleOpenHashSet((DoubleOpenHashSet) obj);
+        } else if (obj instanceof ObjectOpenHashSet) {
+            return new ObjectOpenHashSet((ObjectOpenHashSet) obj);
+        }
+
+        return obj;
     }
 }
