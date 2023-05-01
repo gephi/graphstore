@@ -889,6 +889,11 @@ public class AttributeUtilsTest {
     }
 
     @Test
+    public void testCopyNull() {
+        Assert.assertNull(AttributeUtils.copy(null));
+    }
+
+    @Test
     public void testCopyPrimitive() {
         String str = "foo";
         Assert.assertSame(AttributeUtils.copy(str), str);

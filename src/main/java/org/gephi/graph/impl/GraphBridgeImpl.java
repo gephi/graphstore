@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
@@ -185,12 +186,14 @@ public class GraphBridgeImpl implements GraphBridge {
         textCopy.setColor(text.getColor());
         textCopy.setSize(text.getSize());
         textCopy.setVisible(text.isVisible());
+        textCopy.setText(text.getText());
+        textCopy.setDimensions(text.getWidth(), text.getHeight());
     }
 
     private void copyTimeSet(Element element, Element elementCopy) {
         Column sourceColumn = element.getTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
         Column destColumn = elementCopy.getTable().getColumn(GraphStoreConfiguration.ELEMENT_TIMESET_INDEX);
-        elementCopy.setAttribute(destColumn, element.getAttribute(sourceColumn));
+        elementCopy.setAttribute(destColumn, AttributeUtils.copy(element.getAttribute(sourceColumn)));
     }
 
     private void copyColumns(TableImpl sourceTable, TableImpl destTable) {
@@ -203,26 +206,10 @@ public class GraphBridgeImpl implements GraphBridge {
     }
 
     private void copyAttributes(TableImpl sourceTable, TableImpl destTable, Element element, Element elementCopy) {
-        TimeRepresentation tr = sourceTable.store.graphStore.configuration.getTimeRepresentation();
         for (Column col : sourceTable.toArray()) {
             if (!col.isProperty()) {
                 Column colCopy = destTable.getColumn(col.getId());
-                if (col.isDynamic() && tr.equals(TimeRepresentation.TIMESTAMP)) {
-                    for (Map.Entry<Double, Object> entry : element.getAttributes(col)) {
-                        Double key = entry.getKey();
-                        Object value = entry.getValue();
-                        elementCopy.setAttribute(colCopy, value, key);
-                    }
-                } else if (col.isDynamic() && tr.equals(TimeRepresentation.INTERVAL)) {
-                    for (Map.Entry<Interval, Object> entry : element.getAttributes(col)) {
-                        Interval key = entry.getKey();
-                        Object value = entry.getValue();
-                        elementCopy.setAttribute(colCopy, value, key);
-                    }
-                } else {
-                    Object attribute = element.getAttribute(col);
-                    elementCopy.setAttribute(colCopy, attribute);
-                }
+                elementCopy.setAttribute(colCopy, AttributeUtils.copy(element.getAttribute(col)));
             }
         }
     }

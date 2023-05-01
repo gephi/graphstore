@@ -29,6 +29,7 @@ import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.IntervalIntegerMap;
 import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.types.TimestampIntegerMap;
+import org.gephi.graph.api.types.TimestampSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -151,6 +152,8 @@ public class GraphBridgeTest {
         n1.getTextProperties().setAlpha(0.5f);
         n1.getTextProperties().setSize(5f);
         n1.getTextProperties().setVisible(false);
+        n1.getTextProperties().setText("foo");
+        n1.getTextProperties().setDimensions(2f, 3f);
 
         GraphStore dest = new GraphStore();
         new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
@@ -167,6 +170,8 @@ public class GraphBridgeTest {
         e0.getTextProperties().setAlpha(0.5f);
         e0.getTextProperties().setSize(5f);
         e0.getTextProperties().setVisible(false);
+        e0.getTextProperties().setText("foo");
+        e0.getTextProperties().setDimensions(2f, 3f);
 
         GraphStore dest = new GraphStore();
         new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
@@ -214,7 +219,6 @@ public class GraphBridgeTest {
         e0.setWeight(42.0, new Interval(1.0, 2.0));
         e0.setWeight(5.0, new Interval(3.0, 4.0));
 
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
         GraphModelImpl gm = new GraphModelImpl(config);
         GraphStore dest = gm.store;
         new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
@@ -350,6 +354,8 @@ public class GraphBridgeTest {
 
         Node n1Copy = dest.getNode("1");
         Assert.assertTrue(n1Copy.hasTimestamp(42.0));
+        n1.addTimestamp(43.0);
+        Assert.assertFalse(n1Copy.hasTimestamp(43.0));
     }
 
     @Test
@@ -365,5 +371,44 @@ public class GraphBridgeTest {
 
         Node n1Copy = dest.getNode("1");
         Assert.assertTrue(n1Copy.hasInterval(new Interval(1.0, 2.0)));
+        n1.addInterval(new Interval(3.0, 4.0));
+        Assert.assertFalse(n1Copy.hasInterval(new Interval(3.0, 4.0)));
+    }
+
+    @Test
+    public void testCopyArray() {
+        GraphStore source = GraphGenerator.generateTinyGraphStore();
+        Column c1 = source.nodeTable.addColumn("foo", int[].class);
+        Node n1 = source.getNode("1");
+        int[] a1 = new int[] { 1, 2, 3 };
+        n1.setAttribute(c1, a1);
+
+        GraphModelImpl model = new GraphModelImpl();
+        GraphStore dest = model.store;
+        new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
+
+        Node n1Copy = dest.getNode("1");
+        Assert.assertEquals(n1Copy.getAttribute(c1.getId()), a1);
+        a1[0] = 4;
+        Assert.assertNotEquals(n1Copy.getAttribute(c1.getId()), a1);
+    }
+
+    @Test
+    public void testCopyOtherTimesetColumn() {
+        GraphStore source = GraphGenerator.generateTinyGraphStore();
+        Column c1 = source.nodeTable.addColumn("foo", TimestampSet.class);
+        Node n1 = source.getNode("1");
+        TimestampSet set = new TimestampSet();
+        set.add(42.0);
+        n1.setAttribute(c1, set);
+
+        GraphModelImpl model = new GraphModelImpl();
+        GraphStore dest = model.store;
+        new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
+
+        Node n1Copy = dest.getNode("1");
+        Assert.assertEquals(n1Copy.getAttribute(c1.getId()), set);
+        set.add(43.0);
+        Assert.assertNotEquals(n1Copy.getAttribute(c1.getId()), set);
     }
 }

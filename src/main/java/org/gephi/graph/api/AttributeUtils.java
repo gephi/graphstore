@@ -1227,6 +1227,9 @@ public class AttributeUtils {
      * @return copy of the provided object
      */
     public static Object copy(Object obj) {
+        if (obj == null) {
+            return null;
+        }
         Class typeClass = obj.getClass();
         if (!isSupported(typeClass)) {
             throw new IllegalArgumentException("Unsupported type " + typeClass.getCanonicalName());

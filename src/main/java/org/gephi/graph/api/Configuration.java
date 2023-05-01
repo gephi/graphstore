@@ -27,6 +27,7 @@ import org.gephi.graph.impl.ConfigurationImpl;
  * create a <em>GraphModel</em> with custom configuration.
  * <p>
  * Create instances by using the builder:
+ * 
  * <pre>
  * Configuration config = Configuration.builder().build();
  * </pre>
