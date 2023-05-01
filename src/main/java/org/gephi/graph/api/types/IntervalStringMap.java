@@ -62,6 +62,15 @@ public final class IntervalStringMap extends IntervalMap<String> {
         System.arraycopy(vals, 0, values, 0, vals.length);
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public IntervalStringMap(IntervalStringMap source) {
+        this(source.array, source.values);
+    }
+
     @Override
     public Class<String> getTypeClass() {
         return String.class;

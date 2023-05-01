@@ -414,7 +414,7 @@ public abstract class ElementImpl implements Element {
     @Override
     public Iterable<Map.Entry> getAttributes(Column column) {
         checkColumn(column);
-        checkColumnDynamic(column);
+        checkColumnDynamicAttribute(column);
 
         return attributes.getAttributes(column);
     }
@@ -547,8 +547,14 @@ public abstract class ElementImpl implements Element {
     }
 
     void checkColumnDynamic(Column column) {
-        if (!((ColumnImpl) column).isDynamic()) {
+        if (!column.isDynamic()) {
             throw new IllegalArgumentException("The column is not dynamic");
+        }
+    }
+
+    void checkColumnDynamicAttribute(Column column) {
+        if (!column.isDynamicAttribute()) {
+            throw new IllegalArgumentException("The column is not a dynamic attribute");
         }
     }
 

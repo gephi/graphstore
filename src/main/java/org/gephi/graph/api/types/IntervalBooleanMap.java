@@ -64,6 +64,15 @@ public final class IntervalBooleanMap extends IntervalMap<Boolean> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public IntervalBooleanMap(IntervalBooleanMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given interval.
      *
      * @param interval interval

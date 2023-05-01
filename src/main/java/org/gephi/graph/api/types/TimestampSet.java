@@ -64,6 +64,15 @@ public final class TimestampSet implements TimeSet<Double> {
         size = arr.length;
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param source the set to copy
+     */
+    public TimestampSet(TimestampSet source) {
+        this(source.array);
+    }
+
     @Override
     public boolean add(Double timestamp) {
         return addInner(timestamp) >= 0;

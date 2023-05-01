@@ -64,6 +64,15 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampBooleanMap(TimestampBooleanMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp

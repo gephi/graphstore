@@ -62,6 +62,15 @@ public final class TimestampDoubleMap extends TimestampMap<Double> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampDoubleMap(TimestampDoubleMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given timestamp index.
      *
      * @param timestamp timestamp index

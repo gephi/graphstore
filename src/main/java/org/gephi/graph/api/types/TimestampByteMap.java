@@ -63,6 +63,15 @@ public final class TimestampByteMap extends TimestampMap<Byte> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampByteMap(TimestampByteMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp

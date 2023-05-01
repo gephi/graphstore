@@ -378,6 +378,15 @@ public class TimestampSetTest {
         Assert.assertEquals(setInf.toString(TimeFormat.DATETIME), "<[-Infinity, Infinity]>");
     }
 
+    @Test
+    public void testCopy() {
+        TimestampSet set1 = new TimestampSet();
+        set1.add(1.0);
+        TimestampSet set2 = new TimestampSet(set1);
+        Assert.assertEquals(set2, set1);
+        Assert.assertNotSame(set2.toPrimitiveArray(), set1.toPrimitiveArray());
+    }
+
     // UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);

@@ -694,12 +694,41 @@ public class TimestampMapTest {
         Assert.assertEquals(mapInf.toString(TimeFormat.DATETIME), "<[-Infinity, value]; [Infinity, value]>");
     }
 
+    @Test
+    public void testCopy() {
+        TimestampStringMap strMap = new TimestampStringMap(new double[] { 1.0 }, new String[] { "foo" });
+        TimestampByteMap byteMap = new TimestampByteMap(new double[] { 1.0 }, new byte[] { 1 });
+        TimestampShortMap shortMap = new TimestampShortMap(new double[] { 1.0 }, new short[] { 1 });
+        TimestampIntegerMap intMap = new TimestampIntegerMap(new double[] { 1.0 }, new int[] { 1 });
+        TimestampLongMap longMap = new TimestampLongMap(new double[] { 1.0 }, new long[] { 1 });
+        TimestampFloatMap floatMap = new TimestampFloatMap(new double[] { 1.0 }, new float[] { 1 });
+        TimestampDoubleMap doubleMap = new TimestampDoubleMap(new double[] { 1.0 }, new double[] { 1 });
+        TimestampCharMap charMap = new TimestampCharMap(new double[] { 1.0 }, new char[] { 'a' });
+        TimestampBooleanMap boolMap = new TimestampBooleanMap(new double[] { 1.0 }, new boolean[] { true });
+
+        testEqualsButNotSameUnderlyingArrays(new TimestampStringMap(strMap), strMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampByteMap(byteMap), byteMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampShortMap(shortMap), shortMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampIntegerMap(intMap), intMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampLongMap(longMap), longMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampFloatMap(floatMap), floatMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampDoubleMap(doubleMap), doubleMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampCharMap(charMap), charMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampBooleanMap(boolMap), boolMap);
+    }
+
     // UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);
         for (int i = 0; i < a.length; i++) {
             Assert.assertEquals(a[i], b[i]);
         }
+    }
+
+    private void testEqualsButNotSameUnderlyingArrays(TimestampMap a, TimestampMap b) {
+        Assert.assertEquals(a, b);
+        Assert.assertNotSame(a.array, b.array);
+        Assert.assertNotSame(a.getValuesArray(), b.getValuesArray());
     }
 
     private TimestampMap[] getAllInstances() {

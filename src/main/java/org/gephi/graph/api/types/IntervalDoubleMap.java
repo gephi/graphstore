@@ -64,6 +64,15 @@ public final class IntervalDoubleMap extends IntervalMap<Double> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public IntervalDoubleMap(IntervalDoubleMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given interval.
      *
      * @param interval interval

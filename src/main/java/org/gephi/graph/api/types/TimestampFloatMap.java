@@ -64,6 +64,15 @@ public final class TimestampFloatMap extends TimestampMap<Float> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampFloatMap(TimestampFloatMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp

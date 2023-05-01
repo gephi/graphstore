@@ -426,4 +426,14 @@ public class IntervalSetTest {
         setInf.add(new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
         Assert.assertEquals(setInf.toString(TimeFormat.DATETIME), "<[-Infinity, Infinity]>");
     }
+
+    @Test
+    public void testCopy() {
+        IntervalSet set1 = new IntervalSet();
+        set1.add(new Interval(1.0, 2.0));
+        IntervalSet set2 = new IntervalSet(set1);
+        Assert.assertEquals(set2, set1);
+        set1.add(new Interval(3.0, 4.0));
+        Assert.assertNotEquals(set2, set1);
+    }
 }
