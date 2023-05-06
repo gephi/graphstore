@@ -608,10 +608,43 @@ public class EdgeStoreTest {
             edges[i] = e;
             Assert.assertTrue(edgeStore.add(e));
             Assert.assertTrue(edgeStore.contains(e));
+            Assert.assertEquals(edgeStore.size(), i + 1);
+            Assert.assertEquals(edgeStore.size(0), i + 1);
         }
         for (int i = 0; i < 5; i++) {
             Assert.assertTrue(edgeStore.remove(edges[i]));
             Assert.assertFalse(edgeStore.contains(edges[i]));
+            Assert.assertEquals(edgeStore.size(), 9 - i);
+            Assert.assertEquals(edgeStore.size(0), 9 - i);
+        }
+        for (int i = 5; i < 10; i++) {
+            Assert.assertTrue(edgeStore.contains(edges[i]));
+        }
+    }
+
+    @Test
+    public void testParallelUndirected() {
+        NodeStore nodeStore = new NodeStore();
+        NodeImpl n1 = new NodeImpl("0");
+        NodeImpl n2 = new NodeImpl("1");
+        nodeStore.add(n1);
+        nodeStore.add(n2);
+
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = new EdgeImpl[10];
+        for (int i = 0; i < 10; i++) {
+            EdgeImpl e = new EdgeImpl("" + i, n1, n2, 0, 1.0, false);
+            edges[i] = e;
+            Assert.assertTrue(edgeStore.add(e));
+            Assert.assertTrue(edgeStore.contains(e));
+            Assert.assertEquals(edgeStore.size(), i + 1);
+            Assert.assertEquals(edgeStore.size(0), i + 1);
+        }
+        for (int i = 0; i < 5; i++) {
+            Assert.assertTrue(edgeStore.remove(edges[i]));
+            Assert.assertFalse(edgeStore.contains(edges[i]));
+            Assert.assertEquals(edgeStore.size(), 9 - i);
+            Assert.assertEquals(edgeStore.size(0), 9 - i);
         }
         for (int i = 5; i < 10; i++) {
             Assert.assertTrue(edgeStore.contains(edges[i]));
@@ -1268,6 +1301,8 @@ public class EdgeStoreTest {
         Assert.assertTrue(edgeStore.add(e1));
         Assert.assertFalse(e1.isMutual());
         Assert.assertTrue(edgeStore.add(e2));
+        Assert.assertEquals(edgeStore.size(), 2);
+        Assert.assertEquals(edgeStore.size(0), 2);
 
         Assert.assertTrue(edgeStore.add(e3));
         Assert.assertTrue(e1.isMutual());
@@ -1277,6 +1312,8 @@ public class EdgeStoreTest {
         Assert.assertEquals(n1.getUndirectedDegree(), 2);
         Assert.assertEquals(n2.getDegree(), 3);
         Assert.assertEquals(n2.getUndirectedDegree(), 2);
+        Assert.assertEquals(edgeStore.size(), 3);
+        Assert.assertEquals(edgeStore.size(0), 3);
 
         Assert.assertTrue(edgeStore.add(e4));
         Assert.assertTrue(e4.isMutual());
@@ -1285,18 +1322,24 @@ public class EdgeStoreTest {
         Assert.assertEquals(n1.getUndirectedDegree(), 2);
         Assert.assertEquals(n2.getDegree(), 4);
         Assert.assertEquals(n2.getUndirectedDegree(), 2);
+        Assert.assertEquals(edgeStore.size(), 4);
+        Assert.assertEquals(edgeStore.size(0), 4);
 
         Assert.assertTrue(edgeStore.remove(e1));
         Assert.assertEquals(n1.getDegree(), 3);
         Assert.assertEquals(n1.getUndirectedDegree(), 2);
         Assert.assertEquals(n2.getDegree(), 3);
         Assert.assertEquals(n2.getUndirectedDegree(), 2);
+        Assert.assertEquals(edgeStore.size(), 3);
+        Assert.assertEquals(edgeStore.size(0), 3);
 
         Assert.assertTrue(edgeStore.remove(e2));
         Assert.assertEquals(n1.getDegree(), 2);
         Assert.assertEquals(n1.getUndirectedDegree(), 2);
         Assert.assertEquals(n2.getDegree(), 2);
         Assert.assertEquals(n2.getUndirectedDegree(), 2);
+        Assert.assertEquals(edgeStore.size(), 2);
+        Assert.assertEquals(edgeStore.size(0), 2);
     }
 
     @Test

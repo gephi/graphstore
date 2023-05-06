@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -501,6 +502,22 @@ public class GraphStoreTest {
 
         Assert.assertTrue(graphStore.contains(edge1));
         Assert.assertTrue(graphStore.contains(edge2));
+    }
+
+    @Test
+    public void testAddEdgeWithSameTypeWithoutParallel() {
+        Configuration configuration = Configuration.builder().enableParallelEdgesSameType(false).build();
+        GraphStore graphStore = new GraphStore(null, new ConfigurationImpl(configuration));
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeImpl edge1 = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge2 = new EdgeImpl("1", graphStore, nodes[0], nodes[1], 0, 1.0, true);
+        Assert.assertTrue(graphStore.addEdge(edge1));
+        Assert.assertFalse(graphStore.addEdge(edge2));
+
+        Assert.assertTrue(graphStore.contains(edge1));
+        Assert.assertFalse(graphStore.contains(edge2));
     }
 
     @Test
