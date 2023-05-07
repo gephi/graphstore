@@ -1,6 +1,8 @@
 # GraphStore
 
 [![build](https://github.com/gephi/graphstore/actions/workflows/ci.yml/badge.svg)](https://github.com/gephi/graphstore/actions/workflows/ci.yml)
+[![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)][license]
+[![Maven Central](https://img.shields.io/maven-central/v/org.gephi/graphstore.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.gephi/graphstore)
 [![Coverage Status](https://coveralls.io/repos/gephi/graphstore/badge.svg?branch=master&service=github)](https://coveralls.io/github/gephi/graphstore?branch=master)
 
 GraphStore is an in-memory graph structure implementation written in Java. It's designed to be powerful, efficient and robust. It's powering the Gephi software and supports large graphs in intensive applications.
