@@ -15,7 +15,7 @@
  */
 package org.gephi.graph.api.types;
 
-import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.TimeFormat;
@@ -226,7 +226,7 @@ public final class TimestampSet implements TimeSet<Double> {
     }
 
     @Override
-    public String toString(TimeFormat timeFormat, ZonedDateTime timeZone) {
+    public String toString(TimeFormat timeFormat, ZoneId timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
         }

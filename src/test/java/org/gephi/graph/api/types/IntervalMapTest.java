@@ -535,12 +535,12 @@ public class IntervalMapTest {
                 .toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342483341000.0, 1342483380000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZonedDateTime
-                .now(ZoneId.of("UTC"))), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZonedDateTime
-                .now(ZoneId.of("+03:00"))), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZonedDateTime
-                .now(ZoneId.of("-03:00"))), "<[2012-02-28, 2012-02-29, foo]; [2012-07-16, 2012-07-16, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZoneId
+                .of("UTC")), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZoneId
+                .of("+03:00")), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZoneId
+                .of("-03:00")), "<[2012-02-28, 2012-02-29, foo]; [2012-07-16, 2012-07-16, bar]>");
 
         // Test infinity:
         IntervalStringMap mapInf = new IntervalStringMap();
@@ -567,10 +567,10 @@ public class IntervalMapTest {
                 .toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342487444000.0, 1342487445000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZonedDateTime.now(ZoneId
-                .of("UTC"))), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZonedDateTime.now(ZoneId
-                .of("+12:30"))), "<[2012-02-29T12:30:00.000+12:30, 2012-03-01T12:30:00.000+12:30, foo]; [2012-07-17T13:40:44.000+12:30, 2012-07-17T13:40:45.000+12:30, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZoneId
+                .of("UTC")), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZoneId
+                .of("+12:30")), "<[2012-02-29T12:30:00.000+12:30, 2012-03-01T12:30:00.000+12:30, foo]; [2012-07-17T13:40:44.000+12:30, 2012-07-17T13:40:45.000+12:30, bar]>");
 
         // Test with timezone parsing and UTC printing:
         IntervalStringMap map2 = new IntervalStringMap();
