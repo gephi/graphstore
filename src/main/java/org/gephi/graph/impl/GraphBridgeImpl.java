@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
-import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphBridge;
