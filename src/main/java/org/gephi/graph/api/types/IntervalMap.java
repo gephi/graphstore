@@ -16,12 +16,12 @@
 package org.gephi.graph.api.types;
 
 import java.lang.reflect.Array;
-import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
+import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
@@ -604,7 +604,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
     }
 
     @Override
-    public String toString(TimeFormat timeFormat, ZonedDateTime timeZone) {
+    public String toString(TimeFormat timeFormat, ZoneId zoneId) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
         }
@@ -615,9 +615,9 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         sb.append('<');
         for (int i = 0; i < size; i++) {
             sb.append('[');
-            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2], timeFormat, timeZone));
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2], timeFormat, zoneId));
             sb.append(", ");
-            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2 + 1], timeFormat, timeZone));
+            sb.append(AttributeUtils.printTimestampInFormat(array[i * 2 + 1], timeFormat, zoneId));
 
             sb.append(", ");
             String stringValue = values[i].toString();

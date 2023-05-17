@@ -15,7 +15,7 @@
  */
 package org.gephi.graph.api.types;
 
-import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
@@ -137,8 +137,8 @@ public interface TimeMap<K, V> {
      * Returns this map as a string.
      *
      * @param timeFormat time format
-     * @param timeZone time zone
+     * @param zoneId time zone
      * @return map as string
      */
-    public String toString(TimeFormat timeFormat, ZonedDateTime timeZone);
+    public String toString(TimeFormat timeFormat, ZoneId zoneId);
 }

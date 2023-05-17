@@ -20,7 +20,7 @@ import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import org.gephi.graph.api.AttributeUtils;
 
@@ -49,11 +49,11 @@ public final class FormattingAndParsingUtils {
      * Returns the date or timestamp converted to a timestamp in milliseconds.
      *
      * @param timeStr Date or timestamp string
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @param zoneId Time zone to use or null to use default time zone (UTC)
      * @return Timestamp
      * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTimeOrTimestamp(String timeStr, ZonedDateTime timeZone) throws DateTimeParseException {
+    public static double parseDateTimeOrTimestamp(String timeStr, ZoneId zoneId) throws DateTimeParseException {
         double value;
         try {
             // Try first to parse as a single double:
@@ -62,7 +62,7 @@ public final class FormattingAndParsingUtils {
                 throw new IllegalArgumentException("NaN is not allowed as an interval bound");
             }
         } catch (Exception ex) {
-            value = AttributeUtils.parseDateTime(timeStr, timeZone);
+            value = AttributeUtils.parseDateTime(timeStr, zoneId);
         }
 
         return value;

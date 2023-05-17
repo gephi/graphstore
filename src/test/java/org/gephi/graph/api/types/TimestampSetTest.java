@@ -324,15 +324,13 @@ public class TimestampSetTest {
         Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330473741000.0]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(set1
-                .toString(TimeFormat.DATE, ZonedDateTime.now(ZoneId.of("UTC"))), "<[2012-02-29, 2012-02-29]>");
-        Assert.assertEquals(set1
-                .toString(TimeFormat.DATE, ZonedDateTime.now(ZoneId.of("+12:00"))), "<[2012-02-29, 2012-02-29]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DATE, ZoneId.of("UTC")), "<[2012-02-29, 2012-02-29]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DATE, ZoneId.of("+12:00")), "<[2012-02-29, 2012-02-29]>");
         set1.add(AttributeUtils.parseDateTime("2012-07-18T18:30:00"));
-        Assert.assertEquals(set1.toString(TimeFormat.DATE, ZonedDateTime
-                .now(ZoneId.of("+08:00"))), "<[2012-02-29, 2012-02-29, 2012-07-19]>");
-        Assert.assertEquals(set1.toString(TimeFormat.DATE, ZonedDateTime
-                .now(ZoneId.of("-10:00"))), "<[2012-02-28, 2012-02-28, 2012-07-18]>");
+        Assert.assertEquals(set1
+                .toString(TimeFormat.DATE, ZoneId.of("+08:00")), "<[2012-02-29, 2012-02-29, 2012-07-19]>");
+        Assert.assertEquals(set1
+                .toString(TimeFormat.DATE, ZoneId.of("-10:00")), "<[2012-02-28, 2012-02-28, 2012-07-18]>");
 
         // Test infinity:
         TimestampSet setInf = new TimestampSet();
@@ -356,10 +354,10 @@ public class TimestampSetTest {
         Assert.assertEquals(set1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330477844000.0]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(set1.toString(TimeFormat.DATETIME, ZonedDateTime
-                .now(ZoneId.of("UTC"))), "<[2012-02-29T00:00:00.000Z, 2012-02-29T01:10:44.000Z]>");
-        Assert.assertEquals(set1.toString(TimeFormat.DATETIME, ZonedDateTime
-                .now(ZoneId.of("+12:15"))), "<[2012-02-29T12:15:00.000+12:15, 2012-02-29T13:25:44.000+12:15]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME, ZoneId
+                .of("UTC")), "<[2012-02-29T00:00:00.000Z, 2012-02-29T01:10:44.000Z]>");
+        Assert.assertEquals(set1.toString(TimeFormat.DATETIME, ZoneId
+                .of("+12:15")), "<[2012-02-29T12:15:00.000+12:15, 2012-02-29T13:25:44.000+12:15]>");
 
         // Test with timezone parsing and UTC printing:
         TimestampSet set2 = new TimestampSet();

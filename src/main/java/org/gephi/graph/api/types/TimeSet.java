@@ -15,7 +15,7 @@
  */
 package org.gephi.graph.api.types;
 
-import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import org.gephi.graph.api.TimeFormat;
 
 /**
@@ -130,5 +130,5 @@ public interface TimeSet<K> {
      * @param timeZone time zone
      * @return set as string
      */
-    public String toString(TimeFormat timeFormat, ZonedDateTime timeZone);
+    public String toString(TimeFormat timeFormat, ZoneId timeZone);
 }
