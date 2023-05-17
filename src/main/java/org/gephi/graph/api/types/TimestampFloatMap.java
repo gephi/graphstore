@@ -15,8 +15,8 @@
  */
 package org.gephi.graph.api.types;
 
-import org.gephi.graph.api.Estimator;
 import java.math.BigDecimal;
+import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 
 /**
