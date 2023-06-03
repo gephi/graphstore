@@ -17,34 +17,29 @@ package org.gephi.graph.impl;
 
 import java.time.ZoneId;
 import java.util.Arrays;
-import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Configuration;
-import org.gephi.graph.api.Element;
-import org.gephi.graph.api.Index;
-import org.gephi.graph.api.SpatialIndex;
-import org.gephi.graph.api.Table;
-import org.gephi.graph.api.TimeFormat;
-import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphBridge;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Index;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
-import org.gephi.graph.api.Origin;
+import org.gephi.graph.api.SpatialIndex;
 import org.gephi.graph.api.Subgraph;
+import org.gephi.graph.api.Table;
+import org.gephi.graph.api.TimeFormat;
+import org.gephi.graph.api.TimeIndex;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
-import org.gephi.graph.api.TimeIndex;
-import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalDoubleMap;
-import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampSet;
 
 public class GraphModelImpl implements GraphModel {
 

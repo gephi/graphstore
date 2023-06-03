@@ -21,17 +21,12 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortRBTreeSet;
 import it.unimi.dsi.fastutil.shorts.ShortSortedSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
-import org.gephi.graph.api.Configuration;
-import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
-import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 
 public class ColumnStore<T extends Element> implements ColumnIterable {

@@ -21,13 +21,12 @@ import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Element;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
-import org.gephi.graph.api.TableLock;
 import org.gephi.graph.api.TableObserver;
-import org.gephi.graph.api.Element;
-import org.gephi.graph.api.Graph;
 
 public class TableImpl<T extends Element> implements Collection<Column>, Table {
 

@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
-import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimeSet;
 
