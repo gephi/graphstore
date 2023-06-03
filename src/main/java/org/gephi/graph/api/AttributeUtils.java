@@ -146,6 +146,9 @@ public class AttributeUtils {
         // Objects
         supportedTypes.add(String.class);
 
+        // Instant
+        supportedTypes.add(Instant.class);
+
         // Primitives Array
         supportedTypes.add(Boolean[].class);
         supportedTypes.add(boolean[].class);
@@ -351,6 +354,9 @@ public class AttributeUtils {
         if (value instanceof TimeMap) {
             return ((TimeMap) value).toString(timeFormat, zoneId);
         }
+        if (value instanceof Instant) {
+            printDate((Instant) value, zoneId);
+        }
         if (value.getClass().isArray()) {
             return printArray(value);
         }
@@ -364,7 +370,7 @@ public class AttributeUtils {
      * @param str string to parse
      * @param typeClass class of the desired type
      * @param zoneId time zone to use or null to use default time zone (UTC), for
-     *        dynamic types only
+     *        dynamic types and <code>Instant</code> only
      * @return an instance of the type class, or null if <em>str</em> is null or
      *         empty
      */
@@ -415,6 +421,12 @@ public class AttributeUtils {
                 throw new IllegalArgumentException("The string has a length > 1");
             }
             return str.charAt(0);
+        }
+
+        // Instant
+        if (typeClass.equals(Instant.class)) {
+            double milliseconds = FormattingAndParsingUtils.parseDateTimeOrTimestamp(str, zoneId);
+            return Instant.ofEpochMilli((long) milliseconds);
         }
 
         // Interval types:
@@ -1106,9 +1118,19 @@ public class AttributeUtils {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
-        Instant ofEpochMilli = Instant.ofEpochMilli((long) timestamp);
+        return printDate(Instant.ofEpochMilli((long) timestamp), zoneId);
+    }
+
+    /**
+     * Returns the date's string representation of the given instant.
+     *
+     * @param instant instant to format
+     * @param zoneId time zone to use or null to use default time zone (UTC)
+     * @return formatted date
+     */
+    public static String printDate(Instant instant, ZoneId zoneId) {
         DateTimeFormatter datePrinterByTimeZone = getDatePrinterByTimeZone(zoneId);
-        ZonedDateTime zonedDateTime = ofEpochMilli.atZone(datePrinterByTimeZone.getZone());
+        ZonedDateTime zonedDateTime = instant.atZone(datePrinterByTimeZone.getZone());
         return zonedDateTime.format(datePrinterByTimeZone);
     }
 
@@ -1134,15 +1156,25 @@ public class AttributeUtils {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
+        return printDateTime(Instant.ofEpochMilli((long) timestamp), zoneId);
+    }
+
+    /**
+     * Returns the time's string representation of the given instant.
+     *
+     * @param instant instant to format
+     * @param zoneId time zone to use or null to use default time zone (UTC)
+     * @return formatted time
+     */
+    public static String printDateTime(Instant instant, ZoneId zoneId) {
         DateTimeFormatter dateTimePrinterByTimeZone = getDateTimePrinterByTimeZone(zoneId);
-        Instant ofEpochMilli = Instant.ofEpochMilli((long) timestamp);
-        ZonedDateTime zonedDateTime2 = ofEpochMilli.atZone(dateTimePrinterByTimeZone.getZone());
+        ZonedDateTime zonedDateTime2 = instant.atZone(dateTimePrinterByTimeZone.getZone());
         OffsetDateTime time = OffsetDateTime.from(zonedDateTime2);
         return time.format(dateTimePrinterByTimeZone);
     }
 
     /**
-     * Returns the time's tring representation of the given timestamp. Default time
+     * Returns the time's string representation of the given timestamp. Default time
      * zone is used (UTC).
      *
      * @param timestamp time, in milliseconds
@@ -1240,6 +1272,11 @@ public class AttributeUtils {
         // Primitive
         if (isSimpleType(typeClass)) {
             return obj;
+        }
+
+        // Instant
+        if (typeClass.equals(Instant.class)) {
+            return Instant.from((Instant) obj);
         }
 
         // Interval types:
