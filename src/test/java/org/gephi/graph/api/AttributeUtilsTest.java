@@ -13,13 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.gephi.graph.impl;
+package org.gephi.graph.api;
 
 import java.awt.Color;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,6 +61,7 @@ import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimestampSet;
+import org.gephi.graph.impl.TableImpl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -107,6 +112,18 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("true", boolean.class), true);
         Assert.assertEquals(AttributeUtils.parse("1", boolean.class), true);
         Assert.assertEquals(AttributeUtils.parse("0", boolean.class), false);
+    }
+
+    @Test
+    public void testParseInstant() {
+        Assert.assertEquals(AttributeUtils.parse("2014-01-01T00:00:00Z", Instant.class), Instant
+                .parse("2014-01-01T00:00:00Z"));
+        Assert.assertEquals(AttributeUtils.parse("2014-01-01", Instant.class), Instant.parse("2014-01-01T00:00:00Z"));
+    }
+
+    @Test(expectedExceptions = DateTimeParseException.class)
+    public void testParseInstantException() {
+        AttributeUtils.parse("foo", Instant.class);
     }
 
     @Test
@@ -397,6 +414,7 @@ public class AttributeUtilsTest {
         Assert.assertTrue(AttributeUtils.isSupported(HashSet.class));
         Assert.assertTrue(AttributeUtils.isSupported(Map.class));
         Assert.assertTrue(AttributeUtils.isSupported(HashMap.class));
+        Assert.assertTrue(AttributeUtils.isSupported(Instant.class));
 
         Assert.assertFalse(AttributeUtils.isSupported(Color.class));
         Assert.assertFalse(AttributeUtils.isSupported(Collection.class));
@@ -645,6 +663,19 @@ public class AttributeUtilsTest {
     }
 
     @Test
+    public void testPrintDateWithInstant() {
+        String date = "2012-01-05";
+        LocalDate localDate = LocalDate.of(2012, 1, 5);
+        ZonedDateTime zonedDateTime = localDate.atStartOfDay(ZoneId.of("UTC"));
+
+        Assert.assertEquals(AttributeUtils.printDate(zonedDateTime.toInstant(), ZoneId.of("UTC")), date);
+        Assert.assertEquals(AttributeUtils.printDate(zonedDateTime.toInstant(), null), date);
+        Assert.assertEquals(AttributeUtils.printDate(zonedDateTime.toInstant(), ZoneId.of("+00:30")), date);
+        Assert.assertEquals(AttributeUtils.printDate(zonedDateTime.toInstant(), ZoneId.of("+12:00")), date);
+        Assert.assertEquals(AttributeUtils.printDate(zonedDateTime.toInstant(), ZoneId.of("-00:30")), "2012-01-04");
+    }
+
+    @Test
     public void testPrintDateTime() {
         String date = "2003-01-01T00:00:00.000-08:00";
         double d = AttributeUtils.parseDateTime(date);
@@ -662,6 +693,23 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils
                 .printDateTime(AttributeUtils.parseDateTime("2003-01-01T16:00:00", ZoneId.of("+00:00")), ZoneId
                         .of("+12:00")), "2003-01-02T04:00:00.000+12:00");
+    }
+
+    @Test
+    public void testPrintDateTimeWithInstant() {
+        String date = "2012-01-05T08:00:00.000Z";
+        LocalDate localDate = LocalDate.of(2012, 1, 5);
+        LocalTime localTime = LocalTime.of(0, 0, 0, 0);
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, localTime, ZoneId.of("-08:00"));
+
+        Assert.assertEquals(AttributeUtils.printDateTime(zonedDateTime.toInstant(), ZoneId.of("UTC")), date);
+        Assert.assertEquals(AttributeUtils.printDateTime(zonedDateTime.toInstant(), null), date);
+        Assert.assertEquals(AttributeUtils
+                .printDateTime(zonedDateTime.toInstant(), ZoneId.of("+00:30")), "2012-01-05T08:30:00.000+00:30");
+        Assert.assertEquals(AttributeUtils
+                .printDateTime(zonedDateTime.toInstant(), ZoneId.of("+12:00")), "2012-01-05T20:00:00.000+12:00");
+        Assert.assertEquals(AttributeUtils
+                .printDateTime(zonedDateTime.toInstant(), ZoneId.of("-12:00")), "2012-01-04T20:00:00.000-12:00");
     }
 
     @Test
@@ -700,6 +748,8 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.print(tm, TimeFormat.DATE, null), tm.toString(TimeFormat.DATE, null));
         Assert.assertEquals(AttributeUtils.print(tm, TimeFormat.DATETIME, ZoneId.of("+00:30")), tm
                 .toString(TimeFormat.DATETIME, ZoneId.of("+00:30")));
+
+        Assert.assertEquals(AttributeUtils.print(Instant.ofEpochMilli(0)), "1970-01-01T00:00:00Z");
     }
 
     @Test
@@ -934,6 +984,12 @@ public class AttributeUtilsTest {
         assertCopyIsEqualsButNotSame(doubleMap);
         assertCopyIsEqualsButNotSame(charMap);
         assertCopyIsEqualsButNotSame(boolMap);
+    }
+
+    @Test
+    public void testCopyInstant() {
+        Instant instant = Instant.now();
+        Assert.assertSame(AttributeUtils.copy(instant), instant);
     }
 
     @Test

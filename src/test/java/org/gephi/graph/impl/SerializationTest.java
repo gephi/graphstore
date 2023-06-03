@@ -45,6 +45,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -650,6 +651,15 @@ public class SerializationTest {
         byte[] buf = ser.serialize(timestampMap);
         IntervalStringMap l = (IntervalStringMap) ser.deserialize(buf);
         Assert.assertEquals(timestampMap, l);
+    }
+
+    @Test
+    public void testInstant() throws IOException, ClassNotFoundException {
+        Instant instant = Instant.ofEpochSecond(1234567890, 44553);
+        Serialization ser = new Serialization(null);
+        byte[] buf = ser.serialize(instant);
+        Instant l = (Instant) ser.deserialize(buf);
+        Assert.assertEquals(instant, l);
     }
 
     @Test
