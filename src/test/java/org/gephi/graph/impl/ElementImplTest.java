@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -101,6 +102,17 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttributes().length, 1 + getElementPropertiesLength());
         Assert.assertEquals(node.getAttributes()[getFirstNonPropertyIndex()], 1);
         Assert.assertEquals(node.getAttribute(column), 1);
+    }
+
+    @Test
+    public void testSetAttributeInstant() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicInstantColumn(store);
+
+        Instant instant = Instant.parse("2014-01-01T00:00:00Z");
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute("date", instant);
+        Assert.assertEquals(node.getAttribute(column), instant);
     }
 
     @Test
@@ -1222,6 +1234,12 @@ public class ElementImplTest {
         graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "visible", Boolean.class, "Visible",
                 null, Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("visible");
+    }
+
+    private Column generateBasicInstantColumn(GraphStore graphStore) {
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "date", Instant.class, "Date", null,
+                Origin.DATA, true, false));
+        return graphStore.nodeTable.store.getColumn("date");
     }
 
     private Column generateBasicListColumn(GraphStore graphStore) {

@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import java.awt.Color;
+import java.time.Instant;
 import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Origin;
@@ -216,6 +217,13 @@ public class TableImplTest {
         Object d = col.getDefaultValue();
         Assert.assertEquals(d.getClass(), int[].class);
         Assert.assertEquals(d, new int[] { 1, 2 });
+    }
+
+    @Test
+    public void testInstantColumn() {
+        TableImpl<Node> table = new TableImpl<>(Node.class);
+        Column col = table.addColumn("test_col", Instant.class);
+        Assert.assertEquals(col.getTypeClass(), Instant.class);
     }
 
     @Test
