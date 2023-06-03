@@ -22,7 +22,6 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortRBTreeSet;
 import it.unimi.dsi.fastutil.shorts.ShortSortedSet;
 import java.util.Arrays;
-import org.gephi.graph.api.Configuration;
 import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public class EdgeTypeStore {

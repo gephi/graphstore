@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -59,24 +60,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Configuration;
-import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.Origin;
-import org.gephi.graph.api.Estimator;
-import org.gephi.graph.api.TimeFormat;
-import org.gephi.graph.api.types.TimestampBooleanMap;
-import org.gephi.graph.api.types.TimestampByteMap;
-import org.gephi.graph.api.types.TimestampCharMap;
-import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampFloatMap;
-import org.gephi.graph.api.types.TimestampIntegerMap;
-import org.gephi.graph.api.types.TimestampLongMap;
-import org.gephi.graph.api.types.TimestampSet;
-import org.gephi.graph.api.types.TimestampShortMap;
-import org.gephi.graph.api.types.TimestampStringMap;
-import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Estimator;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Origin;
+import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
@@ -89,6 +79,17 @@ import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
+import org.gephi.graph.api.types.TimestampBooleanMap;
+import org.gephi.graph.api.types.TimestampByteMap;
+import org.gephi.graph.api.types.TimestampCharMap;
+import org.gephi.graph.api.types.TimestampDoubleMap;
+import org.gephi.graph.api.types.TimestampFloatMap;
+import org.gephi.graph.api.types.TimestampIntegerMap;
+import org.gephi.graph.api.types.TimestampLongMap;
+import org.gephi.graph.api.types.TimestampMap;
+import org.gephi.graph.api.types.TimestampSet;
+import org.gephi.graph.api.types.TimestampShortMap;
+import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.impl.EdgeImpl.EdgePropertiesImpl;
 import org.gephi.graph.impl.NodeImpl.NodePropertiesImpl;
 import org.gephi.graph.impl.utils.DataInputOutput;
@@ -215,6 +216,7 @@ public class Serialization {
     final static int LIST = 229;
     final static int SET = 230;
     final static int MAP = 231;
+    final static int INSTANT = 232;
     // Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
@@ -1030,6 +1032,17 @@ public class Serialization {
         return intervalIndexStore;
     }
 
+    private void serializeInstant(final DataOutput out, final Instant instant) throws IOException {
+        serialize(out, instant.getEpochSecond());
+        serialize(out, instant.getNano());
+    }
+
+    private Instant deserializeInstant(final DataInput is) throws IOException, ClassNotFoundException {
+        long epochSecond = (long) deserialize(is);
+        int nano = (int) deserialize(is);
+        return Instant.ofEpochSecond(epochSecond, nano);
+    }
+
     private void serializeGraphAttributes(final DataOutput out, final GraphAttributesImpl graphAttributes) throws IOException {
         serialize(out, graphAttributes.attributes.size());
         for (Map.Entry<String, Object> entry : graphAttributes.attributes.entrySet()) {
@@ -1625,6 +1638,10 @@ public class Serialization {
             Map b = (Map) obj;
             out.write(MAP);
             serializeMap(out, b);
+        } else if (obj instanceof Instant) {
+            Instant i = (Instant) obj;
+            out.write(INSTANT);
+            serializeInstant(out, i);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -2166,6 +2183,9 @@ public class Serialization {
                 break;
             case MAP:
                 ret = deserializeMap(is);
+                break;
+            case INSTANT:
+                ret = deserializeInstant(is);
                 break;
             case -1:
                 throw new EOFException();

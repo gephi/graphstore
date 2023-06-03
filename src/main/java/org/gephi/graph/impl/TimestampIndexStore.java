@@ -16,9 +16,9 @@
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.doubles.Double2IntRBTreeMap;
-import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.types.TimestampMap;
+import org.gephi.graph.api.types.TimestampSet;
 
 public class TimestampIndexStore<T extends Element> extends TimeIndexStore<T, Double, TimestampSet, TimestampMap<?>> {
 

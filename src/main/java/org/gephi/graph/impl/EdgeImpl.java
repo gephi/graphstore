@@ -15,15 +15,16 @@
  */
 package org.gephi.graph.impl;
 
+import static org.gephi.graph.impl.GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
+
 import java.awt.Color;
 import java.util.Map;
 import org.gephi.graph.api.Column;
-import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeProperties;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Table;
-import static org.gephi.graph.impl.GraphStoreConfiguration.DEFAULT_DYNAMIC_EDGE_WEIGHT_WHEN_MISSING;
 
 public class EdgeImpl extends ElementImpl implements Edge {
 

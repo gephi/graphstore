@@ -15,17 +15,18 @@
  */
 package org.gephi.graph.impl;
 
+import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_SQUARE_BRACKET;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import org.gephi.graph.api.AttributeUtils;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_BRACKET;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
 
 /**
  * <p>
