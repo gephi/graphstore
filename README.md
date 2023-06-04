@@ -33,9 +33,27 @@ API Documentation is available [here](https://www.javadoc.io/doc/org.gephi/graph
 
 Follow [this QuickStart](https://github.com/gephi/graphstore/wiki/Quick-Start) to get started.
 
+## Usage
+
+### From a Maven project
+
+```xml
+<dependency>
+    <groupId>org.gephi</groupId>
+    <artifactId>graphstore</artifactId>
+    <version>0.7.0</version>
+</dependency>
+```
+
+### From a Gradle project
+
+```
+compile 'org.gephi:graphstore:0.7.0'
+```
+
 ## Dependencies
 
-GraphStore depends on FastUtil >= 6.0 and Colt 1.2.0.
+GraphStore is built for JRE 11+ and depends on FastUtil and Colt.
 
 For a complete list of dependencies, consult the `pom.xml` file.
 
