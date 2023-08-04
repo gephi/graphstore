@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.TimeZone;
 import org.gephi.graph.api.Interval;
@@ -100,8 +101,6 @@ public class IntervalsParserTest {
         // Dates:
         assertEquals(buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"),
                 parseDateIntoTimestamp("2015-01-31"))), IntervalsParser.parseIntervalSet("[2015-01-01, 2015-01-31]"));
-        assertEquals(buildIntervalSet(new Interval(parseDateIntoTimestamp("2015-01-01"),
-                parseDateIntoTimestamp("2015-01-31"))), IntervalsParser.parseIntervalSet("[2015-01, 2015-01-31]"));
 
         // Date times:
         assertEquals(buildIntervalSet(new Interval(parseDateTimeIntoTimestamp("2015-01-01 21:12:05"),

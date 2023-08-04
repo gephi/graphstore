@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -473,7 +474,7 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 0, 1.0, true);
         boolean a = graphStore.addEdge(edge);
         boolean b = graphStore.addEdge(edge);
 
@@ -491,8 +492,8 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge1 = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
-        EdgeImpl edge2 = new EdgeImpl("1", nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge1 = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge2 = new EdgeImpl("1", graphStore, nodes[0], nodes[1], 0, 1.0, true);
         boolean a = graphStore.addEdge(edge1);
         boolean b = graphStore.addEdge(edge2);
 
@@ -504,6 +505,22 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testAddEdgeWithSameTypeWithoutParallel() {
+        Configuration configuration = Configuration.builder().enableParallelEdgesSameType(false).build();
+        GraphStore graphStore = new GraphStore(null, new ConfigurationImpl(configuration));
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        EdgeImpl edge1 = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge2 = new EdgeImpl("1", graphStore, nodes[0], nodes[1], 0, 1.0, true);
+        Assert.assertTrue(graphStore.addEdge(edge1));
+        Assert.assertFalse(graphStore.addEdge(edge2));
+
+        Assert.assertTrue(graphStore.contains(edge1));
+        Assert.assertFalse(graphStore.contains(edge2));
+    }
+
+    @Test
     public void testAddEdgeTypeRegistration() {
         GraphStore graphStore = new GraphStore();
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
@@ -512,7 +529,7 @@ public class GraphStoreTest {
         EdgeTypeStore typeStore = graphStore.edgeTypeStore;
         Assert.assertFalse(typeStore.contains(1));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 1, 1.0, true);
+        EdgeImpl edge = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 1, 1.0, true);
         graphStore.addEdge(edge);
 
         Assert.assertTrue(typeStore.contains(1));
@@ -525,7 +542,7 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 0, 1.0, true);
+        EdgeImpl edge = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 0, 1.0, true);
         graphStore.addAllEdges(Collections.singletonList(edge));
 
         Assert.assertTrue(graphStore.contains(edge));
@@ -537,7 +554,7 @@ public class GraphStoreTest {
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);
         graphStore.addAllNodes(Arrays.asList(nodes));
 
-        EdgeImpl edge = new EdgeImpl("0", nodes[0], nodes[1], 1, 1.0, true);
+        EdgeImpl edge = new EdgeImpl("0", graphStore, nodes[0], nodes[1], 1, 1.0, true);
         graphStore.addAllEdges(Collections.singletonList(edge));
 
         Assert.assertTrue(graphStore.edgeTypeStore.contains(1));

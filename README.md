@@ -1,6 +1,8 @@
 # GraphStore
 
 [![build](https://github.com/gephi/graphstore/actions/workflows/ci.yml/badge.svg)](https://github.com/gephi/graphstore/actions/workflows/ci.yml)
+[![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Maven Central](https://img.shields.io/maven-central/v/org.gephi/graphstore.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.gephi/graphstore)
 [![Coverage Status](https://coveralls.io/repos/gephi/graphstore/badge.svg?branch=master&service=github)](https://coveralls.io/github/gephi/graphstore?branch=master)
 
 GraphStore is an in-memory graph structure implementation written in Java. It's designed to be powerful, efficient and robust. It's powering the Gephi software and supports large graphs in intensive applications.
@@ -29,9 +31,29 @@ Development builds can be found on [Sonatype's Snapshot Repository](https://oss.
 
 API Documentation is available [here](https://www.javadoc.io/doc/org.gephi/graphstore/latest/index.html).
 
+Follow [this QuickStart](https://github.com/gephi/graphstore/wiki/Quick-Start) to get started.
+
+## Usage
+
+### From a Maven project
+
+```xml
+<dependency>
+    <groupId>org.gephi</groupId>
+    <artifactId>graphstore</artifactId>
+    <version>0.7.0</version>
+</dependency>
+```
+
+### From a Gradle project
+
+```
+compile 'org.gephi:graphstore:0.7.0'
+```
+
 ## Dependencies
 
-GraphStore depends on FastUtil >= 6.0, Colt 1.2.0 and Joda-Time 2.2.
+GraphStore is built for JRE 11+ and depends on FastUtil and Colt.
 
 For a complete list of dependencies, consult the `pom.xml` file.
 
@@ -42,6 +64,8 @@ For a complete list of dependencies, consult the `pom.xml` file.
 GraphStore uses Maven for building. 
 
 	> mvn clean install
+
+Note that code formatting is automatically applied at that time.
 		
 ### How to test
 
@@ -50,10 +74,6 @@ GraphStore uses Maven for building.
 ## How to obtain code coverage report
 
 	> mvn jacoco:report
-
-## How to run the benchmark code
-
-	> mvn integration-test
 
 ## Contribute
 

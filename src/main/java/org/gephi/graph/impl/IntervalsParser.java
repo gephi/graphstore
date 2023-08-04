@@ -15,17 +15,21 @@
  */
 package org.gephi.graph.impl;
 
+import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_BRACKET;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_SQUARE_BRACKET;
+
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_BRACKET;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
 import org.gephi.graph.api.types.IntervalCharMap;
@@ -37,8 +41,6 @@ import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
-import org.joda.time.DateTimeZone;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
 
 /**
  * <p>
@@ -93,14 +95,14 @@ public final class IntervalsParser {
      * Parses a {@link IntervalSet} type with one or more intervals.
      *
      * @param input Input string to parse
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @param zoneId Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link IntervalSet}, or null if the input equals
      *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if there are no intervals in the
      *         input string or bounds cannot be parsed into doubles or
      *         dates/datetimes.
      */
-    public static IntervalSet parseIntervalSet(String input, DateTimeZone timeZone) throws IllegalArgumentException {
+    public static IntervalSet parseIntervalSet(String input, ZoneId zoneId) throws IllegalArgumentException {
         if (input == null) {
             return null;
         }
@@ -111,7 +113,7 @@ public final class IntervalsParser {
 
         List<IntervalWithValue<Object>> intervals;
         try {
-            intervals = parseIntervals(null, input, timeZone);
+            intervals = parseIntervals(null, input, zoneId);
         } catch (IOException ex) {
             throw new RuntimeException("Unexpected expection while parsing intervals", ex);
         }
@@ -147,7 +149,7 @@ public final class IntervalsParser {
      * @param typeClass Simple type or {@link IntervalMap} subtype for the result
      *        intervals' values.
      * @param input Input string to parse
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @param zoneId Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link IntervalMap}, or null if the input equals
      *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if type class is not supported, any
@@ -155,7 +157,7 @@ public final class IntervalsParser {
      *         are no intervals in the input string or bounds cannot be parsed into
      *         doubles or dates/datetimes.
      */
-    public static <T> IntervalMap<T> parseIntervalMap(Class<T> typeClass, String input, DateTimeZone timeZone) throws IllegalArgumentException {
+    public static <T> IntervalMap<T> parseIntervalMap(Class<T> typeClass, String input, ZoneId zoneId) throws IllegalArgumentException {
         if (typeClass == null) {
             throw new IllegalArgumentException("typeClass required");
         }
@@ -166,7 +168,7 @@ public final class IntervalsParser {
 
         List<IntervalWithValue<T>> intervals;
         try {
-            intervals = parseIntervals(typeClass, input, timeZone);
+            intervals = parseIntervals(typeClass, input, zoneId);
         } catch (IOException ex) {
             throw new RuntimeException("Unexpected expection while parsing intervals", ex);
         }
@@ -234,10 +236,10 @@ public final class IntervalsParser {
      * @param typeClass Class of the intervals' values or null to parse intervals
      *        without values
      * @param input Input to parse
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @param zoneId Time zone to use or null to use default time zone (UTC)
      * @return List of Interval
      */
-    private static <T> List<IntervalWithValue<T>> parseIntervals(Class<T> typeClass, String input, DateTimeZone timeZone) throws IOException, IllegalArgumentException {
+    private static <T> List<IntervalWithValue<T>> parseIntervals(Class<T> typeClass, String input, ZoneId zoneId) throws IOException, IllegalArgumentException {
         if (input == null) {
             return null;
         }
@@ -265,7 +267,7 @@ public final class IntervalsParser {
             switch (c) {
                 case LEFT_BOUND_SQUARE_BRACKET:
                 case LEFT_BOUND_BRACKET:
-                    intervals.add(parseInterval(typeClass, reader, timeZone));
+                    intervals.add(parseInterval(typeClass, reader, zoneId));
                     break;
                 default:
                     // Ignore other chars outside of intervals
@@ -279,7 +281,7 @@ public final class IntervalsParser {
         return intervals;
     }
 
-    private static <T> IntervalWithValue<T> parseInterval(Class<T> typeClass, StringReader reader, DateTimeZone timeZone) throws IOException {
+    private static <T> IntervalWithValue<T> parseInterval(Class<T> typeClass, StringReader reader, ZoneId zoneId) throws IOException {
         ArrayList<String> values = new ArrayList<>();
 
         int r;
@@ -289,7 +291,7 @@ public final class IntervalsParser {
             switch (c) {
                 case RIGHT_BOUND_SQUARE_BRACKET:
                 case RIGHT_BOUND_BRACKET:
-                    return buildInterval(typeClass, values, timeZone);
+                    return buildInterval(typeClass, values, zoneId);
                 case ' ':
                 case '\t':
                 case '\r':
@@ -309,26 +311,30 @@ public final class IntervalsParser {
             }
         }
 
-        return buildInterval(typeClass, values, timeZone);
+        return buildInterval(typeClass, values, zoneId);
     }
 
-    private static <T> IntervalWithValue<T> buildInterval(Class<T> typeClass, ArrayList<String> values, DateTimeZone timeZone) {
+    private static <T> IntervalWithValue<T> buildInterval(Class<T> typeClass, ArrayList<String> values, ZoneId zoneId) {
         if (typeClass == null && values.size() != 2) {
             throw new IllegalArgumentException("Each interval must have 2 values");
         } else if (typeClass != null && values.size() != 3) {
             throw new IllegalArgumentException("Each interval must have 3 values");
         }
 
-        double low = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
-        double high = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(1), timeZone);
+        try {
+            double low = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), zoneId);
+            double high = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(1), zoneId);
 
-        if (typeClass == null) {
-            return new IntervalWithValue(low, high, null);
-        } else {
-            String valString = values.get(2);
-            Object value = FormattingAndParsingUtils.convertValue(typeClass, valString);
+            if (typeClass == null) {
+                return new IntervalWithValue(low, high, null);
+            } else {
+                String valString = values.get(2);
+                Object value = FormattingAndParsingUtils.convertValue(typeClass, valString);
 
-            return new IntervalWithValue(low, high, value);
+                return new IntervalWithValue(low, high, value);
+            }
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Invalid date/time/timestamp value", ex);
         }
     }
 

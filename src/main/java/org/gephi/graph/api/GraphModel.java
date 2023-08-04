@@ -18,8 +18,8 @@ package org.gephi.graph.api;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.time.ZoneId;
 import org.gephi.graph.impl.GraphModelImpl;
-import org.joda.time.DateTimeZone;
 
 /**
  * Graph API's entry point.
@@ -38,14 +38,21 @@ import org.joda.time.DateTimeZone;
  * </ul>
  * <p>
  * New instances can be obtained via the embedded factory:
- * 
+ *
  * <pre>
  * GraphModel model = GraphModel.Factory.newInstance();
  * </pre>
- * 
+ *
+ * A <code>Configuration</code> object can be passed to the factory:
+ *
+ * <pre>
+ * Configuration configuration = Configuration.builder().build();
+ * GraphModel model = GraphModel.Factory.newInstance(configuration);
+ * </pre>
+ *
  * This API revolves around a set of simple concepts. A <code>GraphModel</code>
  * encapsulate all elements and metadata associated with a graph structure. In
- * other words its a single graph but it also contains configuration, indices,
+ * other words it's a single graph, but it also contains configuration, indices,
  * views and other less important services such as observers.
  * <p>
  * Then, <code>GraphModel</code> gives access to the <code>Graph</code>
@@ -83,6 +90,7 @@ import org.joda.time.DateTimeZone;
  * <code>null</code> label, which is internally represented as zero.
  *
  * @see Graph
+ * @see Configuration
  * @see Element
  * @see Table
  * @see Column
@@ -139,7 +147,8 @@ public interface GraphModel {
 
         /**
          * Read the <code>input</code> into the given graph model. The provided graph
-         * model should be empty.
+         * model should be empty and the configurations should match between the
+         * provided model and the one being read.
          *
          * @param input data input to read from
          * @return the graphmodel passed as parameter
@@ -700,14 +709,14 @@ public interface GraphModel {
      *
      * @return time zone
      */
-    public DateTimeZone getTimeZone();
+    public ZoneId getTimeZone();
 
     /**
      * Sets the time zone used to display time.
      *
      * @param timeZone time zone
      */
-    public void setTimeZone(DateTimeZone timeZone);
+    public void setTimeZone(ZoneId timeZone);
 
     /**
      * Returns the current configuration.
@@ -718,12 +727,16 @@ public interface GraphModel {
 
     /**
      * Sets a new configuration for this graph model.
-     * <p>
-     * Note that this method only works if the graph model is empty.
+     *
+     * @deprecated setting configuration after graph model creation is no longer
+     *             supported. Best is to use the {@link Configuration#builder()} to
+     *             create a new configuration and then use it at graph model
+     *             creation from
+     *             {@link GraphModel.Factory#newInstance(Configuration)}.
      *
      * @param configuration new configuration
-     * @throws IllegalStateException if the graph model isn't empty
      */
+    @Deprecated
     public void setConfiguration(Configuration configuration);
 
     /**

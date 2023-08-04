@@ -17,11 +17,12 @@ package org.gephi.graph.api.types;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
-import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -642,11 +643,11 @@ public class TimestampMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330473741000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, foo]; [2012-02-29, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZoneId.of("UTC")), "<[2012-02-29, foo]; [2012-02-29, bar]>");
         Assert.assertEquals(map1
-                .toString(TimeFormat.DATE, DateTimeZone.forID("+03:00")), "<[2012-02-29, foo]; [2012-02-29, bar]>");
+                .toString(TimeFormat.DATE, ZoneId.of("+03:00")), "<[2012-02-29, foo]; [2012-02-29, bar]>");
         Assert.assertEquals(map1
-                .toString(TimeFormat.DATE, DateTimeZone.forID("-03:00")), "<[2012-02-28, foo]; [2012-02-28, bar]>");
+                .toString(TimeFormat.DATE, ZoneId.of("-03:00")), "<[2012-02-28, foo]; [2012-02-28, bar]>");
 
         // Test infinity:
         TimestampStringMap mapInf = new TimestampStringMap();
@@ -670,10 +671,10 @@ public class TimestampMapTest {
         Assert.assertEquals(map1.toString(TimeFormat.DOUBLE), "<[1330473600000.0, foo]; [1330477844000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1
-                .toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone
-                .forID("-01:30")), "<[2012-02-28T22:30:00.000-01:30, foo]; [2012-02-28T23:40:44.000-01:30, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZoneId
+                .of("UTC")), "<[2012-02-29T00:00:00.000Z, foo]; [2012-02-29T01:10:44.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZoneId
+                .of("-01:30")), "<[2012-02-28T22:30:00.000-01:30, foo]; [2012-02-28T23:40:44.000-01:30, bar]>");
 
         // Test with timezone parsing and UTC printing:
         TimestampStringMap map2 = new TimestampStringMap();
@@ -692,12 +693,41 @@ public class TimestampMapTest {
         Assert.assertEquals(mapInf.toString(TimeFormat.DATETIME), "<[-Infinity, value]; [Infinity, value]>");
     }
 
+    @Test
+    public void testCopy() {
+        TimestampStringMap strMap = new TimestampStringMap(new double[] { 1.0 }, new String[] { "foo" });
+        TimestampByteMap byteMap = new TimestampByteMap(new double[] { 1.0 }, new byte[] { 1 });
+        TimestampShortMap shortMap = new TimestampShortMap(new double[] { 1.0 }, new short[] { 1 });
+        TimestampIntegerMap intMap = new TimestampIntegerMap(new double[] { 1.0 }, new int[] { 1 });
+        TimestampLongMap longMap = new TimestampLongMap(new double[] { 1.0 }, new long[] { 1 });
+        TimestampFloatMap floatMap = new TimestampFloatMap(new double[] { 1.0 }, new float[] { 1 });
+        TimestampDoubleMap doubleMap = new TimestampDoubleMap(new double[] { 1.0 }, new double[] { 1 });
+        TimestampCharMap charMap = new TimestampCharMap(new double[] { 1.0 }, new char[] { 'a' });
+        TimestampBooleanMap boolMap = new TimestampBooleanMap(new double[] { 1.0 }, new boolean[] { true });
+
+        testEqualsButNotSameUnderlyingArrays(new TimestampStringMap(strMap), strMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampByteMap(byteMap), byteMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampShortMap(shortMap), shortMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampIntegerMap(intMap), intMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampLongMap(longMap), longMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampFloatMap(floatMap), floatMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampDoubleMap(doubleMap), doubleMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampCharMap(charMap), charMap);
+        testEqualsButNotSameUnderlyingArrays(new TimestampBooleanMap(boolMap), boolMap);
+    }
+
     // UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);
         for (int i = 0; i < a.length; i++) {
             Assert.assertEquals(a[i], b[i]);
         }
+    }
+
+    private void testEqualsButNotSameUnderlyingArrays(TimestampMap a, TimestampMap b) {
+        Assert.assertEquals(a, b);
+        Assert.assertNotSame(a.array, b.array);
+        Assert.assertNotSame(a.getValuesArray(), b.getValuesArray());
     }
 
     private TimestampMap[] getAllInstances() {
@@ -769,7 +799,7 @@ public class TimestampMapTest {
             Assert.assertEquals(set.get(expectedTimestamp[i], null), expectedValues[i]);
             Assert.assertEquals(set.get(999999.0, getDefaultValue(set)), getDefaultValue(set));
             Assert.assertTrue(set.contains(expectedTimestamp[i]));
-            Assert.assertEquals(keysArray[i], expectedTimestamp[i]);
+            Assert.assertEquals(keysArray[i], expectedTimestamp[i], 0.0);
 
             if (typeClass != String.class) {
                 try {

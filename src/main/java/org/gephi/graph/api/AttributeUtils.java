@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.gephi.graph.api;
 
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
@@ -41,25 +42,19 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
-import org.gephi.graph.impl.TimestampsParser;
-import org.gephi.graph.impl.IntervalsParser;
-import org.gephi.graph.impl.FormattingAndParsingUtils;
-import org.gephi.graph.api.types.TimestampMap;
-import org.gephi.graph.api.types.TimestampShortMap;
-import org.gephi.graph.api.types.TimestampLongMap;
-import org.gephi.graph.api.types.TimestampSet;
-import org.gephi.graph.api.types.TimestampCharMap;
-import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampBooleanMap;
-import org.gephi.graph.api.types.TimestampFloatMap;
-import org.gephi.graph.api.types.TimestampStringMap;
-import org.gephi.graph.api.types.TimestampByteMap;
-import org.gephi.graph.api.types.TimestampIntegerMap;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,11 +75,22 @@ import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.gephi.graph.api.types.TimeMap;
 import org.gephi.graph.api.types.TimeSet;
+import org.gephi.graph.api.types.TimestampBooleanMap;
+import org.gephi.graph.api.types.TimestampByteMap;
+import org.gephi.graph.api.types.TimestampCharMap;
+import org.gephi.graph.api.types.TimestampDoubleMap;
+import org.gephi.graph.api.types.TimestampFloatMap;
+import org.gephi.graph.api.types.TimestampIntegerMap;
+import org.gephi.graph.api.types.TimestampLongMap;
+import org.gephi.graph.api.types.TimestampMap;
+import org.gephi.graph.api.types.TimestampSet;
+import org.gephi.graph.api.types.TimestampShortMap;
+import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.impl.ArraysParser;
+import org.gephi.graph.impl.FormattingAndParsingUtils;
 import org.gephi.graph.impl.GraphStoreConfiguration;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+import org.gephi.graph.impl.IntervalsParser;
+import org.gephi.graph.impl.TimestampsParser;
 
 /**
  * Set of utility methods to manipulate supported attribute types.
@@ -105,9 +111,9 @@ public class AttributeUtils {
 
     // These are used to avoid creating a lot of new instances of
     // DateTimeFormatter
-    private static final Map<DateTimeZone, DateTimeFormatter> DATE_PRINTERS_BY_TIMEZONE;
-    private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PRINTERS_BY_TIMEZONE;
-    private static final Map<DateTimeZone, DateTimeFormatter> DATE_TIME_PARSERS_BY_TIMEZONE;
+    private static final Map<ZoneId, DateTimeFormatter> DATE_PRINTERS_BY_TIMEZONE;
+    private static final Map<ZoneId, DateTimeFormatter> DATE_TIME_PRINTERS_BY_TIMEZONE;
+    private static final Map<ZoneId, DateTimeFormatter> DATE_TIME_PARSERS_BY_TIMEZONE;
 
     // Collectio types to speedup lookup
     private static final Set<Class> TYPED_LIST_TYPES;
@@ -139,6 +145,9 @@ public class AttributeUtils {
 
         // Objects
         supportedTypes.add(String.class);
+
+        // Instant
+        supportedTypes.add(Instant.class);
 
         // Primitives Array
         supportedTypes.add(Boolean[].class);
@@ -220,10 +229,26 @@ public class AttributeUtils {
         TYPES_STANDARDIZATION = Collections.unmodifiableMap(typesStandardization);
 
         // Datetime - make sure UTC timezone is used by default
-        DATE_TIME_PARSER = ISODateTimeFormat.dateOptionalTimeParser()
+        DATE_TIME_PARSER = new DateTimeFormatterBuilder().parseCaseInsensitive()
+                .appendOptional(DateTimeFormatter.ISO_DATE).appendOptional(DateTimeFormatter.ofPattern("yyyyMMdd"))
+                .optionalStart().appendLiteral('T').append(DateTimeFormatter.ISO_TIME)
+                .appendPattern("[.SSSSSSSSS][.SSSSSS][.SSS]").optionalEnd().optionalStart()
+                .appendFraction(ChronoField.NANO_OF_SECOND, 9, 9, true).optionalEnd()
+                // optional nanos with 6 digits (including decimal point)
+                .optionalStart().appendFraction(ChronoField.NANO_OF_SECOND, 6, 6, true).optionalEnd()
+                // optional nanos with 3 digits (including decimal point)
+                .optionalStart().appendFraction(ChronoField.NANO_OF_SECOND, 3, 3, true).optionalEnd()
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
+                .toFormatter().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
+        DATE_PRINTER = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("yyyy-MM-dd").toFormatter()
                 .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
-        DATE_PRINTER = ISODateTimeFormat.date().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
-        DATE_TIME_PRINTER = ISODateTimeFormat.dateTime().withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
+        DATE_TIME_PRINTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
+                .append(DateTimeFormatter.ISO_LOCAL_DATE).appendLiteral('T').appendPattern("HH:mm:ss")
+                .appendPattern(".SSS").parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                .parseDefaulting(ChronoField.NANO_OF_SECOND, 0).appendOffset("+HH:MM", "Z").toFormatter()
+                .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
 
         DATE_PRINTERS_BY_TIMEZONE = new HashMap<>();
         DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<>();
@@ -275,30 +300,30 @@ public class AttributeUtils {
         // Only static methods
     }
 
-    private static DateTimeFormatter getDateTimeFormatterByTimeZone(Map<DateTimeZone, DateTimeFormatter> cache, DateTimeFormatter baseFormatter, DateTimeZone timeZone) {
-        if (timeZone == null) {
+    private static DateTimeFormatter getDateTimeFormatterByTimeZone(Map<ZoneId, DateTimeFormatter> cache, DateTimeFormatter baseFormatter, ZoneId zoneId) {
+        if (zoneId == null) {
             return baseFormatter;
         }
 
-        DateTimeFormatter formatter = cache.get(timeZone);
+        DateTimeFormatter formatter = cache.get(zoneId);
         if (formatter == null) {
-            formatter = baseFormatter.withZone(timeZone);
-            cache.put(timeZone, formatter);
+            formatter = baseFormatter.withZone(zoneId);
+            cache.put(zoneId, formatter);
         }
 
         return formatter;
     }
 
-    private static DateTimeFormatter getDateTimeParserByTimeZone(DateTimeZone timeZone) {
-        return getDateTimeFormatterByTimeZone(DATE_TIME_PARSERS_BY_TIMEZONE, DATE_TIME_PARSER, timeZone);
+    private static DateTimeFormatter getDateTimeParserByTimeZone(ZoneId zoneId) {
+        return getDateTimeFormatterByTimeZone(DATE_TIME_PARSERS_BY_TIMEZONE, DATE_TIME_PARSER, zoneId);
     }
 
-    private static DateTimeFormatter getDateTimePrinterByTimeZone(DateTimeZone timeZone) {
-        return getDateTimeFormatterByTimeZone(DATE_TIME_PRINTERS_BY_TIMEZONE, DATE_TIME_PRINTER, timeZone);
+    private static DateTimeFormatter getDateTimePrinterByTimeZone(ZoneId zoneId) {
+        return getDateTimeFormatterByTimeZone(DATE_TIME_PRINTERS_BY_TIMEZONE, DATE_TIME_PRINTER, zoneId);
     }
 
-    private static DateTimeFormatter getDatePrinterByTimeZone(DateTimeZone timeZone) {
-        return getDateTimeFormatterByTimeZone(DATE_PRINTERS_BY_TIMEZONE, DATE_PRINTER, timeZone);
+    private static DateTimeFormatter getDatePrinterByTimeZone(ZoneId zoneId) {
+        return getDateTimeFormatterByTimeZone(DATE_PRINTERS_BY_TIMEZONE, DATE_PRINTER, zoneId);
     }
 
     /**
@@ -316,18 +341,21 @@ public class AttributeUtils {
      *
      * @param value value
      * @param timeFormat time format
-     * @param timeZone time zone
+     * @param zoneId time zone
      * @return string representation
      */
-    public static String print(Object value, TimeFormat timeFormat, DateTimeZone timeZone) {
+    public static String print(Object value, TimeFormat timeFormat, ZoneId zoneId) {
         if (value == null) {
             return "null";
         }
         if (value instanceof TimeSet) {
-            return ((TimeSet) value).toString(timeFormat, timeZone);
+            return ((TimeSet) value).toString(timeFormat, zoneId);
         }
         if (value instanceof TimeMap) {
-            return ((TimeMap) value).toString(timeFormat, timeZone);
+            return ((TimeMap) value).toString(timeFormat, zoneId);
+        }
+        if (value instanceof Instant) {
+            printDate((Instant) value, zoneId);
         }
         if (value.getClass().isArray()) {
             return printArray(value);
@@ -341,12 +369,12 @@ public class AttributeUtils {
      *
      * @param str string to parse
      * @param typeClass class of the desired type
-     * @param timeZone time zone to use or null to use default time zone (UTC), for
-     *        dynamic types only
+     * @param zoneId time zone to use or null to use default time zone (UTC), for
+     *        dynamic types and <code>Instant</code> only
      * @return an instance of the type class, or null if <em>str</em> is null or
      *         empty
      */
-    public static Object parse(String str, Class typeClass, DateTimeZone timeZone) {
+    public static Object parse(String str, Class typeClass, ZoneId zoneId) {
         if (str == null || str.isEmpty()) {
             return null;
         }
@@ -364,17 +392,17 @@ public class AttributeUtils {
         if (typeClass.equals(String.class)) {
             return str;
         } else if (typeClass.equals(Byte.class)) {
-            return new Byte(str);
+            return Byte.valueOf(str);
         } else if (typeClass.equals(Short.class)) {
-            return new Short(str);
+            return Short.valueOf(str);
         } else if (typeClass.equals(Integer.class)) {
-            return new Integer(str);
+            return Integer.valueOf(str);
         } else if (typeClass.equals(Long.class)) {
-            return new Long(str);
+            return Long.valueOf(str);
         } else if (typeClass.equals(Float.class)) {
-            return new Float(str);
+            return Float.valueOf(str);
         } else if (typeClass.equals(Double.class)) {
-            return new Double(str);
+            return Double.valueOf(str);
         } else if (typeClass.equals(BigInteger.class)) {
             return new BigInteger(str);
         } else if (typeClass.equals(BigDecimal.class)) {
@@ -395,50 +423,56 @@ public class AttributeUtils {
             return str.charAt(0);
         }
 
+        // Instant
+        if (typeClass.equals(Instant.class)) {
+            double milliseconds = FormattingAndParsingUtils.parseDateTimeOrTimestamp(str, zoneId);
+            return Instant.ofEpochMilli((long) milliseconds);
+        }
+
         // Interval types:
         if (typeClass.equals(IntervalSet.class)) {
-            return IntervalsParser.parseIntervalSet(str, timeZone);
+            return IntervalsParser.parseIntervalSet(str, zoneId);
         } else if (typeClass.equals(IntervalStringMap.class)) {
-            return IntervalsParser.parseIntervalMap(String.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(String.class, str, zoneId);
         } else if (typeClass.equals(IntervalByteMap.class)) {
-            return IntervalsParser.parseIntervalMap(Byte.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(Byte.class, str, zoneId);
         } else if (typeClass.equals(IntervalShortMap.class)) {
-            return IntervalsParser.parseIntervalMap(Short.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(Short.class, str, zoneId);
         } else if (typeClass.equals(IntervalIntegerMap.class)) {
-            return IntervalsParser.parseIntervalMap(Integer.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(Integer.class, str, zoneId);
         } else if (typeClass.equals(IntervalLongMap.class)) {
-            return IntervalsParser.parseIntervalMap(Long.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(Long.class, str, zoneId);
         } else if (typeClass.equals(IntervalFloatMap.class)) {
-            return IntervalsParser.parseIntervalMap(Float.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(Float.class, str, zoneId);
         } else if (typeClass.equals(IntervalDoubleMap.class)) {
-            return IntervalsParser.parseIntervalMap(Double.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(Double.class, str, zoneId);
         } else if (typeClass.equals(IntervalBooleanMap.class)) {
-            return IntervalsParser.parseIntervalMap(Boolean.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(Boolean.class, str, zoneId);
         } else if (typeClass.equals(IntervalCharMap.class)) {
-            return IntervalsParser.parseIntervalMap(Character.class, str, timeZone);
+            return IntervalsParser.parseIntervalMap(Character.class, str, zoneId);
         }
 
         // Timestamp types:
         if (typeClass.equals(TimestampSet.class)) {
-            return TimestampsParser.parseTimestampSet(str, timeZone);
+            return TimestampsParser.parseTimestampSet(str, zoneId);
         } else if (typeClass.equals(TimestampStringMap.class)) {
-            return TimestampsParser.parseTimestampMap(String.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(String.class, str, zoneId);
         } else if (typeClass.equals(TimestampByteMap.class)) {
-            return TimestampsParser.parseTimestampMap(Byte.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(Byte.class, str, zoneId);
         } else if (typeClass.equals(TimestampShortMap.class)) {
-            return TimestampsParser.parseTimestampMap(Short.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(Short.class, str, zoneId);
         } else if (typeClass.equals(TimestampIntegerMap.class)) {
-            return TimestampsParser.parseTimestampMap(Integer.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(Integer.class, str, zoneId);
         } else if (typeClass.equals(TimestampLongMap.class)) {
-            return TimestampsParser.parseTimestampMap(Long.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(Long.class, str, zoneId);
         } else if (typeClass.equals(TimestampFloatMap.class)) {
-            return TimestampsParser.parseTimestampMap(Float.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(Float.class, str, zoneId);
         } else if (typeClass.equals(TimestampDoubleMap.class)) {
-            return TimestampsParser.parseTimestampMap(Double.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(Double.class, str, zoneId);
         } else if (typeClass.equals(TimestampBooleanMap.class)) {
-            return TimestampsParser.parseTimestampMap(Boolean.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(Boolean.class, str, zoneId);
         } else if (typeClass.equals(TimestampCharMap.class)) {
-            return TimestampsParser.parseTimestampMap(Character.class, str, timeZone);
+            return TimestampsParser.parseTimestampMap(Character.class, str, zoneId);
         }
 
         // Array types:
@@ -1015,11 +1049,14 @@ public class AttributeUtils {
      * Parses the given time and returns its milliseconds representation.
      *
      * @param dateTime type to parse
-     * @param timeZone time zone to use or null to use default time zone (UTC)
+     * @param zoneId time zone to use or null to use default time zone (UTC)
      * @return milliseconds representation
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTime(String dateTime, DateTimeZone timeZone) {
-        return getDateTimeParserByTimeZone(timeZone).parseDateTime(dateTime).getMillis();
+    public static double parseDateTime(String dateTime, ZoneId zoneId) throws DateTimeParseException {
+        DateTimeFormatter dateTimeParserByTimeZone = getDateTimeParserByTimeZone(zoneId);
+        Instant instant = dateTimeParserByTimeZone.parse(dateTime, Instant::from);
+        return (double) instant.toEpochMilli();
     }
 
     /**
@@ -1028,8 +1065,9 @@ public class AttributeUtils {
      *
      * @param dateTime the type to parse
      * @return milliseconds representation
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTime(String dateTime) {
+    public static double parseDateTime(String dateTime) throws DateTimeParseException {
         return parseDateTime(dateTime, null);
     }
 
@@ -1038,11 +1076,12 @@ public class AttributeUtils {
      * Returns the date or timestamp converted to a timestamp in milliseconds.
      *
      * @param timeStr Date or timestamp string
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @param zoneId Time zone to use or null to use default time zone (UTC)
      * @return Timestamp
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTimeOrTimestamp(String timeStr, DateTimeZone timeZone) {
-        return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr, timeZone);
+    public static double parseDateTimeOrTimestamp(String timeStr, ZoneId zoneId) throws DateTimeParseException {
+        return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr, zoneId);
     }
 
     /**
@@ -1052,9 +1091,10 @@ public class AttributeUtils {
      *
      * @param timeStr Date or timestamp string
      * @return Timestamp
+     * @throws DateTimeParseException if the time cannot be parsed
      */
-    public static double parseDateTimeOrTimestamp(String timeStr) {
-        return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr, null);
+    public static double parseDateTimeOrTimestamp(String timeStr) throws DateTimeParseException {
+        return FormattingAndParsingUtils.parseDateTimeOrTimestamp(timeStr);
     }
 
     /**
@@ -1071,14 +1111,27 @@ public class AttributeUtils {
      * Returns the date's string representation of the given timestamp.
      *
      * @param timestamp time, in milliseconds
-     * @param timeZone time zone to use or null to use default time zone (UTC)
+     * @param zoneId time zone to use or null to use default time zone (UTC)
      * @return formatted date
      */
-    public static String printDate(double timestamp, DateTimeZone timeZone) {
+    public static String printDate(double timestamp, ZoneId zoneId) {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
-        return getDatePrinterByTimeZone(timeZone).print((long) timestamp);
+        return printDate(Instant.ofEpochMilli((long) timestamp), zoneId);
+    }
+
+    /**
+     * Returns the date's string representation of the given instant.
+     *
+     * @param instant instant to format
+     * @param zoneId time zone to use or null to use default time zone (UTC)
+     * @return formatted date
+     */
+    public static String printDate(Instant instant, ZoneId zoneId) {
+        DateTimeFormatter datePrinterByTimeZone = getDatePrinterByTimeZone(zoneId);
+        ZonedDateTime zonedDateTime = instant.atZone(datePrinterByTimeZone.getZone());
+        return zonedDateTime.format(datePrinterByTimeZone);
     }
 
     /**
@@ -1096,18 +1149,32 @@ public class AttributeUtils {
      * Returns the time's string representation of the given timestamp.
      *
      * @param timestamp time, in milliseconds
-     * @param timeZone time zone to use or null to use default time zone (UTC)
+     * @param zoneId time zone to use or null to use default time zone (UTC)
      * @return formatted time
      */
-    public static String printDateTime(double timestamp, DateTimeZone timeZone) {
+    public static String printDateTime(double timestamp, ZoneId zoneId) {
         if (Double.isInfinite(timestamp) || Double.isNaN(timestamp)) {
             return printTimestamp(timestamp);
         }
-        return getDateTimePrinterByTimeZone(timeZone).print((long) timestamp);
+        return printDateTime(Instant.ofEpochMilli((long) timestamp), zoneId);
     }
 
     /**
-     * Returns the time's tring representation of the given timestamp. Default time
+     * Returns the time's string representation of the given instant.
+     *
+     * @param instant instant to format
+     * @param zoneId time zone to use or null to use default time zone (UTC)
+     * @return formatted time
+     */
+    public static String printDateTime(Instant instant, ZoneId zoneId) {
+        DateTimeFormatter dateTimePrinterByTimeZone = getDateTimePrinterByTimeZone(zoneId);
+        ZonedDateTime zonedDateTime2 = instant.atZone(dateTimePrinterByTimeZone.getZone());
+        OffsetDateTime time = OffsetDateTime.from(zonedDateTime2);
+        return time.format(dateTimePrinterByTimeZone);
+    }
+
+    /**
+     * Returns the time's string representation of the given timestamp. Default time
      * zone is used (UTC).
      *
      * @param timestamp time, in milliseconds
@@ -1122,15 +1189,15 @@ public class AttributeUtils {
      *
      * @param timestamp time, in milliseconds
      * @param timeFormat time format
-     * @param timeZone time zone to use or null to use default time zone (UTC).
+     * @param zoneId time zone to use or null to use default time zone (UTC).
      * @return formatted timestamp
      */
-    public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat, DateTimeZone timeZone) {
+    public static String printTimestampInFormat(double timestamp, TimeFormat timeFormat, ZoneId zoneId) {
         switch (timeFormat) {
             case DATE:
-                return AttributeUtils.printDate(timestamp, timeZone);
+                return AttributeUtils.printDate(timestamp, zoneId);
             case DATETIME:
-                return AttributeUtils.printDateTime(timestamp, timeZone);
+                return AttributeUtils.printDateTime(timestamp, zoneId);
             case DOUBLE:
                 return AttributeUtils.printTimestamp(timestamp);
         }
@@ -1180,5 +1247,154 @@ public class AttributeUtils {
      */
     public static boolean isEdgeColumn(Column colum) {
         return colum.getTable().getElementClass().equals(Edge.class);
+    }
+
+    /**
+     * Returns a copy of the provided object.
+     * <p>
+     * The copy is a deep copy for arrays, {@link IntervalSet},
+     * {@link TimestampSet}, sets and lists
+     *
+     * @param obj object to copy
+     * @return copy of the provided object
+     */
+    public static Object copy(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        Class typeClass = obj.getClass();
+        if (!isSupported(typeClass)) {
+            throw new IllegalArgumentException("Unsupported type " + typeClass.getCanonicalName());
+        }
+        typeClass = getStandardizedType(typeClass);
+        obj = standardizeValue(obj);
+
+        // Primitive
+        if (isSimpleType(typeClass)) {
+            return obj;
+        }
+
+        // Instant
+        if (typeClass.equals(Instant.class)) {
+            return Instant.from((Instant) obj);
+        }
+
+        // Interval types:
+        if (typeClass.equals(IntervalSet.class)) {
+            return new IntervalSet((IntervalSet) obj);
+        } else if (typeClass.equals(IntervalStringMap.class)) {
+            return new IntervalStringMap((IntervalStringMap) obj);
+        } else if (typeClass.equals(IntervalByteMap.class)) {
+            return new IntervalByteMap((IntervalByteMap) obj);
+        } else if (typeClass.equals(IntervalShortMap.class)) {
+            return new IntervalShortMap((IntervalShortMap) obj);
+        } else if (typeClass.equals(IntervalIntegerMap.class)) {
+            return new IntervalIntegerMap((IntervalIntegerMap) obj);
+        } else if (typeClass.equals(IntervalLongMap.class)) {
+            return new IntervalLongMap((IntervalLongMap) obj);
+        } else if (typeClass.equals(IntervalFloatMap.class)) {
+            return new IntervalFloatMap((IntervalFloatMap) obj);
+        } else if (typeClass.equals(IntervalDoubleMap.class)) {
+            return new IntervalDoubleMap((IntervalDoubleMap) obj);
+        } else if (typeClass.equals(IntervalBooleanMap.class)) {
+            return new IntervalBooleanMap((IntervalBooleanMap) obj);
+        } else if (typeClass.equals(IntervalCharMap.class)) {
+            return new IntervalCharMap((IntervalCharMap) obj);
+        }
+
+        // Timestamp types:
+        if (typeClass.equals(TimestampSet.class)) {
+            return new TimestampSet((TimestampSet) obj);
+        } else if (typeClass.equals(TimestampStringMap.class)) {
+            return new TimestampStringMap((TimestampStringMap) obj);
+        } else if (typeClass.equals(TimestampByteMap.class)) {
+            return new TimestampByteMap((TimestampByteMap) obj);
+        } else if (typeClass.equals(TimestampShortMap.class)) {
+            return new TimestampShortMap((TimestampShortMap) obj);
+        } else if (typeClass.equals(TimestampIntegerMap.class)) {
+            return new TimestampIntegerMap((TimestampIntegerMap) obj);
+        } else if (typeClass.equals(TimestampLongMap.class)) {
+            return new TimestampLongMap((TimestampLongMap) obj);
+        } else if (typeClass.equals(TimestampFloatMap.class)) {
+            return new TimestampFloatMap((TimestampFloatMap) obj);
+        } else if (typeClass.equals(TimestampDoubleMap.class)) {
+            return new TimestampDoubleMap((TimestampDoubleMap) obj);
+        } else if (typeClass.equals(TimestampBooleanMap.class)) {
+            return new TimestampBooleanMap((TimestampBooleanMap) obj);
+        } else if (typeClass.equals(TimestampCharMap.class)) {
+            return new TimestampCharMap((TimestampCharMap) obj);
+        }
+
+        // Array
+        if (isArrayType(typeClass)) {
+            Class componentType = typeClass.getComponentType();
+            int length = Array.getLength(obj);
+            Object dest = Array.newInstance(componentType, length);
+            System.arraycopy(obj, 0, dest, 0, length);
+            return dest;
+        }
+
+        // List
+        if (obj instanceof CharArrayList) {
+            return new CharArrayList((CharArrayList) obj);
+        } else if (obj instanceof BooleanArrayList) {
+            return new BooleanArrayList((BooleanArrayList) obj);
+        } else if (obj instanceof ByteArrayList) {
+            return new ByteArrayList((ByteArrayList) obj);
+        } else if (obj instanceof ShortArrayList) {
+            return new ShortArrayList((ShortArrayList) obj);
+        } else if (obj instanceof IntArrayList) {
+            return new IntArrayList((IntArrayList) obj);
+        } else if (obj instanceof LongArrayList) {
+            return new LongArrayList((LongArrayList) obj);
+        } else if (obj instanceof FloatArrayList) {
+            return new FloatArrayList((FloatArrayList) obj);
+        } else if (obj instanceof DoubleArrayList) {
+            return new DoubleArrayList((DoubleArrayList) obj);
+        } else if (obj instanceof ObjectArrayList) {
+            return new ObjectArrayList((ObjectArrayList) obj);
+        }
+
+        // Map
+        if (obj instanceof Char2ObjectOpenHashMap) {
+            return new Char2ObjectOpenHashMap((Char2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Byte2ObjectOpenHashMap) {
+            return new Byte2ObjectOpenHashMap((Byte2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Short2ObjectOpenHashMap) {
+            return new Short2ObjectOpenHashMap((Short2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Int2ObjectOpenHashMap) {
+            return new Int2ObjectOpenHashMap((Int2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Long2ObjectOpenHashMap) {
+            return new Long2ObjectOpenHashMap((Long2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Float2ObjectOpenHashMap) {
+            return new Float2ObjectOpenHashMap((Float2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Double2ObjectOpenHashMap) {
+            return new Double2ObjectOpenHashMap((Double2ObjectOpenHashMap) obj);
+        } else if (obj instanceof Object2ObjectOpenHashMap) {
+            return new Object2ObjectOpenHashMap((Object2ObjectOpenHashMap) obj);
+        }
+
+        // Set
+        if (obj instanceof CharOpenHashSet) {
+            return new CharOpenHashSet((CharOpenHashSet) obj);
+        } else if (obj instanceof BooleanOpenHashSet) {
+            return new BooleanOpenHashSet((BooleanOpenHashSet) obj);
+        } else if (obj instanceof ByteOpenHashSet) {
+            return new ByteOpenHashSet((ByteOpenHashSet) obj);
+        } else if (obj instanceof ShortOpenHashSet) {
+            return new ShortOpenHashSet((ShortOpenHashSet) obj);
+        } else if (obj instanceof IntOpenHashSet) {
+            return new IntOpenHashSet((IntOpenHashSet) obj);
+        } else if (obj instanceof LongOpenHashSet) {
+            return new LongOpenHashSet((LongOpenHashSet) obj);
+        } else if (obj instanceof FloatOpenHashSet) {
+            return new FloatOpenHashSet((FloatOpenHashSet) obj);
+        } else if (obj instanceof DoubleOpenHashSet) {
+            return new DoubleOpenHashSet((DoubleOpenHashSet) obj);
+        } else if (obj instanceof ObjectOpenHashSet) {
+            return new ObjectOpenHashSet((ObjectOpenHashSet) obj);
+        }
+
+        return obj;
     }
 }

@@ -64,6 +64,15 @@ public final class IntervalByteMap extends IntervalMap<Byte> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public IntervalByteMap(IntervalByteMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given interval.
      *
      * @param interval interval

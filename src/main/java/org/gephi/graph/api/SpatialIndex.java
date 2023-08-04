@@ -17,7 +17,7 @@ package org.gephi.graph.api;
 
 /**
  * Object to query the nodes and edges of the graph in a spatial context.
- * 
+ *
  * @author Eduardo Ramos
  */
 public interface SpatialIndex {

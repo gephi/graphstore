@@ -16,7 +16,6 @@
 package org.gephi.graph.api.types;
 
 import org.gephi.graph.api.Estimator;
-import java.math.BigDecimal;
 import org.gephi.graph.api.Interval;
 
 /**
@@ -61,6 +60,15 @@ public final class TimestampShortMap extends TimestampMap<Short> {
         super(keys);
         values = new short[vals.length];
         System.arraycopy(vals, 0, values, 0, vals.length);
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampShortMap(TimestampShortMap source) {
+        this(source.array, source.values);
     }
 
     /**

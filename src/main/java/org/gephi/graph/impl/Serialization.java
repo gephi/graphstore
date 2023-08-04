@@ -52,30 +52,21 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Configuration;
-import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.Origin;
-import org.gephi.graph.api.Estimator;
-import org.gephi.graph.api.TimeFormat;
-import org.gephi.graph.api.types.TimestampBooleanMap;
-import org.gephi.graph.api.types.TimestampByteMap;
-import org.gephi.graph.api.types.TimestampCharMap;
-import org.gephi.graph.api.types.TimestampDoubleMap;
-import org.gephi.graph.api.types.TimestampFloatMap;
-import org.gephi.graph.api.types.TimestampIntegerMap;
-import org.gephi.graph.api.types.TimestampLongMap;
-import org.gephi.graph.api.types.TimestampSet;
-import org.gephi.graph.api.types.TimestampShortMap;
-import org.gephi.graph.api.types.TimestampStringMap;
-import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Estimator;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Origin;
+import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
@@ -88,11 +79,21 @@ import org.gephi.graph.api.types.IntervalMap;
 import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalShortMap;
 import org.gephi.graph.api.types.IntervalStringMap;
+import org.gephi.graph.api.types.TimestampBooleanMap;
+import org.gephi.graph.api.types.TimestampByteMap;
+import org.gephi.graph.api.types.TimestampCharMap;
+import org.gephi.graph.api.types.TimestampDoubleMap;
+import org.gephi.graph.api.types.TimestampFloatMap;
+import org.gephi.graph.api.types.TimestampIntegerMap;
+import org.gephi.graph.api.types.TimestampLongMap;
+import org.gephi.graph.api.types.TimestampMap;
+import org.gephi.graph.api.types.TimestampSet;
+import org.gephi.graph.api.types.TimestampShortMap;
+import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.impl.EdgeImpl.EdgePropertiesImpl;
 import org.gephi.graph.impl.NodeImpl.NodePropertiesImpl;
 import org.gephi.graph.impl.utils.DataInputOutput;
 import org.gephi.graph.impl.utils.LongPacker;
-import org.joda.time.DateTimeZone;
 
 // Greatly inspired from JDBM https://github.com/jankotek/JDBM3
 public class Serialization {
@@ -215,6 +216,7 @@ public class Serialization {
     final static int LIST = 229;
     final static int SET = 230;
     final static int MAP = 231;
+    final static int INSTANT = 232;
     // Store
     protected final Int2IntMap idMap;
     protected GraphModelImpl model;
@@ -241,29 +243,58 @@ public class Serialization {
 
     public GraphModelImpl deserializeGraphModel(DataInput is) throws IOException, ClassNotFoundException {
         readVersion = (Float) deserialize(is);
-        Configuration config = (Configuration) deserialize(is);
-        model = new GraphModelImpl(config);
+        ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
+        model = new GraphModelImpl(config.toConfiguration());
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
     public GraphModelImpl deserializeGraphModel(DataInput is, GraphModel graphModel) throws IOException, ClassNotFoundException {
         model = (GraphModelImpl) graphModel;
         readVersion = (Float) deserialize(is);
-        Configuration config = (Configuration) deserialize(is);
-        model.setConfiguration(config);
+        ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
+        verifyCompatibility(config, model.configuration);
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
+    }
+
+    private void verifyCompatibility(ConfigurationImpl readConfig, ConfigurationImpl modelConfig) {
+        // Time representation
+        if (!readConfig.getTimeRepresentation().equals(modelConfig.getTimeRepresentation())) {
+            throw new RuntimeException("The time representations doesn't match, read: " + readConfig
+                    .getTimeRepresentation() + ", model: " + modelConfig.getTimeRepresentation());
+        }
+
+        // Node id type
+        if (!readConfig.getNodeIdType().equals(modelConfig.getNodeIdType())) {
+            throw new RuntimeException("The node id type doesn't match, read: " + readConfig
+                    .getNodeIdType() + ", model: " + modelConfig.getNodeIdType());
+        }
+
+        // Edge id type
+        if (!readConfig.getEdgeIdType().equals(modelConfig.getEdgeIdType())) {
+            throw new RuntimeException("The edge id type doesn't match, read: " + readConfig
+                    .getEdgeIdType() + ", model: " + modelConfig.getEdgeIdType());
+        }
+
+        // Edge weight type
+        if (!readConfig.getEdgeWeightType().equals(modelConfig.getEdgeWeightType())) {
+            throw new RuntimeException("The edge weight type doesn't match, read: " + readConfig
+                    .getEdgeWeightType() + ", model: " + modelConfig.getEdgeWeightType());
+        }
+
+        // Edge label type
+        if (!readConfig.getEdgeLabelType().equals(modelConfig.getEdgeLabelType())) {
+            throw new RuntimeException("The edge label type doesn't match, read: " + readConfig
+                    .getEdgeLabelType() + ", model: " + modelConfig.getEdgeLabelType());
+        }
     }
 
     public GraphModelImpl deserializeGraphModelWithoutVersionPrefix(DataInput is, float version) throws IOException, ClassNotFoundException {
         readVersion = version;
-        Configuration config = (Configuration) deserialize(is);
-        model = new GraphModelImpl(config);
+        ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
+        model = new GraphModelImpl(config.toConfiguration());
         deserialize(is);
-        model.store.defaultColumns.resetConfiguration();
         return model;
     }
 
@@ -552,24 +583,14 @@ public class Serialization {
         boolean readOnly = (Boolean) deserialize(is);
         Estimator estimator = (Estimator) deserialize(is);
 
-        ColumnImpl column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed,
-                readOnly);
-        column.storeId = storeId;
-        if (estimator != null) {
-            column.setEstimator(estimator);
+        ColumnImpl column = model.store.defaultColumns.getColumn(table, storeId);
+        if (column == null) {
+            column = new ColumnImpl(table, (String) id, typeClass, title, defaultValue, origin, indexed, readOnly);
+            column.storeId = storeId;
         }
 
-        // Make sure configured types match the deserialized column types:
-        if (Edge.class.equals(table.getElementClass())) {
-            if (id.equals(GraphStoreConfiguration.EDGE_WEIGHT_COLUMN_ID)) {
-                table.store.configuration.setEdgeWeightType(typeClass);
-            } else if (id.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
-                table.store.configuration.setEdgeIdType(typeClass);
-            }
-        } else if (Node.class.equals(table.getElementClass())) {
-            if (id.equals(GraphStoreConfiguration.ELEMENT_ID_COLUMN_ID)) {
-                table.store.configuration.setNodeIdType(typeClass);
-            }
+        if (estimator != null) {
+            column.setEstimator(estimator);
         }
 
         return column;
@@ -689,8 +710,10 @@ public class Serialization {
         out.write(GRAPH_STORE_CONFIGURATION);
         serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_LABEL);
         serialize(out, GraphStoreConfiguration.ENABLE_ELEMENT_TIME_SET);
-        serialize(out, GraphStoreConfiguration.ENABLE_NODE_PROPERTIES);
-        serialize(out, GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES);
+        // Was GraphStoreConfiguration.ENABLE_NODE_PROPERTIES
+        serialize(out, true);
+        // Was GraphStoreConfiguration.ENABLE_EDGE_PROPERTIES
+        serialize(out, true);
     }
 
     private GraphStoreConfigurationVersion deserializeGraphStoreConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
@@ -1009,6 +1032,17 @@ public class Serialization {
         return intervalIndexStore;
     }
 
+    private void serializeInstant(final DataOutput out, final Instant instant) throws IOException {
+        serialize(out, instant.getEpochSecond());
+        serialize(out, instant.getNano());
+    }
+
+    private Instant deserializeInstant(final DataInput is) throws IOException, ClassNotFoundException {
+        long epochSecond = (long) deserialize(is);
+        int nano = (int) deserialize(is);
+        return Instant.ofEpochSecond(epochSecond, nano);
+    }
+
     private void serializeGraphAttributes(final DataOutput out, final GraphAttributesImpl graphAttributes) throws IOException {
         serialize(out, graphAttributes.attributes.size());
         for (Map.Entry<String, Object> entry : graphAttributes.attributes.entrySet()) {
@@ -1041,14 +1075,14 @@ public class Serialization {
         return tf;
     }
 
-    private void serializeTimeZone(final DataOutput out, final DateTimeZone timeZone) throws IOException {
-        serialize(out, timeZone.getID());
+    private void serializeTimeZone(final DataOutput out, final ZoneId timeZone) throws IOException {
+        serialize(out, timeZone.getId());
     }
 
-    private DateTimeZone deserializeTimeZone(final DataInput is) throws IOException, ClassNotFoundException {
+    private ZoneId deserializeTimeZone(final DataInput is) throws IOException, ClassNotFoundException {
         String id = (String) deserialize(is);
 
-        DateTimeZone tz = DateTimeZone.forID(id);
+        ZoneId tz = ZoneId.of(id);
         model.store.timeZone = tz;
 
         return tz;
@@ -1082,18 +1116,18 @@ public class Serialization {
     }
 
     private void serializeConfiguration(final DataOutput out) throws IOException {
-        Configuration config = model.store.configuration;
+        ConfigurationImpl config = model.configuration;
 
         serialize(out, config.getNodeIdType());
         serialize(out, config.getEdgeIdType());
         serialize(out, config.getEdgeLabelType());
         serialize(out, config.getEdgeWeightType());
         serialize(out, config.getTimeRepresentation());
-        serialize(out, config.getEdgeWeightColumn());
+        serialize(out, config.isEdgeWeightColumn());
     }
 
-    private Configuration deserializeConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
-        Configuration config = new Configuration();
+    private ConfigurationImpl deserializeConfiguration(final DataInput is) throws IOException, ClassNotFoundException {
+        Configuration.Builder config = Configuration.builder();
 
         Class nodeIdType = (Class) deserialize(is);
         Class edgeIdType = (Class) deserialize(is);
@@ -1101,17 +1135,17 @@ public class Serialization {
         Class edgeWeightType = (Class) deserialize(is);
         TimeRepresentation timeRepresentation = (TimeRepresentation) deserialize(is);
 
-        config.setNodeIdType(nodeIdType);
-        config.setEdgeIdType(edgeIdType);
-        config.setEdgeLabelType(edgeLabelType);
-        config.setEdgeWeightType(edgeWeightType);
-        config.setTimeRepresentation(timeRepresentation);
+        config.nodeIdType(nodeIdType);
+        config.edgeIdType(edgeIdType);
+        config.edgeLabelType(edgeLabelType);
+        config.edgeWeightType(edgeWeightType);
+        config.timeRepresentation(timeRepresentation);
         if (readVersion >= 0.5) {
             Boolean edgeColumn = (Boolean) deserialize(is);
-            config.setEdgeWeightColumn(edgeColumn);
+            config.edgeWeightColumn(edgeColumn);
         }
 
-        return config;
+        return new ConfigurationImpl(config.build());
     }
 
     private void serializeList(final DataOutput out, final List list) throws IOException {
@@ -1576,16 +1610,16 @@ public class Serialization {
             TimeFormat b = (TimeFormat) obj;
             out.write(TIME_FORMAT);
             serializeTimeFormat(out, b);
-        } else if (obj instanceof DateTimeZone) {
-            DateTimeZone b = (DateTimeZone) obj;
+        } else if (obj instanceof ZoneId) {
+            ZoneId b = (ZoneId) obj;
             out.write(TIME_ZONE);
             serializeTimeZone(out, b);
         } else if (obj instanceof TimeStore) {
             TimeStore b = (TimeStore) obj;
             out.write(TIME_STORE);
             serializeTimeStore(out);
-        } else if (obj instanceof Configuration) {
-            Configuration b = (Configuration) obj;
+        } else if (obj instanceof ConfigurationImpl) {
+            ConfigurationImpl b = (ConfigurationImpl) obj;
             out.write(CONFIGURATION);
             serializeConfiguration(out);
         } else if (obj instanceof Interval) {
@@ -1604,6 +1638,10 @@ public class Serialization {
             Map b = (Map) obj;
             out.write(MAP);
             serializeMap(out, b);
+        } else if (obj instanceof Instant) {
+            Instant i = (Instant) obj;
+            out.write(INSTANT);
+            serializeInstant(out, i);
         } else {
             throw new IOException("No serialization handler for this class: " + clazz.getName());
         }
@@ -2145,6 +2183,9 @@ public class Serialization {
                 break;
             case MAP:
                 ret = deserializeMap(is);
+                break;
+            case INSTANT:
+                ret = deserializeInstant(is);
                 break;
             case -1:
                 throw new EOFException();

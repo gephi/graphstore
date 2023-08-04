@@ -15,11 +15,11 @@
  */
 package org.gephi.graph.api.types;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
-import org.joda.time.DateTimeZone;
 
 /**
  * Sorted set for timestamps.
@@ -62,6 +62,15 @@ public final class TimestampSet implements TimeSet<Double> {
         array = new double[arr.length];
         System.arraycopy(arr, 0, array, 0, arr.length);
         size = arr.length;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param source the set to copy
+     */
+    public TimestampSet(TimestampSet source) {
+        this(source.array);
     }
 
     @Override
@@ -217,7 +226,7 @@ public final class TimestampSet implements TimeSet<Double> {
     }
 
     @Override
-    public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
+    public String toString(TimeFormat timeFormat, ZoneId timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
         }

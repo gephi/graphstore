@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -607,10 +608,43 @@ public class EdgeStoreTest {
             edges[i] = e;
             Assert.assertTrue(edgeStore.add(e));
             Assert.assertTrue(edgeStore.contains(e));
+            Assert.assertEquals(edgeStore.size(), i + 1);
+            Assert.assertEquals(edgeStore.size(0), i + 1);
         }
         for (int i = 0; i < 5; i++) {
             Assert.assertTrue(edgeStore.remove(edges[i]));
             Assert.assertFalse(edgeStore.contains(edges[i]));
+            Assert.assertEquals(edgeStore.size(), 9 - i);
+            Assert.assertEquals(edgeStore.size(0), 9 - i);
+        }
+        for (int i = 5; i < 10; i++) {
+            Assert.assertTrue(edgeStore.contains(edges[i]));
+        }
+    }
+
+    @Test
+    public void testParallelUndirected() {
+        NodeStore nodeStore = new NodeStore();
+        NodeImpl n1 = new NodeImpl("0");
+        NodeImpl n2 = new NodeImpl("1");
+        nodeStore.add(n1);
+        nodeStore.add(n2);
+
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = new EdgeImpl[10];
+        for (int i = 0; i < 10; i++) {
+            EdgeImpl e = new EdgeImpl("" + i, n1, n2, 0, 1.0, false);
+            edges[i] = e;
+            Assert.assertTrue(edgeStore.add(e));
+            Assert.assertTrue(edgeStore.contains(e));
+            Assert.assertEquals(edgeStore.size(), i + 1);
+            Assert.assertEquals(edgeStore.size(0), i + 1);
+        }
+        for (int i = 0; i < 5; i++) {
+            Assert.assertTrue(edgeStore.remove(edges[i]));
+            Assert.assertFalse(edgeStore.contains(edges[i]));
+            Assert.assertEquals(edgeStore.size(), 9 - i);
+            Assert.assertEquals(edgeStore.size(0), 9 - i);
         }
         for (int i = 5; i < 10; i++) {
             Assert.assertTrue(edgeStore.contains(edges[i]));
@@ -1267,6 +1301,8 @@ public class EdgeStoreTest {
         Assert.assertTrue(edgeStore.add(e1));
         Assert.assertFalse(e1.isMutual());
         Assert.assertTrue(edgeStore.add(e2));
+        Assert.assertEquals(edgeStore.size(), 2);
+        Assert.assertEquals(edgeStore.size(0), 2);
 
         Assert.assertTrue(edgeStore.add(e3));
         Assert.assertTrue(e1.isMutual());
@@ -1276,6 +1312,8 @@ public class EdgeStoreTest {
         Assert.assertEquals(n1.getUndirectedDegree(), 2);
         Assert.assertEquals(n2.getDegree(), 3);
         Assert.assertEquals(n2.getUndirectedDegree(), 2);
+        Assert.assertEquals(edgeStore.size(), 3);
+        Assert.assertEquals(edgeStore.size(0), 3);
 
         Assert.assertTrue(edgeStore.add(e4));
         Assert.assertTrue(e4.isMutual());
@@ -1284,25 +1322,31 @@ public class EdgeStoreTest {
         Assert.assertEquals(n1.getUndirectedDegree(), 2);
         Assert.assertEquals(n2.getDegree(), 4);
         Assert.assertEquals(n2.getUndirectedDegree(), 2);
+        Assert.assertEquals(edgeStore.size(), 4);
+        Assert.assertEquals(edgeStore.size(0), 4);
 
         Assert.assertTrue(edgeStore.remove(e1));
         Assert.assertEquals(n1.getDegree(), 3);
         Assert.assertEquals(n1.getUndirectedDegree(), 2);
         Assert.assertEquals(n2.getDegree(), 3);
         Assert.assertEquals(n2.getUndirectedDegree(), 2);
+        Assert.assertEquals(edgeStore.size(), 3);
+        Assert.assertEquals(edgeStore.size(0), 3);
 
         Assert.assertTrue(edgeStore.remove(e2));
         Assert.assertEquals(n1.getDegree(), 2);
         Assert.assertEquals(n1.getUndirectedDegree(), 2);
         Assert.assertEquals(n2.getDegree(), 2);
         Assert.assertEquals(n2.getUndirectedDegree(), 2);
+        Assert.assertEquals(edgeStore.size(), 2);
+        Assert.assertEquals(edgeStore.size(0), 2);
     }
 
     @Test
     public void testRemoveMutualEdge() {
         EdgeImpl[] edges = GraphGenerator.generateMutualEdges(1);
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null, null);
         edgeStore.addAll(Arrays.asList(edges));
         edgeStore.remove(edges[0]);
         Assert.assertFalse(edges[0].isMutual());
@@ -1652,7 +1696,7 @@ public class EdgeStoreTest {
     @Test
     public void testTypeCounting() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(edgeTypeStore, null, null, null, null, null);
         EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
 
         Int2IntMap counts = new Int2IntOpenHashMap();
@@ -1898,7 +1942,7 @@ public class EdgeStoreTest {
 
     @Test
     public void testSetType() {
-        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null, null);
         EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
         edgeStore.add(edge);
         edgeStore.setEdgeType(edge, 1);
@@ -1910,9 +1954,28 @@ public class EdgeStoreTest {
         Assert.assertEquals(1, edgeStore.size(1));
     }
 
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testAddWithoutAutoRegistration() {
+        ConfigurationImpl config = new ConfigurationImpl(
+                Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(config), null, config, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge(4);
+        edgeStore.add(edge);
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testSetTypeWithoutAutoRegistration() {
+        ConfigurationImpl config = new ConfigurationImpl(
+                Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(config), null, config, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
+        edgeStore.add(edge);
+        edgeStore.setEdgeType(edge, 1);
+    }
+
     @Test
     public void testSetTypeWithMutualEdge() {
-        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null, null);
         EdgeImpl[] edges = GraphGenerator.generateMutualEdges(4);
         edgeStore.addAll(Arrays.asList(edges));
         Assert.assertTrue(edges[0].isMutual());
@@ -1922,10 +1985,11 @@ public class EdgeStoreTest {
         Assert.assertFalse(edges[1].isMutual());
     }
 
-    // Can only run when GraphStoreConfiguration.ENABLE_PARALLEL_EDGES = false
-    @Test(enabled = false)
+    @Test
     public void testReturnFalseWithoutParallelEdges() {
-        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null);
+        ConfigurationImpl configuration = new ConfigurationImpl(
+                Configuration.builder().enableParallelEdgesSameType(false).build());
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, configuration, null, null, null);
         EdgeImpl edge = GraphGenerator.generateSingleEdge(1);
         EdgeImpl edge2 = new EdgeImpl('0', edge.graphStore, edge.source, edge.target, 2, 1.0, true);
         Assert.assertTrue(edgeStore.add(edge));

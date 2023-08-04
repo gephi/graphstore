@@ -64,6 +64,15 @@ public final class TimestampCharMap extends TimestampMap<Character> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public TimestampCharMap(TimestampCharMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given timestamp.
      *
      * @param timestamp timestamp

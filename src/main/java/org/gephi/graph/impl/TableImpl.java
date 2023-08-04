@@ -21,25 +21,32 @@ import java.util.List;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Element;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Table;
-import org.gephi.graph.api.TableLock;
 import org.gephi.graph.api.TableObserver;
-import org.gephi.graph.api.Element;
-import org.gephi.graph.api.Graph;
 
 public class TableImpl<T extends Element> implements Collection<Column>, Table {
 
     // Store
     protected final ColumnStore<T> store;
+    // Configuration
+    protected final ConfigurationImpl configuration;
 
-    public TableImpl(Class<T> elementType, boolean indexed) {
-        this(null, elementType, indexed);
+    public TableImpl(Class<T> elementType) {
+        this(null, elementType);
     }
 
-    public TableImpl(GraphStore graphStore, Class<T> elementType, boolean indexed) {
-        store = new ColumnStore<>(graphStore, elementType, indexed);
+    public TableImpl(GraphStore graphStore, Class<T> elementType) {
+        store = new ColumnStore<>(graphStore, elementType);
+        if (graphStore == null) {
+            // Used for testing only
+            configuration = new ConfigurationImpl();
+        } else {
+            configuration = graphStore.configuration;
+        }
     }
 
     @Override
@@ -62,6 +69,7 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
         checkValidId(id);
         checkSupportedTypes(type);
         checkDefaultValue(defaultValue, type);
+        checkCanIndex(indexed);
 
         type = AttributeUtils.getStandardizedType(type);
         if (defaultValue != null) {
@@ -288,6 +296,19 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
         if (defaultValue != null) {
             if (defaultValue.getClass() != type) {
                 throw new IllegalArgumentException("The default value type cannot be cast to the type");
+            }
+        }
+    }
+
+    private void checkCanIndex(boolean indexed) {
+        if (indexed && store.graphStore != null) {
+            if (!store.graphStore.configuration.isEnableIndexNodes() && isNodeTable()) {
+                throw new IllegalArgumentException(
+                        "Can't use reverse index as node indexing is disabled (from Configuration)");
+            }
+            if (!store.graphStore.configuration.isEnableIndexEdges() && isEdgeTable()) {
+                throw new IllegalArgumentException(
+                        "Can't index edge table as edge indexing is disabled (from Configuration)");
             }
         }
     }

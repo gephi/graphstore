@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,11 +105,23 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testSetAttributeInstant() {
+        GraphStore store = new GraphStore();
+        Column column = generateBasicInstantColumn(store);
+
+        Instant instant = Instant.parse("2014-01-01T00:00:00Z");
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute("date", instant);
+        Assert.assertEquals(node.getAttribute(column), instant);
+    }
+
+    @Test
     public void testSetAttributeStandardizedType() {
         GraphStore store = new GraphStore();
-        store.nodeTable.store
-                .addColumn(new ColumnImpl("arr1", Integer[].class, "Array", null, Origin.DATA, true, false));
-        store.nodeTable.store.addColumn(new ColumnImpl("arr2", int[].class, "Array", null, Origin.DATA, true, false));
+        store.nodeTable.store.addColumn(new ColumnImpl(store.nodeTable, "arr1", Integer[].class, "Array", null,
+                Origin.DATA, true, false));
+        store.nodeTable.store.addColumn(new ColumnImpl(store.nodeTable, "arr2", int[].class, "Array", null, Origin.DATA,
+                true, false));
         Column column1 = store.nodeTable.store.getColumn("arr1");
         Column column2 = store.nodeTable.store.getColumn("arr2");
 
@@ -588,7 +601,8 @@ public class ElementImplTest {
     public void testGetDefaultValue() {
         GraphStore store = new GraphStore();
         Integer defaultValue = 25;
-        Column column = new ColumnImpl("age", Integer.class, "Age", defaultValue, Origin.DATA, true, false);
+        Column column = new ColumnImpl(store.nodeTable, "age", Integer.class, "Age", defaultValue, Origin.DATA, true,
+                false);
         store.nodeTable.store.addColumn(column);
 
         NodeImpl node = new NodeImpl("0", store);
@@ -1056,6 +1070,15 @@ public class ElementImplTest {
         node.getAttributes(column);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetDynamicAttributesTimeset() {
+        GraphStore store = new GraphStore();
+        Column column = store.defaultColumns.nodeTimeSet();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.getAttributes(column);
+    }
+
     @Test
     public void testGetAttributeInView() {
         GraphStore store = new GraphStore();
@@ -1195,8 +1218,7 @@ public class ElementImplTest {
 
     // Utility
     private GraphStore getIntervalGraphStore() {
-        Configuration config = new Configuration();
-        config.setTimeRepresentation(TimeRepresentation.INTERVAL);
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);
         GraphStore store = graphModel.store;
         return store;
@@ -1212,6 +1234,12 @@ public class ElementImplTest {
         graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "visible", Boolean.class, "Visible",
                 null, Origin.DATA, true, false));
         return graphStore.nodeTable.store.getColumn("visible");
+    }
+
+    private Column generateBasicInstantColumn(GraphStore graphStore) {
+        graphStore.nodeTable.store.addColumn(new ColumnImpl(graphStore.nodeTable, "date", Instant.class, "Date", null,
+                Origin.DATA, true, false));
+        return graphStore.nodeTable.store.getColumn("date");
     }
 
     private Column generateBasicListColumn(GraphStore graphStore) {

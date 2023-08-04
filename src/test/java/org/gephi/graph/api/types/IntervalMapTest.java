@@ -18,11 +18,12 @@ package org.gephi.graph.api.types;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
-import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -534,12 +535,12 @@ public class IntervalMapTest {
                 .toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342483341000.0, 1342483380000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1
-                .toString(TimeFormat.DATE, DateTimeZone.UTC), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone
-                .forID("+03:00")), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATE, DateTimeZone
-                .forID("-03:00")), "<[2012-02-28, 2012-02-29, foo]; [2012-07-16, 2012-07-16, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZoneId
+                .of("UTC")), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZoneId
+                .of("+03:00")), "<[2012-02-29, 2012-03-01, foo]; [2012-07-17, 2012-07-17, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATE, ZoneId
+                .of("-03:00")), "<[2012-02-28, 2012-02-29, foo]; [2012-07-16, 2012-07-16, bar]>");
 
         // Test infinity:
         IntervalStringMap mapInf = new IntervalStringMap();
@@ -566,10 +567,10 @@ public class IntervalMapTest {
                 .toString(TimeFormat.DOUBLE), "<[1330473600000.0, 1330560000000.0, foo]; [1342487444000.0, 1342487445000.0, bar]>");
 
         // Test with time zone printing:
-        Assert.assertEquals(map1
-                .toString(TimeFormat.DATETIME, DateTimeZone.UTC), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
-        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, DateTimeZone
-                .forID("+12:30")), "<[2012-02-29T12:30:00.000+12:30, 2012-03-01T12:30:00.000+12:30, foo]; [2012-07-17T13:40:44.000+12:30, 2012-07-17T13:40:45.000+12:30, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZoneId
+                .of("UTC")), "<[2012-02-29T00:00:00.000Z, 2012-03-01T00:00:00.000Z, foo]; [2012-07-17T01:10:44.000Z, 2012-07-17T01:10:45.000Z, bar]>");
+        Assert.assertEquals(map1.toString(TimeFormat.DATETIME, ZoneId
+                .of("+12:30")), "<[2012-02-29T12:30:00.000+12:30, 2012-03-01T12:30:00.000+12:30, foo]; [2012-07-17T13:40:44.000+12:30, 2012-07-17T13:40:45.000+12:30, bar]>");
 
         // Test with timezone parsing and UTC printing:
         IntervalStringMap map2 = new IntervalStringMap();
@@ -591,12 +592,41 @@ public class IntervalMapTest {
         Assert.assertEquals(mapInf.toString(TimeFormat.DATETIME), "<[-Infinity, Infinity, value]>");
     }
 
+    @Test
+    public void testCopy() {
+        IntervalStringMap strMap = new IntervalStringMap(new double[] { 1.0, 2.0 }, new String[] { "foo" });
+        IntervalByteMap byteMap = new IntervalByteMap(new double[] { 1.0, 2.0 }, new byte[] { 1 });
+        IntervalShortMap shortMap = new IntervalShortMap(new double[] { 1.0, 2.0 }, new short[] { 1 });
+        IntervalIntegerMap intMap = new IntervalIntegerMap(new double[] { 1.0, 2.0 }, new int[] { 1 });
+        IntervalLongMap longMap = new IntervalLongMap(new double[] { 1.0, 2.0 }, new long[] { 1 });
+        IntervalFloatMap floatMap = new IntervalFloatMap(new double[] { 1.0, 2.0 }, new float[] { 1 });
+        IntervalDoubleMap doubleMap = new IntervalDoubleMap(new double[] { 1.0, 2.0 }, new double[] { 1 });
+        IntervalBooleanMap boolMap = new IntervalBooleanMap(new double[] { 1.0, 2.0 }, new boolean[] { true });
+        IntervalCharMap charMap = new IntervalCharMap(new double[] { 1.0, 2.0 }, new char[] { 'a' });
+
+        testEqualsButNotSameUnderlyingArrays(new IntervalStringMap(strMap), strMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalByteMap(byteMap), byteMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalShortMap(shortMap), shortMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalIntegerMap(intMap), intMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalLongMap(longMap), longMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalFloatMap(floatMap), floatMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalDoubleMap(doubleMap), doubleMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalBooleanMap(boolMap), boolMap);
+        testEqualsButNotSameUnderlyingArrays(new IntervalCharMap(charMap), charMap);
+    }
+
     // UTILITY
     private void testDoubleArrayEquals(double[] a, double[] b) {
         Assert.assertEquals(a.length, b.length);
         for (int i = 0; i < a.length; i++) {
             Assert.assertEquals(a[i], b[i]);
         }
+    }
+
+    private void testEqualsButNotSameUnderlyingArrays(IntervalMap a, IntervalMap b) {
+        Assert.assertEquals(a, b);
+        Assert.assertNotSame(a.array, b.array);
+        Assert.assertNotSame(a.getValuesArray(), b.getValuesArray());
     }
 
     private IntervalMap[] getAllInstances() {

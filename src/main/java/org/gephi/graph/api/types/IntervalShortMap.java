@@ -64,6 +64,15 @@ public final class IntervalShortMap extends IntervalMap<Short> {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source the map to copy
+     */
+    public IntervalShortMap(IntervalShortMap source) {
+        this(source.array, source.values);
+    }
+
+    /**
      * Get the value for the given interval.
      *
      * @param interval interval

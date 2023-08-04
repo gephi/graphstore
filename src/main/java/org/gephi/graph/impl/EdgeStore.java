@@ -49,6 +49,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected final GraphViewStore viewStore;
     // Spatial index
     protected final SpatialIndexImpl spatialIndex;
+    // Configuration
+    protected final ConfigurationImpl configuration;
     // Data
     protected int size;
     protected int garbageSize;
@@ -59,6 +61,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected Object2IntOpenHashMap dictionary;
     protected Long2ObjectOpenCustomHashMap<int[]>[] longDictionary;
     // Stats
+    protected int typeSize[];
     protected int undirectedSize;
     protected int mutualEdgesSize;
     protected int[] mutualEdgesTypeSize;
@@ -70,15 +73,17 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.viewStore = null;
         this.version = null;
         this.spatialIndex = null;
+        this.configuration = new ConfigurationImpl();
     }
 
-    public EdgeStore(final EdgeTypeStore edgeTypeStore, final SpatialIndexImpl spatialIndex, final GraphLockImpl lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
+    public EdgeStore(final EdgeTypeStore edgeTypeStore, final SpatialIndexImpl spatialIndex, final ConfigurationImpl configuration, final GraphLockImpl lock, final GraphViewStore viewStore, final GraphVersion graphVersion) {
         initStore();
         this.lock = lock;
         this.edgeTypeStore = edgeTypeStore;
         this.viewStore = viewStore;
         this.version = graphVersion;
         this.spatialIndex = spatialIndex;
+        this.configuration = configuration == null ? new ConfigurationImpl() : configuration;
     }
 
     protected static long getLongId(NodeImpl source, NodeImpl target, boolean directed) {
@@ -108,6 +113,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE,
                 GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
         this.mutualEdgesTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        this.typeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
     }
 
     private void ensureCapacity(final int capacity) {
@@ -203,6 +209,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             int[] newSizeArray = new int[type + 1];
             System.arraycopy(mutualEdgesTypeSize, 0, newSizeArray, 0, length);
             mutualEdgesTypeSize = newSizeArray;
+            newSizeArray = new int[type + 1];
+            System.arraycopy(typeSize, 0, newSizeArray, 0, length);
+            typeSize = newSizeArray;
         }
     }
 
@@ -317,14 +326,14 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     public int size(int type) {
         if (type < longDictionary.length) {
-            return longDictionary[type].size();
+            return typeSize[type];
         }
         return 0;
     }
 
     public int undirectedSize(int type) {
         if (type < longDictionary.length) {
-            return longDictionary[type].size() - mutualEdgesTypeSize[type];
+            return typeSize[type] - mutualEdgesTypeSize[type];
         }
         return 0;
     }
@@ -574,13 +583,14 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             long longId = getLongId(edge.source, edge.target, edge.isDirected());
             int[] newDicoValue = newDico.get(longId);
-            if (newDicoValue != null && !GraphStoreConfiguration.ENABLE_PARALLEL_EDGES) {
+            if (newDicoValue != null && !configuration.isEnableParallelEdgesSameType()) {
                 return false;
             }
 
             edgeTypeStore.registerEdgeType(type);
             boolean wasMutual = edge.isMutual();
             removeFromDico(edge, edge.storeId);
+            typeSize[oldType]--;
 
             removeOutEdge(edge);
             removeInEdge(edge);
@@ -589,6 +599,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             insertInEdge(edge);
 
             addToDico(newDico, newDicoValue, edge, longId);
+            typeSize[type]++;
 
             if (viewStore != null) {
                 viewStore.setEdgeType(edge, oldType, wasMutual);
@@ -693,10 +704,13 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
             long longId = getLongId(source, target, directed);
             int[] dicoValue = dico.get(longId);
-            if (dicoValue != null && !GraphStoreConfiguration.ENABLE_PARALLEL_EDGES) {
+            if (dicoValue != null && !configuration.isEnableParallelEdgesSameType()) {
                 return false;
             }
 
+            if (edgeTypeStore != null) {
+                edgeTypeStore.registerEdgeType(type);
+            }
             incrementVersion();
 
             if (garbageSize > 0) {
@@ -733,6 +747,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             }
 
             size++;
+            typeSize[type]++;
             return true;
         } else if (isValidIndex(edge.storeId) && get(edge.storeId) == edge) {
             return false;
@@ -773,6 +788,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             target.inDegree--;
 
             size--;
+            typeSize[edge.type]--;
             garbageSize++;
             dictionary.remove(edge.getId());
             trimDictionary();

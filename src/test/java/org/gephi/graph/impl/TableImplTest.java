@@ -16,6 +16,7 @@
 package org.gephi.graph.impl;
 
 import java.awt.Color;
+import java.time.Instant;
 import java.util.Arrays;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Origin;
@@ -28,7 +29,7 @@ public class TableImplTest {
 
     @Test
     public void testTable() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Assert.assertEquals(table.countColumns(), 0);
         Assert.assertEquals(table.size(), 0);
         Assert.assertTrue(table.isEmpty());
@@ -36,7 +37,7 @@ public class TableImplTest {
 
     @Test
     public void testAddColumnDefault() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
 
         Assert.assertEquals(table.countColumns(), 1);
@@ -47,7 +48,7 @@ public class TableImplTest {
 
     @Test
     public void testAddColumnWithOrigin() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class, Origin.PROPERTY);
         Assert.assertEquals(col.getOrigin(), Origin.PROPERTY);
         Assert.assertTrue(col.isProperty());
@@ -55,7 +56,7 @@ public class TableImplTest {
 
     @Test
     public void testAddColumnWithTitleAndDefaultValue() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", "Foo", Integer.class, 42);
         Assert.assertEquals(col.getTitle(), "Foo");
         Assert.assertEquals(col.getDefaultValue(), 42);
@@ -63,13 +64,13 @@ public class TableImplTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testUnknownType() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         table.addColumn("Id", Node.class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testDefaultValueWrongType() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Float defaultValue = 25f;
 
         table.addColumn("Id", null, Integer.class, Origin.DATA, defaultValue, false);
@@ -77,28 +78,28 @@ public class TableImplTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testOriginCantBeNull() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
 
         table.addColumn("Id", null, Integer.class, null, 0, false);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testOriginCantBeNull2() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
 
         table.addColumn("Id", Integer.class, null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testTypeClassCantBeNull() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
 
         table.addColumn("Id", null, null, Origin.DATA, 0, false);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testTypeClassCantBeNull2() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
 
         table.addColumn("Id", null);
     }
@@ -106,7 +107,7 @@ public class TableImplTest {
     @Test
     public void testIsIndexed() {
         GraphStore graphStore = new GraphStore();
-        TableImpl<Node> table = new TableImpl<>(graphStore, Node.class, true);
+        TableImpl<Node> table = new TableImpl<>(graphStore, Node.class);
         Column col1 = table.addColumn("Id", null, Integer.class, Origin.DATA, null, false);
         Column col2 = table.addColumn("1", null, Integer.class, Origin.DATA, null, true);
         Column col3 = table.addColumn("2", null, TimestampIntegerMap.class, Origin.DATA, null, true);
@@ -120,7 +121,7 @@ public class TableImplTest {
 
     @Test
     public void testGetColumnId() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
 
         Column c1 = table.getColumn("Id");
@@ -131,13 +132,13 @@ public class TableImplTest {
 
     @Test
     public void testGetColumnBadId() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Assert.assertNull(table.getColumn("Id"));
     }
 
     @Test
     public void testGetColumnIndex() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
 
         Column c = table.getColumn(0);
@@ -146,7 +147,7 @@ public class TableImplTest {
 
     @Test
     public void testHasColumn() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         table.addColumn("Id", Integer.class);
 
         Assert.assertTrue(table.hasColumn("Id"));
@@ -157,7 +158,7 @@ public class TableImplTest {
 
     @Test
     public void testContains() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
 
         Assert.assertTrue(table.contains(col));
@@ -165,40 +166,40 @@ public class TableImplTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetColumnBadIndex() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         table.getColumn(0);
     }
 
     @Test
     public void testTitleBackFill() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
         Assert.assertEquals(col.getTitle(), "Id");
     }
 
     @Test
     public void testIdLowercase() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("A", Integer.class);
         Assert.assertEquals(col.getId(), "a");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testNonStandardType() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         table.addColumn("Id", Color.class);
     }
 
     @Test
     public void testStandardizePrimitiveType() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", int.class);
         Assert.assertEquals(col.getTypeClass(), Integer.class);
     }
 
     @Test
     public void testStandardizeArrayType() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("test_col"/*
                                                 * Id does not allow non-simple types
                                                 */, Integer[].class);
@@ -207,7 +208,7 @@ public class TableImplTest {
 
     @Test
     public void testStandardizeArrayDefaultValue() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Integer[] t = new Integer[] { 1, 2 };
 
         Column col = table.addColumn("test_col"/*
@@ -219,8 +220,15 @@ public class TableImplTest {
     }
 
     @Test
+    public void testInstantColumn() {
+        TableImpl<Node> table = new TableImpl<>(Node.class);
+        Column col = table.addColumn("test_col", Instant.class);
+        Assert.assertEquals(col.getTypeClass(), Instant.class);
+    }
+
+    @Test
     public void testRemoveColumn() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
 
         table.removeColumn(col);
@@ -230,7 +238,7 @@ public class TableImplTest {
 
     @Test
     public void testRemove() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
 
         table.remove(col);
@@ -239,7 +247,7 @@ public class TableImplTest {
 
     @Test
     public void testRemoveColumnString() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         table.addColumn("Id", Integer.class);
 
         table.removeColumn("Id");
@@ -253,7 +261,7 @@ public class TableImplTest {
 
     @Test
     public void testCountColumns() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         table.addColumn("Id", Integer.class);
 
         table.removeColumn("Id");
@@ -263,37 +271,37 @@ public class TableImplTest {
 
     @Test
     public void testGetElementClass() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Assert.assertEquals(table.getElementClass(), Node.class);
     }
 
     @Test
     public void testToArray() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
         Assert.assertEquals(table.toArray(), new Column[] { col });
     }
 
     @Test
     public void testToArrayFromCollection() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
         Assert.assertEquals(table.toArray(new Column[0]), new Column[] { col });
     }
 
     @Test
     public void testToList() {
-        TableImpl<Node> table = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table = new TableImpl<>(Node.class);
         Column col = table.addColumn("Id", Integer.class);
         Assert.assertEquals(table.toList(), Arrays.asList(new Column[] { col }));
     }
 
     @Test
     public void testDeepEquals() {
-        TableImpl<Node> table1 = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table1 = new TableImpl<>(Node.class);
         table1.addColumn("Id", Integer.class);
 
-        TableImpl<Node> table2 = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table2 = new TableImpl<>(Node.class);
         table2.addColumn("Id", Integer.class);
 
         Assert.assertTrue(table1.deepEquals(table2));
@@ -301,10 +309,10 @@ public class TableImplTest {
 
     @Test
     public void testDeepHashCode() {
-        TableImpl<Node> table1 = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table1 = new TableImpl<>(Node.class);
         table1.addColumn("Id", Integer.class);
 
-        TableImpl<Node> table2 = new TableImpl<>(Node.class, false);
+        TableImpl<Node> table2 = new TableImpl<>(Node.class);
         table2.addColumn("Id", Integer.class);
 
         Assert.assertEquals(table1.deepHashCode(), table2.deepHashCode());

@@ -15,14 +15,10 @@
  */
 package org.gephi.graph.impl;
 
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;

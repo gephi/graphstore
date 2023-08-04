@@ -15,17 +15,21 @@
  */
 package org.gephi.graph.impl;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import org.gephi.graph.api.AttributeUtils;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.DYNAMIC_TYPE_LEFT_BOUND;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.DYNAMIC_TYPE_RIGHT_BOUND;
+import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_BRACKET;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_SQUARE_BRACKET;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.types.TimestampBooleanMap;
 import org.gephi.graph.api.types.TimestampByteMap;
 import org.gephi.graph.api.types.TimestampCharMap;
@@ -37,8 +41,6 @@ import org.gephi.graph.api.types.TimestampMap;
 import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.types.TimestampShortMap;
 import org.gephi.graph.api.types.TimestampStringMap;
-import org.joda.time.DateTimeZone;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
 
 /**
  * <p>
@@ -88,14 +90,14 @@ public final class TimestampsParser {
      * Parses a {@link TimestampSet} type with one or more timestamps.
      *
      * @param input Input string to parse
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @param zoneId Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link TimestampSet}, or null if the input equals
      *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if there are no timestamps in the
      *         input string or bounds cannot be parsed into doubles or
      *         dates/datetimes.
      */
-    public static TimestampSet parseTimestampSet(String input, DateTimeZone timeZone) throws IllegalArgumentException {
+    public static TimestampSet parseTimestampSet(String input, ZoneId zoneId) throws IllegalArgumentException {
         if (input == null) {
             return null;
         }
@@ -151,8 +153,12 @@ public final class TimestampsParser {
 
         TimestampSet result = new TimestampSet(values.size());
 
-        for (String value : values) {
-            result.add(FormattingAndParsingUtils.parseDateTimeOrTimestamp(value, timeZone));
+        try {
+            for (String value : values) {
+                result.add(FormattingAndParsingUtils.parseDateTimeOrTimestamp(value, zoneId));
+            }
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Invalid timestamp value: " + ex.getMessage(), ex);
         }
 
         return result;
@@ -181,7 +187,7 @@ public final class TimestampsParser {
      * @param typeClass Simple type or {@link TimestampMap} subtype for the result
      *        values.
      * @param input Input string to parse
-     * @param timeZone Time zone to use or null to use default time zone (UTC)
+     * @param zoneId Time zone to use or null to use default time zone (UTC)
      * @return Resulting {@link TimestampMap}, or null if the input equals
      *         '&lt;empty&gt;' or is null
      * @throws IllegalArgumentException Thrown if type class is not supported, any
@@ -189,7 +195,7 @@ public final class TimestampsParser {
      *         are no timestamps in the input string or bounds cannot be parsed into
      *         doubles or dates/datetimes.
      */
-    public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input, DateTimeZone timeZone) throws IllegalArgumentException {
+    public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input, ZoneId zoneId) throws IllegalArgumentException {
         if (typeClass == null) {
             throw new IllegalArgumentException("typeClass required");
         }
@@ -243,7 +249,7 @@ public final class TimestampsParser {
                 switch (c) {
                     case LEFT_BOUND_SQUARE_BRACKET:
                     case LEFT_BOUND_BRACKET:
-                        parseTimestampAndValue(typeClass, reader, result, timeZone);
+                        parseTimestampAndValue(typeClass, reader, result, zoneId);
                         break;
                     default:
                         // Ignore other chars outside of bounds
@@ -275,7 +281,7 @@ public final class TimestampsParser {
         return parseTimestampMap(typeClass, input, null);
     }
 
-    private static <T> void parseTimestampAndValue(Class<T> typeClass, StringReader reader, TimestampMap<T> result, DateTimeZone timeZone) throws IOException {
+    private static <T> void parseTimestampAndValue(Class<T> typeClass, StringReader reader, TimestampMap<T> result, ZoneId zoneId) throws IOException {
         ArrayList<String> values = new ArrayList<>();
 
         int r;
@@ -285,7 +291,7 @@ public final class TimestampsParser {
             switch (c) {
                 case RIGHT_BOUND_SQUARE_BRACKET:
                 case RIGHT_BOUND_BRACKET:
-                    addTimestampAndValue(typeClass, values, result, timeZone);
+                    addTimestampAndValue(typeClass, values, result, zoneId);
                     return;
                 case ' ':
                 case '\t':
@@ -306,19 +312,23 @@ public final class TimestampsParser {
             }
         }
 
-        addTimestampAndValue(typeClass, values, result, timeZone);
+        addTimestampAndValue(typeClass, values, result, zoneId);
     }
 
-    private static <T> void addTimestampAndValue(Class<T> typeClass, ArrayList<String> values, TimestampMap<T> result, DateTimeZone timeZone) {
+    private static <T> void addTimestampAndValue(Class<T> typeClass, ArrayList<String> values, TimestampMap<T> result, ZoneId zoneId) {
         if (values.size() != 2) {
             throw new IllegalArgumentException("Each timestamp and value array must have 2 values");
         }
 
-        double timestamp = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), timeZone);
+        try {
+            double timestamp = FormattingAndParsingUtils.parseDateTimeOrTimestamp(values.get(0), zoneId);
 
-        String valString = values.get(1);
-        T value = FormattingAndParsingUtils.convertValue(typeClass, valString);
+            String valString = values.get(1);
+            T value = FormattingAndParsingUtils.convertValue(typeClass, valString);
 
-        result.put(timestamp, value);
+            result.put(timestamp, value);
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Invalid timestamp value: " + values.get(0), ex);
+        }
     }
 }

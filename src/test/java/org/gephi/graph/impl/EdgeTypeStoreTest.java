@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.Configuration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -283,8 +284,8 @@ public class EdgeTypeStoreTest {
 
     @Test
     public void testAddDifferentType() {
-        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
-        edgeTypeStore.configuration.setEdgeLabelType(Integer.class);
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore(
+                new ConfigurationImpl(Configuration.builder().edgeLabelType(Integer.class).build()));
         int id = edgeTypeStore.addType(42);
         Assert.assertEquals(id, 1);
         Assert.assertEquals(edgeTypeStore.getLabel(1), 42);

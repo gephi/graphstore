@@ -15,12 +15,12 @@
  */
 package org.gephi.graph.api.types;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
-import org.joda.time.DateTimeZone;
 
 /**
  * Sorted set for intervals.
@@ -63,6 +63,15 @@ public final class IntervalSet implements TimeSet<Interval> {
         array = new double[arr.length];
         System.arraycopy(arr, 0, array, 0, arr.length);
         size = arr.length / 2;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param source set to copy
+     */
+    public IntervalSet(IntervalSet source) {
+        this(source.array);
     }
 
     @Override
@@ -351,7 +360,7 @@ public final class IntervalSet implements TimeSet<Interval> {
     }
 
     @Override
-    public String toString(TimeFormat timeFormat, DateTimeZone timeZone) {
+    public String toString(TimeFormat timeFormat, ZoneId timeZone) {
         if (size == 0) {
             return FormattingAndParsingUtils.EMPTY_VALUE;
         }
