@@ -322,7 +322,7 @@ public class Configuration {
          * If enabled, the spatial index is updated while node positions are updated. If
          * unused, disabling it is recommended as it adds some overhead.
          * <p>
-         * The spatial index can be retrieved from {@link GraphModel#getSpatialIndex()}.
+         * The spatial index can be retrieved from {@link Graph#getSpatialIndex()}.
          * <p>
          * Default is <code>false</code>.
          *
