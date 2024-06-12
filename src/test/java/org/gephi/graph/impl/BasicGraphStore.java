@@ -1712,4 +1712,9 @@ public class BasicGraphStore implements DirectedGraph {
             // Not used because no locking
         }
     }
+
+    @Override
+    public SpatialIndex getSpatialIndex() {
+        return null;
+    }
 }

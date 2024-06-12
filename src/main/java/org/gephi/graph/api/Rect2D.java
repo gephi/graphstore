@@ -66,18 +66,39 @@ public class Rect2D {
         this.maxY = maxY;
     }
 
+    /**
+     * Return the rectangle's width.
+     *
+     * @return the rectangle's width
+     */
     public float width() {
         return maxX - minX;
     }
 
+    /**
+     * Return the rectangle's height.
+     *
+     * @return the rectangle's height
+     */
     public float height() {
         return maxY - minY;
     }
 
+    /**
+     * Return the rectangle's center, as an array where the first element is the x
+     * coordinate and the second element is the y coordinate.
+     *
+     * @return the rectangle's center
+     */
     public float[] center() {
         return new float[] { (maxX + minX) / 2, (maxY + minY) / 2 };
     }
 
+    /**
+     * Return the rectangle's radius.
+     *
+     * @return the rectangle's radius
+     */
     public float radius() {
         float width = width();
         float height = height();
@@ -92,11 +113,17 @@ public class Rect2D {
         return toString(FORMAT);
     }
 
-    public String toString(NumberFormat formatter) {
+    private String toString(NumberFormat formatter) {
         return "(" + formatter.format(minX) + " " + formatter.format(minY) + ") < " + "(" + formatter
                 .format(maxX) + " " + formatter.format(maxY) + ")";
     }
 
+    /**
+     * Returns true if this rectangle contains the given rectangle.
+     *
+     * @param rect the rectangle to check
+     * @return true if this rectangle contains, false otherwise
+     */
     public boolean contains(Rect2D rect) {
         if (rect == this) {
             return true;
@@ -105,6 +132,12 @@ public class Rect2D {
         return contains(rect.minX, rect.minY, rect.maxX, rect.maxY);
     }
 
+    /**
+     * Returns true if this rectangle intersects the given rectangle.
+     *
+     * @param rect the rectangle to check
+     * @return true if this rectangle intersects, false otherwise
+     */
     public boolean intersects(Rect2D rect) {
         if (rect == this) {
             return true;
@@ -113,10 +146,30 @@ public class Rect2D {
         return intersects(rect.minX, rect.minY, rect.maxX, rect.maxY);
     }
 
+    /**
+     * Returns true if this rectangle contains the given rectangle.
+     *
+     * @param minX the x coordinate of the minimum corner
+     * @param minY the y coordinate of the minimum corner
+     * @param maxX the x coordinate of the maximum corner
+     * @param maxY the y coordinate of the maximum corner
+     *
+     * @return true if this rectangle contains, false otherwise
+     */
     public boolean contains(float minX, float minY, float maxX, float maxY) {
         return this.minX <= minX && this.minY <= minY && this.maxX >= maxX && this.maxY >= maxY;
     }
 
+    /**
+     * Returns true if this rectangle intersects the given rectangle.
+     *
+     * @param minX the x coordinate of the minimum corner
+     * @param minY the y coordinate of the minimum corner
+     * @param maxX the x coordinate of the maximum corner
+     * @param maxY the y coordinate of the maximum corner
+     *
+     * @return true if this rectangle intersects, false otherwise
+     */
     public boolean intersects(float minX, float minY, float maxX, float maxY) {
         return this.minX <= maxX && minX <= this.maxX && this.maxY >= minY && maxY >= this.minY;
     }

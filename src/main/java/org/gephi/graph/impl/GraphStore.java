@@ -23,23 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import org.gephi.graph.api.Configuration;
-import org.gephi.graph.api.DirectedGraph;
-import org.gephi.graph.api.DirectedSubgraph;
-import org.gephi.graph.api.Edge;
-import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.ElementIterable;
-import org.gephi.graph.api.Graph;
-import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.GraphView;
-import org.gephi.graph.api.Interval;
-import org.gephi.graph.api.Node;
-import org.gephi.graph.api.NodeIterable;
-import org.gephi.graph.api.Origin;
-import org.gephi.graph.api.Subgraph;
-import org.gephi.graph.api.Table;
-import org.gephi.graph.api.TimeFormat;
-import org.gephi.graph.api.TimeRepresentation;
+
+import org.gephi.graph.api.*;
 import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.TimestampSet;
 
@@ -719,6 +704,14 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     @Override
     public GraphLockImpl getLock() {
         return lock;
+    }
+
+    @Override
+    public SpatialIndex getSpatialIndex() {
+        if (spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return spatialIndex;
     }
 
     protected void autoReadLock() {

@@ -22,7 +22,19 @@ package org.gephi.graph.api;
  */
 public interface SpatialIndex {
 
+    /**
+     * Returns the nodes in the given area.
+     *
+     * @param rect area to query
+     * @return nodes in the area
+     */
     NodeIterable getNodesInArea(Rect2D rect);
 
+    /**
+     * Returns the edges in the given area.
+     *
+     * @param rect area to query
+     * @return edges in the area
+     */
     EdgeIterable getEdgesInArea(Rect2D rect);
 }

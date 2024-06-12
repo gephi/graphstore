@@ -752,6 +752,14 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         return graphStore;
     }
 
+    @Override
+    public SpatialIndex getSpatialIndex() {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return this;
+    }
+
     void checkWriteLock() {
         if (graphStore.lock != null) {
             graphStore.lock.checkHoldWriteLock();
@@ -821,12 +829,18 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public NodeIterable getNodesInArea(Rect2D rect) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
         Iterator<Node> iterator = graphStore.spatialIndex.getNodesInArea(rect).iterator();
         return new NodeIterableWrapper(new NodeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
     }
 
     @Override
     public EdgeIterable getEdgesInArea(Rect2D rect) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
         Iterator<Edge> iterator = graphStore.spatialIndex.getEdgesInArea(rect).iterator();
         return new EdgeIterableWrapper(new EdgeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
     }

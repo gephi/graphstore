@@ -557,4 +557,11 @@ public interface Graph {
      * @return graph lock
      */
     GraphLock getLock();
+
+    /**
+     * Returns the spatial index.
+     *
+     * @return spatial index
+     */
+    SpatialIndex getSpatialIndex();
 }
