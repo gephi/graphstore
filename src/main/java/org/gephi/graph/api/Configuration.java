@@ -663,4 +663,20 @@ public class Configuration {
     public int hashCode() {
         return delegate.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return delegate.toString();
+    }
+
+    /**
+     * Returns a string representation of the differences between this configuration
+     * and another one.
+     *
+     * @param other the other configuration
+     * @return a string representation of the differences
+     */
+    public String diffAsString(Configuration other) {
+        return delegate.diffAsString(other.delegate);
+    }
 }

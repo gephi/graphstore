@@ -284,4 +284,19 @@ public class ConfigurationTest {
     public void testExceptionSpatialIndexWithDisabledNodeProperties() {
         Configuration.builder().enableSpatialIndex(true).enableNodeProperties(false).build();
     }
+
+    @Test
+    public void testToSting() {
+        Configuration c = Configuration.builder().build();
+        Assert.assertNotNull(c.toString());
+        Assert.assertTrue(c.toString().contains(c.getTimeRepresentation().name()));
+    }
+
+    @Test
+    public void testDiffAsString() {
+        Configuration c1 = Configuration.builder().build();
+        Configuration c2 = Configuration.builder().nodeIdType(Float.class).build();
+        Assert.assertNotNull(c1.diffAsString(c2));
+        Assert.assertEquals(c1.diffAsString(c2), "nodeIdType: class java.lang.String != class java.lang.Float");
+    }
 }
