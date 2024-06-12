@@ -448,6 +448,14 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return blocks[id / GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE].get(id);
     }
 
+    // Only used for Graph.getEdgeByStoreId
+    public EdgeImpl getForGetByStoreId(int id) {
+        if(id < 0 || !isValidIndex(id)) {
+            return null;
+        }
+        return blocks[id / GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE].get(id);
+    }
+
     public EdgeImpl get(final Object id) {
         checkNonNullObject(id);
 

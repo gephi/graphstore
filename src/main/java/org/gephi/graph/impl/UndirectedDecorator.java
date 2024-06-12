@@ -111,6 +111,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public Node getNodeByStoreId(int id) {
+        return store.getNodeByStoreId(id);
+    }
+
+    @Override
     public boolean hasNode(final Object id) {
         return store.hasNode(id);
     }
@@ -118,6 +123,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     @Override
     public Edge getEdge(Object id) {
         return store.getEdge(id);
+    }
+
+    @Override
+    public Edge getEdgeByStoreId(int storeId) {
+        return store.getEdgeByStoreId(storeId);
     }
 
     @Override

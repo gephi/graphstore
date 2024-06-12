@@ -125,6 +125,14 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         return blocks[id / GraphStoreConfiguration.NODESTORE_BLOCK_SIZE].get(id);
     }
 
+    // Only used for Graph.getNodeByStoreId
+    public NodeImpl getForGetByStoreId(int id) {
+        if(id < 0 || !isValidIndex(id)) {
+            return null;
+        }
+        return blocks[id / GraphStoreConfiguration.NODESTORE_BLOCK_SIZE].get(id);
+    }
+
     public NodeImpl get(final Object id) {
         int index = dictionary.getInt(id);
         if (index != NodeStore.NULL_ID) {
