@@ -22,8 +22,8 @@ jobs:
       - name: Publish package
         run: mvn -B -Djava.awt.headless=true deploy -P release
         env:
-          OSSRH_USER: ${{ secrets.OSSRH_USER }}
-          OSSRH_PASS: ${{ secrets.OSSRH_PASS }}
+          OSSRH_USER: ${{ secrets.OSSRH_TOKEN_USER }}
+          OSSRH_PASS: ${{ secrets.OSSRH_TOKEN_PASSWD }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Submit test coverage to Coveralls
         run: mvn test jacoco:report coveralls:report -DrepoToken=${{ secrets.COVERALLS_TOKEN }}
