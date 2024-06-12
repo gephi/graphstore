@@ -27,7 +27,7 @@ import org.gephi.graph.impl.ConfigurationImpl;
  * create a <em>GraphModel</em> with custom configuration.
  * <p>
  * Create instances by using the builder:
- * 
+ *
  * <pre>
  * Configuration config = Configuration.builder().build();
  * </pre>
@@ -260,7 +260,7 @@ public class Configuration {
          * for each type.
          * <p>
          * Default is <code>true</code>.
-         * 
+         *
          * @param enableAutoEdgeTypeRegistration enable auto edge type registration
          * @return this builder
          */
@@ -281,7 +281,7 @@ public class Configuration {
          * properties aren't needed, disabling them can save memory.
          * <p>
          * Default is <code>true</code>.
-         * 
+         *
          * @param enableNodeProperties enable node properties
          * @return this builder
          */
@@ -302,7 +302,7 @@ public class Configuration {
          * properties aren't needed, disabling them can save memory.
          * <p>
          * Default is <code>true</code>.
-         * 
+         *
          * @param enableEdgeProperties enable edge properties
          * @return this builder
          */
@@ -325,7 +325,7 @@ public class Configuration {
          * The spatial index can be retrieved from {@link GraphModel#getSpatialIndex()}.
          * <p>
          * Default is <code>false</code>.
-         * 
+         *
          * @param enableSpatialIndex enable edge properties
          * @return this builder
          */
@@ -349,7 +349,7 @@ public class Configuration {
          * return results.
          * <p>
          * Default is <code>true</code>.
-         * 
+         *
          * @param enableIndexNodes enable node attribute indexing
          * @return this builder
          */
@@ -373,7 +373,7 @@ public class Configuration {
          * return results.
          * <p>
          * Default is <code>true</code>.
-         * 
+         *
          * @param enableIndexEdges enable edge attribute indexing
          * @return this builder
          */
@@ -416,7 +416,7 @@ public class Configuration {
          * If disabled, only a single edge of a given type can exist between two nodes.
          * <p>
          * Default is <code>false</code>.
-         * 
+         *
          * @param enableParallelEdgesSameType enable parallel edges of the same type
          * @return this builder
          */
@@ -586,7 +586,7 @@ public class Configuration {
     /**
      * Sets whether to create an edge weight column.
      * <p>
-     * 
+     *
      * @deprecated Use {@link #builder()} instead.
      *
      * @param edgeWeightColumn edge weight column

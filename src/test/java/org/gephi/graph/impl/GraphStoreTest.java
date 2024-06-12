@@ -623,7 +623,7 @@ public class GraphStoreTest {
     @Test
     public void testGetNodeByStoreId() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
-        for(Node node : graphStore.getNodes().toArray()) {
+        for (Node node : graphStore.getNodes().toArray()) {
             Assert.assertNotNull(graphStore.getNodeByStoreId(node.getStoreId()));
         }
     }
@@ -650,7 +650,7 @@ public class GraphStoreTest {
     @Test
     public void testGetEdgeByStoreId() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
-        for(Edge edge : graphStore.getEdges().toArray()) {
+        for (Edge edge : graphStore.getEdges().toArray()) {
             Assert.assertNotNull(graphStore.getEdgeByStoreId(edge.getStoreId()));
         }
     }
