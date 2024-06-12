@@ -370,14 +370,6 @@ public class GraphModelImpl implements GraphModel {
     }
 
     @Override
-    public SpatialIndex getSpatialIndex() {
-        if (!configuration.isEnableSpatialIndex()) {
-            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
-        }
-        return store.spatialIndex;
-    }
-
-    @Override
     public GraphObserver createGraphObserver(Graph graph, boolean withGraphDiff) {
         store.autoWriteLock();
         try {

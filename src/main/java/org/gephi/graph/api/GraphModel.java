@@ -684,13 +684,6 @@ public interface GraphModel {
     public GraphObserver createGraphObserver(Graph graph, boolean withGraphDiff);
 
     /**
-     * Returns the spatial index.
-     *
-     * @return spatial index
-     */
-    public SpatialIndex getSpatialIndex();
-
-    /**
      * Returns the time format used to display time.
      *
      * @return time format
