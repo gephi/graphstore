@@ -232,4 +232,83 @@ public class ConfigurationImpl {
         result = 31 * result + (isEnableParallelEdgesSameType() ? 1 : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "ConfigurationImpl{" + "nodeIdType:" + nodeIdType + ", edgeIdType:" + edgeIdType + ", edgeLabelType:" + edgeLabelType + ", edgeWeightType:" + edgeWeightType + ", timeRepresentation:" + timeRepresentation + ", edgeWeightColumn:" + edgeWeightColumn + ", enableAutoLocking:" + enableAutoLocking + ", enableAutoEdgeTypeRegistration:" + enableAutoEdgeTypeRegistration + ", enableIndexNodes:" + enableIndexNodes + ", enableIndexEdges:" + enableIndexEdges + ", enableIndexTime:" + enableIndexTime + ", enableObservers:" + enableObservers + ", enableNodeProperties:" + enableNodeProperties + ", enableEdgeProperties:" + enableEdgeProperties + ", enableSpatialIndex:" + enableSpatialIndex + ", enableParallelEdgesSameType:" + enableParallelEdgesSameType + '}';
+    }
+
+    public String diffAsString(ConfigurationImpl other) {
+        ConfigurationImpl otherImpl = (ConfigurationImpl) other;
+        StringBuilder sb = new StringBuilder();
+        if (!getNodeIdType().equals(otherImpl.getNodeIdType())) {
+            sb.append("nodeIdType: ").append(getNodeIdType()).append(" != ").append(otherImpl.getNodeIdType())
+                    .append("\n");
+        }
+        if (!getEdgeIdType().equals(otherImpl.getEdgeIdType())) {
+            sb.append("edgeIdType: ").append(getEdgeIdType()).append(" != ").append(otherImpl.getEdgeIdType())
+                    .append("\n");
+        }
+        if (!getEdgeLabelType().equals(otherImpl.getEdgeLabelType())) {
+            sb.append("edgeLabelType: ").append(getEdgeLabelType()).append(" != ").append(otherImpl.getEdgeLabelType())
+                    .append("\n");
+        }
+        if (!getEdgeWeightType().equals(otherImpl.getEdgeWeightType())) {
+            sb.append("edgeWeightType: ").append(getEdgeWeightType()).append(" != ")
+                    .append(otherImpl.getEdgeWeightType()).append("\n");
+        }
+        if (getTimeRepresentation() != otherImpl.getTimeRepresentation()) {
+            sb.append("timeRepresentation: ").append(getTimeRepresentation()).append(" != ")
+                    .append(otherImpl.getTimeRepresentation()).append("\n");
+        }
+        if (isEdgeWeightColumn() != otherImpl.isEdgeWeightColumn()) {
+            sb.append("edgeWeightColumn: ").append(isEdgeWeightColumn()).append(" != ")
+                    .append(otherImpl.isEdgeWeightColumn()).append("\n");
+        }
+        if (isEnableAutoLocking() != otherImpl.isEnableAutoLocking()) {
+            sb.append("enableAutoLocking: ").append(isEnableAutoLocking()).append(" != ")
+                    .append(otherImpl.isEnableAutoLocking()).append("\n");
+        }
+        if (isEnableAutoEdgeTypeRegistration() != otherImpl.isEnableAutoEdgeTypeRegistration()) {
+            sb.append("enableAutoEdgeTypeRegistration: ").append(isEnableAutoEdgeTypeRegistration()).append(" != ")
+                    .append(otherImpl.isEnableAutoEdgeTypeRegistration()).append("\n");
+        }
+        if (isEnableIndexNodes() != otherImpl.isEnableIndexNodes()) {
+            sb.append("enableIndexNodes: ").append(isEnableIndexNodes()).append(" != ")
+                    .append(otherImpl.isEnableIndexNodes()).append("\n");
+        }
+        if (isEnableIndexEdges() != otherImpl.isEnableIndexEdges()) {
+            sb.append("enableIndexEdges: ").append(isEnableIndexEdges()).append(" != ")
+                    .append(otherImpl.isEnableIndexEdges()).append("\n");
+        }
+        if (isEnableIndexTime() != otherImpl.isEnableIndexTime()) {
+            sb.append("enableIndexTime: ").append(isEnableIndexTime()).append(" != ")
+                    .append(otherImpl.isEnableIndexTime()).append("\n");
+        }
+        if (isEnableObservers() != otherImpl.isEnableObservers()) {
+            sb.append("enableObservers: ").append(isEnableObservers()).append(" != ")
+                    .append(otherImpl.isEnableObservers()).append("\n");
+        }
+        if (isEnableNodeProperties() != otherImpl.isEnableNodeProperties()) {
+            sb.append("enableNodeProperties: ").append(isEnableNodeProperties()).append(" != ")
+                    .append(otherImpl.isEnableNodeProperties()).append("\n");
+        }
+        if (isEnableEdgeProperties() != otherImpl.isEnableEdgeProperties()) {
+            sb.append("enableEdgeProperties: ").append(isEnableEdgeProperties()).append(" != ")
+                    .append(otherImpl.isEnableEdgeProperties()).append("\n");
+        }
+        if (isEnableSpatialIndex() != otherImpl.isEnableSpatialIndex()) {
+            sb.append("enableSpatialIndex: ").append(isEnableSpatialIndex()).append(" != ")
+                    .append(otherImpl.isEnableSpatialIndex()).append("\n");
+        }
+        if (isEnableParallelEdgesSameType() != otherImpl.isEnableParallelEdgesSameType()) {
+            sb.append("enableParallelEdgesSameType: ").append(isEnableParallelEdgesSameType()).append(" != ")
+                    .append(otherImpl.isEnableParallelEdgesSameType()).append("\n");
+        }
+        // Remove last /n
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+        }
+        return sb.toString();
+    }
 }
