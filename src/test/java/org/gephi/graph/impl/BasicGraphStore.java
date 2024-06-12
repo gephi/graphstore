@@ -209,6 +209,10 @@ public class BasicGraphStore implements DirectedGraph {
         return nodeStore.get(id);
     }
 
+    public Node getNodeByStoreId(int storeId) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     @Override
     public boolean hasNode(Object id) {
         return nodeStore.get(id) != null;
@@ -217,6 +221,11 @@ public class BasicGraphStore implements DirectedGraph {
     @Override
     public Edge getEdge(Object id) {
         return edgeStore.get(id);
+    }
+
+    @Override
+    public Edge getEdgeByStoreId(int storeId) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

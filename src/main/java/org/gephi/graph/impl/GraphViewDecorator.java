@@ -319,6 +319,20 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
+    public Node getNodeByStoreId(int id) {
+        graphStore.autoReadLock();
+        try {
+            NodeImpl node = graphStore.getNodeByStoreId(id);
+            if (node != null && view.containsNode(node)) {
+                return node;
+            }
+            return null;
+        } finally {
+            graphStore.autoReadUnlock();
+        }
+    }
+
+    @Override
     public boolean hasNode(final Object id) {
         return getNode(id) != null;
     }
@@ -328,6 +342,20 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         graphStore.autoReadLock();
         try {
             EdgeImpl edge = graphStore.getEdge(id);
+            if (edge != null && view.containsEdge(edge)) {
+                return edge;
+            }
+            return null;
+        } finally {
+            graphStore.autoReadUnlock();
+        }
+    }
+
+    @Override
+    public Edge getEdgeByStoreId(int id) {
+        graphStore.autoReadLock();
+        try {
+            EdgeImpl edge = graphStore.getEdgeByStoreId(id);
             if (edge != null && view.containsEdge(edge)) {
                 return edge;
             }

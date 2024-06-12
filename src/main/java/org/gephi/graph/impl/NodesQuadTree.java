@@ -17,7 +17,7 @@ import org.gephi.graph.api.Rect2D;
  * Adapted from https://bitbucket.org/C3/quadtree/wiki/Home
  *
  * TODO: unit tests!!
- * 
+ *
  * @author Eduardo Ramos
  */
 public class NodesQuadTree {

@@ -198,6 +198,16 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public NodeImpl getNodeByStoreId(final int id) {
+        autoReadLock();
+        try {
+            return nodeStore.getForGetByStoreId(id);
+        } finally {
+            autoReadUnlock();
+        }
+    }
+
+    @Override
     public boolean hasNode(final Object id) {
         return getNode(id) != null;
     }
@@ -207,6 +217,16 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         autoReadLock();
         try {
             return edgeStore.get(id);
+        } finally {
+            autoReadUnlock();
+        }
+    }
+
+    @Override
+    public EdgeImpl getEdgeByStoreId(final int id) {
+        autoReadLock();
+        try {
+            return edgeStore.getForGetByStoreId(id);
         } finally {
             autoReadUnlock();
         }
