@@ -38,7 +38,7 @@ import org.gephi.graph.impl.GraphModelImpl;
  * </ul>
  * <p>
  * New instances can be obtained via the embedded factory:
- * 
+ *
  * <pre>
  * GraphModel model = GraphModel.Factory.newInstance();
  * </pre>
@@ -49,7 +49,7 @@ import org.gephi.graph.impl.GraphModelImpl;
  * Configuration configuration = Configuration.builder().build();
  * GraphModel model = GraphModel.Factory.newInstance(configuration);
  * </pre>
- * 
+ *
  * This API revolves around a set of simple concepts. A <code>GraphModel</code>
  * encapsulate all elements and metadata associated with a graph structure. In
  * other words it's a single graph, but it also contains configuration, indices,

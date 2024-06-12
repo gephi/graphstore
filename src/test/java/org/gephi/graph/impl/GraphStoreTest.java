@@ -621,12 +621,47 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testGetNodeByStoreId() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        for (Node node : graphStore.getNodes().toArray()) {
+            Assert.assertNotNull(graphStore.getNodeByStoreId(node.getStoreId()));
+        }
+    }
+
+    @Test
+    public void testGetNodeByStoreIdIsNull() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        for (Node node : graphStore.getNodes().toArray()) {
+            int storeId = node.getStoreId();
+            graphStore.removeNode(node);
+            Assert.assertNull(graphStore.getNodeByStoreId(storeId));
+        }
+    }
+
+    @Test
     public void testGetEdge() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         Assert.assertNotNull(graphStore.getEdge("0"));
         Assert.assertNull(graphStore.getEdge("bar"));
         Assert.assertTrue(graphStore.hasEdge("0"));
         Assert.assertFalse(graphStore.hasEdge("bar"));
+    }
+
+    @Test
+    public void testGetEdgeByStoreId() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        for (Edge edge : graphStore.getEdges().toArray()) {
+            Assert.assertNotNull(graphStore.getEdgeByStoreId(edge.getStoreId()));
+        }
+    }
+
+    @Test
+    public void testGetEdgeByStoreIdIsNull() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Edge toRemove = graphStore.getEdge("0");
+        int storeId = toRemove.getStoreId();
+        graphStore.removeEdge(toRemove);
+        Assert.assertNull(graphStore.getEdgeByStoreId(storeId));
     }
 
     @Test

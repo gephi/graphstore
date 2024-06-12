@@ -132,6 +132,14 @@ public interface Graph {
     public Node getNode(Object id);
 
     /**
+     * Gets a node given its store id.
+     *
+     * @param storeId the store id
+     * @return the node, or null if not found
+     */
+    public Node getNodeByStoreId(int storeId);
+
+    /**
      * Returns true if a node with <em>id</em> as identifier exists.
      *
      * @param id node id
@@ -146,6 +154,14 @@ public interface Graph {
      * @return the edge, or null if not found
      */
     public Edge getEdge(Object id);
+
+    /**
+     * Gets an edge given its store id.
+     *
+     * @param storeId the store id
+     * @return the edge, or null if not found
+     */
+    public Edge getEdgeByStoreId(int storeId);
 
     /**
      * Returns true if an edge with <em>id</em> as identifier exists.
