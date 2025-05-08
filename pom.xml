@@ -103,9 +103,10 @@
                     <version>3.2.7</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.7.0</version>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.7.0</version>
+                    <extensions>true</extensions>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -175,18 +176,6 @@
                 </executions>
             </plugin>
             
-            <!-- Nexus staging, https://oss.sonatype.org/ -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-            
             <!-- Code coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -225,6 +214,17 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Maven central -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -300,12 +300,4 @@
             </build>
         </profile>
     </profiles>
-
-    <!-- Locations of the artifacts published -->
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
