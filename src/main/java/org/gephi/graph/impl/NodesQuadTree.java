@@ -16,8 +16,6 @@ import org.gephi.graph.api.Rect2D;
 /**
  * Adapted from https://bitbucket.org/C3/quadtree/wiki/Home
  *
- * TODO: unit tests!!
- *
  * @author Eduardo Ramos
  */
 public class NodesQuadTree {
@@ -169,6 +167,44 @@ public class NodesQuadTree {
         int depth = quadTreeRoot.getDepth();
         readUnlock();
         return depth;
+    }
+
+    public Rect2D getBoundaries() {
+        readLock();
+        try {
+            NodeIterable allNodes = getAllNodes();
+
+            float minX = Float.MAX_VALUE;
+            float minY = Float.MAX_VALUE;
+            float maxX = -Float.MAX_VALUE;
+            float maxY = -Float.MAX_VALUE;
+
+            boolean hasNodes = false;
+
+            for (Node node : allNodes) {
+                SpatialNodeDataImpl spatialData = ((NodeImpl) node).getSpatialData();
+                if (spatialData != null) {
+                    hasNodes = true;
+                    if (spatialData.minX < minX) {
+                        minX = spatialData.minX;
+                    }
+                    if (spatialData.minY < minY) {
+                        minY = spatialData.minY;
+                    }
+                    if (spatialData.maxX > maxX) {
+                        maxX = spatialData.maxX;
+                    }
+                    if (spatialData.maxY > maxY) {
+                        maxY = spatialData.maxY;
+                    }
+                }
+            }
+
+            return hasNodes ? new Rect2D(minX, minY, maxX, maxY)
+                    : new Rect2D(Float.MIN_VALUE, Float.MIN_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        } finally {
+            readUnlock();
+        }
     }
 
     protected class QuadTreeNode {
