@@ -174,10 +174,10 @@ public class NodesQuadTree {
         try {
             NodeIterable allNodes = getAllNodes();
 
-            float minX = Float.MAX_VALUE;
-            float minY = Float.MAX_VALUE;
-            float maxX = -Float.MAX_VALUE;
-            float maxY = -Float.MAX_VALUE;
+            float minX = Float.POSITIVE_INFINITY;
+            float minY = Float.POSITIVE_INFINITY;
+            float maxX = Float.NEGATIVE_INFINITY;
+            float maxY = Float.NEGATIVE_INFINITY;
 
             boolean hasNodes = false;
 
@@ -200,8 +200,8 @@ public class NodesQuadTree {
                 }
             }
 
-            return hasNodes ? new Rect2D(minX, minY, maxX, maxY)
-                    : new Rect2D(Float.MIN_VALUE, Float.MIN_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+            return hasNodes ? new Rect2D(minX, minY, maxX, maxY) : new Rect2D(Float.NEGATIVE_INFINITY,
+                    Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
         } finally {
             readUnlock();
         }

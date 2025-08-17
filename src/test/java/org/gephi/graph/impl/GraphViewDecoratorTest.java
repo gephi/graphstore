@@ -929,8 +929,8 @@ public class GraphViewDecoratorTest {
 
         DirectedSubgraph graph = store.getDirectedGraph(view);
 
-        // Empty view should return null
-        Assert.assertNull(((SpatialIndex) graph).getBoundaries());
+        Assert.assertEquals(new Rect2D(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY,
+                Float.POSITIVE_INFINITY), graph.getSpatialIndex().getBoundaries());
     }
 
     @Test
@@ -956,7 +956,7 @@ public class GraphViewDecoratorTest {
         DirectedSubgraph graph = store.getDirectedGraph(view);
 
         // Should return boundaries only for node1
-        Rect2D boundaries = ((SpatialIndex) graph).getBoundaries();
+        Rect2D boundaries = graph.getSpatialIndex().getBoundaries();
         Assert.assertNotNull(boundaries);
         Assert.assertEquals(boundaries.minX, 90f); // 100 - 10
         Assert.assertEquals(boundaries.minY, 190f); // 200 - 10
@@ -993,7 +993,7 @@ public class GraphViewDecoratorTest {
         DirectedSubgraph graph = store.getDirectedGraph(view);
 
         // Should return boundaries only for node1 and node2
-        Rect2D boundaries = ((SpatialIndex) graph).getBoundaries();
+        Rect2D boundaries = graph.getSpatialIndex().getBoundaries();
         Assert.assertNotNull(boundaries);
         Assert.assertEquals(boundaries.minX, -5f); // node1: 0 - 5
         Assert.assertEquals(boundaries.minY, -5f); // node1: 0 - 5
@@ -1031,7 +1031,7 @@ public class GraphViewDecoratorTest {
         DirectedSubgraph fullGraph = graphStore;
 
         // Get boundaries for both
-        Rect2D viewBoundaries = ((SpatialIndex) viewGraph).getBoundaries();
+        Rect2D viewBoundaries = viewGraph.getSpatialIndex().getBoundaries();
         Rect2D fullBoundaries = graphStore.spatialIndex.getBoundaries();
 
         // View boundaries should only include node1 and node2
@@ -1073,32 +1073,35 @@ public class GraphViewDecoratorTest {
         DirectedSubgraph graph = store.getDirectedGraph(view);
 
         // Initially empty view
-        Assert.assertNull(((SpatialIndex) graph).getBoundaries());
+        Rect2D boundaries = graph.getSpatialIndex().getBoundaries();
+        Rect2D expected = new Rect2D(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY,
+                Float.POSITIVE_INFINITY);
+        Assert.assertEquals(expected, boundaries);
 
         // Add first node to view
         view.addNode(node1);
-        Rect2D boundaries1 = ((SpatialIndex) graph).getBoundaries();
+        Rect2D boundaries1 = graph.getSpatialIndex().getBoundaries();
         Assert.assertNotNull(boundaries1);
         Assert.assertEquals(boundaries1.minX, -5f);
         Assert.assertEquals(boundaries1.maxX, 5f);
 
         // Add second node to view
         view.addNode(node2);
-        Rect2D boundaries2 = ((SpatialIndex) graph).getBoundaries();
+        Rect2D boundaries2 = graph.getSpatialIndex().getBoundaries();
         Assert.assertNotNull(boundaries2);
         Assert.assertEquals(boundaries2.minX, -5f);
         Assert.assertEquals(boundaries2.maxX, 110f);
 
         // Remove first node from view
         view.removeNode(node1);
-        Rect2D boundaries3 = ((SpatialIndex) graph).getBoundaries();
+        Rect2D boundaries3 = graph.getSpatialIndex().getBoundaries();
         Assert.assertNotNull(boundaries3);
         Assert.assertEquals(boundaries3.minX, 90f); // Only node2 remains
         Assert.assertEquals(boundaries3.maxX, 110f);
 
         // Remove last node from view
         view.removeNode(node2);
-        Assert.assertNull(((SpatialIndex) graph).getBoundaries());
+        Assert.assertEquals(expected, graph.getSpatialIndex().getBoundaries());
     }
 
     private void addSomeElements(GraphStore store, GraphViewImpl view) {

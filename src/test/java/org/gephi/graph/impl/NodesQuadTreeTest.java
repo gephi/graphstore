@@ -226,10 +226,10 @@ public class NodesQuadTreeTest {
         NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
         Rect2D boundaries = q.getBoundaries();
         Assert.assertNotNull(boundaries);
-        Assert.assertEquals(boundaries.minX, Float.MIN_VALUE);
-        Assert.assertEquals(boundaries.minY, Float.MIN_VALUE);
-        Assert.assertEquals(boundaries.maxX, Float.MAX_VALUE);
-        Assert.assertEquals(boundaries.maxY, Float.MAX_VALUE);
+        Assert.assertEquals(boundaries.minX, Float.NEGATIVE_INFINITY);
+        Assert.assertEquals(boundaries.minY, Float.NEGATIVE_INFINITY);
+        Assert.assertEquals(boundaries.maxX, Float.POSITIVE_INFINITY);
+        Assert.assertEquals(boundaries.maxY, Float.POSITIVE_INFINITY);
     }
 
     @Test
@@ -289,16 +289,16 @@ public class NodesQuadTreeTest {
         // Should have boundaries initially
         Rect2D boundaries = q.getBoundaries();
         Assert.assertNotNull(boundaries);
-        Assert.assertNotEquals(boundaries.minX, Float.MIN_VALUE);
+        Assert.assertNotEquals(boundaries.minX, Float.NEGATIVE_INFINITY);
 
         // After clear, should return empty rectangle
         q.clear();
         boundaries = q.getBoundaries();
         Assert.assertNotNull(boundaries);
-        Assert.assertEquals(boundaries.minX, Float.MIN_VALUE);
-        Assert.assertEquals(boundaries.minY, Float.MIN_VALUE);
-        Assert.assertEquals(boundaries.maxX, Float.MAX_VALUE);
-        Assert.assertEquals(boundaries.maxY, Float.MAX_VALUE);
+        Assert.assertEquals(boundaries.minX, Float.NEGATIVE_INFINITY);
+        Assert.assertEquals(boundaries.minY, Float.NEGATIVE_INFINITY);
+        Assert.assertEquals(boundaries.maxX, Float.POSITIVE_INFINITY);
+        Assert.assertEquals(boundaries.maxY, Float.POSITIVE_INFINITY);
     }
 
     @Test
@@ -330,10 +330,10 @@ public class NodesQuadTreeTest {
         q.removeNode(n2);
         boundaries = q.getBoundaries();
         Assert.assertNotNull(boundaries);
-        Assert.assertEquals(boundaries.minX, Float.MIN_VALUE);
-        Assert.assertEquals(boundaries.minY, Float.MIN_VALUE);
-        Assert.assertEquals(boundaries.maxX, Float.MAX_VALUE);
-        Assert.assertEquals(boundaries.maxY, Float.MAX_VALUE);
+        Assert.assertEquals(boundaries.minX, Float.NEGATIVE_INFINITY);
+        Assert.assertEquals(boundaries.minY, Float.NEGATIVE_INFINITY);
+        Assert.assertEquals(boundaries.maxX, Float.POSITIVE_INFINITY);
+        Assert.assertEquals(boundaries.maxY, Float.POSITIVE_INFINITY);
     }
 
     @Test

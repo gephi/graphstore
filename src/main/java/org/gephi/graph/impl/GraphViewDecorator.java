@@ -849,10 +849,10 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public Rect2D getBoundaries() {
         graphStore.autoReadLock();
         try {
-            float minX = Float.MAX_VALUE;
-            float minY = Float.MAX_VALUE;
-            float maxX = -Float.MAX_VALUE;
-            float maxY = -Float.MAX_VALUE;
+            float minX = Float.POSITIVE_INFINITY;
+            float minY = Float.POSITIVE_INFINITY;
+            float maxX = Float.NEGATIVE_INFINITY;
+            float maxY = Float.NEGATIVE_INFINITY;
 
             boolean hasNodes = false;
 
@@ -878,7 +878,8 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
                     maxY = nodeMaxY;
             }
 
-            return hasNodes ? new Rect2D(minX, minY, maxX, maxY) : null;
+            return hasNodes ? new Rect2D(minX, minY, maxX, maxY) : new Rect2D(Float.NEGATIVE_INFINITY,
+                    Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
         } finally {
             graphStore.autoReadUnlock();
         }

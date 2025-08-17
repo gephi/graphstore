@@ -173,4 +173,26 @@ public class Rect2D {
     public boolean intersects(float minX, float minY, float maxX, float maxY) {
         return this.minX <= maxX && minX <= this.maxX && this.maxY >= minY && maxY >= this.minY;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Rect2D rect2D = (Rect2D) obj;
+        return Float.compare(rect2D.minX, minX) == 0 && Float.compare(rect2D.minY, minY) == 0 && Float
+                .compare(rect2D.maxX, maxX) == 0 && Float.compare(rect2D.maxY, maxY) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (minX != +0.0f ? Float.floatToIntBits(minX) : 0);
+        result = 31 * result + (minY != +0.0f ? Float.floatToIntBits(minY) : 0);
+        result = 31 * result + (maxX != +0.0f ? Float.floatToIntBits(maxX) : 0);
+        result = 31 * result + (maxY != +0.0f ? Float.floatToIntBits(maxY) : 0);
+        return result;
+    }
 }
