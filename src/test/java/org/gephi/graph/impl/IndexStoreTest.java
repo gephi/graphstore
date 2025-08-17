@@ -302,6 +302,34 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testEdgeWeigthSimple() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        ColumnStore<Edge> columnStore = graphStore.edgeTable.store;
+        IndexImpl<Edge> mainIndex = columnStore.indexStore.mainIndex;
+
+        Column weigthCol = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+
+        Assert.assertEquals(mainIndex.getMinValue(weigthCol), 1.0);
+        Assert.assertEquals(mainIndex.getMaxValue(weigthCol), 1.0);
+    }
+
+    @Test
+    public void testEdgeWeigthInView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        ColumnStore<Edge> columnStore = graphStore.edgeTable.store;
+
+        GraphView view = graphStore.viewStore.createView();
+        Subgraph graph = graphStore.viewStore.getGraph(view);
+        graph.fill();
+        IndexImpl index = columnStore.indexStore.createViewIndex(graph);
+
+        Column weigthCol = columnStore.getColumnByIndex(GraphStoreConfiguration.EDGE_WEIGHT_INDEX);
+
+        Assert.assertEquals(index.getMinValue(weigthCol), 1.0);
+        Assert.assertEquals(index.getMaxValue(weigthCol), 1.0);
+    }
+
+    @Test
     public void testCreateViewIndex() {
         GraphStore graphStore = generateBasicGraphStoreWithColumns();
         IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
