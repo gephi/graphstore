@@ -37,4 +37,12 @@ public interface SpatialIndex {
      * @return edges in the area
      */
     EdgeIterable getEdgesInArea(Rect2D rect);
+
+    /**
+     * Returns the bounding rectangle that contains all nodes in the graph. The
+     * boundaries are calculated based on each node's position and size.
+     *
+     * @return the bounding rectangle, or null if there are no nodes
+     */
+    Rect2D getBoundaries();
 }

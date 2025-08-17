@@ -59,6 +59,11 @@ public class SpatialIndexImpl implements SpatialIndex {
         nodesTree.updateNode(node, minX, minY, maxX, maxY);
     }
 
+    @Override
+    public Rect2D getBoundaries() {
+        return nodesTree.getBoundaries();
+    }
+
     protected class EdgeIterator implements Iterator<Edge> {
 
         private final Iterator<Node> nodeItr;
