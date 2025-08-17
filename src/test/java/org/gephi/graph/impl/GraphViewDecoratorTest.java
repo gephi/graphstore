@@ -20,12 +20,15 @@ import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Rect2D;
+import org.gephi.graph.api.SpatialIndex;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -918,6 +921,189 @@ public class GraphViewDecoratorTest {
         return store;
     }
 
+    @Test
+    public void testGetBoundariesEmptyView() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        Assert.assertEquals(new Rect2D(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY,
+                Float.POSITIVE_INFINITY), graph.getSpatialIndex().getBoundaries());
+    }
+
+    @Test
+    public void testGetBoundariesSingleNodeInView() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        // Add a node to the graph store
+        NodeImpl node1 = (NodeImpl) graphStore.factory.newNode("1");
+        node1.setPosition(100, 200);
+        node1.setSize(10);
+        graphStore.addNode(node1);
+
+        NodeImpl node2 = (NodeImpl) graphStore.factory.newNode("2");
+        node2.setPosition(500, 600);
+        node2.setSize(20);
+        graphStore.addNode(node2);
+
+        // Add only node1 to the view
+        view.addNode(node1);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        // Should return boundaries only for node1
+        Rect2D boundaries = graph.getSpatialIndex().getBoundaries();
+        Assert.assertNotNull(boundaries);
+        Assert.assertEquals(boundaries.minX, 90f); // 100 - 10
+        Assert.assertEquals(boundaries.minY, 190f); // 200 - 10
+        Assert.assertEquals(boundaries.maxX, 110f); // 100 + 10
+        Assert.assertEquals(boundaries.maxY, 210f); // 200 + 10
+    }
+
+    @Test
+    public void testGetBoundariesMultipleNodesInView() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        // Add nodes to the graph store
+        NodeImpl node1 = (NodeImpl) graphStore.factory.newNode("1");
+        node1.setPosition(0, 0);
+        node1.setSize(5);
+        graphStore.addNode(node1);
+
+        NodeImpl node2 = (NodeImpl) graphStore.factory.newNode("2");
+        node2.setPosition(100, 200);
+        node2.setSize(10);
+        graphStore.addNode(node2);
+
+        NodeImpl node3 = (NodeImpl) graphStore.factory.newNode("3");
+        node3.setPosition(500, 600); // This node won't be in the view
+        node3.setSize(20);
+        graphStore.addNode(node3);
+
+        // Add only node1 and node2 to the view
+        view.addNode(node1);
+        view.addNode(node2);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        // Should return boundaries only for node1 and node2
+        Rect2D boundaries = graph.getSpatialIndex().getBoundaries();
+        Assert.assertNotNull(boundaries);
+        Assert.assertEquals(boundaries.minX, -5f); // node1: 0 - 5
+        Assert.assertEquals(boundaries.minY, -5f); // node1: 0 - 5
+        Assert.assertEquals(boundaries.maxX, 110f); // node2: 100 + 10
+        Assert.assertEquals(boundaries.maxY, 210f); // node2: 200 + 10
+    }
+
+    @Test
+    public void testGetBoundariesViewSubsetVsFullGraph() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        // Add nodes to the graph store
+        NodeImpl node1 = (NodeImpl) graphStore.factory.newNode("1");
+        node1.setPosition(0, 0);
+        node1.setSize(5);
+        graphStore.addNode(node1);
+
+        NodeImpl node2 = (NodeImpl) graphStore.factory.newNode("2");
+        node2.setPosition(100, 200);
+        node2.setSize(10);
+        graphStore.addNode(node2);
+
+        NodeImpl node3 = (NodeImpl) graphStore.factory.newNode("3");
+        node3.setPosition(-50, -100);
+        node3.setSize(15);
+        graphStore.addNode(node3);
+
+        // Add only first two nodes to the view
+        view.addNode(node1);
+        view.addNode(node2);
+
+        DirectedSubgraph viewGraph = store.getDirectedGraph(view);
+        DirectedSubgraph fullGraph = graphStore;
+
+        // Get boundaries for both
+        Rect2D viewBoundaries = viewGraph.getSpatialIndex().getBoundaries();
+        Rect2D fullBoundaries = graphStore.spatialIndex.getBoundaries();
+
+        // View boundaries should only include node1 and node2
+        Assert.assertNotNull(viewBoundaries);
+        Assert.assertEquals(viewBoundaries.minX, -5f); // node1: 0 - 5
+        Assert.assertEquals(viewBoundaries.minY, -5f); // node1: 0 - 5
+        Assert.assertEquals(viewBoundaries.maxX, 110f); // node2: 100 + 10
+        Assert.assertEquals(viewBoundaries.maxY, 210f); // node2: 200 + 10
+
+        // Full graph boundaries should include all nodes
+        Assert.assertNotNull(fullBoundaries);
+        Assert.assertEquals(fullBoundaries.minX, -65f); // node3: -50 - 15
+        Assert.assertEquals(fullBoundaries.minY, -115f); // node3: -100 - 15
+        Assert.assertEquals(fullBoundaries.maxX, 110f); // node2: 100 + 10
+        Assert.assertEquals(fullBoundaries.maxY, 210f); // node2: 200 + 10
+
+        // They should be different
+        Assert.assertFalse(viewBoundaries.minX == fullBoundaries.minX);
+        Assert.assertFalse(viewBoundaries.minY == fullBoundaries.minY);
+    }
+
+    @Test
+    public void testGetBoundariesAfterViewChanges() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        // Add nodes to the graph store
+        NodeImpl node1 = (NodeImpl) graphStore.factory.newNode("1");
+        node1.setPosition(0, 0);
+        node1.setSize(5);
+        graphStore.addNode(node1);
+
+        NodeImpl node2 = (NodeImpl) graphStore.factory.newNode("2");
+        node2.setPosition(100, 200);
+        node2.setSize(10);
+        graphStore.addNode(node2);
+
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+
+        // Initially empty view
+        Rect2D boundaries = graph.getSpatialIndex().getBoundaries();
+        Rect2D expected = new Rect2D(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY,
+                Float.POSITIVE_INFINITY);
+        Assert.assertEquals(expected, boundaries);
+
+        // Add first node to view
+        view.addNode(node1);
+        Rect2D boundaries1 = graph.getSpatialIndex().getBoundaries();
+        Assert.assertNotNull(boundaries1);
+        Assert.assertEquals(boundaries1.minX, -5f);
+        Assert.assertEquals(boundaries1.maxX, 5f);
+
+        // Add second node to view
+        view.addNode(node2);
+        Rect2D boundaries2 = graph.getSpatialIndex().getBoundaries();
+        Assert.assertNotNull(boundaries2);
+        Assert.assertEquals(boundaries2.minX, -5f);
+        Assert.assertEquals(boundaries2.maxX, 110f);
+
+        // Remove first node from view
+        view.removeNode(node1);
+        Rect2D boundaries3 = graph.getSpatialIndex().getBoundaries();
+        Assert.assertNotNull(boundaries3);
+        Assert.assertEquals(boundaries3.minX, 90f); // Only node2 remains
+        Assert.assertEquals(boundaries3.maxX, 110f);
+
+        // Remove last node from view
+        view.removeNode(node2);
+        Assert.assertEquals(expected, graph.getSpatialIndex().getBoundaries());
+    }
+
     private void addSomeElements(GraphStore store, GraphViewImpl view) {
         double perc = 0.8;
         Random rand = new Random(98324);
@@ -933,5 +1119,10 @@ public class GraphViewDecoratorTest {
                 }
             }
         }
+    }
+
+    // Configuration with spatial index enabled
+    private Configuration getSpatialConfig() {
+        return Configuration.builder().enableSpatialIndex(true).build();
     }
 }

@@ -845,6 +845,46 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         return new EdgeIterableWrapper(new EdgeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
     }
 
+    @Override
+    public Rect2D getBoundaries() {
+        graphStore.autoReadLock();
+        try {
+            float minX = Float.POSITIVE_INFINITY;
+            float minY = Float.POSITIVE_INFINITY;
+            float maxX = Float.NEGATIVE_INFINITY;
+            float maxY = Float.NEGATIVE_INFINITY;
+
+            boolean hasNodes = false;
+
+            // Iterate only through nodes visible in this view
+            for (Node node : getNodes()) {
+                hasNodes = true;
+                final float x = node.x();
+                final float y = node.y();
+                final float size = node.size();
+
+                final float nodeMinX = x - size;
+                final float nodeMinY = y - size;
+                final float nodeMaxX = x + size;
+                final float nodeMaxY = y + size;
+
+                if (nodeMinX < minX)
+                    minX = nodeMinX;
+                if (nodeMinY < minY)
+                    minY = nodeMinY;
+                if (nodeMaxX > maxX)
+                    maxX = nodeMaxX;
+                if (nodeMaxY > maxY)
+                    maxY = nodeMaxY;
+            }
+
+            return hasNodes ? new Rect2D(minX, minY, maxX, maxY) : new Rect2D(Float.NEGATIVE_INFINITY,
+                    Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+        } finally {
+            graphStore.autoReadUnlock();
+        }
+    }
+
     protected final class NodeViewIterator implements Iterator<Node> {
 
         private final Iterator<Node> nodeIterator;
