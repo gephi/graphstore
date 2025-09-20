@@ -31,7 +31,8 @@ public class SpatialIndexImpl implements SpatialIndex {
 
     @Override
     public EdgeIterable getEdgesInArea(Rect2D rect) {
-        return new EdgeIterableWrapper(new EdgeIterator(rect, nodesTree.getNodes(rect).iterator()), nodesTree.lock);
+        return new EdgeIterableWrapper(() -> new EdgeIterator(rect, nodesTree.getNodes(rect).iterator()),
+                nodesTree.lock);
     }
 
     protected void clearNodes() {

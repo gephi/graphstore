@@ -19,16 +19,19 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Rect2D;
-import org.gephi.graph.api.SpatialIndex;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -500,26 +503,26 @@ public class GraphViewDecoratorTest {
         DirectedSubgraph graph = store.getDirectedGraph(view);
         GraphStore copyGraphStore = convertToStore(view);
 
-        Assert.assertTrue(isIterablesEqual(graph.getNodes(), copyGraphStore.getNodes()));
-        Assert.assertTrue(isIterablesEqual(graph.getEdges(), copyGraphStore.getEdges()));
-        Assert.assertTrue(isIterablesEqual(graph.getSelfLoops(), copyGraphStore.getSelfLoops()));
+         assertIterablesEqual(graph.getNodes(), copyGraphStore.getNodes());
+         assertIterablesEqual(graph.getEdges(), copyGraphStore.getEdges());
+         assertIterablesEqual(graph.getSelfLoops(), copyGraphStore.getSelfLoops());
 
         for (Node n : graph.getNodes()) {
             Node m = copyGraphStore.getNode(n.getId());
-            Assert.assertTrue(isIterablesEqual(graph.getEdges(n), copyGraphStore.getEdges(m)));
-            Assert.assertTrue(isIterablesEqual(graph.getInEdges(n), copyGraphStore.getInEdges(m)));
-            Assert.assertTrue(isIterablesEqual(graph.getOutEdges(n), copyGraphStore.getOutEdges(m)));
-            Assert.assertTrue(isIterablesEqual(graph.getNeighbors(n), copyGraphStore.getNeighbors(m)));
-            Assert.assertTrue(isIterablesEqual(graph.getSuccessors(n), copyGraphStore.getSuccessors(m)));
-            Assert.assertTrue(isIterablesEqual(graph.getPredecessors(n), copyGraphStore.getPredecessors(m)));
+            assertIterablesEqual(graph.getEdges(n), copyGraphStore.getEdges(m));
+            assertIterablesEqual(graph.getInEdges(n), copyGraphStore.getInEdges(m));
+            assertIterablesEqual(graph.getOutEdges(n), copyGraphStore.getOutEdges(m));
+            assertIterablesEqual(graph.getNeighbors(n), copyGraphStore.getNeighbors(m));
+            assertIterablesEqual(graph.getSuccessors(n), copyGraphStore.getSuccessors(m));
+            assertIterablesEqual(graph.getPredecessors(n), copyGraphStore.getPredecessors(m));
 
             for (int i = 0; i < typeCount; i++) {
-                Assert.assertTrue(isIterablesEqual(graph.getEdges(n, i), copyGraphStore.getEdges(m, i)));
-                Assert.assertTrue(isIterablesEqual(graph.getInEdges(n, i), copyGraphStore.getInEdges(m, i)));
-                Assert.assertTrue(isIterablesEqual(graph.getOutEdges(n, i), copyGraphStore.getOutEdges(m, i)));
-                Assert.assertTrue(isIterablesEqual(graph.getNeighbors(n, i), copyGraphStore.getNeighbors(m, i)));
-                Assert.assertTrue(isIterablesEqual(graph.getSuccessors(n, i), copyGraphStore.getSuccessors(m, i)));
-                Assert.assertTrue(isIterablesEqual(graph.getPredecessors(n, i), copyGraphStore.getPredecessors(m, i)));
+                assertIterablesEqual(graph.getEdges(n, i), copyGraphStore.getEdges(m, i));
+                assertIterablesEqual(graph.getInEdges(n, i), copyGraphStore.getInEdges(m, i));
+                assertIterablesEqual(graph.getOutEdges(n, i), copyGraphStore.getOutEdges(m, i));
+                assertIterablesEqual(graph.getNeighbors(n, i), copyGraphStore.getNeighbors(m, i));
+                assertIterablesEqual(graph.getSuccessors(n, i), copyGraphStore.getSuccessors(m, i));
+                assertIterablesEqual(graph.getPredecessors(n, i), copyGraphStore.getPredecessors(m, i));
             }
         }
     }
@@ -535,21 +538,18 @@ public class GraphViewDecoratorTest {
         UndirectedSubgraph graph = store.getUndirectedGraph(view);
         GraphStore copyGraphStore = convertToStore(view);
 
-        Assert.assertTrue(isIterablesEqual(graph.getNodes(), copyGraphStore.undirectedDecorator.getNodes()));
-        Assert.assertTrue(isIterablesEqual(graph.getEdges(), copyGraphStore.undirectedDecorator.getEdges()));
-        Assert.assertTrue(isIterablesEqual(graph.getSelfLoops(), copyGraphStore.undirectedDecorator.getSelfLoops()));
+        assertIterablesEqual(graph.getNodes(), copyGraphStore.undirectedDecorator.getNodes());
+        assertIterablesEqual(graph.getEdges(), copyGraphStore.undirectedDecorator.getEdges());
+        assertIterablesEqual(graph.getSelfLoops(), copyGraphStore.undirectedDecorator.getSelfLoops());
 
         for (Node n : graph.getNodes()) {
             Node m = copyGraphStore.getNode(n.getId());
-            Assert.assertTrue(isIterablesEqual(graph.getEdges(n), copyGraphStore.undirectedDecorator.getEdges(m)));
-            Assert.assertTrue(isIterablesEqual(graph.getNeighbors(n), copyGraphStore.undirectedDecorator
-                    .getNeighbors(m)));
+            assertIterablesEqual(graph.getEdges(n), copyGraphStore.undirectedDecorator.getEdges(m));
+            assertIterablesEqual(graph.getNeighbors(n), copyGraphStore.undirectedDecorator.getNeighbors(m));
 
             for (int i = 0; i < typeCount; i++) {
-                Assert.assertTrue(isIterablesEqual(graph.getEdges(n, i), copyGraphStore.undirectedDecorator
-                        .getEdges(m, i)));
-                Assert.assertTrue(isIterablesEqual(graph.getNeighbors(n, i), copyGraphStore.undirectedDecorator
-                        .getNeighbors(m, i)));
+                assertIterablesEqual(graph.getEdges(n, i), copyGraphStore.undirectedDecorator.getEdges(m, i));
+                assertIterablesEqual(graph.getNeighbors(n, i), copyGraphStore.undirectedDecorator.getNeighbors(m, i));
             }
         }
     }
@@ -892,35 +892,6 @@ public class GraphViewDecoratorTest {
         Assert.assertTrue(graph1.contains(n2));
     }
 
-    // UTILITY
-    private boolean isIterablesEqual(ElementIterable n1, ElementIterable n2) {
-        ObjectSet s1 = new ObjectOpenHashSet();
-        for (Object n : n1) {
-            s1.add(((Element) n).getId());
-        }
-        ObjectSet s2 = new ObjectOpenHashSet();
-        for (Object n : n2) {
-            s2.add(((Element) n).getId());
-        }
-        return s1.equals(s2);
-    }
-
-    private GraphStore convertToStore(GraphViewImpl view) {
-        GraphStore store = new GraphStore();
-        DirectedSubgraph graph = view.getDirectedGraph();
-        for (Node n : graph.getNodes()) {
-            NodeImpl m = new NodeImpl(n.getId());
-            store.addNode(m);
-        }
-        for (Edge e : graph.getEdges()) {
-            NodeImpl source = store.getNode(e.getSource().getId());
-            NodeImpl target = store.getNode(e.getTarget().getId());
-            EdgeImpl f = new EdgeImpl(e.getId(), source, target, e.getType(), e.getWeight(), e.isDirected());
-            store.addEdge(f);
-        }
-        return store;
-    }
-
     @Test
     public void testGetBoundariesEmptyView() {
         GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
@@ -1102,6 +1073,35 @@ public class GraphViewDecoratorTest {
         // Remove last node from view
         view.removeNode(node2);
         Assert.assertEquals(expected, graph.getSpatialIndex().getBoundaries());
+    }
+
+    // UTILITY
+    private void assertIterablesEqual(NodeIterable n1, NodeIterable n2) {
+        Assert.assertEquals(n1.toCollection(), n2.toCollection());
+        Assert.assertEquals(n1.stream().collect(Collectors.toList()), n2.stream().collect(Collectors.toList()));
+        Assert.assertEquals(n1.toArray(), n2.toArray());
+    }
+
+    private void assertIterablesEqual(EdgeIterable e1, EdgeIterable e2) {
+        Assert.assertEquals(e1.toCollection(), e2.toCollection());
+        Assert.assertEquals(e1.stream().collect(Collectors.toList()), e2.stream().collect(Collectors.toList()));
+        Assert.assertEquals(e1.toArray(), e2.toArray());
+    }
+
+    private GraphStore convertToStore(GraphViewImpl view) {
+        GraphStore store = new GraphStore();
+        DirectedSubgraph graph = view.getDirectedGraph();
+        for (Node n : graph.getNodes()) {
+            NodeImpl m = new NodeImpl(n.getId());
+            store.addNode(m);
+        }
+        for (Edge e : graph.getEdges()) {
+            NodeImpl source = store.getNode(e.getSource().getId());
+            NodeImpl target = store.getNode(e.getTarget().getId());
+            EdgeImpl f = new EdgeImpl(e.getId(), source, target, e.getType(), e.getWeight(), e.isDirected());
+            store.addEdge(f);
+        }
+        return store;
     }
 
     private void addSomeElements(GraphStore store, GraphViewImpl view) {

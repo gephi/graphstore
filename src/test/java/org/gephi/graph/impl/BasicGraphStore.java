@@ -35,7 +35,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.DirectedGraph;
@@ -1147,6 +1150,21 @@ public class BasicGraphStore implements DirectedGraph {
         @Override
         public Iterator<Node> iterator() {
             return new BasicNodeIterator(idToNodeMap.values().iterator());
+        }
+
+        @Override
+        public Spliterator<Node> spliterator() {
+            return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED | Spliterator.NONNULL);
+        }
+
+        @Override
+        public Stream<Node> stream() {
+            return Collection.super.stream();
+        }
+
+        @Override
+        public Stream<Node> parallelStream() {
+            return Collection.super.parallelStream();
         }
 
         @Override

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import java.util.function.Supplier;
 import org.gephi.graph.api.*;
 import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.TimestampSet;
@@ -248,12 +249,13 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     @Override
     public EdgeIterable getEdges(int type) {
-        return new EdgeIterableWrapper(edgeStore.iteratorType(type, false));
+        return new EdgeIterableWrapper(() -> edgeStore.iteratorType(type, false),
+                () -> edgeStore.spliteratorType(type, false), getAutoLock());
     }
 
     @Override
     public EdgeIterable getSelfLoops() {
-        return new EdgeIterableWrapper(edgeStore.iteratorSelfLoop());
+        return new EdgeIterableWrapper(edgeStore::iteratorSelfLoop, edgeStore::spliteratorSelfLoop, getAutoLock());
     }
 
     @Override
@@ -261,8 +263,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         autoWriteLock();
         try {
             nodeStore.checkNonNullNodeObject(node);
-            for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator((NodeImpl) node); edgeIterator
-                    .hasNext();) {
+            for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(node); edgeIterator.hasNext();) {
                 edgeIterator.next();
                 edgeIterator.remove();
             }
@@ -288,8 +289,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         try {
             for (Node node : nodes) {
                 nodeStore.checkNonNullNodeObject(node);
-                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator((NodeImpl) node); edgeIterator
-                        .hasNext();) {
+                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(node); edgeIterator.hasNext();) {
                     edgeIterator.next();
                     edgeIterator.remove();
                 }
@@ -370,11 +370,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     @Override
     public EdgeIterable getEdges(Node node1, Node node2, int type) {
-        Iterator<Edge> itr = edgeStore.getAll(node1, node2, type, false);
-        if (itr != null) {
-            return new EdgeIterableWrapper(itr);
-        }
-        return EdgeIterable.EMPTY;
+        return new EdgeIterableWrapper(() -> edgeStore.getAll(node1, node2, type, false), getAutoLock());
     }
 
     @Override
@@ -389,71 +385,67 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     @Override
     public EdgeIterable getEdges(Node node1, Node node2) {
-        Iterator<Edge> itr = edgeStore.getAll(node1, node2, false);
-        if (itr != null) {
-            return new EdgeIterableWrapper(itr);
-        }
-        return EdgeIterable.EMPTY;
+        return new EdgeIterableWrapper(() -> edgeStore.getAll(node1, node2, false), getAutoLock());
     }
 
     @Override
     public NodeIterable getNeighbors(final Node node) {
-        return new NodeIterableWrapper(edgeStore.neighborIterator(node));
+        return new NodeIterableWrapper(() -> edgeStore.neighborIterator(node), getAutoLock());
     }
 
     @Override
     public NodeIterable getNeighbors(final Node node, final int type) {
-        return new NodeIterableWrapper(edgeStore.neighborIterator(node, type));
+        return new NodeIterableWrapper(() -> edgeStore.neighborIterator(node, type), getAutoLock());
     }
 
     @Override
     public NodeIterable getPredecessors(final Node node) {
-        return new NodeIterableWrapper(edgeStore.neighborInIterator(node));
+        return new NodeIterableWrapper(() -> edgeStore.neighborInIterator(node), getAutoLock());
     }
 
     @Override
     public NodeIterable getPredecessors(final Node node, final int type) {
-        return new NodeIterableWrapper(edgeStore.neighborInIterator(node, type));
+        return new NodeIterableWrapper(() -> edgeStore.neighborInIterator(node, type), getAutoLock());
     }
 
     @Override
     public NodeIterable getSuccessors(final Node node) {
-        return new NodeIterableWrapper(edgeStore.neighborOutIterator(node));
+        return new NodeIterableWrapper(() -> edgeStore.neighborOutIterator(node), getAutoLock());
     }
 
     @Override
     public NodeIterable getSuccessors(final Node node, final int type) {
-        return new NodeIterableWrapper(edgeStore.neighborOutIterator(node, type));
+        return new NodeIterableWrapper(() -> edgeStore.neighborOutIterator(node, type), getAutoLock());
     }
 
     @Override
     public EdgeIterable getEdges(final Node node) {
-        return new EdgeIterableWrapper(edgeStore.edgeIterator(node));
+        return new EdgeIterableWrapper(() -> edgeStore.edgeIterator(node), getAutoLock());
     }
 
     @Override
     public EdgeIterable getEdges(final Node node, final int type) {
-        return new EdgeIterableWrapper(edgeStore.edgeIterator(node, type));
+        return new EdgeIterableWrapper(() -> edgeStore.edgeIterator(node, type), getAutoLock());
     }
 
     @Override
     public EdgeIterable getInEdges(final Node node) {
-        return new EdgeIterableWrapper(edgeStore.edgeInIterator(node));
+        return new EdgeIterableWrapper(() -> edgeStore.edgeInIterator(node), getAutoLock());
     }
 
     @Override
     public EdgeIterable getInEdges(final Node node, final int type) {
-        return new EdgeIterableWrapper(edgeStore.edgeInIterator(node, type));
+        return new EdgeIterableWrapper(() -> edgeStore.edgeInIterator(node, type), getAutoLock());
     }
 
     @Override
     public EdgeIterable getOutEdges(final Node node) {
-        return new EdgeIterableWrapper(edgeStore.edgeOutIterator(node));
+        return new EdgeIterableWrapper(() -> edgeStore.edgeOutIterator(node), getAutoLock());
     }
 
     @Override
     public EdgeIterable getOutEdges(final Node node, final int type) {
-        return new EdgeIterableWrapper(edgeStore.edgeOutIterator(node, type));
+        return new EdgeIterableWrapper(() -> edgeStore.edgeOutIterator(node, type), getAutoLock());
     }
 
     @Override
@@ -833,20 +825,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         }
     }
 
-    protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator) {
-        return getEdgeIterableWrapper(edgeIterator, true);
-    }
-
-    protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator) {
-        return getNodeIterableWrapper(nodeIterator, true);
-    }
-
-    protected EdgeIterableWrapper getEdgeIterableWrapper(Iterator<Edge> edgeIterator, boolean blocking) {
-        return new EdgeIterableWrapper(edgeIterator, (blocking && configuration.isEnableAutoLocking()) ? lock : null);
-    }
-
-    protected NodeIterableWrapper getNodeIterableWrapper(Iterator<Node> nodeIterator, boolean blocking) {
-        return new NodeIterableWrapper(nodeIterator, (blocking && configuration.isEnableAutoLocking()) ? lock : null);
+    protected GraphLockImpl getAutoLock() {
+        return configuration.isEnableAutoLocking() ? lock : null;
     }
 
     public int deepHashCode() {

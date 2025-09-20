@@ -15,22 +15,39 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 
 public class NodeIterableWrapper extends ElementIterableWrapper<Node> implements NodeIterable {
 
-    public NodeIterableWrapper(Iterator<Node> iterator) {
-        super(iterator);
+    public NodeIterableWrapper(Supplier<Iterator<Node>> iteratorSupplier, GraphLockImpl lock) {
+        super(iteratorSupplier, lock);
     }
 
-    public NodeIterableWrapper(Iterator<Node> iterator, GraphLockImpl lock) {
-        super(iterator, lock);
+    public NodeIterableWrapper(Supplier<Iterator<Node>> iteratorSupplier, Supplier<Spliterator<Node>> spliteratorSupplier, GraphLockImpl lock) {
+        super(iteratorSupplier, spliteratorSupplier, lock);
     }
 
     @Override
     public Node[] toArray() {
-        return toArray(new Node[0]);
+        return StreamSupport.stream(spliterator(), parallelPossible).toArray(Node[]::new);
+    }
+
+    @Override
+    public Collection<Node> toCollection() {
+        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<Node> toSet() {
+        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toSet());
     }
 }

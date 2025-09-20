@@ -21,10 +21,16 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 
@@ -46,7 +52,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     protected int garbageSize;
     protected int blocksCount;
     protected int currentBlockIndex;
-    protected NodeBlock blocks[];
+    protected NodeBlock[] blocks;
     protected NodeBlock currentBlock;
     protected Object2IntOpenHashMap dictionary;
 
@@ -172,6 +178,27 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     @Override
     public NodeStoreIterator iterator() {
         return new NodeStoreIterator();
+    }
+
+    @Override
+    public Spliterator<Node> spliterator() {
+        int end = blocksCount;
+        return new FilteredNodeSpliterator(0, end, null);
+    }
+
+    @Override
+    public Stream<Node> stream() {
+        return StreamSupport.stream(spliterator(), false);
+    }
+
+    @Override
+    public Stream<Node> parallelStream() {
+        return StreamSupport.stream(spliterator(), true);
+    }
+
+    protected Spliterator<Node> newFilteredSpliterator(Predicate<NodeImpl> filter) {
+        int end = blocksCount;
+        return new FilteredNodeSpliterator(0, end, filter);
     }
 
     @Override
@@ -673,6 +700,146 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 }
             }
             NodeStore.this.remove(pointer);
+        }
+    }
+
+    private final class FilteredNodeSpliterator implements Spliterator<Node> {
+
+        private final int endBlockExclusive;
+        private int blockIndex;
+        private int indexInBlock;
+        private NodeImpl[] currentArray;
+        private int currentLength;
+        private final int expectedVersion;
+        private final long totalLiveAtSnapshot;
+        private long emitted;
+        private final Predicate<NodeImpl> filter;
+        private final boolean fastPathUnfiltered;
+
+        FilteredNodeSpliterator(int startBlock, int endBlockExclusive, Predicate<NodeImpl> filter) {
+            this.blockIndex = startBlock;
+            this.endBlockExclusive = endBlockExclusive;
+            this.expectedVersion = version != null ? version.getNodeVersion() : 0;
+            this.filter = filter;
+            this.fastPathUnfiltered = filter == null;
+            this.totalLiveAtSnapshot = computeTotalLive(startBlock, endBlockExclusive);
+            this.emitted = 0L;
+            if (startBlock < endBlockExclusive) {
+                NodeBlock b = blocks[startBlock];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+        }
+
+        private long computeTotalLive(int start, int end) {
+            long sum = 0L;
+            for (int i = start; i < end; i++) {
+                NodeBlock b = blocks[i];
+                if (b != null) {
+                    if (fastPathUnfiltered) {
+                        sum += (b.nodeLength - b.garbageLength);
+                    } else {
+                        NodeImpl[] arr = b.backingArray;
+                        int len = b.nodeLength;
+                        for (int j = 0; j < len; j++) {
+                            NodeImpl n = arr[j];
+                            if (n != null && filter.test(n)) {
+                                sum++;
+                            }
+                        }
+                    }
+                }
+            }
+            return sum;
+        }
+
+        private void advanceBlock() {
+            blockIndex++;
+            if (blockIndex < endBlockExclusive) {
+                NodeBlock b = blocks[blockIndex];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+        }
+
+        private void checkForComodification() {
+            if (version != null && expectedVersion != version.getNodeVersion()) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Node> action) {
+            checkForComodification();
+            while (currentArray != null) {
+                while (indexInBlock < currentLength) {
+                    NodeImpl n = currentArray[indexInBlock++];
+                    if (n != null && (fastPathUnfiltered || filter.test(n))) {
+                        emitted++;
+                        action.accept(n);
+                        return true;
+                    }
+                }
+                advanceBlock();
+            }
+            return false;
+        }
+
+        @Override
+        public Spliterator<Node> trySplit() {
+            // Only split at block boundaries to preserve encounter order
+            if (indexInBlock != 0) {
+                return null;
+            }
+
+            // Calculate the current position (including already advanced blocks)
+            int currentPos = blockIndex;
+            int remainingBlocks = endBlockExclusive - currentPos;
+
+            if (remainingBlocks <= 1) {
+                return null;
+            }
+
+            int mid = currentPos + remainingBlocks / 2;
+
+            // Create left half for the blocks we haven't processed yet
+            Spliterator<Node> left = new FilteredNodeSpliterator(currentPos, mid, filter);
+
+            // Update this spliterator to become the right half
+            blockIndex = mid;
+            if (mid < endBlockExclusive) {
+                NodeBlock b = blocks[mid];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+
+            return left;
+        }
+
+        @Override
+        public long estimateSize() {
+            long remaining = totalLiveAtSnapshot - emitted;
+            return remaining < 0 ? 0 : remaining;
+        }
+
+        @Override
+        public int characteristics() {
+            return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.SIZED | Spliterator.SUBSIZED;
         }
     }
 }

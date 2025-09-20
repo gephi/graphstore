@@ -20,6 +20,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A node iterable.
@@ -64,6 +68,20 @@ public interface NodeIterable extends ElementIterable<Node> {
     public Set<Node> toSet();
 
     /**
+     * Returns a Spliterator over the nodes.
+     * <p>
+     * Implementations return a splittable, sized, fail-fast spliterator suitable
+     * for parallel streams. When not possible, a non-splittable spliterator is
+     * returned.
+     *
+     * @return node spliterator
+     */
+    @Override
+    default Spliterator<Node> spliterator() {
+        return ElementIterable.super.spliterator();
+    }
+
+    /**
      * Empty node iterable.
      */
     static final class NodeIterableEmpty implements Iterator<Node>, NodeIterable {
@@ -86,6 +104,11 @@ public interface NodeIterable extends ElementIterable<Node> {
         @Override
         public Iterator<Node> iterator() {
             return this;
+        }
+
+        @Override
+        public Spliterator<Node> spliterator() {
+            return Spliterators.emptySpliterator();
         }
 
         @Override

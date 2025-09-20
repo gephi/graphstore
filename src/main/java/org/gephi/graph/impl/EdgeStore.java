@@ -29,6 +29,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.ConcurrentModificationException;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
@@ -346,6 +352,43 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     @Override
     public EdgeStoreIterator iterator() {
         return new EdgeStoreIterator();
+    }
+
+    @Override
+    public Spliterator<Edge> spliterator() {
+        int end = blocksCount;
+        return new FilteredEdgeSpliterator(0, end, null);
+    }
+
+    @Override
+    public Stream<Edge> stream() {
+        return StreamSupport.stream(spliterator(), false);
+    }
+
+    @Override
+    public Stream<Edge> parallelStream() {
+        return StreamSupport.stream(spliterator(), true);
+    }
+
+    public Spliterator<Edge> spliteratorUndirected() {
+        int end = blocksCount;
+        return new FilteredEdgeSpliterator(0, end, e -> !isUndirectedToIgnore(e));
+    }
+
+    public Spliterator<Edge> spliteratorType(int type, boolean undirected) {
+        int end = blocksCount;
+        return new FilteredEdgeSpliterator(0, end,
+                e -> e.getType() == type && (!undirected || !isUndirectedToIgnore(e)));
+    }
+
+    public Spliterator<Edge> spliteratorSelfLoop() {
+        int end = blocksCount;
+        return new FilteredEdgeSpliterator(0, end, EdgeImpl::isSelfLoop);
+    }
+
+    protected Spliterator<Edge> newFilteredSpliterator(java.util.function.Predicate<EdgeImpl> filter) {
+        int end = blocksCount;
+        return new FilteredEdgeSpliterator(0, end, filter);
     }
 
     public EdgeStoreIterator iteratorUndirected() {
@@ -1952,6 +1995,160 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                         "Removing directed edges from undirected iterator is not supported");
             }
             EdgeStore.this.remove(pointer);
+        }
+    }
+
+    private final class FilteredEdgeSpliterator implements Spliterator<Edge> {
+
+        private final int endBlockExclusive;
+        private int blockIndex;
+        private int indexInBlock;
+        private EdgeImpl[] currentArray;
+        private int currentLength;
+        private final int expectedVersion;
+        private long totalLiveAtSnapshot;
+        private long emitted;
+        private final Predicate<EdgeImpl> filter;
+        private final boolean fastPathUnfiltered;
+
+        FilteredEdgeSpliterator(int startBlock, int endBlockExclusive, Predicate<EdgeImpl> filter) {
+            this.blockIndex = startBlock;
+            this.endBlockExclusive = endBlockExclusive;
+            this.expectedVersion = version != null ? version.getEdgeVersion() : 0;
+            this.filter = filter;
+            this.fastPathUnfiltered = filter == null;
+            this.totalLiveAtSnapshot = computeTotalLive(startBlock, endBlockExclusive);
+            this.emitted = 0L;
+            if (startBlock < endBlockExclusive) {
+                EdgeBlock b = blocks[startBlock];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+        }
+
+        private long computeTotalLive(int start, int end) {
+            long sum = 0L;
+            for (int i = start; i < end; i++) {
+                EdgeBlock b = blocks[i];
+                if (b != null) {
+                    if (fastPathUnfiltered) {
+                        sum += (b.nodeLength - b.garbageLength);
+                    } else {
+                        EdgeImpl[] arr = b.backingArray;
+                        int len = b.nodeLength;
+                        for (int j = 0; j < len; j++) {
+                            EdgeImpl e = arr[j];
+                            if (e != null && filter.test(e)) {
+                                sum++;
+                            }
+                        }
+                    }
+                }
+            }
+            return sum;
+        }
+
+        private void advanceBlock() {
+            blockIndex++;
+            if (blockIndex < endBlockExclusive) {
+                EdgeBlock b = blocks[blockIndex];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+        }
+
+        private void checkForComodification() {
+            if (version != null && expectedVersion != version.getEdgeVersion()) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Edge> action) {
+            checkForComodification();
+            while (currentArray != null) {
+                while (indexInBlock < currentLength) {
+                    EdgeImpl e = currentArray[indexInBlock++];
+                    if (e != null && (fastPathUnfiltered || filter.test(e))) {
+                        emitted++;
+                        action.accept(e);
+                        return true;
+                    }
+                }
+                advanceBlock();
+            }
+            return false;
+        }
+
+        @Override
+        public Spliterator<Edge> trySplit() {
+            // Only split at block boundaries to preserve encounter order
+            if (indexInBlock != 0) {
+                return null;
+            }
+
+            // Calculate the current position (including already advanced blocks)
+            int currentPos = blockIndex;
+            int remainingBlocks = endBlockExclusive - currentPos;
+
+            if (remainingBlocks <= 1) {
+                return null;
+            }
+
+            int mid = currentPos + remainingBlocks / 2;
+
+            // Create left half for the blocks we haven't processed yet
+            Spliterator<Edge> left = new FilteredEdgeSpliterator(currentPos, mid, filter);
+
+            // Update this spliterator to become the right half
+            blockIndex = mid;
+            if (mid < endBlockExclusive) {
+                EdgeBlock b = blocks[mid];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+
+            return left;
+        }
+
+        private long countRemainingInCurrentBlock() {
+            if (currentArray == null) {
+                return 0L;
+            }
+            long count = 0L;
+            for (int i = indexInBlock; i < currentLength; i++) {
+                EdgeImpl e = currentArray[i];
+                if (e != null && (fastPathUnfiltered || filter.test(e))) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        @Override
+        public long estimateSize() {
+            long remaining = totalLiveAtSnapshot - emitted;
+            return remaining < 0 ? 0 : remaining;
+        }
+
+        @Override
+        public int characteristics() {
+            return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.SIZED | Spliterator.SUBSIZED;
         }
     }
 }

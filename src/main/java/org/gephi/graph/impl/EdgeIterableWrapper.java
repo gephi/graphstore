@@ -15,22 +15,39 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 
 public class EdgeIterableWrapper extends ElementIterableWrapper<Edge> implements EdgeIterable {
 
-    public EdgeIterableWrapper(Iterator<Edge> iterator) {
-        super(iterator);
+    public EdgeIterableWrapper(Supplier<Iterator<Edge>> iteratorSupplier, GraphLockImpl lock) {
+        super(iteratorSupplier, lock);
     }
 
-    public EdgeIterableWrapper(Iterator<Edge> iterator, GraphLockImpl lock) {
-        super(iterator, lock);
+    public EdgeIterableWrapper(Supplier<Iterator<Edge>> iteratorSupplier, Supplier<Spliterator<Edge>> spliteratorSupplier, GraphLockImpl lock) {
+        super(iteratorSupplier, spliteratorSupplier, lock);
     }
 
     @Override
     public Edge[] toArray() {
-        return toArray(new Edge[0]);
+        return StreamSupport.stream(spliterator(), parallelPossible).toArray(Edge[]::new);
+    }
+
+    @Override
+    public Collection<Edge> toCollection() {
+        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<Edge> toSet() {
+        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toSet());
     }
 }

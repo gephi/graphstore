@@ -19,52 +19,64 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 
 public abstract class ElementIterableWrapper<T extends Element> implements ElementIterable<T> {
 
-    protected final Iterator<T> iterator;
+    protected final Supplier<Iterator<T>> iteratorSupplier;
+    protected final Supplier<Spliterator<T>> spliteratorSupplier;
     protected final GraphLockImpl lock;
+    protected final boolean parallelPossible;
 
-    public ElementIterableWrapper(Iterator<T> iterator) {
-        this(iterator, null);
+    public ElementIterableWrapper(Supplier<Iterator<T>> iteratorSupplier, GraphLockImpl lock) {
+        this.iteratorSupplier = iteratorSupplier;
+        this.spliteratorSupplier = () -> Spliterators
+                .spliteratorUnknownSize(iteratorSupplier.get(), Spliterator.ORDERED | Spliterator.NONNULL);
+        this.lock = lock;
+        this.parallelPossible = false;
     }
 
-    public ElementIterableWrapper(Iterator<T> iterator, GraphLockImpl lock) {
-        this.iterator = iterator;
+    public ElementIterableWrapper(Supplier<Iterator<T>> iteratorSupplier, Supplier<Spliterator<T>> spliteratorSupplier, GraphLockImpl lock) {
+        this.iteratorSupplier = iteratorSupplier;
+        this.spliteratorSupplier = spliteratorSupplier;
         this.lock = lock;
+        this.parallelPossible = true;
     }
 
     @Override
     public Iterator<T> iterator() {
-        return iterator;
-    }
-
-    protected T[] toArray(T[] a) {
-        // TODO This can be improved
-        return toCollection().toArray(a);
+        return iteratorSupplier.get();
     }
 
     @Override
-    public Collection<T> toCollection() {
-        List<T> list = new ArrayList<>();
-        while (iterator.hasNext()) {
-            list.add(iterator.next());
-        }
-        return list;
+    public Spliterator<T> spliterator() {
+        return spliteratorSupplier.get();
     }
 
     @Override
-    public Set<T> toSet() {
-        Set<T> set = new HashSet<>();
-        while (iterator.hasNext()) {
-            set.add(iterator.next());
+    public Stream<T> parallelStream() {
+        if (!parallelPossible) {
+            throw new UnsupportedOperationException("Parallel stream not supported for this operation.");
         }
-        return set;
+        return ElementIterable.super.parallelStream();
     }
+
+    public abstract T[] toArray();
+
+    public abstract Collection<T> toCollection();
+
+    public abstract Set<T> toSet();
 
     @Override
     public void doBreak() {
