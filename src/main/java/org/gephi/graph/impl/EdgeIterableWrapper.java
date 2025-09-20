@@ -15,17 +15,12 @@
  */
 package org.gephi.graph.impl;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
-import org.gephi.graph.api.Node;
 
 public class EdgeIterableWrapper extends ElementIterableWrapper<Edge> implements EdgeIterable {
 

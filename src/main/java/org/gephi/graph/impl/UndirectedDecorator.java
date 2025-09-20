@@ -17,8 +17,18 @@ package org.gephi.graph.impl;
 
 import java.util.Collection;
 import java.util.Set;
-
-import org.gephi.graph.api.*;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.Node;
+import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.SpatialIndex;
+import org.gephi.graph.api.Subgraph;
+import org.gephi.graph.api.UndirectedGraph;
+import org.gephi.graph.api.UndirectedSubgraph;
 
 public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph {
 

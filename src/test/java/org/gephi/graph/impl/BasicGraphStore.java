@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;

@@ -15,11 +15,11 @@
  */
 package org.gephi.graph.impl;
 
-import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
