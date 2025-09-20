@@ -38,16 +38,14 @@ public class NodeIterableWrapper extends ElementIterableWrapper<Node> implements
 
     @Override
     public Node[] toArray() {
+        if (parallelPossible && lock != null) {
+            lock.readLock();
+            try {
+                return StreamSupport.stream(spliterator(), true).toArray(Node[]::new);
+            } finally {
+                lock.readUnlock();
+            }
+        }
         return StreamSupport.stream(spliterator(), parallelPossible).toArray(Node[]::new);
-    }
-
-    @Override
-    public Collection<Node> toCollection() {
-        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toList());
-    }
-
-    @Override
-    public Set<Node> toSet() {
-        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toSet());
     }
 }

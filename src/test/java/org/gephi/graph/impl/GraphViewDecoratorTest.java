@@ -503,9 +503,9 @@ public class GraphViewDecoratorTest {
         DirectedSubgraph graph = store.getDirectedGraph(view);
         GraphStore copyGraphStore = convertToStore(view);
 
-         assertIterablesEqual(graph.getNodes(), copyGraphStore.getNodes());
-         assertIterablesEqual(graph.getEdges(), copyGraphStore.getEdges());
-         assertIterablesEqual(graph.getSelfLoops(), copyGraphStore.getSelfLoops());
+        assertIterablesEqual(graph.getNodes(), copyGraphStore.getNodes());
+        assertIterablesEqual(graph.getEdges(), copyGraphStore.getEdges());
+        assertIterablesEqual(graph.getSelfLoops(), copyGraphStore.getSelfLoops());
 
         for (Node n : graph.getNodes()) {
             Node m = copyGraphStore.getNode(n.getId());

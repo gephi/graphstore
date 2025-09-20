@@ -74,9 +74,31 @@ public abstract class ElementIterableWrapper<T extends Element> implements Eleme
 
     public abstract T[] toArray();
 
-    public abstract Collection<T> toCollection();
+    @Override
+    public Collection<T> toCollection() {
+        if (parallelPossible && lock != null) {
+            lock.readLock();
+            try {
+                return StreamSupport.stream(spliterator(), true).collect(Collectors.toList());
+            } finally {
+                lock.readUnlock();
+            }
+        }
+        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toList());
+    }
 
-    public abstract Set<T> toSet();
+    @Override
+    public Set<T> toSet() {
+        if (parallelPossible && lock != null) {
+            lock.readLock();
+            try {
+                return StreamSupport.stream(spliterator(), true).collect(Collectors.toSet());
+            } finally {
+                lock.readUnlock();
+            }
+        }
+        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toSet());
+    }
 
     @Override
     public void doBreak() {

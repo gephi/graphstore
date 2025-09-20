@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.Node;
 
 public class EdgeIterableWrapper extends ElementIterableWrapper<Edge> implements EdgeIterable {
 
@@ -38,16 +39,14 @@ public class EdgeIterableWrapper extends ElementIterableWrapper<Edge> implements
 
     @Override
     public Edge[] toArray() {
+        if (parallelPossible && lock != null) {
+            lock.readLock();
+            try {
+                return StreamSupport.stream(spliterator(), true).toArray(Edge[]::new);
+            } finally {
+                lock.readUnlock();
+            }
+        }
         return StreamSupport.stream(spliterator(), parallelPossible).toArray(Edge[]::new);
-    }
-
-    @Override
-    public Collection<Edge> toCollection() {
-        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toList());
-    }
-
-    @Override
-    public Set<Edge> toSet() {
-        return StreamSupport.stream(spliterator(), parallelPossible).collect(Collectors.toSet());
     }
 }
