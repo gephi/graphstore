@@ -18,6 +18,9 @@ package org.gephi.graph.impl;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.ConcurrentModificationException;
+import java.util.function.Consumer;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -382,7 +385,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     @Override
     public NodeIterable getNodes() {
         return new NodeIterableWrapper(() -> new NodeViewIterator(graphStore.nodeStore.iterator()),
-                () -> graphStore.nodeStore.newFilteredSpliterator(view::containsNode), graphStore.getAutoLock());
+            NodeViewSpliterator::new, graphStore.getAutoLock());
     }
 
     @Override
@@ -916,6 +919,155 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
                     Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
         } finally {
             graphStore.autoReadUnlock();
+        }
+    }
+
+    private final class NodeViewSpliterator implements Spliterator<Node> {
+
+        private final int endBlockExclusive;
+        private int blockIndex;
+        private int indexInBlock;
+        private NodeImpl[] currentArray;
+        private int currentLength;
+        private final int expectedVersion;
+        private int totalSize;
+        private int consumed;
+
+        NodeViewSpliterator() {
+            this(0, graphStore.nodeStore.blocksCount);
+        }
+
+        NodeViewSpliterator(int startBlock, int endBlockExclusive) {
+            this.blockIndex = startBlock;
+            this.endBlockExclusive = endBlockExclusive;
+            this.expectedVersion = graphStore.version != null ? graphStore.version.getNodeVersion() : 0;
+            this.consumed = 0;
+
+            // Use the view's node count for exact sizing
+            // Use the total store size for the root spliterator (covering all blocks)
+            if (startBlock == 0 && endBlockExclusive == graphStore.nodeStore.blocksCount) {
+                this.totalSize = view.getNodeCount();
+            } else {
+                // For split spliterators, compute proportionally
+                this.totalSize = computeSizeEstimate(startBlock, endBlockExclusive);
+            }
+
+            if (startBlock < endBlockExclusive) {
+                NodeStore.NodeBlock b = graphStore.nodeStore.blocks[startBlock];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+        }
+
+        private void advanceBlock() {
+            blockIndex++;
+            if (blockIndex < endBlockExclusive) {
+                NodeStore.NodeBlock b = graphStore.nodeStore.blocks[blockIndex];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+        }
+
+        private void checkForComodification() {
+            if (graphStore.version != null && expectedVersion != graphStore.version.getNodeVersion()) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
+        private int computeSizeEstimate(int start, int end) {
+            int sum = 0;
+            for (int i = start; i < end; i++) {
+                NodeStore.NodeBlock b = graphStore.nodeStore.blocks[i];
+                if (b != null) {
+                    // Exact count: nodeLength minus garbageLength
+                    sum += (b.nodeLength - b.garbageLength);
+                }
+            }
+            if (sum > 0) {
+                // Scale by view ratio to estimate number of nodes in view
+                double viewRatio = (double) view.getNodeCount() / graphStore.nodeStore.size;
+                sum = (int) Math.round(sum * viewRatio);
+            }
+            return sum;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Node> action) {
+            checkForComodification();
+            while (currentArray != null) {
+                while (indexInBlock < currentLength) {
+                    NodeImpl n = currentArray[indexInBlock++];
+                    if (n != null && view.containsNode(n)) {
+                        consumed++;
+                        action.accept(n);
+                        return true;
+                    }
+                }
+                advanceBlock();
+            }
+            return false;
+        }
+
+        @Override
+        public Spliterator<Node> trySplit() {
+            // Only split at block boundaries to preserve encounter order
+            if (indexInBlock != 0) {
+                return null;
+            }
+
+            int currentPos = blockIndex;
+            int remainingBlocks = endBlockExclusive - currentPos;
+
+            if (remainingBlocks <= 1) {
+                return null;
+            }
+
+            int mid = currentPos + remainingBlocks / 2;
+
+            // Create left half
+            NodeViewSpliterator left = new NodeViewSpliterator(currentPos, mid);
+
+            // Update this spliterator to become the right half
+            blockIndex = mid;
+            if (mid < endBlockExclusive) {
+                NodeStore.NodeBlock b = graphStore.nodeStore.blocks[mid];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+
+            // Update this spliterator size
+            this.totalSize = Math.max(0, totalSize - left.totalSize);
+
+            return left;
+        }
+
+        @Override
+        public long estimateSize() {
+            // Use the exact view size minus what we've consumed
+            long remaining = totalSize - consumed;
+            return remaining < 0 ? 0 : remaining;
+        }
+
+        @Override
+        public int characteristics() {
+            // SIZED because we know the exact count from view.getNodeCount()
+            // But not SUBSIZED because splits can't guarantee exact size distribution
+            return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.SIZED;
         }
     }
 

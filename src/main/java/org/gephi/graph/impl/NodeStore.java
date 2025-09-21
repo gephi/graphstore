@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Node;
@@ -183,7 +182,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     @Override
     public Spliterator<Node> spliterator() {
         int end = blocksCount;
-        return new FilteredNodeSpliterator(0, end, null);
+        return new NodeSpliterator(0, end);
     }
 
     @Override
@@ -194,11 +193,6 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     @Override
     public Stream<Node> parallelStream() {
         return StreamSupport.stream(spliterator(), true);
-    }
-
-    protected Spliterator<Node> newFilteredSpliterator(Predicate<NodeImpl> filter) {
-        int end = blocksCount;
-        return new FilteredNodeSpliterator(0, end, filter);
     }
 
     @Override
@@ -703,7 +697,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         }
     }
 
-    private final class FilteredNodeSpliterator implements Spliterator<Node> {
+    private final class NodeSpliterator implements Spliterator<Node> {
 
         private final int endBlockExclusive;
         private int blockIndex;
@@ -711,19 +705,23 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         private NodeImpl[] currentArray;
         private int currentLength;
         private final int expectedVersion;
-        private final long totalLiveAtSnapshot;
-        private long emitted;
-        private final Predicate<NodeImpl> filter;
-        private final boolean fastPathUnfiltered;
+        private int totalSize;
+        private int consumed;
 
-        FilteredNodeSpliterator(int startBlock, int endBlockExclusive, Predicate<NodeImpl> filter) {
+        NodeSpliterator(int startBlock, int endBlockExclusive) {
             this.blockIndex = startBlock;
             this.endBlockExclusive = endBlockExclusive;
             this.expectedVersion = version != null ? version.getNodeVersion() : 0;
-            this.filter = filter;
-            this.fastPathUnfiltered = filter == null;
-            this.totalLiveAtSnapshot = computeTotalLive(startBlock, endBlockExclusive);
-            this.emitted = 0L;
+            this.consumed = 0;
+
+            // Use the total store size for the root spliterator (covering all blocks)
+            if (startBlock == 0 && endBlockExclusive == blocksCount) {
+                this.totalSize = NodeStore.this.size();
+            } else {
+                // For split spliterators, compute proportionally
+                this.totalSize = computeExactSize(startBlock, endBlockExclusive);
+            }
+
             if (startBlock < endBlockExclusive) {
                 NodeBlock b = blocks[startBlock];
                 currentArray = b.backingArray;
@@ -736,23 +734,13 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             }
         }
 
-        private long computeTotalLive(int start, int end) {
-            long sum = 0L;
+        private int computeExactSize(int start, int end) {
+            int sum = 0;
             for (int i = start; i < end; i++) {
                 NodeBlock b = blocks[i];
                 if (b != null) {
-                    if (fastPathUnfiltered) {
-                        sum += (b.nodeLength - b.garbageLength);
-                    } else {
-                        NodeImpl[] arr = b.backingArray;
-                        int len = b.nodeLength;
-                        for (int j = 0; j < len; j++) {
-                            NodeImpl n = arr[j];
-                            if (n != null && filter.test(n)) {
-                                sum++;
-                            }
-                        }
-                    }
+                    // Exact count: nodeLength minus garbageLength
+                    sum += (b.nodeLength - b.garbageLength);
                 }
             }
             return sum;
@@ -784,8 +772,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             while (currentArray != null) {
                 while (indexInBlock < currentLength) {
                     NodeImpl n = currentArray[indexInBlock++];
-                    if (n != null && (fastPathUnfiltered || filter.test(n))) {
-                        emitted++;
+                    if (n != null) {
+                        consumed++;
                         action.accept(n);
                         return true;
                     }
@@ -802,7 +790,6 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 return null;
             }
 
-            // Calculate the current position (including already advanced blocks)
             int currentPos = blockIndex;
             int remainingBlocks = endBlockExclusive - currentPos;
 
@@ -812,8 +799,8 @@ public class NodeStore implements Collection<Node>, NodeIterable {
 
             int mid = currentPos + remainingBlocks / 2;
 
-            // Create left half for the blocks we haven't processed yet
-            Spliterator<Node> left = new FilteredNodeSpliterator(currentPos, mid, filter);
+            // Create left half
+            NodeSpliterator left = new NodeSpliterator(currentPos, mid);
 
             // Update this spliterator to become the right half
             blockIndex = mid;
@@ -828,12 +815,16 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 indexInBlock = 0;
             }
 
+            // Update this spliterator size
+            this.totalSize = totalSize - left.totalSize;
+
             return left;
         }
 
         @Override
         public long estimateSize() {
-            long remaining = totalLiveAtSnapshot - emitted;
+            // Use the exact totalSize minus what we've consumed
+            long remaining = totalSize - consumed;
             return remaining < 0 ? 0 : remaining;
         }
 
