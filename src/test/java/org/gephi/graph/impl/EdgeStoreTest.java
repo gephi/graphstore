@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -1785,7 +1786,7 @@ public class EdgeStoreTest {
         }
 
         EdgeStore.EdgeStoreIterator undirectedIterator = edgeStore.iteratorUndirected();
-        for (; undirectedIterator.hasNext();) {
+        while (undirectedIterator.hasNext()) {
             EdgeImpl e = undirectedIterator.next();
             Assert.assertTrue(edgeSet.remove(e));
         }
@@ -1876,7 +1877,6 @@ public class EdgeStoreTest {
         Spliterator<Edge> sp = edgeStore.spliteratorUndirected();
         int ch = sp.characteristics();
         Assert.assertTrue((ch & Spliterator.SIZED) != 0);
-        Assert.assertTrue((ch & Spliterator.SUBSIZED) != 0);
 
         // Count expected
         int expected = 0;
@@ -1981,6 +1981,17 @@ public class EdgeStoreTest {
         }
         long count = store.parallelStream().count();
         Assert.assertEquals(count, n);
+    }
+
+    @Test
+    public void testEdgeStream() {
+        EdgeStore store = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateLargeEdgeList();
+        store.addAll(Arrays.asList(edges));
+
+        Set<Edge> set = Collections.synchronizedSet(new HashSet<>());
+        store.parallelStream().forEachOrdered(set::add);
+        Assert.assertEquals(set, store.toSet());
     }
 
     @Test

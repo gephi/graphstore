@@ -385,7 +385,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     @Override
     public NodeIterable getNodes() {
         return new NodeIterableWrapper(() -> new NodeViewIterator(graphStore.nodeStore.iterator()),
-            NodeViewSpliterator::new, graphStore.getAutoLock());
+                NodeViewSpliterator::new, graphStore.getAutoLock());
     }
 
     @Override
@@ -393,11 +393,13 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         if (undirected) {
             return new EdgeIterableWrapper(() -> new UndirectedEdgeViewIterator(graphStore.edgeStore.iterator()),
                     () -> graphStore.edgeStore
-                            .newFilteredSpliterator(e -> view.containsEdge(e) && !isUndirectedToIgnore(e)),
+                            .newFilteredSizedSpliterator(e -> view.containsEdge(e) && !isUndirectedToIgnore(e), view
+                                    .getUndirectedEdgeCount()),
                     graphStore.getAutoLock());
         } else {
             return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.iterator()),
-                    () -> graphStore.edgeStore.newFilteredSpliterator(view::containsEdge), graphStore.getAutoLock());
+                    () -> graphStore.edgeStore.newFilteredSizedSpliterator(view::containsEdge, view.getEdgeCount()),
+                    graphStore.getAutoLock());
         }
     }
 
@@ -406,13 +408,15 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         if (undirected) {
             return new EdgeIterableWrapper(
                     () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.iteratorType(type, undirected)),
-                    () -> graphStore.edgeStore.newFilteredSpliterator(e -> e.getType() == type && view
-                            .containsEdge(e) && !isUndirectedToIgnore(e)),
+                    () -> graphStore.edgeStore.newFilteredSizedSpliterator(e -> e.getType() == type && view
+                            .containsEdge(e) && !isUndirectedToIgnore(e), view.getUndirectedEdgeCount(type)),
                     graphStore.getAutoLock());
         } else {
             return new EdgeIterableWrapper(
                     () -> new EdgeViewIterator(graphStore.edgeStore.iteratorType(type, undirected)),
-                    () -> graphStore.edgeStore.newFilteredSpliterator(e -> e.getType() == type && view.containsEdge(e)),
+                    () -> graphStore.edgeStore
+                            .newFilteredSizedSpliterator(e -> e.getType() == type && view.containsEdge(e), view
+                                    .getEdgeCount(type)),
                     graphStore.getAutoLock());
         }
     }
