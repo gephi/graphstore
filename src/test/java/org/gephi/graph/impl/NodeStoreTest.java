@@ -20,10 +20,13 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.stream.Collectors;
 import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -501,6 +504,167 @@ public class NodeStoreTest {
         NodeImpl node2 = new NodeImpl("1");
         nodeStore.add(node2);
     }
+
+    @Test
+    public void testSpliteratorCoversAll() {
+        NodeStore nodeStore = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateLargeNodeList());
+        nodeStore.addAll(nodes);
+
+        List<NodeImpl> seen = new ArrayList<>();
+        Spliterator<Node> sp = nodeStore.spliterator();
+        Assert.assertEquals(sp.estimateSize(), nodes.size());
+        sp.forEachRemaining(e -> seen.add((NodeImpl) e));
+
+        Assert.assertEquals(seen, nodes);
+    }
+
+    @Test
+    public void testSpliteratorSizeReduce() {
+        NodeStore nodeStore = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateSmallNodeList());
+        nodeStore.addAll(nodes);
+
+        Spliterator<Node> sp = nodeStore.spliterator();
+        long size = sp.estimateSize();
+        sp.tryAdvance(n -> {
+        });
+        Assert.assertEquals(sp.estimateSize(), size - 1);
+    }
+
+    @Test
+    public void testSpliteratorSizeReduceWithGarbage() {
+        NodeStore nodeStore = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateSmallNodeList());
+        nodeStore.addAll(nodes);
+        nodeStore.remove(nodes.get(0));
+
+        Spliterator<Node> sp = nodeStore.spliterator();
+        Assert.assertEquals(sp.estimateSize(), nodes.size() - 1);
+
+        // Last node
+        nodeStore.remove(nodes.get(nodes.size() - 1));
+        sp = nodeStore.spliterator();
+        Assert.assertEquals(sp.estimateSize(), nodes.size() - 2);
+    }
+
+    @Test
+    public void testSpliteratorParallel() {
+        NodeStore nodeStore = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateLargeNodeList());
+        nodeStore.addAll(nodes);
+
+        List<Node> seen = nodeStore.parallelStream().collect(Collectors.toList());
+
+        Assert.assertEquals(seen, nodes);
+    }
+
+    @Test
+    public void testSpliteratorEmpty() {
+        NodeStore nodeStore = new NodeStore();
+
+        Assert.assertEquals(nodeStore.parallelStream().count(), 0);
+        Assert.assertEquals(nodeStore.spliterator().estimateSize(), 0);
+    }
+
+    @Test
+    public void testSpliteratorEmptyAfterRemove() {
+        NodeStore nodeStore = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateLargeNodeList());
+        nodeStore.addAll(nodes);
+        nodeStore.removeAll(nodes);
+
+        Assert.assertEquals(nodeStore.parallelStream().count(), 0);
+        Assert.assertEquals(nodeStore.spliterator().estimateSize(), 0);
+    }
+
+    @Test
+    public void testSpliteratorParallelLarge() {
+        NodeStore nodeStore = new NodeStore();
+        List<NodeImpl> nodes = Arrays
+                .asList(GraphGenerator.generateNodeList(GraphStoreConfiguration.NODESTORE_BLOCK_SIZE * 4 + 10));
+        nodeStore.addAll(nodes);
+
+        List<Node> seen = nodeStore.parallelStream().collect(Collectors.toList());
+
+        Assert.assertEquals(seen, nodes);
+    }
+
+    @Test
+    public void testSpliteratorParallelAfterRemove() {
+        NodeStore nodeStore = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateSmallNodeList());
+        nodeStore.addAll(nodes);
+        nodeStore.remove(nodes.get(0));
+
+        List<Node> seen = nodeStore.parallelStream().collect(Collectors.toList());
+
+        Assert.assertEquals(seen, nodes.subList(1, nodes.size()));
+    }
+
+    @Test(expectedExceptions = ConcurrentModificationException.class)
+    public void testSpliteratorFailFastOnAdd() {
+        NodeStore store = new NodeStore(null, null, null, null, new GraphVersion(null));
+        store.add(new NodeImpl("a"));
+        Spliterator<Node> sp = store.spliterator();
+        store.add(new NodeImpl("b"));
+        sp.tryAdvance(x -> {
+        });
+    }
+
+    @Test
+    public void testParallelStreamCount() {
+        NodeStore store = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateLargeNodeList());
+        store.addAll(nodes);
+
+        long count = store.parallelStream().count();
+        Assert.assertEquals(count, store.size());
+    }
+
+    @Test
+    public void testParallelStreamForEach() {
+        NodeStore store = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateLargeNodeList());
+        store.addAll(nodes);
+
+        Set<Node> set = Collections.synchronizedSet(new HashSet<>());
+        store.parallelStream().forEach(set::add);
+        Assert.assertEquals(set, store.toSet());
+    }
+
+    @Test
+    public void testParallelStreamForEachOrdered() {
+        NodeStore store = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateLargeNodeList());
+        store.addAll(nodes);
+
+        Set<Node> set = Collections.synchronizedSet(new HashSet<>());
+        store.parallelStream().forEachOrdered(set::add);
+        Assert.assertEquals(set, store.toSet());
+    }
+
+    @Test
+    public void testParallelStreamForEachOrderedAfterRemove() {
+        NodeStore store = new NodeStore();
+        List<NodeImpl> nodes = Arrays.asList(GraphGenerator.generateLargeNodeList());
+        store.addAll(nodes);
+
+        Random random = new Random();
+        for (int i = 0; i < nodes.size() / 5; i++) {
+            int r = random.nextInt(store.maxStoreId());
+            Node n = store.getForGetByStoreId(r);
+            if (n != null) {
+                store.remove(n);
+            }
+        }
+
+        Set<Node> set = Collections.synchronizedSet(new HashSet<>());
+        store.parallelStream().forEachOrdered(set::add);
+        Assert.assertEquals(set, store.toSet());
+    }
+
+    // Utils
 
     private void testContainsOnly(NodeStore store, List<NodeImpl> list) {
         for (NodeImpl n : list) {

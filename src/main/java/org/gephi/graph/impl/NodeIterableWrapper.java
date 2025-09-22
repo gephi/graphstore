@@ -16,21 +16,32 @@
 package org.gephi.graph.impl;
 
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 
 public class NodeIterableWrapper extends ElementIterableWrapper<Node> implements NodeIterable {
 
-    public NodeIterableWrapper(Iterator<Node> iterator) {
-        super(iterator);
+    public NodeIterableWrapper(Supplier<Iterator<Node>> iteratorSupplier, GraphLockImpl lock) {
+        super(iteratorSupplier, lock);
     }
 
-    public NodeIterableWrapper(Iterator<Node> iterator, GraphLockImpl lock) {
-        super(iterator, lock);
+    public NodeIterableWrapper(Supplier<Iterator<Node>> iteratorSupplier, Supplier<Spliterator<Node>> spliteratorSupplier, GraphLockImpl lock) {
+        super(iteratorSupplier, spliteratorSupplier, lock);
     }
 
     @Override
     public Node[] toArray() {
-        return toArray(new Node[0]);
+        if (parallelPossible && lock != null) {
+            lock.readLock();
+            try {
+                return StreamSupport.stream(spliterator(), true).toArray(Node[]::new);
+            } finally {
+                lock.readUnlock();
+            }
+        }
+        return StreamSupport.stream(spliterator(), parallelPossible).toArray(Node[]::new);
     }
 }

@@ -17,8 +17,18 @@ package org.gephi.graph.impl;
 
 import java.util.Collection;
 import java.util.Set;
-
-import org.gephi.graph.api.*;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Interval;
+import org.gephi.graph.api.Node;
+import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.SpatialIndex;
+import org.gephi.graph.api.Subgraph;
+import org.gephi.graph.api.UndirectedGraph;
+import org.gephi.graph.api.UndirectedSubgraph;
 
 public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph {
 
@@ -138,7 +148,8 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public EdgeIterable getEdges(Node node1, Node node2) {
-        return store.getEdgeIterableWrapper(store.edgeStore.edgesUndirectedIterator(node1, node2));
+        return new EdgeIterableWrapper(() -> store.edgeStore.edgesUndirectedIterator(node1, node2),
+                store.getAutoLock());
     }
 
     @Override
@@ -153,7 +164,8 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public EdgeIterable getEdges(Node node1, Node node2, int type) {
-        return store.getEdgeIterableWrapper(store.edgeStore.edgesUndirectedIterator(node1, node2, type));
+        return new EdgeIterableWrapper(() -> store.edgeStore.edgesUndirectedIterator(node1, node2, type),
+                store.getAutoLock());
     }
 
     @Override
@@ -163,37 +175,40 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public EdgeIterable getEdges() {
-        return store.getEdgeIterableWrapper(store.edgeStore.iteratorUndirected());
+        return new EdgeIterableWrapper(store.edgeStore::iteratorUndirected, store.edgeStore::spliteratorUndirected,
+                store.getAutoLock());
     }
 
     @Override
     public EdgeIterable getEdges(int type) {
-        return store.getEdgeIterableWrapper(store.edgeStore.iteratorType(type, true));
+        return new EdgeIterableWrapper(() -> store.edgeStore.iteratorType(type, true),
+                () -> store.edgeStore.spliteratorType(type, true), store.getAutoLock());
     }
 
     @Override
     public EdgeIterable getSelfLoops() {
-        return store.getEdgeIterableWrapper(store.edgeStore.iteratorSelfLoop());
+        return new EdgeIterableWrapper(store.edgeStore::iteratorSelfLoop, store.edgeStore::spliteratorSelfLoop,
+                store.getAutoLock());
     }
 
     @Override
     public NodeIterable getNeighbors(Node node) {
-        return store.getNodeIterableWrapper(store.edgeStore.neighborIterator(node));
+        return new NodeIterableWrapper(() -> store.edgeStore.neighborIterator(node), store.getAutoLock());
     }
 
     @Override
     public NodeIterable getNeighbors(Node node, int type) {
-        return store.getNodeIterableWrapper(store.edgeStore.neighborIterator(node, type));
+        return new NodeIterableWrapper(() -> store.edgeStore.neighborIterator(node, type), store.getAutoLock());
     }
 
     @Override
     public EdgeIterable getEdges(Node node) {
-        return store.getEdgeIterableWrapper(store.edgeStore.edgeUndirectedIterator(node));
+        return new EdgeIterableWrapper(() -> store.edgeStore.edgeUndirectedIterator(node), store.getAutoLock());
     }
 
     @Override
     public EdgeIterable getEdges(Node node, int type) {
-        return store.getEdgeIterableWrapper(store.edgeStore.edgeUndirectedIterator(node, type));
+        return new EdgeIterableWrapper(() -> store.edgeStore.edgeUndirectedIterator(node, type), store.getAutoLock());
     }
 
     @Override

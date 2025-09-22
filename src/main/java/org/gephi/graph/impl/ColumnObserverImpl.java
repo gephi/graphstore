@@ -19,6 +19,7 @@ import cern.colt.bitvector.BitVector;
 import cern.colt.bitvector.QuickBitVector;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnDiff;
@@ -155,7 +156,8 @@ public class ColumnObserverImpl implements ColumnObserver {
         @Override
         public NodeIterable getTouchedElements() {
             if (!touchedElements.isEmpty()) {
-                return graphStore.getNodeIterableWrapper(touchedElements.iterator(), false);
+                return new NodeIterableWrapper(() -> ObjectLists.unmodifiable(touchedElements).iterator(),
+                        () -> ObjectLists.unmodifiable(touchedElements).spliterator(), null);
 
             }
             return NodeIterable.NodeIterableEmpty.EMPTY;
@@ -167,8 +169,8 @@ public class ColumnObserverImpl implements ColumnObserver {
         @Override
         public EdgeIterable getTouchedElements() {
             if (!touchedElements.isEmpty()) {
-                return graphStore.getEdgeIterableWrapper(touchedElements.iterator(), false);
-
+                return new EdgeIterableWrapper(() -> ObjectLists.unmodifiable(touchedElements).iterator(),
+                        () -> ObjectLists.unmodifiable(touchedElements).spliterator(), null);
             }
             return EdgeIterable.EdgeIterableEmpty.EMPTY;
         }

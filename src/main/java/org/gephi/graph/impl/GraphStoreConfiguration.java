@@ -35,9 +35,9 @@ public final class GraphStoreConfiguration {
     public static final boolean DEFAULT_ENABLE_EDGE_WEIGHT_COLUMN = true;
     public static final boolean DEFAULT_ENABLE_PARALLEL_EDGES_SAME_TYPE = true;
     // NodeStore
-    public final static int NODESTORE_BLOCK_SIZE = 5000;
-    public final static int NODESTORE_DEFAULT_BLOCKS = 10;
-    public static final int NODESTORE_DEFAULT_DICTIONARY_SIZE = 1000;
+    public final static int NODESTORE_BLOCK_SIZE = 8192;
+    public final static int NODESTORE_DEFAULT_BLOCKS = 5;
+    public static final int NODESTORE_DEFAULT_DICTIONARY_SIZE = 8192;
     public final static float NODESTORE_DICTIONARY_LOAD_FACTOR = .7f;
     // EdgeStore
     public static final int EDGESTORE_BLOCK_SIZE = 8192;

@@ -17,7 +17,7 @@ package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import java.util.Collections;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
@@ -196,7 +196,8 @@ public class GraphObserverImpl implements GraphObserver {
         @Override
         public NodeIterable getAddedNodes() {
             if (!addedNodes.isEmpty()) {
-                return graphStore.getNodeIterableWrapper(Collections.unmodifiableList(addedNodes).iterator(), false);
+                return new NodeIterableWrapper(() -> ObjectLists.unmodifiable(addedNodes).iterator(),
+                        () -> ObjectLists.unmodifiable(addedNodes).spliterator(), null);
             }
             return NodeIterable.EMPTY;
         }
@@ -204,7 +205,8 @@ public class GraphObserverImpl implements GraphObserver {
         @Override
         public NodeIterable getRemovedNodes() {
             if (!removedNodes.isEmpty()) {
-                return graphStore.getNodeIterableWrapper(Collections.unmodifiableList(removedNodes).iterator(), false);
+                return new NodeIterableWrapper(() -> ObjectLists.unmodifiable(removedNodes).iterator(),
+                        () -> ObjectLists.unmodifiable(removedNodes).spliterator(), null);
             }
             return NodeIterable.EMPTY;
         }
@@ -212,7 +214,8 @@ public class GraphObserverImpl implements GraphObserver {
         @Override
         public EdgeIterable getAddedEdges() {
             if (!addedEdges.isEmpty()) {
-                return graphStore.getEdgeIterableWrapper(Collections.unmodifiableList(addedEdges).iterator(), false);
+                return new EdgeIterableWrapper(() -> ObjectLists.unmodifiable(addedEdges).iterator(),
+                        () -> ObjectLists.unmodifiable(addedEdges).spliterator(), null);
             }
             return EdgeIterable.EMPTY;
         }
@@ -220,7 +223,8 @@ public class GraphObserverImpl implements GraphObserver {
         @Override
         public EdgeIterable getRemovedEdges() {
             if (!removedEdges.isEmpty()) {
-                return graphStore.getEdgeIterableWrapper(Collections.unmodifiableList(removedEdges).iterator(), false);
+                return new EdgeIterableWrapper(() -> ObjectLists.unmodifiable(removedEdges).iterator(),
+                        () -> ObjectLists.unmodifiable(removedEdges).spliterator(), null);
             }
             return EdgeIterable.EMPTY;
         }

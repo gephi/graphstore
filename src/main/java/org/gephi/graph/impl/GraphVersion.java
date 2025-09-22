@@ -45,6 +45,14 @@ public class GraphVersion {
         return edgeVersion;
     }
 
+    public int getNodeVersion() {
+        return nodeVersion;
+    }
+
+    public int getEdgeVersion() {
+        return edgeVersion;
+    }
+
     private void handleNodeReset() {
         if (graph != null) {
             if (graph.getView().isMainView()) {

@@ -18,6 +18,9 @@ package org.gephi.graph.impl;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.ConcurrentModificationException;
+import java.util.function.Consumer;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -60,8 +63,9 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public EdgeIterable getEdges(Node node1, Node node2) {
-        return graphStore
-                .getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.getAll(node1, node2, undirected)));
+        return new EdgeIterableWrapper(
+                () -> new EdgeViewIterator(graphStore.edgeStore.getAll(node1, node2, undirected)),
+                graphStore.getAutoLock());
     }
 
     @Override
@@ -80,8 +84,9 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public EdgeIterable getEdges(Node node1, Node node2, int type) {
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(
-                graphStore.edgeStore.getAll(node1, node2, type, undirected)));
+        return new EdgeIterableWrapper(
+                () -> new EdgeViewIterator(graphStore.edgeStore.getAll(node1, node2, type, undirected)),
+                graphStore.getAutoLock());
     }
 
     @Override
@@ -101,54 +106,61 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     @Override
     public NodeIterable getPredecessors(Node node) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node,
-                new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node))));
+        return new NodeIterableWrapper(() -> new NeighborsIterator((NodeImpl) node,
+                new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node))), graphStore.getAutoLock());
     }
 
     @Override
     public NodeIterable getPredecessors(Node node, int type) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node,
-                new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node, type))));
+        return new NodeIterableWrapper(
+                () -> new NeighborsIterator((NodeImpl) node,
+                        new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node, type))),
+                graphStore.getAutoLock());
     }
 
     @Override
     public NodeIterable getSuccessors(Node node) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node,
-                new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node))));
+        return new NodeIterableWrapper(() -> new NeighborsIterator((NodeImpl) node,
+                new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node))), graphStore.getAutoLock());
     }
 
     @Override
     public NodeIterable getSuccessors(Node node, int type) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node,
-                new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node, type))));
+        return new NodeIterableWrapper(
+                () -> new NeighborsIterator((NodeImpl) node,
+                        new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node, type))),
+                graphStore.getAutoLock());
     }
 
     @Override
     public EdgeIterable getInEdges(Node node) {
         checkValidInViewNodeObject(node);
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node)));
+        return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node)),
+                graphStore.getAutoLock());
     }
 
     @Override
     public EdgeIterable getInEdges(Node node, int type) {
         checkValidInViewNodeObject(node);
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node, type)));
+        return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeInIterator(node, type)),
+                graphStore.getAutoLock());
     }
 
     @Override
     public EdgeIterable getOutEdges(Node node) {
         checkValidInViewNodeObject(node);
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node)));
+        return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node)),
+                graphStore.getAutoLock());
     }
 
     @Override
     public EdgeIterable getOutEdges(Node node, int type) {
         checkValidInViewNodeObject(node);
-        return graphStore
-                .getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node, type)));
+        return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeOutIterator(node, type)),
+                graphStore.getAutoLock());
     }
 
     @Override
@@ -372,51 +384,78 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public NodeIterable getNodes() {
-        return graphStore.getNodeIterableWrapper(new NodeViewIterator(graphStore.nodeStore.iterator()));
+        return new NodeIterableWrapper(() -> new NodeViewIterator(graphStore.nodeStore.iterator()),
+                NodeViewSpliterator::new, graphStore.getAutoLock());
     }
 
     @Override
     public EdgeIterable getEdges() {
         if (undirected) {
-            return graphStore.getEdgeIterableWrapper(new UndirectedEdgeViewIterator(graphStore.edgeStore.iterator()));
+            return new EdgeIterableWrapper(() -> new UndirectedEdgeViewIterator(graphStore.edgeStore.iterator()),
+                    () -> graphStore.edgeStore
+                            .newFilteredSizedSpliterator(e -> view.containsEdge(e) && !isUndirectedToIgnore(e), view
+                                    .getUndirectedEdgeCount()),
+                    graphStore.getAutoLock());
         } else {
-            return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.iterator()));
+            return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.iterator()),
+                    () -> graphStore.edgeStore.newFilteredSizedSpliterator(view::containsEdge, view.getEdgeCount()),
+                    graphStore.getAutoLock());
         }
     }
 
     @Override
     public EdgeIterable getEdges(int type) {
-        return graphStore.getEdgeIterableWrapper(new UndirectedEdgeViewIterator(
-                graphStore.edgeStore.iteratorType(type, undirected)));
+        if (undirected) {
+            return new EdgeIterableWrapper(
+                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.iteratorType(type, undirected)),
+                    () -> graphStore.edgeStore.newFilteredSizedSpliterator(e -> e.getType() == type && view
+                            .containsEdge(e) && !isUndirectedToIgnore(e), view.getUndirectedEdgeCount(type)),
+                    graphStore.getAutoLock());
+        } else {
+            return new EdgeIterableWrapper(
+                    () -> new EdgeViewIterator(graphStore.edgeStore.iteratorType(type, undirected)),
+                    () -> graphStore.edgeStore
+                            .newFilteredSizedSpliterator(e -> e.getType() == type && view.containsEdge(e), view
+                                    .getEdgeCount(type)),
+                    graphStore.getAutoLock());
+        }
     }
 
     @Override
     public EdgeIterable getSelfLoops() {
-        return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.iteratorSelfLoop()));
+        return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.iteratorSelfLoop()),
+                () -> graphStore.edgeStore.newFilteredSpliterator(e -> e.isSelfLoop() && view.containsEdge(e)),
+                graphStore.getAutoLock());
     }
 
     @Override
     public NodeIterable getNeighbors(Node node) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node,
-                new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node))));
+        return new NodeIterableWrapper(
+                () -> new NeighborsIterator((NodeImpl) node,
+                        new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node))),
+                graphStore.getAutoLock());
     }
 
     @Override
     public NodeIterable getNeighbors(Node node, int type) {
         checkValidInViewNodeObject(node);
-        return graphStore.getNodeIterableWrapper(new NeighborsIterator((NodeImpl) node,
-                new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node, type))));
+        return new NodeIterableWrapper(
+                () -> new NeighborsIterator((NodeImpl) node,
+                        new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node, type))),
+                graphStore.getAutoLock());
     }
 
     @Override
     public EdgeIterable getEdges(Node node) {
         checkValidInViewNodeObject(node);
         if (undirected) {
-            return graphStore
-                    .getEdgeIterableWrapper(new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node)));
+            return new EdgeIterableWrapper(
+                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node)),
+                    graphStore.getAutoLock());
         } else {
-            return graphStore.getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.edgeIterator(node)));
+            return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeIterator(node)),
+                    graphStore.getAutoLock());
         }
     }
 
@@ -424,13 +463,13 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public EdgeIterable getEdges(Node node, int type) {
         checkValidInViewNodeObject(node);
         if (undirected) {
-            return graphStore.getEdgeIterableWrapper(new UndirectedEdgeViewIterator(
-                    graphStore.edgeStore.edgeIterator(node, type)));
+            return new EdgeIterableWrapper(
+                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node, type)),
+                    graphStore.getAutoLock());
         } else {
-            return graphStore
-                    .getEdgeIterableWrapper(new EdgeViewIterator(graphStore.edgeStore.edgeIterator(node, type)));
+            return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeIterator(node, type)),
+                    graphStore.getAutoLock());
         }
-
     }
 
     @Override
@@ -560,7 +599,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         graphStore.autoWriteLock();
         try {
             EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
-            for (; itr.hasNext();) {
+            while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
                 view.removeEdge(edge);
             }
@@ -574,7 +613,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         graphStore.autoWriteLock();
         try {
             EdgeStore.EdgeTypeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, type);
-            for (; itr.hasNext();) {
+            while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
                 view.removeEdge(edge);
             }
@@ -832,8 +871,9 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         if (graphStore.spatialIndex == null) {
             throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
         }
-        Iterator<Node> iterator = graphStore.spatialIndex.getNodesInArea(rect).iterator();
-        return new NodeIterableWrapper(new NodeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
+        return new NodeIterableWrapper(
+                () -> new NodeViewIterator(graphStore.spatialIndex.getNodesInArea(rect).iterator()),
+                graphStore.spatialIndex.nodesTree.lock);
     }
 
     @Override
@@ -841,8 +881,9 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         if (graphStore.spatialIndex == null) {
             throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
         }
-        Iterator<Edge> iterator = graphStore.spatialIndex.getEdgesInArea(rect).iterator();
-        return new EdgeIterableWrapper(new EdgeViewIterator(iterator), graphStore.spatialIndex.nodesTree.lock);
+        return new EdgeIterableWrapper(
+                () -> new EdgeViewIterator(graphStore.spatialIndex.getEdgesInArea(rect).iterator()),
+                graphStore.spatialIndex.nodesTree.lock);
     }
 
     @Override
@@ -882,6 +923,155 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
                     Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
         } finally {
             graphStore.autoReadUnlock();
+        }
+    }
+
+    private final class NodeViewSpliterator implements Spliterator<Node> {
+
+        private final int endBlockExclusive;
+        private int blockIndex;
+        private int indexInBlock;
+        private NodeImpl[] currentArray;
+        private int currentLength;
+        private final int expectedVersion;
+        private int totalSize;
+        private int consumed;
+
+        NodeViewSpliterator() {
+            this(0, graphStore.nodeStore.blocksCount);
+        }
+
+        NodeViewSpliterator(int startBlock, int endBlockExclusive) {
+            this.blockIndex = startBlock;
+            this.endBlockExclusive = endBlockExclusive;
+            this.expectedVersion = graphStore.version != null ? graphStore.version.getNodeVersion() : 0;
+            this.consumed = 0;
+
+            // Use the view's node count for exact sizing
+            // Use the total store size for the root spliterator (covering all blocks)
+            if (startBlock == 0 && endBlockExclusive == graphStore.nodeStore.blocksCount) {
+                this.totalSize = view.getNodeCount();
+            } else {
+                // For split spliterators, compute proportionally
+                this.totalSize = computeSizeEstimate(startBlock, endBlockExclusive);
+            }
+
+            if (startBlock < endBlockExclusive) {
+                NodeStore.NodeBlock b = graphStore.nodeStore.blocks[startBlock];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+        }
+
+        private void advanceBlock() {
+            blockIndex++;
+            if (blockIndex < endBlockExclusive) {
+                NodeStore.NodeBlock b = graphStore.nodeStore.blocks[blockIndex];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+        }
+
+        private void checkForComodification() {
+            if (graphStore.version != null && expectedVersion != graphStore.version.getNodeVersion()) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
+        private int computeSizeEstimate(int start, int end) {
+            int sum = 0;
+            for (int i = start; i < end; i++) {
+                NodeStore.NodeBlock b = graphStore.nodeStore.blocks[i];
+                if (b != null) {
+                    // Exact count: nodeLength minus garbageLength
+                    sum += (b.nodeLength - b.garbageLength);
+                }
+            }
+            if (sum > 0) {
+                // Scale by view ratio to estimate number of nodes in view
+                double viewRatio = (double) view.getNodeCount() / graphStore.nodeStore.size;
+                sum = (int) Math.round(sum * viewRatio);
+            }
+            return sum;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Node> action) {
+            checkForComodification();
+            while (currentArray != null) {
+                while (indexInBlock < currentLength) {
+                    NodeImpl n = currentArray[indexInBlock++];
+                    if (n != null && view.containsNode(n)) {
+                        consumed++;
+                        action.accept(n);
+                        return true;
+                    }
+                }
+                advanceBlock();
+            }
+            return false;
+        }
+
+        @Override
+        public Spliterator<Node> trySplit() {
+            // Only split at block boundaries to preserve encounter order
+            if (indexInBlock != 0) {
+                return null;
+            }
+
+            int currentPos = blockIndex;
+            int remainingBlocks = endBlockExclusive - currentPos;
+
+            if (remainingBlocks <= 1) {
+                return null;
+            }
+
+            int mid = currentPos + remainingBlocks / 2;
+
+            // Create left half
+            NodeViewSpliterator left = new NodeViewSpliterator(currentPos, mid);
+
+            // Update this spliterator to become the right half
+            blockIndex = mid;
+            if (mid < endBlockExclusive) {
+                NodeStore.NodeBlock b = graphStore.nodeStore.blocks[mid];
+                currentArray = b.backingArray;
+                currentLength = b.nodeLength;
+                indexInBlock = 0;
+            } else {
+                currentArray = null;
+                currentLength = 0;
+                indexInBlock = 0;
+            }
+
+            // Update this spliterator size
+            this.totalSize = Math.max(0, totalSize - left.totalSize);
+
+            return left;
+        }
+
+        @Override
+        public long estimateSize() {
+            // Use the exact view size minus what we've consumed
+            long remaining = totalSize - consumed;
+            return remaining < 0 ? 0 : remaining;
+        }
+
+        @Override
+        public int characteristics() {
+            // SIZED because we know the exact count from view.getNodeCount()
+            // But not SUBSIZED because splits can't guarantee exact size distribution
+            return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.SIZED;
         }
     }
 
@@ -989,7 +1179,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         }
     }
 
-    protected class NeighborsIterator implements Iterator<Node> {
+    protected static class NeighborsIterator implements Iterator<Node> {
 
         protected final NodeImpl node;
         protected final Iterator<Edge> itr;

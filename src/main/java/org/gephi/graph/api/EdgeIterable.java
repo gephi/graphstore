@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 
 /**
  * An edge iterable.
@@ -64,9 +66,23 @@ public interface EdgeIterable extends ElementIterable<Edge> {
     public Set<Edge> toSet();
 
     /**
+     * Returns a Spliterator over the edges.
+     * <p>
+     * Implementations return a splittable, sized, fail-fast spliterator suitable
+     * for parallel streams. When not possible, a non-splittable spliterator is
+     * returned.
+     *
+     * @return edge spliterator
+     */
+    @Override
+    default Spliterator<Edge> spliterator() {
+        return ElementIterable.super.spliterator();
+    }
+
+    /**
      * Empty edge iterable.
      */
-    static final class EdgeIterableEmpty implements Iterator<Edge>, EdgeIterable {
+    final class EdgeIterableEmpty implements Iterator<Edge>, EdgeIterable {
 
         @Override
         public boolean hasNext() {
@@ -86,6 +102,11 @@ public interface EdgeIterable extends ElementIterable<Edge> {
         @Override
         public Iterator<Edge> iterator() {
             return this;
+        }
+
+        @Override
+        public Spliterator<Edge> spliterator() {
+            return Spliterators.emptySpliterator();
         }
 
         @Override
