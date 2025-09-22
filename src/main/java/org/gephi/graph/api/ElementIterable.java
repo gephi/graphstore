@@ -20,6 +20,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Element iterable.
@@ -40,6 +44,25 @@ public interface ElementIterable<T extends Element> extends Iterable<T> {
      */
     @Override
     public Iterator<T> iterator();
+
+    /**
+     * Creates a new sequential stream, based on the spliterator returned.
+     *
+     * @return stream
+     */
+    default Stream<T> stream() {
+        return StreamSupport.stream(spliterator(), false);
+    }
+
+    /**
+     * Creates a new sequential and parallel stream, based on the spliterator
+     * returned.
+     *
+     * @return stream
+     */
+    default Stream<T> parallelStream() {
+        return StreamSupport.stream(spliterator(), true);
+    }
 
     /**
      * Returns the iterator content as an array.
@@ -90,6 +113,11 @@ public interface ElementIterable<T extends Element> extends Iterable<T> {
         @Override
         public Iterator<Element> iterator() {
             return this;
+        }
+
+        @Override
+        public Spliterator<Element> spliterator() {
+            return Spliterators.emptySpliterator();
         }
 
         @Override

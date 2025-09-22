@@ -16,8 +16,10 @@
 package org.gephi.graph.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
@@ -63,6 +65,15 @@ public class EmptyIterableTest {
     }
 
     @Test
+    public void testEdgeIterableSpliterator() {
+        EdgeIterable itr = EdgeIterable.EMPTY;
+        Assert.assertFalse(itr.spliterator().tryAdvance((e) -> {
+        }));
+        Assert.assertEquals(itr.spliterator().estimateSize(), 0);
+        Assert.assertEquals(itr.stream().collect(Collectors.toList()), Collections.EMPTY_LIST);
+    }
+
+    @Test
     public void testNodeIterableHasNext() {
         Iterator<Node> itr = NodeIterable.EMPTY.iterator();
         Assert.assertFalse(itr.hasNext());
@@ -96,6 +107,15 @@ public class EmptyIterableTest {
     }
 
     @Test
+    public void testNodeIterableSpliterator() {
+        NodeIterable itr = NodeIterable.EMPTY;
+        Assert.assertFalse(itr.spliterator().tryAdvance((e) -> {
+        }));
+        Assert.assertEquals(itr.spliterator().estimateSize(), 0);
+        Assert.assertEquals(itr.stream().collect(Collectors.toList()), Collections.EMPTY_LIST);
+    }
+
+    @Test
     public void testElementIterableHasNext() {
         Iterator<Element> itr = ElementIterable.EMPTY.iterator();
         Assert.assertFalse(itr.hasNext());
@@ -126,5 +146,14 @@ public class EmptyIterableTest {
     @Test
     public void testElementIterableDoBreak() {
         ElementIterable.EMPTY.doBreak();
+    }
+
+    @Test
+    public void testElementIterableSpliterator() {
+        ElementIterable itr = ElementIterable.EMPTY;
+        Assert.assertFalse(itr.spliterator().tryAdvance((e) -> {
+        }));
+        Assert.assertEquals(itr.spliterator().estimateSize(), 0);
+        Assert.assertEquals(itr.stream().collect(Collectors.toList()), Collections.EMPTY_LIST);
     }
 }

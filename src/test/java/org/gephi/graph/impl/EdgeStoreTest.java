@@ -30,13 +30,18 @@ import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Node;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -1783,12 +1788,147 @@ public class EdgeStoreTest {
         }
 
         EdgeStore.EdgeStoreIterator undirectedIterator = edgeStore.iteratorUndirected();
-        for (; undirectedIterator.hasNext();) {
+        while (undirectedIterator.hasNext()) {
             EdgeImpl e = undirectedIterator.next();
             Assert.assertTrue(edgeSet.remove(e));
         }
 
         Assert.assertEquals(0, edgeSet.size());
+    }
+
+    @Test
+    public void testUndirectedSpliterator() {
+        EdgeImpl[] edges = GraphGenerator.generateMutualEdges(0);
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        // Collect ids from spliteratorUndirected
+        Spliterator<Edge> spliterator = edgeStore.spliteratorUndirected();
+        Assert.assertEquals(spliterator.estimateSize(), 1);
+        List<Edge> edgeList = StreamSupport.stream(spliterator, true).collect(Collectors.toList());
+        Assert.assertEquals(edgeList.size(), 1);
+        Assert.assertEquals(edgeList.get(0), edges[0]);
+    }
+
+    @Test
+    public void testUndirectedSpliteratorMatchesIterator() {
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(300, 0, true, true, false);
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        // Collect ids from iteratorUndirected
+        List<Edge> idsIter = iteratorToArray(edgeStore.iteratorUndirected());
+
+        // Collect ids from spliteratorUndirected
+        Spliterator<Edge> spliterator = edgeStore.spliteratorUndirected();
+        Assert.assertEquals(spliterator.estimateSize(), idsIter.size());
+        List<Edge> idsSplit = StreamSupport.stream(spliterator, true).collect(Collectors.toList());
+
+        Assert.assertEquals(idsSplit, idsIter);
+    }
+
+    @Test
+    public void testTypeSpliteratorMatchesIterator() {
+        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        for (boolean directed : new boolean[] { true, false }) {
+            for (int type = 0; type < 3; type++) {
+                // Collect ids from iteratorUndirected
+                List<Edge> idsIter = iteratorToArray(edgeStore.iteratorType(type, directed));
+
+                // Collect ids from spliteratorUndirected
+                Spliterator<Edge> spliterator = edgeStore.spliteratorType(type, directed);
+                Assert.assertEquals(spliterator.estimateSize(), idsIter.size());
+                List<Edge> idsSplit = StreamSupport.stream(spliterator, true).collect(Collectors.toList());
+
+                Assert.assertEquals(idsSplit, idsIter);
+            }
+        }
+    }
+
+    @Test
+    public void testSelfLoopSpliterator() {
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.add(GraphGenerator.generateSelfLoop(0, true));
+
+        List<Edge> idsSplit = StreamSupport.stream(edgeStore.spliteratorSelfLoop(), true).collect(Collectors.toList());
+        List<Edge> idsIter = iteratorToArray(edgeStore.iteratorSelfLoop());
+        Assert.assertEquals(idsSplit, idsIter);
+    }
+
+    @Test
+    public void testFilteredSpliteratorCharacteristicsAndEstimate() {
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(200, 0, true, true, false);
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        Spliterator<Edge> sp = edgeStore.spliteratorUndirected();
+        int ch = sp.characteristics();
+        Assert.assertTrue((ch & Spliterator.SIZED) != 0);
+        Assert.assertTrue((ch & Spliterator.SUBSIZED) == 0);
+
+        // Count expected
+        List<Edge> expected = iteratorToArray(edgeStore.iteratorUndirected());
+        Assert.assertEquals(sp.estimateSize(), expected.size());
+
+        // Consume 5 and check estimate decreases
+        for (int i = 0; i < 5; i++) {
+            Assert.assertTrue(sp.tryAdvance(e -> {
+            }));
+        }
+        Assert.assertEquals(sp.estimateSize(), expected.size() - 5);
+    }
+
+    @Test
+    public void testEdgeSpliteratorCoversAll() {
+        NodeStore nodeStore = GraphGenerator.generateNodeStore(2);
+        NodeImpl n1 = nodeStore.get(0);
+        NodeImpl n2 = nodeStore.get(1);
+        EdgeStore store = new EdgeStore();
+        int n = GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 2 + 321;
+        for (int i = 0; i < n; i++) {
+            store.add(new EdgeImpl("e" + i, n1, n2, 0, 1.0, true));
+        }
+        Set<Edge> seen = new HashSet<>();
+        Spliterator<Edge> sp = store.spliterator();
+        sp.forEachRemaining(seen::add);
+        Assert.assertEquals(seen.size(), n);
+        for (Edge e : store) {
+            Assert.assertTrue(seen.contains(e));
+        }
+    }
+
+    @Test(expectedExceptions = ConcurrentModificationException.class)
+    public void testEdgeSpliteratorFailFastOnAdd() {
+        EdgeImpl[] edges = GraphGenerator.generateSmallMultiTypeEdgeList();
+        EdgeStore edgeStore = new EdgeStore(null, null, null, null, null, new GraphVersion(null));
+        edgeStore.addAll(Arrays.asList(edges));
+        Spliterator<Edge> sp = edgeStore.spliterator();
+        Assert.assertTrue(edgeStore.remove(edges[0]));
+        sp.tryAdvance(x -> {
+        });
+    }
+
+    @Test
+    public void testEdgeParallelStreamCount() {
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(100000, 2, true, true, true);
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.addAll(Arrays.asList(edges));
+        long count = edgeStore.parallelStream().count();
+        Assert.assertEquals(count, edges.length);
+    }
+
+    @Test
+    public void testEdgeStream() {
+        EdgeStore store = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateLargeEdgeList();
+        store.addAll(Arrays.asList(edges));
+
+        Set<Edge> set = Collections.synchronizedSet(new HashSet<>());
+        store.parallelStream().forEachOrdered(set::add);
+        Assert.assertEquals(set, store.toSet());
     }
 
     @Test
@@ -2105,10 +2245,10 @@ public class EdgeStoreTest {
         return nodes.toArray(new NodeImpl[0]);
     }
 
-    public List<EdgeImpl> iteratorToArray(Iterator<EdgeImpl> edgeIterator) {
-        List<EdgeImpl> list = new ArrayList<>();
+    public List<Edge> iteratorToArray(Iterator<Edge> edgeIterator) {
+        List<Edge> list = new ArrayList<>();
         for (; edgeIterator.hasNext();) {
-            EdgeImpl e = edgeIterator.next();
+            Edge e = edgeIterator.next();
             list.add(e);
         }
         return list;

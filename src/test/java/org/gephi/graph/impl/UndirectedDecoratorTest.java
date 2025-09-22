@@ -15,12 +15,10 @@
  */
 package org.gephi.graph.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
@@ -205,7 +203,11 @@ public class UndirectedDecoratorTest {
 
     // UTILITY
     private void testEdgeIterable(EdgeIterable iterable, Edge[] edges) {
-        Set<Edge> edgeSet = new HashSet<>(iterable.toCollection());
+        testEdgeIterable(new HashSet<>(iterable.toCollection()), edges);
+        testEdgeIterable(iterable.stream().collect(Collectors.toSet()), edges);
+    }
+
+    private void testEdgeIterable(Set<Edge> edgeSet, Edge[] edges) {
         for (Edge n : edges) {
             Assert.assertTrue(edgeSet.remove(n));
         }

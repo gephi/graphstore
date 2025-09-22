@@ -22,11 +22,10 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Spliterator;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Configuration;
@@ -733,8 +732,8 @@ public class GraphStoreTest {
         graphStore.addAllEdges(Arrays.asList(edges));
 
         for (EdgeImpl e : edges) {
-            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
-            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
         }
     }
 
@@ -746,8 +745,8 @@ public class GraphStoreTest {
         graphStore.addAllEdges(Arrays.asList(edges));
 
         for (EdgeImpl e : edges) {
-            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] {});
-            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target), new EdgeImpl[] {});
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
         }
     }
 
@@ -756,8 +755,8 @@ public class GraphStoreTest {
         GraphStore graphStore = GraphGenerator.generateSmallMixedGraphStore();
 
         for (EdgeImpl e : graphStore.edgeStore.toArray()) {
-            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
-            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
         }
     }
 
@@ -766,8 +765,8 @@ public class GraphStoreTest {
         GraphStore graphStore = GraphGenerator.generateSmallMixedGraphStore(2);
 
         for (EdgeImpl e : graphStore.edgeStore.toArray()) {
-            testEdgeIterable(graphStore.getEdges(e.source, e.target), new EdgeImpl[] {});
-            testEdgeIterable(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target), new EdgeImpl[] {});
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
         }
     }
 
@@ -1057,19 +1056,19 @@ public class GraphStoreTest {
 
     // UTILITY
     private void testNodeIterable(NodeIterable iterable, NodeImpl[] nodes) {
-        Set<Node> nodeSet = new HashSet<>(iterable.toCollection());
-        for (NodeImpl n : nodes) {
-            Assert.assertTrue(nodeSet.remove(n));
-        }
-        Assert.assertEquals(nodeSet.size(), 0);
+        Assert.assertEquals(iterable.toArray(), nodes);
+        Assert.assertEquals(iterable.stream().toArray(Node[]::new), nodes);
+        Assert.assertEquals(iterable.parallelStream().toArray(Node[]::new), nodes);
     }
 
     private void testEdgeIterable(EdgeIterable iterable, EdgeImpl[] edges) {
-        Set<Edge> edgeSet = new HashSet<>(iterable.toCollection());
-        for (EdgeImpl n : edges) {
-            Assert.assertTrue(edgeSet.remove(n));
-        }
-        Assert.assertEquals(edgeSet.size(), 0);
+        testEdgeIterableWithoutParallel(iterable, edges);
+        Assert.assertEquals(iterable.parallelStream().toArray(Edge[]::new), edges);
+    }
+
+    private void testEdgeIterableWithoutParallel(EdgeIterable iterable, EdgeImpl[] edges) {
+        Assert.assertEquals(iterable.toArray(), edges);
+        Assert.assertEquals(iterable.stream().toArray(Edge[]::new), edges);
     }
 
     private void testBasicStoreEquals(GraphStore graphStore, BasicGraphStore basicGraphStore) {
@@ -1193,4 +1192,36 @@ public class GraphStoreTest {
         }
         Assert.assertEquals(s2.size(), 0);
     }
+
+    @Test
+    public void testGetEdgesTypeSpliteratorMatches() {
+        GraphStore gs = GraphGenerator.generateSmallMultiTypeGraphStore();
+        Edge[] edges = gs.getEdges().toArray();
+        for (int i = 0; i < 3; i++) {
+            Spliterator<Edge> sp = gs.getEdges(i).spliterator();
+            int finalI = i;
+            sp.forEachRemaining(e -> Assert.assertEquals(finalI, e.getType()));
+        }
+    }
+
+    // @Test
+    // public void testGetSelfLoopsSpliteratorMatches() {
+    // GraphStore gs = new GraphStore();
+    // NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
+    // gs.addAllNodes(Arrays.asList(nodes));
+    // EdgeImpl[] edges = new EdgeImpl[] {
+    // GraphGenerator.generateSelfLoop(0, true),
+    // GraphGenerator.generateSelfLoop(1, false)
+    // };
+    // for (EdgeImpl e : edges) {
+    // e.source = nodes[0];
+    // e.target = nodes[0];
+    // gs.addEdge(e);
+    // }
+    // Set<Object> ids = new HashSet<>();
+    // gs.getSelfLoops().spliterator().forEachRemaining(e -> ids.add(e.getId()));
+    // for (EdgeImpl e : edges) {
+    // Assert.assertTrue(ids.contains(e.getId()));
+    // }
+    // }
 }
