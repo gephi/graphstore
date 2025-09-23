@@ -40,10 +40,10 @@ public final class GraphStoreConfiguration {
     public static final int NODESTORE_DEFAULT_DICTIONARY_SIZE = 8192;
     public final static float NODESTORE_DICTIONARY_LOAD_FACTOR = .7f;
     // EdgeStore
-    public static final int EDGESTORE_BLOCK_SIZE = 8192;
-    public static final int EDGESTORE_DEFAULT_BLOCKS = 10;
+    public static final int EDGESTORE_BLOCK_SIZE = 32768;
+    public static final int EDGESTORE_DEFAULT_BLOCKS = 5;
     public static final int EDGESTORE_DEFAULT_TYPE_COUNT = 1;
-    public static final int EDGESTORE_DEFAULT_DICTIONARY_SIZE = 1000;
+    public static final int EDGESTORE_DEFAULT_DICTIONARY_SIZE = 32768;
     public static final float EDGESTORE_DICTIONARY_LOAD_FACTOR = .7f;
     // GraphView
     public static final int VIEW_DEFAULT_TYPE_COUNT = 1;
@@ -83,7 +83,7 @@ public final class GraphStoreConfiguration {
     public static final TimeRepresentation DEFAULT_TIME_REPRESENTATION = TimeRepresentation.TIMESTAMP;
     // Spatial index
     public static final int SPATIAL_INDEX_MAX_LEVELS = 16;
-    public static final int SPATIAL_INDEX_MAX_OBJECTS_PER_NODE = 5000;
+    public static final int SPATIAL_INDEX_MAX_OBJECTS_PER_NODE = 8192;
     public static final float SPATIAL_INDEX_DIMENSION_BOUNDARY = 1e6f;
     // Miscellaneous
     public static final double TIMESTAMP_STORE_GROWING_FACTOR = 1.1;
