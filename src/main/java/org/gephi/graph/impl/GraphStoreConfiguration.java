@@ -85,6 +85,7 @@ public final class GraphStoreConfiguration {
     public static final int SPATIAL_INDEX_MAX_LEVELS = 16;
     public static final int SPATIAL_INDEX_MAX_OBJECTS_PER_NODE = 8192;
     public static final float SPATIAL_INDEX_DIMENSION_BOUNDARY = 1e6f;
+    public static final boolean SPATIAL_INDEX_APPROXIMATE_AREA_SEARCH = false;
     // Miscellaneous
     public static final double TIMESTAMP_STORE_GROWING_FACTOR = 1.1;
     public static final double INTERVAL_STORE_GROWING_FACTOR = 1.1;

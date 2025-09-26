@@ -26,7 +26,12 @@ public class SpatialIndexImpl implements SpatialIndex {
 
     @Override
     public NodeIterable getNodesInArea(Rect2D rect) {
-        return nodesTree.getNodes(rect);
+        return nodesTree.getNodes(rect, false);
+    }
+
+    @Override
+    public NodeIterable getApproximateNodesInArea(Rect2D rect) {
+        return nodesTree.getNodes(rect, true);
     }
 
     @Override
