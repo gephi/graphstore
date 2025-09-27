@@ -881,7 +881,7 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testInOutIteratorNull() {
         EdgeStore edgeStore = new EdgeStore();
-        edgeStore.edgeIterator(null);
+        edgeStore.edgeIterator((Node) null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -940,6 +940,80 @@ public class EdgeStoreTest {
         }
         Assert.assertEquals(index, edges.length);
         testContainsNone(edgeStore, Arrays.asList(edges));
+    }
+
+    @Test
+    public void testEdgeInOutMultiIterator() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        // Get all nodes from the edges
+        List<NodeImpl> nodeList = Arrays.asList(getNodes(edges));
+
+        // Collect edges using multi-iterator
+        EdgeStore.EdgeInOutMultiIterator multiIterator = edgeStore.edgeIterator(nodeList.iterator());
+        Set<EdgeImpl> multiIteratorEdges = new ObjectOpenHashSet<>();
+        while (multiIterator.hasNext()) {
+            EdgeImpl edge = multiIterator.next();
+            multiIteratorEdges.add(edge);
+        }
+
+        // Collect edges using individual iterators (old approach)
+        Set<EdgeImpl> individualIteratorEdges = new ObjectOpenHashSet<>();
+        for (NodeImpl node : nodeList) {
+            EdgeStore.EdgeInOutIterator singleIterator = edgeStore.edgeIterator(node);
+            while (singleIterator.hasNext()) {
+                EdgeImpl edge = singleIterator.next();
+                individualIteratorEdges.add(edge);
+            }
+        }
+
+        // Both approaches should yield the same set of edges
+        Assert.assertEquals(multiIteratorEdges, individualIteratorEdges);
+
+        // Verify all edges are accounted for
+        Set<EdgeImpl> allEdges = new ObjectOpenHashSet<>(Arrays.asList(edges));
+        Assert.assertEquals(multiIteratorEdges, allEdges);
+    }
+
+    @Test
+    public void testEdgeInOutMultiIteratorEmpty() {
+        EdgeStore edgeStore = new EdgeStore();
+        List<NodeImpl> emptyNodeList = new ArrayList<>();
+
+        EdgeStore.EdgeInOutMultiIterator multiIterator = edgeStore.edgeIterator(emptyNodeList.iterator());
+        Assert.assertFalse(multiIterator.hasNext());
+    }
+
+    @Test
+    public void testEdgeInOutMultiIteratorRemove() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        List<NodeImpl> nodeList = Arrays.asList(getNodes(edges));
+        EdgeStore.EdgeInOutMultiIterator multiIterator = edgeStore.edgeIterator(nodeList.iterator());
+
+        int initialSize = edgeStore.size();
+        int removedCount = 0;
+
+        while (multiIterator.hasNext()) {
+            EdgeImpl edge = multiIterator.next();
+            multiIterator.remove();
+            removedCount++;
+            Assert.assertFalse(edgeStore.contains(edge));
+            Assert.assertEquals(edgeStore.size(), initialSize - removedCount);
+        }
+
+        Assert.assertEquals(removedCount, initialSize);
+        Assert.assertTrue(edgeStore.isEmpty());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testEdgeInOutMultiIteratorNullIterator() {
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.edgeIterator((Iterator<NodeImpl>) null);
     }
 
     @Test
