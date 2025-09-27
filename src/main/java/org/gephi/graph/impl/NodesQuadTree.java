@@ -52,14 +52,6 @@ public class NodesQuadTree {
         return quadTreeRoot.getNodes(searchRect, approximate);
     }
 
-    public NodeIterable getNodes(float minX, float minY, float maxX, float maxY) {
-        return quadTreeRoot.getNodes(new Rect2D(minX, minY, maxX, maxY));
-    }
-
-    public NodeIterable getNodes(float minX, float minY, float maxX, float maxY, boolean approximate) {
-        return quadTreeRoot.getNodes(new Rect2D(minX, minY, maxX, maxY), approximate);
-    }
-
     public NodeIterable getAllNodes() {
         return quadTreeRoot.getAllNodes();
     }

@@ -142,7 +142,8 @@ public class NodesQuadTreeTest {
         Collection<Node> rectContainingAll = q.getNodes(BOUNDS_RECT).toCollection();
         Assert.assertEquals(rectContainingAll, all);
 
-        Collection<Node> bigRectContainingAll = q.getNodes(-BOUNDS * 2, -BOUNDS * 2, BOUNDS, BOUNDS).toCollection();
+        Collection<Node> bigRectContainingAll = q.getNodes(new Rect2D(-BOUNDS * 2, -BOUNDS * 2, BOUNDS, BOUNDS))
+                .toCollection();
         Assert.assertEquals(bigRectContainingAll, all);
     }
 
@@ -169,11 +170,11 @@ public class NodesQuadTreeTest {
         Collection<Node> all = q.getAllNodes().toCollection();
         Assert.assertEquals(all.size(), 3);
 
-        assertEmpty(q.getNodes(80, 80, 89.99f, 89.99f));
+        assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(95, 95, 99, 99), n1);
-        assertSame(q.getNodes(0, 0, 101, 101), n1, n2);
-        assertSame(q.getNodes(4, 4, 91, 91), n1, n2);
+        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n1, n2);
+        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n1, n2);
     }
 
     @Test
@@ -196,11 +197,11 @@ public class NodesQuadTreeTest {
         q.addNode(n2);
         q.addNode(n3);
 
-        assertEmpty(q.getNodes(80, 80, 89.99f, 89.99f));
+        assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(95, 95, 99, 99), n1);
-        assertSame(q.getNodes(0, 0, 101, 101), n2, n1);
-        assertSame(q.getNodes(4, 4, 91, 91), n2, n1);
+        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n2, n1);
+        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n2, n1);
     }
 
     @Test
@@ -223,11 +224,11 @@ public class NodesQuadTreeTest {
         q.addNode(n2);
         q.addNode(n3);
 
-        assertEmpty(q.getNodes(80, 80, 89.99f, 89.99f));
+        assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(95, 95, 99, 99), n1);
-        assertSame(q.getNodes(0, 0, 101, 101), n1, n2);
-        assertSame(q.getNodes(4, 4, 91, 91), n1, n2);
+        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n1, n2);
+        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n1, n2);
     }
 
     @Test
