@@ -1,7 +1,11 @@
 package org.gephi.graph.impl;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
+import java.util.stream.Collectors;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Rect2D;
@@ -24,6 +28,14 @@ public class NodesQuadTreeTest {
         NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
         Assert.assertTrue(q.getAllNodes().toCollection().isEmpty());
         Assert.assertEquals(q.getAllNodes().toArray().length, 0);
+        Assert.assertEquals(q.getNodeCount(false), 1);
+    }
+
+    @Test
+    public void testGetNodeCount() {
+        NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
+        Assert.assertEquals(q.getNodeCount(false), 1);
+        Assert.assertEquals(q.getNodeCount(true), 0);
     }
 
     @Test
@@ -37,6 +49,7 @@ public class NodesQuadTreeTest {
         NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
         NodeImpl node = new NodeImpl("0");
         Assert.assertFalse(q.removeNode(node));
+        Assert.assertEquals(q.getNodeCount(true), 0);
     }
 
     @Test
@@ -45,6 +58,7 @@ public class NodesQuadTreeTest {
         NodeImpl node = new NodeImpl("0");
         Assert.assertTrue(q.addNode(node));
         Assert.assertNotNull(node.getSpatialData().quadTreeNode);
+        Assert.assertEquals(q.getNodeCount(true), 1);
     }
 
     @Test
@@ -64,6 +78,7 @@ public class NodesQuadTreeTest {
         Assert.assertNull(node.getSpatialData().quadTreeNode);
         Assert.assertTrue(q.getAllNodes().toCollection().isEmpty());
         Assert.assertFalse(q.removeNode(node));
+        Assert.assertEquals(q.getNodeCount(true), 0);
     }
 
     @Test
@@ -102,6 +117,8 @@ public class NodesQuadTreeTest {
             q.addNode(node);
         }
         Assert.assertTrue(q.getDepth() >= 1);
+        Assert.assertEquals(q.getNodeCount(true), 4);
+        Assert.assertEquals(q.getNodeCount(false), 5);
     }
 
     @Test
@@ -125,7 +142,8 @@ public class NodesQuadTreeTest {
         Collection<Node> rectContainingAll = q.getNodes(BOUNDS_RECT).toCollection();
         Assert.assertEquals(rectContainingAll, all);
 
-        Collection<Node> bigRectContainingAll = q.getNodes(-BOUNDS * 2, -BOUNDS * 2, BOUNDS, BOUNDS).toCollection();
+        Collection<Node> bigRectContainingAll = q.getNodes(new Rect2D(-BOUNDS * 2, -BOUNDS * 2, BOUNDS, BOUNDS))
+                .toCollection();
         Assert.assertEquals(bigRectContainingAll, all);
     }
 
@@ -152,11 +170,11 @@ public class NodesQuadTreeTest {
         Collection<Node> all = q.getAllNodes().toCollection();
         Assert.assertEquals(all.size(), 3);
 
-        assertEmpty(q.getNodes(80, 80, 89.99f, 89.99f));
+        assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(95, 95, 99, 99), n1);
-        assertSame(q.getNodes(0, 0, 101, 101), n1, n2);
-        assertSame(q.getNodes(4, 4, 91, 91), n1, n2);
+        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n1, n2);
+        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n1, n2);
     }
 
     @Test
@@ -179,11 +197,11 @@ public class NodesQuadTreeTest {
         q.addNode(n2);
         q.addNode(n3);
 
-        assertEmpty(q.getNodes(80, 80, 89.99f, 89.99f));
+        assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(95, 95, 99, 99), n1);
-        assertSame(q.getNodes(0, 0, 101, 101), n2, n1);
-        assertSame(q.getNodes(4, 4, 91, 91), n2, n1);
+        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n2, n1);
+        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n2, n1);
     }
 
     @Test
@@ -206,19 +224,11 @@ public class NodesQuadTreeTest {
         q.addNode(n2);
         q.addNode(n3);
 
-        assertEmpty(q.getNodes(80, 80, 89.99f, 89.99f));
+        assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(95, 95, 99, 99), n1);
-        assertSame(q.getNodes(0, 0, 101, 101), n1, n2);
-        assertSame(q.getNodes(4, 4, 91, 91), n1, n2);
-    }
-
-    private void assertSame(NodeIterable iterable, Node... expected) {
-        Assert.assertEqualsNoOrder(iterable.toArray(), expected);
-    }
-
-    private void assertEmpty(NodeIterable iterable) {
-        Assert.assertEquals(iterable.toCollection().size(), 0);
+        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n1, n2);
+        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n1, n2);
     }
 
     @Test
@@ -525,5 +535,64 @@ public class NodesQuadTreeTest {
         Assert.assertEquals(boundaries.minY, -1f);
         Assert.assertEquals(boundaries.maxX, 1f);
         Assert.assertEquals(boundaries.maxY, 1f);
+    }
+
+    @Test
+    public void testGetMaximumObjectsReached() {
+        NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
+        addRandomNodes(q, GraphStoreConfiguration.SPATIAL_INDEX_MAX_OBJECTS_PER_NODE, 0);
+        Assert.assertEquals(q.getObjectCount(), GraphStoreConfiguration.SPATIAL_INDEX_MAX_OBJECTS_PER_NODE);
+        Assert.assertEquals(q.getNodeCount(true), 1);
+        Assert.assertEquals(q.getNodeCount(false), 1);
+        NodeImpl[] newNodes = addRandomNodes(q, 1, GraphStoreConfiguration.SPATIAL_INDEX_MAX_OBJECTS_PER_NODE);
+        Assert.assertEquals(q.getNodeCount(true), 4);
+        Assert.assertEquals(q.getObjectCount(), GraphStoreConfiguration.SPATIAL_INDEX_MAX_OBJECTS_PER_NODE + 1);
+        q.removeNode(newNodes[0]);
+        Assert.assertEquals(q.getObjectCount(), GraphStoreConfiguration.SPATIAL_INDEX_MAX_OBJECTS_PER_NODE);
+    }
+
+    @Test
+    public void testCountsWithLargerDepth() {
+        NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
+        int totalNodes = GraphStoreConfiguration.SPATIAL_INDEX_MAX_OBJECTS_PER_NODE * 10;
+        addRandomNodes(q, totalNodes, 0);
+        Assert.assertEquals(q.getObjectCount(), totalNodes);
+        Assert.assertTrue(q.getNodeCount(true) >= 10);
+        Assert.assertTrue(q.getNodeCount(false) >= 10);
+    }
+
+    @Test
+    public void testIteratorWithLargerGraph() {
+        NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
+        int totalNodes = 100000;
+        NodeImpl[] nodes = addRandomNodes(q, totalNodes, 0);
+        assertSame(q.getAllNodes(), nodes);
+    }
+
+    private void assertSame(NodeIterable iterable, Node... expected) {
+        ObjectSet<Node> set = new ObjectOpenHashSet<>(expected.length);
+        set.addAll(Arrays.asList(expected));
+        Assert.assertEquals(set, iterable.toSet());
+        Assert.assertEquals(set, iterable.stream().collect(Collectors.toSet()));
+        Assert.assertEquals(set, iterable.parallelStream().collect(Collectors.toSet()));
+    }
+
+    private void assertEmpty(NodeIterable iterable) {
+        Assert.assertEquals(iterable.toCollection().size(), 0);
+    }
+
+    private NodeImpl[] addRandomNodes(NodesQuadTree q, int count, int startIndex) {
+        Random rand = new Random();
+        NodeImpl[] nodes = new NodeImpl[count];
+        for (int i = 0; i < count; i++) {
+            NodeImpl node = new NodeImpl(String.valueOf(startIndex++));
+            float x = BOUNDS_RECT.minX + rand.nextFloat() * (BOUNDS_RECT.maxX - BOUNDS_RECT.minX);
+            float y = BOUNDS_RECT.minY + rand.nextFloat() * (BOUNDS_RECT.maxY - BOUNDS_RECT.minY);
+            node.setPosition(x, y);
+            node.setSize(1.0f);
+            q.addNode(node);
+            nodes[i] = node;
+        }
+        return nodes;
     }
 }

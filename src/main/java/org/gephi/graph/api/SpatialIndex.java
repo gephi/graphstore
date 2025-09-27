@@ -31,6 +31,17 @@ public interface SpatialIndex {
     NodeIterable getNodesInArea(Rect2D rect);
 
     /**
+     * Returns the nodes in the given area using a faster, but approximate method.
+     * <p>
+     * All nodes in the provided area are guaranteed to be returned, but some nodes
+     * outside the area may also be returned.
+     *
+     * @param rect area to query
+     * @return nodes in the area
+     */
+    NodeIterable getApproximateNodesInArea(Rect2D rect);
+
+    /**
      * Returns the edges in the given area.
      *
      * @param rect area to query

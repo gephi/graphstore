@@ -877,6 +877,16 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
+    public NodeIterable getApproximateNodesInArea(Rect2D rect) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return new NodeIterableWrapper(
+                () -> new NodeViewIterator(graphStore.spatialIndex.getApproximateNodesInArea(rect).iterator()),
+                graphStore.spatialIndex.nodesTree.lock);
+    }
+
+    @Override
     public EdgeIterable getEdgesInArea(Rect2D rect) {
         if (graphStore.spatialIndex == null) {
             throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
