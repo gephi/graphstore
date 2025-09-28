@@ -50,6 +50,17 @@ public interface SpatialIndex {
     EdgeIterable getEdgesInArea(Rect2D rect);
 
     /**
+     * Returns the edges in the given area using a faster, but approximate method.
+     * <p>
+     * All edges in the provided area are guaranteed to be returned, but some edges
+     * outside the area may also be returned.
+     *
+     * @param rect area to query
+     * @return edges in the area
+     */
+    EdgeIterable getApproximateEdgesInArea(Rect2D rect);
+
+    /**
      * Returns the bounding rectangle that contains all nodes in the graph. The
      * boundaries are calculated based on each node's position and size.
      *

@@ -807,6 +807,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 undirectedSize++;
             }
 
+            if (spatialIndex != null) {
+                spatialIndex.addEdge(edge);
+            }
+
             size++;
             typeSize[type]++;
             return true;
@@ -830,6 +834,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             if (viewStore != null) {
                 viewStore.removeEdge(edge);
+            }
+
+            if (spatialIndex != null) {
+                spatialIndex.removeEdge(edge);
             }
 
             edge.destroyAttributes();

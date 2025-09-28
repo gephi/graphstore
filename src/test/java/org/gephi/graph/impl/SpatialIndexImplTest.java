@@ -37,7 +37,7 @@ public class SpatialIndexImplTest {
 
         SpatialIndexImpl spatialIndex = store.spatialIndex;
         assertSame(spatialIndex.getNodesInArea(BOUNDS_RECT), n1, n2);
-        assertSame(spatialIndex.getEdgesInArea(BOUNDS_RECT), e);
+        assertSame(spatialIndex.getEdgesInArea(BOUNDS_RECT), e, e);
     }
 
     @Test

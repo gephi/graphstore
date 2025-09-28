@@ -1,6 +1,6 @@
 package org.gephi.graph.impl;
 
-import java.util.Iterator;
+import java.util.function.Predicate;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
@@ -21,7 +21,7 @@ public class SpatialIndexImpl implements SpatialIndex {
     public SpatialIndexImpl(GraphStore store) {
         this.store = store;
         float boundaries = GraphStoreConfiguration.SPATIAL_INDEX_DIMENSION_BOUNDARY;
-        this.nodesTree = new NodesQuadTree(new Rect2D(-boundaries, -boundaries, boundaries, boundaries));
+        this.nodesTree = new NodesQuadTree(store, new Rect2D(-boundaries, -boundaries, boundaries, boundaries));
     }
 
     @Override
@@ -36,8 +36,28 @@ public class SpatialIndexImpl implements SpatialIndex {
 
     @Override
     public EdgeIterable getEdgesInArea(Rect2D rect) {
-        return new EdgeIterableWrapper(() -> new EdgeIterator(rect, nodesTree.getNodes(rect).iterator()),
-                nodesTree.lock);
+        return nodesTree.getEdges(rect, false);
+    }
+
+    @Override
+    public EdgeIterable getApproximateEdgesInArea(Rect2D rect) {
+        return nodesTree.getEdges(rect, true);
+    }
+
+    public NodeIterable getNodesInArea(Rect2D rect, Predicate<? super Node> predicate) {
+        return nodesTree.getNodes(rect, false, predicate);
+    }
+
+    public NodeIterable getApproximateNodesInArea(Rect2D rect, Predicate<? super Node> predicate) {
+        return nodesTree.getNodes(rect, true, predicate);
+    }
+
+    public EdgeIterable getEdgesInArea(Rect2D rect, Predicate<? super Edge> predicate) {
+        return nodesTree.getEdges(rect, false, predicate);
+    }
+
+    public EdgeIterable getApproximateEdgesInArea(Rect2D rect, Predicate<? super Edge> predicate) {
+        return nodesTree.getEdges(rect, true, predicate);
     }
 
     protected void clearNodes() {
@@ -50,6 +70,28 @@ public class SpatialIndexImpl implements SpatialIndex {
 
     protected void removeNode(final NodeImpl node) {
         nodesTree.removeNode(node);
+    }
+
+    protected void addEdge(final EdgeImpl edge) {
+        SpatialNodeDataImpl sourceSpatialData = edge.source.getSpatialData();
+        SpatialNodeDataImpl targetSpatialData = edge.target.getSpatialData();
+        if (sourceSpatialData != null && sourceSpatialData.quadTreeNode != null) {
+            sourceSpatialData.quadTreeNode.addEdge();
+        }
+        if (targetSpatialData != null && targetSpatialData.quadTreeNode != null) {
+            targetSpatialData.quadTreeNode.addEdge();
+        }
+    }
+
+    protected void removeEdge(final EdgeImpl edge) {
+        SpatialNodeDataImpl sourceSpatialData = edge.source.getSpatialData();
+        SpatialNodeDataImpl targetSpatialData = edge.target.getSpatialData();
+        if (sourceSpatialData != null && sourceSpatialData.quadTreeNode != null) {
+            sourceSpatialData.quadTreeNode.removeEdge();
+        }
+        if (targetSpatialData != null && targetSpatialData.quadTreeNode != null) {
+            targetSpatialData.quadTreeNode.removeEdge();
+        }
     }
 
     protected void moveNode(final NodeImpl node) {
@@ -70,62 +112,8 @@ public class SpatialIndexImpl implements SpatialIndex {
         return nodesTree.getBoundaries();
     }
 
-    protected class EdgeIterator implements Iterator<Edge> {
-
-        private final Iterator<Node> nodeItr;
-        private final Rect2D rect2D;
-        private Iterator<Edge> edgeItr;
-        private Edge pointer;
-        private Node node;
-
-        public EdgeIterator(Rect2D rect2D, Iterator<Node> nodeIterator) {
-            this.nodeItr = nodeIterator;
-            this.rect2D = rect2D;
-
-            nodesTree.readLock();
-        }
-
-        @Override
-        public boolean hasNext() {
-            while (pointer == null) {
-                while (pointer == null && edgeItr != null && edgeItr.hasNext()) {
-                    pointer = edgeItr.next();
-                    if (!pointer.isSelfLoop()) {
-                        Node oppositeNode = store.getOpposite(node, pointer);
-                        // Skip edge - do not return same edges twice when both
-                        // source and target nodes are visible
-                        SpatialNodeDataImpl spatialData = ((NodeImpl) oppositeNode).getSpatialData();
-                        if (oppositeNode.getStoreId() < node.getStoreId() && rect2D
-                                .intersects(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
-                            pointer = null;
-                        }
-                    }
-                }
-                if (pointer == null) {
-                    edgeItr = null;
-                    if (nodeItr != null && nodeItr.hasNext()) {
-                        node = nodeItr.next();
-                        edgeItr = store.edgeStore.edgeIterator(node);
-                    } else {
-                        nodesTree.readUnlock();
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        @Override
-        public Edge next() {
-            Edge res = pointer;
-            pointer = null;
-            return res;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
+    public Rect2D getBoundaries(Predicate<? super Node> predicate) {
+        return nodesTree.getBoundaries(predicate);
     }
+
 }
