@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.gephi.graph.api.Node;
@@ -168,6 +169,8 @@ public class NodesQuadTreeTest {
         q.addNode(n3);
 
         Collection<Node> all = q.getAllNodes().toCollection();
+        Assert.assertEquals(all.size(), 3);
+        all = q.getAllNodes().stream().collect(Collectors.toList());
         Assert.assertEquals(all.size(), 3);
 
         assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
@@ -569,7 +572,48 @@ public class NodesQuadTreeTest {
         assertSame(q.getAllNodes(), nodes);
     }
 
+    @Test
+    public void testGetNodesInArea() {
+        Rect2D area = new Rect2D(-1000, -1000, 1000, 1000);
+        NodesQuadTree q = new NodesQuadTree(area);
+        int totalNodes = 30000;
+        NodeImpl[] nodes = addRandomNodes(q, totalNodes, 0, area);
+        Rect2D subarea = new Rect2D(-100, -100, 100, 100);
+
+        assertSame(q
+                .getNodes(subarea, false), Arrays
+                        .stream(nodes).filter(n -> subarea.intersects(n.getSpatialData().minX, n
+                                .getSpatialData().minY, n.getSpatialData().maxX, n.getSpatialData().maxY))
+                        .toArray(NodeImpl[]::new));
+    }
+
+    @Test
+    public void testGetNodesInAreaApproximate() {
+        Rect2D area = new Rect2D(-1000, -1000, 1000, 1000);
+        NodesQuadTree q = new NodesQuadTree(area);
+        int totalNodes = 30000;
+        NodeImpl[] nodes = addRandomNodes(q, totalNodes, 0, area);
+        Rect2D subarea = new Rect2D(-100, -100, -1, -1);
+
+        // Approximate should return all nodes that are in the quadtree nodes
+        // intersecting the area
+        assertSame(q.getNodes(subarea, true), Arrays.stream(nodes)
+                .filter(n -> subarea.intersects(n.getSpatialData().quadTreeNode.quadRect())).toArray(NodeImpl[]::new));
+    }
+
+    @Test
+    public void testGetNodesInAreaWithPredicate() {
+        NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
+
+        Rect2D rect = new Rect2D(-10, -10, 10, 10);
+        NodeImpl[] nodes = addRandomNodes(q, 2, 0, rect);
+        NodeImpl node1 = nodes[0];
+
+        assertSame(q.getNodes(rect, false, n -> n == node1), node1);
+    }
+
     private void assertSame(NodeIterable iterable, Node... expected) {
+        Assert.assertTrue(expected.length > 0, "Expected array must not be empty");
         ObjectSet<Node> set = new ObjectOpenHashSet<>(expected.length);
         set.addAll(Arrays.asList(expected));
         Assert.assertEquals(set, iterable.toSet());
@@ -582,12 +626,16 @@ public class NodesQuadTreeTest {
     }
 
     private NodeImpl[] addRandomNodes(NodesQuadTree q, int count, int startIndex) {
+        return addRandomNodes(q, count, startIndex, BOUNDS_RECT);
+    }
+
+    private NodeImpl[] addRandomNodes(NodesQuadTree q, int count, int startIndex, Rect2D area) {
         Random rand = new Random();
         NodeImpl[] nodes = new NodeImpl[count];
         for (int i = 0; i < count; i++) {
             NodeImpl node = new NodeImpl(String.valueOf(startIndex++));
-            float x = BOUNDS_RECT.minX + rand.nextFloat() * (BOUNDS_RECT.maxX - BOUNDS_RECT.minX);
-            float y = BOUNDS_RECT.minY + rand.nextFloat() * (BOUNDS_RECT.maxY - BOUNDS_RECT.minY);
+            float x = area.minX + rand.nextFloat() * (area.maxX - area.minX);
+            float y = area.minY + rand.nextFloat() * (area.maxY - area.minY);
             node.setPosition(x, y);
             node.setSize(1.0f);
             q.addNode(node);

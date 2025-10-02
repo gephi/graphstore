@@ -114,8 +114,8 @@ public class Rect2D {
     }
 
     private String toString(NumberFormat formatter) {
-        return "(" + formatter.format(minX) + " " + formatter.format(minY) + ") < " + "(" + formatter
-                .format(maxX) + " " + formatter.format(maxY) + ")";
+        return "min(x:" + formatter.format(minX) + " y:" + formatter.format(minY) + ") < " + "max(x:" + formatter
+                .format(maxX) + " y:" + formatter.format(maxY) + ")";
     }
 
     /**

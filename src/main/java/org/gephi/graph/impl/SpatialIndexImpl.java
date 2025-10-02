@@ -72,28 +72,6 @@ public class SpatialIndexImpl implements SpatialIndex {
         nodesTree.removeNode(node);
     }
 
-    protected void addEdge(final EdgeImpl edge) {
-        SpatialNodeDataImpl sourceSpatialData = edge.source.getSpatialData();
-        SpatialNodeDataImpl targetSpatialData = edge.target.getSpatialData();
-        if (sourceSpatialData != null && sourceSpatialData.quadTreeNode != null) {
-            sourceSpatialData.quadTreeNode.addEdge();
-        }
-        if (targetSpatialData != null && targetSpatialData.quadTreeNode != null) {
-            targetSpatialData.quadTreeNode.addEdge();
-        }
-    }
-
-    protected void removeEdge(final EdgeImpl edge) {
-        SpatialNodeDataImpl sourceSpatialData = edge.source.getSpatialData();
-        SpatialNodeDataImpl targetSpatialData = edge.target.getSpatialData();
-        if (sourceSpatialData != null && sourceSpatialData.quadTreeNode != null) {
-            sourceSpatialData.quadTreeNode.removeEdge();
-        }
-        if (targetSpatialData != null && targetSpatialData.quadTreeNode != null) {
-            targetSpatialData.quadTreeNode.removeEdge();
-        }
-    }
-
     protected void moveNode(final NodeImpl node) {
         final float x = node.x();
         final float y = node.y();

@@ -234,6 +234,9 @@ public class NodesQuadTree {
             boolean hasNodes = false;
 
             for (Node node : allNodes) {
+                if (node == null) {
+                    continue;
+                }
                 SpatialNodeDataImpl spatialData = ((NodeImpl) node).getSpatialData();
                 if (spatialData != null) {
                     hasNodes = true;
@@ -259,6 +262,28 @@ public class NodesQuadTree {
         }
     }
 
+    private int collectOverlapping(QuadTreeNode node, Rect2D searchRect, Set<QuadTreeNode> resultSet) {
+        if (searchRect != null && !node.rect.intersects(searchRect)) {
+            return 0;
+        }
+
+        // If this node has objects and intersects with search rect, add it
+        int nodeCount = 0;
+        if (node.objectCount > 0) {
+            resultSet.add(node);
+            nodeCount += node.objectCount;
+        }
+
+        // Recursively check children
+        if (node.childTL != null) {
+            nodeCount += collectOverlapping(node.childTL, searchRect, resultSet);
+            nodeCount += collectOverlapping(node.childTR, searchRect, resultSet);
+            nodeCount += collectOverlapping(node.childBL, searchRect, resultSet);
+            nodeCount += collectOverlapping(node.childBR, searchRect, resultSet);
+        }
+        return nodeCount;
+    }
+
     protected class QuadTreeNode {
 
         private NodeImpl[] objects = null; // Fixed-size array for objects
@@ -268,7 +293,6 @@ public class NodesQuadTree {
         private final QuadTreeNode parent; // The parent of this quad
         private final int level;
         private int size = 0; // Total number of objects in this node and its children
-        private int edgeSize = 0; // Total number of edges connected to nodes in this node and its children
 
         private QuadTreeNode childTL = null; // Top Left Child
         private QuadTreeNode childTR = null; // Top Right Child
@@ -343,11 +367,9 @@ public class NodesQuadTree {
             objectCount++;
 
             // Update size and edge size for this node and all parents
-            int nodeDegree = item.getDegree();
             QuadTreeNode node = this;
             while (node != null) {
                 node.size++;
-                node.edgeSize += nodeDegree;
                 node = node.parent;
             }
         }
@@ -373,40 +395,18 @@ public class NodesQuadTree {
                     spatialData.setArrayIndex(-1);
                     spatialData.setQuadTreeNode(null);
 
-                    // Update size and edge size for this node and all parents
-                    int nodeDegree = item.getDegree();
+                    // Update size
                     QuadTreeNode node = this;
                     while (node != null) {
                         node.size--;
-                        node.edgeSize -= nodeDegree;
                         node = node.parent;
                     }
                 }
             }
         }
 
-        protected void addEdge() {
-            QuadTreeNode node = this;
-            while (node != null) {
-                node.edgeSize++;
-                node = node.parent;
-            }
-        }
-
-        protected void removeEdge() {
-            QuadTreeNode node = this;
-            while (node != null) {
-                node.edgeSize--;
-                node = node.parent;
-            }
-        }
-
         private int objectCount() {
             return size;
-        }
-
-        private int edgeCount() {
-            return edgeSize;
         }
 
         private void subdivide() {
@@ -436,13 +436,10 @@ public class NodesQuadTree {
                     // Insert to the appropriate tree
                     destTree.insert(obj);
 
-                    // Update size and edge size for this node and all parents to compensate for the
-                    // object moving
-                    int nodeDegree = obj.getDegree();
+                    // Update size
                     QuadTreeNode node = this;
                     while (node != null) {
                         node.size--;
-                        node.edgeSize -= nodeDegree;
                         node = node.parent;
                     }
                 } else {
@@ -564,7 +561,6 @@ public class NodesQuadTree {
 
             // Reset size and edge size
             size = 0;
-            edgeSize = 0;
 
             // Set the children to null
             childTL = null;
@@ -703,13 +699,11 @@ public class NodesQuadTree {
             sb.append(rect.toString()).append('\n');
 
             if (objects != null) {
-                for (int i = 0; i < objectCount; i++) {
-                    for (int j = 0; j <= level; j++) {
-                        sb.append("  ");
-                    }
-
-                    sb.append(objects[i].getId()).append('\n');
+                for (int j = 0; j <= level; j++) {
+                    sb.append("  ");
                 }
+
+                sb.append(objectCount).append(" objects \n");
             }
 
             if (childTL != null) {
@@ -821,6 +815,13 @@ public class NodesQuadTree {
 
         @Override
         public Spliterator<Edge> spliterator() {
+            if (approximate) {
+                HashSet<QuadTreeNode> overlappingNodes = new HashSet<>();
+                int nodeCount = collectOverlapping(quadTreeRoot, searchRect, overlappingNodes);
+                if (useDirectIterator(nodeCount)) {
+                    return new QuadTreeGlobalEdgesSpliterator(searchRect, overlappingNodes, predicate);
+                }
+            }
             return new FilteredQuadTreeEdgesSpliterator(quadTreeRoot, searchRect, approximate, predicate);
         }
     }
@@ -844,21 +845,31 @@ public class NodesQuadTree {
             return new QuadTreeEdgesIterator(quadTreeRoot, searchRect, approximate);
         }
 
+        protected boolean useDirectIterator(int nodeCount) {
+            return (float) nodeCount / quadTreeRoot.size > GraphStoreConfiguration.SPATIAL_INDEX_LOCAL_ITERATOR_THRESHOLD;
+        }
+
         @Override
         public Spliterator<Edge> spliterator() {
+            if (approximate) {
+                if (searchRect == null) {
+                    // Special case: all edges
+                    return new QuadTreeGlobalEdgesSpliterator(null, null, null);
+                }
+                HashSet<QuadTreeNode> overlappingNodes = new HashSet<>();
+                int nodeCount = collectOverlapping(quadTreeRoot, searchRect, overlappingNodes);
+                if (nodeCount == quadTreeRoot.size) {
+                    return new QuadTreeGlobalEdgesSpliterator(null, null, null);
+                } else if (useDirectIterator(nodeCount)) {
+                    return new QuadTreeGlobalEdgesSpliterator(searchRect, overlappingNodes, null);
+                }
+            }
             return new QuadTreeEdgesSpliterator(quadTreeRoot, searchRect, approximate);
         }
 
         @Override
         public Edge[] toArray() {
-            readLock();
-            int count = quadTreeRoot.edgeSize;
-            Edge[] array = new Edge[count];
-            for (Edge edge : this) {
-                array[--count] = edge;
-            }
-            readUnlock();
-            return array;
+            return toCollection().toArray(new Edge[0]);
         }
 
         @Override
@@ -1376,9 +1387,10 @@ public class NodesQuadTree {
         }
     }
 
-    private abstract class FilteredSpliterator<T, S extends Spliterator<T>, P extends Spliterator<T>> implements Spliterator<T> {
+    private abstract static class FilteredSpliterator<T, S extends Spliterator<T>, P extends Spliterator<T>> implements Spliterator<T> {
         protected final S parentSpliterator;
         protected final Predicate<? super T> predicate;
+        protected final Object[] holder = new Object[1];
 
         protected FilteredSpliterator(S parentSpliterator, Predicate<? super T> predicate) {
             this.parentSpliterator = parentSpliterator;
@@ -1391,14 +1403,17 @@ public class NodesQuadTree {
 
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
-            return parentSpliterator.tryAdvance(element -> {
-                if (testPredicate(element)) {
-                    action.accept(element);
-                } else {
-                    // Return null for filtered elements to maintain SIZED/SUBSIZED characteristics
-                    action.accept(null);
+            while (true) {
+                boolean advanced = parentSpliterator.tryAdvance(e -> holder[0] = e);
+                if (!advanced)
+                    return false;
+                @SuppressWarnings("unchecked")
+                T t = (T) holder[0];
+                if (testPredicate(t)) {
+                    action.accept(t);
+                    return true;
                 }
-            });
+            }
         }
 
         @Override
@@ -1418,8 +1433,7 @@ public class NodesQuadTree {
 
         @Override
         public int characteristics() {
-            // Remove NONNULL characteristic since we may return null for filtered elements
-            return parentSpliterator.characteristics() & ~NONNULL;
+            return parentSpliterator.characteristics() & ~(Spliterator.SIZED | Spliterator.SUBSIZED);
         }
     }
 
@@ -1475,13 +1489,13 @@ public class NodesQuadTree {
             // For SIZED characteristic, we need exact count
             if (searchRect == null) {
                 // Getting all edges, so we can use the maintained edge size
-                remainingSize = root.edgeSize;
+                remainingSize = root.size;
             } else if (approximate) {
                 // In approximate mode, count all edges in intersecting quadrants
-                remainingSize = countEdgesInRectApproximate(root, searchRect);
+                remainingSize = countNodesInRectApproximate(root, searchRect);
             } else {
                 // Need to count edges in the search rect
-                remainingSize = countEdgesInRect(root, searchRect);
+                remainingSize = countNodesInRect(root, searchRect);
             }
         }
 
@@ -1528,16 +1542,16 @@ public class NodesQuadTree {
             return graphStore.edgeStore.edgeIterator(new ArrayIterator(node.objects, node.objectCount));
         }
 
-        protected int countEdgesInRect(QuadTreeNode node, Rect2D rect) {
+        protected int countNodesInRect(QuadTreeNode node, Rect2D rect) {
             int count = 0;
 
-            // Count edges from objects at this level
+            // Count objects at this level
             if (node.objects != null) {
                 for (int i = 0; i < node.objectCount; i++) {
                     NodeImpl obj = node.objects[i];
                     SpatialNodeDataImpl spatialData = obj.getSpatialData();
                     if (rect.intersects(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
-                        count += obj.getDegree();
+                        count++;
                     }
                 }
             }
@@ -1545,56 +1559,54 @@ public class NodesQuadTree {
             // Count in children if they intersect
             if (node.childTL != null) {
                 if (rect.contains(node.childTL.rect)) {
-                    count += node.childTL.edgeSize;
+                    count += node.childTL.size;
                 } else if (node.childTL.rect.intersects(rect)) {
-                    count += countEdgesInRect(node.childTL, rect);
+                    count += countNodesInRect(node.childTL, rect);
                 }
 
                 if (rect.contains(node.childTR.rect)) {
-                    count += node.childTR.edgeSize;
+                    count += node.childTR.size;
                 } else if (node.childTR.rect.intersects(rect)) {
-                    count += countEdgesInRect(node.childTR, rect);
+                    count += countNodesInRect(node.childTR, rect);
                 }
 
                 if (rect.contains(node.childBL.rect)) {
-                    count += node.childBL.edgeSize;
+                    count += node.childBL.size;
                 } else if (node.childBL.rect.intersects(rect)) {
-                    count += countEdgesInRect(node.childBL, rect);
+                    count += countNodesInRect(node.childBL, rect);
                 }
 
                 if (rect.contains(node.childBR.rect)) {
-                    count += node.childBR.edgeSize;
+                    count += node.childBR.size;
                 } else if (node.childBR.rect.intersects(rect)) {
-                    count += countEdgesInRect(node.childBR, rect);
+                    count += countNodesInRect(node.childBR, rect);
                 }
             }
 
             return count;
         }
 
-        protected int countEdgesInRectApproximate(QuadTreeNode node, Rect2D rect) {
+        protected int countNodesInRectApproximate(QuadTreeNode node, Rect2D rect) {
             int count = 0;
 
-            // Count edges from objects at this level if the node intersects
+            // Count objects at this level if the node intersects
             if (node.objects != null) {
-                for (int i = 0; i < node.objectCount; i++) {
-                    count += node.objects[i].getDegree();
-                }
+                count += node.objectCount;
             }
 
             // Count in children if they intersect
             if (node.childTL != null) {
                 if (rect.containsOrIntersects(node.childTL.rect)) {
-                    count += node.childTL.edgeSize;
+                    count += node.childTL.size;
                 }
                 if (rect.containsOrIntersects(node.childTR.rect)) {
-                    count += node.childTR.edgeSize;
+                    count += node.childTR.size;
                 }
                 if (rect.containsOrIntersects(node.childBL.rect)) {
-                    count += node.childBL.edgeSize;
+                    count += node.childBL.size;
                 }
                 if (rect.containsOrIntersects(node.childBR.rect)) {
-                    count += node.childBR.edgeSize;
+                    count += node.childBR.size;
                 }
             }
 
@@ -1678,11 +1690,11 @@ public class NodesQuadTree {
                         splitContained.addFirst(contained);
 
                         if (searchRect == null || contained) {
-                            splitSize += node.edgeSize;
+                            splitSize += node.size;
                         } else if (approximate) {
-                            splitSize += countEdgesInRectApproximate(node, searchRect);
+                            splitSize += countNodesInRectApproximate(node, searchRect);
                         } else {
-                            splitSize += countEdgesInRect(node, searchRect);
+                            splitSize += countNodesInRect(node, searchRect);
                         }
                     }
 
@@ -1712,7 +1724,7 @@ public class NodesQuadTree {
 
         @Override
         public int characteristics() {
-            return SIZED | SUBSIZED | NONNULL;
+            return DISTINCT | NONNULL;
         }
     }
 
@@ -1734,6 +1746,116 @@ public class NodesQuadTree {
         @Override
         protected boolean testPredicate(Edge element) {
             return predicate == null || predicate.test(element);
+        }
+    }
+
+    /**
+     * A spliterator that iterates through all edges in the EdgeStore and filters
+     * them based on whether their nodes belong to quad tree nodes that overlap with
+     * a search rectangle. This approach iterates edges directly rather than
+     * iterating nodes first.
+     */
+    protected class QuadTreeGlobalEdgesSpliterator implements Spliterator<Edge> {
+
+        private final Rect2D searchRect;
+        private final Set<QuadTreeNode> overlappingQuadNodes;
+        private final Spliterator<Edge> baseSpliterator;
+        private final int expectedVersion;
+        private final Predicate<? super Edge> additionalPredicate;
+
+        public QuadTreeGlobalEdgesSpliterator(Rect2D searchRect, Set<QuadTreeNode> overlappingQuadNodes, Predicate<? super Edge> additionalPredicate) {
+            this.searchRect = searchRect;
+            this.additionalPredicate = additionalPredicate;
+            this.expectedVersion = modCount;
+            this.overlappingQuadNodes = overlappingQuadNodes;
+
+            // Create the base spliterator from EdgeStore with our predicate
+            if (additionalPredicate == null) {
+                if (searchRect == null) {
+                    // No filtering needed, use the full spliterator
+                    this.baseSpliterator = graphStore.edgeStore.spliterator();
+                } else {
+                    // Only spatial filtering
+                    this.baseSpliterator = graphStore.edgeStore.newFilteredSpliterator(this::shouldIncludeEdge);
+                }
+            } else {
+                if (searchRect == null) {
+                    this.baseSpliterator = graphStore.edgeStore
+                            .newFilteredSpliterator(this::shouldIncludeEdgeAllWithPredicate);
+                } else {
+                    this.baseSpliterator = graphStore.edgeStore.newFilteredSpliterator(this::shouldIncludeEdge);
+                }
+            }
+        }
+
+        private QuadTreeGlobalEdgesSpliterator(Rect2D searchRect, Set<QuadTreeNode> overlappingQuadNodes, Spliterator<Edge> baseSpliterator, int expectedVersion, Predicate<? super Edge> additionalPredicate) {
+            this.searchRect = searchRect;
+            this.overlappingQuadNodes = overlappingQuadNodes;
+            this.baseSpliterator = baseSpliterator;
+            this.expectedVersion = expectedVersion;
+            this.additionalPredicate = additionalPredicate;
+        }
+
+        private boolean shouldIncludeEdgeAllWithPredicate(EdgeImpl edge) {
+            checkForComodification();
+
+            return additionalPredicate.test(edge);
+        }
+
+        /**
+         * Determines if an edge should be included based on spatial filtering criteria
+         */
+        private boolean shouldIncludeEdge(EdgeImpl edge) {
+            checkForComodification();
+
+            boolean spatialMatch = false;
+
+            SpatialNodeDataImpl sourceSpatialData = edge.source.getSpatialData();
+            SpatialNodeDataImpl targetSpatialData = edge.target.getSpatialData();
+
+            if (sourceSpatialData != null && sourceSpatialData.quadTreeNode != null) {
+                spatialMatch = overlappingQuadNodes.contains(sourceSpatialData.quadTreeNode);
+            }
+
+            if (!spatialMatch && targetSpatialData != null && targetSpatialData.quadTreeNode != null) {
+                // Only check target if source wasn't already overlapping
+                spatialMatch = overlappingQuadNodes.contains(targetSpatialData.quadTreeNode);
+            }
+
+            // Apply additional predicate if provided
+            return spatialMatch && (additionalPredicate == null || additionalPredicate.test(edge));
+        }
+
+        private void checkForComodification() {
+            if (expectedVersion != modCount) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Edge> action) {
+            return baseSpliterator.tryAdvance(action);
+        }
+
+        @Override
+        public Spliterator<Edge> trySplit() {
+            Spliterator<Edge> splitBase = baseSpliterator.trySplit();
+            if (splitBase == null) {
+                return null;
+            }
+
+            return new QuadTreeGlobalEdgesSpliterator(searchRect, overlappingQuadNodes, splitBase, expectedVersion,
+                    additionalPredicate);
+        }
+
+        @Override
+        public long estimateSize() {
+            return baseSpliterator.estimateSize();
+        }
+
+        @Override
+        public int characteristics() {
+            return baseSpliterator.characteristics();
         }
     }
 }
