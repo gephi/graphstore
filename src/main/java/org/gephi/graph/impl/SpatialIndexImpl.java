@@ -43,6 +43,16 @@ public class SpatialIndexImpl implements SpatialIndex {
         return nodesTree.getEdges(rect, true);
     }
 
+    @Override
+    public void readLock() {
+        nodesTree.readLock();
+    }
+
+    @Override
+    public void readUnlock() {
+        nodesTree.readUnlock();
+    }
+
     public NodeIterable getNodesInArea(Rect2D rect, Predicate<? super Node> predicate) {
         return nodesTree.getNodes(rect, false, predicate);
     }
