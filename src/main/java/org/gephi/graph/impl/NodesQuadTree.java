@@ -778,14 +778,7 @@ public class NodesQuadTree {
 
         @Override
         public Node[] toArray() {
-            readLock();
-            int count = getObjectCount();
-            Node[] array = new Node[count];
-            for (Node node : this) {
-                array[--count] = node;
-            }
-            readUnlock();
-            return array;
+            return toCollection().toArray(new Node[0]);
         }
 
         @Override
