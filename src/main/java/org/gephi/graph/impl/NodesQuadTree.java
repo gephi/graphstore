@@ -362,7 +362,8 @@ public class NodesQuadTree {
 
         private void add(NodeImpl item) {
             if (objects == null) {
-                objects = new NodeImpl[maxObjectsPerNode];
+                // Allocate initial array
+                objects = new NodeImpl[maxObjectsPerNode / 16];
             }
 
             // Check if item is already in this node (avoid duplicates)
