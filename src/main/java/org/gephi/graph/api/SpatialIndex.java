@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.api;
 
+import java.util.function.Predicate;
+
 /**
  * Query the (quadtree-based) index based on the given rectangle area.
  * <p>
@@ -43,6 +45,15 @@ public interface SpatialIndex {
     NodeIterable getNodesInArea(Rect2D rect);
 
     /**
+     * Returns the nodes in the given area, filtered by the given predicate.
+     *
+     * @param rect area to query
+     * @param predicate filter predicate
+     * @return nodes in the area
+     */
+    NodeIterable getNodesInArea(Rect2D rect, Predicate<? super Node> predicate);
+
+    /**
      * Returns the nodes in the given area using a faster, but approximate method.
      * <p>
      * All nodes in the provided area are guaranteed to be returned, but some nodes
@@ -54,12 +65,35 @@ public interface SpatialIndex {
     NodeIterable getApproximateNodesInArea(Rect2D rect);
 
     /**
+     * Returns the nodes in the given area using a faster, but approximate method,
+     * filtered by the given predicate.
+     * <p>
+     * All nodes in the provided area are guaranteed to be returned, but some nodes
+     * outside the area may also be returned.
+     *
+     * @param rect area to query
+     * @param predicate filter predicate
+     * @return nodes in the area
+     */
+    NodeIterable getApproximateNodesInArea(Rect2D rect, Predicate<? super Node> predicate);
+
+    /**
      * Returns the edges in the given area. Edges may be returned twice.
      *
      * @param rect area to query
      * @return edges in the area
      */
     EdgeIterable getEdgesInArea(Rect2D rect);
+
+    /**
+     * Returns the edges in the given area, filtered by the given predicate. Edges
+     * may be returned twice.
+     *
+     * @param rect area to query
+     * @param predicate filter predicate
+     * @return edges in the area
+     */
+    EdgeIterable getEdgesInArea(Rect2D rect, Predicate<? super Edge> predicate);
 
     /**
      * Returns the edges in the given area using a faster, but approximate method.
@@ -71,6 +105,19 @@ public interface SpatialIndex {
      * @return edges in the area
      */
     EdgeIterable getApproximateEdgesInArea(Rect2D rect);
+
+    /**
+     * Returns the edges in the given area using a faster, but approximate method,
+     * filtered by the given predicate.
+     * <p>
+     * All edges in the provided area are guaranteed to be returned, but some edges
+     * outside the area may also be returned. Edges may also be returned twice.
+     *
+     * @param rect area to query
+     * @param predicate filter predicate
+     * @return edges in the area
+     */
+    EdgeIterable getApproximateEdgesInArea(Rect2D rect, Predicate<? super Edge> predicate);
 
     /**
      * Returns the bounding rectangle that contains all nodes in the graph. The
