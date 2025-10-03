@@ -815,13 +815,12 @@ public class NodesQuadTree {
 
         @Override
         public Spliterator<Edge> spliterator() {
-            if (approximate) {
-                HashSet<QuadTreeNode> overlappingNodes = new HashSet<>();
-                int nodeCount = collectOverlapping(quadTreeRoot, searchRect, overlappingNodes);
-                if (useDirectIterator(nodeCount)) {
-                    return new QuadTreeGlobalEdgesSpliterator(searchRect, overlappingNodes, predicate);
-                }
+            HashSet<QuadTreeNode> overlappingNodes = new HashSet<>();
+            int nodeCount = collectOverlapping(quadTreeRoot, searchRect, overlappingNodes);
+            if (useDirectIterator(nodeCount)) {
+                return new QuadTreeGlobalEdgesSpliterator(searchRect, approximate, overlappingNodes, predicate);
             }
+            // Use local iterator
             return new FilteredQuadTreeEdgesSpliterator(quadTreeRoot, searchRect, approximate, predicate);
         }
     }
@@ -851,19 +850,19 @@ public class NodesQuadTree {
 
         @Override
         public Spliterator<Edge> spliterator() {
-            if (approximate) {
-                if (searchRect == null) {
-                    // Special case: all edges
-                    return new QuadTreeGlobalEdgesSpliterator(null, null, null);
-                }
-                HashSet<QuadTreeNode> overlappingNodes = new HashSet<>();
-                int nodeCount = collectOverlapping(quadTreeRoot, searchRect, overlappingNodes);
-                if (nodeCount == quadTreeRoot.size) {
-                    return new QuadTreeGlobalEdgesSpliterator(null, null, null);
-                } else if (useDirectIterator(nodeCount)) {
-                    return new QuadTreeGlobalEdgesSpliterator(searchRect, overlappingNodes, null);
-                }
+            if (searchRect == null) {
+                // Special case: all edges
+                return new QuadTreeGlobalEdgesSpliterator(null, approximate, null, null);
             }
+            HashSet<QuadTreeNode> overlappingNodes = new HashSet<>();
+            int nodeCount = collectOverlapping(quadTreeRoot, searchRect, overlappingNodes);
+            if (approximate && nodeCount == quadTreeRoot.size) {
+                // Optimisation: approximate search and all nodes overlapping, so just return all edges
+                return new QuadTreeGlobalEdgesSpliterator(null, true, null, null);
+            } else if (useDirectIterator(nodeCount)) {
+                return new QuadTreeGlobalEdgesSpliterator(searchRect, approximate, overlappingNodes, null);
+            }
+            // Use local iterator
             return new QuadTreeEdgesSpliterator(quadTreeRoot, searchRect, approximate);
         }
 
@@ -1597,13 +1596,15 @@ public class NodesQuadTree {
     protected class QuadTreeGlobalEdgesSpliterator implements Spliterator<Edge> {
 
         private final Rect2D searchRect;
+        private final boolean approximate;
         private final Set<QuadTreeNode> overlappingQuadNodes;
         private final Spliterator<Edge> baseSpliterator;
         private final int expectedVersion;
         private final Predicate<? super Edge> additionalPredicate;
 
-        public QuadTreeGlobalEdgesSpliterator(Rect2D searchRect, Set<QuadTreeNode> overlappingQuadNodes, Predicate<? super Edge> additionalPredicate) {
+        public QuadTreeGlobalEdgesSpliterator(Rect2D searchRect, boolean approximate, Set<QuadTreeNode> overlappingQuadNodes, Predicate<? super Edge> additionalPredicate) {
             this.searchRect = searchRect;
+            this.approximate = approximate;
             this.additionalPredicate = additionalPredicate;
             this.expectedVersion = modCount;
             this.overlappingQuadNodes = overlappingQuadNodes;
@@ -1627,8 +1628,9 @@ public class NodesQuadTree {
             }
         }
 
-        private QuadTreeGlobalEdgesSpliterator(Rect2D searchRect, Set<QuadTreeNode> overlappingQuadNodes, Spliterator<Edge> baseSpliterator, int expectedVersion, Predicate<? super Edge> additionalPredicate) {
+        private QuadTreeGlobalEdgesSpliterator(Rect2D searchRect, boolean approximate, Set<QuadTreeNode> overlappingQuadNodes, Spliterator<Edge> baseSpliterator, int expectedVersion, Predicate<? super Edge> additionalPredicate) {
             this.searchRect = searchRect;
+            this.approximate = approximate;
             this.overlappingQuadNodes = overlappingQuadNodes;
             this.baseSpliterator = baseSpliterator;
             this.expectedVersion = expectedVersion;
@@ -1662,7 +1664,17 @@ public class NodesQuadTree {
             }
 
             // Apply additional predicate if provided
-            return spatialMatch && (additionalPredicate == null || additionalPredicate.test(edge));
+            if(spatialMatch && (additionalPredicate == null || additionalPredicate.test(edge))) {
+                if (approximate) {
+                    return true;
+                } else {
+                    // In exact mode, check if edge endpoints intersect with search rect
+                    boolean sourceIntersects = sourceSpatialData != null && searchRect.intersects(sourceSpatialData.minX, sourceSpatialData.minY, sourceSpatialData.maxX, sourceSpatialData.maxY);
+                    boolean targetIntersects = targetSpatialData != null && searchRect.intersects(targetSpatialData.minX, targetSpatialData.minY, targetSpatialData.maxX, targetSpatialData.maxY);
+                    return sourceIntersects || targetIntersects;
+                }
+            }
+            return false;
         }
 
         private void checkForComodification() {
@@ -1683,7 +1695,7 @@ public class NodesQuadTree {
                 return null;
             }
 
-            return new QuadTreeGlobalEdgesSpliterator(searchRect, overlappingQuadNodes, splitBase, expectedVersion,
+            return new QuadTreeGlobalEdgesSpliterator(searchRect, approximate, overlappingQuadNodes, splitBase, expectedVersion,
                     additionalPredicate);
         }
 

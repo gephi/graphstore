@@ -635,6 +635,72 @@ public class NodesQuadTreeTest {
         assertSame(q.getEdges(), edges);
     }
 
+    @Test
+    public void testGetEdgesInArea() {
+        Rect2D area = new Rect2D(-1000, -1000, 1000, 1000);
+        GraphStore store = GraphGenerator.generateEmptyGraphStore(getConfig());
+        NodesQuadTree q = store.spatialIndex.nodesTree;
+        NodeImpl[] nodes = addRandomNodes(q, 30000, 0, area);
+        EdgeImpl[] edges = addRandomEdges(store, nodes, 100000);
+
+        Rect2D subarea = new Rect2D(-100, -100, 100, 100);
+
+        assertSame(q
+            .getEdges(subarea, false), Arrays
+            .stream(edges).filter(e -> edgeIntersectsArea(e, subarea, false))
+            .toArray(EdgeImpl[]::new));
+    }
+
+    @Test
+    public void testGetEdgesInAreaGlobal() {
+        Rect2D area = new Rect2D(-1000, -1000, 1000, 1000);
+        GraphStore store = GraphGenerator.generateEmptyGraphStore(getConfig());
+        NodesQuadTree q = store.spatialIndex.nodesTree;
+        NodeImpl[] nodes = addRandomNodes(q, 30000, 0, area);
+        EdgeImpl[] edges = addRandomEdges(store, nodes, 100000);
+
+        Rect2D subarea = new Rect2D(-600, -600, 600, 600);
+
+        assertSame(q
+            .getEdges(subarea, false), Arrays
+            .stream(edges).filter(e -> edgeIntersectsArea(e, subarea, false))
+            .toArray(EdgeImpl[]::new));
+    }
+
+    @Test
+    public void testGetEdgesInAreaApproximate() {
+        Rect2D area = new Rect2D(-1000, -1000, 1000, 1000);
+        GraphStore store = GraphGenerator.generateEmptyGraphStore(getConfig());
+        NodesQuadTree q = store.spatialIndex.nodesTree;
+        NodeImpl[] nodes = addRandomNodes(q, 30000, 0, area);
+        EdgeImpl[] edges = addRandomEdges(store, nodes, 100000);
+
+        Rect2D subarea = new Rect2D(-100, -100, -1, -1);
+
+        // Approximate should return all nodes that are in the quadtree nodes
+        // intersecting the area
+        assertSame(q.getEdges(subarea, true), Arrays.stream(edges)
+            .filter(e -> edgeIntersectsArea(e, subarea, true)).toArray(EdgeImpl[]::new));
+    }
+
+    @Test
+    public void testGetEdgesInAreaWithPredicate() {
+        GraphStore store = GraphGenerator.generateEmptyGraphStore(getConfig());
+        NodesQuadTree q = store.spatialIndex.nodesTree;
+
+        Rect2D rect = new Rect2D(-10, -10, 10, 10);
+        NodeImpl[] nodes = addRandomNodes(q, 2, 0, rect);
+        EdgeImpl[] edges = addRandomEdges(store, nodes, 2);
+        EdgeImpl edge1 = edges[0];
+
+        assertSame(q.getEdges(rect, false), edges);
+        assertSame(q.getEdges(rect, false, e -> e == edge1), edge1);
+        assertSame(q.getEdges(rect, true), edges);
+        assertSame(q.getEdges(rect, true, e -> e == edge1), edge1);
+    }
+
+    // Utils
+
     private void assertSame(NodeIterable iterable, Node... expected) {
         Assert.assertTrue(expected.length > 0, "Expected array must not be empty");
         ObjectSet<Node> set = new ObjectOpenHashSet<>(expected.length);
@@ -697,5 +763,16 @@ public class NodesQuadTreeTest {
 
     private Configuration getConfig() {
         return Configuration.builder().enableSpatialIndex(true).build();
+    }
+
+    private boolean edgeIntersectsArea(EdgeImpl e, Rect2D area, boolean approximate) {
+        if (approximate) {
+            return area.intersects(e.source.getSpatialData().quadTreeNode.quadRect())
+                || area.intersects(e.target.getSpatialData().quadTreeNode.quadRect());
+        }
+        return area.intersects(e.source.getSpatialData().minX, e.source.getSpatialData().minY,
+            e.source.getSpatialData().maxX, e.source.getSpatialData().maxY)
+            || area.intersects(e.target.getSpatialData().minX, e.target.getSpatialData().minY,
+            e.target.getSpatialData().maxX, e.target.getSpatialData().maxY);
     }
 }
