@@ -859,7 +859,7 @@ public class EdgeStoreTest {
         Object2ObjectMap<Object, EdgeImpl> outEdgeMap = getObjectMap(edges);
 
         for (NodeImpl n : getNodes(edges)) {
-            EdgeStore.EdgeInOutIterator itr = edgeStore.edgeIterator(n);
+            EdgeStore.EdgeInOutIterator itr = edgeStore.edgeIterator(n, true);
             for (; itr.hasNext();) {
                 EdgeImpl e = itr.next();
                 if (e.isSelfLoop()) {
@@ -881,13 +881,13 @@ public class EdgeStoreTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void testInOutIteratorNull() {
         EdgeStore edgeStore = new EdgeStore();
-        edgeStore.edgeIterator(null);
+        edgeStore.edgeIterator((Node) null, true);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInOutIteratorInvalid() {
         EdgeStore edgeStore = new EdgeStore();
-        edgeStore.edgeIterator(new NodeImpl("0"));
+        edgeStore.edgeIterator(new NodeImpl("0"), true);
     }
 
     @Test
@@ -903,7 +903,7 @@ public class EdgeStoreTest {
         Object2ObjectMap<Object, EdgeImpl> outEdgeMap = getObjectMap(edgeList.toArray(new EdgeImpl[0]));
 
         for (NodeImpl n : getNodes(edges)) {
-            EdgeStore.EdgeInOutIterator itr = edgeStore.edgeIterator(n);
+            EdgeStore.EdgeInOutIterator itr = edgeStore.edgeIterator(n, true);
             for (; itr.hasNext();) {
                 EdgeImpl e = itr.next();
                 if (e.isSelfLoop()) {
@@ -930,7 +930,7 @@ public class EdgeStoreTest {
 
         int index = 0;
         for (NodeImpl n : getNodes(edges)) {
-            EdgeStore.EdgeInOutIterator itr = edgeStore.edgeIterator(n);
+            EdgeStore.EdgeInOutIterator itr = edgeStore.edgeIterator(n, true);
             for (; itr.hasNext();) {
                 EdgeImpl e = itr.next();
                 itr.remove();
@@ -940,6 +940,80 @@ public class EdgeStoreTest {
         }
         Assert.assertEquals(index, edges.length);
         testContainsNone(edgeStore, Arrays.asList(edges));
+    }
+
+    @Test
+    public void testEdgeInOutMultiIterator() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        // Get all nodes from the edges
+        List<NodeImpl> nodeList = Arrays.asList(getNodes(edges));
+
+        // Collect edges using multi-iterator
+        EdgeStore.EdgeInOutMultiIterator multiIterator = edgeStore.edgeIterator(nodeList.iterator(), true);
+        Set<EdgeImpl> multiIteratorEdges = new ObjectOpenHashSet<>();
+        while (multiIterator.hasNext()) {
+            EdgeImpl edge = multiIterator.next();
+            multiIteratorEdges.add(edge);
+        }
+
+        // Collect edges using individual iterators (old approach)
+        Set<EdgeImpl> individualIteratorEdges = new ObjectOpenHashSet<>();
+        for (NodeImpl node : nodeList) {
+            EdgeStore.EdgeInOutIterator singleIterator = edgeStore.edgeIterator(node, true);
+            while (singleIterator.hasNext()) {
+                EdgeImpl edge = singleIterator.next();
+                individualIteratorEdges.add(edge);
+            }
+        }
+
+        // Both approaches should yield the same set of edges
+        Assert.assertEquals(multiIteratorEdges, individualIteratorEdges);
+
+        // Verify all edges are accounted for
+        Set<EdgeImpl> allEdges = new ObjectOpenHashSet<>(Arrays.asList(edges));
+        Assert.assertEquals(multiIteratorEdges, allEdges);
+    }
+
+    @Test
+    public void testEdgeInOutMultiIteratorEmpty() {
+        EdgeStore edgeStore = new EdgeStore();
+        List<NodeImpl> emptyNodeList = new ArrayList<>();
+
+        EdgeStore.EdgeInOutMultiIterator multiIterator = edgeStore.edgeIterator(emptyNodeList.iterator(), true);
+        Assert.assertFalse(multiIterator.hasNext());
+    }
+
+    @Test
+    public void testEdgeInOutMultiIteratorRemove() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        List<NodeImpl> nodeList = Arrays.asList(getNodes(edges));
+        EdgeStore.EdgeInOutMultiIterator multiIterator = edgeStore.edgeIterator(nodeList.iterator(), true);
+
+        int initialSize = edgeStore.size();
+        int removedCount = 0;
+
+        while (multiIterator.hasNext()) {
+            EdgeImpl edge = multiIterator.next();
+            multiIterator.remove();
+            removedCount++;
+            Assert.assertFalse(edgeStore.contains(edge));
+            Assert.assertEquals(edgeStore.size(), initialSize - removedCount);
+        }
+
+        Assert.assertEquals(removedCount, initialSize);
+        Assert.assertTrue(edgeStore.isEmpty());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testEdgeInOutMultiIteratorNullIterator() {
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.edgeIterator((Iterator<NodeImpl>) null, true);
     }
 
     @Test
@@ -1966,7 +2040,7 @@ public class EdgeStoreTest {
         edgeStore.addAll(Arrays.asList(edges));
 
         for (NodeImpl n : getNodes(edges)) {
-            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n);
+            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n, true);
             for (; itr.hasNext();) {
                 itr.next();
                 itr.remove();
@@ -1983,7 +2057,7 @@ public class EdgeStoreTest {
         edgeStore.addAll(Arrays.asList(edges));
 
         for (NodeImpl n : getNodes(edges)) {
-            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n);
+            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n, true);
             for (; itr.hasNext();) {
                 itr.next();
                 itr.remove();
@@ -2000,7 +2074,7 @@ public class EdgeStoreTest {
         Object2ObjectMap<NodeImpl, Set<EdgeImpl>> neighbours = getNeighboursMap(edges, 0, true);
 
         for (NodeImpl n : getNodes(edges)) {
-            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n);
+            Iterator<Edge> itr = edgeStore.edgeUndirectedIterator(n, true);
 
             Set<EdgeImpl> incidentEdges = neighbours.get(n);
 

@@ -114,8 +114,8 @@ public class Rect2D {
     }
 
     private String toString(NumberFormat formatter) {
-        return "(" + formatter.format(minX) + " " + formatter.format(minY) + ") < " + "(" + formatter
-                .format(maxX) + " " + formatter.format(maxY) + ")";
+        return "min(x:" + formatter.format(minX) + " y:" + formatter.format(minY) + ") < " + "max(x:" + formatter
+                .format(maxX) + " y:" + formatter.format(maxY) + ")";
     }
 
     /**
@@ -171,6 +171,44 @@ public class Rect2D {
      * @return true if this rectangle intersects, false otherwise
      */
     public boolean intersects(float minX, float minY, float maxX, float maxY) {
+        return this.minX <= maxX && minX <= this.maxX && this.maxY >= minY && maxY >= this.minY;
+    }
+
+    /**
+     * Returns true if this rectangle contains or intersects with the given
+     * rectangle. This is equivalent to checking
+     * {@code this.contains(rect) || this.intersects(rect)} but more efficient as it
+     * performs the check in a single operation.
+     *
+     * @param rect the rectangle to check
+     * @return true if this rectangle contains or intersects with the given
+     *         rectangle, false otherwise
+     */
+    public boolean containsOrIntersects(Rect2D rect) {
+        if (rect == this) {
+            return true;
+        }
+
+        return containsOrIntersects(rect.minX, rect.minY, rect.maxX, rect.maxY);
+    }
+
+    /**
+     * Returns true if this rectangle contains or intersects with the given
+     * rectangle. This is equivalent to checking
+     * {@code this.contains(minX, minY, maxX, maxY) || this.intersects(minX, minY, maxX, maxY)}
+     * but more efficient as it performs the check in a single operation.
+     *
+     * @param minX the x coordinate of the minimum corner
+     * @param minY the y coordinate of the minimum corner
+     * @param maxX the x coordinate of the maximum corner
+     * @param maxY the y coordinate of the maximum corner
+     *
+     * @return true if this rectangle contains or intersects with the given
+     *         rectangle, false otherwise
+     */
+    public boolean containsOrIntersects(float minX, float minY, float maxX, float maxY) {
+        // Two rectangles have overlap if they intersect - containment is a subset of
+        // intersection
         return this.minX <= maxX && minX <= this.maxX && this.maxY >= minY && maxY >= this.minY;
     }
 

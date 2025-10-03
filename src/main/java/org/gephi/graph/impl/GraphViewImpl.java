@@ -135,7 +135,7 @@ public class GraphViewImpl implements GraphView {
 
             if (nodeView && !edgeView) {
                 // Add edges
-                EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+                EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
                 while (itr.hasNext()) {
                     EdgeImpl edge = itr.next();
                     NodeImpl opposite = edge.source == nodeImpl ? edge.target : edge.source;
@@ -234,7 +234,7 @@ public class GraphViewImpl implements GraphView {
             }
 
             // Remove edges
-            EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+            EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
             while (itr.hasNext()) {
                 EdgeImpl edgeImpl = itr.next();
 
@@ -462,15 +462,15 @@ public class GraphViewImpl implements GraphView {
         }
     }
 
-    public boolean containsNode(final NodeImpl node) {
+    public boolean containsNode(final Node node) {
         if (!nodeView) {
             return true;
         }
-        return nodeBitVector.get(node.storeId);
+        return nodeBitVector.get(node.getStoreId());
     }
 
-    public boolean containsEdge(final EdgeImpl edge) {
-        return edgeBitVector.get(edge.storeId);
+    public boolean containsEdge(final Edge edge) {
+        return edgeBitVector.get(edge.getStoreId());
     }
 
     public void intersection(final GraphViewImpl otherView) {
@@ -915,7 +915,7 @@ public class GraphViewImpl implements GraphView {
         if (!(n instanceof NodeImpl)) {
             throw new ClassCastException("Object must be a NodeImpl object");
         }
-        if (((NodeImpl) n).storeId == NodeStore.NULL_ID) {
+        if (n.getStoreId() == NodeStore.NULL_ID) {
             throw new IllegalArgumentException("Node should belong to a store");
         }
     }

@@ -419,14 +419,18 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return new EdgeInIterator((NodeImpl) node);
     }
 
-    public EdgeInOutIterator edgeIterator(final Node node) {
+    public EdgeInOutIterator edgeIterator(final Node node, boolean locking) {
         checkValidNodeObject(node);
-        return new EdgeInOutIterator((NodeImpl) node);
+        return new EdgeInOutIterator((NodeImpl) node, locking);
     }
 
-    public Iterator<Edge> edgeUndirectedIterator(final Node node) {
+    public EdgeInOutMultiIterator edgeIterator(final Iterator<NodeImpl> nodeIterator, boolean locking) {
+        return new EdgeInOutMultiIterator(nodeIterator, locking);
+    }
+
+    public Iterator<Edge> edgeUndirectedIterator(final Node node, boolean locking) {
         checkValidNodeObject(node);
-        return undirectedIterator(new EdgeInOutIterator((NodeImpl) node));
+        return undirectedIterator(new EdgeInOutIterator((NodeImpl) node, locking));
     }
 
     public EdgeTypeOutIterator edgeOutIterator(final Node node, int type) {
@@ -471,7 +475,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     public NeighborsIterator neighborIterator(Node node) {
         checkValidNodeObject(node);
-        return new NeighborsUndirectedIterator((NodeImpl) node, new EdgeInOutIterator((NodeImpl) node));
+        return new NeighborsUndirectedIterator((NodeImpl) node, new EdgeInOutIterator((NodeImpl) node, true));
     }
 
     public NeighborsIterator neighborIterator(final Node node, int type) {
@@ -1285,6 +1289,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         if (version != null) {
             version.incrementAndGetEdgeVersion();
         }
+        if (spatialIndex != null) {
+            spatialIndex.incrementVersion();
+        }
     }
 
     boolean isUndirectedToIgnore(EdgeImpl edge) {
@@ -1491,10 +1498,15 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
-    protected final class EdgeInOutIterator implements Iterator<Edge> {
+    /**
+     * Abstract base class for iterating over edges connected to nodes. Provides
+     * common logic for handling both incoming and outgoing edges.
+     */
+    protected abstract class AbstractEdgeInOutIterator implements Iterator<Edge> {
 
-        protected final int outTypeLength;
-        protected final int inTypeLength;
+        protected final boolean locking;
+        protected int outTypeLength;
+        protected int inTypeLength;
         protected EdgeImpl[] outArray;
         protected EdgeImpl[] inArray;
         protected int typeIndex = 0;
@@ -1502,17 +1514,36 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected EdgeImpl lastEdge;
         protected boolean out = true;
 
-        public EdgeInOutIterator(NodeImpl node) {
-            readLock();
+        protected AbstractEdgeInOutIterator(boolean locking) {
+            this.locking = locking;
+            if (locking) {
+                readLock();
+            }
+        }
+
+        /**
+         * Initialize arrays for the current node. Called when starting iteration for a
+         * new node.
+         */
+        protected void initializeForNode(NodeImpl node) {
             outArray = node.headOut;
             outTypeLength = outArray.length;
             inArray = node.headIn;
             inTypeLength = inArray.length;
+            typeIndex = 0;
+            pointer = null;
+            out = true;
         }
+
+        /**
+         * Called when the current node has no more edges. Should return true if there
+         * are more nodes to process, false otherwise.
+         */
+        protected abstract boolean moveToNextNode();
 
         @Override
         public boolean hasNext() {
-            if (pointer == null) {
+            while (pointer == null) {
                 if (out) {
                     while (pointer == null && typeIndex < outTypeLength) {
                         pointer = outArray[typeIndex++];
@@ -1537,8 +1568,13 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 }
 
                 if (pointer == null) {
-                    readUnlock();
-                    return false;
+                    // No more edges for current node, try next node
+                    if (!moveToNextNode()) {
+                        if (locking) {
+                            readUnlock();
+                        }
+                        return false;
+                    }
                 }
             }
             return true;
@@ -1576,6 +1612,53 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         public void remove() {
             checkWriteLock();
             EdgeStore.this.remove(lastEdge);
+        }
+    }
+
+    /**
+     * Iterator for edges connected to a single node (both incoming and outgoing).
+     */
+    protected final class EdgeInOutIterator extends AbstractEdgeInOutIterator {
+
+        public EdgeInOutIterator(NodeImpl node, boolean locking) {
+            super(locking);
+            initializeForNode(node);
+        }
+
+        @Override
+        protected boolean moveToNextNode() {
+            // Single node iterator - no more nodes to process
+            return false;
+        }
+    }
+
+    /**
+     * Iterator for edges connected to multiple nodes (both incoming and outgoing).
+     * Iterates through all edges of all provided nodes without creating separate
+     * iterators.
+     */
+    protected final class EdgeInOutMultiIterator extends AbstractEdgeInOutIterator {
+
+        private final Iterator<NodeImpl> nodeIterator;
+
+        public EdgeInOutMultiIterator(Iterator<NodeImpl> nodeIterator, boolean locking) {
+            super(locking);
+            this.nodeIterator = nodeIterator;
+            // Initialize with first node if available
+            if (nodeIterator.hasNext()) {
+                NodeImpl node = nodeIterator.next();
+                checkValidNodeObject(node);
+                initializeForNode(node);
+            }
+        }
+
+        @Override
+        protected boolean moveToNextNode() {
+            if (nodeIterator.hasNext()) {
+                initializeForNode(nodeIterator.next());
+                return true;
+            }
+            return false;
         }
     }
 
