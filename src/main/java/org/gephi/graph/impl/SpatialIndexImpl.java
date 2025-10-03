@@ -15,13 +15,12 @@ import org.gephi.graph.api.SpatialIndex;
  */
 public class SpatialIndexImpl implements SpatialIndex {
 
-    private final GraphStore store;
     protected final NodesQuadTree nodesTree;
 
     public SpatialIndexImpl(GraphStore store) {
-        this.store = store;
         float boundaries = GraphStoreConfiguration.SPATIAL_INDEX_DIMENSION_BOUNDARY;
-        this.nodesTree = new NodesQuadTree(store, new Rect2D(-boundaries, -boundaries, boundaries, boundaries));
+        this.nodesTree = new NodesQuadTree(store,
+                new Rect2D(-boundaries / 2, -boundaries / 2, boundaries / 2, boundaries / 2));
     }
 
     @Override
