@@ -135,7 +135,7 @@ public class GraphViewImpl implements GraphView {
 
             if (nodeView && !edgeView) {
                 // Add edges
-                EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+                EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
                 while (itr.hasNext()) {
                     EdgeImpl edge = itr.next();
                     NodeImpl opposite = edge.source == nodeImpl ? edge.target : edge.source;
@@ -234,7 +234,7 @@ public class GraphViewImpl implements GraphView {
             }
 
             // Remove edges
-            EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+            EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
             while (itr.hasNext()) {
                 EdgeImpl edgeImpl = itr.next();
 

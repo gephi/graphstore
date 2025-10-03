@@ -277,7 +277,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         autoWriteLock();
         try {
             nodeStore.checkNonNullNodeObject(node);
-            for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(node); edgeIterator.hasNext();) {
+            for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(node, false); edgeIterator.hasNext();) {
                 edgeIterator.next();
                 edgeIterator.remove();
             }
@@ -303,7 +303,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         try {
             for (Node node : nodes) {
                 nodeStore.checkNonNullNodeObject(node);
-                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(node); edgeIterator.hasNext();) {
+                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(node, false); edgeIterator.hasNext();) {
                     edgeIterator.next();
                     edgeIterator.remove();
                 }
@@ -434,7 +434,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     @Override
     public EdgeIterable getEdges(final Node node) {
-        return new EdgeIterableWrapper(() -> edgeStore.edgeIterator(node), getAutoLock());
+        return new EdgeIterableWrapper(() -> edgeStore.edgeIterator(node, true), getAutoLock());
     }
 
     @Override
@@ -575,7 +575,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public void clearEdges(final Node node) {
         autoWriteLock();
         try {
-            EdgeStore.EdgeInOutIterator itr = edgeStore.edgeIterator(node);
+            EdgeStore.EdgeInOutIterator itr = edgeStore.edgeIterator(node, false);
             for (; itr.hasNext();) {
                 itr.next();
                 itr.remove();

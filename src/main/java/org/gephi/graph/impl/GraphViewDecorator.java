@@ -433,7 +433,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         checkValidInViewNodeObject(node);
         return new NodeIterableWrapper(
                 () -> new NeighborsIterator((NodeImpl) node,
-                        new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node))),
+                        new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node, true))),
                 graphStore.getAutoLock());
     }
 
@@ -451,10 +451,10 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         checkValidInViewNodeObject(node);
         if (undirected) {
             return new EdgeIterableWrapper(
-                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node)),
+                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node, true)),
                     graphStore.getAutoLock());
         } else {
-            return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeIterator(node)),
+            return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeIterator(node, true)),
                     graphStore.getAutoLock());
         }
     }
@@ -507,7 +507,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public int getDegree(Node node) {
         if (undirected) {
             int count = 0;
-            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, true);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
                 if (view.containsEdge(edge) && !isUndirectedToIgnore(edge)) {
@@ -520,7 +520,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
             return count;
         } else {
             int count = 0;
-            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, true);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
                 if (view.containsEdge(edge)) {
@@ -598,7 +598,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public void clearEdges(Node node) {
         graphStore.autoWriteLock();
         try {
-            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
                 view.removeEdge(edge);

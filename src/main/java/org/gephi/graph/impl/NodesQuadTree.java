@@ -930,7 +930,7 @@ public class NodesQuadTree {
                 public NodeImpl next() {
                     return nodeIterator.next();
                 }
-            });
+            }, true);
         }
 
         @Override
@@ -1134,19 +1134,19 @@ public class NodesQuadTree {
         }
     }
 
-    private class QuadTreeNodesSpliterator implements Spliterator<Node> {
+    private abstract class AbstractQuadTreeSpliterator<T> implements Spliterator<T> {
         protected final Rect2D searchRect;
         protected final boolean approximate;
         protected final Deque<QuadTreeNode> nodesStack = new ArrayDeque<>();
         protected final Deque<Boolean> fullyContainedStack = new ArrayDeque<>();
 
         protected final int expectedModCount;
-        protected Iterator<NodeImpl> currentIterator;
+        protected Iterator<?> currentIterator;
         protected boolean currentFullyContained;
-        protected NodeImpl next;
+        protected T next;
         protected int remainingSize;
 
-        public QuadTreeNodesSpliterator(QuadTreeNode root, Rect2D searchRect, boolean approximate) {
+        protected AbstractQuadTreeSpliterator(QuadTreeNode root, Rect2D searchRect, boolean approximate) {
             this.searchRect = searchRect;
             this.approximate = approximate;
             this.expectedModCount = modCount;
@@ -1156,22 +1156,22 @@ public class NodesQuadTree {
 
             // Initialize with root
             addNode(root, currentFullyContained);
-            currentIterator = root.objects != null ? new ArrayIterator(root.objects, root.objectCount) : null;
+            currentIterator = createIteratorForNode(root);
 
             // For SIZED characteristic, we need exact count
             if (searchRect == null) {
-                // Getting all nodes, so we can use the maintained size
+                // Getting all elements, so we can use the maintained size
                 remainingSize = root.size;
             } else if (approximate) {
-                // In approximate mode, count all nodes in intersecting quadrants
+                // In approximate mode, count all elements in intersecting quadrants
                 remainingSize = countNodesInRectApproximate(root, searchRect);
             } else {
-                // Need to count nodes in the search rect
+                // Need to count elements in the search rect
                 remainingSize = countNodesInRect(root, searchRect);
             }
         }
 
-        protected QuadTreeNodesSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
+        protected AbstractQuadTreeSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
             this.searchRect = searchRect;
             this.approximate = approximate;
             this.expectedModCount = expectedModCount;
@@ -1180,7 +1180,7 @@ public class NodesQuadTree {
 
             if (node != null) {
                 addNode(node, fullyContained);
-                currentIterator = node.objects != null ? new ArrayIterator(node.objects, node.objectCount) : null;
+                currentIterator = createIteratorForNode(node);
             } else {
                 currentIterator = null;
             }
@@ -1192,7 +1192,7 @@ public class NodesQuadTree {
             }
         }
 
-        private void addNode(QuadTreeNode node, boolean fullyContained) {
+        protected void addNode(QuadTreeNode node, boolean fullyContained) {
             if (node.childTL != null) {
                 nodesStack.push(node.childBR);
                 nodesStack.push(node.childBL);
@@ -1278,7 +1278,7 @@ public class NodesQuadTree {
         }
 
         @Override
-        public boolean tryAdvance(Consumer<? super Node> action) {
+        public boolean tryAdvance(Consumer<? super T> action) {
             checkForComodification();
 
             if (next != null || findNext()) {
@@ -1290,44 +1290,16 @@ public class NodesQuadTree {
             return false;
         }
 
-        protected boolean findNext() {
-            while (currentIterator != null || !nodesStack.isEmpty()) {
-                if (currentIterator != null) {
-                    while (currentIterator.hasNext()) {
-                        final NodeImpl elem = currentIterator.next();
+        protected abstract boolean findNext();
 
-                        if (approximate || currentFullyContained || searchRect == null) {
-                            // In approximate mode, when fully contained, or getting all nodes
-                            next = elem;
-                            return true;
-                        } else {
-                            // In exact mode, check intersection
-                            final SpatialNodeDataImpl spatialData = elem.getSpatialData();
-                            if (searchRect
-                                    .intersects(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
-                                next = elem;
-                                return true;
-                            }
-                        }
-                    }
-                    currentIterator = null;
-                } else {
-                    final QuadTreeNode pointer = nodesStack.pop();
-                    currentFullyContained = fullyContainedStack
-                            .pop() || (searchRect != null && searchRect.contains(pointer.rect));
+        protected abstract Iterator<?> createIteratorForNode(QuadTreeNode node);
 
-                    if (currentFullyContained || searchRect == null || pointer.rect.intersects(searchRect)) {
-                        addNode(pointer, currentFullyContained);
-                        currentIterator = pointer.objects != null
-                                ? new ArrayIterator(pointer.objects, pointer.objectCount) : null;
-                    }
-                }
-            }
-            return false;
-        }
+        protected abstract boolean checkElementSpatialMatch(Object element);
+
+        protected abstract AbstractQuadTreeSpliterator<T> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size);
 
         @Override
-        public Spliterator<Node> trySplit() {
+        public Spliterator<T> trySplit() {
             checkForComodification();
 
             // Can only split if we have nodes on the stack
@@ -1361,8 +1333,7 @@ public class NodesQuadTree {
                     remainingSize -= splitSize;
 
                     // Create new spliterator for the split portion with empty initial state
-                    QuadTreeNodesSpliterator split = new QuadTreeNodesSpliterator(null, searchRect, approximate,
-                            expectedModCount, false, splitSize);
+                    AbstractQuadTreeSpliterator<T> split = createSplitInstance(null, searchRect, approximate, expectedModCount, false, splitSize);
 
                     // Add all split nodes to the new spliterator's stack
                     while (!splitNodes.isEmpty()) {
@@ -1379,6 +1350,65 @@ public class NodesQuadTree {
         @Override
         public long estimateSize() {
             return remainingSize;
+        }
+    }
+
+    private class QuadTreeNodesSpliterator extends AbstractQuadTreeSpliterator<Node> {
+
+        public QuadTreeNodesSpliterator(QuadTreeNode root, Rect2D searchRect, boolean approximate) {
+            super(root, searchRect, approximate);
+        }
+
+        private QuadTreeNodesSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
+            super(node, searchRect, approximate, expectedModCount, fullyContained, size);
+        }
+
+        @Override
+        protected Iterator<?> createIteratorForNode(QuadTreeNode node) {
+            return node.objects != null ? new ArrayIterator(node.objects, node.objectCount) : null;
+        }
+
+        @Override
+        protected boolean checkElementSpatialMatch(Object element) {
+            NodeImpl elem = (NodeImpl) element;
+            if (approximate || currentFullyContained || searchRect == null) {
+                return true;
+            } else {
+                final SpatialNodeDataImpl spatialData = elem.getSpatialData();
+                return searchRect.intersects(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY);
+            }
+        }
+
+        @Override
+        protected AbstractQuadTreeSpliterator<Node> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
+            return new QuadTreeNodesSpliterator(node, searchRect, approximate, expectedModCount, fullyContained, size);
+        }
+
+        @Override
+        protected boolean findNext() {
+            while (currentIterator != null || !nodesStack.isEmpty()) {
+                if (currentIterator != null) {
+                    while (currentIterator.hasNext()) {
+                        final NodeImpl elem = (NodeImpl) currentIterator.next();
+
+                        if (checkElementSpatialMatch(elem)) {
+                            next = elem;
+                            return true;
+                        }
+                    }
+                    currentIterator = null;
+                } else {
+                    final QuadTreeNode pointer = nodesStack.pop();
+                    currentFullyContained = fullyContainedStack
+                            .pop() || (searchRect != null && searchRect.contains(pointer.rect));
+
+                    if (currentFullyContained || searchRect == null || pointer.rect.intersects(searchRect)) {
+                        addNode(pointer, currentFullyContained);
+                        currentIterator = createIteratorForNode(pointer);
+                    }
+                }
+            }
+            return false;
         }
 
         @Override
@@ -1458,200 +1488,64 @@ public class NodesQuadTree {
         }
     }
 
-    private class QuadTreeEdgesSpliterator implements Spliterator<Edge> {
-        protected final Rect2D searchRect;
-        protected final boolean approximate;
-        protected final Deque<QuadTreeNode> nodesStack = new ArrayDeque<>();
-        protected final Deque<Boolean> fullyContainedStack = new ArrayDeque<>();
-
-        protected final int expectedModCount;
-        protected Iterator<Edge> currentEdgeIterator;
-        protected boolean currentFullyContained;
-        protected Edge next;
-        protected int remainingSize;
+    private class QuadTreeEdgesSpliterator extends AbstractQuadTreeSpliterator<Edge> {
 
         public QuadTreeEdgesSpliterator(QuadTreeNode root, Rect2D searchRect) {
             this(root, searchRect, false);
         }
 
         public QuadTreeEdgesSpliterator(QuadTreeNode root, Rect2D searchRect, boolean approximate) {
-            this.searchRect = searchRect;
-            this.approximate = approximate;
-            this.expectedModCount = modCount;
-
-            // Null rect means get all
-            currentFullyContained = searchRect == null;
-
-            // Initialize with root
-            addNode(root, currentFullyContained);
-            currentEdgeIterator = createEdgeIteratorForNode(root);
-
-            // For SIZED characteristic, we need exact count
-            if (searchRect == null) {
-                // Getting all edges, so we can use the maintained edge size
-                remainingSize = root.size;
-            } else if (approximate) {
-                // In approximate mode, count all edges in intersecting quadrants
-                remainingSize = countNodesInRectApproximate(root, searchRect);
-            } else {
-                // Need to count edges in the search rect
-                remainingSize = countNodesInRect(root, searchRect);
-            }
+            super(root, searchRect, approximate);
         }
 
-        protected QuadTreeEdgesSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
-            this.searchRect = searchRect;
-            this.approximate = approximate;
-            this.expectedModCount = expectedModCount;
-            this.remainingSize = size;
-            this.currentFullyContained = fullyContained;
-
-            if (node != null) {
-                addNode(node, fullyContained);
-                currentEdgeIterator = createEdgeIteratorForNode(node);
-            } else {
-                currentEdgeIterator = null;
-            }
-        }
-
-        protected void checkForComodification() {
-            if (modCount != expectedModCount) {
-                throw new ConcurrentModificationException();
-            }
-        }
-
-        private void addNode(QuadTreeNode node, boolean fullyContained) {
-            if (node.childTL != null) {
-                nodesStack.push(node.childBR);
-                nodesStack.push(node.childBL);
-                nodesStack.push(node.childTR);
-                nodesStack.push(node.childTL);
-
-                fullyContainedStack.push(fullyContained);
-                fullyContainedStack.push(fullyContained);
-                fullyContainedStack.push(fullyContained);
-                fullyContainedStack.push(fullyContained);
-            }
-        }
-
-        private Iterator<Edge> createEdgeIteratorForNode(QuadTreeNode node) {
-            if (node.objects == null) {
-                return Collections.emptyIterator();
-            }
-
-            return graphStore.edgeStore.edgeIterator(new ArrayIterator(node.objects, node.objectCount));
-        }
-
-        protected int countNodesInRect(QuadTreeNode node, Rect2D rect) {
-            int count = 0;
-
-            // Count objects at this level
-            if (node.objects != null) {
-                for (int i = 0; i < node.objectCount; i++) {
-                    NodeImpl obj = node.objects[i];
-                    SpatialNodeDataImpl spatialData = obj.getSpatialData();
-                    if (rect.intersects(spatialData.minX, spatialData.minY, spatialData.maxX, spatialData.maxY)) {
-                        count++;
-                    }
-                }
-            }
-
-            // Count in children if they intersect
-            if (node.childTL != null) {
-                if (rect.contains(node.childTL.rect)) {
-                    count += node.childTL.size;
-                } else if (node.childTL.rect.intersects(rect)) {
-                    count += countNodesInRect(node.childTL, rect);
-                }
-
-                if (rect.contains(node.childTR.rect)) {
-                    count += node.childTR.size;
-                } else if (node.childTR.rect.intersects(rect)) {
-                    count += countNodesInRect(node.childTR, rect);
-                }
-
-                if (rect.contains(node.childBL.rect)) {
-                    count += node.childBL.size;
-                } else if (node.childBL.rect.intersects(rect)) {
-                    count += countNodesInRect(node.childBL, rect);
-                }
-
-                if (rect.contains(node.childBR.rect)) {
-                    count += node.childBR.size;
-                } else if (node.childBR.rect.intersects(rect)) {
-                    count += countNodesInRect(node.childBR, rect);
-                }
-            }
-
-            return count;
-        }
-
-        protected int countNodesInRectApproximate(QuadTreeNode node, Rect2D rect) {
-            int count = 0;
-
-            // Count objects at this level if the node intersects
-            if (node.objects != null) {
-                count += node.objectCount;
-            }
-
-            // Count in children if they intersect
-            if (node.childTL != null) {
-                if (rect.containsOrIntersects(node.childTL.rect)) {
-                    count += node.childTL.size;
-                }
-                if (rect.containsOrIntersects(node.childTR.rect)) {
-                    count += node.childTR.size;
-                }
-                if (rect.containsOrIntersects(node.childBL.rect)) {
-                    count += node.childBL.size;
-                }
-                if (rect.containsOrIntersects(node.childBR.rect)) {
-                    count += node.childBR.size;
-                }
-            }
-
-            return count;
+        private QuadTreeEdgesSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
+            super(node, searchRect, approximate, expectedModCount, fullyContained, size);
         }
 
         @Override
-        public boolean tryAdvance(Consumer<? super Edge> action) {
-            checkForComodification();
-
-            if (next != null || findNext()) {
-                action.accept(next);
-                next = null;
-                remainingSize--;
-                return true;
+        protected Iterator<?> createIteratorForNode(QuadTreeNode node) {
+            if (node.objects == null) {
+                return Collections.emptyIterator();
             }
-            return false;
+            return graphStore.edgeStore.edgeIterator(new ArrayIterator(node.objects, node.objectCount), false);
         }
 
-        protected boolean findNext() {
-            while (currentEdgeIterator != null || !nodesStack.isEmpty()) {
-                if (currentEdgeIterator != null) {
-                    if (currentEdgeIterator.hasNext()) {
-                        Edge edge = currentEdgeIterator.next();
+        @Override
+        protected boolean checkElementSpatialMatch(Object element) {
+            Edge edge = (Edge) element;
+            if (approximate || currentFullyContained || searchRect == null) {
+                return true;
+            } else {
+                // In exact mode, check if edge endpoints intersect with search rect
+                Node source = edge.getSource();
+                Node target = edge.getTarget();
+                SpatialNodeDataImpl sourceSpatialData = ((NodeImpl) source).getSpatialData();
+                SpatialNodeDataImpl targetSpatialData = ((NodeImpl) target).getSpatialData();
 
-                        if (approximate || currentFullyContained || searchRect == null) {
-                            // In approximate mode, when fully contained, or getting all edges
+                return (sourceSpatialData != null && searchRect
+                        .intersects(sourceSpatialData.minX, sourceSpatialData.minY, sourceSpatialData.maxX, sourceSpatialData.maxY)) || (targetSpatialData != null && searchRect
+                                .intersects(targetSpatialData.minX, targetSpatialData.minY, targetSpatialData.maxX, targetSpatialData.maxY));
+            }
+        }
+
+        @Override
+        protected AbstractQuadTreeSpliterator<Edge> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
+            return new QuadTreeEdgesSpliterator(node, searchRect, approximate, expectedModCount, fullyContained, size);
+        }
+
+        @Override
+        protected boolean findNext() {
+            while (currentIterator != null || !nodesStack.isEmpty()) {
+                if (currentIterator != null) {
+                    if (currentIterator.hasNext()) {
+                        Edge edge = (Edge) currentIterator.next();
+
+                        if (checkElementSpatialMatch(edge)) {
                             next = edge;
                             return true;
-                        } else {
-                            // In exact mode, check if edge endpoints intersect with search rect
-                            Node source = edge.getSource();
-                            Node target = edge.getTarget();
-                            SpatialNodeDataImpl sourceSpatialData = ((NodeImpl) source).getSpatialData();
-                            SpatialNodeDataImpl targetSpatialData = ((NodeImpl) target).getSpatialData();
-
-                            if ((sourceSpatialData != null && searchRect
-                                    .intersects(sourceSpatialData.minX, sourceSpatialData.minY, sourceSpatialData.maxX, sourceSpatialData.maxY)) || (targetSpatialData != null && searchRect
-                                            .intersects(targetSpatialData.minX, targetSpatialData.minY, targetSpatialData.maxX, targetSpatialData.maxY))) {
-                                next = edge;
-                                return true;
-                            }
                         }
                     } else {
-                        currentEdgeIterator = null;
+                        currentIterator = null;
                     }
                 } else {
                     final QuadTreeNode pointer = nodesStack.pop();
@@ -1660,66 +1554,11 @@ public class NodesQuadTree {
 
                     if (currentFullyContained || searchRect == null || pointer.rect.intersects(searchRect)) {
                         addNode(pointer, currentFullyContained);
-                        currentEdgeIterator = createEdgeIteratorForNode(pointer);
+                        currentIterator = createIteratorForNode(pointer);
                     }
                 }
             }
             return false;
-        }
-
-        @Override
-        public Spliterator<Edge> trySplit() {
-            checkForComodification();
-
-            // Can only split if we have nodes on the stack
-            if (!nodesStack.isEmpty() && remainingSize > 1) {
-                // Take half of the remaining nodes from the stack
-                int nodesToSplit = Math.min(nodesStack.size() / 2, remainingSize / 2);
-                if (nodesToSplit > 0) {
-                    Deque<QuadTreeNode> splitNodes = new ArrayDeque<>();
-                    Deque<Boolean> splitContained = new ArrayDeque<>();
-
-                    // Calculate size for the split
-                    int splitSize = 0;
-
-                    // Move nodes to split queues and calculate their size
-                    for (int i = 0; i < nodesToSplit; i++) {
-                        QuadTreeNode node = nodesStack.removeLast();
-                        boolean contained = fullyContainedStack.removeLast();
-                        splitNodes.addFirst(node);
-                        splitContained.addFirst(contained);
-
-                        if (searchRect == null || contained) {
-                            splitSize += node.size;
-                        } else if (approximate) {
-                            splitSize += countNodesInRectApproximate(node, searchRect);
-                        } else {
-                            splitSize += countNodesInRect(node, searchRect);
-                        }
-                    }
-
-                    // Update our remaining size
-                    remainingSize -= splitSize;
-
-                    // Create new spliterator for the split portion with empty initial state
-                    QuadTreeEdgesSpliterator split = new QuadTreeEdgesSpliterator(null, searchRect, approximate,
-                            expectedModCount, false, splitSize);
-
-                    // Add all split nodes to the new spliterator's stack
-                    while (!splitNodes.isEmpty()) {
-                        split.nodesStack.push(splitNodes.removeLast());
-                        split.fullyContainedStack.push(splitContained.removeLast());
-                    }
-
-                    return split;
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public long estimateSize() {
-            return remainingSize;
         }
 
         @Override

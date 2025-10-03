@@ -419,18 +419,18 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return new EdgeInIterator((NodeImpl) node);
     }
 
-    public EdgeInOutIterator edgeIterator(final Node node) {
+    public EdgeInOutIterator edgeIterator(final Node node, boolean locking) {
         checkValidNodeObject(node);
-        return new EdgeInOutIterator((NodeImpl) node);
+        return new EdgeInOutIterator((NodeImpl) node, locking);
     }
 
-    public EdgeInOutMultiIterator edgeIterator(final Iterator<NodeImpl> nodeIterator) {
-        return new EdgeInOutMultiIterator(nodeIterator);
+    public EdgeInOutMultiIterator edgeIterator(final Iterator<NodeImpl> nodeIterator, boolean locking) {
+        return new EdgeInOutMultiIterator(nodeIterator, locking);
     }
 
-    public Iterator<Edge> edgeUndirectedIterator(final Node node) {
+    public Iterator<Edge> edgeUndirectedIterator(final Node node, boolean locking) {
         checkValidNodeObject(node);
-        return undirectedIterator(new EdgeInOutIterator((NodeImpl) node));
+        return undirectedIterator(new EdgeInOutIterator((NodeImpl) node, locking));
     }
 
     public EdgeTypeOutIterator edgeOutIterator(final Node node, int type) {
@@ -475,7 +475,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     public NeighborsIterator neighborIterator(Node node) {
         checkValidNodeObject(node);
-        return new NeighborsUndirectedIterator((NodeImpl) node, new EdgeInOutIterator((NodeImpl) node));
+        return new NeighborsUndirectedIterator((NodeImpl) node, new EdgeInOutIterator((NodeImpl) node, true));
     }
 
     public NeighborsIterator neighborIterator(final Node node, int type) {
@@ -1501,6 +1501,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
      */
     protected abstract class AbstractEdgeInOutIterator implements Iterator<Edge> {
 
+        protected final boolean locking;
         protected int outTypeLength;
         protected int inTypeLength;
         protected EdgeImpl[] outArray;
@@ -1510,8 +1511,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected EdgeImpl lastEdge;
         protected boolean out = true;
 
-        protected AbstractEdgeInOutIterator() {
-            readLock();
+        protected AbstractEdgeInOutIterator(boolean locking) {
+            this.locking = locking;
+            if (locking) {
+                readLock();
+            }
         }
 
         /**
@@ -1563,7 +1567,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 if (pointer == null) {
                     // No more edges for current node, try next node
                     if (!moveToNextNode()) {
-                        readUnlock();
+                        if (locking) {
+                            readUnlock();
+                        }
                         return false;
                     }
                 }
@@ -1611,8 +1617,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
      */
     protected final class EdgeInOutIterator extends AbstractEdgeInOutIterator {
 
-        public EdgeInOutIterator(NodeImpl node) {
-            super();
+        public EdgeInOutIterator(NodeImpl node, boolean locking) {
+            super(locking);
             initializeForNode(node);
         }
 
@@ -1632,8 +1638,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         private final Iterator<NodeImpl> nodeIterator;
 
-        public EdgeInOutMultiIterator(Iterator<NodeImpl> nodeIterator) {
-            super();
+        public EdgeInOutMultiIterator(Iterator<NodeImpl> nodeIterator, boolean locking) {
+            super(locking);
             this.nodeIterator = nodeIterator;
             // Initialize with first node if available
             if (nodeIterator.hasNext()) {

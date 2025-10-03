@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import org.gephi.graph.api.Configuration;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Rect2D;
@@ -612,9 +615,38 @@ public class NodesQuadTreeTest {
         assertSame(q.getNodes(rect, false, n -> n == node1), node1);
     }
 
+    @Test
+    public void testGetAllEdges() {
+        GraphStore store = GraphGenerator.generateEmptyGraphStore(getConfig());
+        NodesQuadTree q = store.spatialIndex.nodesTree;
+        NodeImpl[] nodes = addRandomNodes(q, 2, 0);
+        EdgeImpl[] edges = addRandomEdges(store, nodes, 10);
+
+        assertSame(q.getEdges(), edges);
+    }
+
+    @Test
+    public void testGetAllEdgesLarge() {
+        GraphStore store = GraphGenerator.generateEmptyGraphStore(getConfig());
+        NodesQuadTree q = store.spatialIndex.nodesTree;
+        NodeImpl[] nodes = addRandomNodes(q, 10000, 0);
+        EdgeImpl[] edges = addRandomEdges(store, nodes, 100000);
+
+        assertSame(q.getEdges(), edges);
+    }
+
     private void assertSame(NodeIterable iterable, Node... expected) {
         Assert.assertTrue(expected.length > 0, "Expected array must not be empty");
         ObjectSet<Node> set = new ObjectOpenHashSet<>(expected.length);
+        set.addAll(Arrays.asList(expected));
+        Assert.assertEquals(set, iterable.toSet());
+        Assert.assertEquals(set, iterable.stream().collect(Collectors.toSet()));
+        Assert.assertEquals(set, iterable.parallelStream().collect(Collectors.toSet()));
+    }
+
+    private void assertSame(EdgeIterable iterable, Edge... expected) {
+        Assert.assertTrue(expected.length > 0, "Expected array must not be empty");
+        ObjectSet<Edge> set = new ObjectOpenHashSet<>(expected.length);
         set.addAll(Arrays.asList(expected));
         Assert.assertEquals(set, iterable.toSet());
         Assert.assertEquals(set, iterable.stream().collect(Collectors.toSet()));
@@ -642,5 +674,28 @@ public class NodesQuadTreeTest {
             nodes[i] = node;
         }
         return nodes;
+    }
+
+    private EdgeImpl[] addRandomEdges(GraphStore store, NodeImpl[] nodes, int count) {
+        for (NodeImpl n : nodes) {
+            store.addNode(n);
+        }
+        EdgeImpl[] edges = new EdgeImpl[count];
+        int edgeIndex = 0;
+        while (edgeIndex < count) {
+            NodeImpl source = nodes[new Random().nextInt(nodes.length)];
+            NodeImpl target = nodes[new Random().nextInt(nodes.length)];
+            if (source != target) {
+                EdgeImpl edge = new EdgeImpl(String.valueOf(edgeIndex), store, source, target, 0,1.0, true);
+                edges[edgeIndex] = edge;
+                store.addEdge(edge);
+                edgeIndex++;
+            }
+        }
+        return edges;
+    }
+
+    private Configuration getConfig() {
+        return Configuration.builder().enableSpatialIndex(true).build();
     }
 }
