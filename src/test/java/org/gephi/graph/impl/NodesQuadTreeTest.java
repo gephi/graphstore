@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.gephi.graph.api.Configuration;
@@ -178,9 +177,9 @@ public class NodesQuadTreeTest {
 
         assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
-        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n1, n2);
-        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n1, n2);
+        assertSameSet(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSameSet(q.getNodes(new Rect2D(0, 0, 101, 101)), n1, n2);
+        assertSameSet(q.getNodes(new Rect2D(4, 4, 91, 91)), n1, n2);
     }
 
     @Test
@@ -205,9 +204,9 @@ public class NodesQuadTreeTest {
 
         assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
-        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n2, n1);
-        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n2, n1);
+        assertSameSet(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSameSet(q.getNodes(new Rect2D(0, 0, 101, 101)), n2, n1);
+        assertSameSet(q.getNodes(new Rect2D(4, 4, 91, 91)), n2, n1);
     }
 
     @Test
@@ -232,9 +231,9 @@ public class NodesQuadTreeTest {
 
         assertEmpty(q.getNodes(new Rect2D(80, 80, 89.99f, 89.99f)));
 
-        assertSame(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
-        assertSame(q.getNodes(new Rect2D(0, 0, 101, 101)), n1, n2);
-        assertSame(q.getNodes(new Rect2D(4, 4, 91, 91)), n1, n2);
+        assertSameSet(q.getNodes(new Rect2D(95, 95, 99, 99)), n1);
+        assertSameSet(q.getNodes(new Rect2D(0, 0, 101, 101)), n1, n2);
+        assertSameSet(q.getNodes(new Rect2D(4, 4, 91, 91)), n1, n2);
     }
 
     @Test
@@ -572,7 +571,7 @@ public class NodesQuadTreeTest {
         NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
         int totalNodes = 100000;
         NodeImpl[] nodes = addRandomNodes(q, totalNodes, 0);
-        assertSame(q.getAllNodes(), nodes);
+        assertSameSet(q.getAllNodes(), nodes);
     }
 
     @Test
@@ -583,7 +582,7 @@ public class NodesQuadTreeTest {
         NodeImpl[] nodes = addRandomNodes(q, totalNodes, 0, area);
         Rect2D subarea = new Rect2D(-100, -100, 100, 100);
 
-        assertSame(q
+        assertSameSet(q
                 .getNodes(subarea, false), Arrays
                         .stream(nodes).filter(n -> subarea.intersects(n.getSpatialData().minX, n
                                 .getSpatialData().minY, n.getSpatialData().maxX, n.getSpatialData().maxY))
@@ -600,7 +599,7 @@ public class NodesQuadTreeTest {
 
         // Approximate should return all nodes that are in the quadtree nodes
         // intersecting the area
-        assertSame(q.getNodes(subarea, true), Arrays.stream(nodes)
+        assertSameSet(q.getNodes(subarea, true), Arrays.stream(nodes)
                 .filter(n -> subarea.intersects(n.getSpatialData().quadTreeNode.quadRect())).toArray(NodeImpl[]::new));
     }
 
@@ -612,7 +611,7 @@ public class NodesQuadTreeTest {
         NodeImpl[] nodes = addRandomNodes(q, 2, 0, rect);
         NodeImpl node1 = nodes[0];
 
-        assertSame(q.getNodes(rect, false, n -> n == node1), node1);
+        assertSameSet(q.getNodes(rect, false, n -> n == node1), node1);
     }
 
     @Test
@@ -622,7 +621,7 @@ public class NodesQuadTreeTest {
         NodeImpl[] nodes = addRandomNodes(q, 2, 0);
         EdgeImpl[] edges = addRandomEdges(store, nodes, 10);
 
-        assertSame(q.getEdges(), edges);
+        assertSameSet(q.getEdges(), edges);
     }
 
     @Test
@@ -632,7 +631,7 @@ public class NodesQuadTreeTest {
         NodeImpl[] nodes = addRandomNodes(q, 10000, 0);
         EdgeImpl[] edges = addRandomEdges(store, nodes, 100000);
 
-        assertSame(q.getEdges(), edges);
+        assertSameSet(q.getEdges(), edges);
     }
 
     @Test
@@ -645,10 +644,8 @@ public class NodesQuadTreeTest {
 
         Rect2D subarea = new Rect2D(-100, -100, 100, 100);
 
-        assertSame(q
-            .getEdges(subarea, false), Arrays
-            .stream(edges).filter(e -> edgeIntersectsArea(e, subarea, false))
-            .toArray(EdgeImpl[]::new));
+        assertSameSet(q.getEdges(subarea, false), Arrays.stream(edges)
+                .filter(e -> edgeIntersectsArea(e, subarea, false)).toArray(EdgeImpl[]::new));
     }
 
     @Test
@@ -661,10 +658,8 @@ public class NodesQuadTreeTest {
 
         Rect2D subarea = new Rect2D(-600, -600, 600, 600);
 
-        assertSame(q
-            .getEdges(subarea, false), Arrays
-            .stream(edges).filter(e -> edgeIntersectsArea(e, subarea, false))
-            .toArray(EdgeImpl[]::new));
+        assertSameSet(q.getEdges(subarea, false), Arrays.stream(edges)
+                .filter(e -> edgeIntersectsArea(e, subarea, false)).toArray(EdgeImpl[]::new));
     }
 
     @Test
@@ -677,10 +672,8 @@ public class NodesQuadTreeTest {
 
         Rect2D subarea = new Rect2D(-100, -100, -1, -1);
 
-        // Approximate should return all nodes that are in the quadtree nodes
-        // intersecting the area
-        assertSame(q.getEdges(subarea, true), Arrays.stream(edges)
-            .filter(e -> edgeIntersectsArea(e, subarea, true)).toArray(EdgeImpl[]::new));
+        assertSameSet(q.getEdges(subarea, true), Arrays.stream(edges).filter(e -> edgeIntersectsArea(e, subarea, true))
+                .toArray(EdgeImpl[]::new));
     }
 
     @Test
@@ -693,34 +686,81 @@ public class NodesQuadTreeTest {
         EdgeImpl[] edges = addRandomEdges(store, nodes, 2);
         EdgeImpl edge1 = edges[0];
 
-        assertSame(q.getEdges(rect, false), edges);
-        assertSame(q.getEdges(rect, false, e -> e == edge1), edge1);
-        assertSame(q.getEdges(rect, true), edges);
-        assertSame(q.getEdges(rect, true, e -> e == edge1), edge1);
+        assertSameSet(q.getEdges(rect, false), edges);
+        assertSameSet(q.getEdges(rect, false, e -> e == edge1), edge1);
+        assertSameSet(q.getEdges(rect, true), edges);
+        assertSameSet(q.getEdges(rect, true, e -> e == edge1), edge1);
+    }
+
+    @Test
+    public void testGetEdgesInAreaBidirectional() {
+        Rect2D rect = new Rect2D(100, 100, 100, 100);
+        GraphStore store = GraphGenerator.generateEmptyGraphStore(getConfig());
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(10000, store, rect);
+        store.addAllNodes(Arrays.asList(nodes));
+        NodesQuadTree q = store.spatialIndex.nodesTree;
+
+        nodes[0].setPosition(-1000, -1000);
+        EdgeImpl[] edges = addRandomEdges(store, new NodeImpl[] { nodes[0], nodes[1] }, 1);
+
+        // Edge should be returned once, as only one node is in the area
+        assertSameSetAndCount(q.getEdges(new Rect2D(-2000, -2000, -999, -999), false), edges);
+
+        nodes[1].setPosition(-1000, -1000);
+
+        // Edge should be returned twice, once for each node
+        assertSameSetAndCount(q
+                .getEdges(new Rect2D(-2000, -2000, -999, -999), false), new EdgeImpl[] { edges[0], edges[0] });
     }
 
     // Utils
 
-    private void assertSame(NodeIterable iterable, Node... expected) {
+    private void assertSameSet(NodeIterable iterable, Node... expected) {
         Assert.assertTrue(expected.length > 0, "Expected array must not be empty");
         ObjectSet<Node> set = new ObjectOpenHashSet<>(expected.length);
         set.addAll(Arrays.asList(expected));
-        Assert.assertEquals(set, iterable.toSet());
-        Assert.assertEquals(set, iterable.stream().collect(Collectors.toSet()));
-        Assert.assertEquals(set, iterable.parallelStream().collect(Collectors.toSet()));
+        Assert.assertEquals(iterable.toSet(), set);
+        Assert.assertEquals(iterable.stream().collect(Collectors.toSet()), set);
+        Assert.assertEquals(iterable.parallelStream().collect(Collectors.toSet()), set);
     }
 
-    private void assertSame(EdgeIterable iterable, Edge... expected) {
+    private void assertSameSetAndCount(NodeIterable iterable, Node... expected) {
+        assertSameSet(iterable, expected);
+        Assert.assertEquals(iterable.toCollection().size(), expected.length);
+        Assert.assertEquals(iterable.stream().count(), expected.length);
+        Assert.assertEquals(iterable.parallelStream().count(), expected.length);
+    }
+
+    private void assertSameSet(EdgeIterable iterable, Edge... expected) {
         Assert.assertTrue(expected.length > 0, "Expected array must not be empty");
         ObjectSet<Edge> set = new ObjectOpenHashSet<>(expected.length);
         set.addAll(Arrays.asList(expected));
-        Assert.assertEquals(set, iterable.toSet());
-        Assert.assertEquals(set, iterable.stream().collect(Collectors.toSet()));
-        Assert.assertEquals(set, iterable.parallelStream().collect(Collectors.toSet()));
+        Assert.assertEquals(iterable.toSet(), set);
+        Assert.assertEquals(iterable.stream().collect(Collectors.toSet()), set);
+        Assert.assertEquals(iterable.parallelStream().collect(Collectors.toSet()), set);
+    }
+
+    private void assertSameSetAndCount(EdgeIterable iterable, Edge... expected) {
+        assertSameSet(iterable, expected);
+        Assert.assertEquals(iterable.toCollection().size(), expected.length);
+        Assert.assertEquals(iterable.stream().count(), expected.length);
+        Assert.assertEquals(iterable.parallelStream().count(), expected.length);
     }
 
     private void assertEmpty(NodeIterable iterable) {
         Assert.assertEquals(iterable.toCollection().size(), 0);
+    }
+
+    private NodeImpl[] addRandomNodes(GraphStore store, int count, int startIndex) {
+        return addRandomNodes(store, count, startIndex, BOUNDS_RECT);
+    }
+
+    private NodeImpl[] addRandomNodes(GraphStore store, int count, int startIndex, Rect2D area) {
+        NodeImpl[] nodes = generateNodes(count, startIndex, area);
+        for (NodeImpl n : nodes) {
+            store.addNode(n);
+        }
+        return nodes;
     }
 
     private NodeImpl[] addRandomNodes(NodesQuadTree q, int count, int startIndex) {
@@ -728,6 +768,14 @@ public class NodesQuadTreeTest {
     }
 
     private NodeImpl[] addRandomNodes(NodesQuadTree q, int count, int startIndex, Rect2D area) {
+        NodeImpl[] nodes = generateNodes(count, startIndex, area);
+        for (NodeImpl n : nodes) {
+            q.addNode(n);
+        }
+        return nodes;
+    }
+
+    private NodeImpl[] generateNodes(int count, int startIndex, Rect2D area) {
         Random rand = new Random();
         NodeImpl[] nodes = new NodeImpl[count];
         for (int i = 0; i < count; i++) {
@@ -736,7 +784,6 @@ public class NodesQuadTreeTest {
             float y = area.minY + rand.nextFloat() * (area.maxY - area.minY);
             node.setPosition(x, y);
             node.setSize(1.0f);
-            q.addNode(node);
             nodes[i] = node;
         }
         return nodes;
@@ -767,12 +814,12 @@ public class NodesQuadTreeTest {
 
     private boolean edgeIntersectsArea(EdgeImpl e, Rect2D area, boolean approximate) {
         if (approximate) {
-            return area.intersects(e.source.getSpatialData().quadTreeNode.quadRect())
-                || area.intersects(e.target.getSpatialData().quadTreeNode.quadRect());
+            return area.intersects(e.source.getSpatialData().quadTreeNode.quadRect()) || area
+                    .intersects(e.target.getSpatialData().quadTreeNode.quadRect());
         }
-        return area.intersects(e.source.getSpatialData().minX, e.source.getSpatialData().minY,
-            e.source.getSpatialData().maxX, e.source.getSpatialData().maxY)
-            || area.intersects(e.target.getSpatialData().minX, e.target.getSpatialData().minY,
-            e.target.getSpatialData().maxX, e.target.getSpatialData().maxY);
+        return area.intersects(e.source.getSpatialData().minX, e.source.getSpatialData().minY, e.source
+                .getSpatialData().maxX, e.source.getSpatialData().maxY) || area
+                        .intersects(e.target.getSpatialData().minX, e.target.getSpatialData().minY, e.target
+                                .getSpatialData().maxX, e.target.getSpatialData().maxY);
     }
 }

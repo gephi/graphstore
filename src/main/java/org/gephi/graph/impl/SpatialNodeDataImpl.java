@@ -32,4 +32,9 @@ public class SpatialNodeDataImpl {
     public void setArrayIndex(int arrayIndex) {
         this.arrayIndex = arrayIndex;
     }
+
+    public void clear() {
+        this.quadTreeNode = null;
+        this.arrayIndex = -1;
+    }
 }

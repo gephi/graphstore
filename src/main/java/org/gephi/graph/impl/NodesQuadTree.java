@@ -139,7 +139,7 @@ public class NodesQuadTree {
         try {
             for (Node node : getAllNodes()) {
                 SpatialNodeDataImpl spatialData = ((NodeImpl) node).getSpatialData();
-                spatialData.setQuadTreeNode(null);
+                spatialData.clear();
             }
             quadTreeRoot.clear();
             modCount++;
@@ -392,8 +392,7 @@ public class NodesQuadTree {
                     }
 
                     // Clear removed item's data
-                    spatialData.setArrayIndex(-1);
-                    spatialData.setQuadTreeNode(null);
+                    spatialData.clear();
 
                     // Update size
                     QuadTreeNode node = this;
@@ -550,8 +549,7 @@ public class NodesQuadTree {
                 for (int i = 0; i < objectCount; i++) {
                     if (objects[i] != null) {
                         SpatialNodeDataImpl spatialData = objects[i].getSpatialData();
-                        spatialData.setArrayIndex(-1);
-                        spatialData.setQuadTreeNode(null);
+                        spatialData.clear();
                         objects[i] = null;
                     }
                 }
@@ -857,7 +855,8 @@ public class NodesQuadTree {
             HashSet<QuadTreeNode> overlappingNodes = new HashSet<>();
             int nodeCount = collectOverlapping(quadTreeRoot, searchRect, overlappingNodes);
             if (approximate && nodeCount == quadTreeRoot.size) {
-                // Optimisation: approximate search and all nodes overlapping, so just return all edges
+                // Optimisation: approximate search and all nodes overlapping, so just return
+                // all edges
                 return new QuadTreeGlobalEdgesSpliterator(null, true, null, null);
             } else if (useDirectIterator(nodeCount)) {
                 return new QuadTreeGlobalEdgesSpliterator(searchRect, approximate, overlappingNodes, null);
@@ -1664,13 +1663,15 @@ public class NodesQuadTree {
             }
 
             // Apply additional predicate if provided
-            if(spatialMatch && (additionalPredicate == null || additionalPredicate.test(edge))) {
+            if (spatialMatch && (additionalPredicate == null || additionalPredicate.test(edge))) {
                 if (approximate) {
                     return true;
                 } else {
                     // In exact mode, check if edge endpoints intersect with search rect
-                    boolean sourceIntersects = sourceSpatialData != null && searchRect.intersects(sourceSpatialData.minX, sourceSpatialData.minY, sourceSpatialData.maxX, sourceSpatialData.maxY);
-                    boolean targetIntersects = targetSpatialData != null && searchRect.intersects(targetSpatialData.minX, targetSpatialData.minY, targetSpatialData.maxX, targetSpatialData.maxY);
+                    boolean sourceIntersects = sourceSpatialData != null && searchRect
+                            .intersects(sourceSpatialData.minX, sourceSpatialData.minY, sourceSpatialData.maxX, sourceSpatialData.maxY);
+                    boolean targetIntersects = targetSpatialData != null && searchRect
+                            .intersects(targetSpatialData.minX, targetSpatialData.minY, targetSpatialData.maxX, targetSpatialData.maxY);
                     return sourceIntersects || targetIntersects;
                 }
             }
@@ -1695,8 +1696,8 @@ public class NodesQuadTree {
                 return null;
             }
 
-            return new QuadTreeGlobalEdgesSpliterator(searchRect, approximate, overlappingQuadNodes, splitBase, expectedVersion,
-                    additionalPredicate);
+            return new QuadTreeGlobalEdgesSpliterator(searchRect, approximate, overlappingQuadNodes, splitBase,
+                    expectedVersion, additionalPredicate);
         }
 
         @Override

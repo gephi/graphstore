@@ -81,6 +81,19 @@ public class SpatialIndexImplTest {
         assertSame(spatialIndex.getEdgesInArea(BOUNDS_RECT), e);
     }
 
+    @Test
+    public void testClear() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore(getConfig());
+
+        SpatialIndexImpl spatialIndex = store.spatialIndex;
+        Assert.assertEquals(spatialIndex.getObjectCount(), store.getNodeCount());
+        Assert.assertEquals(spatialIndex.getNodesInArea(new Rect2D(-1, -1, 1, 1)).toCollection().size(), store
+                .getNodeCount());
+        store.clear();
+        Assert.assertEquals(spatialIndex.getObjectCount(), 0);
+        Assert.assertTrue(spatialIndex.getNodesInArea(new Rect2D(-1, -1, 1, 1)).toCollection().isEmpty());
+    }
+
     private void assertSame(NodeIterable iterable, Node... expected) {
         Assert.assertEquals(iterable.toCollection(), Arrays.asList(expected));
     }

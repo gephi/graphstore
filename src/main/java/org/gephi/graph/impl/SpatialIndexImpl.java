@@ -94,4 +94,7 @@ public class SpatialIndexImpl implements SpatialIndex {
         return nodesTree.getBoundaries(predicate);
     }
 
+    public int getObjectCount() {
+        return nodesTree.getObjectCount();
+    }
 }
