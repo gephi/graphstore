@@ -687,7 +687,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         public void remove() {
             checkWriteLock();
             if (edgeStore != null) {
-                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(pointer); edgeIterator
+                for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(pointer, false); edgeIterator
                         .hasNext();) {
                     edgeIterator.next();
                     edgeIterator.remove();

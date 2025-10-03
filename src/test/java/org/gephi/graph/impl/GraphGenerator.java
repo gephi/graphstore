@@ -29,6 +29,7 @@ import java.util.Random;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Rect2D;
 import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.impl.BasicGraphStore.BasicEdgeStore;
 
@@ -387,9 +388,20 @@ public class GraphGenerator {
     }
 
     public static NodeImpl[] generateNodeList(int nodeCount, GraphStore graphStore) {
+        return generateNodeList(nodeCount, graphStore, null);
+    }
+
+    public static NodeImpl[] generateNodeList(int nodeCount, GraphStore graphStore, Rect2D area) {
         NodeImpl[] nodes = new NodeImpl[nodeCount];
+        Random random = new Random();
         for (int i = 0; i < nodeCount; i++) {
             NodeImpl node = new NodeImpl(String.valueOf(i), graphStore);
+            if (area != null) {
+                float x = area.minX + random.nextFloat() * (area.maxX - area.minX);
+                float y = area.minY + random.nextFloat() * (area.maxY - area.minY);
+                node.setPosition(x, y);
+                node.setSize(1.0f);
+            }
             nodes[i] = node;
         }
         return nodes;

@@ -7,3 +7,4 @@ nbactions.xml
 /store/graphstore/target/
 .idea
 *.iml
+.vscode/**

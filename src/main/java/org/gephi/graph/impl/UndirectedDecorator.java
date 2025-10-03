@@ -203,7 +203,7 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public EdgeIterable getEdges(Node node) {
-        return new EdgeIterableWrapper(() -> store.edgeStore.edgeUndirectedIterator(node), store.getAutoLock());
+        return new EdgeIterableWrapper(() -> store.edgeStore.edgeUndirectedIterator(node, true), store.getAutoLock());
     }
 
     @Override

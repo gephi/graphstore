@@ -299,7 +299,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         checkValidNodeObject(node);
         graphStore.autoReadLock();
         try {
-            return view.containsNode((NodeImpl) node);
+            return view.containsNode(node);
         } finally {
             graphStore.autoReadUnlock();
         }
@@ -433,7 +433,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         checkValidInViewNodeObject(node);
         return new NodeIterableWrapper(
                 () -> new NeighborsIterator((NodeImpl) node,
-                        new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node))),
+                        new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node, true))),
                 graphStore.getAutoLock());
     }
 
@@ -451,10 +451,10 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         checkValidInViewNodeObject(node);
         if (undirected) {
             return new EdgeIterableWrapper(
-                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node)),
+                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.edgeIterator(node, true)),
                     graphStore.getAutoLock());
         } else {
-            return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeIterator(node)),
+            return new EdgeIterableWrapper(() -> new EdgeViewIterator(graphStore.edgeStore.edgeIterator(node, true)),
                     graphStore.getAutoLock());
         }
     }
@@ -507,7 +507,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public int getDegree(Node node) {
         if (undirected) {
             int count = 0;
-            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, true);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
                 if (view.containsEdge(edge) && !isUndirectedToIgnore(edge)) {
@@ -520,7 +520,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
             return count;
         } else {
             int count = 0;
-            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, true);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
                 if (view.containsEdge(edge)) {
@@ -598,7 +598,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public void clearEdges(Node node) {
         graphStore.autoWriteLock();
         try {
-            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node);
+            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
                 view.removeEdge(edge);
@@ -812,7 +812,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         if (!(n instanceof NodeImpl)) {
             throw new ClassCastException("Object must be a NodeImpl object");
         }
-        if (((NodeImpl) n).storeId == NodeStore.NULL_ID) {
+        if (n.getStoreId() == NodeStore.NULL_ID) {
             throw new IllegalArgumentException("Node should belong to a store");
         }
     }
@@ -820,7 +820,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     void checkValidInViewNodeObject(final Node n) {
         checkValidNodeObject(n);
 
-        if (!view.containsNode((NodeImpl) n)) {
+        if (!view.containsNode(n)) {
             throw new RuntimeException("Node doesn't belong to this view");
         }
     }
@@ -832,7 +832,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         if (!(n instanceof EdgeImpl)) {
             throw new ClassCastException("Object must be a EdgeImpl object");
         }
-        if (((EdgeImpl) n).storeId == EdgeStore.NULL_ID) {
+        if (n.getStoreId() == EdgeStore.NULL_ID) {
             throw new IllegalArgumentException("Edge should belong to a store");
         }
     }
@@ -840,7 +840,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     void checkValidInViewEdgeObject(final Edge e) {
         checkValidEdgeObject(e);
 
-        if (!view.containsEdge((EdgeImpl) e)) {
+        if (!view.containsEdge(e)) {
             throw new RuntimeException("Edge doesn't belong to this view");
         }
     }
@@ -871,9 +871,15 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         if (graphStore.spatialIndex == null) {
             throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
         }
-        return new NodeIterableWrapper(
-                () -> new NodeViewIterator(graphStore.spatialIndex.getNodesInArea(rect).iterator()),
-                graphStore.spatialIndex.nodesTree.lock);
+        return graphStore.spatialIndex.getNodesInArea(rect, view::containsNode);
+    }
+
+    @Override
+    public NodeIterable getApproximateNodesInArea(Rect2D rect) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return graphStore.spatialIndex.getApproximateNodesInArea(rect, view::containsNode);
     }
 
     @Override
@@ -881,49 +887,39 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         if (graphStore.spatialIndex == null) {
             throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
         }
-        return new EdgeIterableWrapper(
-                () -> new EdgeViewIterator(graphStore.spatialIndex.getEdgesInArea(rect).iterator()),
-                graphStore.spatialIndex.nodesTree.lock);
+        return graphStore.spatialIndex.getEdgesInArea(rect, view::containsEdge);
+    }
+
+    @Override
+    public EdgeIterable getApproximateEdgesInArea(Rect2D rect) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return graphStore.spatialIndex.getApproximateEdgesInArea(rect, view::containsEdge);
     }
 
     @Override
     public Rect2D getBoundaries() {
-        graphStore.autoReadLock();
-        try {
-            float minX = Float.POSITIVE_INFINITY;
-            float minY = Float.POSITIVE_INFINITY;
-            float maxX = Float.NEGATIVE_INFINITY;
-            float maxY = Float.NEGATIVE_INFINITY;
-
-            boolean hasNodes = false;
-
-            // Iterate only through nodes visible in this view
-            for (Node node : getNodes()) {
-                hasNodes = true;
-                final float x = node.x();
-                final float y = node.y();
-                final float size = node.size();
-
-                final float nodeMinX = x - size;
-                final float nodeMinY = y - size;
-                final float nodeMaxX = x + size;
-                final float nodeMaxY = y + size;
-
-                if (nodeMinX < minX)
-                    minX = nodeMinX;
-                if (nodeMinY < minY)
-                    minY = nodeMinY;
-                if (nodeMaxX > maxX)
-                    maxX = nodeMaxX;
-                if (nodeMaxY > maxY)
-                    maxY = nodeMaxY;
-            }
-
-            return hasNodes ? new Rect2D(minX, minY, maxX, maxY) : new Rect2D(Float.NEGATIVE_INFINITY,
-                    Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
-        } finally {
-            graphStore.autoReadUnlock();
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
         }
+        return graphStore.spatialIndex.getBoundaries(view::containsNode);
+    }
+
+    @Override
+    public void spatialIndexReadLock() {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        graphStore.spatialIndex.spatialIndexReadLock();
+    }
+
+    @Override
+    public void spatialIndexReadUnlock() {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        graphStore.spatialIndex.spatialIndexReadUnlock();
     }
 
     private final class NodeViewSpliterator implements Spliterator<Node> {
