@@ -1573,7 +1573,7 @@ public class NodesQuadTree {
 
         @Override
         public int characteristics() {
-            return DISTINCT | NONNULL;
+            return NONNULL;
         }
     }
 
