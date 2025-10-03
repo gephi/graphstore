@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.ConcurrentModificationException;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -875,11 +876,28 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
+    public NodeIterable getNodesInArea(Rect2D rect, Predicate<? super Node> predicate) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return graphStore.spatialIndex.getNodesInArea(rect, (node) -> view.containsNode(node) && predicate.test(node));
+    }
+
+    @Override
     public NodeIterable getApproximateNodesInArea(Rect2D rect) {
         if (graphStore.spatialIndex == null) {
             throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
         }
         return graphStore.spatialIndex.getApproximateNodesInArea(rect, view::containsNode);
+    }
+
+    @Override
+    public NodeIterable getApproximateNodesInArea(Rect2D rect, Predicate<? super Node> predicate) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return graphStore.spatialIndex
+                .getApproximateNodesInArea(rect, (node) -> view.containsNode(node) && predicate.test(node));
     }
 
     @Override
@@ -891,11 +909,28 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
+    public EdgeIterable getEdgesInArea(Rect2D rect, Predicate<? super Edge> predicate) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return graphStore.spatialIndex.getEdgesInArea(rect, (edge) -> view.containsEdge(edge) && predicate.test(edge));
+    }
+
+    @Override
     public EdgeIterable getApproximateEdgesInArea(Rect2D rect) {
         if (graphStore.spatialIndex == null) {
             throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
         }
         return graphStore.spatialIndex.getApproximateEdgesInArea(rect, view::containsEdge);
+    }
+
+    @Override
+    public EdgeIterable getApproximateEdgesInArea(Rect2D rect, Predicate<? super Edge> predicate) {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        return graphStore.spatialIndex
+                .getApproximateEdgesInArea(rect, (edge) -> view.containsEdge(edge) && predicate.test(edge));
     }
 
     @Override
