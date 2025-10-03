@@ -686,7 +686,7 @@ public class NodesQuadTreeTest {
             NodeImpl source = nodes[new Random().nextInt(nodes.length)];
             NodeImpl target = nodes[new Random().nextInt(nodes.length)];
             if (source != target) {
-                EdgeImpl edge = new EdgeImpl(String.valueOf(edgeIndex), store, source, target, 0,1.0, true);
+                EdgeImpl edge = new EdgeImpl(String.valueOf(edgeIndex), store, source, target, 0, 1.0, true);
                 edges[edgeIndex] = edge;
                 store.addEdge(edge);
                 edgeIndex++;
