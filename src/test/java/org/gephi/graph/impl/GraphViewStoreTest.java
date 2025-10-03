@@ -72,6 +72,14 @@ public class GraphViewStoreTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testDestroyMainView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        store.destroyView(graphStore.mainGraphView);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testDestroyTwice() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
         GraphViewStore store = graphStore.viewStore;
@@ -199,7 +207,7 @@ public class GraphViewStoreTest {
         store.getUndirectedGraph(null);
     }
 
-    @Test(expectedExceptions = ClassCastException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testGetViewAnonymousClass() {
         GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
         GraphViewStore store = graphStore.viewStore;
@@ -212,7 +220,7 @@ public class GraphViewStoreTest {
 
             @Override
             public boolean isMainView() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return false;
             }
 
             @Override
