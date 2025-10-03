@@ -906,6 +906,22 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         return graphStore.spatialIndex.getBoundaries(view::containsNode);
     }
 
+    @Override
+    public void spatialIndexReadLock() {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        graphStore.spatialIndex.spatialIndexReadLock();
+    }
+
+    @Override
+    public void spatialIndexReadUnlock() {
+        if (graphStore.spatialIndex == null) {
+            throw new UnsupportedOperationException("Spatial index is disabled (from Configuration)");
+        }
+        graphStore.spatialIndex.spatialIndexReadUnlock();
+    }
+
     private final class NodeViewSpliterator implements Spliterator<Node> {
 
         private final int endBlockExclusive;

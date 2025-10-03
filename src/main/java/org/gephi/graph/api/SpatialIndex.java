@@ -86,13 +86,13 @@ public interface SpatialIndex {
      * modified while being queried.
      * <p>
      * Every call to this method must be matched with a call to
-     * {@link #readUnlock()}.
+     * {@link #spatialIndexReadUnlock()}.
      */
-    void readLock();
+    void spatialIndexReadLock();
 
     /**
      * Releases a read lock on the spatial index. This must be called after a call
-     * to {@link #readLock()}.
+     * to {@link #spatialIndexReadLock()}.
      */
-    void readUnlock();
+    void spatialIndexReadUnlock();
 }

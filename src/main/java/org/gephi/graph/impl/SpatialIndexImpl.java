@@ -44,12 +44,12 @@ public class SpatialIndexImpl implements SpatialIndex {
     }
 
     @Override
-    public void readLock() {
+    public void spatialIndexReadLock() {
         nodesTree.readLock();
     }
 
     @Override
-    public void readUnlock() {
+    public void spatialIndexReadUnlock() {
         nodesTree.readUnlock();
     }
 
