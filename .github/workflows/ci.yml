@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ master, viz-engine ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v5
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'temurin'
           server-id: central
           server-username: OSSRH_USER
