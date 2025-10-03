@@ -1289,6 +1289,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         if (version != null) {
             version.incrementAndGetEdgeVersion();
         }
+        if (spatialIndex != null) {
+            spatialIndex.incrementVersion();
+        }
     }
 
     boolean isUndirectedToIgnore(EdgeImpl edge) {

@@ -64,6 +64,10 @@ public class SpatialIndexImpl implements SpatialIndex {
         nodesTree.clear();
     }
 
+    protected void incrementVersion() {
+        nodesTree.incrementVersion();
+    }
+
     protected void addNode(final NodeImpl node) {
         nodesTree.addNode(node);
     }

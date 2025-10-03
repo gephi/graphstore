@@ -32,7 +32,7 @@ public class NodesQuadTree {
     private final int maxLevels;
     private final int maxObjectsPerNode;
     private final GraphStore graphStore;
-    private int modCount = 0;
+    private int version = 0;
 
     public NodesQuadTree(Rect2D rect) {
         this(null, rect);
@@ -90,6 +90,10 @@ public class NodesQuadTree {
         return quadTreeRoot.getEdges(searchRect, approximate, predicate);
     }
 
+    public void incrementVersion() {
+        version++;
+    }
+
     public boolean updateNode(NodeImpl item, float minX, float minY, float maxX, float maxY) {
         writeLock();
         try {
@@ -97,7 +101,7 @@ public class NodesQuadTree {
             if (obj != null) {
                 obj.updateBoundaries(minX, minY, maxX, maxY);
                 quadTreeRoot.update(item);
-                modCount++;
+                version++;
                 return true;
             } else {
                 return false;
@@ -124,7 +128,7 @@ public class NodesQuadTree {
                 spatialData = new SpatialNodeDataImpl(minX, minY, maxX, maxY);
                 item.setSpatialData(spatialData);
                 quadTreeRoot.insert(item);
-                modCount++;
+                version++;
                 return true;
             } else {
                 return false;
@@ -142,7 +146,7 @@ public class NodesQuadTree {
                 spatialData.clear();
             }
             quadTreeRoot.clear();
-            modCount++;
+            version++;
         } finally {
             writeUnlock();
         }
@@ -154,7 +158,7 @@ public class NodesQuadTree {
             final SpatialNodeDataImpl spatialData = item.getSpatialData();
             if (spatialData != null && spatialData.quadTreeNode != null) {
                 quadTreeRoot.delete(item, true);
-                modCount++;
+                version++;
                 return true;
             }
             return false;
@@ -1138,7 +1142,7 @@ public class NodesQuadTree {
         protected final Deque<QuadTreeNode> nodesStack = new ArrayDeque<>();
         protected final Deque<Boolean> fullyContainedStack = new ArrayDeque<>();
 
-        protected final int expectedModCount;
+        protected final int expectedVersion;
         protected Iterator<?> currentIterator;
         protected boolean currentFullyContained;
         protected T next;
@@ -1147,7 +1151,7 @@ public class NodesQuadTree {
         protected AbstractQuadTreeSpliterator(QuadTreeNode root, Rect2D searchRect, boolean approximate) {
             this.searchRect = searchRect;
             this.approximate = approximate;
-            this.expectedModCount = modCount;
+            this.expectedVersion = version;
 
             // Null rect means get all
             currentFullyContained = searchRect == null;
@@ -1169,10 +1173,10 @@ public class NodesQuadTree {
             }
         }
 
-        protected AbstractQuadTreeSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
+        protected AbstractQuadTreeSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedVersion, boolean fullyContained, int size) {
             this.searchRect = searchRect;
             this.approximate = approximate;
-            this.expectedModCount = expectedModCount;
+            this.expectedVersion = expectedVersion;
             this.remainingSize = size;
             this.currentFullyContained = fullyContained;
 
@@ -1185,7 +1189,7 @@ public class NodesQuadTree {
         }
 
         protected void checkForComodification() {
-            if (modCount != expectedModCount) {
+            if (version != expectedVersion) {
                 throw new ConcurrentModificationException();
             }
         }
@@ -1294,7 +1298,7 @@ public class NodesQuadTree {
 
         protected abstract boolean checkElementSpatialMatch(Object element);
 
-        protected abstract AbstractQuadTreeSpliterator<T> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size);
+        protected abstract AbstractQuadTreeSpliterator<T> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedVersion, boolean fullyContained, int size);
 
         @Override
         public Spliterator<T> trySplit() {
@@ -1331,7 +1335,7 @@ public class NodesQuadTree {
                     remainingSize -= splitSize;
 
                     // Create new spliterator for the split portion with empty initial state
-                    AbstractQuadTreeSpliterator<T> split = createSplitInstance(null, searchRect, approximate, expectedModCount, false, splitSize);
+                    AbstractQuadTreeSpliterator<T> split = createSplitInstance(null, searchRect, approximate, expectedVersion, false, splitSize);
 
                     // Add all split nodes to the new spliterator's stack
                     while (!splitNodes.isEmpty()) {
@@ -1357,8 +1361,8 @@ public class NodesQuadTree {
             super(root, searchRect, approximate);
         }
 
-        private QuadTreeNodesSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
-            super(node, searchRect, approximate, expectedModCount, fullyContained, size);
+        private QuadTreeNodesSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedVersion, boolean fullyContained, int size) {
+            super(node, searchRect, approximate, expectedVersion, fullyContained, size);
         }
 
         @Override
@@ -1378,8 +1382,8 @@ public class NodesQuadTree {
         }
 
         @Override
-        protected AbstractQuadTreeSpliterator<Node> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
-            return new QuadTreeNodesSpliterator(node, searchRect, approximate, expectedModCount, fullyContained, size);
+        protected AbstractQuadTreeSpliterator<Node> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedVersion, boolean fullyContained, int size) {
+            return new QuadTreeNodesSpliterator(node, searchRect, approximate, expectedVersion, fullyContained, size);
         }
 
         @Override
@@ -1496,8 +1500,8 @@ public class NodesQuadTree {
             super(root, searchRect, approximate);
         }
 
-        private QuadTreeEdgesSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
-            super(node, searchRect, approximate, expectedModCount, fullyContained, size);
+        private QuadTreeEdgesSpliterator(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedVersion, boolean fullyContained, int size) {
+            super(node, searchRect, approximate, expectedVersion, fullyContained, size);
         }
 
         @Override
@@ -1527,8 +1531,8 @@ public class NodesQuadTree {
         }
 
         @Override
-        protected AbstractQuadTreeSpliterator<Edge> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedModCount, boolean fullyContained, int size) {
-            return new QuadTreeEdgesSpliterator(node, searchRect, approximate, expectedModCount, fullyContained, size);
+        protected AbstractQuadTreeSpliterator<Edge> createSplitInstance(QuadTreeNode node, Rect2D searchRect, boolean approximate, int expectedVersion, boolean fullyContained, int size) {
+            return new QuadTreeEdgesSpliterator(node, searchRect, approximate, expectedVersion, fullyContained, size);
         }
 
         @Override
@@ -1605,7 +1609,7 @@ public class NodesQuadTree {
             this.searchRect = searchRect;
             this.approximate = approximate;
             this.additionalPredicate = additionalPredicate;
-            this.expectedVersion = modCount;
+            this.expectedVersion = version;
             this.overlappingQuadNodes = overlappingQuadNodes;
 
             // Create the base spliterator from EdgeStore with our predicate
@@ -1679,7 +1683,7 @@ public class NodesQuadTree {
         }
 
         private void checkForComodification() {
-            if (expectedVersion != modCount) {
+            if (expectedVersion != version) {
                 throw new ConcurrentModificationException();
             }
         }
