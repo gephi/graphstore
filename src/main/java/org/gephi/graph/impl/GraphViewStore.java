@@ -82,6 +82,7 @@ public class GraphViewStore {
             }
         } else {
             checkNonNullViewObject(view);
+            checkGraphViewObject(view);
             checkViewExist((GraphViewImpl) view);
 
             graphStore.autoWriteLock();
@@ -96,9 +97,13 @@ public class GraphViewStore {
     }
 
     public void destroyView(GraphView view) {
+        if (view.isMainView()) {
+            throw new IllegalArgumentException("Can't delete the main view");
+        }
         graphStore.autoWriteLock();
         try {
             checkNonNullViewObject(view);
+            checkGraphViewObject(view);
 
             TimeIndexStore nodeTimeStore = graphStore.timeStore.nodeIndexStore;
             if (nodeTimeStore != null) {
@@ -160,6 +165,7 @@ public class GraphViewStore {
 
     public Subgraph getGraph(GraphView view) {
         checkNonNullViewObject(view);
+        checkGraphViewObject(view);
 
         if (graphStore.isUndirected()) {
             if (view.isMainView()) {
@@ -176,6 +182,7 @@ public class GraphViewStore {
 
     public DirectedSubgraph getDirectedGraph(GraphView view) {
         checkNonNullViewObject(view);
+        checkGraphViewObject(view);
 
         if (view.isMainView()) {
             return graphStore;
@@ -187,6 +194,7 @@ public class GraphViewStore {
 
     public UndirectedSubgraph getUndirectedGraph(GraphView view) {
         checkNonNullViewObject(view);
+        checkGraphViewObject(view);
 
         if (view.isMainView()) {
             return graphStore.undirectedDecorator;
@@ -358,14 +366,15 @@ public class GraphViewStore {
         return true;
     }
 
-    protected void checkNonNullViewObject(final Object o) {
+    protected void checkNonNullViewObject(final GraphView o) {
         if (o == null) {
             throw new NullPointerException();
         }
-        if (o != graphStore.mainGraphView) {
-            if (!(o instanceof GraphViewImpl)) {
-                throw new ClassCastException("View must be a GraphViewImpl object");
-            }
+    }
+
+    protected void checkGraphViewObject(final GraphView o) {
+        if (!o.isMainView() && !(o instanceof GraphViewImpl)) {
+            throw new IllegalArgumentException("The view is not from this implementation");
         }
     }
 
