@@ -139,7 +139,7 @@ public class IndexStore<T extends Element> {
             final ColumnImpl[] cols = columnStore.columns;
             for (int i = 0; i < length; i++) {
                 Column c = cols[i];
-                if (c != null && c.isIndexed()) {
+                if (c != null) {
                     Object value = elementImpl.getAttribute(c);
                     mainIndex.remove(c, value, element);
                     if (!viewIndexes.isEmpty()) {
@@ -171,7 +171,7 @@ public class IndexStore<T extends Element> {
             final ColumnImpl[] cols = columnStore.columns;
             for (int i = 0; i < length; i++) {
                 Column c = cols[i];
-                if (c != null && c.isIndexed()) {
+                if (c != null) {
                     Object value = elementImpl.getAttribute(c);
                     value = mainIndex.put(c, value, element);
                     elementImpl.attributes.setAttribute(c, value);
@@ -202,7 +202,7 @@ public class IndexStore<T extends Element> {
                         int length = columnStore.length;
                         for (int i = 0; i < length; i++) {
                             Column c = cols[i];
-                            if (c != null && c.isIndexed()) {
+                            if (c != null) {
                                 Object value = element.getAttribute(c);
                                 viewIndex.put(c, value, element);
                             }
@@ -225,7 +225,7 @@ public class IndexStore<T extends Element> {
                 final ColumnImpl[] cols = columnStore.columns;
                 for (int i = 0; i < length; i++) {
                     Column c = cols[i];
-                    if (c != null && c.isIndexed()) {
+                    if (c != null) {
                         Object value = elementImpl.getAttribute(c);
                         index.put(c, value, element);
                     }
@@ -246,7 +246,7 @@ public class IndexStore<T extends Element> {
                 final ColumnImpl[] cols = columnStore.columns;
                 for (int i = 0; i < length; i++) {
                     Column c = cols[i];
-                    if (c != null && c.isIndexed()) {
+                    if (c != null) {
                         Object value = elementImpl.getAttribute(c);
                         index.remove(c, value, element);
                     }

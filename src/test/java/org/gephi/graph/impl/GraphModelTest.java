@@ -389,6 +389,32 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testIndexVersionWithIndexedColumn() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getNodeTable();
+        Column col = table.addColumn("foo", String.class);
+        Index index = graphModel.getNodeIndex();
+        int version = index.getColumnIndex(col).getVersion();
+        Node n1 = graphModel.factory().newNode("1");
+        n1.setAttribute(col, "bar");
+        graphModel.getStore().addNode(n1);
+        Assert.assertTrue(index.getColumnIndex(col).getVersion() > version);
+    }
+
+    @Test
+    public void testIndexVersionWithNoIndexedColumn() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getNodeTable();
+        Column col = table.addColumn("foo", "foo", Integer.class, Origin.DATA, null, false);
+        Index index = graphModel.getNodeIndex();
+        int version = index.getColumnIndex(col).getVersion();
+        Node n1 = graphModel.factory().newNode("1");
+        n1.setAttribute(col, 42);
+        graphModel.getStore().addNode(n1);
+        Assert.assertTrue(index.getColumnIndex(col).getVersion() > version);
+    }
+
+    @Test
     public void testGetEdgeIndexWithIndexConfigDisabled() {
         GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexEdges(false).build());
         Assert.assertNotNull(graphModel.getEdgeIndex());
