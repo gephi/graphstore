@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A column index is associated with a column and and keeps track of each unique
+ * A column index is associated with a column and keeps track of each unique
  * value and can also return the minimum and maximum values in case of a
  * sortable value type.
  *
