@@ -217,6 +217,7 @@ public class IndexImpl<T extends Element> implements Index<T> {
         ensureColumnSize(cols.length);
         for (ColumnImpl col : cols) {
             ColumnIndexImpl index = createIndex(col);
+            ensureColumnSize(col.storeId);
             columns[col.storeId] = index;
             columnsCount++;
         }
