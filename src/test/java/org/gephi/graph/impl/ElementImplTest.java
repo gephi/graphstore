@@ -1117,51 +1117,77 @@ public class ElementImplTest {
     }
 
     @Test
-    public void testCheckType() {
+    public void testCheckDynamicType() {
         GraphStore store = new GraphStore();
 
         NodeImpl node = new NodeImpl("0", store);
-        node.checkType(new ColumnImpl("0", TimestampIntegerMap.class, null, null, Origin.DATA, false, false), 1);
-        node.checkType(new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false, false), 1.0);
-        node.checkType(new ColumnImpl("0", TimestampFloatMap.class, null, null, Origin.DATA, false, false), 1f);
-        node.checkType(new ColumnImpl("0", TimestampByteMap.class, null, null, Origin.DATA, false, false), (byte) 1);
-        node.checkType(new ColumnImpl("0", TimestampShortMap.class, null, null, Origin.DATA, false, false), (short) 1);
-        node.checkType(new ColumnImpl("0", TimestampLongMap.class, null, null, Origin.DATA, false, false), 1l);
-        node.checkType(new ColumnImpl("0", TimestampCharMap.class, null, null, Origin.DATA, false, false), 'a');
-        node.checkType(new ColumnImpl("0", TimestampBooleanMap.class, null, null, Origin.DATA, false, false), true);
-        node.checkType(new ColumnImpl("0", TimestampStringMap.class, null, null, Origin.DATA, false, false), "foo");
+        node.checkDynamicType(new ColumnImpl("0", TimestampIntegerMap.class, null, null, Origin.DATA, false, false), 1);
+        node.checkDynamicType(new ColumnImpl("0", TimestampDoubleMap.class, null, null, Origin.DATA, false,
+                false), 1.0);
+        node.checkDynamicType(new ColumnImpl("0", TimestampFloatMap.class, null, null, Origin.DATA, false, false), 1f);
+        node.checkDynamicType(new ColumnImpl("0", TimestampByteMap.class, null, null, Origin.DATA, false,
+                false), (byte) 1);
+        node.checkDynamicType(new ColumnImpl("0", TimestampShortMap.class, null, null, Origin.DATA, false,
+                false), (short) 1);
+        node.checkDynamicType(new ColumnImpl("0", TimestampLongMap.class, null, null, Origin.DATA, false, false), 1l);
+        node.checkDynamicType(new ColumnImpl("0", TimestampCharMap.class, null, null, Origin.DATA, false, false), 'a');
+        node.checkDynamicType(new ColumnImpl("0", TimestampBooleanMap.class, null, null, Origin.DATA, false,
+                false), true);
+        node.checkDynamicType(new ColumnImpl("0", TimestampStringMap.class, null, null, Origin.DATA, false,
+                false), "foo");
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void testCheckTypeWithWrongIntervalConfiguration() {
+    public void testCheckDynamicTypeWithWrongIntervalConfiguration() {
         GraphStore store = new GraphStore();
 
         NodeImpl node = new NodeImpl("0", store);
-        node.checkType(new ColumnImpl("0", IntervalIntegerMap.class, null, null, Origin.DATA, false, false), 1);
+        node.checkDynamicType(new ColumnImpl("0", IntervalIntegerMap.class, null, null, Origin.DATA, false, false), 1);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void testCheckTypeWithWrongTimestampConfiguration() {
+    public void testCheckDynamicTypeWithWrongTimestampConfiguration() {
         GraphStore store = getIntervalGraphStore();
 
         NodeImpl node = new NodeImpl("0", store);
-        node.checkType(new ColumnImpl("0", TimestampIntegerMap.class, null, null, Origin.DATA, false, false), 1);
+        node.checkDynamicType(new ColumnImpl("0", TimestampIntegerMap.class, null, null, Origin.DATA, false, false), 1);
     }
 
     @Test
-    public void testCheckTypeInterval() {
+    public void testDynamicCheckTypeInterval() {
         GraphStore store = getIntervalGraphStore();
 
         NodeImpl node = new NodeImpl("0", store);
-        node.checkType(new ColumnImpl("0", IntervalIntegerMap.class, null, null, Origin.DATA, false, false), 1);
-        node.checkType(new ColumnImpl("0", IntervalDoubleMap.class, null, null, Origin.DATA, false, false), 1.0);
-        node.checkType(new ColumnImpl("0", IntervalFloatMap.class, null, null, Origin.DATA, false, false), 1f);
-        node.checkType(new ColumnImpl("0", IntervalByteMap.class, null, null, Origin.DATA, false, false), (byte) 1);
-        node.checkType(new ColumnImpl("0", IntervalShortMap.class, null, null, Origin.DATA, false, false), (short) 1);
-        node.checkType(new ColumnImpl("0", IntervalLongMap.class, null, null, Origin.DATA, false, false), 1l);
-        node.checkType(new ColumnImpl("0", IntervalCharMap.class, null, null, Origin.DATA, false, false), 'a');
-        node.checkType(new ColumnImpl("0", IntervalBooleanMap.class, null, null, Origin.DATA, false, false), true);
-        node.checkType(new ColumnImpl("0", IntervalStringMap.class, null, null, Origin.DATA, false, false), "foo");
+        node.checkDynamicType(new ColumnImpl("0", IntervalIntegerMap.class, null, null, Origin.DATA, false, false), 1);
+        node.checkDynamicType(new ColumnImpl("0", IntervalDoubleMap.class, null, null, Origin.DATA, false, false), 1.0);
+        node.checkDynamicType(new ColumnImpl("0", IntervalFloatMap.class, null, null, Origin.DATA, false, false), 1f);
+        node.checkDynamicType(new ColumnImpl("0", IntervalByteMap.class, null, null, Origin.DATA, false,
+                false), (byte) 1);
+        node.checkDynamicType(new ColumnImpl("0", IntervalShortMap.class, null, null, Origin.DATA, false,
+                false), (short) 1);
+        node.checkDynamicType(new ColumnImpl("0", IntervalLongMap.class, null, null, Origin.DATA, false, false), 1l);
+        node.checkDynamicType(new ColumnImpl("0", IntervalCharMap.class, null, null, Origin.DATA, false, false), 'a');
+        node.checkDynamicType(new ColumnImpl("0", IntervalBooleanMap.class, null, null, Origin.DATA, false,
+                false), true);
+        node.checkDynamicType(new ColumnImpl("0", IntervalStringMap.class, null, null, Origin.DATA, false,
+                false), "foo");
+    }
+
+    @Test
+    public void checkType() {
+        GraphStore store = new GraphStore();
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.checkType(new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false), 1);
+        node.checkType(new ColumnImpl("0", Double.class, null, null, Origin.DATA, false, false), 1.0);
+        node.checkType(new ColumnImpl("0", Float.class, null, null, Origin.DATA, false, false), 1f);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void checkTypeException() {
+        GraphStore store = new GraphStore();
+        NodeImpl node = new NodeImpl("0", store);
+        node.checkType(new ColumnImpl("0", Integer.class, null, null, Origin.DATA, false, false), "foo");
     }
 
     @Test

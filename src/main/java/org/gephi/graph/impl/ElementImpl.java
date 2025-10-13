@@ -269,7 +269,7 @@ public abstract class ElementImpl implements Element {
         checkColumn(column);
         checkColumnDynamic(column);
         checkReadOnlyColumn(column);
-        checkType(column, value);
+        checkDynamicType(column, value);
 
         Object newValue = attributes.setAttribute(column, value, timeObject);
         updateIndex(column, null, newValue);
@@ -558,7 +558,7 @@ public abstract class ElementImpl implements Element {
         }
     }
 
-    void checkType(Column column, Object value) {
+    void checkDynamicType(Column column, Object value) {
         if (value != null) {
             Class typeClass = column.getTypeClass();
             if (TimestampMap.class.isAssignableFrom(typeClass)) {
@@ -591,24 +591,31 @@ public abstract class ElementImpl implements Element {
                     throw new IllegalArgumentException(
                             "The object class does not match with the dynamic type (" + typeClass.getName() + ")");
                 }
-            } else if (List.class.isAssignableFrom(typeClass)) {
+            }
+        }
+    }
+
+    void checkType(Column column, Object value) {
+        if (value != null) {
+            Class typeClass = column.getTypeClass();
+            if (List.class.isAssignableFrom(typeClass)) {
                 if (!(value instanceof List)) {
-                    throw new IllegalArgumentException(
-                            "The object class does not match with the list type (" + typeClass.getName() + ")");
+                    throw new IllegalArgumentException("The object class " + value.getClass()
+                            .getName() + " does not match with the list type (" + typeClass.getName() + ")");
                 }
             } else if (Set.class.isAssignableFrom(typeClass)) {
                 if (!(value instanceof Set)) {
-                    throw new IllegalArgumentException(
-                            "The object class does not match with the set type (" + typeClass.getName() + ")");
+                    throw new IllegalArgumentException("The object class " + value.getClass()
+                            .getName() + " does not match with the set type (" + typeClass.getName() + ")");
                 }
             } else if (Map.class.isAssignableFrom(typeClass)) {
                 if (!(value instanceof Map)) {
-                    throw new IllegalArgumentException(
-                            "The object class does not match with the map type (" + typeClass.getName() + ")");
+                    throw new IllegalArgumentException("The object class " + value.getClass()
+                            .getName() + " does not match with the map type (" + typeClass.getName() + ")");
                 }
             } else if (!value.getClass().equals(typeClass)) {
-                throw new IllegalArgumentException(
-                        "The object class does not match with the column type (" + typeClass.getName() + ")");
+                throw new IllegalArgumentException("The object class " + value.getClass()
+                        .getName() + " does not match with the column type (" + typeClass.getName() + ")");
             }
         }
     }
