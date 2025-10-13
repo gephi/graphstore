@@ -411,4 +411,18 @@ public class GraphBridgeTest {
         set.add(43.0);
         Assert.assertNotEquals(n1Copy.getAttribute(c1.getId()), set);
     }
+
+    @Test
+    public void testCopyOnNonEmpty() {
+        GraphStore dest = GraphGenerator.generateTinyGraphStore();
+
+        GraphStore source = GraphGenerator.generateEmptyGraphStore();
+        Node n1 = source.getModel().factory().newNode("foo");
+        source.addNode(n1);
+
+        new GraphBridgeImpl(dest).copyNodes(source.getNodes().toArray());
+        Assert.assertNotNull(dest.getNode("foo"));
+        Assert.assertEquals(dest.getNodeCount(), 3);
+        Assert.assertEquals(dest.getEdgeCount(), 1);
+    }
 }
