@@ -20,10 +20,13 @@ import cern.colt.bitvector.QuickBitVector;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -69,14 +72,48 @@ public class GraphViewImpl implements GraphView {
             this.nodeBitVector = null;
         }
         this.edgeBitVector = new BitVector(store.edgeStore.maxStoreId());
-        this.typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
-        this.mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
+        this.typeCounts = new int[store.edgeStore.typeSize.length];
+        this.mutualEdgeTypeCounts = new int[store.edgeStore.mutualEdgesTypeSize.length];
 
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
         this.observers = graphStore.version != null ? new ArrayList<>() : null;
         this.interval = Interval.INFINITY_INTERVAL;
+    }
+
+    public GraphViewImpl(final GraphStore store, Predicate<Node> nodePredicate, Predicate<Edge> edgePredicate) {
+        this(store, nodePredicate != null, edgePredicate != null);
+
+        // Fill
+        Stream<Edge> edgeStream = graphStore.edgeStore.parallelStream();
+        if (nodePredicate != null) {
+            ensureNodeVectorSize(graphStore.nodeStore.maxStoreId());
+            graphStore.nodeStore.parallelStream().filter(nodePredicate).forEach((node) -> {
+                nodeBitVector.set(node.getStoreId());
+            });
+            nodeCount = nodeBitVector.size();
+            incrementNodeVersion();
+            edgeStream = edgeStream.filter((edge) -> nodeBitVector.get(edge.getSource().getStoreId()) && nodeBitVector.get(edge.getTarget().getStoreId()))
+        }
+
+        if (edgePredicate != null) {
+            edgeStream = edgeStream.filter(edgePredicate);
+            ensureEdgeVectorSize(graphStore.edgeStore.maxStoreId());
+        }
+        edgeStream.forEach((edge) -> {
+            edgeBitVector.set(edge.getStoreId());
+            int type = edge.getType();
+
+            typeCounts[type]++;
+
+            if (((EdgeImpl)edge).isMutual() && !edge.isSelfLoop() && containsEdge(graphStore.edgeStore
+                .get(edge.getTarget(), edge.getSource(), type, false))) {
+                mutualEdgeTypeCounts[type]++;
+                mutualEdgesCount++;
+            }
+        });
+        edgeCount = edgeBitVector.size();
     }
 
     public GraphViewImpl(final GraphViewImpl view, boolean nodes, boolean edges) {
