@@ -444,8 +444,8 @@ public class Serialization {
         int sourceNewId = idMap.get(sourceId);
         int targetNewId = idMap.get(targetId);
 
-        if (sourceId == NULL_ID || targetId == NULL_ID) {
-            throw new IOException("The edge source of target can't be found");
+        if (sourceNewId == NULL_ID || targetNewId == NULL_ID) {
+            throw new IOException("The edge source or target can't be found");
         }
 
         NodeImpl source = model.store.nodeStore.get(sourceNewId);
@@ -967,7 +967,7 @@ public class Serialization {
         } else if (mapClass.equals(String[].class)) {
             valueSet = new IntervalStringMap(intervals, (String[]) values);
         } else {
-            throw new RuntimeException("Unrecognized timestamp map class");
+            throw new RuntimeException("Unrecognized interval map class");
         }
         return valueSet;
     }
