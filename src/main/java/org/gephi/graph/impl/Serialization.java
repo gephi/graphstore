@@ -15,7 +15,7 @@
  */
 package org.gephi.graph.impl;
 
-import cern.colt.bitvector.BitVector;
+import java.util.BitSet;
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanOpenHashSet;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
@@ -667,8 +667,8 @@ public class Serialization {
         int storeId = (Integer) deserialize(is);
         int nodeCount = (Integer) deserialize(is);
         int edgeCount = (Integer) deserialize(is);
-        BitVector nodeCountVector = (BitVector) deserialize(is);
-        BitVector edgeCountVector = (BitVector) deserialize(is);
+        BitSet nodeCountVector = (BitSet) deserialize(is);
+        BitSet edgeCountVector = (BitSet) deserialize(is);
         int[] typeCounts = (int[]) deserialize(is);
         int[] mutualEdgeTypeCounts = (int[]) deserialize(is);
         int mutualEdgesCount = (Integer) deserialize(is);
@@ -695,15 +695,36 @@ public class Serialization {
         return view;
     }
 
-    private void serializeBitVector(final DataOutput out, final BitVector bitVector) throws IOException {
-        serialize(out, bitVector.size());
-        serialize(out, bitVector.elements());
+    // Made compatible with legacy BitVector serialization, which was in place until
+    // version 0.8.1
+    public void serializeBitSet(final DataOutput out, final BitSet bitSet) throws IOException {
+        // BitSet.length() returns the index of the highest set bit + 1
+        // This gives us the logical size (0 if empty)
+        int size = bitSet.length();
+
+        serialize(out, size);
+
+        // Get the long array from BitSet
+        long[] words = bitSet.toLongArray();
+
+        // Calculate how many longs BitVector would use for this size
+        int requiredLongs = (size + 63) / 64;
+
+        // Create array with the exact required size (matching BitVector format)
+        long[] elements = new long[requiredLongs];
+
+        // Copy the BitSet data
+        System.arraycopy(words, 0, elements, 0, Math.min(words.length, requiredLongs));
+
+        serialize(out, elements);
     }
 
-    private BitVector deserializeBitVector(final DataInput is) throws IOException, ClassNotFoundException {
+    public BitSet deserializeBitSet(final DataInput is) throws IOException, ClassNotFoundException {
         int size = (Integer) deserialize(is);
         long[] elements = (long[]) deserialize(is);
-        return new BitVector(elements, size);
+
+        // BitSet.valueOf() handles the long array correctly
+        return BitSet.valueOf(elements);
     }
 
     private void serializeGraphStoreConfiguration(final DataOutput out) throws IOException {
@@ -1558,10 +1579,10 @@ public class Serialization {
             GraphViewImpl b = (GraphViewImpl) obj;
             out.write(GRAPH_VIEW);
             serializeGraphView(out, b);
-        } else if (obj instanceof BitVector) {
-            BitVector bv = (BitVector) obj;
+        } else if (obj instanceof BitSet) {
+            BitSet bs = (BitSet) obj;
             out.write(BIT_VECTOR);
-            serializeBitVector(out, bv);
+            serializeBitSet(out, bs);
         } else if (obj instanceof GraphVersion) {
             GraphVersion b = (GraphVersion) obj;
             out.write(GRAPH_VERSION);
@@ -2122,7 +2143,7 @@ public class Serialization {
                 ret = deserializeGraphView(is);
                 break;
             case BIT_VECTOR:
-                ret = deserializeBitVector(is);
+                ret = deserializeBitSet(is);
                 break;
             case GRAPH_STORE_CONFIGURATION:
                 ret = deserializeGraphStoreConfiguration(is);

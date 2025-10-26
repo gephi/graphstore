@@ -786,6 +786,7 @@ public class GraphViewDecoratorTest {
 
         Edge edge = graphStore.factory.newEdge("edge", n1, n1, EdgeTypeStore.NULL_LABEL, 1.0, true);
         graphStore.addEdge(edge);
+        view.addEdge(edge); // Explicitly add edge to view
         Assert.assertTrue(graph.isIncident(edge, graph.getEdge("0")));
     }
 
