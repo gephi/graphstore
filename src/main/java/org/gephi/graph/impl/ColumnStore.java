@@ -387,15 +387,25 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 return false;
             }
         }
+        if (itr2.hasNext()) {
+            return false;
+        }
         return true;
     }
 
     public int deepHashCode() {
         int hash = 3;
         hash = 11 * hash + (this.elementType != null ? this.elementType.hashCode() : 0);
-        ColumnStoreIterator itr = new ColumnStoreIterator();
-        while (itr.hasNext()) {
-            hash = 11 * hash + itr.next().deepHashCode();
+        lock();
+        try {
+            for (int i = 0; i < length; i++) {
+                ColumnImpl c = columns[i];
+                if (c != null) {
+                    hash = 11 * hash + c.deepHashCode();
+                }
+            }
+        } finally {
+            unlock();
         }
         // TODO what about timestampmap
         return hash;
