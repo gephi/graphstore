@@ -99,6 +99,19 @@ public class NodeStoreTest {
     }
 
     @Test
+    public void testMaxStoreId() {
+        NodeStore nodeStore = new NodeStore();
+        Assert.assertEquals(nodeStore.maxStoreId(), 0);
+        NodeImpl node1 = new NodeImpl("0");
+        NodeImpl node2 = new NodeImpl("1");
+        nodeStore.add(node1);
+        Assert.assertEquals(nodeStore.maxStoreId(), 1);
+        nodeStore.add(node2);
+        Assert.assertEquals(nodeStore.maxStoreId(), 2);
+        Assert.assertEquals(node2.getStoreId(), 1);
+    }
+
+    @Test
     public void testGet() {
         NodeStore nodeStore = new NodeStore();
         NodeImpl node = new NodeImpl("0");
