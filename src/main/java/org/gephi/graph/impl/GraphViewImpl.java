@@ -570,6 +570,11 @@ public class GraphViewImpl implements GraphView {
             // views)
             for (int edgeId = edgeBitVector.nextSetBit(0); edgeId >= 0; edgeId = edgeBitVector.nextSetBit(edgeId + 1)) {
                 EdgeImpl edge = getEdge(edgeId);
+                if (edge == null) {
+                    // SAFETY: Edge no longer exists in store
+                    edgesToRemove.set(edgeId);
+                    continue;
+                }
                 // Check if both endpoints are in the node view
                 if (!nodeBitVector.get(edge.source.storeId) || !nodeBitVector.get(edge.target.storeId)) {
                     edgesToRemove.set(edgeId);
@@ -625,6 +630,10 @@ public class GraphViewImpl implements GraphView {
         BitSet edgesToRemove = new BitSet();
         for (int nodeId = nodesToRemove.nextSetBit(0); nodeId >= 0; nodeId = nodesToRemove.nextSetBit(nodeId + 1)) {
             NodeImpl node = getNode(nodeId);
+            if (node == null) {
+                continue; // SAFETY: Node was removed from store (storeId reused or deleted)
+            }
+
             EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
@@ -653,11 +662,13 @@ public class GraphViewImpl implements GraphView {
         if (indexStore != null || timeIndexStore != null) {
             for (int i = nodesToRemove.nextSetBit(0); i >= 0; i = nodesToRemove.nextSetBit(i + 1)) {
                 NodeImpl node = getNode(i);
-                if (indexStore != null) {
-                    indexStore.clearInView(node, this);
-                }
-                if (timeIndexStore != null) {
-                    timeIndexStore.clearInView(node, this);
+                if (node != null) { // SAFETY: Skip if node no longer exists
+                    if (indexStore != null) {
+                        indexStore.clearInView(node, this);
+                    }
+                    if (timeIndexStore != null) {
+                        timeIndexStore.clearInView(node, this);
+                    }
                 }
             }
         }
@@ -681,11 +692,13 @@ public class GraphViewImpl implements GraphView {
         if (indexStore != null || timeIndexStore != null) {
             for (int i = nodesToAdd.nextSetBit(0); i >= 0; i = nodesToAdd.nextSetBit(i + 1)) {
                 NodeImpl node = getNode(i);
-                if (indexStore != null) {
-                    indexStore.indexInView(node, this);
-                }
-                if (timeIndexStore != null) {
-                    timeIndexStore.indexInView(node, this);
+                if (node != null) { // SAFETY: Skip if node no longer exists
+                    if (indexStore != null) {
+                        indexStore.indexInView(node, this);
+                    }
+                    if (timeIndexStore != null) {
+                        timeIndexStore.indexInView(node, this);
+                    }
                 }
             }
         }
@@ -696,6 +709,10 @@ public class GraphViewImpl implements GraphView {
             BitSet edgesToAdd = new BitSet();
             for (int nodeId = nodesToAdd.nextSetBit(0); nodeId >= 0; nodeId = nodesToAdd.nextSetBit(nodeId + 1)) {
                 NodeImpl node = getNode(nodeId);
+                if (node == null) {
+                    continue; // SAFETY: Skip if node no longer exists
+                }
+
                 EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
                 while (itr.hasNext()) {
                     EdgeImpl edge = itr.next();
@@ -726,6 +743,10 @@ public class GraphViewImpl implements GraphView {
         // Update type counts and mutual edge counts
         for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
             EdgeImpl edge = getEdge(i);
+            if (edge == null) {
+                continue; // SAFETY: Edge was removed from store (storeId reused or deleted)
+            }
+
             int type = edge.type;
             ensureTypeCountArrayCapacity(type);
             typeCounts[type]--;
@@ -748,11 +769,13 @@ public class GraphViewImpl implements GraphView {
         if (indexStore != null || timeIndexStore != null) {
             for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
                 EdgeImpl edge = getEdge(i);
-                if (indexStore != null) {
-                    indexStore.clearInView(edge, this);
-                }
-                if (timeIndexStore != null) {
-                    timeIndexStore.clearInView(edge, this);
+                if (edge != null) { // SAFETY: Skip if edge no longer exists
+                    if (indexStore != null) {
+                        indexStore.clearInView(edge, this);
+                    }
+                    if (timeIndexStore != null) {
+                        timeIndexStore.clearInView(edge, this);
+                    }
                 }
             }
         }
@@ -771,6 +794,10 @@ public class GraphViewImpl implements GraphView {
         // Update type counts and mutual edge counts
         for (int i = edgesToAdd.nextSetBit(0); i >= 0; i = edgesToAdd.nextSetBit(i + 1)) {
             EdgeImpl edge = getEdge(i);
+            if (edge == null) {
+                continue; // SAFETY: Skip if edge no longer exists in store
+            }
+
             int type = edge.type;
             ensureTypeCountArrayCapacity(type);
             typeCounts[type]++;
@@ -793,11 +820,13 @@ public class GraphViewImpl implements GraphView {
         if (indexStore != null || timeIndexStore != null) {
             for (int i = edgesToAdd.nextSetBit(0); i >= 0; i = edgesToAdd.nextSetBit(i + 1)) {
                 EdgeImpl edge = getEdge(i);
-                if (indexStore != null) {
-                    indexStore.indexInView(edge, this);
-                }
-                if (timeIndexStore != null) {
-                    timeIndexStore.indexInView(edge, this);
+                if (edge != null) { // SAFETY: Skip if edge no longer exists
+                    if (indexStore != null) {
+                        indexStore.indexInView(edge, this);
+                    }
+                    if (timeIndexStore != null) {
+                        timeIndexStore.indexInView(edge, this);
+                    }
                 }
             }
         }
@@ -817,6 +846,10 @@ public class GraphViewImpl implements GraphView {
         // Update type counts and mutual edge counts
         for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
             EdgeImpl edge = getEdge(i);
+            if (edge == null) {
+                continue; // SAFETY: Skip if edge no longer exists in store
+            }
+
             int type = edge.type;
             ensureTypeCountArrayCapacity(type);
             typeCounts[type]--;
