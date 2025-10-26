@@ -15,8 +15,7 @@
  */
 package org.gephi.graph.impl;
 
-import cern.colt.bitvector.BitVector;
-import cern.colt.bitvector.QuickBitVector;
+import java.util.BitSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
@@ -40,7 +39,7 @@ public class ColumnObserverImpl implements ColumnObserver {
     protected boolean destroyed;
     // Config
     protected final boolean withDiff;
-    protected BitVector bitVector;
+    protected BitSet bitVector;
     // Cache
     protected ColumnDiffImpl columnDiff;
 
@@ -109,7 +108,7 @@ public class ColumnObserverImpl implements ColumnObserver {
         boolean node = AttributeUtils.isNodeColumn(column);
         columnDiff = node ? new NodeColumnDiffImpl() : new EdgeColumnDiffImpl();
 
-        int size = bitVector.size();
+        int size = bitVector.length();
 
         for (int i = 0; i < size; i++) {
             boolean t = bitVector.get(i);
@@ -179,19 +178,11 @@ public class ColumnObserverImpl implements ColumnObserver {
     private void ensureVectorSize(ElementImpl element) {
         int sid = element.getStoreId();
         if (bitVector == null) {
-            bitVector = new BitVector(sid + 1);
-        } else if (sid >= bitVector.size()) {
-            int newSize = Math.min(Math
+            int initialSize = Math.min(Math
                     .max(sid + 1, (int) (sid * GraphStoreConfiguration.COLUMNDIFF_GROWING_FACTOR)), Integer.MAX_VALUE);
-            bitVector = growBitVector(bitVector, newSize);
+            bitVector = new BitSet(initialSize);
         }
-    }
-
-    private BitVector growBitVector(BitVector bitVector, int size) {
-        long[] elements = bitVector.elements();
-        long[] newElements = QuickBitVector.makeBitVector(size, 1);
-        System.arraycopy(elements, 0, newElements, 0, elements.length);
-        return new BitVector(newElements, size);
+        // BitSet grows automatically when setting bits, no need to manually grow
     }
 
     private void readLock() {

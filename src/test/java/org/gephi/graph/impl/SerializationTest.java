@@ -15,7 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import cern.colt.bitvector.BitVector;
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanOpenHashSet;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
@@ -49,12 +48,14 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.GraphModel;
@@ -315,14 +316,14 @@ public class SerializationTest {
     }
 
     @Test
-    public void testBitVector() throws IOException, ClassNotFoundException {
-        BitVector bitVector = new BitVector(10);
+    public void testBitSet() throws IOException, ClassNotFoundException {
+        BitSet bitVector = new BitSet(10);
         bitVector.set(1);
         bitVector.set(4);
 
         Serialization ser = new Serialization(null);
         byte[] buf = ser.serialize(bitVector);
-        BitVector l = (BitVector) ser.deserialize(buf);
+        BitSet l = (BitSet) ser.deserialize(buf);
         Assert.assertEquals(bitVector, l);
     }
 
@@ -1265,5 +1266,28 @@ public class SerializationTest {
         ser = new Serialization();
         GraphModelImpl read = ser.deserializeGraphModelWithoutVersionPrefix(dio.reset(bytes), Serialization.VERSION);
         Assert.assertTrue(read.deepEquals(gm));
+    }
+
+    @Test
+    public void testBitVectorEqual() throws Exception {
+        Serialization ser = new Serialization();
+
+        Random random = new Random();
+        for (int i = 0; i < 20000; i += 97) {
+            BitSet bs = new BitSet(i);
+
+            int p = random.nextInt(99) + 1;
+            for (int j = 0; j < i; j++) {
+                if (random.nextInt(100) < p) {
+                    bs.set(j);
+                }
+            }
+            DataInputOutput dio = new DataInputOutput();
+            ser.serializeBitSet(dio, bs);
+            byte[] bytes = dio.toByteArray();
+
+            BitSet deserializedBs = ser.deserializeBitSet(dio.reset(bytes));
+            Assert.assertEquals(bs, deserializedBs);
+        }
     }
 }

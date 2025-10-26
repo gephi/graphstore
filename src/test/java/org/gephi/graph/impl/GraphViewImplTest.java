@@ -15,7 +15,10 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -506,5 +509,674 @@ public class GraphViewImplTest {
         Assert.assertEquals(view.getEdgeCount(1), 2);
         Assert.assertEquals(view.getUndirectedEdgeCount(0), 0);
         Assert.assertEquals(view.getUndirectedEdgeCount(1), 1);
+    }
+
+    @Test
+    public void testCopyConstructor() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+        view.fill();
+
+        // Original view should have mutual edges counted
+        int originalEdgeCount = view.getEdgeCount();
+        int originalMutualCount = view.mutualEdgesCount;
+        int originalUndirectedCount = view.getUndirectedEdgeCount();
+
+        // Create a copy using the copy constructor
+        GraphViewImpl copiedView = new GraphViewImpl(view, true, true);
+
+        // Verify
+        Assert.assertEquals(copiedView.getNodeCount(), view
+                .getNodeCount(), "Node count should be the same in copied view");
+        Assert.assertEquals(copiedView.nodeBitVector, view.nodeBitVector, "Node bit vector should be the same in copied view");
+        Assert.assertEquals(copiedView.edgeBitVector, view.edgeBitVector, "Edge bit vector should be the same in copied view");
+
+        // Verify that mutualEdgesCount was copied correctly
+        Assert.assertEquals(copiedView.mutualEdgesCount, originalMutualCount, "mutualEdgesCount should be copied in copy constructor");
+        Assert.assertEquals(copiedView.getEdgeCount(), originalEdgeCount);
+        Assert.assertEquals(copiedView
+                .getUndirectedEdgeCount(), originalUndirectedCount, "getUndirectedEdgeCount() should return correct value after copy");
+    }
+
+    @Test
+    public void testFilledViewRequiresExplicitAdd() {
+        // Test that users must explicitly add edges to filled views
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        view.fill();
+        int initialEdgeCount = view.getEdgeCount();
+
+        // Add a new edge to the main graph store
+        NodeImpl n1 = graphStore.getNode("0");
+        NodeImpl n2 = graphStore.getNode("1");
+        EdgeImpl newEdge = new EdgeImpl("newEdge", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(newEdge);
+
+        // Edge should not be in view yet
+        Assert.assertFalse(view.containsEdge(newEdge));
+
+        // Explicitly add the edge to the view
+        boolean added = view.addEdge(newEdge);
+
+        // Now it should be in the view
+        Assert.assertTrue(added, "addEdge should return true");
+        Assert.assertTrue(view.containsEdge(newEdge), "Edge should be in view after explicit add");
+        Assert.assertEquals(view.getEdgeCount(), initialEdgeCount + 1);
+    }
+
+    // ========== Tests for Mutual Edge Counts in Bulk Operations ==========
+
+    @Test
+    public void testIntersectionWithMutualEdges() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView();
+        GraphViewImpl view2 = store.createView();
+
+        // Fill both views
+        view1.fill();
+        view2.fill();
+
+        // Initial state: both views have mutual edges (mutual count is 1 for a pair)
+        Assert.assertEquals(view1.mutualEdgesCount, 1, "View1 should have mutual count of 1");
+        Assert.assertEquals(view1.getEdgeCount(), 2, "View1 should have 2 edges");
+        Assert.assertEquals(view1.getUndirectedEdgeCount(), 1, "View1 should have 1 undirected edge");
+
+        // Remove one of the mutual edges from view2
+        EdgeImpl e1 = graphStore.getEdge("1");
+        view2.removeEdge(e1);
+
+        // After removing one mutual edge, view2 should have no mutual edges
+        Assert.assertEquals(view2.mutualEdgesCount, 0, "View2 should have 0 mutual edges after removal");
+        Assert.assertEquals(view2.getEdgeCount(), 1, "View2 should have 1 edge");
+        Assert.assertEquals(view2.getUndirectedEdgeCount(), 1, "View2 should have 1 undirected edge");
+
+        // Intersection should result in view1 losing its mutual edge status
+        view1.intersection(view2);
+
+        Assert.assertEquals(view1.mutualEdgesCount, 0, "View1 should have 0 mutual edges after intersection");
+        Assert.assertEquals(view1.getEdgeCount(), 1, "View1 should have 1 edge total");
+        Assert.assertEquals(view1.getUndirectedEdgeCount(), 1, "View1 should have 1 undirected edge");
+    }
+
+    @Test
+    public void testUnionWithMutualEdges() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView();
+        GraphViewImpl view2 = store.createView();
+
+        EdgeImpl e0 = graphStore.getEdge("0");
+        EdgeImpl e1 = graphStore.getEdge("1");
+        NodeImpl n1 = e0.getSource();
+        NodeImpl n2 = e0.getTarget();
+
+        // View1 has only one edge of the mutual pair
+        view1.addNode(n1);
+        view1.addNode(n2);
+        view1.addEdge(e0);
+
+        // View2 has only the other edge of the mutual pair
+        view2.addNode(n1);
+        view2.addNode(n2);
+        view2.addEdge(e1);
+
+        // Neither view should have mutual edges yet
+        Assert.assertEquals(view1.mutualEdgesCount, 0, "View1 should have 0 mutual edges initially");
+        Assert.assertEquals(view2.mutualEdgesCount, 0, "View2 should have 0 mutual edges initially");
+
+        // Union should create mutual edges (mutual count is 1 for a pair)
+        view1.union(view2);
+
+        Assert.assertEquals(view1.mutualEdgesCount, 1, "View1 should have mutual count of 1 after union");
+        Assert.assertEquals(view1.getEdgeCount(), 2, "View1 should have 2 edges total");
+        Assert.assertEquals(view1.getUndirectedEdgeCount(), 1, "View1 should have 1 undirected edge");
+    }
+
+    @Test
+    public void testNotWithMutualEdges() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        EdgeImpl e0 = graphStore.getEdge("0");
+        EdgeImpl e1 = graphStore.getEdge("1");
+        NodeImpl n1 = e0.getSource();
+        NodeImpl n2 = e0.getTarget();
+
+        // Add only one edge of the mutual pair
+        view.addNode(n1);
+        view.addNode(n2);
+        view.addEdge(e0);
+
+        Assert.assertEquals(view.mutualEdgesCount, 0, "View should have 0 mutual edges initially");
+        Assert.assertEquals(view.getEdgeCount(), 1, "View should have 1 edge");
+        Assert.assertEquals(view.getNodeCount(), 2, "View should have 2 nodes");
+
+        // NOT operation flips both nodes and edges
+        // Since there are only 2 nodes total in the graph, after NOT we have 0 nodes
+        // Edges without endpoints get removed, so we end up with 0 edges
+        view.not();
+
+        Assert.assertEquals(view.getNodeCount(), 0, "View should have 0 nodes after NOT (graph has 2 nodes total)");
+        Assert.assertEquals(view.getEdgeCount(), 0, "View should have 0 edges after NOT (no nodes, so no edges)");
+    }
+
+    // ========== Tests for Multi-Type Edge Counts in Bulk Operations ==========
+
+    @Test
+    public void testIntersectionMultipleEdgeTypes() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView();
+        GraphViewImpl view2 = store.createView();
+
+        // Fill both views
+        view1.fill();
+        view2.fill();
+
+        // Verify initial state has multiple edge types
+        int type0CountInitial = view1.getEdgeCount(0);
+        int type1CountInitial = view1.getEdgeCount(1);
+        Assert.assertTrue(type0CountInitial > 0, "Should have type 0 edges");
+        Assert.assertTrue(type1CountInitial > 0, "Should have type 1 edges");
+
+        // Remove all type 0 edges from view2
+        for (Edge e : graphStore.getEdges().toArray()) {
+            if (e.getType() == 0) {
+                view2.removeEdge(e);
+            }
+        }
+
+        Assert.assertEquals(view2.getEdgeCount(0), 0, "View2 should have 0 type 0 edges");
+        Assert.assertEquals(view2.getEdgeCount(1), type1CountInitial, "View2 should still have all type 1 edges");
+
+        // Intersection should remove all type 0 edges from view1
+        view1.intersection(view2);
+
+        Assert.assertEquals(view1.getEdgeCount(0), 0, "View1 should have 0 type 0 edges after intersection");
+        Assert.assertEquals(view1
+                .getEdgeCount(1), type1CountInitial, "View1 should have all type 1 edges after intersection");
+        int type2CountInitial = view1.getEdgeCount(2);
+        Assert.assertEquals(view1
+                .getEdgeCount(), type1CountInitial + type2CountInitial, "Total edge count should match sum of type 1 and type 2");
+    }
+
+    @Test
+    public void testUnionMultipleEdgeTypes() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView();
+        GraphViewImpl view2 = store.createView();
+
+        // Add only type 0 edges to view1
+        for (Node n : graphStore.getNodes()) {
+            view1.addNode(n);
+        }
+        for (Edge e : graphStore.getEdges().toArray()) {
+            if (e.getType() == 0) {
+                view1.addEdge(e);
+            }
+        }
+
+        // Add only type 1 and type 2 edges to view2
+        for (Node n : graphStore.getNodes()) {
+            view2.addNode(n);
+        }
+        for (Edge e : graphStore.getEdges().toArray()) {
+            if (e.getType() == 1 || e.getType() == 2) {
+                view2.addEdge(e);
+            }
+        }
+
+        int type0Count = view1.getEdgeCount(0);
+        int type1Count = view2.getEdgeCount(1);
+        int type2Count = view2.getEdgeCount(2);
+
+        Assert.assertTrue(type0Count > 0, "View1 should have type 0 edges");
+        Assert.assertEquals(view2.getEdgeCount(0), 0, "View2 should have no type 0 edges");
+        Assert.assertTrue(type1Count > 0, "View2 should have type 1 edges");
+        Assert.assertTrue(type2Count > 0, "View2 should have type 2 edges");
+
+        // Union should combine both types
+        view1.union(view2);
+
+        Assert.assertEquals(view1.getEdgeCount(0), type0Count, "View1 should have all type 0 edges after union");
+        Assert.assertEquals(view1.getEdgeCount(1), type1Count, "View1 should have all type 1 edges after union");
+        Assert.assertEquals(view1.getEdgeCount(2), type2Count, "View1 should have all type 2 edges after union");
+        Assert.assertEquals(view1
+                .getEdgeCount(), type0Count + type1Count + type2Count, "Total should be sum of all types");
+    }
+
+    @Test
+    public void testNotMultipleEdgeTypes() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        // Add all nodes but only type 0 edges
+        for (Node n : graphStore.getNodes()) {
+            view.addNode(n);
+        }
+        for (Edge e : graphStore.getEdges().toArray()) {
+            if (e.getType() == 0) {
+                view.addEdge(e);
+            }
+        }
+
+        int type0Count = view.getEdgeCount(0);
+        int nodeCount = view.getNodeCount();
+        int totalNodesInStore = graphStore.getNodeCount();
+
+        Assert.assertTrue(type0Count > 0, "View should have type 0 edges");
+
+        // NOT operation flips both nodes and edges
+        // Since we have all nodes, after NOT we have 0 nodes
+        // All edges get removed because they have no valid endpoints
+        view.not();
+
+        Assert.assertEquals(view
+                .getNodeCount(), totalNodesInStore - nodeCount, "View should have inverted node count after NOT");
+        Assert.assertEquals(view
+                .getEdgeCount(), 0, "View should have 0 edges after NOT (no nodes means no valid edges)");
+    }
+
+    // ========== Tests for Empty View Edge Cases ==========
+
+    @Test
+    public void testIntersectionWithEmptyView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView();
+        GraphViewImpl view2 = store.createView(); // Empty view
+
+        // Fill view1
+        view1.fill();
+        int initialNodeCount = view1.getNodeCount();
+        int initialEdgeCount = view1.getEdgeCount();
+
+        Assert.assertTrue(initialNodeCount > 0, "View1 should have nodes");
+        Assert.assertTrue(initialEdgeCount > 0, "View1 should have edges");
+        Assert.assertEquals(view2.getNodeCount(), 0, "View2 should be empty");
+        Assert.assertEquals(view2.getEdgeCount(), 0, "View2 should be empty");
+
+        // Intersection with empty view should result in empty view1
+        view1.intersection(view2);
+
+        Assert.assertEquals(view1.getNodeCount(), 0, "View1 should be empty after intersection with empty view");
+        Assert.assertEquals(view1.getEdgeCount(), 0, "View1 should have no edges after intersection with empty view");
+    }
+
+    @Test
+    public void testIntersectionOfEmptyView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView(); // Empty view
+        GraphViewImpl view2 = store.createView();
+
+        // Fill view2
+        view2.fill();
+
+        Assert.assertEquals(view1.getNodeCount(), 0, "View1 should be empty");
+        Assert.assertTrue(view2.getNodeCount() > 0, "View2 should have nodes");
+
+        // Intersection of empty view with filled view should stay empty
+        view1.intersection(view2);
+
+        Assert.assertEquals(view1.getNodeCount(), 0, "View1 should still be empty after intersection");
+        Assert.assertEquals(view1.getEdgeCount(), 0, "View1 should still have no edges after intersection");
+    }
+
+    @Test
+    public void testUnionWithEmptyView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView();
+        GraphViewImpl view2 = store.createView(); // Empty view
+
+        // Fill view1
+        view1.fill();
+        int initialNodeCount = view1.getNodeCount();
+        int initialEdgeCount = view1.getEdgeCount();
+
+        Assert.assertTrue(initialNodeCount > 0, "View1 should have nodes");
+        Assert.assertTrue(initialEdgeCount > 0, "View1 should have edges");
+        Assert.assertEquals(view2.getNodeCount(), 0, "View2 should be empty");
+
+        // Union with empty view should not change view1
+        view1.union(view2);
+
+        Assert.assertEquals(view1.getNodeCount(), initialNodeCount, "View1 node count should not change");
+        Assert.assertEquals(view1.getEdgeCount(), initialEdgeCount, "View1 edge count should not change");
+    }
+
+    @Test
+    public void testUnionOfEmptyView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView(); // Empty view
+        GraphViewImpl view2 = store.createView();
+
+        // Fill view2
+        view2.fill();
+        int view2NodeCount = view2.getNodeCount();
+        int view2EdgeCount = view2.getEdgeCount();
+
+        Assert.assertEquals(view1.getNodeCount(), 0, "View1 should be empty");
+        Assert.assertTrue(view2NodeCount > 0, "View2 should have nodes");
+
+        // Union of empty view with filled view should fill view1
+        view1.union(view2);
+
+        Assert.assertEquals(view1.getNodeCount(), view2NodeCount, "View1 should have same node count as view2");
+        Assert.assertEquals(view1.getEdgeCount(), view2EdgeCount, "View1 should have same edge count as view2");
+    }
+
+    @Test
+    public void testNotOnEmptyView() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(); // Empty view
+
+        int totalNodes = graphStore.getNodeCount();
+        int totalEdges = graphStore.getEdgeCount();
+
+        Assert.assertEquals(view.getNodeCount(), 0, "View should be empty initially");
+        Assert.assertEquals(view.getEdgeCount(), 0, "View should have no edges initially");
+
+        // NOT on empty view should fill it completely
+        view.not();
+
+        Assert.assertEquals(view.getNodeCount(), totalNodes, "View should have all nodes after NOT");
+        Assert.assertEquals(view.getEdgeCount(), totalEdges, "View should have all edges after NOT");
+
+        // Verify all elements are present
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertTrue(view.containsNode((NodeImpl) n), "View should contain all nodes after NOT");
+        }
+        for (Edge e : graphStore.getEdges()) {
+            Assert.assertTrue(view.containsEdge((EdgeImpl) e), "View should contain all edges after NOT");
+        }
+    }
+
+    @Test
+    public void testIntersectionBothEmpty() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView(); // Empty
+        GraphViewImpl view2 = store.createView(); // Empty
+
+        // Both views empty
+        Assert.assertEquals(view1.getNodeCount(), 0, "View1 should be empty");
+        Assert.assertEquals(view2.getNodeCount(), 0, "View2 should be empty");
+
+        // Intersection of two empty views should stay empty
+        view1.intersection(view2);
+
+        Assert.assertEquals(view1.getNodeCount(), 0, "View1 should still be empty");
+        Assert.assertEquals(view1.getEdgeCount(), 0, "View1 should still have no edges");
+    }
+
+    @Test
+    public void testUnionBothEmpty() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view1 = store.createView(); // Empty
+        GraphViewImpl view2 = store.createView(); // Empty
+
+        // Both views empty
+        Assert.assertEquals(view1.getNodeCount(), 0, "View1 should be empty");
+        Assert.assertEquals(view2.getNodeCount(), 0, "View2 should be empty");
+
+        // Union of two empty views should stay empty
+        view1.union(view2);
+
+        Assert.assertEquals(view1.getNodeCount(), 0, "View1 should still be empty");
+        Assert.assertEquals(view1.getEdgeCount(), 0, "View1 should still have no edges");
+    }
+
+    // ========== Tests for Retain Operations ==========
+
+    @Test
+    public void testRetainNodesBasic() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        view.fill();
+        int initialNodeCount = view.getNodeCount();
+        int initialEdgeCount = view.getEdgeCount();
+
+        // Retain all nodes - should return false (no change)
+        boolean changed = view.retainNodes(graphStore.getNodes().toCollection());
+        Assert.assertFalse(changed, "Retaining all nodes should return false");
+        Assert.assertEquals(view.getNodeCount(), initialNodeCount, "Node count should not change");
+        Assert.assertEquals(view.getEdgeCount(), initialEdgeCount, "Edge count should not change");
+
+        // Retain subset of nodes
+        NodeImpl n1 = graphStore.getNode("0");
+        NodeImpl n2 = graphStore.getNode("1");
+        changed = view.retainNodes(Arrays.asList(n1, n2));
+
+        Assert.assertTrue(changed, "Retaining subset should return true");
+        Assert.assertEquals(view.getNodeCount(), 2, "Should have exactly 2 nodes");
+        Assert.assertTrue(view.containsNode(n1), "Should contain node 0");
+        Assert.assertTrue(view.containsNode(n2), "Should contain node 1");
+    }
+
+    @Test
+    public void testRetainNodesEmpty() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        view.fill();
+
+        // Retain empty collection - should clear everything
+        boolean changed = view.retainNodes(Collections.emptyList());
+
+        Assert.assertTrue(changed, "Retaining empty list should return true");
+        Assert.assertEquals(view.getNodeCount(), 0, "Should have no nodes");
+        Assert.assertEquals(view.getEdgeCount(), 0, "Should have no edges");
+    }
+
+    @Test
+    public void testRetainEdgesBasic() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true); // Edge view only
+
+        view.fill();
+        int initialEdgeCount = view.getEdgeCount();
+
+        // Retain all edges - should return false (no change)
+        boolean changed = view.retainEdges(graphStore.getEdges().toCollection());
+        Assert.assertFalse(changed, "Retaining all edges should return false");
+        Assert.assertEquals(view.getEdgeCount(), initialEdgeCount, "Edge count should not change");
+
+        // Retain subset of edges
+        EdgeImpl e1 = graphStore.getEdge("0");
+        EdgeImpl e2 = graphStore.getEdge("1");
+        changed = view.retainEdges(Arrays.asList(e1, e2));
+
+        Assert.assertTrue(changed, "Retaining subset should return true");
+        Assert.assertEquals(view.getEdgeCount(), 2, "Should have exactly 2 edges");
+        Assert.assertTrue(view.containsEdge(e1), "Should contain edge 0");
+        Assert.assertTrue(view.containsEdge(e2), "Should contain edge 1");
+    }
+
+    @Test
+    public void testRetainEdgesEmpty() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true); // Edge view only
+
+        view.fill();
+
+        // Retain empty collection - should clear all edges
+        boolean changed = view.retainEdges(Collections.emptyList());
+
+        Assert.assertTrue(changed, "Retaining empty list should return true");
+        Assert.assertEquals(view.getEdgeCount(), 0, "Should have no edges");
+    }
+
+    @Test
+    public void testRetainNodesWithMutualEdges() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        view.fill();
+
+        EdgeImpl e0 = graphStore.getEdge("0");
+        EdgeImpl e1 = graphStore.getEdge("1");
+        NodeImpl n1 = e0.getSource();
+        NodeImpl n2 = e0.getTarget();
+
+        // Initial state: view has mutual edges
+        Assert.assertEquals(view.mutualEdgesCount, 1, "View should have mutual count of 1");
+        Assert.assertEquals(view.getEdgeCount(), 2, "View should have 2 edges");
+
+        // Retain both nodes - mutual edges should remain
+        boolean changed = view.retainNodes(Arrays.asList(n1, n2));
+
+        Assert.assertFalse(changed, "Retaining all nodes should return false");
+        Assert.assertEquals(view.mutualEdgesCount, 1, "Mutual edges should remain");
+        Assert.assertEquals(view.getEdgeCount(), 2, "Should still have 2 edges");
+    }
+
+    @Test
+    public void testRetainEdgesWithMultipleTypes() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true); // Edge view only
+
+        view.fill();
+
+        int type0Count = view.getEdgeCount(0);
+        int type1Count = view.getEdgeCount(1);
+        int type2Count = view.getEdgeCount(2);
+
+        Assert.assertTrue(type0Count > 0, "Should have type 0 edges");
+        Assert.assertTrue(type1Count > 0, "Should have type 1 edges");
+        Assert.assertTrue(type2Count > 0, "Should have type 2 edges");
+
+        // Collect only type 0 edges to retain
+        List<Edge> type0Edges = new ArrayList<>();
+        for (Edge e : graphStore.getEdges().toArray()) {
+            if (e.getType() == 0) {
+                type0Edges.add(e);
+            }
+        }
+
+        // Retain only type 0 edges
+        boolean changed = view.retainEdges(type0Edges);
+
+        Assert.assertTrue(changed, "Should have removed edges");
+        Assert.assertEquals(view.getEdgeCount(0), type0Count, "Should still have all type 0 edges");
+        Assert.assertEquals(view.getEdgeCount(1), 0, "Should have no type 1 edges");
+        Assert.assertEquals(view.getEdgeCount(2), 0, "Should have no type 2 edges");
+        Assert.assertEquals(view.getEdgeCount(), type0Count, "Total should match type 0 count");
+    }
+
+    @Test
+    public void testRetainNodesWithMultipleEdgeTypes() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        view.fill();
+
+        int initialType0Count = view.getEdgeCount(0);
+        int initialType1Count = view.getEdgeCount(1);
+
+        // Retain subset of nodes
+        List<Node> nodesToRetain = new ArrayList<>();
+        int count = 0;
+        for (Node n : graphStore.getNodes()) {
+            nodesToRetain.add(n);
+            count++;
+            if (count >= 5) {
+                break; // Keep first 5 nodes
+            }
+        }
+
+        boolean changed = view.retainNodes(nodesToRetain);
+
+        Assert.assertTrue(changed, "Should have removed nodes");
+        Assert.assertEquals(view.getNodeCount(), 5, "Should have exactly 5 nodes");
+
+        // Edge counts should have decreased but type tracking should still be correct
+        int newType0Count = view.getEdgeCount(0);
+        int newType1Count = view.getEdgeCount(1);
+
+        Assert.assertTrue(newType0Count <= initialType0Count, "Type 0 count should not increase");
+        Assert.assertTrue(newType1Count <= initialType1Count, "Type 1 count should not increase");
+        Assert.assertEquals(view.getEdgeCount(), newType0Count + newType1Count + view
+                .getEdgeCount(2), "Total edge count should match sum of types");
+    }
+
+    @Test
+    public void testRetainNodesLargeScale() {
+        // Test bulk operation performance with larger dataset
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView();
+
+        view.fill();
+        int totalNodes = view.getNodeCount();
+
+        // Retain half the nodes
+        List<Node> nodesToRetain = new ArrayList<>();
+        int count = 0;
+        for (Node n : graphStore.getNodes()) {
+            if (count % 2 == 0) {
+                nodesToRetain.add(n);
+            }
+            count++;
+        }
+
+        boolean changed = view.retainNodes(nodesToRetain);
+
+        Assert.assertTrue(changed, "Should have removed nodes");
+        Assert.assertTrue(view.getNodeCount() <= totalNodes / 2 + 1, "Should have roughly half the nodes");
+        Assert.assertTrue(view.getNodeCount() >= totalNodes / 2 - 1, "Should have roughly half the nodes");
+
+        // Verify all retained nodes are in the view
+        for (Node n : nodesToRetain) {
+            Assert.assertTrue(view.containsNode((NodeImpl) n), "Retained node should be in view");
+        }
+    }
+
+    @Test
+    public void testRetainEdgesOnlyView() {
+        // Test retain edges when nodeView=false, edgeView=true
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true);
+
+        view.fill();
+
+        List<Edge> edgesToRetain = new ArrayList<>();
+        int count = 0;
+        for (Edge e : graphStore.getEdges().toArray()) {
+            edgesToRetain.add(e);
+            count++;
+            if (count >= 10) {
+                break;
+            }
+        }
+
+        boolean changed = view.retainEdges(edgesToRetain);
+
+        Assert.assertTrue(changed, "Should have removed edges");
+        Assert.assertEquals(view.getEdgeCount(), 10, "Should have exactly 10 edges");
+
+        for (Edge e : edgesToRetain) {
+            Assert.assertTrue(view.containsEdge((EdgeImpl) e), "Retained edge should be in view");
+        }
     }
 }

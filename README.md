@@ -53,7 +53,7 @@ compile 'org.gephi:graphstore:0.8.0'
 
 ## Dependencies
 
-GraphStore is built for JRE 17+ and depends on FastUtil and Colt.
+GraphStore is built for JRE 17+ and depends on FastUtil.
 
 For a complete list of dependencies, consult the `pom.xml` file.
 
