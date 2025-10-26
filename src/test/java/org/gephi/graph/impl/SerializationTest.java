@@ -1273,11 +1273,11 @@ public class SerializationTest {
         Serialization ser = new Serialization();
 
         Random random = new Random();
-        for (int i=0;i<20000;i+=97) {
+        for (int i = 0; i < 20000; i += 97) {
             BitSet bs = new BitSet(i);
 
             int p = random.nextInt(99) + 1;
-            for (int j=0;j<i;j++) {
+            for (int j = 0; j < i; j++) {
                 if (random.nextInt(100) < p) {
                     bs.set(j);
                 }

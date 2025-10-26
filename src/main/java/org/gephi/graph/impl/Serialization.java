@@ -695,7 +695,8 @@ public class Serialization {
         return view;
     }
 
-    // Made compatible with legacy BitVector serialization, which was in place until version 0.8.1
+    // Made compatible with legacy BitVector serialization, which was in place until
+    // version 0.8.1
     public void serializeBitSet(final DataOutput out, final BitSet bitSet) throws IOException {
         // BitSet.length() returns the index of the highest set bit + 1
         // This gives us the logical size (0 if empty)
