@@ -161,11 +161,13 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
 
     @Override
     public ColumnImpl getColumn(String id) {
+        store.checkNonNullObject(id);
         return store.getColumn(id.toLowerCase());
     }
 
     @Override
     public boolean hasColumn(String id) {
+        store.checkNonNullObject(id);
         return store.hasColumn(id.toLowerCase());
     }
 
@@ -184,6 +186,7 @@ public class TableImpl<T extends Element> implements Collection<Column>, Table {
 
     @Override
     public void removeColumn(String id) {
+        store.checkNonNullObject(id);
         store.removeColumn(id.toLowerCase());
     }
 
