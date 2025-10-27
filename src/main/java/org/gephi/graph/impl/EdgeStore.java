@@ -1655,7 +1655,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         @Override
         protected boolean moveToNextNode() {
             if (nodeIterator.hasNext()) {
-                initializeForNode(nodeIterator.next());
+                NodeImpl node = nodeIterator.next();
+                checkValidNodeObject(node);
+                initializeForNode(node);
                 return true;
             }
             return false;

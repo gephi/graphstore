@@ -162,23 +162,15 @@ public class GraphFactoryImpl implements GraphFactory {
     }
 
     private static boolean isNumeric(String str) {
-        if (str == null) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
-        char[] data = str.toCharArray();
-        if (data.length <= 0 || data.length > 9) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
             return false;
         }
-        int index = 0;
-        if (data[0] == '-' && data.length > 1) {
-            index = 1;
-        }
-        for (; index < data.length; index++) {
-            if (data[index] < '0' || data[index] > '9') {
-                return false;
-            }
-        }
-        return true;
     }
 
     public int deepHashCode() {

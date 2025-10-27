@@ -15,9 +15,6 @@
  */
 package org.gephi.graph.impl;
 
-import cern.colt.bitvector.BitVector;
-import cern.colt.bitvector.QuickBitVector;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -43,8 +40,8 @@ public class GraphViewImpl implements GraphView {
     protected final boolean nodeView;
     protected final boolean edgeView;
     protected final GraphAttributesImpl attributes;
-    protected BitVector nodeBitVector;
-    protected BitVector edgeBitVector;
+    protected BitSet nodeBitVector;
+    protected BitSet edgeBitVector;
     protected int storeId;
     // Version
     protected final GraphVersion version;
@@ -67,13 +64,13 @@ public class GraphViewImpl implements GraphView {
         this.edgeView = edges;
         this.attributes = new GraphAttributesImpl();
         if (nodes) {
-            this.nodeBitVector = new BitVector(store.nodeStore.maxStoreId());
+            this.nodeBitVector = new BitSet(store.nodeStore.maxStoreId());
         } else {
             this.nodeBitVector = null;
         }
-        this.edgeBitVector = new BitVector(store.edgeStore.maxStoreId());
-        this.typeCounts = new int[store.edgeStore.typeSize.length];
-        this.mutualEdgeTypeCounts = new int[store.edgeStore.mutualEdgesTypeSize.length];
+        this.edgeBitVector = new BitSet(store.edgeStore.maxStoreId());
+        this.typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
+        this.mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
 
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
@@ -88,18 +85,16 @@ public class GraphViewImpl implements GraphView {
         // Fill
         Stream<Edge> edgeStream = graphStore.edgeStore.parallelStream();
         if (nodePredicate != null) {
-            ensureNodeVectorSize(graphStore.nodeStore.maxStoreId());
             graphStore.nodeStore.parallelStream().filter(nodePredicate).forEach((node) -> {
                 nodeBitVector.set(node.getStoreId());
             });
             nodeCount = nodeBitVector.size();
             incrementNodeVersion();
-            edgeStream = edgeStream.filter((edge) -> nodeBitVector.get(edge.getSource().getStoreId()) && nodeBitVector.get(edge.getTarget().getStoreId()))
+            edgeStream = edgeStream.filter((edge) -> nodeBitVector.get(edge.getSource().getStoreId()) && nodeBitVector.get(edge.getTarget().getStoreId()));
         }
 
         if (edgePredicate != null) {
             edgeStream = edgeStream.filter(edgePredicate);
-            ensureEdgeVectorSize(graphStore.edgeStore.maxStoreId());
         }
         edgeStream.forEach((edge) -> {
             edgeBitVector.set(edge.getStoreId());
@@ -122,17 +117,18 @@ public class GraphViewImpl implements GraphView {
         this.edgeView = edges;
         this.attributes = new GraphAttributesImpl();
         if (nodes) {
-            this.nodeBitVector = view.nodeBitVector.copy();
+            this.nodeBitVector = (BitSet) view.nodeBitVector.clone();
             this.nodeCount = view.nodeCount;
         } else {
             this.nodeBitVector = null;
         }
         this.edgeCount = view.edgeCount;
-        this.edgeBitVector = view.edgeBitVector.copy();
+        this.edgeBitVector = (BitSet) view.edgeBitVector.clone();
         this.typeCounts = new int[view.typeCounts.length];
         System.arraycopy(view.typeCounts, 0, typeCounts, 0, view.typeCounts.length);
         this.mutualEdgeTypeCounts = new int[view.mutualEdgeTypeCounts.length];
         System.arraycopy(view.mutualEdgeTypeCounts, 0, mutualEdgeTypeCounts, 0, view.mutualEdgeTypeCounts.length);
+        this.mutualEdgesCount = view.mutualEdgesCount;
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
@@ -181,9 +177,6 @@ public class GraphViewImpl implements GraphView {
                         int edgeid = edge.storeId;
                         boolean edgeisSet = edgeBitVector.get(edgeid);
                         if (!edgeisSet) {
-
-                            incrementEdgeVersion();
-
                             addEdge(edge);
                         }
                         // End
@@ -305,23 +298,25 @@ public class GraphViewImpl implements GraphView {
     public boolean retainNodes(final Collection<? extends Node> c) {
         if (nodeView) {
             if (!c.isEmpty()) {
-                IntOpenHashSet set = new IntOpenHashSet(c.size());
+                // Build BitSet of nodes to retain
+                BitSet retainSet = new BitSet(graphStore.nodeStore.maxStoreId());
                 for (Node o : c) {
                     checkValidNodeObject(o);
-                    set.add(o.getStoreId());
+                    retainSet.set(o.getStoreId());
                 }
 
-                boolean changed = false;
-                int nodeSize = nodeBitVector.size();
-                for (int i = 0; i < nodeSize; i++) {
-                    boolean t = nodeBitVector.get(i);
-                    if (t && !set.contains(i)) {
-                        if (removeNode(getNode(i))) {
-                            changed = true;
-                        }
-                    }
+                // Find nodes to remove: nodes in this view but NOT in retain set
+                // This is equivalent to: nodeBitVector AND NOT retainSet
+                BitSet nodesToRemove = (BitSet) nodeBitVector.clone();
+                nodesToRemove.andNot(retainSet);
+
+                if (nodesToRemove.isEmpty()) {
+                    return false;
                 }
-                return changed;
+
+                // Bulk remove nodes
+                bulkRemoveNodes(nodesToRemove);
+                return true;
             } else if (nodeCount != 0) {
                 clear();
                 return true;
@@ -333,22 +328,25 @@ public class GraphViewImpl implements GraphView {
     public boolean retainEdges(final Collection<? extends Edge> c) {
         if (edgeView) {
             if (!c.isEmpty()) {
-                IntOpenHashSet set = new IntOpenHashSet(c.size());
+                // Build BitSet of edges to retain
+                BitSet retainSet = new BitSet(graphStore.edgeStore.maxStoreId());
                 for (Edge o : c) {
                     checkValidEdgeObject(o);
-                    set.add(o.getStoreId());
+                    retainSet.set(o.getStoreId());
                 }
 
-                boolean changed = false;
-                int edgeSize = edgeBitVector.size();
-                for (int i = 0; i < edgeSize; i++) {
-                    boolean t = edgeBitVector.get(i);
-                    if (t && !set.contains(i)) {
-                        removeEdge(getEdge(i));
-                        changed = true;
-                    }
+                // Find edges to remove: edges in this view but NOT in retain set
+                // This is equivalent to: edgeBitVector AND NOT retainSet
+                BitSet edgesToRemove = (BitSet) edgeBitVector.clone();
+                edgesToRemove.andNot(retainSet);
+
+                if (edgesToRemove.isEmpty()) {
+                    return false;
                 }
-                return changed;
+
+                // Bulk remove edges
+                bulkRemoveEdges(edgesToRemove);
+                return true;
             } else if (edgeCount != 0) {
                 clearEdges();
                 return true;
@@ -450,16 +448,10 @@ public class GraphViewImpl implements GraphView {
 
     public void fill() {
         if (nodeView) {
-            if (nodeCount > 0) {
-                nodeBitVector = new BitVector(graphStore.nodeStore.maxStoreId());
-            }
-            nodeBitVector.not();
+            nodeBitVector.set(0, graphStore.nodeStore.maxStoreId(), true);
             this.nodeCount = graphStore.nodeStore.size();
         }
-        if (edgeCount > 0) {
-            edgeBitVector = new BitVector(graphStore.edgeStore.maxStoreId());
-        }
-        edgeBitVector.not();
+        edgeBitVector.set(0, graphStore.edgeStore.maxStoreId());
 
         this.edgeCount = graphStore.edgeStore.size();
         int typeLength = graphStore.edgeStore.longDictionary.length;
@@ -511,90 +503,126 @@ public class GraphViewImpl implements GraphView {
     }
 
     public void intersection(final GraphViewImpl otherView) {
-        BitVector nodeOtherBitVector = otherView.nodeBitVector;
-        BitVector edgeOtherBitVector = otherView.edgeBitVector;
+        BitSet nodeOtherBitVector = otherView.nodeBitVector;
+        BitSet edgeOtherBitVector = otherView.edgeBitVector;
 
         if (nodeView) {
-            int nodeSize = nodeBitVector.size();
-            for (int i = 0; i < nodeSize; i++) {
-                boolean t = nodeBitVector.get(i);
-                boolean o = nodeOtherBitVector.get(i);
-                if (t && !o) {
-                    removeNode(getNode(i));
-                }
+            // Find nodes to remove: nodes in this view but NOT in other view
+            BitSet nodesToRemove = (BitSet) nodeBitVector.clone();
+            nodesToRemove.andNot(nodeOtherBitVector);
+
+            if (!nodesToRemove.isEmpty()) {
+                // Bulk remove nodes
+                bulkRemoveNodes(nodesToRemove);
             }
         }
 
         if (edgeView) {
-            int edgeSize = edgeBitVector.size();
-            for (int i = 0; i < edgeSize; i++) {
-                boolean t = edgeBitVector.get(i);
-                boolean o = edgeOtherBitVector.get(i);
-                if (t && !o) {
-                    removeEdge(getEdge(i));
-                }
+            // Find edges to remove: edges in this view but NOT in other view
+            BitSet edgesToRemove = (BitSet) edgeBitVector.clone();
+            edgesToRemove.andNot(edgeOtherBitVector);
+
+            if (!edgesToRemove.isEmpty()) {
+                // Bulk remove edges
+                bulkRemoveEdges(edgesToRemove);
             }
         }
     }
 
     public void union(final GraphViewImpl otherView) {
-        BitVector nodeOtherBitVector = otherView.nodeBitVector;
-        BitVector edgeOtherBitVector = otherView.edgeBitVector;
+        BitSet nodeOtherBitVector = otherView.nodeBitVector;
+        BitSet edgeOtherBitVector = otherView.edgeBitVector;
 
         if (nodeView) {
-            int nodeSize = nodeBitVector.size();
-            for (int i = 0; i < nodeSize; i++) {
-                boolean t = nodeBitVector.get(i);
-                boolean o = nodeOtherBitVector.get(i);
-                if (!t && o) {
-                    addNode(getNode(i));
-                }
+            // Find nodes to add: nodes in other view but NOT in this view
+            BitSet nodesToAdd = (BitSet) nodeOtherBitVector.clone();
+            nodesToAdd.andNot(nodeBitVector);
+
+            if (!nodesToAdd.isEmpty()) {
+                // Bulk add nodes
+                bulkAddNodes(nodesToAdd);
             }
         }
 
         if (edgeView) {
-            int edgeSize = edgeBitVector.size();
-            for (int i = 0; i < edgeSize; i++) {
-                boolean t = edgeBitVector.get(i);
-                boolean o = edgeOtherBitVector.get(i);
-                if (!t && o) {
-                    addEdge(getEdge(i));
-                }
+            // Find edges to add: edges in other view but NOT in this view
+            BitSet edgesToAdd = (BitSet) edgeOtherBitVector.clone();
+            edgesToAdd.andNot(edgeBitVector);
+
+            if (!edgesToAdd.isEmpty()) {
+                // Bulk add edges
+                bulkAddEdges(edgesToAdd);
             }
         }
     }
 
     public void not() {
+        // Flip node bits if this is a node view
         if (nodeView) {
-            nodeBitVector.not();
+            nodeBitVector.flip(0, graphStore.nodeStore.maxStoreId());
             this.nodeCount = graphStore.nodeStore.size() - this.nodeCount;
+            incrementNodeVersion();
         }
-        edgeBitVector.not();
 
+        // Flip edge bits
+        edgeBitVector.flip(0, graphStore.edgeStore.maxStoreId());
+
+        // Update edge counts by subtracting from totals
         this.edgeCount = graphStore.edgeStore.size() - this.edgeCount;
-        for (int i = 0; i < typeCounts.length; i++) {
+
+        // Ensure type count arrays are sized to match the store
+        int storeTypeLength = graphStore.edgeStore.longDictionary.length;
+        if (typeCounts.length < storeTypeLength) {
+            int[] newTypeCounts = new int[storeTypeLength];
+            System.arraycopy(typeCounts, 0, newTypeCounts, 0, typeCounts.length);
+            typeCounts = newTypeCounts;
+
+            int[] newMutualCounts = new int[storeTypeLength];
+            System.arraycopy(mutualEdgeTypeCounts, 0, newMutualCounts, 0, mutualEdgeTypeCounts.length);
+            mutualEdgeTypeCounts = newMutualCounts;
+        }
+
+        // Invert all type counts (including types that weren't in the view before)
+        for (int i = 0; i < storeTypeLength; i++) {
             this.typeCounts[i] = graphStore.edgeStore.longDictionary[i].size() - this.typeCounts[i];
         }
-        for (int i = 0; i < mutualEdgeTypeCounts.length; i++) {
+        for (int i = 0; i < graphStore.edgeStore.mutualEdgesTypeSize.length; i++) {
             this.mutualEdgeTypeCounts[i] = graphStore.edgeStore.mutualEdgesTypeSize[i] - this.mutualEdgeTypeCounts[i];
         }
         this.mutualEdgesCount = graphStore.edgeStore.mutualEdgesSize - this.mutualEdgesCount;
 
-        if (nodeView) {
-            incrementNodeVersion();
-        }
         incrementEdgeVersion();
 
+        // If node view is enabled, remove edges with invalid endpoints
+        // Optimization: Only iterate through edges that are NOW in the view (after
+        // flip)
+        // instead of all edges in the store
         if (nodeView) {
-            for (Edge e : graphStore.edgeStore) {
-                boolean t = edgeBitVector.get(e.getStoreId());
-                if (t && (!nodeBitVector.get(e.getSource().getStoreId()) || !nodeBitVector
-                        .get(e.getTarget().getStoreId()))) {
-                    removeEdge((EdgeImpl) e);
+            BitSet edgesToRemove = new BitSet();
+
+            // Iterate only over edges that are set in the view (much faster for sparse
+            // views)
+            for (int edgeId = edgeBitVector.nextSetBit(0); edgeId >= 0; edgeId = edgeBitVector.nextSetBit(edgeId + 1)) {
+                EdgeImpl edge = getEdge(edgeId);
+                if (edge == null) {
+                    // SAFETY: Edge no longer exists in store
+                    edgesToRemove.set(edgeId);
+                    continue;
                 }
+                // Check if both endpoints are in the node view
+                if (!nodeBitVector.get(edge.source.storeId) || !nodeBitVector.get(edge.target.storeId)) {
+                    edgesToRemove.set(edgeId);
+                }
+            }
+
+            // Bulk remove invalid edges
+            if (!edgesToRemove.isEmpty()) {
+                bulkRemoveEdgesForNot(edgesToRemove);
             }
         }
 
+        // Rebuild indexes (necessary for NOT operation as the view content has
+        // completely changed)
         if (nodeView) {
             IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
             if (nodeIndexStore != null) {
@@ -625,6 +653,251 @@ public class GraphViewImpl implements GraphView {
 
             addEdge(edge);
         }
+    }
+
+    /**
+     * Bulk remove nodes from the view. This is more efficient than removing nodes
+     * one by one as it batches index updates and increments version only once.
+     */
+    private void bulkRemoveNodes(BitSet nodesToRemove) {
+        // First pass: collect all edges to remove (incident to removed nodes)
+        BitSet edgesToRemove = new BitSet();
+        for (int nodeId = nodesToRemove.nextSetBit(0); nodeId >= 0; nodeId = nodesToRemove.nextSetBit(nodeId + 1)) {
+            NodeImpl node = getNode(nodeId);
+            if (node == null) {
+                continue; // SAFETY: Node was removed from store (storeId reused or deleted)
+            }
+
+            EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
+            while (itr.hasNext()) {
+                EdgeImpl edge = itr.next();
+                int edgeId = edge.storeId;
+                if (edgeBitVector.get(edgeId)) {
+                    edgesToRemove.set(edgeId);
+                }
+            }
+        }
+
+        // Remove edges in bulk
+        if (!edgesToRemove.isEmpty()) {
+            bulkRemoveEdges(edgesToRemove);
+        }
+
+        // Update node bit vector
+        int removedCount = nodesToRemove.cardinality();
+        nodeBitVector.andNot(nodesToRemove);
+        nodeCount -= removedCount;
+        incrementNodeVersion();
+
+        // Bulk update indexes
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        TimeIndexStore timeIndexStore = graphStore.timeStore.nodeIndexStore;
+
+        if (indexStore != null || timeIndexStore != null) {
+            for (int i = nodesToRemove.nextSetBit(0); i >= 0; i = nodesToRemove.nextSetBit(i + 1)) {
+                NodeImpl node = getNode(i);
+                if (node != null) { // SAFETY: Skip if node no longer exists
+                    if (indexStore != null) {
+                        indexStore.clearInView(node, this);
+                    }
+                    if (timeIndexStore != null) {
+                        timeIndexStore.clearInView(node, this);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Bulk add nodes to the view. This is more efficient than adding nodes one by
+     * one as it batches index updates and increments version only once.
+     */
+    private void bulkAddNodes(BitSet nodesToAdd) {
+        // Update node bit vector
+        int addedCount = nodesToAdd.cardinality();
+        nodeBitVector.or(nodesToAdd);
+        nodeCount += addedCount;
+        incrementNodeVersion();
+
+        // Bulk update indexes
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        TimeIndexStore timeIndexStore = graphStore.timeStore.nodeIndexStore;
+
+        if (indexStore != null || timeIndexStore != null) {
+            for (int i = nodesToAdd.nextSetBit(0); i >= 0; i = nodesToAdd.nextSetBit(i + 1)) {
+                NodeImpl node = getNode(i);
+                if (node != null) { // SAFETY: Skip if node no longer exists
+                    if (indexStore != null) {
+                        indexStore.indexInView(node, this);
+                    }
+                    if (timeIndexStore != null) {
+                        timeIndexStore.indexInView(node, this);
+                    }
+                }
+            }
+        }
+
+        // If nodeView && !edgeView, add edges between newly added nodes and existing
+        // nodes
+        if (nodeView && !edgeView) {
+            BitSet edgesToAdd = new BitSet();
+            for (int nodeId = nodesToAdd.nextSetBit(0); nodeId >= 0; nodeId = nodesToAdd.nextSetBit(nodeId + 1)) {
+                NodeImpl node = getNode(nodeId);
+                if (node == null) {
+                    continue; // SAFETY: Skip if node no longer exists
+                }
+
+                EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, false);
+                while (itr.hasNext()) {
+                    EdgeImpl edge = itr.next();
+                    NodeImpl opposite = edge.source == node ? edge.target : edge.source;
+                    // Check if opposite node is in view and edge is not already in view
+                    if (nodeBitVector.get(opposite.storeId) && !edgeBitVector.get(edge.storeId)) {
+                        edgesToAdd.set(edge.storeId);
+                    }
+                }
+            }
+
+            if (!edgesToAdd.isEmpty()) {
+                bulkAddEdges(edgesToAdd);
+            }
+        }
+    }
+
+    /**
+     * Bulk remove edges from the view. This is more efficient than removing edges
+     * one by one as it updates stats in bulk and increments version only once.
+     */
+    private void bulkRemoveEdges(BitSet edgesToRemove) {
+        // Update edge bit vector
+        int removedCount = edgesToRemove.cardinality();
+        edgeBitVector.andNot(edgesToRemove);
+        edgeCount -= removedCount;
+
+        // Update type counts and mutual edge counts
+        for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
+            EdgeImpl edge = getEdge(i);
+            if (edge == null) {
+                continue; // SAFETY: Edge was removed from store (storeId reused or deleted)
+            }
+
+            int type = edge.type;
+            ensureTypeCountArrayCapacity(type);
+            typeCounts[type]--;
+
+            if (edge.isMutual() && !edge.isSelfLoop()) {
+                EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
+                if (reverseEdge != null && containsEdge(reverseEdge)) {
+                    mutualEdgeTypeCounts[type]--;
+                    mutualEdgesCount--;
+                }
+            }
+        }
+
+        incrementEdgeVersion();
+
+        // Bulk update indexes
+        IndexStore<Edge> indexStore = graphStore.edgeTable.store.indexStore;
+        TimeIndexStore timeIndexStore = graphStore.timeStore.edgeIndexStore;
+
+        if (indexStore != null || timeIndexStore != null) {
+            for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
+                EdgeImpl edge = getEdge(i);
+                if (edge != null) { // SAFETY: Skip if edge no longer exists
+                    if (indexStore != null) {
+                        indexStore.clearInView(edge, this);
+                    }
+                    if (timeIndexStore != null) {
+                        timeIndexStore.clearInView(edge, this);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Bulk add edges to the view. This is more efficient than adding edges one by
+     * one as it updates stats in bulk and increments version only once.
+     */
+    private void bulkAddEdges(BitSet edgesToAdd) {
+        // Update edge bit vector
+        int addedCount = edgesToAdd.cardinality();
+        edgeBitVector.or(edgesToAdd);
+        edgeCount += addedCount;
+
+        // Update type counts and mutual edge counts
+        for (int i = edgesToAdd.nextSetBit(0); i >= 0; i = edgesToAdd.nextSetBit(i + 1)) {
+            EdgeImpl edge = getEdge(i);
+            if (edge == null) {
+                continue; // SAFETY: Skip if edge no longer exists in store
+            }
+
+            int type = edge.type;
+            ensureTypeCountArrayCapacity(type);
+            typeCounts[type]++;
+
+            if (edge.isMutual() && !edge.isSelfLoop()) {
+                EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
+                if (reverseEdge != null && containsEdge(reverseEdge)) {
+                    mutualEdgeTypeCounts[type]++;
+                    mutualEdgesCount++;
+                }
+            }
+        }
+
+        incrementEdgeVersion();
+
+        // Bulk update indexes
+        IndexStore<Edge> indexStore = graphStore.edgeTable.store.indexStore;
+        TimeIndexStore timeIndexStore = graphStore.timeStore.edgeIndexStore;
+
+        if (indexStore != null || timeIndexStore != null) {
+            for (int i = edgesToAdd.nextSetBit(0); i >= 0; i = edgesToAdd.nextSetBit(i + 1)) {
+                EdgeImpl edge = getEdge(i);
+                if (edge != null) { // SAFETY: Skip if edge no longer exists
+                    if (indexStore != null) {
+                        indexStore.indexInView(edge, this);
+                    }
+                    if (timeIndexStore != null) {
+                        timeIndexStore.indexInView(edge, this);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Special bulk remove for the not() operation. This updates the bit vector and
+     * stats but does NOT increment version or update indexes (those are handled
+     * separately in not()).
+     */
+    private void bulkRemoveEdgesForNot(BitSet edgesToRemove) {
+        // Update edge bit vector
+        int removedCount = edgesToRemove.cardinality();
+        edgeBitVector.andNot(edgesToRemove);
+        edgeCount -= removedCount;
+
+        // Update type counts and mutual edge counts
+        for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
+            EdgeImpl edge = getEdge(i);
+            if (edge == null) {
+                continue; // SAFETY: Skip if edge no longer exists in store
+            }
+
+            int type = edge.type;
+            ensureTypeCountArrayCapacity(type);
+            typeCounts[type]--;
+
+            if (edge.isMutual() && !edge.isSelfLoop()) {
+                EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
+                if (reverseEdge != null && containsEdge(reverseEdge)) {
+                    mutualEdgeTypeCounts[type]--;
+                    mutualEdgesCount--;
+                }
+            }
+        }
+        // Note: Version increment and index updates are handled by the caller (not()
+        // method)
     }
 
     public int getNodeCount() {
@@ -724,33 +997,11 @@ public class GraphViewImpl implements GraphView {
     }
 
     protected void ensureNodeVectorSize(NodeImpl node) {
-        int sid = node.storeId;
-        if (sid >= nodeBitVector.size()) {
-            int newSize = Math.min(Math
-                    .max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
-            nodeBitVector = growBitVector(nodeBitVector, newSize);
-        }
-    }
-
-    private void ensureNodeVectorSize(int size) {
-        if (size > nodeBitVector.size()) {
-            nodeBitVector = growBitVector(nodeBitVector, size);
-        }
-    }
-
-    private void ensureEdgeVectorSize(int size) {
-        if (size > edgeBitVector.size()) {
-            edgeBitVector = growBitVector(edgeBitVector, size);
-        }
+        // BitSet automatically grows as needed, no manual resizing required
     }
 
     protected void ensureEdgeVectorSize(EdgeImpl edge) {
-        int sid = edge.storeId;
-        if (sid >= edgeBitVector.size()) {
-            int newSize = Math.min(Math
-                    .max(sid + 1, (int) (sid * GraphStoreConfiguration.VIEW_GROWING_FACTOR)), Integer.MAX_VALUE);
-            edgeBitVector = growBitVector(edgeBitVector, newSize);
-        }
+        // BitSet automatically grows as needed, no manual resizing required
     }
 
     protected void setEdgeType(EdgeImpl edgeImpl, int oldType, boolean wasMutual) {
@@ -816,13 +1067,10 @@ public class GraphViewImpl implements GraphView {
         if (indexStore != null) {
             indexStore.clearInView(edgeImpl, this);
         }
-    }
-
-    private BitVector growBitVector(BitVector bitVector, int size) {
-        long[] elements = bitVector.elements();
-        long[] newElements = QuickBitVector.makeBitVector(size, 1);
-        System.arraycopy(elements, 0, newElements, 0, elements.length);
-        return new BitVector(newElements, size);
+        TimeIndexStore timeIndexStore = graphStore.timeStore.edgeIndexStore;
+        if (timeIndexStore != null) {
+            timeIndexStore.clearInView(edgeImpl, this);
+        }
     }
 
     private NodeImpl getNode(int id) {

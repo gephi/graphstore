@@ -115,7 +115,7 @@ public class AttributeUtils {
     private static final Map<ZoneId, DateTimeFormatter> DATE_TIME_PRINTERS_BY_TIMEZONE;
     private static final Map<ZoneId, DateTimeFormatter> DATE_TIME_PARSERS_BY_TIMEZONE;
 
-    // Collectio types to speedup lookup
+    // Collection types to speedup lookup
     private static final Set<Class> TYPED_LIST_TYPES;
     private static final Set<Class> TYPED_SET_TYPES;
     private static final Set<Class> TYPED_MAP_TYPES;
@@ -355,7 +355,7 @@ public class AttributeUtils {
             return ((TimeMap) value).toString(timeFormat, zoneId);
         }
         if (value instanceof Instant) {
-            printDate((Instant) value, zoneId);
+            return value.toString();
         }
         if (value.getClass().isArray()) {
             return printArray(value);
@@ -814,8 +814,8 @@ public class AttributeUtils {
     }
 
     private static Set getStandardizedSet(Set set) {
-        Class listClass = set.getClass();
-        if (TYPED_LIST_TYPES.contains(listClass)) {
+        Class setClass = set.getClass();
+        if (TYPED_SET_TYPES.contains(setClass)) {
             return set;
         }
 
@@ -1276,7 +1276,7 @@ public class AttributeUtils {
 
         // Instant
         if (typeClass.equals(Instant.class)) {
-            return Instant.from((Instant) obj);
+            return obj;
         }
 
         // Interval types:
