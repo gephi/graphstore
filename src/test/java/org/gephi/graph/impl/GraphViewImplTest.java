@@ -173,12 +173,33 @@ public class GraphViewImplTest {
 
         view.intersection(view2);
 
+        // Positive assertions - expected elements ARE present
         Assert.assertTrue(view.containsNode(n1));
         Assert.assertTrue(view.containsNode(n2));
         Assert.assertTrue(view.containsEdge(e1));
+
+        // Negative assertions - elements not in intersection should be absent
         Assert.assertFalse(view.containsNode(n3));
         Assert.assertFalse(view.containsNode(n4));
         Assert.assertFalse(view.containsEdge(e2));
+
+        // Exact count assertions
+        Assert.assertEquals(view.getNodeCount(), 2, "Should have exactly 2 nodes after intersection");
+        Assert.assertEquals(view.getEdgeCount(), 1, "Should have exactly 1 edge after intersection");
+
+        // Verify no other elements from the graph are present
+        for (Node n : graphStore.getNodes()) {
+            if (n != n1 && n != n2) {
+                Assert.assertFalse(view
+                        .containsNode((NodeImpl) n), "Node " + n.getId() + " should not be in view after intersection");
+            }
+        }
+        for (Edge e : graphStore.getEdges()) {
+            if (e != e1) {
+                Assert.assertFalse(view
+                        .containsEdge((EdgeImpl) e), "Edge " + e.getId() + " should not be in view after intersection");
+            }
+        }
 
         Assert.assertTrue(view2.deepEquals(view));
     }
@@ -193,6 +214,7 @@ public class GraphViewImplTest {
         view.fill();
         view2.fill();
 
+        int totalEdges = graphStore.getEdgeCount();
         EdgeImpl e1 = graphStore.getEdge("0");
         EdgeImpl e2 = graphStore.getEdge("5");
 
@@ -201,8 +223,21 @@ public class GraphViewImplTest {
 
         view.intersection(view2);
 
+        // Negative assertions - removed edges should be absent
         Assert.assertFalse(view.containsEdge(e1));
         Assert.assertFalse(view.containsEdge(e2));
+
+        // Exact count assertion - intersection excludes both removed edges
+        Assert.assertEquals(view
+                .getEdgeCount(), totalEdges - 2, "Should have all edges except e1 and e2 after intersection");
+
+        // Verify all other edges are present
+        for (Edge e : graphStore.getEdges()) {
+            if (e != e1 && e != e2) {
+                Assert.assertTrue(view
+                        .containsEdge((EdgeImpl) e), "Edge " + e.getId() + " should be in view after intersection");
+            }
+        }
     }
 
     @Test
@@ -215,6 +250,7 @@ public class GraphViewImplTest {
         view.fill();
         view2.fill();
 
+        int totalNodes = graphStore.getNodeCount();
         EdgeImpl e1 = graphStore.getEdge("0");
         EdgeImpl e2 = graphStore.getEdge("5");
         NodeImpl s1 = e1.getSource();
@@ -224,9 +260,21 @@ public class GraphViewImplTest {
 
         view.intersection(view2);
 
-        Assert.assertFalse(view.containsEdge(e1));
+        // Node intersection: s1 was removed from view2, so it should be absent
         Assert.assertFalse(view.containsNode(s1));
-        Assert.assertTrue(view.containsEdge(e2));
+        Assert.assertEquals(view.getNodeCount(), totalNodes - 1, "Should have all nodes except s1 after intersection");
+
+        // Edge intersection: e1 removed because s1 is gone (node view), e2 present
+        Assert.assertFalse(view.containsEdge(e1), "e1 should be absent (source node removed)");
+        Assert.assertTrue(view.containsEdge(e2), "e2 should be present");
+
+        // Verify all other nodes are present
+        for (Node n : graphStore.getNodes()) {
+            if (n != s1) {
+                Assert.assertTrue(view
+                        .containsNode((NodeImpl) n), "Node " + n.getId() + " should be in view after intersection");
+            }
+        }
     }
 
     @Test
@@ -253,12 +301,31 @@ public class GraphViewImplTest {
 
         view.union(view2);
 
+        // Positive assertions - expected elements ARE present
         Assert.assertTrue(view.containsNode(n1));
         Assert.assertTrue(view.containsNode(n2));
         Assert.assertTrue(view.containsEdge(e1));
         Assert.assertTrue(view.containsNode(n3));
         Assert.assertTrue(view.containsNode(n4));
         Assert.assertTrue(view.containsEdge(e2));
+
+        // Exact count assertions - verify ONLY expected elements
+        Assert.assertEquals(view.getNodeCount(), 4, "Should have exactly 4 nodes after union");
+        Assert.assertEquals(view.getEdgeCount(), 2, "Should have exactly 2 edges after union");
+
+        // Negative assertions - verify other graph elements are NOT present
+        for (Node n : graphStore.getNodes()) {
+            if (n != n1 && n != n2 && n != n3 && n != n4) {
+                Assert.assertFalse(view
+                        .containsNode((NodeImpl) n), "Node " + n.getId() + " should not be in view after union");
+            }
+        }
+        for (Edge e : graphStore.getEdges()) {
+            if (e != e1 && e != e2) {
+                Assert.assertFalse(view
+                        .containsEdge((EdgeImpl) e), "Edge " + e.getId() + " should not be in view after union");
+            }
+        }
     }
 
     @Test
@@ -276,8 +343,20 @@ public class GraphViewImplTest {
 
         view.union(view2);
 
+        // Positive assertions
         Assert.assertTrue(view.containsEdge(e1));
         Assert.assertTrue(view.containsEdge(e2));
+
+        // Exact count assertion
+        Assert.assertEquals(view.getEdgeCount(), 2, "Should have exactly 2 edges after union");
+
+        // Negative assertions - verify other edges are NOT present
+        for (Edge e : graphStore.getEdges()) {
+            if (e != e1 && e != e2) {
+                Assert.assertFalse(view
+                        .containsEdge((EdgeImpl) e), "Edge " + e.getId() + " should not be in view after union");
+            }
+        }
     }
 
     @Test
@@ -300,8 +379,24 @@ public class GraphViewImplTest {
 
         view.union(view2);
 
+        // Positive assertions
         Assert.assertTrue(view.containsEdge(e1));
-        Assert.assertTrue(view.containsEdge(e2));
+        Assert.assertTrue(view.containsEdge(e2), "e2 should be present (both endpoints are in union)");
+
+        // All 4 nodes should be present
+        Assert.assertTrue(view.containsNode(n1));
+        Assert.assertTrue(view.containsNode(n2));
+        Assert.assertTrue(view.containsNode(n3));
+        Assert.assertTrue(view.containsNode(n4));
+        Assert.assertEquals(view.getNodeCount(), 4, "Should have exactly 4 nodes after union");
+
+        // Verify no other nodes are present
+        for (Node n : graphStore.getNodes()) {
+            if (n != n1 && n != n2 && n != n3 && n != n4) {
+                Assert.assertFalse(view
+                        .containsNode((NodeImpl) n), "Node " + n.getId() + " should not be in view after union");
+            }
+        }
     }
 
     @Test
@@ -586,6 +681,7 @@ public class GraphViewImplTest {
         Assert.assertEquals(view1.getUndirectedEdgeCount(), 1, "View1 should have 1 undirected edge");
 
         // Remove one of the mutual edges from view2
+        EdgeImpl e0 = graphStore.getEdge("0");
         EdgeImpl e1 = graphStore.getEdge("1");
         view2.removeEdge(e1);
 
@@ -600,6 +696,10 @@ public class GraphViewImplTest {
         Assert.assertEquals(view1.mutualEdgesCount, 0, "View1 should have 0 mutual edges after intersection");
         Assert.assertEquals(view1.getEdgeCount(), 1, "View1 should have 1 edge total");
         Assert.assertEquals(view1.getUndirectedEdgeCount(), 1, "View1 should have 1 undirected edge");
+
+        // Verify which edge remains
+        Assert.assertTrue(view1.containsEdge(e0), "e0 should remain after intersection");
+        Assert.assertFalse(view1.containsEdge(e1), "e1 should be absent after intersection");
     }
 
     @Test
@@ -634,6 +734,15 @@ public class GraphViewImplTest {
         Assert.assertEquals(view1.mutualEdgesCount, 1, "View1 should have mutual count of 1 after union");
         Assert.assertEquals(view1.getEdgeCount(), 2, "View1 should have 2 edges total");
         Assert.assertEquals(view1.getUndirectedEdgeCount(), 1, "View1 should have 1 undirected edge");
+
+        // Verify both edges are present
+        Assert.assertTrue(view1.containsEdge(e0), "e0 should be present after union");
+        Assert.assertTrue(view1.containsEdge(e1), "e1 should be present after union");
+
+        // Verify only the expected nodes are present
+        Assert.assertEquals(view1.getNodeCount(), 2, "Should have exactly 2 nodes");
+        Assert.assertTrue(view1.containsNode(n1));
+        Assert.assertTrue(view1.containsNode(n2));
     }
 
     @Test
@@ -643,7 +752,6 @@ public class GraphViewImplTest {
         GraphViewImpl view = store.createView();
 
         EdgeImpl e0 = graphStore.getEdge("0");
-        EdgeImpl e1 = graphStore.getEdge("1");
         NodeImpl n1 = e0.getSource();
         NodeImpl n2 = e0.getTarget();
 
@@ -681,6 +789,7 @@ public class GraphViewImplTest {
         // Verify initial state has multiple edge types
         int type0CountInitial = view1.getEdgeCount(0);
         int type1CountInitial = view1.getEdgeCount(1);
+        int type2CountInitial = view1.getEdgeCount(2);
         Assert.assertTrue(type0CountInitial > 0, "Should have type 0 edges");
         Assert.assertTrue(type1CountInitial > 0, "Should have type 1 edges");
 
@@ -700,9 +809,18 @@ public class GraphViewImplTest {
         Assert.assertEquals(view1.getEdgeCount(0), 0, "View1 should have 0 type 0 edges after intersection");
         Assert.assertEquals(view1
                 .getEdgeCount(1), type1CountInitial, "View1 should have all type 1 edges after intersection");
-        int type2CountInitial = view1.getEdgeCount(2);
+        Assert.assertEquals(view1
+                .getEdgeCount(2), type2CountInitial, "View1 should have all type 2 edges after intersection");
         Assert.assertEquals(view1
                 .getEdgeCount(), type1CountInitial + type2CountInitial, "Total edge count should match sum of type 1 and type 2");
+
+        // Verify no type 0 edges are present
+        for (Edge e : graphStore.getEdges()) {
+            if (e.getType() == 0) {
+                Assert.assertFalse(view1.containsEdge((EdgeImpl) e), "Type 0 edge " + e
+                        .getId() + " should not be in view after intersection");
+            }
+        }
     }
 
     @Test
@@ -749,6 +867,12 @@ public class GraphViewImplTest {
         Assert.assertEquals(view1.getEdgeCount(2), type2Count, "View1 should have all type 2 edges after union");
         Assert.assertEquals(view1
                 .getEdgeCount(), type0Count + type1Count + type2Count, "Total should be sum of all types");
+
+        // Verify all edges of each type are present
+        for (Edge e : graphStore.getEdges()) {
+            Assert.assertTrue(view1.containsEdge((EdgeImpl) e), "Edge " + e.getId() + " of type " + e
+                    .getType() + " should be in view after union");
+        }
     }
 
     @Test
@@ -808,6 +932,16 @@ public class GraphViewImplTest {
 
         Assert.assertEquals(view1.getNodeCount(), 0, "View1 should be empty after intersection with empty view");
         Assert.assertEquals(view1.getEdgeCount(), 0, "View1 should have no edges after intersection with empty view");
+
+        // Verify all elements are absent
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertFalse(view1.containsNode((NodeImpl) n), "Node " + n
+                    .getId() + " should not be in view after intersection with empty view");
+        }
+        for (Edge e : graphStore.getEdges()) {
+            Assert.assertFalse(view1.containsEdge((EdgeImpl) e), "Edge " + e
+                    .getId() + " should not be in view after intersection with empty view");
+        }
     }
 
     @Test
@@ -828,6 +962,12 @@ public class GraphViewImplTest {
 
         Assert.assertEquals(view1.getNodeCount(), 0, "View1 should still be empty after intersection");
         Assert.assertEquals(view1.getEdgeCount(), 0, "View1 should still have no edges after intersection");
+
+        // Verify all elements are absent
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertFalse(view1.containsNode((NodeImpl) n), "Node " + n
+                    .getId() + " should not be in empty view after intersection");
+        }
     }
 
     @Test
@@ -851,6 +991,16 @@ public class GraphViewImplTest {
 
         Assert.assertEquals(view1.getNodeCount(), initialNodeCount, "View1 node count should not change");
         Assert.assertEquals(view1.getEdgeCount(), initialEdgeCount, "View1 edge count should not change");
+
+        // Verify all elements are still present
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertTrue(view1.containsNode((NodeImpl) n), "Node " + n
+                    .getId() + " should still be in view after union with empty view");
+        }
+        for (Edge e : graphStore.getEdges()) {
+            Assert.assertTrue(view1.containsEdge((EdgeImpl) e), "Edge " + e
+                    .getId() + " should still be in view after union with empty view");
+        }
     }
 
     @Test
@@ -873,6 +1023,14 @@ public class GraphViewImplTest {
 
         Assert.assertEquals(view1.getNodeCount(), view2NodeCount, "View1 should have same node count as view2");
         Assert.assertEquals(view1.getEdgeCount(), view2EdgeCount, "View1 should have same edge count as view2");
+
+        // Verify all elements are present
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertTrue(view1.containsNode((NodeImpl) n), "Node " + n.getId() + " should be in view after union");
+        }
+        for (Edge e : graphStore.getEdges()) {
+            Assert.assertTrue(view1.containsEdge((EdgeImpl) e), "Edge " + e.getId() + " should be in view after union");
+        }
     }
 
     @Test
@@ -918,6 +1076,12 @@ public class GraphViewImplTest {
 
         Assert.assertEquals(view1.getNodeCount(), 0, "View1 should still be empty");
         Assert.assertEquals(view1.getEdgeCount(), 0, "View1 should still have no edges");
+
+        // Verify all elements are absent (trivial case but validates correctness)
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertFalse(view1
+                    .containsNode((NodeImpl) n), "No nodes should be in view after intersection of empty views");
+        }
     }
 
     @Test
@@ -936,6 +1100,12 @@ public class GraphViewImplTest {
 
         Assert.assertEquals(view1.getNodeCount(), 0, "View1 should still be empty");
         Assert.assertEquals(view1.getEdgeCount(), 0, "View1 should still have no edges");
+
+        // Verify all elements are absent (trivial case but validates correctness)
+        for (Node n : graphStore.getNodes()) {
+            Assert.assertFalse(view1
+                    .containsNode((NodeImpl) n), "No nodes should be in view after union of empty views");
+        }
     }
 
     // ========== Tests for Retain Operations ==========
@@ -1032,7 +1202,6 @@ public class GraphViewImplTest {
         view.fill();
 
         EdgeImpl e0 = graphStore.getEdge("0");
-        EdgeImpl e1 = graphStore.getEdge("1");
         NodeImpl n1 = e0.getSource();
         NodeImpl n2 = e0.getTarget();
 
