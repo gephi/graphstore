@@ -128,7 +128,7 @@ public class NodesQuadTreeTest {
     @Test
     public void testDepth() {
         NodesQuadTree q = new NodesQuadTree(BOUNDS_RECT);
-        Random random = new Random();
+        Random random = new Random(42L);
         for (int i = 0; i <= GraphStoreConfiguration.SPATIAL_INDEX_MAX_OBJECTS_PER_NODE; i++) {
             NodeImpl node = new NodeImpl(String.valueOf(i));
             node.setPosition(random.nextInt((int) BOUNDS * 2) - BOUNDS, random.nextInt((int) BOUNDS * 2) - BOUNDS);
@@ -791,7 +791,7 @@ public class NodesQuadTreeTest {
     }
 
     private NodeImpl[] generateNodes(int count, int startIndex, Rect2D area) {
-        Random rand = new Random();
+        Random rand = new Random(42L);
         NodeImpl[] nodes = new NodeImpl[count];
         for (int i = 0; i < count; i++) {
             NodeImpl node = new NodeImpl(String.valueOf(startIndex++));
@@ -805,14 +805,15 @@ public class NodesQuadTreeTest {
     }
 
     private EdgeImpl[] addRandomEdges(GraphStore store, NodeImpl[] nodes, int count) {
+        Random rand = new Random(789012L);
         for (NodeImpl n : nodes) {
             store.addNode(n);
         }
         EdgeImpl[] edges = new EdgeImpl[count];
         int edgeIndex = 0;
         while (edgeIndex < count) {
-            NodeImpl source = nodes[new Random().nextInt(nodes.length)];
-            NodeImpl target = nodes[new Random().nextInt(nodes.length)];
+            NodeImpl source = nodes[rand.nextInt(nodes.length)];
+            NodeImpl target = nodes[rand.nextInt(nodes.length)];
             if (source != target) {
                 EdgeImpl edge = new EdgeImpl(String.valueOf(edgeIndex), store, source, target, 0, 1.0, true);
                 edges[edgeIndex] = edge;
