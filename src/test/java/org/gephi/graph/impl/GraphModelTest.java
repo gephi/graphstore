@@ -203,6 +203,203 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testCreateViewWithPredicates() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphView view = graphModel.createView(n -> true, e -> true);
+        Assert.assertNotNull(view);
+        Assert.assertSame(view.getGraphModel(), graphModel);
+        Assert.assertTrue(view.isNodeView());
+        Assert.assertTrue(view.isEdgeView());
+    }
+
+    @Test
+    public void testCreateViewWithNodePredicateOnly() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphView view = graphModel.createView(n -> true, null);
+        Assert.assertNotNull(view);
+        Assert.assertTrue(view.isNodeView());
+        Assert.assertFalse(view.isEdgeView());
+    }
+
+    @Test
+    public void testCreateViewWithEdgePredicateOnly() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphView view = graphModel.createView(null, e -> true);
+        Assert.assertNotNull(view);
+        Assert.assertFalse(view.isNodeView());
+        Assert.assertTrue(view.isEdgeView());
+    }
+
+    @Test
+    public void testCreateViewWithBothPredicatesNull() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphView view = graphModel.createView(null, null);
+        Assert.assertNotNull(view);
+        Assert.assertFalse(view.isNodeView());
+        Assert.assertFalse(view.isEdgeView());
+    }
+
+    @Test
+    public void testCreateViewWithNodePredicateFiltering() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getNodeTable();
+        Column col = table.addColumn("value", Integer.class);
+
+        Node n1 = graphModel.factory().newNode("1");
+        n1.setAttribute(col, 10);
+        Node n2 = graphModel.factory().newNode("2");
+        n2.setAttribute(col, 20);
+        Node n3 = graphModel.factory().newNode("3");
+        n3.setAttribute(col, 30);
+        graphModel.getStore().addAllNodes(Arrays.asList(new Node[] { n1, n2, n3 }));
+
+        // Create view with predicate that filters nodes with value > 15
+        GraphView view = graphModel.createView(n -> {
+            Integer value = (Integer) n.getAttribute(col);
+            return value != null && value > 15;
+        }, null);
+
+        Graph subgraph = graphModel.getGraph(view);
+        Assert.assertEquals(subgraph.getNodeCount(), 2);
+        Assert.assertTrue(subgraph.contains(n2));
+        Assert.assertTrue(subgraph.contains(n3));
+        Assert.assertFalse(subgraph.contains(n1));
+    }
+
+    @Test
+    public void testCreateViewWithEdgePredicateFiltering() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table table = graphModel.getEdgeTable();
+        Column col = table.addColumn("weight_custom", Double.class);
+
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        Node n3 = graphModel.factory().newNode("3");
+        graphModel.getStore().addAllNodes(Arrays.asList(new Node[] { n1, n2, n3 }));
+
+        Edge e1 = graphModel.factory().newEdge(n1, n2);
+        e1.setAttribute(col, 1.0);
+        Edge e2 = graphModel.factory().newEdge(n2, n3);
+        e2.setAttribute(col, 5.0);
+        Edge e3 = graphModel.factory().newEdge(n1, n3);
+        e3.setAttribute(col, 10.0);
+        graphModel.getStore().addAllEdges(Arrays.asList(new Edge[] { e1, e2, e3 }));
+
+        // Create view with predicate that filters edges with weight >= 5.0
+        GraphView view = graphModel.createView(null, e -> {
+            Double weight = (Double) e.getAttribute(col);
+            return weight != null && weight >= 5.0;
+        });
+
+        Graph subgraph = graphModel.getGraph(view);
+        Assert.assertEquals(subgraph.getNodeCount(), 3); // All nodes included
+        Assert.assertEquals(subgraph.getEdgeCount(), 2);
+        Assert.assertTrue(subgraph.contains(e2));
+        Assert.assertTrue(subgraph.contains(e3));
+        Assert.assertFalse(subgraph.contains(e1));
+    }
+
+    @Test
+    public void testCreateViewWithBothPredicatesFiltering() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table nodeTable = graphModel.getNodeTable();
+        Table edgeTable = graphModel.getEdgeTable();
+        Column nodeCol = nodeTable.addColumn("active", Boolean.class);
+        Column edgeCol = edgeTable.addColumn("strength", Double.class);
+
+        Node n1 = graphModel.factory().newNode("1");
+        n1.setAttribute(nodeCol, true);
+        Node n2 = graphModel.factory().newNode("2");
+        n2.setAttribute(nodeCol, false);
+        Node n3 = graphModel.factory().newNode("3");
+        n3.setAttribute(nodeCol, true);
+        graphModel.getStore().addAllNodes(Arrays.asList(new Node[] { n1, n2, n3 }));
+
+        Edge e1 = graphModel.factory().newEdge(n1, n2);
+        e1.setAttribute(edgeCol, 0.5);
+        Edge e2 = graphModel.factory().newEdge(n2, n3);
+        e2.setAttribute(edgeCol, 0.8);
+        Edge e3 = graphModel.factory().newEdge(n1, n3);
+        e3.setAttribute(edgeCol, 0.3);
+        graphModel.getStore().addAllEdges(Arrays.asList(new Edge[] { e1, e2, e3 }));
+
+        // Create view with both predicates
+        GraphView view = graphModel.createView(n -> Boolean.TRUE.equals(n.getAttribute(nodeCol)), e -> {
+            Double strength = (Double) e.getAttribute(edgeCol);
+            return strength != null && strength > 0.4;
+        });
+
+        Graph subgraph = graphModel.getGraph(view);
+
+        Assert.assertEquals(subgraph.getNodeCount(), 2); // n1 and n3
+        Assert.assertTrue(subgraph.contains(n1));
+        Assert.assertTrue(subgraph.contains(n3));
+        Assert.assertFalse(subgraph.contains(n2));
+
+        // No edges should be included:
+        // - e1 has n2 which is not in node view (active=false)
+        // - e2 has n2 which is not in node view (active=false)
+        // - e3 connects n1 and n3 (both in view) but strength 0.3 fails edge filter
+        Assert.assertEquals(subgraph.getEdgeCount(), 0);
+        Assert.assertFalse(subgraph.contains(e1));
+        Assert.assertFalse(subgraph.contains(e2));
+        Assert.assertFalse(subgraph.contains(e3));
+    }
+
+    @Test
+    public void testCreateViewWithBothPredicatesFilteringWithMatchingEdges() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Table nodeTable = graphModel.getNodeTable();
+        Table edgeTable = graphModel.getEdgeTable();
+        Column nodeCol = nodeTable.addColumn("category", String.class);
+        Column edgeCol = edgeTable.addColumn("score", Double.class);
+
+        Node n1 = graphModel.factory().newNode("1");
+        n1.setAttribute(nodeCol, "A");
+        Node n2 = graphModel.factory().newNode("2");
+        n2.setAttribute(nodeCol, "B");
+        Node n3 = graphModel.factory().newNode("3");
+        n3.setAttribute(nodeCol, "A");
+        Node n4 = graphModel.factory().newNode("4");
+        n4.setAttribute(nodeCol, "A");
+        graphModel.getStore().addAllNodes(Arrays.asList(new Node[] { n1, n2, n3, n4 }));
+
+        Edge e1 = graphModel.factory().newEdge(n1, n2);
+        e1.setAttribute(edgeCol, 5.0);
+        Edge e2 = graphModel.factory().newEdge(n1, n3);
+        e2.setAttribute(edgeCol, 3.0);
+        Edge e3 = graphModel.factory().newEdge(n3, n4);
+        e3.setAttribute(edgeCol, 8.0);
+        Edge e4 = graphModel.factory().newEdge(n2, n4);
+        e4.setAttribute(edgeCol, 1.0);
+        graphModel.getStore().addAllEdges(Arrays.asList(new Edge[] { e1, e2, e3, e4 }));
+
+        // Create view: nodes with category "A" AND edges with score > 2.0
+        GraphView view = graphModel.createView(n -> "A".equals(n.getAttribute(nodeCol)), e -> {
+            Double score = (Double) e.getAttribute(edgeCol);
+            return score != null && score > 2.0;
+        });
+
+        Graph subgraph = graphModel.getGraph(view);
+
+        // Nodes: n1, n3, n4 (all category "A")
+        Assert.assertEquals(subgraph.getNodeCount(), 3);
+        Assert.assertTrue(subgraph.contains(n1));
+        Assert.assertTrue(subgraph.contains(n3));
+        Assert.assertTrue(subgraph.contains(n4));
+        Assert.assertFalse(subgraph.contains(n2));
+
+        // Edges: only e2 (n1-n3, score 3.0) and e3 (n3-n4, score 8.0)
+        // e1 excluded: n2 not in view
+        // e4 excluded: n2 not in view
+        Assert.assertEquals(subgraph.getEdgeCount(), 2);
+        Assert.assertFalse(subgraph.contains(e1));
+        Assert.assertTrue(subgraph.contains(e2));
+        Assert.assertTrue(subgraph.contains(e3));
+        Assert.assertFalse(subgraph.contains(e4));
+    }
+
+    @Test
     public void testCopyView() {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphView view = graphModel.createView();
