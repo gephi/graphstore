@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -82,33 +81,48 @@ public class GraphViewImpl implements GraphView {
     public GraphViewImpl(final GraphStore store, Predicate<Node> nodePredicate, Predicate<Edge> edgePredicate) {
         this(store, nodePredicate != null, edgePredicate != null);
 
-        // Fill
-        Stream<Edge> edgeStream = graphStore.edgeStore.parallelStream();
+        // Fill - optimized with iterators and manual counting
         if (nodePredicate != null) {
-            graphStore.nodeStore.parallelStream().filter(nodePredicate).forEach((node) -> {
-                nodeBitVector.set(node.getStoreId());
-            });
-            nodeCount = nodeBitVector.size();
+            int count = 0;
+            for (Node node : graphStore.nodeStore) {
+                if (nodePredicate.test(node)) {
+                    nodeBitVector.set(node.getStoreId());
+                    count++;
+                }
+            }
+            nodeCount = count;
             incrementNodeVersion();
-            edgeStream = edgeStream.filter((edge) -> nodeBitVector.get(edge.getSource().getStoreId()) && nodeBitVector.get(edge.getTarget().getStoreId()));
         }
 
-        if (edgePredicate != null) {
-            edgeStream = edgeStream.filter(edgePredicate);
-        }
-        edgeStream.forEach((edge) -> {
+        // Process edges with iterator
+        int count = 0;
+        for (Edge edge : graphStore.edgeStore) {
+            // Cache store IDs
+            int sourceId = edge.getSource().getStoreId();
+            int targetId = edge.getTarget().getStoreId();
+
+            // Filter by node predicate if needed
+            if (nodePredicate != null && (!nodeBitVector.get(sourceId) || !nodeBitVector.get(targetId))) {
+                continue;
+            }
+
+            // Filter by edge predicate if needed
+            if (edgePredicate != null && !edgePredicate.test(edge)) {
+                continue;
+            }
+
             edgeBitVector.set(edge.getStoreId());
             int type = edge.getType();
-
             typeCounts[type]++;
+            count++;
 
-            if (((EdgeImpl)edge).isMutual() && !edge.isSelfLoop() && containsEdge(graphStore.edgeStore
-                .get(edge.getTarget(), edge.getSource(), type, false))) {
+            if (((EdgeImpl) edge).isMutual() && !edge.isSelfLoop() && containsEdge(graphStore.edgeStore
+                    .get(edge.getTarget(), edge.getSource(), type, false))) {
                 mutualEdgeTypeCounts[type]++;
                 mutualEdgesCount++;
             }
-        });
-        edgeCount = edgeBitVector.size();
+        }
+        edgeCount = count;
     }
 
     public GraphViewImpl(final GraphViewImpl view, boolean nodes, boolean edges) {
@@ -994,14 +1008,6 @@ public class GraphViewImpl implements GraphView {
             }
             observers.clear();
         }
-    }
-
-    protected void ensureNodeVectorSize(NodeImpl node) {
-        // BitSet automatically grows as needed, no manual resizing required
-    }
-
-    protected void ensureEdgeVectorSize(EdgeImpl edge) {
-        // BitSet automatically grows as needed, no manual resizing required
     }
 
     protected void setEdgeType(EdgeImpl edgeImpl, int oldType, boolean wasMutual) {
