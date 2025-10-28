@@ -19,6 +19,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.time.ZoneId;
+import java.util.function.Predicate;
 import org.gephi.graph.impl.GraphModelImpl;
 
 /**
@@ -488,6 +489,12 @@ public interface GraphModel {
 
     /**
      * Creates a new graph view.
+     * <p>
+     * By default, the view applies to both nodes and edges, so this is equivalent
+     * to {@link #createView(boolean, boolean) createView(true, true)}.
+     * <p>
+     * New views are by default empty, i.e. no nodes and no edges are visible in the
+     * view.
      *
      * @return newly created graph view
      */
@@ -496,8 +503,24 @@ public interface GraphModel {
     /**
      * Creates a new graph view.
      * <p>
+     * The node and edge filters allows to restrict the view filtering to only nodes
+     * or only edges. If node only, all edges connected to included nodes will be
+     * included too. If edge only, all nodes are included but only the edges
+     * matching the view are included.
+     *
+     * @param nodeFilter predicate to filter nodes, or null to include all nodes
+     * @param edgeFilter predicate to filter edges, or null to include all edges
+     * @return newly created graph view
+     */
+    public GraphView createView(Predicate<Node> nodeFilter, Predicate<Edge> edgeFilter);
+
+    /**
+     * Creates a new graph view.
+     * <p>
      * The node and edge parameters allows to restrict the view filtering to only
-     * nodes or only edges. By default, the view applies to both nodes and edges.
+     * nodes or only edges. If node only, all edges connected to included nodes will
+     * be included too. If edge only, all nodes are included but only the edges
+     * matching the view are included.
      *
      * @param node true to enable node view, false otherwise
      * @param edge true to enable edge view, false otherwise

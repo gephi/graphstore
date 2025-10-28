@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
+import java.util.function.Predicate;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -52,6 +53,17 @@ public class GraphViewStore {
 
     public GraphViewImpl createView() {
         return createView(true, true);
+    }
+
+    public GraphViewImpl createView(Predicate<Node> nodeFilter, Predicate<Edge> edgeFilter) {
+        graphStore.autoWriteLock();
+        try {
+            GraphViewImpl graphView = new GraphViewImpl(graphStore, nodeFilter, edgeFilter);
+            addView(graphView);
+            return graphView;
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
     }
 
     public GraphViewImpl createView(boolean nodes, boolean edges) {
@@ -232,58 +244,38 @@ public class GraphViewStore {
         graphViewImpl.destroyGraphObserver(graphObserver);
     }
 
-    protected void addNode(NodeImpl node) {
-        if (views.length > 0) {
-            for (GraphViewImpl view : views) {
-                if (view != null) {
-                    view.ensureNodeVectorSize(node);
-                }
-            }
-        }
-    }
-
     protected void removeNode(NodeImpl node) {
-        if (views.length > 0) {
-            for (GraphViewImpl view : views) {
-                if (view != null) {
-                    view.removeNode(node);
-                }
+        for (GraphViewImpl view : views) {
+            if (view != null) {
+                view.removeNode(node);
             }
         }
     }
 
     protected void addEdge(EdgeImpl edge) {
-        if (views.length > 0) {
-            for (GraphViewImpl view : views) {
-                if (view != null) {
-                    view.ensureEdgeVectorSize(edge);
-
-                    if (view.nodeView && !view.edgeView) {
-                        view.addEdgeInNodeView(edge);
-                    }
+        for (GraphViewImpl view : views) {
+            if (view != null) {
+                if (view.nodeView && !view.edgeView) {
+                    view.addEdgeInNodeView(edge);
                 }
             }
         }
     }
 
     protected void setEdgeType(EdgeImpl edge, int oldType, boolean wasMutual) {
-        if (views.length > 0) {
-            for (GraphViewImpl view : views) {
-                if (view != null) {
-                    if ((view.nodeView && !view.edgeView) || (view.edgeView && view.containsEdge(edge))) {
-                        view.setEdgeType(edge, oldType, wasMutual);
-                    }
+        for (GraphViewImpl view : views) {
+            if (view != null) {
+                if ((view.nodeView && !view.edgeView) || (view.edgeView && view.containsEdge(edge))) {
+                    view.setEdgeType(edge, oldType, wasMutual);
                 }
             }
         }
     }
 
     protected void removeEdge(EdgeImpl edge) {
-        if (views.length > 0) {
-            for (GraphViewImpl view : views) {
-                if (view != null) {
-                    view.removeEdge(edge);
-                }
+        for (GraphViewImpl view : views) {
+            if (view != null) {
+                view.removeEdge(edge);
             }
         }
     }

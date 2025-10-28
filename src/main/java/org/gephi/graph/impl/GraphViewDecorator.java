@@ -385,6 +385,9 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public NodeIterable getNodes() {
+        if (!view.isNodeView()) {
+            return graphStore.getNodes();
+        }
         return new NodeIterableWrapper(() -> new NodeViewIterator(graphStore.nodeStore.iterator()),
                 NodeViewSpliterator::new, graphStore.getAutoLock());
     }

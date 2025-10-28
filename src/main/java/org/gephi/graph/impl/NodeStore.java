@@ -305,9 +305,6 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 currentBlock.add(node);
                 dictionary.put(node.getId(), node.storeId);
             }
-            if (viewStore != null) {
-                viewStore.addNode(node);
-            }
             node.indexAttributes();
 
             if (spatialIndex != null) {

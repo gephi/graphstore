@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.function.Predicate;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -249,6 +250,11 @@ public class GraphModelImpl implements GraphModel {
     @Override
     public GraphView createView() {
         return store.viewStore.createView();
+    }
+
+    @Override
+    public GraphView createView(Predicate<Node> nodeFilter, Predicate<Edge> edgeFilter) {
+        return store.viewStore.createView(nodeFilter, edgeFilter);
     }
 
     @Override

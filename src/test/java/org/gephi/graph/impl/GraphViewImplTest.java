@@ -25,6 +25,7 @@ import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -48,6 +49,7 @@ public class GraphViewImplTest {
         }
         for (Node n : graphStore.getNodes()) {
             Assert.assertTrue(graph.contains(n));
+            Assert.assertEquals(graph.getDegree(n), graphStore.getDegree(n));
         }
         for (int i = 0; i < graphStore.edgeTypeStore.length; i++) {
             Assert.assertEquals(graph.getEdgeCount(i), graphStore.getEdgeCount(i));
@@ -106,6 +108,20 @@ public class GraphViewImplTest {
         boolean a = view.addEdge(edge);
         Assert.assertTrue(a);
         Assert.assertTrue(view.containsEdge(edge));
+    }
+
+    @Test
+    public void testEdgeViewNodeBehaviors() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true);
+        Subgraph subgraph = store.getGraph(view);
+        Assert.assertEquals(subgraph.getNodeCount(), graphStore.getNodeCount());
+        Assert.assertEquals(subgraph.getNodes().stream().count(), graphStore.getNodeCount());
+        for (Node node : subgraph.getNodes()) {
+            Assert.assertSame(subgraph.getNode(node.getId()), node);
+            Assert.assertEquals(subgraph.getDegree(node), 0);
+        }
     }
 
     @Test
@@ -522,6 +538,23 @@ public class GraphViewImplTest {
         graphStore.addEdge(edge);
 
         Assert.assertTrue(view.containsEdge(edge));
+    }
+
+    @Test
+    public void testEdgeViewUpdate() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        GraphViewImpl view = store.createView(false, true);
+
+        GraphFactory factory = graphStore.factory;
+        Node n1 = factory.newNode("foo1");
+        Node n2 = factory.newNode("foo2");
+        graphStore.addNode(n1);
+        graphStore.addNode(n2);
+        Assert.assertEquals(view.getNodeCount(), graphStore.getNodeCount());
+        Edge e1 = factory.newEdge("foo", n1, n2, 0, 0.0, true);
+        graphStore.addEdge(e1);
+        Assert.assertFalse(view.containsEdge(e1));
     }
 
     @Test
