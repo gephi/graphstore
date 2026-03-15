@@ -27,6 +27,17 @@ import org.testng.annotations.Test;
 public class ElementPropertiesTest {
 
     @Test
+    public void testDefaultsAlpha() {
+        NodeImpl.NodePropertiesImpl p = new NodeImpl.NodePropertiesImpl();
+        Assert.assertEquals(p.alpha(), 1f);
+        Assert.assertEquals(p.getTextProperties().getAlpha(), 1f);
+
+        EdgeImpl.EdgePropertiesImpl ep = new EdgeImpl.EdgePropertiesImpl();
+        Assert.assertEquals(ep.alpha(), 1f);
+        Assert.assertEquals(ep.getTextProperties().getAlpha(), 1f);
+    }
+
+    @Test
     public void testNodeProperties() {
         NodeImpl.NodePropertiesImpl p = new NodeImpl.NodePropertiesImpl();
         p.setX(1f);
