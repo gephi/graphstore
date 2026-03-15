@@ -344,7 +344,7 @@ public class SerializationTest {
     @Test
     public void testTextProperties() throws IOException, ClassNotFoundException {
         TextPropertiesImpl textProperties = new TextPropertiesImpl();
-        textProperties.rgba = 100;
+        textProperties.rgba = 0x01FF0000;
         textProperties.size = 3f;
         textProperties.text = "foo";
         textProperties.visible = true;
@@ -366,7 +366,7 @@ public class SerializationTest {
         nodeProperties.rgba = 100;
         nodeProperties.size = 4f;
         nodeProperties.fixed = true;
-        nodeProperties.textProperties.rgba = 200;
+        nodeProperties.textProperties.rgba = 0x01FF0000;
         nodeProperties.textProperties.size = 5f;
         nodeProperties.textProperties.text = "foo";
         nodeProperties.textProperties.visible = true;
@@ -380,8 +380,8 @@ public class SerializationTest {
     @Test
     public void testEdgeProperties() throws IOException, ClassNotFoundException {
         EdgeImpl.EdgePropertiesImpl edgeProperties = new EdgeImpl.EdgePropertiesImpl();
-        edgeProperties.rgba = 100;
-        edgeProperties.textProperties.rgba = 200;
+        edgeProperties.rgba = 0x01FF0000;
+        edgeProperties.textProperties.rgba = 0x01FF0000;
         edgeProperties.textProperties.size = 5f;
         edgeProperties.textProperties.text = "foo";
         edgeProperties.textProperties.visible = true;
