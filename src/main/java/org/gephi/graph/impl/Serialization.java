@@ -811,7 +811,7 @@ public class Serialization {
 
         // Gephi versions before 0.11 used zero alpha to indicate that the element has no color
         // Override this to avoid hidden elements
-        if (props.alpha() == 0f) {
+        if (props.alpha() <= 0f) {
             props.setAlpha(1f);
         }
 
@@ -845,7 +845,7 @@ public class Serialization {
 
         // Gephi versions before 0.11 used zero alpha to indicate that the element has no color
         // Override this to avoid hidden elements
-        if (props.getAlpha() == 0f) {
+        if (props.getAlpha() <= 0f) {
             props.setAlpha(1f);
         }
 
