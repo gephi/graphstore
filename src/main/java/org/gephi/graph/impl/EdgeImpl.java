@@ -215,7 +215,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
         }
     }
 
-    protected boolean isMutual() {
+    @Override
+    public boolean isMutual() {
         return (flags & MUTUAL_BYTE) == MUTUAL_BYTE;
     }
 

@@ -1012,6 +1012,11 @@ public class BasicGraphStore implements DirectedGraph {
             return directed;
         }
 
+        @Override
+        public boolean isMutual() {
+            return false;
+        }
+
         public String getStringId() {
             return BasicEdgeStore.getStringId(source, target, directed);
         }

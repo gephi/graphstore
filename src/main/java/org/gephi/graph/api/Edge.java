@@ -141,4 +141,12 @@ public interface Edge extends Element, EdgeProperties {
      * @return true if directed, false otherwise
      */
     public boolean isDirected();
+
+    /**
+     * Returns true if this edge is directed and another edge exists in the opposite
+     * direction.
+     *
+     * @return true if mutual, false otherwise
+     */
+    public boolean isMutual();
 }
