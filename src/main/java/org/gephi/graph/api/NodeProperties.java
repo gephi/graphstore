@@ -69,6 +69,7 @@ public interface NodeProperties extends ElementProperties {
      * Sets the x position.
      *
      * @param x the x position
+     * @throws IllegalArgumentException if x is NaN
      */
     public void setX(float x);
 
@@ -76,6 +77,7 @@ public interface NodeProperties extends ElementProperties {
      * Sets the y position.
      *
      * @param y the y position
+     * @throws IllegalArgumentException if y is NaN
      */
     public void setY(float y);
 
@@ -83,6 +85,7 @@ public interface NodeProperties extends ElementProperties {
      * Sets the z position.
      *
      * @param z the z position
+     * @throws IllegalArgumentException if z is NaN
      */
     public void setZ(float z);
 
@@ -90,6 +93,7 @@ public interface NodeProperties extends ElementProperties {
      * Sets the size.
      *
      * @param size the size
+     * @throws IllegalArgumentException if size is NaN
      */
     public void setSize(float size);
 
@@ -98,6 +102,7 @@ public interface NodeProperties extends ElementProperties {
      *
      * @param x the x position
      * @param y the y position
+     * @throws IllegalArgumentException if x or y is NaN
      */
     public void setPosition(float x, float y);
 
@@ -107,6 +112,7 @@ public interface NodeProperties extends ElementProperties {
      * @param x the x position
      * @param y the y position
      * @param z the z position
+     * @throws IllegalArgumentException if x, y or z is NaN
      */
     public void setPosition(float x, float y, float z);
 

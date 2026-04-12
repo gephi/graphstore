@@ -201,30 +201,54 @@ public class NodeImpl extends ElementImpl implements Node {
 
     @Override
     public void setX(float x) {
+        if (Float.isNaN(x)) {
+            throw new IllegalArgumentException("x cannot be NaN");
+        }
         properties.setX(x);
         updateNodeInSpatialIndex();
     }
 
     @Override
     public void setY(float y) {
+        if (Float.isNaN(y)) {
+            throw new IllegalArgumentException("y cannot be NaN");
+        }
         properties.setY(y);
         updateNodeInSpatialIndex();
     }
 
     @Override
     public void setZ(float z) {
+        if (Float.isNaN(z)) {
+            throw new IllegalArgumentException("z cannot be NaN");
+        }
         properties.setZ(z);
         updateNodeInSpatialIndex();
     }
 
     @Override
     public void setPosition(float x, float y) {
+        if (Float.isNaN(x)) {
+            throw new IllegalArgumentException("x cannot be NaN");
+        }
+        if (Float.isNaN(y)) {
+            throw new IllegalArgumentException("y cannot be NaN");
+        }
         properties.setPosition(x, y);
         updateNodeInSpatialIndex();
     }
 
     @Override
     public void setPosition(float x, float y, float z) {
+        if (Float.isNaN(x)) {
+            throw new IllegalArgumentException("x cannot be NaN");
+        }
+        if (Float.isNaN(y)) {
+            throw new IllegalArgumentException("y cannot be NaN");
+        }
+        if (Float.isNaN(z)) {
+            throw new IllegalArgumentException("z cannot be NaN");
+        }
         properties.setPosition(x, y, z);
         updateNodeInSpatialIndex();
     }
@@ -256,6 +280,9 @@ public class NodeImpl extends ElementImpl implements Node {
 
     @Override
     public void setSize(float size) {
+        if (Float.isNaN(size)) {
+            throw new IllegalArgumentException("size cannot be NaN");
+        }
         properties.setSize(size);
         updateNodeInSpatialIndex();
     }
