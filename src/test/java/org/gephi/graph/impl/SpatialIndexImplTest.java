@@ -32,7 +32,7 @@ public class SpatialIndexImplTest {
 
     @Test
     public void testDisabled() {
-        GraphStore store = GraphGenerator.generateEmptyGraphStore();
+        GraphStore store = new GraphStore(null, Configuration.builder().enableSpatialIndex(false).build());
         Assert.assertNull(store.spatialIndex);
     }
 

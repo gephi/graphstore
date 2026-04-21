@@ -809,7 +809,8 @@ public class Serialization {
         props.rgba = rgba;
         props.setTextProperties(textProperties);
 
-        // Gephi versions before 0.11 used zero alpha to indicate that the element has no color
+        // Gephi versions before 0.11 used zero alpha to indicate that the element has
+        // no color
         // Override this to avoid hidden elements
         if (props.alpha() <= 0f) {
             props.setAlpha(1f);
@@ -843,7 +844,8 @@ public class Serialization {
         props.width = width;
         props.height = height;
 
-        // Gephi versions before 0.11 used zero alpha to indicate that the element has no color
+        // Gephi versions before 0.11 used zero alpha to indicate that the element has
+        // no color
         // Override this to avoid hidden elements
         if (props.getAlpha() <= 0f) {
             props.setAlpha(1f);

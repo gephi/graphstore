@@ -31,7 +31,7 @@ public final class GraphStoreConfiguration {
     public static final boolean DEFAULT_ENABLE_OBSERVERS = true;
     public static final boolean DEFAULT_ENABLE_NODE_PROPERTIES = true;
     public static final boolean DEFAULT_ENABLE_EDGE_PROPERTIES = true;
-    public static final boolean DEFAULT_ENABLE_SPATIAL_INDEX = false;
+    public static final boolean DEFAULT_ENABLE_SPATIAL_INDEX = true;
     public static final boolean DEFAULT_ENABLE_EDGE_WEIGHT_COLUMN = true;
     public static final boolean DEFAULT_ENABLE_PARALLEL_EDGES_SAME_TYPE = true;
     // NodeStore

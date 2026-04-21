@@ -18,8 +18,8 @@ public class NodeImplTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void testPropertiesDisabled() {
-        GraphStore graphStore = GraphGenerator
-                .generateTinyGraphStore(Configuration.builder().enableNodeProperties(false).build());
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(Configuration.builder().enableSpatialIndex(false)
+                .enableNodeProperties(false).build());
         Node n = graphStore.getNode("1");
         Assert.assertNull(n.getColor());
     }
