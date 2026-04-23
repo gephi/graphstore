@@ -643,6 +643,33 @@ public class TimestampIndexStoreTest {
         Assert.assertFalse(index.hasElements());
     }
 
+    @Test
+    public void testGetIndexViewNotIndexed() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        Assert.assertNull(store.getIndex(graph));
+    }
+
+    @Test
+    public void testClearInViewElementNotInView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addTimestamp(1.0);
+
+        TimestampIndexStore store = (TimestampIndexStore) graphStore.timeStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        store.createViewIndex(graph);
+
+        // n1 has timestamp 1.0 in timeSortedMap but was never added to the (empty) view
+        // index
+        // clearInView previously threw ArrayIndexOutOfBoundsException
+        store.clearInView(n1, view);
+    }
+
     // UTILITY
     private <T> Object[] getArrayFromIterable(Iterable<T> iterable) {
         List<T> list = new ArrayList<>();

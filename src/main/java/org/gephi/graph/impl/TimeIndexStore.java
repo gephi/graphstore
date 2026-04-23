@@ -275,6 +275,9 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         if (view.isMainView()) {
             return mainIndex;
         }
+        if (viewIndexes == null) {
+            return null;
+        }
         lock();
         try {
             TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
@@ -339,8 +342,10 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                             K[] ts = set.toArray();
                             int tsLength = ts.length;
                             for (int i = 0; i < tsLength; i++) {
-                                int timestamp = timeSortedMap.get(ts[i]);
-                                viewIndex.add(timestamp, element);
+                                Integer timestamp = timeSortedMap.get(ts[i]);
+                                if (timestamp != null) {
+                                    viewIndex.add(timestamp, element);
+                                }
                             }
                         }
                     }
@@ -362,8 +367,10 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                     K[] ts = set.toArray();
                     int tsLength = ts.length;
                     for (int i = 0; i < tsLength; i++) {
-                        int timestampIndex = timeSortedMap.get(ts[i]);
-                        viewIndex.add(timestampIndex, element);
+                        Integer timestampIndex = timeSortedMap.get(ts[i]);
+                        if (timestampIndex != null) {
+                            viewIndex.add(timestampIndex, element);
+                        }
                     }
                 }
             } finally {
@@ -382,8 +389,10 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                     K[] ts = set.toArray();
                     int tsLength = ts.length;
                     for (int i = 0; i < tsLength; i++) {
-                        int timestampIndex = timeSortedMap.get(ts[i]);
-                        viewIndex.remove(timestampIndex, element);
+                        Integer timestampIndex = timeSortedMap.get(ts[i]);
+                        if (timestampIndex != null) {
+                            viewIndex.remove(timestampIndex, element);
+                        }
                     }
                 }
             } finally {

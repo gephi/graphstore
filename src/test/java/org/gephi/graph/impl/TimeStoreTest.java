@@ -54,6 +54,20 @@ public class TimeStoreTest {
     }
 
     @Test
+    public void testGetMinNotIndexed() {
+        GraphStore graphStore = new GraphStore();
+        TimeStore store = new TimeStore(graphStore, false);
+        Assert.assertEquals(store.getMin(graphStore), Double.NEGATIVE_INFINITY);
+    }
+
+    @Test
+    public void testGetMaxNotIndexed() {
+        GraphStore graphStore = new GraphStore();
+        TimeStore store = new TimeStore(graphStore, false);
+        Assert.assertEquals(store.getMax(graphStore), Double.POSITIVE_INFINITY);
+    }
+
+    @Test
     public void testGetMin() {
         GraphStore graphStore = new GraphStore();
         TimeStore store = new TimeStore(graphStore, true);

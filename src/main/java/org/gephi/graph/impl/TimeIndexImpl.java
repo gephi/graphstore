@@ -48,9 +48,12 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
 
     public void clear() {
         lock();
-        timestamps = new TimeIndexEntry[0];
-        elementCount = 0;
-        unlock();
+        try {
+            timestamps = new TimeIndexEntry[0];
+            elementCount = 0;
+        } finally {
+            unlock();
+        }
     }
 
     protected void add(int timestampIndex, Element element) {
@@ -72,8 +75,11 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
     protected void remove(int timestampIndex, Element element) {
         lock();
         try {
+            if (timestampIndex >= timestamps.length) {
+                return;
+            }
             TimeIndexEntry entry = timestamps[timestampIndex];
-            if (entry.remove(element)) {
+            if (entry != null && entry.remove(element)) {
                 elementCount--;
                 if (entry.isEmpty()) {
                     clearEntry(timestampIndex);
