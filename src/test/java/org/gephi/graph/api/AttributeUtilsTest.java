@@ -159,7 +159,7 @@ public class AttributeUtilsTest {
         Assert.assertEquals(AttributeUtils.parse("[-1e6, 1, .001, 2e6]", double[].class).getClass(), double[].class);
 
         Assert.assertEquals(AttributeUtils
-                .parse("[' true ', 'null', null]", String[].class), new String[] { " true ", null, null });
+                .parse("[' true ', 'null', null]", String[].class), new String[] { " true ", "null", null });
         Assert.assertEquals(AttributeUtils.parse("['null']", Integer[].class), new Integer[] { null });
         Assert.assertEquals(AttributeUtils.parse("['null']", Double[].class), new Double[] { null });
         Assert.assertEquals(AttributeUtils
