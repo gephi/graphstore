@@ -619,6 +619,33 @@ public class IntervalIndexStoreTest {
         Assert.assertFalse(index.hasElements());
     }
 
+    @Test
+    public void testGetIndexViewNotIndexed() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
+        GraphView view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        Assert.assertNull(store.getIndex(graph));
+    }
+
+    @Test
+    public void testClearInViewElementNotInView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(TimeRepresentation.INTERVAL);
+        NodeImpl n1 = graphStore.getNode("1");
+        n1.addInterval(new Interval(1.0, 2.0));
+
+        IntervalIndexStore store = (IntervalIndexStore) graphStore.timeStore.nodeIndexStore;
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        Graph graph = graphStore.viewStore.getGraph(view);
+        store.createViewIndex(graph);
+
+        // n1 has interval [1,2] in timeSortedMap but was never added to the (empty)
+        // view index
+        // clearInView previously threw ArrayIndexOutOfBoundsException
+        store.clearInView(n1, view);
+    }
+
     // UTILITY
     private <T> Object[] getArrayFromIterable(Iterable<T> iterable) {
         List<T> list = new ArrayList<>();
