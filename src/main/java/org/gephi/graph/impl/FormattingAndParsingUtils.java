@@ -168,7 +168,9 @@ public final class FormattingAndParsingUtils {
      */
     protected static <T> T convertValue(Class<T> typeClass, String valString) {
         Object value;
-        if (typeClass.equals(Byte.class) || typeClass.equals(byte.class) || typeClass.equals(Short.class) || typeClass
+        if (typeClass.equals(String.class)) {
+            value = valString;
+        } else if (typeClass.equals(Byte.class) || typeClass.equals(byte.class) || typeClass.equals(Short.class) || typeClass
                 .equals(short.class) || typeClass.equals(Integer.class) || typeClass.equals(int.class) || typeClass
                         .equals(Long.class) || typeClass.equals(long.class) || typeClass.equals(BigInteger.class)) {
             value = parseNumberWithoutDecimals((Class<? extends Number>) typeClass, valString);
