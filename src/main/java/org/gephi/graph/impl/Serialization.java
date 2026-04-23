@@ -348,6 +348,8 @@ public class Serialization {
             throw new IOException("The store is not empty");
         }
 
+        idMap.clear();
+
         // Store Configuration
         deserialize(is);
 

@@ -109,11 +109,12 @@ public class SerializationTest {
 
         Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphStore);
-        graphStore.clear();
 
+        GraphModelImpl graphModel2 = new GraphModelImpl();
+        ser = new Serialization(graphModel2);
         GraphStore l = (GraphStore) ser.deserialize(buf);
-        Assert.assertTrue(nodeStore.equals(l.nodeStore));
-        Assert.assertTrue(edgeStore.equals(l.edgeStore));
+        Assert.assertTrue(nodeStore.deepEquals(l.nodeStore));
+        Assert.assertTrue(edgeStore.deepEquals(l.edgeStore));
     }
 
     @Test
@@ -130,11 +131,12 @@ public class SerializationTest {
 
         Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphStore);
-        graphStore.clear();
 
+        GraphModelImpl graphModel2 = new GraphModelImpl();
+        ser = new Serialization(graphModel2);
         GraphStore l = (GraphStore) ser.deserialize(buf);
-        Assert.assertTrue(nodeStore.equals(l.nodeStore));
-        Assert.assertTrue(edgeStore.equals(l.edgeStore));
+        Assert.assertTrue(nodeStore.deepEquals(l.nodeStore));
+        Assert.assertTrue(edgeStore.deepEquals(l.edgeStore));
     }
 
     @Test
@@ -146,16 +148,17 @@ public class SerializationTest {
         EdgeStore edgeStore = graphStore.edgeStore;
         NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
         nodeStore.addAll(Arrays.asList(nodes));
-        EdgeImpl[] edges = GraphGenerator.generateSmallEdgeList();
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 100, 0, true, true, false);
         edgeStore.addAll(Arrays.asList(edges));
 
         Serialization ser = new Serialization(graphModel);
         byte[] buf = ser.serialize(graphStore);
-        graphStore.clear();
 
+        GraphModelImpl graphModel2 = new GraphModelImpl();
+        ser = new Serialization(graphModel2);
         GraphStore l = (GraphStore) ser.deserialize(buf);
-        Assert.assertTrue(nodeStore.equals(l.nodeStore));
-        Assert.assertTrue(edgeStore.equals(l.edgeStore));
+        Assert.assertTrue(nodeStore.deepEquals(l.nodeStore));
+        Assert.assertTrue(edgeStore.deepEquals(l.edgeStore));
     }
 
     @Test
@@ -1266,6 +1269,27 @@ public class SerializationTest {
         ser = new Serialization();
         GraphModelImpl read = ser.deserializeGraphModelWithoutVersionPrefix(dio.reset(bytes), Serialization.VERSION);
         Assert.assertTrue(read.deepEquals(gm));
+    }
+
+    @Test
+    public void testReuseSerializationInstanceForDeserialization() throws Exception {
+        GraphModelImpl gm1 = GraphGenerator.generateSmallGraphStore().graphModel;
+        GraphModelImpl gm2 = GraphGenerator.generateSmallMultiTypeGraphStore().graphModel;
+
+        DataInputOutput dio1 = new DataInputOutput();
+        new Serialization(gm1).serializeGraphModel(dio1, gm1);
+        byte[] bytes1 = dio1.toByteArray();
+
+        DataInputOutput dio2 = new DataInputOutput();
+        new Serialization(gm2).serializeGraphModel(dio2, gm2);
+        byte[] bytes2 = dio2.toByteArray();
+
+        Serialization reused = new Serialization();
+        GraphModelImpl read1 = reused.deserializeGraphModel(dio1.reset(bytes1));
+        Assert.assertTrue(read1.deepEquals(gm1));
+
+        GraphModelImpl read2 = reused.deserializeGraphModel(dio2.reset(bytes2));
+        Assert.assertTrue(read2.deepEquals(gm2));
     }
 
     @Test
