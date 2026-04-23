@@ -425,4 +425,119 @@ public class GraphViewStoreTest {
         Assert.assertTrue(graphStore.addEdge(e));
         Assert.assertTrue(graphStore.removeEdge(e));
     }
+
+    @Test
+    public void testDeepHashCodeAfterDestroy() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        store.createView();
+        GraphViewImpl view2 = store.createView();
+        store.destroyView(view2);
+
+        store.deepHashCode();
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testDestroyViewNull() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        store.destroyView(null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testDestroyViewForeignStore() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        GraphStore graphStore2 = GraphGenerator.generateSmallGraphStore();
+        GraphViewImpl foreignView = graphStore2.viewStore.createView();
+
+        store.destroyView(foreignView);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testContainsForeignViewImplementation() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        store.contains(new GraphView() {
+            @Override
+            public GraphModel getGraphModel() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isMainView() {
+                return false;
+            }
+
+            @Override
+            public boolean isNodeView() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Interval getTimeInterval() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isEdgeView() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isDestroyed() {
+                throw new UnsupportedOperationException();
+            }
+        });
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetVisibleViewForeignViewImplementation() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        store.setVisibleView(new GraphView() {
+            @Override
+            public GraphModel getGraphModel() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isMainView() {
+                return false;
+            }
+
+            @Override
+            public boolean isNodeView() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Interval getTimeInterval() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isEdgeView() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isDestroyed() {
+                throw new UnsupportedOperationException();
+            }
+        });
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testCreateViewCopyNull() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+
+        store.createView((GraphView) null);
+    }
 }

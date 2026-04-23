@@ -82,6 +82,7 @@ public class GraphViewStore {
     }
 
     public GraphViewImpl createView(GraphView view, boolean nodes, boolean edges) {
+        checkNonNullViewObject(view);
         if (view.isMainView()) {
             graphStore.autoWriteLock();
             try {
@@ -93,7 +94,6 @@ public class GraphViewStore {
                 graphStore.autoWriteUnlock();
             }
         } else {
-            checkNonNullViewObject(view);
             checkGraphViewObject(view);
             checkViewExist((GraphViewImpl) view);
 
@@ -109,14 +109,15 @@ public class GraphViewStore {
     }
 
     public void destroyView(GraphView view) {
+        checkNonNullViewObject(view);
         if (view.isMainView()) {
             throw new IllegalArgumentException("Can't delete the main view");
         }
+        checkGraphViewObject(view);
+        checkViewExist((GraphViewImpl) view);
+
         graphStore.autoWriteLock();
         try {
-            checkNonNullViewObject(view);
-            checkGraphViewObject(view);
-
             TimeIndexStore nodeTimeStore = graphStore.timeStore.nodeIndexStore;
             if (nodeTimeStore != null) {
                 nodeTimeStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
@@ -160,6 +161,7 @@ public class GraphViewStore {
         graphStore.autoReadLock();
         try {
             checkNonNullViewObject(view);
+            checkGraphViewObject(view);
             GraphViewImpl viewImpl = (GraphViewImpl) view;
             int id = viewImpl.storeId;
             if (id != NULL_VIEW && id < length && views[id] == view) {
@@ -222,7 +224,7 @@ public class GraphViewStore {
         if (view == null || view == graphStore.mainGraphView) {
             visibleView = graphStore.mainGraphView;
         } else {
-            checkNonNullViewObject(view);
+            checkGraphViewObject(view);
             checkViewExist((GraphViewImpl) view);
             visibleView = view;
         }
@@ -323,7 +325,7 @@ public class GraphViewStore {
     public int deepHashCode() {
         int hash = 5;
         for (GraphViewImpl view : this.views) {
-            hash = 67 * hash + view.deepHashCode();
+            hash = 67 * hash + (view != null ? view.deepHashCode() : 0);
         }
         hash = 67 * hash + this.length;
         return hash;
