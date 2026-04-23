@@ -38,6 +38,11 @@ public class TimestampIndexImpl<T extends Element> extends TimeIndexImpl<T, Doub
         try {
             Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
             if (mainIndex) {
+                // Returns the minimum across all tracked timestamps, including those that
+                // belong only to dynamic attribute values (TimeMap columns) and not to
+                // element existence (TimeSet). This intentionally gives the earliest time
+                // at which any graph data exists, which may be earlier than the first time
+                // any element is present. View indexes filter to element-only timestamps.
                 if (!sortedMap.isEmpty()) {
                     return sortedMap.firstDoubleKey();
                 }
@@ -69,6 +74,9 @@ public class TimestampIndexImpl<T extends Element> extends TimeIndexImpl<T, Doub
         try {
             Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
             if (mainIndex) {
+                // Returns the maximum across all tracked timestamps, including those that
+                // belong only to dynamic attribute values (TimeMap columns) and not to
+                // element existence (TimeSet). See getMinTimestamp() for details.
                 if (!sortedMap.isEmpty()) {
                     return sortedMap.lastDoubleKey();
                 }

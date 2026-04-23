@@ -36,6 +36,11 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
         try {
             Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
             if (mainIndex) {
+                // Returns the minimum across all tracked intervals, including those that
+                // belong only to dynamic attribute values (IntervalMap columns) and not to
+                // element existence (IntervalSet). This intentionally gives the earliest time
+                // at which any graph data exists, which may be earlier than the first time
+                // any element is present. View indexes filter to element-only intervals.
                 if (!sortedMap.isEmpty()) {
                     return sortedMap.getLow();
                 }
@@ -63,6 +68,9 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
         lock();
         try {
             if (mainIndex) {
+                // Returns the maximum across all tracked intervals, including those that
+                // belong only to dynamic attribute values (IntervalMap columns) and not to
+                // element existence (IntervalSet). See getMinTimestamp() for details.
                 Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
                 if (!sortedMap.isEmpty()) {
                     return sortedMap.getHigh();
