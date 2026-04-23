@@ -226,7 +226,7 @@ public final class TimestampsParser {
         } else if (typeClass.equals(Character.class)) {
             result = new TimestampCharMap();
         } else {
-            throw new IllegalArgumentException("Unsupported type " + typeClass.getClass().getCanonicalName());
+            throw new IllegalArgumentException("Unsupported type " + typeClass.getCanonicalName());
         }
 
         if (input.equalsIgnoreCase(EMPTY_VALUE)) {

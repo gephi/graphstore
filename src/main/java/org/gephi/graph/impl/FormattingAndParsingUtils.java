@@ -61,7 +61,7 @@ public final class FormattingAndParsingUtils {
             if (Double.isNaN(value)) {
                 throw new IllegalArgumentException("NaN is not allowed as an interval bound");
             }
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
             value = AttributeUtils.parseDateTime(timeStr, zoneId);
         }
 

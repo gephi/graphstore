@@ -58,6 +58,7 @@ import java.time.temporal.ChronoField;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -250,9 +251,9 @@ public class AttributeUtils {
                 .parseDefaulting(ChronoField.NANO_OF_SECOND, 0).appendOffset("+HH:MM", "Z").toFormatter()
                 .withZone(GraphStoreConfiguration.DEFAULT_TIME_ZONE);
 
-        DATE_PRINTERS_BY_TIMEZONE = new HashMap<>();
-        DATE_TIME_PRINTERS_BY_TIMEZONE = new HashMap<>();
-        DATE_TIME_PARSERS_BY_TIMEZONE = new HashMap<>();
+        DATE_PRINTERS_BY_TIMEZONE = new ConcurrentHashMap<>();
+        DATE_TIME_PRINTERS_BY_TIMEZONE = new ConcurrentHashMap<>();
+        DATE_TIME_PARSERS_BY_TIMEZONE = new ConcurrentHashMap<>();
 
         DATE_PRINTERS_BY_TIMEZONE.put(DATE_PRINTER.getZone(), DATE_PRINTER);
         DATE_TIME_PRINTERS_BY_TIMEZONE.put(DATE_TIME_PRINTER.getZone(), DATE_TIME_PRINTER);
@@ -305,13 +306,7 @@ public class AttributeUtils {
             return baseFormatter;
         }
 
-        DateTimeFormatter formatter = cache.get(zoneId);
-        if (formatter == null) {
-            formatter = baseFormatter.withZone(zoneId);
-            cache.put(zoneId, formatter);
-        }
-
-        return formatter;
+        return cache.computeIfAbsent(zoneId, z -> baseFormatter.withZone(z));
     }
 
     private static DateTimeFormatter getDateTimeParserByTimeZone(ZoneId zoneId) {
@@ -426,7 +421,7 @@ public class AttributeUtils {
         // Instant
         if (typeClass.equals(Instant.class)) {
             double milliseconds = FormattingAndParsingUtils.parseDateTimeOrTimestamp(str, zoneId);
-            return Instant.ofEpochMilli((long) milliseconds);
+            return Instant.ofEpochMilli(Math.round(milliseconds));
         }
 
         // Interval types:
@@ -785,7 +780,7 @@ public class AttributeUtils {
         }
         if (oCls != null && !(isSimpleType(oCls) || isArrayType(oCls))) {
             throw new IllegalArgumentException(
-                    "The list contains unsupported type " + oCls.getClass().getCanonicalName());
+                    "The list contains unsupported type " + oCls.getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
@@ -831,7 +826,7 @@ public class AttributeUtils {
         }
         if (oCls != null && !(isSimpleType(oCls) || isArrayType(oCls))) {
             throw new IllegalArgumentException(
-                    "The set contains unsupported type " + oCls.getClass().getCanonicalName());
+                    "The set contains unsupported type " + oCls.getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
@@ -883,7 +878,7 @@ public class AttributeUtils {
         }
         if (oCls != null && !isSimpleType(oCls)) {
             throw new IllegalArgumentException(
-                    "The map contains unsupported key type " + oCls.getClass().getCanonicalName());
+                    "The map contains unsupported key type " + oCls.getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
