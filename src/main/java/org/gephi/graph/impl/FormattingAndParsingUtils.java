@@ -170,9 +170,10 @@ public final class FormattingAndParsingUtils {
         Object value;
         if (typeClass.equals(String.class)) {
             value = valString;
-        } else if (typeClass.equals(Byte.class) || typeClass.equals(byte.class) || typeClass.equals(Short.class) || typeClass
-                .equals(short.class) || typeClass.equals(Integer.class) || typeClass.equals(int.class) || typeClass
-                        .equals(Long.class) || typeClass.equals(long.class) || typeClass.equals(BigInteger.class)) {
+        } else if (typeClass.equals(Byte.class) || typeClass.equals(byte.class) || typeClass
+                .equals(Short.class) || typeClass.equals(short.class) || typeClass.equals(Integer.class) || typeClass
+                        .equals(int.class) || typeClass.equals(Long.class) || typeClass
+                                .equals(long.class) || typeClass.equals(BigInteger.class)) {
             value = parseNumberWithoutDecimals((Class<? extends Number>) typeClass, valString);
         } else if (typeClass.equals(Float.class) || typeClass.equals(float.class) || typeClass
                 .equals(Double.class) || typeClass.equals(double.class) || typeClass.equals(BigDecimal.class)) {

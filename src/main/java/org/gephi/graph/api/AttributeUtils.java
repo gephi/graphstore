@@ -779,8 +779,7 @@ public class AttributeUtils {
             }
         }
         if (oCls != null && !(isSimpleType(oCls) || isArrayType(oCls))) {
-            throw new IllegalArgumentException(
-                    "The list contains unsupported type " + oCls.getCanonicalName());
+            throw new IllegalArgumentException("The list contains unsupported type " + oCls.getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
@@ -825,8 +824,7 @@ public class AttributeUtils {
             }
         }
         if (oCls != null && !(isSimpleType(oCls) || isArrayType(oCls))) {
-            throw new IllegalArgumentException(
-                    "The set contains unsupported type " + oCls.getCanonicalName());
+            throw new IllegalArgumentException("The set contains unsupported type " + oCls.getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
@@ -877,8 +875,7 @@ public class AttributeUtils {
             }
         }
         if (oCls != null && !isSimpleType(oCls)) {
-            throw new IllegalArgumentException(
-                    "The map contains unsupported key type " + oCls.getCanonicalName());
+            throw new IllegalArgumentException("The map contains unsupported key type " + oCls.getCanonicalName());
         }
         if (oCls != null) {
             if (oCls.equals(Integer.class)) {
