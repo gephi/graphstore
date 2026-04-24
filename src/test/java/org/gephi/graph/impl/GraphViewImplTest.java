@@ -66,6 +66,33 @@ public class GraphViewImplTest {
     }
 
     @Test
+    public void testFillTypeCountsWithParallelEdges() {
+        // Regression test: fill() used longDictionary[i].size() (distinct source-target
+        // pairs) instead of typeSize[i] (actual edge count), producing wrong typeCounts
+        // when parallel edges of the same type exist.
+        GraphModelImpl model = new GraphModelImpl(
+                org.gephi.graph.api.Configuration.builder().enableParallelEdgesSameType(true).build());
+        GraphStore graphStore = model.store;
+
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addNode(n1);
+        graphStore.addNode(n2);
+
+        // Two parallel edges of type 0 between the same pair
+        Edge e1 = graphStore.factory.newEdge("e1", n1, n2, 0, 1.0, true);
+        Edge e2 = graphStore.factory.newEdge("e2", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(e1);
+        graphStore.addEdge(e2);
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+
+        Assert.assertEquals(view.getEdgeCount(), 2);
+        Assert.assertEquals(view.getEdgeCount(0), 2);
+    }
+
+    @Test
     public void testMainView() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
         GraphViewImpl view = new GraphViewStore(graphStore).createView();

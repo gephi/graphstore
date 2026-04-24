@@ -468,12 +468,9 @@ public class GraphViewImpl implements GraphView {
         edgeBitVector.set(0, graphStore.edgeStore.maxStoreId());
 
         this.edgeCount = graphStore.edgeStore.size();
-        int typeLength = graphStore.edgeStore.longDictionary.length;
+        int typeLength = graphStore.edgeStore.typeSize.length;
         this.typeCounts = new int[typeLength];
-        for (int i = 0; i < typeLength; i++) {
-            int count = graphStore.edgeStore.longDictionary[i].size();
-            this.typeCounts[i] = count;
-        }
+        System.arraycopy(graphStore.edgeStore.typeSize, 0, this.typeCounts, 0, typeLength);
         this.mutualEdgeTypeCounts = new int[graphStore.edgeStore.mutualEdgesTypeSize.length];
         System.arraycopy(graphStore.edgeStore.mutualEdgesTypeSize, 0, this.mutualEdgeTypeCounts, 0, this.mutualEdgeTypeCounts.length);
         this.mutualEdgesCount = graphStore.edgeStore.mutualEdgesSize;
@@ -598,7 +595,7 @@ public class GraphViewImpl implements GraphView {
 
         // Invert all type counts (including types that weren't in the view before)
         for (int i = 0; i < storeTypeLength; i++) {
-            this.typeCounts[i] = graphStore.edgeStore.longDictionary[i].size() - this.typeCounts[i];
+            this.typeCounts[i] = graphStore.edgeStore.typeSize[i] - this.typeCounts[i];
         }
         for (int i = 0; i < graphStore.edgeStore.mutualEdgesTypeSize.length; i++) {
             this.mutualEdgeTypeCounts[i] = graphStore.edgeStore.mutualEdgesTypeSize[i] - this.mutualEdgeTypeCounts[i];
