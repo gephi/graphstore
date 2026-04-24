@@ -102,9 +102,8 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                 if (!viewIndexes.isEmpty()) {
                     for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
                         GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                        DirectedSubgraph graph = graphView.getDirectedGraph();
                         boolean node = element instanceof Node;
-                        if (node ? graph.contains((Node) element) : graph.contains((Edge) element)) {
+                        if (node ? graphView.containsNode((Node) element) : graphView.containsEdge((Edge) element)) {
                             entry.getValue().add(timeIndex, element);
                         }
                     }
@@ -201,46 +200,42 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     }
 
     public void index(Element element) {
-        lock();
-        try {
+        synchronized (element) {
             S timeSet = getTimeSet(element);
-
-            if (timeSet != null) {
-                add(timeSet, element);
-            }
-
-            synchronized (element) {
+            lock();
+            try {
+                if (timeSet != null) {
+                    add(timeSet, element);
+                }
                 for (Object val : element.getAttributes()) {
                     if (val instanceof TimeMap) {
                         TimeMap dynamicValue = (TimeMap) val;
                         add(dynamicValue);
                     }
                 }
+            } finally {
+                unlock();
             }
-        } finally {
-            unlock();
         }
     }
 
     public void clear(Element element) {
-        lock();
-        try {
+        synchronized (element) {
             S timeSet = getTimeSet(element);
-
-            if (timeSet != null) {
-                remove(timeSet, element);
-            }
-
-            synchronized (element) {
+            lock();
+            try {
+                if (timeSet != null) {
+                    remove(timeSet, element);
+                }
                 for (Object val : element.getAttributes()) {
                     if (val instanceof TimeMap) {
                         TimeMap dynamicValue = (TimeMap) val;
                         remove((M) dynamicValue);
                     }
                 }
+            } finally {
+                unlock();
             }
-        } finally {
-            unlock();
         }
     }
 
@@ -454,7 +449,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         if (!obj.getClass().equals(getClass())) {
             return false;
         }
-        TimeIndexStore other = (TimeIndexStore) obj;
+        TimeIndexStore other = obj;
         if (!other.elementType.equals(elementType)) {
             return false;
         }
