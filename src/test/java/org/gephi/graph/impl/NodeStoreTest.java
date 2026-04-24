@@ -334,6 +334,14 @@ public class NodeStoreTest {
     }
 
     @Test
+    public void testContainsAllEmpty() {
+        NodeStore nodeStore = new NodeStore();
+        NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1") };
+        nodeStore.addAll(Arrays.asList(nodes));
+        Assert.assertTrue(nodeStore.containsAll(new java.util.ArrayList<>()));
+    }
+
+    @Test
     public void testIterator() {
         NodeStore nodeStore = new NodeStore();
         NodeImpl[] nodes = new NodeImpl[] { new NodeImpl("0"), new NodeImpl("1"), new NodeImpl("2") };

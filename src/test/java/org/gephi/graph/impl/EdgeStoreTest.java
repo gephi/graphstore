@@ -370,6 +370,14 @@ public class EdgeStoreTest {
     }
 
     @Test
+    public void testContainsAllEmpty() {
+        EdgeStore edgeStore = new EdgeStore();
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);
+        edgeStore.addAll(Arrays.asList(edges));
+        Assert.assertTrue(edgeStore.containsAll(new java.util.ArrayList<>()));
+    }
+
+    @Test
     public void testIterator() {
         EdgeStore edgeStore = new EdgeStore();
         EdgeImpl[] edges = GraphGenerator.generateEdgeList(3);

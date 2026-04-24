@@ -404,7 +404,7 @@ public class NodeStore implements Collection<Node>, NodeIterable {
             }
             return found == c.size();
         }
-        return false;
+        return true;
     }
 
     @Override

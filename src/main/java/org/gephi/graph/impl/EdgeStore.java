@@ -1033,7 +1033,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             }
             return found == c.size();
         }
-        return false;
+        return true;
     }
 
     @Override
