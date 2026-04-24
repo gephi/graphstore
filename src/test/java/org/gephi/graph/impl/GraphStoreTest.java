@@ -900,6 +900,38 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testClearUpdatesViews() {
+        // Regression test: clear() did not propagate to views, leaving them with
+        // stale bit-vectors and counts.
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+
+        Assert.assertEquals(view.getNodeCount(), graphStore.getNodeCount());
+        Assert.assertEquals(view.getEdgeCount(), graphStore.getEdgeCount());
+
+        graphStore.clear();
+
+        Assert.assertEquals(view.getNodeCount(), 0);
+        Assert.assertEquals(view.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testClearEdgesUpdatesViews() {
+        // Regression test: clearEdges() did not propagate to views.
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+
+        Assert.assertTrue(view.getEdgeCount() > 0);
+
+        graphStore.clearEdges();
+
+        Assert.assertEquals(view.getEdgeCount(), 0);
+        Assert.assertEquals(view.getNodeCount(), graphStore.getNodeCount());
+    }
+
+    @Test
     public void testClearEdgesByType() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         Node n1 = graphStore.getNode("1");
