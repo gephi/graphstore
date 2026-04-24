@@ -119,10 +119,11 @@ public class GraphObserverImpl implements GraphObserver {
         if (nodeVersion < graphVersion.nodeVersion) {
             int maxStoreId = graphStore.nodeStore.maxStoreId();
 
-            for (Node n : nodeCache) {
-                NodeImpl nImpl = (NodeImpl) n;
+            for (int i = 0; i < nodeCache.length; i++) {
+                NodeImpl nImpl = nodeCache[i];
                 if (nImpl != null && !graph.contains(nImpl)) {
                     graphDiff.removedNodes.add(nImpl);
+                    nodeCache[i] = null;
                 }
             }
             if (maxStoreId > nodeCache.length || maxStoreId < nodeCache.length) {
@@ -145,10 +146,11 @@ public class GraphObserverImpl implements GraphObserver {
         if (edgeVersion < graphVersion.edgeVersion) {
             int maxStoreId = graphStore.edgeStore.maxStoreId();
 
-            for (Edge e : edgeCache) {
-                EdgeImpl eImpl = (EdgeImpl) e;
+            for (int i = 0; i < edgeCache.length; i++) {
+                EdgeImpl eImpl = edgeCache[i];
                 if (eImpl != null && !graph.contains(eImpl)) {
                     graphDiff.removedEdges.add(eImpl);
+                    edgeCache[i] = null;
                 }
             }
             if (maxStoreId > edgeCache.length || maxStoreId < edgeCache.length) {

@@ -390,6 +390,57 @@ public class GraphObserverTest {
     }
 
     @Test
+    public void testDiffRemovedNodeNotReportedTwice() {
+        GraphStore store = GraphGenerator.generateSmallGraphStore();
+        GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
+        graphObserver.hasGraphChanged();
+
+        Node removed = store.getNodes().toArray()[0];
+        store.removeNode(removed);
+
+        // First diff: removal is reported
+        graphObserver.hasGraphChanged();
+        GraphDiff diff1 = graphObserver.getDiff();
+        Assert.assertEquals(diff1.getRemovedNodes().toArray().length, 1);
+
+        // Make an unrelated change so a second diff is triggered
+        store.addNode(store.factory.newNode("extra"));
+
+        // Second diff: the already-reported removal must NOT appear again
+        graphObserver.hasGraphChanged();
+        GraphDiff diff2 = graphObserver.getDiff();
+        for (Node n : diff2.getRemovedNodes()) {
+            Assert.assertNotSame(n, removed);
+        }
+    }
+
+    @Test
+    public void testDiffRemovedEdgeNotReportedTwice() {
+        GraphStore store = GraphGenerator.generateSmallGraphStore();
+        GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
+        graphObserver.hasGraphChanged();
+
+        Edge removed = store.getEdges().toArray()[0];
+        store.removeEdge(removed);
+
+        // First diff: removal is reported
+        graphObserver.hasGraphChanged();
+        GraphDiff diff1 = graphObserver.getDiff();
+        Assert.assertEquals(diff1.getRemovedEdges().toArray().length, 1);
+
+        // Make an unrelated change so a second diff is triggered
+        Node[] ns = store.getNodes().toArray();
+        store.addEdge(store.factory.newEdge("extra", ns[0], ns[1], 0, 1.0, true));
+
+        // Second diff: the already-reported removal must NOT appear again
+        graphObserver.hasGraphChanged();
+        GraphDiff diff2 = graphObserver.getDiff();
+        for (Edge e : diff2.getRemovedEdges()) {
+            Assert.assertNotSame(e, removed);
+        }
+    }
+
+    @Test
     public void testDiffReplaceNode() {
         GraphStore store = GraphGenerator.generateSmallGraphStore();
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
