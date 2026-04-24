@@ -154,7 +154,11 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
 
     public void removeColumn(final String key) {
         checkNonNullObject(key);
-        removeColumn(getColumn(key));
+        ColumnImpl col = getColumn(key);
+        if (col == null) {
+            throw new IllegalArgumentException("The column doesnt exist");
+        }
+        removeColumn(col);
     }
 
     public int getColumnIndex(final String key) {
@@ -345,6 +349,9 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
 
         @Override
         public boolean hasNext() {
+            if (pointer != null) {
+                return true;
+            }
             while (index < length && (pointer = columns[index++]) == null) {
             }
             if (pointer == null) {
@@ -377,20 +384,34 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         }
         Iterator<Column> itr1 = this.iterator();
         Iterator<Column> itr2 = obj.iterator();
-        while (itr1.hasNext()) {
-            if (!itr2.hasNext()) {
+        boolean itr1Closed = false;
+        boolean itr2Closed = false;
+        try {
+            while (itr1.hasNext()) {
+                if (!itr2.hasNext()) {
+                    itr2Closed = true;
+                    return false;
+                }
+                Column c1 = itr1.next();
+                Column c2 = itr2.next();
+                if (!c1.equals(c2)) {
+                    return false;
+                }
+            }
+            itr1Closed = true;
+            if (itr2.hasNext()) {
                 return false;
             }
-            Column c1 = itr1.next();
-            Column c2 = itr2.next();
-            if (!c1.equals(c2)) {
-                return false;
+            itr2Closed = true;
+            return true;
+        } finally {
+            if (!itr1Closed) {
+                this.doBreak();
+            }
+            if (!itr2Closed) {
+                obj.doBreak();
             }
         }
-        if (itr2.hasNext()) {
-            return false;
-        }
-        return true;
     }
 
     public int deepHashCode() {

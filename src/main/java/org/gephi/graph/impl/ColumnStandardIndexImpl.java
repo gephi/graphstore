@@ -209,21 +209,27 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     @Override
     public void destroy() {
         lock();
-        map = null;
-        nullSet.clear();
-        elements = 0;
-        version.incrementAndGet();
-        unlock();
+        try {
+            map = null;
+            nullSet.clear();
+            elements = 0;
+            version.incrementAndGet();
+        } finally {
+            unlock();
+        }
     }
 
     @Override
     public void clear() {
         lock();
-        map.clear();
-        nullSet.clear();
-        elements = 0;
-        version.incrementAndGet();
-        unlock();
+        try {
+            map.clear();
+            nullSet.clear();
+            elements = 0;
+            version.incrementAndGet();
+        } finally {
+            unlock();
+        }
     }
 
     @Override
@@ -236,6 +242,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         lock();
         ValueSet<K, T> valueSet = getValueSet(value);
         if (valueSet == null) {
+            unlock();
             return ValueSet.EMPTY;
         }
         return new LockableIterable<>(valueSet.set);
