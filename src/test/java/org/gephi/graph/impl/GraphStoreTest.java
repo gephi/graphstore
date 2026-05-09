@@ -800,6 +800,34 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testRemoveNodeAlreadyRemoved() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        Node node = graphStore.getNodes().toArray()[0];
+
+        Assert.assertTrue(graphStore.removeNode(node));
+        Assert.assertFalse(graphStore.contains(node));
+        Assert.assertFalse(graphStore.removeNode(node));
+    }
+
+    @Test
+    public void testRemoveNodeNeverAdded() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        Node detached = graphStore.factory.newNode("detached");
+
+        Assert.assertFalse(graphStore.removeNode(detached));
+    }
+
+    @Test
+    public void testRemoveAllNodesWithAlreadyRemoved() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        Node[] nodes = graphStore.getNodes().toArray();
+
+        Assert.assertTrue(graphStore.removeNode(nodes[0]));
+        Assert.assertTrue(graphStore.removeAllNodes(Arrays.asList(nodes)));
+        Assert.assertEquals(graphStore.getNodeCount(), 0);
+    }
+
+    @Test
     public void testRemoveAllNode() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
         Node[] nodes = graphStore.getNodes().toArray();
