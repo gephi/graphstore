@@ -1964,6 +1964,41 @@ public class EdgeStoreTest {
     }
 
     @Test
+    public void testFilteredSpliteratorParallelCollectAcrossBlocks() {
+        // Regression: FilteredSizedEdgeSpliterator used to keep SIZED after splitting, with a
+        // per-half totalSize derived from the unfiltered range count. Parallel collect would
+        // then fail with "Accept exceeded fixed size of N" inside FixedNodeBuilder.
+        int undirectedCount = GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE + (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 2);
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(undirectedCount, 0, false, true, false);
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        int expectedUndirected = edgeStore.undirectedSize();
+        Assert.assertTrue(edgeStore.blocksCount > 1, "Need multiple blocks to exercise trySplit");
+
+        List<Edge> collected = StreamSupport.stream(edgeStore.spliteratorUndirected(), true)
+                .collect(Collectors.toList());
+        Assert.assertEquals(collected.size(), expectedUndirected);
+        Assert.assertEquals(new HashSet<>(collected).size(), expectedUndirected);
+    }
+
+    @Test
+    public void testFilteredSpliteratorSplitDropsSizedCharacteristic() {
+        int undirectedCount = GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE + 256;
+        EdgeImpl[] edges = GraphGenerator.generateEdgeList(undirectedCount, 0, false, true, false);
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.addAll(Arrays.asList(edges));
+
+        Spliterator<Edge> root = edgeStore.spliteratorUndirected();
+        Assert.assertTrue((root.characteristics() & Spliterator.SIZED) != 0);
+
+        Spliterator<Edge> left = root.trySplit();
+        Assert.assertNotNull(left);
+        Assert.assertTrue((root.characteristics() & Spliterator.SIZED) == 0);
+        Assert.assertTrue((left.characteristics() & Spliterator.SIZED) == 0);
+    }
+
+    @Test
     public void testEdgeSpliteratorCoversAll() {
         NodeStore nodeStore = GraphGenerator.generateNodeStore(2);
         NodeImpl n1 = nodeStore.get(0);

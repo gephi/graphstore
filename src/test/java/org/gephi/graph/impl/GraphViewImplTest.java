@@ -17,8 +17,11 @@ package org.gephi.graph.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Spliterator;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -546,6 +549,55 @@ public class GraphViewImplTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void testNodeViewSpliteratorParallelCollectAcrossBlocks() {
+        // Regression: NodeViewSpliterator used to keep SIZED after splitting, with a per-half
+        // totalSize derived from a proportional estimate. Parallel collect would then fail
+        // with "Accept exceeded fixed size of N" inside FixedNodeBuilder. The view here only
+        // contains the first block's nodes, so the proportional estimate undercounts.
+        GraphStore graphStore = new GraphModelImpl().store;
+        int totalNodes = GraphStoreConfiguration.NODESTORE_BLOCK_SIZE * 2 + 256;
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(totalNodes, graphStore);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        GraphViewStore viewStore = graphStore.viewStore;
+        GraphViewImpl view = viewStore.createView(true, false);
+        int inViewCount = GraphStoreConfiguration.NODESTORE_BLOCK_SIZE;
+        for (int i = 0; i < inViewCount; i++) {
+            view.addNode(nodes[i]);
+        }
+        Assert.assertEquals(view.getNodeCount(), inViewCount);
+        Assert.assertTrue(graphStore.nodeStore.blocksCount > 1, "Need multiple blocks to exercise trySplit");
+
+        Subgraph subgraph = viewStore.getGraph(view);
+        Collection<Node> collected = subgraph.getNodes().toCollection();
+        Assert.assertEquals(collected.size(), inViewCount);
+        Assert.assertEquals(new HashSet<>(collected).size(), inViewCount);
+    }
+
+    @Test
+    public void testNodeViewSpliteratorSplitDropsSizedCharacteristic() {
+        GraphStore graphStore = new GraphModelImpl().store;
+        int totalNodes = GraphStoreConfiguration.NODESTORE_BLOCK_SIZE + 128;
+        NodeImpl[] nodes = GraphGenerator.generateNodeList(totalNodes, graphStore);
+        graphStore.addAllNodes(Arrays.asList(nodes));
+
+        GraphViewStore viewStore = graphStore.viewStore;
+        GraphViewImpl view = viewStore.createView(true, false);
+        for (int i = 0; i < totalNodes / 2; i++) {
+            view.addNode(nodes[i]);
+        }
+
+        Subgraph subgraph = viewStore.getGraph(view);
+        Spliterator<Node> root = subgraph.getNodes().spliterator();
+        Assert.assertTrue((root.characteristics() & Spliterator.SIZED) != 0);
+
+        Spliterator<Node> left = root.trySplit();
+        Assert.assertNotNull(left);
+        Assert.assertTrue((root.characteristics() & Spliterator.SIZED) == 0);
+        Assert.assertTrue((left.characteristics() & Spliterator.SIZED) == 0);
     }
 
     @Test
