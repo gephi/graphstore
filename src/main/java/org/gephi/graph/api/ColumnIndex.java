@@ -20,9 +20,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A column index is associated with a column and keeps track of each unique
- * value and can also return the minimum and maximum values in case of a
- * sortable value type.
+ * A column index is associated with a column and keeps track of each unique value and can also return the minimum and
+ * maximum values in case of a sortable value type.
  *
  * @param <K> value type
  * @param <T> Element class
@@ -33,8 +32,7 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
      * Counts the elements with <em>value</em>.
      *
      * @param value the value
-     * @return the number of elements in the column index with <em>value</em>, or
-     *         zero if none
+     * @return the number of elements in the column index with <em>value</em>, or zero if none
      */
     int count(K value);
 
@@ -68,8 +66,8 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
     int countElements();
 
     /**
-     * Returns whether the column index is numeric and sortable, and therefore
-     * methods {@link #getMinValue()} and {@link #getMaxValue()} are available.
+     * Returns whether the column index is numeric and sortable, and therefore methods {@link #getMinValue()} and
+     * {@link #getMaxValue()} are available.
      *
      * @return true if sortable, false otherwise
      */
@@ -101,8 +99,7 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
     Column getColumn();
 
     /**
-     * Returns the index's version. The version is incremented every time the index
-     * is modified.
+     * Returns the index's version. The version is incremented every time the index is modified.
      *
      * @return index's version
      */

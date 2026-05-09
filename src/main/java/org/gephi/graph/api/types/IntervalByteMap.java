@@ -38,8 +38,8 @@ public final class IntervalByteMap extends IntervalMap<Byte> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of timestamps
-     * is known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of timestamps is known in advance as it minimizes
+     * array resizes.
      *
      * @param capacity timestamp capacity
      */
@@ -51,8 +51,7 @@ public final class IntervalByteMap extends IntervalMap<Byte> {
     /**
      * Constructor with an initial interval map.
      * <p>
-     * The <code>keys</code> array must be in the same format returned by
-     * {@link #getIntervals() }.
+     * The <code>keys</code> array must be in the same format returned by {@link #getIntervals() }.
      *
      * @param keys initial keys content
      * @param vals initial values content
@@ -107,8 +106,8 @@ public final class IntervalByteMap extends IntervalMap<Byte> {
     /**
      * Returns an array of all values in this map.
      * <p>
-     * This method may return a reference to the underlying array so clients should
-     * make a copy if the array is written to.
+     * This method may return a reference to the underlying array so clients should make a copy if the array is written
+     * to.
      *
      * @return array of all values
      */

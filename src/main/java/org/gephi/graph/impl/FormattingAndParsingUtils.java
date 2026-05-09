@@ -25,8 +25,7 @@ import java.time.format.DateTimeParseException;
 import org.gephi.graph.api.AttributeUtils;
 
 /**
- * Utils for formatting and parsing special data types (dynamic intervals,
- * timestamps and arrays).
+ * Utils for formatting and parsing special data types (dynamic intervals, timestamps and arrays).
  *
  * @author Eduardo Ramos
  */
@@ -45,8 +44,8 @@ public final class FormattingAndParsingUtils {
     public static final String INFINITY = "Infinity";
 
     /**
-     * Parses an ISO date with or without time or a timestamp (in milliseconds).
-     * Returns the date or timestamp converted to a timestamp in milliseconds.
+     * Parses an ISO date with or without time or a timestamp (in milliseconds). Returns the date or timestamp converted
+     * to a timestamp in milliseconds.
      *
      * @param timeStr Date or timestamp string
      * @param zoneId Time zone to use or null to use default time zone (UTC)
@@ -69,9 +68,8 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Parses an ISO date with or without time or a timestamp (in milliseconds).
-     * Returns the date or timestamp converted to a timestamp in milliseconds.
-     * Default time zone is used (UTC).
+     * Parses an ISO date with or without time or a timestamp (in milliseconds). Returns the date or timestamp converted
+     * to a timestamp in milliseconds. Default time zone is used (UTC).
      *
      * @param timeStr Date or timestamp string
      * @return Timestamp
@@ -128,8 +126,7 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Parses a value until end is detected either by a comma or a bounds closing
-     * character.
+     * Parses a value until end is detected either by a comma or a bounds closing character.
      *
      * @param reader Input reader
      * @return Parsed value
@@ -157,9 +154,8 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Converts a string parsed with {@link #parseValue(java.io.StringReader)} to
-     * the target type, taking into account dynamic parsing quirks such as numbers
-     * with/without decimals and infinity values.
+     * Converts a string parsed with {@link #parseValue(java.io.StringReader)} to the target type, taking into account
+     * dynamic parsing quirks such as numbers with/without decimals and infinity values.
      *
      * @param <T> Target type
      * @param typeClass Target type class
@@ -216,9 +212,8 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Removes anything after the dot of decimal numbers in a string when necessary.
-     * Used for trying to parse decimal numbers as not decimal. For example
-     * BigDecimal to BigInteger.
+     * Removes anything after the dot of decimal numbers in a string when necessary. Used for trying to parse decimal
+     * numbers as not decimal. For example BigDecimal to BigInteger.
      *
      * @param s String to remove decimal digits
      * @return String without dot and decimal digits.
@@ -236,8 +231,7 @@ public final class FormattingAndParsingUtils {
 
     /**
      * @param value String value
-     * @return True if the string contains special characters for dynamic types
-     *         intervals syntax
+     * @return True if the string contains special characters for dynamic types intervals syntax
      */
     public static boolean containsDynamicSpecialCharacters(String value) {
         for (char c : DYNAMIC_SPECIAL_CHARACTERS) {
@@ -289,8 +283,7 @@ public final class FormattingAndParsingUtils {
 
     /**
      * @param value String value
-     * @return True if the string contains special characters for arrays intervals
-     *         syntax
+     * @return True if the string contains special characters for arrays intervals syntax
      */
     private static boolean containsArraySpecialCharacters(String value) {
         for (char c : ARRAY_SPECIAL_CHARACTERS) {

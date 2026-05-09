@@ -61,8 +61,8 @@ public final class Interval {
      * Compares this interval with the specified interval for order.
      *
      * <p>
-     * Any two intervals <i>i</i> and <i>i'</i> satisfy the interval trichotomy;
-     * that is, exactly one of the following three properties holds:
+     * Any two intervals <i>i</i> and <i>i'</i> satisfy the interval trichotomy; that is, exactly one of the following
+     * three properties holds:
      * <ol>
      * <li><i>i</i> and <i>i'</i> overlap
      * <li><i>i</i> is to the left of <i>i'</i>
@@ -70,16 +70,14 @@ public final class Interval {
      * </ol>
      *
      * <p>
-     * Note that if two intervals are equal ({@code i.low = i'.low} and
-     * {@code i.high = i'.high}), they overlap as well. But if they simply overlap
-     * (for instance {@code i.low < i'.low} and {@code i.high >
+     * Note that if two intervals are equal ({@code i.low = i'.low} and {@code i.high = i'.high}), they overlap as well.
+     * But if they simply overlap (for instance {@code i.low < i'.low} and {@code i.high >
      * i'.high}) they aren't equal.
      *
      * @param interval the interval to be compared
      *
-     * @return a negative integer, zero, or a positive integer as this interval is
-     *         to the left of, overlaps with, or is to the right of the specified
-     *         interval.
+     * @return a negative integer, zero, or a positive integer as this interval is to the left of, overlaps with, or is
+     *         to the right of the specified interval.
      *
      * @throws NullPointerException if {@code interval} is null.
      */
@@ -101,9 +99,8 @@ public final class Interval {
      * Compares this interval to the given timetamp.
      *
      * @param timestamp timestamp
-     * @return a negative integer, zero or a positive integer if this interval is to
-     *         the left of, overlaps with, or is to the right with the specified
-     *         timestamp.
+     * @return a negative integer, zero or a positive integer if this interval is to the left of, overlaps with, or is
+     *         to the right with the specified timestamp.
      *
      * @throws NullPointerException if {@code timestamp} is null.
      */
@@ -142,14 +139,12 @@ public final class Interval {
      * Compares this interval with the specified object for equality.
      *
      * <p>
-     * Note that two intervals are equal if {@code i.low = i'.low} and
-     * {@code i.high = i'.high}.
+     * Note that two intervals are equal if {@code i.low = i'.low} and {@code i.high = i'.high}.
      *
      * @param obj object to which this interval is to be compared
      *
-     * @return {@code true} if and only if the specified {@code Object} is a
-     *         {@code Interval} whose low and high are equal to this
-     *         {@code Interval's}.
+     * @return {@code true} if and only if the specified {@code Object} is a {@code Interval} whose low and high are
+     *         equal to this {@code Interval's}.
      *
      */
     @Override

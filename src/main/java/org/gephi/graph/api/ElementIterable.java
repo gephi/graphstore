@@ -55,8 +55,7 @@ public interface ElementIterable<T extends Element> extends Iterable<T> {
     }
 
     /**
-     * Creates a new sequential and parallel stream, based on the spliterator
-     * returned.
+     * Creates a new sequential and parallel stream, based on the spliterator returned.
      *
      * @return stream
      */

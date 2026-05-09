@@ -27,11 +27,10 @@ import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.impl.FormattingAndParsingUtils;
 
 /**
- * Abstract class that implement a sorted map between intervals and attribute
- * values.
+ * Abstract class that implement a sorted map between intervals and attribute values.
  * <p>
- * Implementations which extend this class customize the map for a unique type,
- * which is represented by the <code>T</code> parameter.
+ * Implementations which extend this class customize the map for a unique type, which is represented by the
+ * <code>T</code> parameter.
  *
  * @param <T> Value type
  */
@@ -52,8 +51,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of timestamps
-     * is known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of timestamps is known in advance as it minimizes
+     * array resizes.
      *
      * @param capacity timestamp capacity
      */
@@ -310,8 +309,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
     }
 
     /**
-     * Returns true if this map contains an interval that starts or ends at
-     * <code>timestamp</code>.
+     * Returns true if this map contains an interval that starts or ends at <code>timestamp</code>.
      *
      * @param timestamp timestamp
      * @return true if contains, false otherwise
@@ -418,11 +416,11 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
     /**
      * Returns an array of all intervals in this set.
      * <p>
-     * The intervals are represented in a flat and sorted array (e.g. {[1.0,2.0],
-     * [5.0,6.0]}) returns [1.0,2.0,5.0,6.0]).
+     * The intervals are represented in a flat and sorted array (e.g. {[1.0,2.0], [5.0,6.0]}) returns
+     * [1.0,2.0,5.0,6.0]).
      * <p>
-     * This method may return a reference to the underlying array so clients should
-     * make a copy if the array is written to.
+     * This method may return a reference to the underlying array so clients should make a copy if the array is written
+     * to.
      *
      * @return array of all intervals
      */

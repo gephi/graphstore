@@ -18,8 +18,7 @@ package org.gephi.graph.api;
 /**
  * A column belongs to a table and represent a dimension in the data.
  * <p>
- * A column has primarily a unique identifier and a type, which both are set at
- * the creation time.
+ * A column has primarily a unique identifier and a type, which both are set at the creation time.
  *
  * @see Table
  */
@@ -33,8 +32,7 @@ public interface Column {
     public String getId();
 
     /**
-     * Returns the column's integer index, which is the position of the column in
-     * the store.
+     * Returns the column's integer index, which is the position of the column in the store.
      *
      * @return the column's index
      */
@@ -152,8 +150,7 @@ public interface Column {
      *
      * @param withDiff true if column observer should provide column differences
      * @return the column observer
-     * @throws UnsupportedOperationException if observers are disabled (from
-     *         Configuration)
+     * @throws UnsupportedOperationException if observers are disabled (from Configuration)
      */
     public ColumnObserver createColumnObserver(boolean withDiff);
 }

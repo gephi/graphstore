@@ -68,9 +68,8 @@ public interface EdgeIterable extends ElementIterable<Edge> {
     /**
      * Returns a Spliterator over the edges.
      * <p>
-     * Implementations return a splittable, sized, fail-fast spliterator suitable
-     * for parallel streams. When not possible, a non-splittable spliterator is
-     * returned.
+     * Implementations return a splittable, sized, fail-fast spliterator suitable for parallel streams. When not
+     * possible, a non-splittable spliterator is returned.
      *
      * @return edge spliterator
      */

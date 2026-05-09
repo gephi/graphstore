@@ -18,15 +18,13 @@ package org.gephi.graph.api;
 /**
  * Different time representations.
  * <p>
- * Both the elements (i.e nodes and edges) existence in time and the attributes'
- * values in time can be represented in two different ways: using timestamps or
- * using intervals. They can be mixed thought and therefore need to be
+ * Both the elements (i.e nodes and edges) existence in time and the attributes' values in time can be represented in
+ * two different ways: using timestamps or using intervals. They can be mixed thought and therefore need to be
  * configured by the user.
  * <p>
- * Each representation has its advantages and disadvantages. For instance,
- * timestamps are great when observations are made at fixed periods. On the
- * other hand, intervals are great when the time is arbitrary and elements or
- * attributes have long continuous existence.
+ * Each representation has its advantages and disadvantages. For instance, timestamps are great when observations are
+ * made at fixed periods. On the other hand, intervals are great when the time is arbitrary and elements or attributes
+ * have long continuous existence.
  *
  * @see Configuration
  */
@@ -34,15 +32,14 @@ public enum TimeRepresentation {
     /**
      * Timestamp representation (fixed).
      * <p>
-     * Time is represented using timestamps. Timestamps are single value and
-     * represent a single moment in time.
+     * Time is represented using timestamps. Timestamps are single value and represent a single moment in time.
      */
     TIMESTAMP,
     /**
      * Interval representation (continuous).
      * <p>
-     * Time is represented using intervals, with a beginning and an end. Intervals
-     * are always included on both bounds but allows an infinite bound.
+     * Time is represented using intervals, with a beginning and an end. Intervals are always included on both bounds
+     * but allows an infinite bound.
      */
     INTERVAL;
 }

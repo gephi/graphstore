@@ -20,11 +20,10 @@ import java.util.Collection;
 /**
  * A subgraph is a subset of a graph based on a graph view.
  * <p>
- * A subgraph has the same or less elements compared to the graph it's based on.
- * This interface inherits from <em>Graph</em> and all read operations behave in
- * a similar fashion. For instance, calling <em>getNodes</em> will return only
- * nodes in this subgraph. However, write operations such as <em>addNode</em> or
- * <em>removeNode</em> are used to control which elements are part of the view.
+ * A subgraph has the same or less elements compared to the graph it's based on. This interface inherits from
+ * <em>Graph</em> and all read operations behave in a similar fashion. For instance, calling <em>getNodes</em> will
+ * return only nodes in this subgraph. However, write operations such as <em>addNode</em> or <em>removeNode</em> are
+ * used to control which elements are part of the view.
  *
  */
 public interface Subgraph extends Graph {
@@ -111,8 +110,7 @@ public interface Subgraph extends Graph {
     public boolean removeAllNodes(Collection<? extends Node> nodes);
 
     /**
-     * Retains only nodes in this subgraph that are contained in the specified
-     * collection.
+     * Retains only nodes in this subgraph that are contained in the specified collection.
      * <p>
      * The nodes should be part of the root graph.
      *
@@ -144,8 +142,7 @@ public interface Subgraph extends Graph {
     public boolean removeAllEdges(Collection<? extends Edge> edges);
 
     /**
-     * Retains only edges in this subgraph that are contained in the specified
-     * collection.
+     * Retains only edges in this subgraph that are contained in the specified collection.
      * <p>
      * The edges should be part of the root graph.
      *
@@ -178,8 +175,7 @@ public interface Subgraph extends Graph {
     public void intersection(Subgraph subGraph);
 
     /**
-     * Inverse this subgraph so all elements in the graph are removed and all
-     * elements not in the graph are added.
+     * Inverse this subgraph so all elements in the graph are removed and all elements not in the graph are added.
      */
     public void not();
 }

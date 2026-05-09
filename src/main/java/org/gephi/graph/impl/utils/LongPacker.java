@@ -21,11 +21,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * Packing utility for non-negative <code>long</code> and <code>int</code>
- * values.
+ * Packing utility for non-negative <code>long</code> and <code>int</code> values.
  * <p>
- * Originally developed for Kryo by Nathan Sweet. Modified for JDBM by Jan
- * Kotek.
+ * Originally developed for Kryo by Nathan Sweet. Modified for JDBM by Jan Kotek.
  */
 public final class LongPacker {
 
@@ -35,8 +33,8 @@ public final class LongPacker {
     }
 
     /**
-     * Pack non-negative long into output stream. It will occupy 1-10 bytes
-     * depending on value (lower values occupy smaller space)
+     * Pack non-negative long into output stream. It will occupy 1-10 bytes depending on value (lower values occupy
+     * smaller space)
      *
      * @param os the data output
      * @param value the long value
@@ -60,8 +58,8 @@ public final class LongPacker {
     }
 
     /**
-     * Pack non-negative long into byte array. It will occupy 1-10 bytes depending
-     * on value (lower values occupy smaller space)
+     * Pack non-negative long into byte array. It will occupy 1-10 bytes depending on value (lower values occupy smaller
+     * space)
      *
      * @param ba the byte array
      * @param value the long value
@@ -136,8 +134,8 @@ public final class LongPacker {
     }
 
     /**
-     * Pack non-negative int into output stream. It will occupy 1-5 bytes depending
-     * on value (lower values occupy smaller space)
+     * Pack non-negative int into output stream. It will occupy 1-5 bytes depending on value (lower values occupy
+     * smaller space)
      *
      * @param os the data output
      * @param value the value

@@ -68,9 +68,8 @@ public interface NodeIterable extends ElementIterable<Node> {
     /**
      * Returns a Spliterator over the nodes.
      * <p>
-     * Implementations return a splittable, sized, fail-fast spliterator suitable
-     * for parallel streams. When not possible, a non-splittable spliterator is
-     * returned.
+     * Implementations return a splittable, sized, fail-fast spliterator suitable for parallel streams. When not
+     * possible, a non-splittable spliterator is returned.
      *
      * @return node spliterator
      */

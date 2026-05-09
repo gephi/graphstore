@@ -379,8 +379,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     /**
      * Returns the interval with the lowest left endpoint.
      *
-     * @return the interval with the lowest left endpoint or null if the tree is
-     *         empty.
+     * @return the interval with the lowest left endpoint or null if the tree is empty.
      */
     public Interval minimum() {
         if (root.left == nil) {
@@ -410,8 +409,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     /**
      * Returns the interval with the highest right endpoint.
      *
-     * @return the interval with the highest right endpoint or null if the tree is
-     *         empty.
+     * @return the interval with the highest right endpoint or null if the tree is empty.
      */
     public Interval maximum() {
         if (root.left == nil) {
@@ -430,8 +428,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     }
 
     /**
-     * Returns the leftmost point or {@code Double.NEGATIVE_INFINITY} in case of no
-     * intervals.
+     * Returns the leftmost point or {@code Double.NEGATIVE_INFINITY} in case of no intervals.
      *
      * @return the leftmost point
      */
@@ -447,8 +444,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     }
 
     /**
-     * Returns the rightmost point or {@code Double.POSITIVE_INFINITY} in case of no
-     * intervals.
+     * Returns the rightmost point or {@code Double.POSITIVE_INFINITY} in case of no intervals.
      *
      * @return the rightmost point
      */
@@ -509,8 +505,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     }
 
     /**
-     * Returns an entry set of all entries, which interval keys overlap with
-     * <code>point</code>.
+     * Returns an entry set of all entries, which interval keys overlap with <code>point</code>.
      *
      * @param point point
      * @return entry set
@@ -520,8 +515,7 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
     }
 
     /**
-     * Returns an entry set of all entries, which interval keys overlap with
-     * <code>interval</code>.
+     * Returns an entry set of all entries, which interval keys overlap with <code>interval</code>.
      *
      * @param interval interval
      * @return entry set
@@ -659,9 +653,8 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
      *
      * @param obj object to which this interval tree is to be compared
      *
-     * @return {@code true} if and only if the specified {@code Object} is a
-     *         {@code IntervalTree} which contain the same intervals as this
-     *         {@code IntervalTree's}.
+     * @return {@code true} if and only if the specified {@code Object} is a {@code IntervalTree} which contain the same
+     *         intervals as this {@code IntervalTree's}.
      *
      * @see #hashCode
      */

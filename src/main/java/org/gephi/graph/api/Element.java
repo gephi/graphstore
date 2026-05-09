@@ -108,8 +108,7 @@ public interface Element extends ElementProperties {
     public Object getAttribute(Column column, GraphView view);
 
     /**
-     * Returns an iterable over all the keys and values over time for the given
-     * (dynamic) column.
+     * Returns an iterable over all the keys and values over time for the given (dynamic) column.
      *
      * @param column column
      * @return time attribute iterable
@@ -322,8 +321,7 @@ public interface Element extends ElementProperties {
     /**
      * Gets the time bounds.
      * <p>
-     * The time bounds is an interval made of the minimum and maximum time observed
-     * in this element.
+     * The time bounds is an interval made of the minimum and maximum time observed in this element.
      *
      * @return time bounds
      */

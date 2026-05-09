@@ -667,8 +667,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     /**
-     * Bulk remove nodes from the view. This is more efficient than removing nodes
-     * one by one as it batches index updates and increments version only once.
+     * Bulk remove nodes from the view. This is more efficient than removing nodes one by one as it batches index
+     * updates and increments version only once.
      */
     private void bulkRemoveNodes(BitSet nodesToRemove) {
         // First pass: collect all edges to remove (incident to removed nodes)
@@ -720,8 +720,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     /**
-     * Bulk add nodes to the view. This is more efficient than adding nodes one by
-     * one as it batches index updates and increments version only once.
+     * Bulk add nodes to the view. This is more efficient than adding nodes one by one as it batches index updates and
+     * increments version only once.
      */
     private void bulkAddNodes(BitSet nodesToAdd) {
         // Update node bit vector
@@ -776,8 +776,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     /**
-     * Bulk remove edges from the view. This is more efficient than removing edges
-     * one by one as it updates stats in bulk and increments version only once.
+     * Bulk remove edges from the view. This is more efficient than removing edges one by one as it updates stats in
+     * bulk and increments version only once.
      */
     private void bulkRemoveEdges(BitSet edgesToRemove) {
         // Update edge bit vector
@@ -827,8 +827,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     /**
-     * Bulk add edges to the view. This is more efficient than adding edges one by
-     * one as it updates stats in bulk and increments version only once.
+     * Bulk add edges to the view. This is more efficient than adding edges one by one as it updates stats in bulk and
+     * increments version only once.
      */
     private void bulkAddEdges(BitSet edgesToAdd) {
         // Update edge bit vector
@@ -878,9 +878,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     /**
-     * Special bulk remove for the not() operation. This updates the bit vector and
-     * stats but does NOT increment version or update indexes (those are handled
-     * separately in not()).
+     * Special bulk remove for the not() operation. This updates the bit vector and stats but does NOT increment version
+     * or update indexes (those are handled separately in not()).
      */
     private void bulkRemoveEdgesForNot(BitSet edgesToRemove) {
         // Update edge bit vector

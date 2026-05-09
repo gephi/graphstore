@@ -20,8 +20,8 @@ package org.gephi.graph.api;
  * <p>
  * All new nodes and edges are created by this factory.
  * <p>
- * Both nodes and edges have unique identifiers. If not provided, a unique id
- * will be automatically assigned to the elements.
+ * Both nodes and edges have unique identifiers. If not provided, a unique id will be automatically assigned to the
+ * elements.
  */
 public interface GraphFactory {
 

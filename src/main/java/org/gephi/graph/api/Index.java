@@ -18,8 +18,7 @@ package org.gephi.graph.api;
 import java.util.Collection;
 
 /**
- * An index is associated with each table and keeps track of each unique value
- * in columns.
+ * An index is associated with each table and keeps track of each unique value in columns.
  * <p>
  * Each column is associated with a @{{@link ColumnIndex}}.
  *
@@ -32,19 +31,16 @@ public interface Index<T extends Element> {
      *
      * @param column the column to count values
      * @param value the value
-     * @return the number of elements in the index with <em>value</em> in
-     *         <em>column</em>, or zero if none
+     * @return the number of elements in the index with <em>value</em> in <em>column</em>, or zero if none
      */
     public int count(Column column, Object value);
 
     /**
-     * Gets an Iterable of all elements in the index with <em>value</em> in the
-     * given <em>column</em>.
+     * Gets an Iterable of all elements in the index with <em>value</em> in the given <em>column</em>.
      *
      * @param column the column to get values
      * @param value the value
-     * @return an iterable with element with <em>value</em> in <em>column</em>, or
-     *         null if value not found
+     * @return an iterable with element with <em>value</em> in <em>column</em>, or null if value not found
      */
     public Iterable<T> get(Column column, Object value);
 
@@ -74,9 +70,8 @@ public interface Index<T extends Element> {
 
     /**
      * Returns whether the column is numeric and sortable, and therefore methods
-     * {@link #getMinValue(org.gephi.graph.api.Column)} and
-     * {@link #getMaxValue(org.gephi.graph.api.Column)} are available for the
-     * column.
+     * {@link #getMinValue(org.gephi.graph.api.Column)} and {@link #getMaxValue(org.gephi.graph.api.Column)} are
+     * available for the column.
      *
      * @param column the column
      * @return true if the column is sortable, false otherwise

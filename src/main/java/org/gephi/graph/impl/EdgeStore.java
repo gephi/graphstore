@@ -1499,8 +1499,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     /**
-     * Abstract base class for iterating over edges connected to nodes. Provides
-     * common logic for handling both incoming and outgoing edges.
+     * Abstract base class for iterating over edges connected to nodes. Provides common logic for handling both incoming
+     * and outgoing edges.
      */
     protected abstract class AbstractEdgeInOutIterator implements Iterator<Edge> {
 
@@ -1522,8 +1522,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
 
         /**
-         * Initialize arrays for the current node. Called when starting iteration for a
-         * new node.
+         * Initialize arrays for the current node. Called when starting iteration for a new node.
          */
         protected void initializeForNode(NodeImpl node) {
             outArray = node.headOut;
@@ -1536,8 +1535,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
 
         /**
-         * Called when the current node has no more edges. Should return true if there
-         * are more nodes to process, false otherwise.
+         * Called when the current node has no more edges. Should return true if there are more nodes to process, false
+         * otherwise.
          */
         protected abstract boolean moveToNextNode();
 
@@ -1633,9 +1632,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     /**
-     * Iterator for edges connected to multiple nodes (both incoming and outgoing).
-     * Iterates through all edges of all provided nodes without creating separate
-     * iterators.
+     * Iterator for edges connected to multiple nodes (both incoming and outgoing). Iterates through all edges of all
+     * provided nodes without creating separate iterators.
      */
     protected final class EdgeInOutMultiIterator extends AbstractEdgeInOutIterator {
 

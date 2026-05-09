@@ -18,8 +18,8 @@ package org.gephi.graph.api;
 /**
  * Estimators specify the strategy to merge attribute values over time.
  * <p>
- * Estimators are associated with actions that require to transform a sorted set
- * of values over time into a single value.
+ * Estimators are associated with actions that require to transform a sorted set of values over time into a single
+ * value.
  */
 public enum Estimator {
 

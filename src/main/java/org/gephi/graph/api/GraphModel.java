@@ -25,17 +25,14 @@ import org.gephi.graph.impl.GraphModelImpl;
 /**
  * Graph API's entry point.
  * <p>
- * <code>GraphModel</code> is the entry point for this API and provide methods
- * to create, access and modify graphs. It supports the most common graph
- * paradigms and a complete support for graphs over time as well.
+ * <code>GraphModel</code> is the entry point for this API and provide methods to create, access and modify graphs. It
+ * supports the most common graph paradigms and a complete support for graphs over time as well.
  * <ul>
- * <li>Directed: Edges can have a direction. Graphs can be directed, undirected
- * or mixed.
+ * <li>Directed: Edges can have a direction. Graphs can be directed, undirected or mixed.
  * <li>Weighted: Edges can have a weight.
  * <li>Self-loops: Nodes can have self-loops.
  * <li>Labelled edges: Edges can have a label.
- * <li>Properties: Each element in the graph can have properties associated to
- * it.
+ * <li>Properties: Each element in the graph can have properties associated to it.
  * </ul>
  * <p>
  * New instances can be obtained via the embedded factory:
@@ -51,44 +48,33 @@ import org.gephi.graph.impl.GraphModelImpl;
  * GraphModel model = GraphModel.Factory.newInstance(configuration);
  * </pre>
  *
- * This API revolves around a set of simple concepts. A <code>GraphModel</code>
- * encapsulate all elements and metadata associated with a graph structure. In
- * other words it's a single graph, but it also contains configuration, indices,
+ * This API revolves around a set of simple concepts. A <code>GraphModel</code> encapsulate all elements and metadata
+ * associated with a graph structure. In other words it's a single graph, but it also contains configuration, indices,
  * views and other less important services such as observers.
  * <p>
- * Then, <code>GraphModel</code> gives access to the <code>Graph</code>
- * interface, which focuses only on the graph structure and provide methods to
- * add, remove, get and iterate nodes and edges.
+ * Then, <code>GraphModel</code> gives access to the <code>Graph</code> interface, which focuses only on the graph
+ * structure and provide methods to add, remove, get and iterate nodes and edges.
  * <p>
- * The <code>Graph</code> contains nodes and edges, which both implement the
- * <code>Element</code> interface. This <code>Element</code> interface gives
- * access to methods that manipulate the attributes associated to nodes and
- * edges.
+ * The <code>Graph</code> contains nodes and edges, which both implement the <code>Element</code> interface. This
+ * <code>Element</code> interface gives access to methods that manipulate the attributes associated to nodes and edges.
  * <p>
- * Any number of attributes can be associated to elements but are managed
- * through the <code>Table</code> and <code>Column</code> interfaces. A
- * <code>GraphModel</code> gives access by default to a node and edge table. A
- * <code>Table</code> is simply a list of columns, which each has a unique
- * identifier and a type (e.g. integer). Attribute values can only be associated
- * with elements for existing columns.
+ * Any number of attributes can be associated to elements but are managed through the <code>Table</code> and
+ * <code>Column</code> interfaces. A <code>GraphModel</code> gives access by default to a node and edge table. A
+ * <code>Table</code> is simply a list of columns, which each has a unique identifier and a type (e.g. integer).
+ * Attribute values can only be associated with elements for existing columns.
  * <p>
- * Attributes are automatically indexed and information such as the number of
- * elements with a particular value can be obtained from the <code>Index</code>
- * interface.
+ * Attributes are automatically indexed and information such as the number of elements with a particular value can be
+ * obtained from the <code>Index</code> interface.
  * <p>
- * Finally, this API supports the concept of graph views. A view is a mask on
- * the graph structure and represents a subgraph. The user controls the set of
- * nodes and edges in the view by obtaining a <code>Subgraph</code> for a
- * specific <code>GraphView</code>. Views can directly be created and destroyed
- * from this model.
+ * Finally, this API supports the concept of graph views. A view is a mask on the graph structure and represents a
+ * subgraph. The user controls the set of nodes and edges in the view by obtaining a <code>Subgraph</code> for a
+ * specific <code>GraphView</code>. Views can directly be created and destroyed from this model.
  * <p>
  * Elements should be created through the {@link #factory() } method.
  * <p>
- * For performance reasons, edge labels are internally represented as integers
- * and the mapping between arbitrary labels is managed through the
- * {@link #addEdgeType(java.lang.Object) } and
- * {@link #getEdgeType(java.lang.Object) } methods. By default, edges have a
- * <code>null</code> label, which is internally represented as zero.
+ * For performance reasons, edge labels are internally represented as integers and the mapping between arbitrary labels
+ * is managed through the {@link #addEdgeType(java.lang.Object) } and {@link #getEdgeType(java.lang.Object) } methods.
+ * By default, edges have a <code>null</code> label, which is internally represented as zero.
  *
  * @see Graph
  * @see Configuration
@@ -147,9 +133,8 @@ public interface GraphModel {
         }
 
         /**
-         * Read the <code>input</code> into the given graph model. The provided graph
-         * model should be empty and the configurations should match between the
-         * provided model and the one being read.
+         * Read the <code>input</code> into the given graph model. The provided graph model should be empty and the
+         * configurations should match between the provided model and the one being read.
          *
          * @param input data input to read from
          * @return the graphmodel passed as parameter
@@ -165,9 +150,8 @@ public interface GraphModel {
         }
 
         /**
-         * Read the <code>input</code> and return the read graph model without an
-         * explicit version header in the input. To be used with old graphstore
-         * serialized data prior to version 0.4 (first, that added the version header).
+         * Read the <code>input</code> and return the read graph model without an explicit version header in the input.
+         * To be used with old graphstore serialized data prior to version 0.4 (first, that added the version header).
          *
          * @param input data input to read from
          * @param graphStoreVersion Forced version to use
@@ -490,11 +474,10 @@ public interface GraphModel {
     /**
      * Creates a new graph view.
      * <p>
-     * By default, the view applies to both nodes and edges, so this is equivalent
-     * to {@link #createView(boolean, boolean) createView(true, true)}.
+     * By default, the view applies to both nodes and edges, so this is equivalent to
+     * {@link #createView(boolean, boolean) createView(true, true)}.
      * <p>
-     * New views are by default empty, i.e. no nodes and no edges are visible in the
-     * view.
+     * New views are by default empty, i.e. no nodes and no edges are visible in the view.
      *
      * @return newly created graph view
      */
@@ -503,9 +486,8 @@ public interface GraphModel {
     /**
      * Creates a new graph view.
      * <p>
-     * The node and edge filters allows to restrict the view filtering to only nodes
-     * or only edges. If node only, all edges connected to included nodes will be
-     * included too. If edge only, all nodes are included but only the edges
+     * The node and edge filters allows to restrict the view filtering to only nodes or only edges. If node only, all
+     * edges connected to included nodes will be included too. If edge only, all nodes are included but only the edges
      * matching the view are included.
      *
      * @param nodeFilter predicate to filter nodes, or null to include all nodes
@@ -517,9 +499,8 @@ public interface GraphModel {
     /**
      * Creates a new graph view.
      * <p>
-     * The node and edge parameters allows to restrict the view filtering to only
-     * nodes or only edges. If node only, all edges connected to included nodes will
-     * be included too. If edge only, all nodes are included but only the edges
+     * The node and edge parameters allows to restrict the view filtering to only nodes or only edges. If node only, all
+     * edges connected to included nodes will be included too. If edge only, all nodes are included but only the edges
      * matching the view are included.
      *
      * @param node true to enable node view, false otherwise
@@ -539,8 +520,8 @@ public interface GraphModel {
     /**
      * Creates a new graph based on an existing view.
      * <p>
-     * The node and edge parameters allows to restrict the view filtering to only
-     * nodes or only edges. By default, the view applies to both nodes and edges.
+     * The node and edge parameters allows to restrict the view filtering to only nodes or only edges. By default, the
+     * view applies to both nodes and edges.
      *
      * @param view view to copy
      * @param node true to enable node view, false otherwise
@@ -567,22 +548,18 @@ public interface GraphModel {
     public void setTimeInterval(GraphView view, Interval interval);
 
     /**
-     * Returns the <b>node</b> table. Contains all the columns associated to node
-     * elements.
+     * Returns the <b>node</b> table. Contains all the columns associated to node elements.
      * <p>
-     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables by
-     * default.
+     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables by default.
      *
      * @return node table, contains node columns
      */
     public Table getNodeTable();
 
     /**
-     * Returns the <b>edge</b> table. Contains all the columns associated to edge
-     * elements.
+     * Returns the <b>edge</b> table. Contains all the columns associated to edge elements.
      * <p>
-     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables by
-     * default.
+     * A <code>GraphModel</code> always has <b>node</b> and <b>edge</b> tables by default.
      *
      * @return edge table, contains edge columns
      */
@@ -668,8 +645,7 @@ public interface GraphModel {
     /**
      * Gets the time bounds.
      * <p>
-     * The time bounds is an interval made of the minimum and maximum time observed
-     * in the entire graph.
+     * The time bounds is an interval made of the minimum and maximum time observed in the entire graph.
      *
      * @return time bounds
      */
@@ -678,8 +654,7 @@ public interface GraphModel {
     /**
      * Gets the time bounds for the visible graph.
      * <p>
-     * The time bounds is an interval made of the minimum and maximum time observed
-     * in the entire graph.
+     * The time bounds is an interval made of the minimum and maximum time observed in the entire graph.
      *
      * @return time bounds
      */
@@ -688,8 +663,7 @@ public interface GraphModel {
     /**
      * Gets the time bounds for the given graph view.
      * <p>
-     * The time bounds is an interval made of the minimum and maximum time observed
-     * in the entire graph.
+     * The time bounds is an interval made of the minimum and maximum time observed in the entire graph.
      *
      * @param view the graph view
      * @return time bounds
@@ -700,8 +674,7 @@ public interface GraphModel {
      * Creates and returns a new graph observer.
      *
      * @param graph the graph to observe
-     * @param withGraphDiff true to include graph difference feature, false
-     *        otherwise
+     * @param withGraphDiff true to include graph difference feature, false otherwise
      * @return newly created graph observer
      */
     public GraphObserver createGraphObserver(Graph graph, boolean withGraphDiff);
@@ -744,11 +717,9 @@ public interface GraphModel {
     /**
      * Sets a new configuration for this graph model.
      *
-     * @deprecated setting configuration after graph model creation is no longer
-     *             supported. Best is to use the {@link Configuration#builder()} to
-     *             create a new configuration and then use it at graph model
-     *             creation from
-     *             {@link GraphModel.Factory#newInstance(Configuration)}.
+     * @deprecated setting configuration after graph model creation is no longer supported. Best is to use the
+     *             {@link Configuration#builder()} to create a new configuration and then use it at graph model creation
+     *             from {@link GraphModel.Factory#newInstance(Configuration)}.
      *
      * @param configuration new configuration
      */
@@ -758,10 +729,9 @@ public interface GraphModel {
     /**
      * Returns the maximum store id number nodes have in this model.
      * <p>
-     * Each node has a unique store identifier which can be retrieved from
-     * {@link Node#getStoreId() }. This maximum number can help design algorithms
-     * thar rely on storing nodes in a array. Note that not all consecutive ids may
-     * be assigned.
+     * Each node has a unique store identifier which can be retrieved from {@link Node#getStoreId() }. This maximum
+     * number can help design algorithms thar rely on storing nodes in a array. Note that not all consecutive ids may be
+     * assigned.
      *
      * @return maximum node store id
      */
@@ -770,10 +740,9 @@ public interface GraphModel {
     /**
      * Returns the maximum store id number edges have in this model.
      * <p>
-     * Each edge has a unique store identifier which can be retrieved from
-     * {@link Edge#getStoreId() }. This maximum number can help design algorithms
-     * thar rely on storing edges in a array. Note that not all consecutive ids may
-     * be assigned.
+     * Each edge has a unique store identifier which can be retrieved from {@link Edge#getStoreId() }. This maximum
+     * number can help design algorithms thar rely on storing edges in a array. Note that not all consecutive ids may be
+     * assigned.
      *
      * @return maximum edge store id
      */

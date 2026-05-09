@@ -18,8 +18,8 @@ package org.gephi.graph.api;
 /**
  * Directed graph.
  * <p>
- * This interface has additional methods specific to directed graphs compared to
- * the <em>Graph</em> interface it inherits from.
+ * This interface has additional methods specific to directed graphs compared to the <em>Graph</em> interface it
+ * inherits from.
  */
 public interface DirectedGraph extends Graph {
 
@@ -55,8 +55,7 @@ public interface DirectedGraph extends Graph {
     public boolean isAdjacent(Node source, Node target);
 
     /**
-     * Returns true if source and target are adjacent with an edge of the given
-     * type.
+     * Returns true if source and target are adjacent with an edge of the given type.
      *
      * @param source the source node
      * @param target the target node
@@ -145,8 +144,7 @@ public interface DirectedGraph extends Graph {
     /**
      * Gets the edge in the other direction of the given edge.
      * <p>
-     * This takes in account the edge type so only edges of the same type can be
-     * mutual.
+     * This takes in account the edge type so only edges of the same type can be mutual.
      *
      * @param edge the edge to get the mutual edge
      * @return the mutual edge, or null
