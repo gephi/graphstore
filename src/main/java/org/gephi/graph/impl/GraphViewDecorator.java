@@ -970,6 +970,9 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         private final int expectedVersion;
         private int totalSize;
         private int consumed;
+        // True only for the root spliterator, where totalSize comes from view.getNodeCount().
+        // Sub-ranges only have a proportional estimate and must drop SIZED.
+        private boolean exactSize;
 
         NodeViewSpliterator() {
             this(0, graphStore.nodeStore.blocksCount);
@@ -981,13 +984,13 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
             this.expectedVersion = graphStore.version != null ? graphStore.version.getNodeVersion() : 0;
             this.consumed = 0;
 
-            // Use the view's node count for exact sizing
-            // Use the total store size for the root spliterator (covering all blocks)
+            // Root spliterator uses the exact view count; sub-ranges fall back to an estimate.
             if (startBlock == 0 && endBlockExclusive == graphStore.nodeStore.blocksCount) {
                 this.totalSize = view.getNodeCount();
+                this.exactSize = true;
             } else {
-                // For split spliterators, compute proportionally
                 this.totalSize = computeSizeEstimate(startBlock, endBlockExclusive);
+                this.exactSize = false;
             }
 
             if (startBlock < endBlockExclusive) {
@@ -1088,8 +1091,10 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
                 indexInBlock = 0;
             }
 
-            // Update this spliterator size
             this.totalSize = Math.max(0, totalSize - left.totalSize);
+            // Once split, neither half can guarantee an exact view-aware size, so drop SIZED.
+            this.exactSize = false;
+            left.exactSize = false;
 
             return left;
         }
@@ -1103,9 +1108,8 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
         @Override
         public int characteristics() {
-            // SIZED because we know the exact count from view.getNodeCount()
-            // But not SUBSIZED because splits can't guarantee exact size distribution
-            return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.SIZED;
+            int base = Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL;
+            return exactSize ? base | Spliterator.SIZED : base;
         }
     }
 

@@ -2237,10 +2237,15 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     private class FilteredSizedEdgeSpliterator extends EdgeSpliterator {
 
         protected final Predicate<EdgeImpl> filter;
+        // True only for the root spliterator, where totalSize is the caller-supplied,
+        // filter-aware count. Sub-ranges created by trySplit fall back to the inherited,
+        // unfiltered block count and must drop SIZED.
+        protected boolean exactSize;
 
         FilteredSizedEdgeSpliterator(int startBlock, int endBlockExclusive, Predicate<EdgeImpl> filter, int totalSize) {
             super(startBlock, endBlockExclusive, totalSize);
             this.filter = filter;
+            this.exactSize = (startBlock == 0 && endBlockExclusive == blocksCount);
         }
 
         @Override
@@ -2260,13 +2265,25 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             return false;
         }
 
+        @Override
+        public Spliterator<Edge> trySplit() {
+            Spliterator<Edge> left = super.trySplit();
+            if (left != null) {
+                // Once split, neither half can guarantee an exact filtered size, so drop SIZED.
+                this.exactSize = false;
+                ((FilteredSizedEdgeSpliterator) left).exactSize = false;
+            }
+            return left;
+        }
+
         protected EdgeSpliterator createSplit(int startBlock, int endBlockExclusive) {
             return new FilteredSizedEdgeSpliterator(startBlock, endBlockExclusive, filter, totalSize);
         }
 
         @Override
         public int characteristics() {
-            return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.SIZED;
+            int base = Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL;
+            return exactSize ? base | Spliterator.SIZED : base;
         }
     }
 
