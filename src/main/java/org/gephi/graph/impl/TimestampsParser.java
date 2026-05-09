@@ -48,18 +48,16 @@ import org.gephi.graph.api.types.TimestampStringMap;
  * </p>
  *
  * <p>
- * The standard format for {@link TimestampMap} is &lt;[timestamp, value1];
- * [timestamp, value2]&gt;.
+ * The standard format for {@link TimestampMap} is &lt;[timestamp, value1]; [timestamp, value2]&gt;.
  * </p>
  *
  * <p>
- * The standard format for {@link TimestampSet} is &lt;[timestamp1, timestamp2,
- * timestamp3, ...]&gt;.
+ * The standard format for {@link TimestampSet} is &lt;[timestamp1, timestamp2, timestamp3, ...]&gt;.
  * </p>
  *
  * <p>
- * Timestamps values can be both numbers and ISO dates or datetimes. Dates and
- * datetimes will be converted to their millisecond-precision timestamp.
+ * Timestamps values can be both numbers and ISO dates or datetimes. Dates and datetimes will be converted to their
+ * millisecond-precision timestamp.
  * </p>
  *
  * Examples of valid timestamp maps are:
@@ -77,9 +75,8 @@ import org.gephi.graph.api.types.TimestampStringMap;
  * </ul>
  *
  * <p>
- * The most correct examples are those that include &lt; &gt; and proper commas
- * and semicolons for separation, but the parser will be indulgent when
- * possible.
+ * The most correct examples are those that include &lt; &gt; and proper commas and semicolons for separation, but the
+ * parser will be indulgent when possible.
  * </p>
  *
  * @author Eduardo Ramos
@@ -91,11 +88,9 @@ public final class TimestampsParser {
      *
      * @param input Input string to parse
      * @param zoneId Time zone to use or null to use default time zone (UTC)
-     * @return Resulting {@link TimestampSet}, or null if the input equals
-     *         '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if there are no timestamps in the
-     *         input string or bounds cannot be parsed into doubles or
-     *         dates/datetimes.
+     * @return Resulting {@link TimestampSet}, or null if the input equals '&lt;empty&gt;' or is null
+     * @throws IllegalArgumentException Thrown if there are no timestamps in the input string or bounds cannot be parsed
+     *         into doubles or dates/datetimes.
      */
     public static TimestampSet parseTimestampSet(String input, ZoneId zoneId) throws IllegalArgumentException {
         if (input == null) {
@@ -165,34 +160,27 @@ public final class TimestampsParser {
     }
 
     /**
-     * Parses a {@link TimestampSet} type with one or more timestamps. Default time
-     * zone is used (UTC).
+     * Parses a {@link TimestampSet} type with one or more timestamps. Default time zone is used (UTC).
      *
      * @param input Input string to parse
-     * @return Resulting {@link TimestampSet}, or null if the input equals
-     *         '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if there are no timestamps in the
-     *         input string or bounds cannot be parsed into doubles or
-     *         dates/datetimes.
+     * @return Resulting {@link TimestampSet}, or null if the input equals '&lt;empty&gt;' or is null
+     * @throws IllegalArgumentException Thrown if there are no timestamps in the input string or bounds cannot be parsed
+     *         into doubles or dates/datetimes.
      */
     public static TimestampSet parseTimestampSet(String input) throws IllegalArgumentException {
         return parseTimestampSet(input, null);
     }
 
     /**
-     * Parses a {@link TimestampMap} type with one or more timestamps, and their
-     * associated values.
+     * Parses a {@link TimestampMap} type with one or more timestamps, and their associated values.
      *
      * @param <T> Underlying type of the {@link TimestampMap} values
-     * @param typeClass Simple type or {@link TimestampMap} subtype for the result
-     *        values.
+     * @param typeClass Simple type or {@link TimestampMap} subtype for the result values.
      * @param input Input string to parse
      * @param zoneId Time zone to use or null to use default time zone (UTC)
-     * @return Resulting {@link TimestampMap}, or null if the input equals
-     *         '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if type class is not supported, any
-     *         of the timestamps don't have a value or have an invalid value, there
-     *         are no timestamps in the input string or bounds cannot be parsed into
+     * @return Resulting {@link TimestampMap}, or null if the input equals '&lt;empty&gt;' or is null
+     * @throws IllegalArgumentException Thrown if type class is not supported, any of the timestamps don't have a value
+     *         or have an invalid value, there are no timestamps in the input string or bounds cannot be parsed into
      *         doubles or dates/datetimes.
      */
     public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input, ZoneId zoneId) throws IllegalArgumentException {
@@ -263,18 +251,15 @@ public final class TimestampsParser {
     }
 
     /**
-     * Parses a {@link TimestampMap} type with one or more timestamps, and their
-     * associated values. Default time zone is used (UTC).
+     * Parses a {@link TimestampMap} type with one or more timestamps, and their associated values. Default time zone is
+     * used (UTC).
      *
      * @param <T> Underlying type of the {@link TimestampMap} values
-     * @param typeClass Simple type or {@link TimestampMap} subtype for the result
-     *        values.
+     * @param typeClass Simple type or {@link TimestampMap} subtype for the result values.
      * @param input Input string to parse
-     * @return Resulting {@link TimestampMap}, or null if the input equals
-     *         '&lt;empty&gt;' or is null
-     * @throws IllegalArgumentException Thrown if type class is not supported, any
-     *         of the timestamps don't have a value or have an invalid value, there
-     *         are no timestamps in the input string or bounds cannot be parsed into
+     * @return Resulting {@link TimestampMap}, or null if the input equals '&lt;empty&gt;' or is null
+     * @throws IllegalArgumentException Thrown if type class is not supported, any of the timestamps don't have a value
+     *         or have an invalid value, there are no timestamps in the input string or bounds cannot be parsed into
      *         doubles or dates/datetimes.
      */
     public static <T> TimestampMap<T> parseTimestampMap(Class<T> typeClass, String input) throws IllegalArgumentException {

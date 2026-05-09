@@ -96,10 +96,9 @@ import org.gephi.graph.impl.TimestampsParser;
 /**
  * Set of utility methods to manipulate supported attribute types.
  * <p>
- * The attribute system is built with a set of supported column types. This
- * class contains utilities to parse and convert supported types. It also
- * contains utilities to manipulate primitive arrays (the preferred array type)
- * and date/time types. Default time zone for parsing/printing dates is UTC.
+ * The attribute system is built with a set of supported column types. This class contains utilities to parse and
+ * convert supported types. It also contains utilities to manipulate primitive arrays (the preferred array type) and
+ * date/time types. Default time zone for parsing/printing dates is UTC.
  */
 public class AttributeUtils {
 
@@ -359,15 +358,13 @@ public class AttributeUtils {
     }
 
     /**
-     * Parses the given string using the type class provided and returns an
-     * instance.
+     * Parses the given string using the type class provided and returns an instance.
      *
      * @param str string to parse
      * @param typeClass class of the desired type
-     * @param zoneId time zone to use or null to use default time zone (UTC), for
-     *        dynamic types and <code>Instant</code> only
-     * @return an instance of the type class, or null if <em>str</em> is null or
-     *         empty
+     * @param zoneId time zone to use or null to use default time zone (UTC), for dynamic types and <code>Instant</code>
+     *        only
+     * @return an instance of the type class, or null if <em>str</em> is null or empty
      */
     public static Object parse(String str, Class typeClass, ZoneId zoneId) {
         if (str == null || str.isEmpty()) {
@@ -500,15 +497,13 @@ public class AttributeUtils {
     }
 
     /**
-     * Parses the given string using the type class provided and returns an
-     * instance.
+     * Parses the given string using the type class provided and returns an instance.
      *
      * Default time zone is used (UTC) for dynamic types (timestamps/intervals).
      *
      * @param str string to parse
      * @param typeClass class of the desired type
-     * @return an instance of the type class, or null if <em>str</em> is null or
-     *         empty
+     * @return an instance of the type class, or null if <em>str</em> is null or empty
      */
     public static Object parse(String str, Class typeClass) {
         return parse(str, typeClass, null);
@@ -600,8 +595,7 @@ public class AttributeUtils {
     /**
      * Returns the standardized type for the given type class.
      * <p>
-     * For instance, <code>getStandardizedType(int.class)</code> would return
-     * <code>Integer.class</code>.
+     * For instance, <code>getStandardizedType(int.class)</code> would return <code>Integer.class</code>.
      *
      * @param type type to standardize
      * @return standardized type
@@ -733,8 +727,7 @@ public class AttributeUtils {
     }
 
     /**
-     * Transform the given <em>value</em> instance in a standardized type if
-     * necessary.
+     * Transform the given <em>value</em> instance in a standardized type if necessary.
      * <p>
      * This function transforms wrapped primitive arrays in primitive arrays.
      *
@@ -1052,8 +1045,7 @@ public class AttributeUtils {
     }
 
     /**
-     * Parses the given time and returns its milliseconds representation. Default
-     * time zone is used (UTC).
+     * Parses the given time and returns its milliseconds representation. Default time zone is used (UTC).
      *
      * @param dateTime the type to parse
      * @return milliseconds representation
@@ -1064,8 +1056,8 @@ public class AttributeUtils {
     }
 
     /**
-     * Parses an ISO date with or without time or a timestamp (in milliseconds).
-     * Returns the date or timestamp converted to a timestamp in milliseconds.
+     * Parses an ISO date with or without time or a timestamp (in milliseconds). Returns the date or timestamp converted
+     * to a timestamp in milliseconds.
      *
      * @param timeStr Date or timestamp string
      * @param zoneId Time zone to use or null to use default time zone (UTC)
@@ -1077,9 +1069,8 @@ public class AttributeUtils {
     }
 
     /**
-     * Parses an ISO date with or without time or a timestamp (in milliseconds).
-     * Returns the date or timestamp converted to a timestamp in milliseconds.
-     * Default time zone is used (UTC).
+     * Parses an ISO date with or without time or a timestamp (in milliseconds). Returns the date or timestamp converted
+     * to a timestamp in milliseconds. Default time zone is used (UTC).
      *
      * @param timeStr Date or timestamp string
      * @return Timestamp
@@ -1127,8 +1118,7 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the date's string representation of the given timestamp. Default time
-     * zone is used (UTC).
+     * Returns the date's string representation of the given timestamp. Default time zone is used (UTC).
      *
      * @param timestamp time, in milliseconds
      * @return formatted date
@@ -1166,8 +1156,7 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the time's string representation of the given timestamp. Default time
-     * zone is used (UTC).
+     * Returns the time's string representation of the given timestamp. Default time zone is used (UTC).
      *
      * @param timestamp time, in milliseconds
      * @return formatted time
@@ -1198,8 +1187,7 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the string representation of the given timestamp in the given format.
-     * Default time zone is used (UTC).
+     * Returns the string representation of the given timestamp in the given format. Default time zone is used (UTC).
      *
      * @param timestamp time, in milliseconds
      * @param timeFormat time format
@@ -1210,9 +1198,8 @@ public class AttributeUtils {
     }
 
     /**
-     * Returns the string representation of the given array. The used format is the
-     * same format supported by {@link #parse(java.lang.String, java.lang.Class)}
-     * method
+     * Returns the string representation of the given array. The used format is the same format supported by
+     * {@link #parse(java.lang.String, java.lang.Class)} method
      *
      * @param arr Input array. Can be an array of objects or primitives.
      * @return formatted array
@@ -1244,8 +1231,7 @@ public class AttributeUtils {
     /**
      * Returns a copy of the provided object.
      * <p>
-     * The copy is a deep copy for arrays, {@link IntervalSet},
-     * {@link TimestampSet}, sets and lists
+     * The copy is a deep copy for arrays, {@link IntervalSet}, {@link TimestampSet}, sets and lists
      *
      * @param obj object to copy
      * @return copy of the provided object

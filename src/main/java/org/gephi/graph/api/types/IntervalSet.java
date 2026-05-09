@@ -42,8 +42,8 @@ public final class IntervalSet implements TimeSet<Interval> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of intervals is
-     * known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of intervals is known in advance as it minimizes
+     * array resizes.
      *
      * @param capacity interval capacity
      */
@@ -127,8 +127,7 @@ public final class IntervalSet implements TimeSet<Interval> {
     }
 
     /**
-     * Returns true if this set contains an interval that starts or ends at
-     * <code>timestamp</code>.
+     * Returns true if this set contains an interval that starts or ends at <code>timestamp</code>.
      *
      * @param timestamp timestamp
      * @return true if contains, false otherwise
@@ -167,11 +166,11 @@ public final class IntervalSet implements TimeSet<Interval> {
     /**
      * Returns an array of all intervals in this set in a flat format.
      * <p>
-     * The intervals are represented in a flat and sorted array (e.g. {[1.0,2.0],
-     * [5.0,6.0]}) returns [1.0,2.0,5.0,6.0]).
+     * The intervals are represented in a flat and sorted array (e.g. {[1.0,2.0], [5.0,6.0]}) returns
+     * [1.0,2.0,5.0,6.0]).
      * <p>
-     * This method may return a reference to the underlying array so clients should
-     * make a copy if the array is written to.
+     * This method may return a reference to the underlying array so clients should make a copy if the array is written
+     * to.
      *
      * @return array of all intervals
      */

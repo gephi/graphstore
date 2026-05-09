@@ -37,8 +37,8 @@ public final class IntervalStringMap extends IntervalMap<String> {
     /**
      * Constructor with capacity.
      * <p>
-     * Using this constructor can improve performances if the number of timestamps
-     * is known in advance as it minimizes array resizes.
+     * Using this constructor can improve performances if the number of timestamps is known in advance as it minimizes
+     * array resizes.
      *
      * @param capacity timestamp capacity
      */
@@ -50,8 +50,7 @@ public final class IntervalStringMap extends IntervalMap<String> {
     /**
      * Constructor with an initial interval map.
      * <p>
-     * The <code>keys</code> array must be in the same format returned by
-     * {@link #getIntervals() }.
+     * The <code>keys</code> array must be in the same format returned by {@link #getIntervals() }.
      *
      * @param keys initial keys content
      * @param vals initial values content

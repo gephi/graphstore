@@ -18,26 +18,22 @@ package org.gephi.graph.api;
 /**
  * Observer over a graph to monitor changes and obtain the list of differences.
  * <p>
- * The graph observer is a mechanism used to monitor periodically changes made
- * to the graph. This scenario is common in multi-threaded application where a
- * thread is modifying the graph and one or multiple threads need to take action
- * when updates are made.
+ * The graph observer is a mechanism used to monitor periodically changes made to the graph. This scenario is common in
+ * multi-threaded application where a thread is modifying the graph and one or multiple threads need to take action when
+ * updates are made.
  * <p>
- * Graph observer users should periodically call the
- * <code>hasGraphChanged()</code> method to check the status. Each call resets
- * the observer so if the method returns true and the graph doesn't change after
- * that it will return false next time.
+ * Graph observer users should periodically call the <code>hasGraphChanged()</code> method to check the status. Each
+ * call resets the observer so if the method returns true and the graph doesn't change after that it will return false
+ * next time.
  * <p>
- * In addition of a boolean flag whether the graph has changed, an observer can
- * collect data about the differences such as nodes added or removed. Users
- * should call the <code>getDiff()</code> method after calling
+ * In addition of a boolean flag whether the graph has changed, an observer can collect data about the differences such
+ * as nodes added or removed. Users should call the <code>getDiff()</code> method after calling
  * <code>hasGraphChanged()</code> to obtain the diff.
  * <p>
- * Observers should be destroyed when not needed anymore. A new observer can be
- * obtained from the <code>GraphModel</code>.
+ * Observers should be destroyed when not needed anymore. A new observer can be obtained from the
+ * <code>GraphModel</code>.
  * <p>
- * Note that observer instances are not thread-safe and should not be called
- * from multiple threads simultaneously.
+ * Note that observer instances are not thread-safe and should not be called from multiple threads simultaneously.
  *
  * @see GraphModel
  */
@@ -77,8 +73,7 @@ public interface GraphObserver {
     public boolean isDestroyed();
 
     /**
-     * Returns true if this observer has never got its <em>hasGraphChanged()</em>
-     * method called.
+     * Returns true if this observer has never got its <em>hasGraphChanged()</em> method called.
      *
      * @return true if new observer, false otherwise
      */

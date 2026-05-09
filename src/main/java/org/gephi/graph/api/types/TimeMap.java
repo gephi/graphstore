@@ -21,8 +21,7 @@ import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeFormat;
 
 /**
- * Interface that defines the functionalities both timestamp and interval map
- * have.
+ * Interface that defines the functionalities both timestamp and interval map have.
  *
  * @param <K> key type
  * @param <V> value type
@@ -49,8 +48,8 @@ public interface TimeMap<K, V> {
     /**
      * Get the estimated value for the given interval.
      * <p>
-     * The estimator is used to determine the way multiple interval values are
-     * merged together (e.g average, first, median).
+     * The estimator is used to determine the way multiple interval values are merged together (e.g average, first,
+     * median).
      *
      * @param interval interval query
      * @param estimator estimator used

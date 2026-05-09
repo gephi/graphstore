@@ -20,8 +20,8 @@ import java.util.List;
 /**
  * Interface to retrieve added, removed and modified columns from the table.
  * <p>
- * This interface is associated with a {@link TableObserver} and provides an
- * easy access to the columns added or removed.
+ * This interface is associated with a {@link TableObserver} and provides an easy access to the columns added or
+ * removed.
  */
 public interface TableDiff {
 

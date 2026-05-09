@@ -90,8 +90,7 @@ public interface Graph {
     public boolean removeAllNodes(Collection<? extends Node> nodes);
 
     /**
-     * Retains only nodes in this graph that are contained in the specified
-     * collection.
+     * Retains only nodes in this graph that are contained in the specified collection.
      *
      * @param nodes the node collection
      * @return true if at least one node has been removed, false otherwise
@@ -99,8 +98,7 @@ public interface Graph {
     public boolean retainNodes(Collection<? extends Node> nodes);
 
     /**
-     * Retains only edges in this graph that are contained in the specified
-     * collection.
+     * Retains only edges in this graph that are contained in the specified collection.
      *
      * @param edges the edge collection
      * @return true if at least one edge has been removed, false otherwise
@@ -350,8 +348,7 @@ public interface Graph {
      * @param node1 the first node
      * @param node2 the second node
      * @param type the edge type
-     * @return true if node1 and node2 are adjacent with an edge og the given type,
-     *         false otherwise
+     * @return true if node1 and node2 are adjacent with an edge og the given type, false otherwise
      */
     public boolean isAdjacent(Node node1, Node node2, int type);
 
@@ -551,8 +548,8 @@ public interface Graph {
     public void writeUnlock();
 
     /**
-     * Returns the graph lock, in case locking is enabled. The graph lock controls
-     * the multi-thread access to the graph structure.
+     * Returns the graph lock, in case locking is enabled. The graph lock controls the multi-thread access to the graph
+     * structure.
      *
      * @return graph lock
      */

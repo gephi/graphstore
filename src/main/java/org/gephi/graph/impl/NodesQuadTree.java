@@ -1600,9 +1600,8 @@ public class NodesQuadTree {
     }
 
     /**
-     * A spliterator that iterates through all edges in the EdgeStore and filters
-     * them based on whether their nodes belong to quad tree nodes that overlap with
-     * a search rectangle. This approach iterates edges directly rather than
+     * A spliterator that iterates through all edges in the EdgeStore and filters them based on whether their nodes
+     * belong to quad tree nodes that overlap with a search rectangle. This approach iterates edges directly rather than
      * iterating nodes first.
      */
     protected class QuadTreeGlobalEdgesSpliterator implements Spliterator<Edge> {

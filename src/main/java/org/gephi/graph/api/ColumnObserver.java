@@ -18,20 +18,18 @@ package org.gephi.graph.api;
 /**
  * Observer over a column to monitor changes in the attributes values.
  * <p>
- * Column observer can be used to periodically monitor changes made to a column.
- * This scenario is common is multi-threaded applications where a thread is
- * responsible to take action when something has changed in the column's data.
+ * Column observer can be used to periodically monitor changes made to a column. This scenario is common is
+ * multi-threaded applications where a thread is responsible to take action when something has changed in the column's
+ * data.
  * <p>
- * Column observer users should periodically call the
- * <code>hasColumnChanged()</code> method to check the status. Each call resets
- * the observer so if the method returns true and the table doesn't change after
- * that it will return false next time.
+ * Column observer users should periodically call the <code>hasColumnChanged()</code> method to check the status. Each
+ * call resets the observer so if the method returns true and the table doesn't change after that it will return false
+ * next time.
  * <p>
- * This observer monitors all the rows for this column and consider something
- * has changed when an element's value for this column has been changed.
+ * This observer monitors all the rows for this column and consider something has changed when an element's value for
+ * this column has been changed.
  * <p>
- * Observers should be destroyed when not needed anymore. A new observer can be
- * obtained from the <code>Column</code>.
+ * Observers should be destroyed when not needed anymore. A new observer can be obtained from the <code>Column</code>.
  *
  * @see Column
  */

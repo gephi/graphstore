@@ -22,9 +22,8 @@ import org.gephi.graph.impl.ConfigurationImpl;
 /**
  * Global configuration set at initialization.
  * <p>
- * This class can be passed as a parameter to
- * {@link GraphModel.Factory#newInstance(org.gephi.graph.api.Configuration)} to
- * create a <em>GraphModel</em> with custom configuration.
+ * This class can be passed as a parameter to {@link GraphModel.Factory#newInstance(org.gephi.graph.api.Configuration)}
+ * to create a <em>GraphModel</em> with custom configuration.
  * <p>
  * Create instances by using the builder:
  *
@@ -32,11 +31,10 @@ import org.gephi.graph.impl.ConfigurationImpl;
  * Configuration config = Configuration.builder().build();
  * </pre>
  * <p>
- * Note that setting configurations after the <em>GraphModel</em> has been
- * created won't have any effect.
+ * Note that setting configurations after the <em>GraphModel</em> has been created won't have any effect.
  * <p>
- * By default, both node and edge id types are <code>String.class</code> and the
- * time representation is <code>TIMESTAMP</code>.
+ * By default, both node and edge id types are <code>String.class</code> and the time representation is
+ * <code>TIMESTAMP</code>.
  * <p>
  * See the builder documentation for more information on default values.
  *
@@ -171,8 +169,7 @@ public class Configuration {
         /**
          * Sets the edge weight type.
          * <p>
-         * <code>Double</code>, <code>IntervalDoubleMap</code> and
-         * <code>TimestampDoubleMap</code> are supported.
+         * <code>Double</code>, <code>IntervalDoubleMap</code> and <code>TimestampDoubleMap</code> are supported.
          * <p>
          * Default is <code>Double.class</code>.
          *
@@ -255,9 +252,8 @@ public class Configuration {
         /**
          * Sets whether to enable auto edge type registration.
          * <p>
-         * If enabled, edge types are automatically registered when edges are added. If
-         * disabled, one needs to call {@link GraphModel#addEdgeType(Object)} explicitly
-         * for each type.
+         * If enabled, edge types are automatically registered when edges are added. If disabled, one needs to call
+         * {@link GraphModel#addEdgeType(Object)} explicitly for each type.
          * <p>
          * Default is <code>true</code>.
          *
@@ -277,8 +273,8 @@ public class Configuration {
         /**
          * Sets whether to enable node properties.
          * <p>
-         * If enabled, {@link NodeProperties} are created for each node. If those
-         * properties aren't needed, disabling them can save memory.
+         * If enabled, {@link NodeProperties} are created for each node. If those properties aren't needed, disabling
+         * them can save memory.
          * <p>
          * Default is <code>true</code>.
          *
@@ -298,8 +294,8 @@ public class Configuration {
         /**
          * Sets whether to enable edge properties.
          * <p>
-         * If enabled, {@link EdgeProperties} are created for each edge. If those
-         * properties aren't needed, disabling them can save memory.
+         * If enabled, {@link EdgeProperties} are created for each edge. If those properties aren't needed, disabling
+         * them can save memory.
          * <p>
          * Default is <code>true</code>.
          *
@@ -319,8 +315,8 @@ public class Configuration {
         /**
          * Sets whether to enable the {@link SpatialIndex}.
          * <p>
-         * If enabled, the spatial index is updated while node positions are updated. If
-         * unused, disabling it is recommended as it adds some overhead.
+         * If enabled, the spatial index is updated while node positions are updated. If unused, disabling it is
+         * recommended as it adds some overhead.
          * <p>
          * The spatial index can be retrieved from {@link Graph#getSpatialIndex()}.
          * <p>
@@ -342,10 +338,9 @@ public class Configuration {
         /**
          * Sets whether to enable the reverse indexing of node attributes.
          * <p>
-         * If enabled, the reverse index is updated while node attributes are updated.
-         * This powers {@link GraphModel#getNodeIndex()} but has a negative impact on
-         * memory usage (as any reverse index does). When disabled, the features of
-         * {@link Index<Node>} are still available but need to iterate over all nodes to
+         * If enabled, the reverse index is updated while node attributes are updated. This powers
+         * {@link GraphModel#getNodeIndex()} but has a negative impact on memory usage (as any reverse index does). When
+         * disabled, the features of {@link Index<Node>} are still available but need to iterate over all nodes to
          * return results.
          * <p>
          * Default is <code>true</code>.
@@ -366,10 +361,9 @@ public class Configuration {
         /**
          * Sets whether to enable the reverse indexing of edge attributes.
          * <p>
-         * If enabled, the reverse index is updated while node attributes are updated.
-         * This powers {@link GraphModel#getEdgeIndex()} but has a negative impact on
-         * memory usage (as any reverse index does). When disabled, the features of
-         * {@link Index<Edge>} are still available but need to iterate over all nodes to
+         * If enabled, the reverse index is updated while node attributes are updated. This powers
+         * {@link GraphModel#getEdgeIndex()} but has a negative impact on memory usage (as any reverse index does). When
+         * disabled, the features of {@link Index<Edge>} are still available but need to iterate over all nodes to
          * return results.
          * <p>
          * Default is <code>true</code>.
@@ -390,10 +384,9 @@ public class Configuration {
         /**
          * Sets whether to enable the reverse indexing of timestamps and intervals.
          * <p>
-         * If enabled, the reverse index is updated while element's time set is updated.
-         * This powers {@link GraphModel#getNodeTimeIndex()} and
-         * {@link GraphModel#getEdgeTimeIndex()} ()} but has a negative impact on memory
-         * usage (as any reverse index does).
+         * If enabled, the reverse index is updated while element's time set is updated. This powers
+         * {@link GraphModel#getNodeTimeIndex()} and {@link GraphModel#getEdgeTimeIndex()} ()} but has a negative impact
+         * on memory usage (as any reverse index does).
          * <p>
          * Default is <code>true</code>.
          *
@@ -433,10 +426,9 @@ public class Configuration {
         /**
          * Sets whether to enable auto locking when using read/write APIs.
          * <p>
-         * If disabled, the client is responsible for handling multithreading themselves
-         * or calling methods such as {@link Graph#readLock()} or
-         * {@link Graph#writeLock()}. If enabled, each read methods (including
-         * iterators) handle locking. Similarly, each write method handle locking.
+         * If disabled, the client is responsible for handling multithreading themselves or calling methods such as
+         * {@link Graph#readLock()} or {@link Graph#writeLock()}. If enabled, each read methods (including iterators)
+         * handle locking. Similarly, each write method handle locking.
          * <p>
          * Default is <code>true</code>.
          *
@@ -670,8 +662,7 @@ public class Configuration {
     }
 
     /**
-     * Returns a string representation of the differences between this configuration
-     * and another one.
+     * Returns a string representation of the differences between this configuration and another one.
      *
      * @param other the other configuration
      * @return a string representation of the differences
