@@ -277,6 +277,9 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         autoWriteLock();
         try {
             nodeStore.checkNonNullNodeObject(node);
+            if (((NodeImpl) node).storeId == NodeStore.NULL_ID) {
+                return false;
+            }
             for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(node, false); edgeIterator
                     .hasNext();) {
                 edgeIterator.next();
@@ -304,6 +307,9 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         try {
             for (Node node : nodes) {
                 nodeStore.checkNonNullNodeObject(node);
+                if (((NodeImpl) node).storeId == NodeStore.NULL_ID) {
+                    continue;
+                }
                 for (EdgeStore.EdgeInOutIterator edgeIterator = edgeStore.edgeIterator(node, false); edgeIterator
                         .hasNext();) {
                     edgeIterator.next();
