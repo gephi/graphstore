@@ -42,6 +42,8 @@ import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -53,7 +55,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -1185,14 +1186,6 @@ public class SerializationTest {
     }
 
     @Test
-    public void testLocale() throws Exception {
-        Serialization ser = new Serialization(null);
-        Assert.assertEquals(Locale.FRANCE, ser.deserialize(ser.serialize(Locale.FRANCE)));
-        Assert.assertEquals(Locale.CANADA_FRENCH, ser.deserialize(ser.serialize(Locale.CANADA_FRENCH)));
-        Assert.assertEquals(Locale.SIMPLIFIED_CHINESE, ser.deserialize(ser.serialize(Locale.SIMPLIFIED_CHINESE)));
-    }
-
-    @Test
     public void testSmallGraphModel() throws Exception {
         GraphModelImpl gm = GraphGenerator.generateSmallGraphStore().graphModel;
         Serialization ser = new Serialization(gm);
@@ -1312,6 +1305,26 @@ public class SerializationTest {
 
             BitSet deserializedBs = ser.deserializeBitSet(dio.reset(bytes));
             Assert.assertEquals(bs, deserializedBs);
+        }
+    }
+
+    @Test
+    public void testSerializationTagsAreUnique() throws Exception {
+        // NULL_ID is excluded: it's an idMap sentinel (-1), not a wire tag
+        Map<Integer, String> tagsByValue = new HashMap<>();
+        for (Field field : Serialization.class.getDeclaredFields()) {
+            int modifiers = field.getModifiers();
+            if (!Modifier.isStatic(modifiers) || !Modifier.isFinal(modifiers) || field.getType() != int.class) {
+                continue;
+            }
+            String name = field.getName();
+            if (name.equals("NULL_ID")) {
+                continue;
+            }
+            field.setAccessible(true);
+            int value = field.getInt(null);
+            String previous = tagsByValue.put(value, name);
+            Assert.assertNull(previous, "Duplicate serialization tag " + value + " shared by " + previous + " and " + name);
         }
     }
 }

@@ -56,7 +56,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Configuration;
@@ -178,6 +177,8 @@ public class Serialization {
     final static int STRING_EMPTY = 101;
     final static int NOTUSED_STRING_255 = 102;
     final static int STRING = 103;
+    // Reserved, do not reuse: was java.util.Locale, removed because Locale isn't an
+    // AttributeUtils supported type. Kept so old streams can still be identified.
     final static int LOCALE = 124;
     final static int PROPERTIES = 125;
     final static int CLASS = 126;
@@ -1470,7 +1471,9 @@ public class Serialization {
             }
         } else if (clazz == Character.class) {
             out.write(CHAR);
-            out.writeChar((Character) obj);
+            // Write as 2-byte short so the encoding doesn't depend on the DataOutput
+            // implementation. Byte-identical to DataOutputStream.writeChar().
+            out.writeShort((Character) obj);
 
         } else if (clazz == String.class) {
             String s = (String) obj;
@@ -1520,7 +1523,8 @@ public class Serialization {
             char[] a = (char[]) obj;
             LongPacker.packInt(out, a.length);
             for (char s : a) {
-                out.writeChar(s);
+                // See CHAR above: 2-byte encoding, independent of the DataOutput impl.
+                out.writeShort(s);
             }
         } else if (obj instanceof byte[]) {
             byte[] b = (byte[]) obj;
@@ -1531,12 +1535,6 @@ public class Serialization {
             out.write(DATE);
             out.writeLong(((Date) obj).getTime());
 
-        } else if (clazz == Locale.class) {
-            out.write(LOCALE);
-            Locale l = (Locale) obj;
-            out.writeUTF(l.getLanguage());
-            out.writeUTF(l.getCountry());
-            out.writeUTF(l.getVariant());
         } else if (obj instanceof String[]) {
             String[] b = (String[]) obj;
             out.write(STRING_ARRAY);
@@ -2023,11 +2021,11 @@ public class Serialization {
                 size = LongPacker.unpackInt(is);
                 ret = new char[size];
                 for (int i = 0; i < size; i++) {
-                    ((char[]) ret)[i] = is.readChar();
+                    ((char[]) ret)[i] = (char) is.readUnsignedShort();
                 }
                 break;
             case CHAR:
-                ret = is.readChar();
+                ret = Character.valueOf((char) is.readUnsignedShort());
                 break;
             case FLOAT_MINUS_1:
                 ret = Float.valueOf(-1);
@@ -2115,9 +2113,6 @@ public class Serialization {
                 break;
             case ARRAY_BYTE_INT:
                 ret = deserializeArrayByteInt(is);
-                break;
-            case LOCALE:
-                ret = new Locale(is.readUTF(), is.readUTF(), is.readUTF());
                 break;
             case STRING_ARRAY:
                 ret = deserializeStringArray(is);
@@ -2224,9 +2219,8 @@ public class Serialization {
             case INSTANT:
                 ret = deserializeInstant(is);
                 break;
-            case -1:
-                throw new EOFException();
-
+            default:
+                throw new IOException("Unknown serialization type tag: " + head);
         }
         return ret;
     }
