@@ -1000,7 +1000,10 @@ public class SerializationTest {
     @Test
     public void testChar() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);
-        char[] vals = { 'a', ' ' };
+        // Chars are written as a 2-byte short, so cover the boundaries of that
+        // range: above 0x7F, above 0x7FF, either side of the signed-short flip,
+        // the 16-bit maximum, and an unpaired surrogate
+        char[] vals = { 'a', ' ', '\u00e9', '\u4e2d', '\u7fff', '\u8000', '\uffff', '\ud83d' };
         for (char i : vals) {
             byte[] buf = ser.serialize(i);
             Object l2 = ser.deserialize(buf);
@@ -1145,7 +1148,7 @@ public class SerializationTest {
     @Test
     public void testCharArray() throws ClassNotFoundException, IOException {
         Serialization ser = new Serialization(null);
-        char[] l = new char[] { '1', 'a', '&' };
+        char[] l = new char[] { '1', 'a', '&', '\u00e9', '\u4e2d', '\u8000', '\uffff' };
         Object deserialize = ser.deserialize(ser.serialize(l));
         Assert.assertTrue(Arrays.equals(l, (char[]) deserialize));
     }
