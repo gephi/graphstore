@@ -124,7 +124,7 @@ public final class DataInputOutput implements DataInput, DataOutput, ObjectInput
 
     @Override
     public char readChar() throws IOException {
-        return (char) readInt();
+        return (char) readUnsignedShort();
     }
 
     @Override
@@ -209,7 +209,7 @@ public final class DataInputOutput implements DataInput, DataOutput, ObjectInput
 
     @Override
     public void writeChar(int v) throws IOException {
-        writeInt(v);
+        writeShort(v);
     }
 
     @Override

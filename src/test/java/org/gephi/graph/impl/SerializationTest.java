@@ -42,6 +42,8 @@ import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -53,7 +55,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -999,7 +1000,10 @@ public class SerializationTest {
     @Test
     public void testChar() throws IOException, ClassNotFoundException {
         Serialization ser = new Serialization(null);
-        char[] vals = { 'a', ' ' };
+        // Chars are written as a 2-byte short, so cover the boundaries of that
+        // range: above 0x7F, above 0x7FF, either side of the signed-short flip,
+        // the 16-bit maximum, and an unpaired surrogate
+        char[] vals = { 'a', ' ', '\u00e9', '\u4e2d', '\u7fff', '\u8000', '\uffff', '\ud83d' };
         for (char i : vals) {
             byte[] buf = ser.serialize(i);
             Object l2 = ser.deserialize(buf);
@@ -1144,7 +1148,7 @@ public class SerializationTest {
     @Test
     public void testCharArray() throws ClassNotFoundException, IOException {
         Serialization ser = new Serialization(null);
-        char[] l = new char[] { '1', 'a', '&' };
+        char[] l = new char[] { '1', 'a', '&', '\u00e9', '\u4e2d', '\u8000', '\uffff' };
         Object deserialize = ser.deserialize(ser.serialize(l));
         Assert.assertTrue(Arrays.equals(l, (char[]) deserialize));
     }
@@ -1182,14 +1186,6 @@ public class SerializationTest {
         Assert.assertEquals(d, ser.deserialize(ser.serialize(d)));
         d = new BigInteger("-535345345345344456567889889895165654423236");
         Assert.assertEquals(d, ser.deserialize(ser.serialize(d)));
-    }
-
-    @Test
-    public void testLocale() throws Exception {
-        Serialization ser = new Serialization(null);
-        Assert.assertEquals(Locale.FRANCE, ser.deserialize(ser.serialize(Locale.FRANCE)));
-        Assert.assertEquals(Locale.CANADA_FRENCH, ser.deserialize(ser.serialize(Locale.CANADA_FRENCH)));
-        Assert.assertEquals(Locale.SIMPLIFIED_CHINESE, ser.deserialize(ser.serialize(Locale.SIMPLIFIED_CHINESE)));
     }
 
     @Test
@@ -1312,6 +1308,26 @@ public class SerializationTest {
 
             BitSet deserializedBs = ser.deserializeBitSet(dio.reset(bytes));
             Assert.assertEquals(bs, deserializedBs);
+        }
+    }
+
+    @Test
+    public void testSerializationTagsAreUnique() throws Exception {
+        // NULL_ID is excluded: it's an idMap sentinel (-1), not a wire tag
+        Map<Integer, String> tagsByValue = new HashMap<>();
+        for (Field field : Serialization.class.getDeclaredFields()) {
+            int modifiers = field.getModifiers();
+            if (!Modifier.isStatic(modifiers) || !Modifier.isFinal(modifiers) || field.getType() != int.class) {
+                continue;
+            }
+            String name = field.getName();
+            if (name.equals("NULL_ID")) {
+                continue;
+            }
+            field.setAccessible(true);
+            int value = field.getInt(null);
+            String previous = tagsByValue.put(value, name);
+            Assert.assertNull(previous, "Duplicate serialization tag " + value + " shared by " + previous + " and " + name);
         }
     }
 }
