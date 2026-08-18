@@ -15,9 +15,10 @@
  */
 package org.gephi.graph.impl;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.types.TimeMap;
@@ -25,13 +26,17 @@ import org.gephi.graph.impl.utils.MapDeepEquals;
 
 public class GraphAttributesImpl {
 
-    protected final Map<String, Object> attributes = new HashMap<>();
+    // A TreeMap is used so the iteration order is canonical (sorted by key).
+    // This makes serialization a pure function of the content rather than of
+    // the insertion history, which is required for byte-pinned fixtures.
+    protected final Map<String, Object> attributes = new TreeMap<>();
 
     public synchronized Set<String> getKeys() {
         return attributes.keySet();
     }
 
     public synchronized void setValue(String key, Object value) {
+        Objects.requireNonNull(key, "key");
         if (value != null) {
             checkSupportedTypes(value.getClass());
         }
@@ -39,18 +44,22 @@ public class GraphAttributesImpl {
     }
 
     public synchronized void removeValue(String key) {
+        Objects.requireNonNull(key, "key");
         attributes.remove(key);
     }
 
     public synchronized Object getValue(String key) {
+        Objects.requireNonNull(key, "key");
         return attributes.get(key);
     }
 
     public synchronized Object getValue(String key, double timestamp) {
+        Objects.requireNonNull(key, "key");
         return getValueInternal(key, timestamp);
     }
 
     public synchronized Object getValue(String key, Interval interval) {
+        Objects.requireNonNull(key, "key");
         return getValueInternal(key, interval);
     }
 
@@ -63,11 +72,13 @@ public class GraphAttributesImpl {
     }
 
     public synchronized void removeValue(String key, double timestamp) {
+        Objects.requireNonNull(key, "key");
         removeValueInternal(key, timestamp);
 
     }
 
     public synchronized void removeValue(String key, Interval interval) {
+        Objects.requireNonNull(key, "key");
         removeValueInternal(key, interval);
     }
 
@@ -83,10 +94,12 @@ public class GraphAttributesImpl {
     }
 
     public synchronized void setValue(String key, Object value, double timestamp) {
+        Objects.requireNonNull(key, "key");
         setValueInternal(key, value, timestamp);
     }
 
     public synchronized void setValue(String key, Object value, Interval interval) {
+        Objects.requireNonNull(key, "key");
         setValueInternal(key, value, interval);
     }
 
