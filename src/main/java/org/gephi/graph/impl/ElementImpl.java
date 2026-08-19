@@ -271,8 +271,10 @@ public abstract class ElementImpl implements Element {
         checkReadOnlyColumn(column);
         checkDynamicType(column, value);
 
-        Object newValue = attributes.setAttribute(column, value, timeObject);
-        updateIndex(column, null, newValue);
+        // Only a time the map did not already hold is a new reference for the time index. Passing the whole map would
+        // re-count every time in it, as removeTimeAttribute decrements one at a time.
+        boolean isNewTime = attributes.setAttribute(column, value, timeObject);
+        updateIndex(column, null, isNewTime ? timeObject : null);
     }
 
     private void updateIndex(Column column, Object oldValue, Object newValue) {

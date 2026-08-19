@@ -428,6 +428,35 @@ public class IntervalIndexStoreTest {
     }
 
     @Test
+    public void testSetAttributeIntervalCounts() {
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
+        GraphModelImpl graphModel = new GraphModelImpl(config);
+        IntervalIndexStore store = (IntervalIndexStore) graphModel.store.timeStore.nodeIndexStore;
+
+        Column col = graphModel.store.nodeTable.addColumn("col", IntervalStringMap.class);
+        NodeImpl nodeImpl = (NodeImpl) graphModel.store.factory.newNode("0");
+        graphModel.store.addNode(nodeImpl);
+
+        Interval first = new Interval(1.0, 2.0);
+        Interval second = new Interval(3.0, 4.0);
+
+        nodeImpl.setAttribute(col, "foo", first);
+        nodeImpl.setAttribute(col, "bar", second);
+        // Overwriting an existing interval is not a new reference
+        nodeImpl.setAttribute(col, "baz", first);
+
+        Assert.assertEquals(store.size(), 2);
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(first)], 1);
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(second)], 1);
+
+        nodeImpl.removeAttribute(col, first);
+        Assert.assertFalse(store.contains(first));
+        nodeImpl.removeAttribute(col);
+        Assert.assertEquals(store.size(), 0);
+        Assert.assertFalse(store.contains(second));
+    }
+
+    @Test
     public void testRemoveAttributeTimestamp() {
         Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
         GraphModelImpl graphModel = new GraphModelImpl(config);

@@ -793,9 +793,9 @@ public class SerializationTest {
     }
 
     /**
-     * ElementImpl.setTimeAttribute re-adds every key of the map on each put, so a store can hold reference counts above
-     * the number of references and keep time values nothing points at. Reading rebuilds the index from the elements,
-     * which drops both.
+     * Files written before the dynamic-attribute overcount fix carry reference counts above the number of references,
+     * and time values nothing points at. Reading rebuilds the index from the elements, which drops both. The index is
+     * inflated directly here, since the write path no longer produces that state.
      */
     private void assertTimeIndexIsRebuiltOnRead(TimeRepresentation timeRepresentation) throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl(
@@ -815,28 +815,31 @@ public class SerializationTest {
         setTimeAttribute(node1, column, timeRepresentation, 3.0, 30);
         addTime(node2, timeRepresentation, 2.0);
 
-        TimeIndexStore nodeIndexStore = graphStore.timeStore.nodeIndexStore;
         Object first = timeKey(timeRepresentation, 1.0);
-        Assert.assertTrue(nodeIndexStore.countMap[(Integer) nodeIndexStore.timeSortedMap
-                .get(first)] > 1, "Expected the saved store to carry an inflated reference count for " + first);
+        Object shared = timeKey(timeRepresentation, 2.0);
+        Object last = timeKey(timeRepresentation, 3.0);
+        Object stranded = timeKey(timeRepresentation, 7.0);
 
-        // Dropping the column leaves 1.0 and 3.0 referenced by nothing, and the counts too high to ever reach zero
-        node1.removeAttribute(column);
-        Assert.assertTrue(nodeIndexStore.contains(first));
+        // Emulate a store written before the fix: a count above the number of references, and a time no element holds
+        TimeIndexStore nodeIndexStore = graphStore.timeStore.nodeIndexStore;
+        nodeIndexStore.add(first);
+        nodeIndexStore.add(stranded);
+        Assert.assertEquals(nodeIndexStore.countMap[(Integer) nodeIndexStore.timeSortedMap.get(first)], 2);
+        Assert.assertTrue(nodeIndexStore.contains(stranded));
 
         GraphStore read = roundTrip(graphStore, timeRepresentation);
         TimeIndexStore readIndexStore = read.timeStore.nodeIndexStore;
 
-        // Node 2 at time 2.0 is the only reference left in the graph
-        Assert.assertFalse(readIndexStore.contains(first));
-        Assert.assertFalse(readIndexStore.contains(timeKey(timeRepresentation, 3.0)));
-        Assert.assertEquals(readIndexStore.size(), 1);
+        // Rebuilt from the elements: node 1 holds 1.0, 2.0 and 3.0, node 2 holds 2.0
+        Assert.assertFalse(readIndexStore.contains(stranded));
+        Assert.assertEquals(readIndexStore.size(), 3);
+        Assert.assertEquals(readIndexStore.countMap[(Integer) readIndexStore.timeSortedMap.get(first)], 1);
+        Assert.assertEquals(readIndexStore.countMap[(Integer) readIndexStore.timeSortedMap.get(shared)], 2);
+        Assert.assertEquals(readIndexStore.countMap[(Integer) readIndexStore.timeSortedMap.get(last)], 1);
 
-        Object shared = timeKey(timeRepresentation, 2.0);
-        Assert.assertEquals(readIndexStore.countMap[(Integer) readIndexStore.timeSortedMap.get(shared)], 1);
-
-        removeTime(read.getNode("2"), timeRepresentation, 2.0);
-        Assert.assertFalse(readIndexStore.contains(shared));
+        // The only reference to 3.0 is node 1's map, so dropping it frees the time
+        removeTimeAttribute(read.getNode("1"), read.nodeTable.getColumn("dynamic"), timeRepresentation, 3.0);
+        Assert.assertFalse(readIndexStore.contains(last));
     }
 
     private void assertTimeIndexCountsSurviveRoundTrip(TimeRepresentation timeRepresentation) throws IOException, ClassNotFoundException {
@@ -959,6 +962,14 @@ public class SerializationTest {
             element.setAttribute(column, value, new Interval(time, time));
         } else {
             element.setAttribute(column, value, time);
+        }
+    }
+
+    private static void removeTimeAttribute(ElementImpl element, Column column, TimeRepresentation timeRepresentation, double time) {
+        if (timeRepresentation.equals(TimeRepresentation.INTERVAL)) {
+            element.removeAttribute(column, new Interval(time, time));
+        } else {
+            element.removeAttribute(column, time);
         }
     }
 
