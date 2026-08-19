@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Origin;
@@ -704,6 +705,10 @@ public class SerializationTest {
         Assert.assertEquals(ZoneId.of("+01:30"), l);
     }
 
+    /**
+     * The time store block is derived state, rebuilt from the elements as they are inserted. Read standalone it carries
+     * nothing, and it must consume exactly its own bytes: Serialization.deserialize(byte[]) throws if any are left.
+     */
     @Test
     public void testTimestampStore() throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl();
@@ -723,7 +728,11 @@ public class SerializationTest {
         graphModel = new GraphModelImpl();
         ser = new Serialization(graphModel);
         TimeStore l = (TimeStore) ser.deserialize(buf);
-        Assert.assertTrue(timestampStore.deepEquals(l));
+
+        Assert.assertSame(l, graphModel.store.timeStore);
+        Assert.assertTrue(l.isEmpty());
+        Assert.assertEquals(l.nodeIndexStore.size(), 0);
+        Assert.assertEquals(l.edgeIndexStore.size(), 0);
     }
 
     @Test
@@ -746,7 +755,219 @@ public class SerializationTest {
         graphModel = new GraphModelImpl(config);
         ser = new Serialization(graphModel);
         TimeStore l = (TimeStore) ser.deserialize(buf);
-        Assert.assertTrue(timestampStore.deepEquals(l));
+
+        Assert.assertSame(l, graphModel.store.timeStore);
+        Assert.assertTrue(l.isEmpty());
+        Assert.assertEquals(l.nodeIndexStore.size(), 0);
+        Assert.assertEquals(l.edgeIndexStore.size(), 0);
+    }
+
+    @Test
+    public void testGraphStoreTimestampIndexCounts() throws IOException, ClassNotFoundException {
+        assertTimeIndexCountsSurviveRoundTrip(TimeRepresentation.TIMESTAMP);
+    }
+
+    @Test
+    public void testGraphStoreIntervalIndexCounts() throws IOException, ClassNotFoundException {
+        assertTimeIndexCountsSurviveRoundTrip(TimeRepresentation.INTERVAL);
+    }
+
+    @Test
+    public void testGraphStoreTimestampIndexRemoveAfterRoundTrip() throws IOException, ClassNotFoundException {
+        assertTimeIsRemovedFromIndexAfterRoundTrip(TimeRepresentation.TIMESTAMP);
+    }
+
+    @Test
+    public void testGraphStoreIntervalIndexRemoveAfterRoundTrip() throws IOException, ClassNotFoundException {
+        assertTimeIsRemovedFromIndexAfterRoundTrip(TimeRepresentation.INTERVAL);
+    }
+
+    @Test
+    public void testGraphStoreTimestampIndexIsRebuiltOnRead() throws IOException, ClassNotFoundException {
+        assertTimeIndexIsRebuiltOnRead(TimeRepresentation.TIMESTAMP);
+    }
+
+    @Test
+    public void testGraphStoreIntervalIndexIsRebuiltOnRead() throws IOException, ClassNotFoundException {
+        assertTimeIndexIsRebuiltOnRead(TimeRepresentation.INTERVAL);
+    }
+
+    /**
+     * ElementImpl.setTimeAttribute re-adds every key of the map on each put, so a store can hold reference counts above
+     * the number of references and keep time values nothing points at. Reading rebuilds the index from the elements,
+     * which drops both.
+     */
+    private void assertTimeIndexIsRebuiltOnRead(TimeRepresentation timeRepresentation) throws IOException, ClassNotFoundException {
+        GraphModelImpl graphModel = new GraphModelImpl(
+                Configuration.builder().timeRepresentation(timeRepresentation).build());
+        GraphStore graphStore = graphModel.store;
+        boolean interval = timeRepresentation.equals(TimeRepresentation.INTERVAL);
+
+        Column column = graphStore.nodeTable
+                .addColumn("dynamic", interval ? IntervalIntegerMap.class : TimestampIntegerMap.class);
+        NodeImpl node1 = (NodeImpl) graphStore.factory.newNode("1");
+        NodeImpl node2 = (NodeImpl) graphStore.factory.newNode("2");
+        graphStore.addNode(node1);
+        graphStore.addNode(node2);
+
+        setTimeAttribute(node1, column, timeRepresentation, 1.0, 10);
+        setTimeAttribute(node1, column, timeRepresentation, 2.0, 20);
+        setTimeAttribute(node1, column, timeRepresentation, 3.0, 30);
+        addTime(node2, timeRepresentation, 2.0);
+
+        TimeIndexStore nodeIndexStore = graphStore.timeStore.nodeIndexStore;
+        Object first = timeKey(timeRepresentation, 1.0);
+        Assert.assertTrue(nodeIndexStore.countMap[(Integer) nodeIndexStore.timeSortedMap
+                .get(first)] > 1, "Expected the saved store to carry an inflated reference count for " + first);
+
+        // Dropping the column leaves 1.0 and 3.0 referenced by nothing, and the counts too high to ever reach zero
+        node1.removeAttribute(column);
+        Assert.assertTrue(nodeIndexStore.contains(first));
+
+        GraphStore read = roundTrip(graphStore, timeRepresentation);
+        TimeIndexStore readIndexStore = read.timeStore.nodeIndexStore;
+
+        // Node 2 at time 2.0 is the only reference left in the graph
+        Assert.assertFalse(readIndexStore.contains(first));
+        Assert.assertFalse(readIndexStore.contains(timeKey(timeRepresentation, 3.0)));
+        Assert.assertEquals(readIndexStore.size(), 1);
+
+        Object shared = timeKey(timeRepresentation, 2.0);
+        Assert.assertEquals(readIndexStore.countMap[(Integer) readIndexStore.timeSortedMap.get(shared)], 1);
+
+        removeTime(read.getNode("2"), timeRepresentation, 2.0);
+        Assert.assertFalse(readIndexStore.contains(shared));
+    }
+
+    private void assertTimeIndexCountsSurviveRoundTrip(TimeRepresentation timeRepresentation) throws IOException, ClassNotFoundException {
+        GraphStore graphStore = newTimeIndexGraphStore(timeRepresentation);
+        GraphStore read = roundTrip(graphStore, timeRepresentation);
+
+        assertTimeIndexCountsEqual(graphStore.timeStore.nodeIndexStore, read.timeStore.nodeIndexStore);
+        assertTimeIndexCountsEqual(graphStore.timeStore.edgeIndexStore, read.timeStore.edgeIndexStore);
+    }
+
+    private void assertTimeIsRemovedFromIndexAfterRoundTrip(TimeRepresentation timeRepresentation) throws IOException, ClassNotFoundException {
+        GraphStore read = roundTrip(newTimeIndexGraphStore(timeRepresentation), timeRepresentation);
+        TimeIndexStore nodeIndexStore = read.timeStore.nodeIndexStore;
+
+        // Time 2.0 is referenced by two nodes and nothing else
+        Object timeKey = timeKey(timeRepresentation, 2.0);
+        Assert.assertTrue(nodeIndexStore.contains(timeKey));
+        int timeIndex = (Integer) nodeIndexStore.timeSortedMap.get(timeKey);
+
+        removeTime(read.getNode("1"), timeRepresentation, 2.0);
+        Assert.assertTrue(nodeIndexStore.contains(timeKey));
+        removeTime(read.getNode("2"), timeRepresentation, 2.0);
+
+        Assert.assertFalse(nodeIndexStore.contains(timeKey));
+        Assert.assertTrue(nodeIndexStore.garbageQueue.contains(timeIndex));
+    }
+
+    /**
+     * Compares the time values and their reference counts. Slot numbering and the garbage queue are allocation state,
+     * not part of the contract: the index is rebuilt from the elements, so slots may be numbered differently.
+     */
+    private static void assertTimeIndexCountsEqual(TimeIndexStore expected, TimeIndexStore actual) {
+        // With equal sizes, resolving every expected time value in actual makes this a full set comparison
+        Assert.assertEquals(actual.size(), expected.size());
+        for (Object o : expected.timeSortedMap.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
+            Object timeKey = entry.getKey();
+            Object actualTimeIndex = actual.timeSortedMap.get(timeKey);
+            Assert.assertNotNull(actualTimeIndex, "Missing time index for " + timeKey);
+            Assert.assertEquals(actual.countMap[(Integer) actualTimeIndex], expected.countMap[(Integer) entry
+                    .getValue()], "Reference count for " + timeKey);
+        }
+    }
+
+    /**
+     * Builds a store with element time sets, a dynamic column, times shared by several elements, a parallel edge and a
+     * freed time index.
+     */
+    private static GraphStore newTimeIndexGraphStore(TimeRepresentation timeRepresentation) {
+        GraphModelImpl graphModel = new GraphModelImpl(
+                Configuration.builder().timeRepresentation(timeRepresentation).build());
+        GraphStore graphStore = graphModel.store;
+        boolean interval = timeRepresentation.equals(TimeRepresentation.INTERVAL);
+
+        Column column = graphStore.nodeTable
+                .addColumn("dynamic", interval ? IntervalIntegerMap.class : TimestampIntegerMap.class);
+
+        NodeImpl node1 = (NodeImpl) graphStore.factory.newNode("1");
+        NodeImpl node2 = (NodeImpl) graphStore.factory.newNode("2");
+        NodeImpl node3 = (NodeImpl) graphStore.factory.newNode("3");
+        graphStore.addNode(node1);
+        graphStore.addNode(node2);
+        graphStore.addNode(node3);
+
+        EdgeImpl edge1 = (EdgeImpl) graphStore.factory.newEdge("1", node1, node2, 0, 1.0, true);
+        EdgeImpl edge2 = (EdgeImpl) graphStore.factory
+                .newEdge("2", node1, node2, graphStore.edgeTypeStore.addType("type"), 1.0, true);
+        graphStore.addEdge(edge1);
+        graphStore.addEdge(edge2);
+
+        addTime(node1, timeRepresentation, 1.0);
+        addTime(node1, timeRepresentation, 2.0);
+        addTime(node2, timeRepresentation, 2.0);
+        addTime(edge1, timeRepresentation, 1.0);
+        addTime(edge2, timeRepresentation, 1.0);
+        addTime(edge2, timeRepresentation, 3.0);
+
+        // Frees a time index, leaving the garbage queue non-empty
+        addTime(node3, timeRepresentation, 4.0);
+        removeTime(node3, timeRepresentation, 4.0);
+
+        if (interval) {
+            IntervalIntegerMap map = new IntervalIntegerMap();
+            map.put(new Interval(5.0, 5.0), 10);
+            map.put(new Interval(6.0, 6.0), 20);
+            node1.setAttribute(column, map);
+        } else {
+            TimestampIntegerMap map = new TimestampIntegerMap();
+            map.put(5.0, 10);
+            map.put(6.0, 20);
+            node1.setAttribute(column, map);
+        }
+
+        return graphStore;
+    }
+
+    private static GraphStore roundTrip(GraphStore graphStore, TimeRepresentation timeRepresentation) throws IOException, ClassNotFoundException {
+        Serialization ser = new Serialization(graphStore.graphModel);
+        byte[] buf = ser.serialize(graphStore);
+
+        GraphModelImpl readModel = new GraphModelImpl(
+                Configuration.builder().timeRepresentation(timeRepresentation).build());
+        return (GraphStore) new Serialization(readModel).deserialize(buf);
+    }
+
+    private static Object timeKey(TimeRepresentation timeRepresentation, double time) {
+        return timeRepresentation.equals(TimeRepresentation.INTERVAL) ? new Interval(time, time) : (Double) time;
+    }
+
+    private static void addTime(ElementImpl element, TimeRepresentation timeRepresentation, double time) {
+        if (timeRepresentation.equals(TimeRepresentation.INTERVAL)) {
+            element.addInterval(new Interval(time, time));
+        } else {
+            element.addTimestamp(time);
+        }
+    }
+
+    private static void setTimeAttribute(ElementImpl element, Column column, TimeRepresentation timeRepresentation, double time, int value) {
+        if (timeRepresentation.equals(TimeRepresentation.INTERVAL)) {
+            element.setAttribute(column, value, new Interval(time, time));
+        } else {
+            element.setAttribute(column, value, time);
+        }
+    }
+
+    private static void removeTime(ElementImpl element, TimeRepresentation timeRepresentation, double time) {
+        if (timeRepresentation.equals(TimeRepresentation.INTERVAL)) {
+            element.removeInterval(new Interval(time, time));
+        } else {
+            element.removeTimestamp(time);
+        }
     }
 
     @Test

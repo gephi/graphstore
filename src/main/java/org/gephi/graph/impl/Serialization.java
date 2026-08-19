@@ -24,7 +24,6 @@ import it.unimi.dsi.fastutil.bytes.ByteOpenHashSet;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharOpenHashSet;
-import it.unimi.dsi.fastutil.doubles.Double2IntMap;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
@@ -1009,21 +1008,14 @@ public class Serialization {
             timestampIndexStore = (TimestampIndexStore) model.store.timeStore.edgeIndexStore;
         }
 
-        int length = (Integer) deserialize(is);
-        double[] doubles = (double[]) deserialize(is);
-        int[] ints = (int[]) deserialize(is);
-        int[] garbage = (int[]) deserialize(is);
-        int[] counts = (int[]) deserialize(is);
+        // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are read to advance
+        // the stream and discarded. See serializeTimestampIndexStore for the layout.
+        deserialize(is); // length
+        deserialize(is); // timestamps
+        deserialize(is); // time indices
+        deserialize(is); // garbage queue
+        deserialize(is); // reference counts
 
-        timestampIndexStore.length = length;
-        for (int i : garbage) {
-            timestampIndexStore.garbageQueue.add(i);
-        }
-        Double2IntMap m = timestampIndexStore.getMap();
-        for (int i = 0; i < ints.length; i++) {
-            m.put(doubles[i], ints[i]);
-        }
-        timestampIndexStore.countMap = counts;
         return timestampIndexStore;
     }
 
@@ -1050,23 +1042,17 @@ public class Serialization {
             intervalIndexStore = (IntervalIndexStore) model.store.timeStore.edgeIndexStore;
         }
 
-        int length = (Integer) deserialize(is);
+        // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are read to advance
+        // the stream and discarded. See serializeIntervalIndexStore for the layout.
+        deserialize(is); // length
         int mapSize = (Integer) deserialize(is);
-
-        Interval2IntTreeMap map = intervalIndexStore.getMap();
         for (int i = 0; i < mapSize; i++) {
-            Interval key = (Interval) deserialize(is);
-            Integer value = (Integer) deserialize(is);
-            map.put(key, value);
+            deserialize(is); // interval
+            deserialize(is); // time index
         }
-        int[] garbage = (int[]) deserialize(is);
-        int[] counts = (int[]) deserialize(is);
+        deserialize(is); // garbage queue
+        deserialize(is); // reference counts
 
-        intervalIndexStore.length = length;
-        for (int i : garbage) {
-            intervalIndexStore.garbageQueue.add(i);
-        }
-        intervalIndexStore.countMap = counts;
         return intervalIndexStore;
     }
 
