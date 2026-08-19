@@ -69,16 +69,7 @@ import org.gephi.graph.api.types.TimestampStringMap;
  * and the regeneration rules.
  * <p>
  * The current minor's fixtures are byte-pinned, so every model built here must serialize to the same bytes on every run
- * and every JVM. That rules out:
- * <ul>
- * <li>wall-clock, random, locale- and timezone-dependent values;</li>
- * <li>a generic {@link java.util.HashMap} or {@link java.util.HashSet} as an attribute value.
- * <code>Serialization.serializeMap</code> and <code>serializeSet</code> iterate in hash order, and reading them back
- * yields fastutil types with a different order. The <code>Map</code> and <code>Set</code> columns are declared here
- * with null values; real values are covered by the round-trip-only test.</li>
- * </ul>
- *
- * Run with:
+ * and every JVM. Run with:
  *
  * <pre>
  * mvn -q test-compile

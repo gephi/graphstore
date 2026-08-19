@@ -32,7 +32,7 @@ A minor bump may change the byte format. Older formats must remain readable.
 
 ## Regenerating
 
-Regeneration applies to the current minor only. The legacy directories are historical artifacts and are never
+Regeneration applies to the current version only. The legacy directories are historical artifacts and are never
 rewritten.
 
 ```
@@ -49,15 +49,3 @@ regenerated fixtures, plus a `Serialization.VERSION` bump if it breaks read comp
 
 When the project moves to a new minor: create its directory, generate its fixtures, bump
 `SerializationFixtureGenerator.CURRENT_MINOR`, and add the minor to `SerializationCompatibilityTest.ALL_MINORS`.
-
-## Notes
-
-* `0.7/` came from a 0.7.0-SNAPSHOT build and may differ from released 0.7.0.
-* The 0.4 to 0.7 fixtures are 830-890 bytes and cover the format skeleton only: a few nodes and edges, the default
-  columns, element and text properties. `0.8/` covers the attribute type surface: a column of every supported type,
-  both time representations, timestamp and interval maps of each value type, graph attributes, views, edge types and
-  dynamic edge weights.
-* A generic `HashMap` or `HashSet` cannot be used as an attribute value in a byte-pinned fixture.
-  `Serialization.serializeMap` and `serializeSet` iterate in hash order, and reading them back yields fastutil types
-  with a different order. The `Map` and `Set` columns are declared with null values; real values are covered by the
-  round-trip-only test.
