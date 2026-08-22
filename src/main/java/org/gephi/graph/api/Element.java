@@ -39,6 +39,11 @@ public interface Element extends ElementProperties {
 
     /**
      * Gets the attribute for the given key.
+     * <p>
+     * For dynamic columns the returned {@link org.gephi.graph.api.types.TimeMap TimeMap} or
+     * {@link org.gephi.graph.api.types.TimeSet TimeSet} is the instance held by this element. Mutating it directly
+     * leaves the time index stale: use the <code>setAttribute</code> and <code>removeAttribute</code> methods that take
+     * a time instead.
      *
      * @param key column's key
      * @return attribute value, or null
@@ -47,6 +52,11 @@ public interface Element extends ElementProperties {
 
     /**
      * Gets the attribute for the given column.
+     * <p>
+     * For dynamic columns the returned {@link org.gephi.graph.api.types.TimeMap TimeMap} or
+     * {@link org.gephi.graph.api.types.TimeSet TimeSet} is the instance held by this element. Mutating it directly
+     * leaves the time index stale: use the <code>setAttribute</code> and <code>removeAttribute</code> methods that take
+     * a time instead.
      *
      * @param column column
      * @return attribute value, or null

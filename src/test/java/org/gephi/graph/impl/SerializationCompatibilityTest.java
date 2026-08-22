@@ -101,9 +101,9 @@ public class SerializationCompatibilityTest {
     // Contract 2: the current minor is byte-pinned
     //
     // Compares today's write path against the committed golden file. Reading a fixture back and re-serializing it
-    // would not work, because deserialization is not byte-idempotent here: GraphVersion counters and
-    // TimeIndexStore.countMap are restored from the stream and then incremented again as elements are re-inserted, and
-    // TextProperties width/height are dropped on read. Contract 1 covers the read path.
+    // would not work, because deserialization is not byte-idempotent here: GraphVersion counters are restored from the
+    // stream and then incremented again as elements are re-inserted, TextProperties width/height are dropped on read,
+    // and the time index is rebuilt from the elements rather than restored. Contract 1 covers the read path.
 
     @Test(dataProvider = "currentMinorFixtures")
     public void testCurrentMinorIsByteIdentical(String fixture) throws IOException {

@@ -452,6 +452,54 @@ public class TimestampIndexStoreTest {
     }
 
     @Test
+    public void testSetAttributeTimestampCounts() {
+        GraphStore graphStore = new GraphStore();
+        TimestampIndexStore store = (TimestampIndexStore) graphStore.timeStore.nodeIndexStore;
+
+        Column col = graphStore.nodeTable.addColumn("col", TimestampStringMap.class);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
+        graphStore.addNode(nodeImpl);
+
+        nodeImpl.setAttribute(col, "foo", 1.0);
+        nodeImpl.setAttribute(col, "bar", 2.0);
+        nodeImpl.setAttribute(col, "baz", 3.0);
+        // Overwriting an existing timestamp is not a new reference
+        nodeImpl.setAttribute(col, "qux", 1.0);
+
+        Assert.assertEquals(store.size(), 3);
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(1.0)], 1);
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(2.0)], 1);
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(3.0)], 1);
+
+        // One reference each, so each removal frees its timestamp
+        nodeImpl.removeAttribute(col, 1.0);
+        Assert.assertFalse(store.contains(1.0));
+        nodeImpl.removeAttribute(col);
+        Assert.assertEquals(store.size(), 0);
+        Assert.assertFalse(store.contains(2.0));
+        Assert.assertFalse(store.contains(3.0));
+    }
+
+    @Test
+    public void testSetAttributeTimestampSharedWithTimeSet() {
+        GraphStore graphStore = new GraphStore();
+        TimestampIndexStore store = (TimestampIndexStore) graphStore.timeStore.nodeIndexStore;
+
+        Column col = graphStore.nodeTable.addColumn("col", TimestampStringMap.class);
+        NodeImpl nodeImpl = (NodeImpl) graphStore.factory.newNode("0");
+        graphStore.addNode(nodeImpl);
+
+        nodeImpl.addTimestamp(1.0);
+        nodeImpl.setAttribute(col, "foo", 1.0);
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(1.0)], 2);
+
+        nodeImpl.removeAttribute(col, 1.0);
+        Assert.assertTrue(store.contains(1.0));
+        nodeImpl.removeTimestamp(1.0);
+        Assert.assertFalse(store.contains(1.0));
+    }
+
+    @Test
     public void testRemoveAttributeTimestamp() {
         GraphStore graphStore = new GraphStore();
         TimeStore timestampStore = graphStore.timeStore;
