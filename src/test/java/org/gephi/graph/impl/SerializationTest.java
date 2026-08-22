@@ -793,9 +793,9 @@ public class SerializationTest {
     }
 
     /**
-     * Files written before the dynamic-attribute overcount fix carry reference counts above the number of references,
-     * and time values nothing points at. Reading rebuilds the index from the elements, which drops both. The index is
-     * inflated directly here, since the write path no longer produces that state.
+     * Files written before #288 carry reference counts above the number of references, and time values nothing points
+     * at. Reading rebuilds the index from the elements, which drops both. The index is inflated directly here, since
+     * the write path no longer produces that state.
      */
     private void assertTimeIndexIsRebuiltOnRead(TimeRepresentation timeRepresentation) throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl(
@@ -820,7 +820,7 @@ public class SerializationTest {
         Object last = timeKey(timeRepresentation, 3.0);
         Object stranded = timeKey(timeRepresentation, 7.0);
 
-        // Emulate a store written before the fix: a count above the number of references, and a time no element holds
+        // Emulate a store written before #288: a count above the number of references, and a time no element holds
         TimeIndexStore nodeIndexStore = graphStore.timeStore.nodeIndexStore;
         nodeIndexStore.add(first);
         nodeIndexStore.add(stranded);
