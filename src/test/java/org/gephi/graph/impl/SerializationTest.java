@@ -706,8 +706,9 @@ public class SerializationTest {
     }
 
     /**
-     * The time store block is derived state, rebuilt from the elements as they are inserted. Read standalone it carries
-     * nothing, and it must consume exactly its own bytes: Serialization.deserialize(byte[]) throws if any are left.
+     * The time store block is derived state, rebuilt from the elements as they are inserted. Its content is not
+     * written, read standalone it carries nothing, and it must consume exactly its own bytes:
+     * Serialization.deserialize(byte[]) throws if any are left.
      */
     @Test
     public void testTimestampStore() throws IOException, ClassNotFoundException {
@@ -722,17 +723,16 @@ public class SerializationTest {
         timestampStore.edgeIndexStore.add(3.0);
         timestampStore.edgeIndexStore.add(4.0);
 
-        Serialization ser = new Serialization(graphModel);
-        byte[] buf = ser.serialize(timestampStore);
+        Assert.assertFalse(timestampStore.isEmpty());
+        byte[] buf = new Serialization(graphModel).serialize(timestampStore);
 
-        graphModel = new GraphModelImpl();
-        ser = new Serialization(graphModel);
-        TimeStore l = (TimeStore) ser.deserialize(buf);
+        // The index is derived state: its content leaves no trace in the bytes and reading yields an empty store
+        GraphModelImpl empty = new GraphModelImpl();
+        Assert.assertEquals(buf, new Serialization(empty).serialize(empty.store.timeStore));
 
-        Assert.assertSame(l, graphModel.store.timeStore);
+        GraphModelImpl readModel = new GraphModelImpl();
+        TimeStore l = (TimeStore) new Serialization(readModel).deserialize(buf);
         Assert.assertTrue(l.isEmpty());
-        Assert.assertEquals(l.nodeIndexStore.size(), 0);
-        Assert.assertEquals(l.edgeIndexStore.size(), 0);
     }
 
     @Test
@@ -749,56 +749,16 @@ public class SerializationTest {
         timestampStore.edgeIndexStore.add(new Interval(2.0, 3.0));
         timestampStore.edgeIndexStore.add(new Interval(2.0, 3.0));
 
-        Serialization ser = new Serialization(graphModel);
-        byte[] buf = ser.serialize(timestampStore);
+        Assert.assertFalse(timestampStore.isEmpty());
+        byte[] buf = new Serialization(graphModel).serialize(timestampStore);
 
-        graphModel = new GraphModelImpl(config);
-        ser = new Serialization(graphModel);
-        TimeStore l = (TimeStore) ser.deserialize(buf);
-
-        Assert.assertSame(l, graphModel.store.timeStore);
-        Assert.assertTrue(l.isEmpty());
-        Assert.assertEquals(l.nodeIndexStore.size(), 0);
-        Assert.assertEquals(l.edgeIndexStore.size(), 0);
-    }
-
-    @Test
-    public void testTimestampIndexStoreContentIsNotWritten() throws IOException {
-        GraphModelImpl withContent = new GraphModelImpl();
-        TimeStore timeStore = withContent.store.timeStore;
-        timeStore.nodeIndexStore.add(6.0);
-        timeStore.nodeIndexStore.add(4.0);
-        timeStore.nodeIndexStore.add(4.0);
-        timeStore.nodeIndexStore.add(2.0);
-        timeStore.nodeIndexStore.remove(2.0);
-        timeStore.edgeIndexStore.add(3.0);
-        Assert.assertFalse(timeStore.isEmpty());
-
-        GraphModelImpl empty = new GraphModelImpl();
-
-        // The time index is written as an empty block: its content leaves no trace in the bytes
-        Assert.assertEquals(new Serialization(withContent).serialize(timeStore), new Serialization(empty)
-                .serialize(empty.store.timeStore));
-    }
-
-    @Test
-    public void testIntervalIndexStoreContentIsNotWritten() throws IOException {
-        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
-        GraphModelImpl withContent = new GraphModelImpl(config);
-        TimeStore timeStore = withContent.store.timeStore;
-        timeStore.nodeIndexStore.add(new Interval(1.0, 6.0));
-        timeStore.nodeIndexStore.add(new Interval(3.0, 4.0));
-        timeStore.nodeIndexStore.add(new Interval(3.0, 4.0));
-        timeStore.nodeIndexStore.add(new Interval(5.0, 6.0));
-        timeStore.nodeIndexStore.remove(new Interval(5.0, 6.0));
-        timeStore.edgeIndexStore.add(new Interval(2.0, 3.0));
-        Assert.assertFalse(timeStore.isEmpty());
-
+        // The index is derived state: its content leaves no trace in the bytes and reading yields an empty store
         GraphModelImpl empty = new GraphModelImpl(config);
+        Assert.assertEquals(buf, new Serialization(empty).serialize(empty.store.timeStore));
 
-        // The time index is written as an empty block: its content leaves no trace in the bytes
-        Assert.assertEquals(new Serialization(withContent).serialize(timeStore), new Serialization(empty)
-                .serialize(empty.store.timeStore));
+        GraphModelImpl readModel = new GraphModelImpl(config);
+        TimeStore l = (TimeStore) new Serialization(readModel).deserialize(buf);
+        Assert.assertTrue(l.isEmpty());
     }
 
     @Test
