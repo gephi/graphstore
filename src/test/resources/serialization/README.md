@@ -47,8 +47,5 @@ The fixture root defaults to `src/test/resources/serialization` and can be passe
 A failing byte-pin means either a bug or an intended format change. An intended change is committed together with the
 regenerated fixtures, plus a `Serialization.VERSION` bump if it breaks read compatibility.
 
-Fixing a bug in the state being written also moves the bytes without changing the layout. The 0.8 fixtures were
-regenerated once for this reason, when dynamic attributes stopped inflating the time index reference counts.
-
 When the project moves to a new minor: create its directory, generate its fixtures, bump
 `SerializationFixtureGenerator.CURRENT_MINOR`, and add the minor to `SerializationCompatibilityTest.ALL_MINORS`.
