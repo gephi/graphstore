@@ -991,11 +991,13 @@ public class Serialization {
     private void serializeTimestampIndexStore(final DataOutput out, final TimestampIndexStore timestampIndexStore) throws IOException {
         serialize(out, timestampIndexStore.elementType);
 
-        serialize(out, timestampIndexStore.length);
-        serialize(out, timestampIndexStore.getMap().keySet().toDoubleArray());
-        serialize(out, timestampIndexStore.getMap().values().toIntArray());
-        serialize(out, timestampIndexStore.garbageQueue.toIntArray());
-        serialize(out, timestampIndexStore.countMap);
+        // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are written empty to
+        // keep the block layout, which earlier versions read positionally.
+        serialize(out, 0);
+        serialize(out, new double[0]);
+        serialize(out, new int[0]);
+        serialize(out, new int[0]);
+        serialize(out, new int[0]);
     }
 
     private TimestampIndexStore deserializeTimestampIndexStore(final DataInput is) throws IOException, ClassNotFoundException {
@@ -1009,12 +1011,12 @@ public class Serialization {
         }
 
         // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are read to advance
-        // the stream and discarded. See serializeTimestampIndexStore for the layout.
-        deserialize(is); // length
-        deserialize(is); // timestamps
-        deserialize(is); // time indices
-        deserialize(is); // garbage queue
-        deserialize(is); // reference counts
+        // the stream and discarded. The casts check each field's type. See serializeTimestampIndexStore for the layout.
+        int length = (Integer) deserialize(is);
+        double[] timestamps = (double[]) deserialize(is);
+        int[] timeIndices = (int[]) deserialize(is);
+        int[] garbage = (int[]) deserialize(is);
+        int[] counts = (int[]) deserialize(is);
 
         return timestampIndexStore;
     }
@@ -1022,14 +1024,12 @@ public class Serialization {
     private void serializeIntervalIndexStore(final DataOutput out, final IntervalIndexStore intervalIndexStore) throws IOException {
         serialize(out, intervalIndexStore.elementType);
 
-        serialize(out, intervalIndexStore.length);
-        serialize(out, intervalIndexStore.getMap().size());
-        for (Map.Entry<Interval, Integer> entry : intervalIndexStore.getMap().entrySet()) {
-            serialize(out, entry.getKey());
-            serialize(out, entry.getValue());
-        }
-        serialize(out, intervalIndexStore.garbageQueue.toIntArray());
-        serialize(out, intervalIndexStore.countMap);
+        // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are written empty to
+        // keep the block layout, which earlier versions read positionally. The map is written with a zero entry count.
+        serialize(out, 0);
+        serialize(out, 0);
+        serialize(out, new int[0]);
+        serialize(out, new int[0]);
     }
 
     private IntervalIndexStore deserializeIntervalIndexStore(final DataInput is) throws IOException, ClassNotFoundException {
@@ -1043,15 +1043,15 @@ public class Serialization {
         }
 
         // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are read to advance
-        // the stream and discarded. See serializeIntervalIndexStore for the layout.
-        deserialize(is); // length
+        // the stream and discarded. The casts check each field's type. See serializeIntervalIndexStore for the layout.
+        int length = (Integer) deserialize(is);
         int mapSize = (Integer) deserialize(is);
         for (int i = 0; i < mapSize; i++) {
-            deserialize(is); // interval
-            deserialize(is); // time index
+            Interval interval = (Interval) deserialize(is);
+            Integer timeIndex = (Integer) deserialize(is);
         }
-        deserialize(is); // garbage queue
-        deserialize(is); // reference counts
+        int[] garbage = (int[]) deserialize(is);
+        int[] counts = (int[]) deserialize(is);
 
         return intervalIndexStore;
     }
