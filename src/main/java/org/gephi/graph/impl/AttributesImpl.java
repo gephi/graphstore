@@ -147,7 +147,12 @@ public class AttributesImpl {
         return null;
     }
 
-    protected Object setAttribute(Column column, Object value, Object timeObject) {
+    /**
+     * Puts a value at the given time in the column's map, creating the map if needed.
+     *
+     * @return true if the time was not already in the map
+     */
+    protected boolean setAttribute(Column column, Object value, Object timeObject) {
         int index = column.getIndex();
         Object oldValue = null;
         synchronized (this) {
@@ -165,8 +170,7 @@ public class AttributesImpl {
                 dynamicValue = (TimeMap) oldValue;
             }
 
-            dynamicValue.put(timeObject, value);
-            return dynamicValue;
+            return dynamicValue.put(timeObject, value);
         }
     }
 

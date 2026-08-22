@@ -22,6 +22,11 @@ import org.gephi.graph.api.TimeFormat;
 
 /**
  * Interface that defines the functionalities both timestamp and interval map have.
+ * <p>
+ * Once a map is set on an element's dynamic column, the graph store maintains a time index over its keys. Calling
+ * {@link #put} or {@link #remove} on that instance bypasses the index and leaves it stale. Populate a map before
+ * setting it on an element, and go through the element's <code>setAttribute</code> and <code>removeAttribute</code>
+ * methods afterwards.
  *
  * @param <K> key type
  * @param <V> value type

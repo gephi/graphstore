@@ -24,7 +24,6 @@ import it.unimi.dsi.fastutil.bytes.ByteOpenHashSet;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharOpenHashSet;
-import it.unimi.dsi.fastutil.doubles.Double2IntMap;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
@@ -992,11 +991,13 @@ public class Serialization {
     private void serializeTimestampIndexStore(final DataOutput out, final TimestampIndexStore timestampIndexStore) throws IOException {
         serialize(out, timestampIndexStore.elementType);
 
-        serialize(out, timestampIndexStore.length);
-        serialize(out, timestampIndexStore.getMap().keySet().toDoubleArray());
-        serialize(out, timestampIndexStore.getMap().values().toIntArray());
-        serialize(out, timestampIndexStore.garbageQueue.toIntArray());
-        serialize(out, timestampIndexStore.countMap);
+        // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are written empty to
+        // keep the block layout, which earlier versions read positionally.
+        serialize(out, 0);
+        serialize(out, new double[0]);
+        serialize(out, new int[0]);
+        serialize(out, new int[0]);
+        serialize(out, new int[0]);
     }
 
     private TimestampIndexStore deserializeTimestampIndexStore(final DataInput is) throws IOException, ClassNotFoundException {
@@ -1009,35 +1010,26 @@ public class Serialization {
             timestampIndexStore = (TimestampIndexStore) model.store.timeStore.edgeIndexStore;
         }
 
+        // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are read to advance
+        // the stream and discarded. The casts check each field's type. See serializeTimestampIndexStore for the layout.
         int length = (Integer) deserialize(is);
-        double[] doubles = (double[]) deserialize(is);
-        int[] ints = (int[]) deserialize(is);
+        double[] timestamps = (double[]) deserialize(is);
+        int[] timeIndices = (int[]) deserialize(is);
         int[] garbage = (int[]) deserialize(is);
         int[] counts = (int[]) deserialize(is);
 
-        timestampIndexStore.length = length;
-        for (int i : garbage) {
-            timestampIndexStore.garbageQueue.add(i);
-        }
-        Double2IntMap m = timestampIndexStore.getMap();
-        for (int i = 0; i < ints.length; i++) {
-            m.put(doubles[i], ints[i]);
-        }
-        timestampIndexStore.countMap = counts;
         return timestampIndexStore;
     }
 
     private void serializeIntervalIndexStore(final DataOutput out, final IntervalIndexStore intervalIndexStore) throws IOException {
         serialize(out, intervalIndexStore.elementType);
 
-        serialize(out, intervalIndexStore.length);
-        serialize(out, intervalIndexStore.getMap().size());
-        for (Map.Entry<Interval, Integer> entry : intervalIndexStore.getMap().entrySet()) {
-            serialize(out, entry.getKey());
-            serialize(out, entry.getValue());
-        }
-        serialize(out, intervalIndexStore.garbageQueue.toIntArray());
-        serialize(out, intervalIndexStore.countMap);
+        // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are written empty to
+        // keep the block layout, which earlier versions read positionally. The map is written with a zero entry count.
+        serialize(out, 0);
+        serialize(out, 0);
+        serialize(out, new int[0]);
+        serialize(out, new int[0]);
     }
 
     private IntervalIndexStore deserializeIntervalIndexStore(final DataInput is) throws IOException, ClassNotFoundException {
@@ -1050,23 +1042,17 @@ public class Serialization {
             intervalIndexStore = (IntervalIndexStore) model.store.timeStore.edgeIndexStore;
         }
 
+        // The time index is derived state: inserting the nodes and edges rebuilds it. These fields are read to advance
+        // the stream and discarded. The casts check each field's type. See serializeIntervalIndexStore for the layout.
         int length = (Integer) deserialize(is);
         int mapSize = (Integer) deserialize(is);
-
-        Interval2IntTreeMap map = intervalIndexStore.getMap();
         for (int i = 0; i < mapSize; i++) {
-            Interval key = (Interval) deserialize(is);
-            Integer value = (Integer) deserialize(is);
-            map.put(key, value);
+            Interval interval = (Interval) deserialize(is);
+            Integer timeIndex = (Integer) deserialize(is);
         }
         int[] garbage = (int[]) deserialize(is);
         int[] counts = (int[]) deserialize(is);
 
-        intervalIndexStore.length = length;
-        for (int i : garbage) {
-            intervalIndexStore.garbageQueue.add(i);
-        }
-        intervalIndexStore.countMap = counts;
         return intervalIndexStore;
     }
 
