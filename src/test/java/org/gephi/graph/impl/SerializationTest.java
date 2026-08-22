@@ -763,6 +763,45 @@ public class SerializationTest {
     }
 
     @Test
+    public void testTimestampIndexStoreContentIsNotWritten() throws IOException {
+        GraphModelImpl withContent = new GraphModelImpl();
+        TimeStore timeStore = withContent.store.timeStore;
+        timeStore.nodeIndexStore.add(6.0);
+        timeStore.nodeIndexStore.add(4.0);
+        timeStore.nodeIndexStore.add(4.0);
+        timeStore.nodeIndexStore.add(2.0);
+        timeStore.nodeIndexStore.remove(2.0);
+        timeStore.edgeIndexStore.add(3.0);
+        Assert.assertFalse(timeStore.isEmpty());
+
+        GraphModelImpl empty = new GraphModelImpl();
+
+        // The time index is written as an empty block: its content leaves no trace in the bytes
+        Assert.assertEquals(new Serialization(withContent).serialize(timeStore), new Serialization(empty)
+                .serialize(empty.store.timeStore));
+    }
+
+    @Test
+    public void testIntervalIndexStoreContentIsNotWritten() throws IOException {
+        Configuration config = Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build();
+        GraphModelImpl withContent = new GraphModelImpl(config);
+        TimeStore timeStore = withContent.store.timeStore;
+        timeStore.nodeIndexStore.add(new Interval(1.0, 6.0));
+        timeStore.nodeIndexStore.add(new Interval(3.0, 4.0));
+        timeStore.nodeIndexStore.add(new Interval(3.0, 4.0));
+        timeStore.nodeIndexStore.add(new Interval(5.0, 6.0));
+        timeStore.nodeIndexStore.remove(new Interval(5.0, 6.0));
+        timeStore.edgeIndexStore.add(new Interval(2.0, 3.0));
+        Assert.assertFalse(timeStore.isEmpty());
+
+        GraphModelImpl empty = new GraphModelImpl(config);
+
+        // The time index is written as an empty block: its content leaves no trace in the bytes
+        Assert.assertEquals(new Serialization(withContent).serialize(timeStore), new Serialization(empty)
+                .serialize(empty.store.timeStore));
+    }
+
+    @Test
     public void testGraphStoreTimestampIndexCounts() throws IOException, ClassNotFoundException {
         assertTimeIndexCountsSurviveRoundTrip(TimeRepresentation.TIMESTAMP);
     }
@@ -885,8 +924,8 @@ public class SerializationTest {
     }
 
     /**
-     * Builds a store with element time sets, a dynamic column, times shared by several elements, a parallel edge and a
-     * freed time index.
+     * Builds a store with element time sets, a dynamic column, times shared by several elements, a parallel edge, a
+     * freed time index and a dynamic time set twice.
      */
     private static GraphStore newTimeIndexGraphStore(TimeRepresentation timeRepresentation) {
         GraphModelImpl graphModel = new GraphModelImpl(
@@ -932,6 +971,10 @@ public class SerializationTest {
             map.put(6.0, 20);
             node1.setAttribute(column, map);
         }
+
+        // 5.0 is already in the map and stays at one reference, 8.0 adds one
+        setTimeAttribute(node1, column, timeRepresentation, 5.0, 30);
+        setTimeAttribute(node1, column, timeRepresentation, 8.0, 40);
 
         return graphStore;
     }
