@@ -20,6 +20,11 @@ import org.gephi.graph.api.TimeFormat;
 
 /**
  * Interface that defines the functionalities both timestamp and interval set have.
+ * <p>
+ * Once a set is attached to an element, the graph store maintains a time index over its keys. Calling {@link #add} or
+ * {@link #remove} on that instance bypasses the index and leaves it stale. Populate a set before setting it on an
+ * element, and go through the element's <code>addTimestamp</code>/<code>addInterval</code> and
+ * <code>removeTimestamp</code>/<code>removeInterval</code> methods afterwards.
  *
  * @param <K> key type
  */
