@@ -551,11 +551,6 @@ public class GraphGenerator {
 
         NodeImpl[] nodes = generateLargeNodeList();
         graphStore.addAllNodes(Arrays.asList(nodes));
-        // Build edges against the real, inserted nodeStore rather than generateLargeEdgeList()'s own
-        // throwaway node population (which is sized and constructed independently of `nodes` above) -
-        // otherwise edge.source/target reference detached node objects that merely happen to share a
-        // storeId with a real node, which falls apart the moment a node is removed (its cascade-delete
-        // walks the real node's own adjacency links, which were never wired to these edges).
         EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, true, true, false);
         graphStore.addAllEdges(Arrays.asList(edges));
         return graphStore;
