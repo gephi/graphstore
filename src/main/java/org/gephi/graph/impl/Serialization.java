@@ -353,8 +353,6 @@ public class Serialization {
     public GraphStore deserializeGraphStore(DataInput is) throws IOException, ClassNotFoundException {
         GraphStore store = model.store;
         // Hold the write lock for the whole method: deserialization mutates the store directly
-        // (nodeStore.add()/edgeStore.add(), bypassing GraphStore's own auto-locked addNode()/
-        // addEdge()), so without this a concurrent reader could observe a partially-populated store.
         store.autoWriteLock();
         try {
             if (!store.nodeStore.isEmpty()) { // TODO test other stores
