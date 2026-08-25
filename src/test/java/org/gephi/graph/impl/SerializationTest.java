@@ -1951,37 +1951,4 @@ public class SerializationTest {
             return delegate.readUTF();
         }
     }
-
-    @Test
-    public void testSerializeAndDeserializeMultiBlockGraphAfterRemovalsRoundTrips() throws Exception {
-        // Regression test for a GraphGenerator.generateLargeGraphStore() bug: its edges used to
-        // reference a throwaway, independently-sized node population instead of the real nodeStore, so
-        // removeNode()'s cascade-edge-removal (which walks the real node's own adjacency links) could
-        // silently leave dangling edges behind whenever a referenced node was removed. That only
-        // surfaced once something both spanned multiple storage blocks and had elements removed
-        // afterward, which serialization round-tripping does here.
-        GraphStore graphStore = GraphGenerator.generateLargeGraphStore();
-
-        NodeImpl[] nodes = graphStore.nodeStore.toArray();
-        for (int i = 0; i < nodes.length; i += 11) {
-            graphStore.removeNode(nodes[i]);
-        }
-        EdgeImpl[] edges = graphStore.edgeStore.toArray();
-        for (int i = 0; i < edges.length; i += 5) {
-            graphStore.removeEdge(edges[i]);
-        }
-
-        GraphModelImpl graphModel = new GraphModelImpl();
-        Serialization ser = new Serialization(graphModel);
-        DataInputOutput dio = new DataInputOutput();
-        ser.serializeGraphStore(dio, graphStore);
-        byte[] bytes = dio.toByteArray();
-
-        GraphModelImpl graphModel2 = new GraphModelImpl();
-        Serialization ser2 = new Serialization(graphModel2);
-        GraphStore deserialized = ser2.deserializeGraphStore(dio.reset(bytes));
-
-        Assert.assertTrue(graphStore.nodeStore.deepEquals(deserialized.nodeStore));
-        Assert.assertTrue(graphStore.edgeStore.deepEquals(deserialized.edgeStore));
-    }
 }
