@@ -66,6 +66,7 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.TimeFormat;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.UnsupportedFormatVersionException;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
 import org.gephi.graph.api.types.IntervalCharMap;
@@ -243,6 +244,7 @@ public class Serialization {
 
     public GraphModelImpl deserializeGraphModel(DataInput is) throws IOException, ClassNotFoundException {
         readVersion = (Float) deserialize(is);
+        checkVersionSupported();
         ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
         model = new GraphModelImpl(config.toConfiguration());
         deserialize(is);
@@ -252,10 +254,19 @@ public class Serialization {
     public GraphModelImpl deserializeGraphModel(DataInput is, GraphModel graphModel) throws IOException, ClassNotFoundException {
         model = (GraphModelImpl) graphModel;
         readVersion = (Float) deserialize(is);
+        checkVersionSupported();
         ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
         verifyCompatibility(config, model.configuration);
         deserialize(is);
         return model;
+    }
+
+    // Fails fast, before any store state is touched, instead of letting a later unrecognized type
+    // tag surface as a confusing "Unknown serialization type tag" mid-deserialization.
+    private void checkVersionSupported() throws UnsupportedFormatVersionException {
+        if (readVersion > VERSION) {
+            throw new UnsupportedFormatVersionException(readVersion, VERSION);
+        }
     }
 
     private void verifyCompatibility(ConfigurationImpl readConfig, ConfigurationImpl modelConfig) {
@@ -292,6 +303,7 @@ public class Serialization {
 
     public GraphModelImpl deserializeGraphModelWithoutVersionPrefix(DataInput is, float version) throws IOException, ClassNotFoundException {
         readVersion = version;
+        checkVersionSupported();
         ConfigurationImpl config = (ConfigurationImpl) deserialize(is);
         model = new GraphModelImpl(config.toConfiguration());
         deserialize(is);

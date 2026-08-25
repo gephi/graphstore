@@ -86,6 +86,7 @@ import org.gephi.graph.api.types.TimestampStringMap;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.UnsupportedFormatVersionException;
 import org.gephi.graph.api.types.IntervalBooleanMap;
 import org.gephi.graph.api.types.IntervalByteMap;
 import org.gephi.graph.api.types.IntervalCharMap;
@@ -1509,6 +1510,53 @@ public class SerializationTest {
         ser = new Serialization();
         GraphModelImpl read = ser.deserializeGraphModelWithoutVersionPrefix(dio.reset(bytes), Serialization.VERSION);
         Assert.assertTrue(read.deepEquals(gm));
+    }
+
+    @Test
+    public void testDeserializeGraphModelRejectsNewerVersion() throws Exception {
+        GraphModelImpl gm = GraphGenerator.generateSmallGraphStore().graphModel;
+        Serialization ser = new Serialization(gm) {
+            @Override
+            public void serializeGraphModel(DataOutput out, GraphModelImpl model) throws IOException {
+                this.model = model;
+                serialize(out, VERSION + 1f);
+                serialize(out, model.configuration);
+                serialize(out, model.store);
+            }
+        };
+
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, gm);
+        byte[] bytes = dio.toByteArray();
+
+        UnsupportedFormatVersionException ex = Assert
+                .expectThrows(UnsupportedFormatVersionException.class, () -> new Serialization()
+                        .deserializeGraphModel(dio.reset(bytes)));
+        Assert.assertEquals(ex.getFileVersion(), Serialization.VERSION + 1f);
+        Assert.assertEquals(ex.getMaxSupportedVersion(), Serialization.VERSION);
+    }
+
+    @Test
+    public void testDeserializeGraphModelWithoutVersionPrefixRejectsNewerVersion() throws Exception {
+        GraphModelImpl gm = GraphGenerator.generateSmallGraphStore().graphModel;
+        Serialization ser = new Serialization(gm) {
+            @Override
+            public void serializeGraphModel(DataOutput out, GraphModelImpl model) throws IOException {
+                this.model = model;
+                serialize(out, model.configuration);
+                serialize(out, model.store);
+            }
+        };
+
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, gm);
+        byte[] bytes = dio.toByteArray();
+
+        UnsupportedFormatVersionException ex = Assert
+                .expectThrows(UnsupportedFormatVersionException.class, () -> new Serialization()
+                        .deserializeGraphModelWithoutVersionPrefix(dio.reset(bytes), Serialization.VERSION + 1f));
+        Assert.assertEquals(ex.getFileVersion(), Serialization.VERSION + 1f);
+        Assert.assertEquals(ex.getMaxSupportedVersion(), Serialization.VERSION);
     }
 
     @Test
