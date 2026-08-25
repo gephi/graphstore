@@ -299,48 +299,55 @@ public class Serialization {
     }
 
     public void serializeGraphStore(DataOutput out, GraphStore store) throws IOException {
-        // Configuration
-        serializeGraphStoreConfiguration(out);
+        // Hold the read lock for the whole method so the write is atomic with respect to
+        // concurrent structural mutation.
+        store.autoReadLock();
+        try {
+            // Configuration
+            serializeGraphStoreConfiguration(out);
 
-        // GraphVersion
-        serialize(out, store.version);
+            // GraphVersion
+            serialize(out, store.version);
 
-        // Edge types
-        EdgeTypeStore edgeTypeStore = store.edgeTypeStore;
-        serialize(out, edgeTypeStore);
+            // Edge types
+            EdgeTypeStore edgeTypeStore = store.edgeTypeStore;
+            serialize(out, edgeTypeStore);
 
-        // Column
-        serialize(out, store.nodeTable);
-        serialize(out, store.edgeTable);
+            // Column
+            serialize(out, store.nodeTable);
+            serialize(out, store.edgeTable);
 
-        // Time store
-        serialize(out, store.timeStore);
+            // Time store
+            serialize(out, store.timeStore);
 
-        // Factory
-        serialize(out, store.factory);
+            // Factory
+            serialize(out, store.factory);
 
-        // Atts
-        serialize(out, store.attributes);
+            // Atts
+            serialize(out, store.attributes);
 
-        // TimeFormat
-        serialize(out, store.timeFormat);
+            // TimeFormat
+            serialize(out, store.timeFormat);
 
-        // Time zone
-        serialize(out, store.timeZone);
+            // Time zone
+            serialize(out, store.timeZone);
 
-        // Nodes + Edges
-        int nodesAndEdges = store.nodeStore.size() + store.edgeStore.size();
-        serialize(out, nodesAndEdges);
+            // Nodes + Edges
+            int nodesAndEdges = store.nodeStore.size() + store.edgeStore.size();
+            serialize(out, nodesAndEdges);
 
-        for (Node node : store.nodeStore) {
-            serialize(out, node);
+            for (Node node : store.nodeStore) {
+                serialize(out, node);
+            }
+            for (Edge edge : store.edgeStore) {
+                serialize(out, edge);
+            }
+
+            // Views
+            serialize(out, store.viewStore);
+        } finally {
+            store.autoReadUnlock();
         }
-        for (Edge edge : store.edgeStore) {
-            serialize(out, edge);
-        }
-
-        // Views
-        serialize(out, store.viewStore);
     }
 
     public GraphStore deserializeGraphStore(DataInput is) throws IOException, ClassNotFoundException {

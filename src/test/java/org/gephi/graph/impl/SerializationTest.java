@@ -40,7 +40,9 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -58,6 +60,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.GraphModel;
@@ -1563,6 +1569,164 @@ public class SerializationTest {
             int value = field.getInt(null);
             String previous = tagsByValue.put(value, name);
             Assert.assertNull(previous, "Duplicate serialization tag " + value + " shared by " + previous + " and " + name);
+        }
+    }
+
+    @Test(timeOut = 5000)
+    public void testSerializeGraphStoreHoldsReadLockForEntireDuration() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        NodeImpl[] nodes = GraphGenerator.generateSmallNodeList();
+        graphStore.nodeStore.addAll(Arrays.asList(nodes));
+
+        CountDownLatch writeStarted = new CountDownLatch(1);
+        CountDownLatch proceed = new CountDownLatch(1);
+        BlockingDataOutput blockingOutput = new BlockingDataOutput(writeStarted, proceed);
+
+        Serialization ser = new Serialization(graphModel);
+        AtomicReference<Exception> writerError = new AtomicReference<>();
+        Thread writer = new Thread(() -> {
+            try {
+                ser.serializeGraphStore(blockingOutput, graphStore);
+            } catch (Exception e) {
+                writerError.set(e);
+            }
+        });
+        writer.start();
+
+        Assert.assertTrue(writeStarted.await(2, TimeUnit.SECONDS), "serialization should have started writing");
+
+        AtomicBoolean writeLockAcquired = new AtomicBoolean(false);
+        Thread locker = new Thread(() -> {
+            graphStore.writeLock();
+            writeLockAcquired.set(true);
+            graphStore.writeUnlock();
+        });
+        locker.start();
+
+        // Give the locker thread a chance to attempt (and be blocked by) the write lock
+        Thread.sleep(300);
+        Assert.assertFalse(writeLockAcquired
+                .get(), "write lock must not be acquired while serializeGraphStore still holds the read lock");
+
+        proceed.countDown();
+        writer.join(2000);
+        locker.join(2000);
+
+        Assert.assertNull(writerError.get());
+        Assert.assertTrue(writeLockAcquired.get(), "write lock should be acquired after serialization completes");
+    }
+
+    /**
+     * A DataOutput that blocks on its very first write call until released, so tests can deterministically assert what
+     * lock state holds while a serialization call is in progress.
+     */
+    private static class BlockingDataOutput implements DataOutput {
+
+        private final DataOutputStream delegate = new DataOutputStream(new ByteArrayOutputStream());
+        private final CountDownLatch started;
+        private final CountDownLatch proceed;
+        private final AtomicBoolean first = new AtomicBoolean(true);
+
+        private BlockingDataOutput(CountDownLatch started, CountDownLatch proceed) {
+            this.started = started;
+            this.proceed = proceed;
+        }
+
+        private void beforeWrite() throws IOException {
+            if (first.compareAndSet(true, false)) {
+                started.countDown();
+                try {
+                    proceed.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException(e);
+                }
+            }
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            beforeWrite();
+            delegate.write(b);
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            beforeWrite();
+            delegate.write(b);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            beforeWrite();
+            delegate.write(b, off, len);
+        }
+
+        @Override
+        public void writeBoolean(boolean v) throws IOException {
+            beforeWrite();
+            delegate.writeBoolean(v);
+        }
+
+        @Override
+        public void writeByte(int v) throws IOException {
+            beforeWrite();
+            delegate.writeByte(v);
+        }
+
+        @Override
+        public void writeShort(int v) throws IOException {
+            beforeWrite();
+            delegate.writeShort(v);
+        }
+
+        @Override
+        public void writeChar(int v) throws IOException {
+            beforeWrite();
+            delegate.writeChar(v);
+        }
+
+        @Override
+        public void writeInt(int v) throws IOException {
+            beforeWrite();
+            delegate.writeInt(v);
+        }
+
+        @Override
+        public void writeLong(long v) throws IOException {
+            beforeWrite();
+            delegate.writeLong(v);
+        }
+
+        @Override
+        public void writeFloat(float v) throws IOException {
+            beforeWrite();
+            delegate.writeFloat(v);
+        }
+
+        @Override
+        public void writeDouble(double v) throws IOException {
+            beforeWrite();
+            delegate.writeDouble(v);
+        }
+
+        @Override
+        public void writeBytes(String s) throws IOException {
+            beforeWrite();
+            delegate.writeBytes(s);
+        }
+
+        @Override
+        public void writeChars(String s) throws IOException {
+            beforeWrite();
+            delegate.writeChars(s);
+        }
+
+        @Override
+        public void writeUTF(String s) throws IOException {
+            beforeWrite();
+            delegate.writeUTF(s);
         }
     }
 }
