@@ -349,10 +349,12 @@ public class Serialization {
             serialize(out, nodesAndEdges);
 
             for (Node node : store.nodeStore) {
-                serialize(out, node);
+                out.write(NODE);
+                serializeNode(out, (NodeImpl) node);
             }
             for (Edge edge : store.edgeStore) {
-                serialize(out, edge);
+                out.write(EDGE);
+                serializeEdge(out, (EdgeImpl) edge);
             }
 
             // Views
@@ -421,24 +423,34 @@ public class Serialization {
 
     private void serializeNode(DataOutput out, NodeImpl node) throws IOException {
         serialize(out, node.getId());
-        serialize(out, node.storeId);
+        writeInteger(out, node.storeId);
         serialize(out, node.attributes.attributes);
-        serialize(out, node.properties);
+        if (node.properties != null) {
+            out.write(NODE_PROPERTIES);
+            serializeNodeProperties(out, node.properties);
+        } else {
+            out.write(NULL);
+        }
     }
 
     private void serializeEdge(DataOutput out, EdgeImpl edge) throws IOException {
         serialize(out, edge.getId());
-        serialize(out, edge.source.storeId);
-        serialize(out, edge.target.storeId);
-        serialize(out, edge.type);
+        writeInteger(out, edge.source.storeId);
+        writeInteger(out, edge.target.storeId);
+        writeInteger(out, edge.type);
         if (edge.graphStore != null && edge.hasDynamicWeight()) {
-            serialize(out, edge.getWeight());
+            writeDouble(out, edge.getWeight());
         } else {
-            serialize(out, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT);
+            writeDouble(out, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT);
         }
-        serialize(out, edge.isDirected());
+        writeBoolean(out, edge.isDirected());
         serialize(out, edge.attributes.attributes);
-        serialize(out, edge.properties);
+        if (edge.properties != null) {
+            out.write(EDGE_PROPERTIES);
+            serializeEdgeProperties(out, edge.properties);
+        } else {
+            out.write(NULL);
+        }
     }
 
     private NodeImpl deserializeNode(DataInput is) throws IOException, ClassNotFoundException {
@@ -1388,35 +1400,15 @@ public class Serialization {
             out.write(NULL);
 
         } else if (clazz == Boolean.class) {
-            if (((Boolean) obj)) {
-                out.write(BOOLEAN_TRUE);
-            } else {
-                out.write(BOOLEAN_FALSE);
+            writeBoolean(out, (Boolean) obj);
 
-            }
         } else if (clazz == Integer.class) {
             final int val = (Integer) obj;
             writeInteger(out, val);
 
         } else if (clazz == Double.class) {
-            double v = (Double) obj;
-            if (v == -1d) {
-                out.write(DOUBLE_MINUS_1);
-            } else if (v == 0d) {
-                out.write(DOUBLE_0);
-            } else if (v == 1d) {
-                out.write(DOUBLE_1);
-            } else if (v >= 0 && v <= 255 && (int) v == v) {
-                out.write(DOUBLE_255);
-                out.write((int) v);
-            } else if (v >= Short.MIN_VALUE && v <= Short.MAX_VALUE && (short) v == v) {
-                out.write(DOUBLE_SHORT);
-                out.writeShort((int) v);
-            } else {
-                out.write(DOUBLE_FULL);
-                out.writeDouble(v);
+            writeDouble(out, (Double) obj);
 
-            }
         } else if (clazz == Float.class) {
             float v = (Float) obj;
             if (v == -1f) {
@@ -1793,6 +1785,29 @@ public class Serialization {
             }
         }
 
+    }
+
+    private void writeBoolean(DataOutput da, final boolean val) throws IOException {
+        da.write(val ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+    }
+
+    private void writeDouble(DataOutput da, final double v) throws IOException {
+        if (v == -1d) {
+            da.write(DOUBLE_MINUS_1);
+        } else if (v == 0d) {
+            da.write(DOUBLE_0);
+        } else if (v == 1d) {
+            da.write(DOUBLE_1);
+        } else if (v >= 0 && v <= 255 && (int) v == v) {
+            da.write(DOUBLE_255);
+            da.write((int) v);
+        } else if (v >= Short.MIN_VALUE && v <= Short.MAX_VALUE && (short) v == v) {
+            da.write(DOUBLE_SHORT);
+            da.writeShort((int) v);
+        } else {
+            da.write(DOUBLE_FULL);
+            da.writeDouble(v);
+        }
     }
 
     private void writeInteger(DataOutput da, final int val) throws IOException {
