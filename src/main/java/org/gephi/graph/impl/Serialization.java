@@ -48,15 +48,24 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Estimator;
@@ -348,17 +357,166 @@ public class Serialization {
             int nodesAndEdges = store.nodeStore.size() + store.edgeStore.size();
             serialize(out, nodesAndEdges);
 
-            for (Node node : store.nodeStore) {
-                serialize(out, node);
-            }
-            for (Edge edge : store.edgeStore) {
-                serialize(out, edge);
-            }
+            serializeNodesAndEdges(out, store);
 
             // Views
             serialize(out, store.viewStore);
         } finally {
             store.autoReadUnlock();
+        }
+    }
+
+    /**
+     * Writes every node then every edge to <code>out</code>. If either store spans more than one internal storage
+     * block, encoding is fanned out across worker threads (one thread per block, or groups of blocks); the encoded
+     * bytes are still written to <code>out</code> from this thread, in the same node-then-edge, block order as the
+     * plain sequential loop would produce.
+     */
+    private void serializeNodesAndEdges(DataOutput out, GraphStore store) throws IOException {
+        List<Spliterator<Node>> nodeChunks = splitIntoBlockChunks(store.nodeStore.spliterator());
+        List<Spliterator<Edge>> edgeChunks = splitIntoBlockChunks(store.edgeStore.spliterator());
+
+        if (nodeChunks.size() > 1 || edgeChunks.size() > 1) {
+            serializeChunksInParallel(out, nodeChunks, edgeChunks);
+        } else {
+            serializeChunksSequentially(out, nodeChunks, edgeChunks);
+        }
+    }
+
+    /**
+     * Recursively decomposes a spliterator into the ordered list of pieces it bottoms out to (one per internal storage
+     * block, since {@code trySplit()} on the node/edge store spliterators only splits at block boundaries and returns
+     * <code>null</code> once a piece is a single block). Returns a single-element list, containing <code>root</code>
+     * unchanged, when there's nothing to split.
+     */
+    static <T> List<Spliterator<T>> splitIntoBlockChunks(Spliterator<T> root) {
+        List<Spliterator<T>> chunks = new ArrayList<>();
+        collectBlockChunks(root, chunks);
+        return chunks;
+    }
+
+    private static <T> void collectBlockChunks(Spliterator<T> spliterator, List<Spliterator<T>> chunks) {
+        // trySplit() returns the first half and mutates its receiver into the second half, so the
+        // recursion order below (left, then the mutated spliterator) preserves original element order.
+        Spliterator<T> left = spliterator.trySplit();
+        if (left == null) {
+            chunks.add(spliterator);
+            return;
+        }
+        collectBlockChunks(left, chunks);
+        collectBlockChunks(spliterator, chunks);
+    }
+
+    void serializeChunksSequentially(DataOutput out, List<Spliterator<Node>> nodeChunks, List<Spliterator<Edge>> edgeChunks) throws IOException {
+        try {
+            for (Spliterator<Node> chunk : nodeChunks) {
+                chunk.forEachRemaining(node -> writeNodeUnchecked(out, (NodeImpl) node));
+            }
+            for (Spliterator<Edge> chunk : edgeChunks) {
+                chunk.forEachRemaining(edge -> writeEdgeUnchecked(out, (EdgeImpl) edge));
+            }
+        } catch (UncheckedIOException e) {
+            throw e.getCause();
+        }
+    }
+
+    private void writeNodeUnchecked(DataOutput out, NodeImpl node) {
+        try {
+            out.write(NODE);
+            serializeNode(out, node);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void writeEdgeUnchecked(DataOutput out, EdgeImpl edge) {
+        try {
+            out.write(EDGE);
+            serializeEdge(out, edge);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    void serializeChunksInParallel(DataOutput out, List<Spliterator<Node>> nodeChunks, List<Spliterator<Edge>> edgeChunks) throws IOException {
+        int threadCount = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount, r -> {
+            Thread t = new Thread(r, "graphstore-serialize");
+            t.setDaemon(true);
+            return t;
+        });
+        try {
+            List<Callable<DataInputOutput>> tasks = new ArrayList<>(nodeChunks.size() + edgeChunks.size());
+            for (Spliterator<Node> chunk : nodeChunks) {
+                tasks.add(() -> encodeNodeChunk(chunk));
+            }
+            for (Spliterator<Edge> chunk : edgeChunks) {
+                tasks.add(() -> encodeEdgeChunk(chunk));
+            }
+            drainInOrder(out, executor, tasks, threadCount * 2);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    // this/serializeNode/serializeEdge touch no instance state (idMap/model/readVersion are
+    // deserialize-only), so calling them concurrently from multiple worker threads on the same
+    // Serialization instance is safe as long as each call writes to its own private buffer.
+    private DataInputOutput encodeNodeChunk(Spliterator<Node> chunk) throws IOException {
+        DataInputOutput buffer = new DataInputOutput();
+        try {
+            chunk.forEachRemaining(node -> writeNodeUnchecked(buffer, (NodeImpl) node));
+        } catch (UncheckedIOException e) {
+            throw e.getCause();
+        }
+        return buffer;
+    }
+
+    private DataInputOutput encodeEdgeChunk(Spliterator<Edge> chunk) throws IOException {
+        DataInputOutput buffer = new DataInputOutput();
+        try {
+            chunk.forEachRemaining(edge -> writeEdgeUnchecked(buffer, (EdgeImpl) edge));
+        } catch (UncheckedIOException e) {
+            throw e.getCause();
+        }
+        return buffer;
+    }
+
+    private void drainInOrder(DataOutput out, ExecutorService executor, List<Callable<DataInputOutput>> tasks, int maxInFlight) throws IOException {
+        ArrayDeque<Future<DataInputOutput>> inFlight = new ArrayDeque<>();
+        int nextToSubmit = 0;
+        try {
+            while (nextToSubmit < Math.min(maxInFlight, tasks.size())) {
+                inFlight.add(executor.submit(tasks.get(nextToSubmit++)));
+            }
+            while (!inFlight.isEmpty()) {
+                DataInputOutput buffer = inFlight.pollFirst().get();
+                out.write(buffer.getBuf(), 0, buffer.getPos());
+                if (nextToSubmit < tasks.size()) {
+                    inFlight.add(executor.submit(tasks.get(nextToSubmit++)));
+                }
+            }
+        } catch (ExecutionException e) {
+            cancelAll(inFlight);
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            } else if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            } else if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IOException(cause);
+        } catch (InterruptedException e) {
+            cancelAll(inFlight);
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
+        }
+    }
+
+    private static void cancelAll(ArrayDeque<Future<DataInputOutput>> inFlight) {
+        for (Future<DataInputOutput> future : inFlight) {
+            future.cancel(true);
         }
     }
 
@@ -421,24 +579,34 @@ public class Serialization {
 
     private void serializeNode(DataOutput out, NodeImpl node) throws IOException {
         serialize(out, node.getId());
-        serialize(out, node.storeId);
+        writeInteger(out, node.storeId);
         serialize(out, node.attributes.attributes);
-        serialize(out, node.properties);
+        if (node.properties != null) {
+            out.write(NODE_PROPERTIES);
+            serializeNodeProperties(out, node.properties);
+        } else {
+            out.write(NULL);
+        }
     }
 
     private void serializeEdge(DataOutput out, EdgeImpl edge) throws IOException {
         serialize(out, edge.getId());
-        serialize(out, edge.source.storeId);
-        serialize(out, edge.target.storeId);
-        serialize(out, edge.type);
+        writeInteger(out, edge.source.storeId);
+        writeInteger(out, edge.target.storeId);
+        writeInteger(out, edge.type);
         if (edge.graphStore != null && edge.hasDynamicWeight()) {
-            serialize(out, edge.getWeight());
+            writeDouble(out, edge.getWeight());
         } else {
-            serialize(out, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT);
+            writeDouble(out, GraphStoreConfiguration.DEFAULT_EDGE_WEIGHT);
         }
-        serialize(out, edge.isDirected());
+        writeBoolean(out, edge.isDirected());
         serialize(out, edge.attributes.attributes);
-        serialize(out, edge.properties);
+        if (edge.properties != null) {
+            out.write(EDGE_PROPERTIES);
+            serializeEdgeProperties(out, edge.properties);
+        } else {
+            out.write(NULL);
+        }
     }
 
     private NodeImpl deserializeNode(DataInput is) throws IOException, ClassNotFoundException {
@@ -1388,35 +1556,15 @@ public class Serialization {
             out.write(NULL);
 
         } else if (clazz == Boolean.class) {
-            if (((Boolean) obj)) {
-                out.write(BOOLEAN_TRUE);
-            } else {
-                out.write(BOOLEAN_FALSE);
+            writeBoolean(out, (Boolean) obj);
 
-            }
         } else if (clazz == Integer.class) {
             final int val = (Integer) obj;
             writeInteger(out, val);
 
         } else if (clazz == Double.class) {
-            double v = (Double) obj;
-            if (v == -1d) {
-                out.write(DOUBLE_MINUS_1);
-            } else if (v == 0d) {
-                out.write(DOUBLE_0);
-            } else if (v == 1d) {
-                out.write(DOUBLE_1);
-            } else if (v >= 0 && v <= 255 && (int) v == v) {
-                out.write(DOUBLE_255);
-                out.write((int) v);
-            } else if (v >= Short.MIN_VALUE && v <= Short.MAX_VALUE && (short) v == v) {
-                out.write(DOUBLE_SHORT);
-                out.writeShort((int) v);
-            } else {
-                out.write(DOUBLE_FULL);
-                out.writeDouble(v);
+            writeDouble(out, (Double) obj);
 
-            }
         } else if (clazz == Float.class) {
             float v = (Float) obj;
             if (v == -1f) {
@@ -1793,6 +1941,29 @@ public class Serialization {
             }
         }
 
+    }
+
+    private void writeBoolean(DataOutput da, final boolean val) throws IOException {
+        da.write(val ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+    }
+
+    private void writeDouble(DataOutput da, final double v) throws IOException {
+        if (v == -1d) {
+            da.write(DOUBLE_MINUS_1);
+        } else if (v == 0d) {
+            da.write(DOUBLE_0);
+        } else if (v == 1d) {
+            da.write(DOUBLE_1);
+        } else if (v >= 0 && v <= 255 && (int) v == v) {
+            da.write(DOUBLE_255);
+            da.write((int) v);
+        } else if (v >= Short.MIN_VALUE && v <= Short.MAX_VALUE && (short) v == v) {
+            da.write(DOUBLE_SHORT);
+            da.writeShort((int) v);
+        } else {
+            da.write(DOUBLE_FULL);
+            da.writeDouble(v);
+        }
     }
 
     private void writeInteger(DataOutput da, final int val) throws IOException {
