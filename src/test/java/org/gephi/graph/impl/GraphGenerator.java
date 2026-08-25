@@ -551,7 +551,7 @@ public class GraphGenerator {
 
         NodeImpl[] nodes = generateLargeNodeList();
         graphStore.addAllNodes(Arrays.asList(nodes));
-        EdgeImpl[] edges = generateLargeEdgeList();
+        EdgeImpl[] edges = generateEdgeList(graphStore.nodeStore, GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE * 3 + (int) (GraphStoreConfiguration.EDGESTORE_BLOCK_SIZE / 3.0), 0, true, true, false);
         graphStore.addAllEdges(Arrays.asList(edges));
         return graphStore;
     }
