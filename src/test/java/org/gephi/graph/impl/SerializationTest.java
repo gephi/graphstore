@@ -63,13 +63,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.TimeFormat;
@@ -1949,6 +1952,116 @@ public class SerializationTest {
         public String readUTF() throws IOException {
             beforeRead();
             return delegate.readUTF();
+        }
+    }
+
+    private GraphStore buildMultiBlockGraphWithGarbage() {
+        GraphStore graphStore = GraphGenerator.generateLargeGraphStore();
+
+        // Delete a scattered subset of nodes/edges so garbage (removed) slots fall across multiple
+        // blocks, exercising the same "skip garbage slots" behavior in the block-splitting spliterator
+        // that the plain sequential iterators already rely on.
+        NodeImpl[] nodes = graphStore.nodeStore.toArray();
+        for (int i = 0; i < nodes.length; i += 11) {
+            graphStore.removeNode(nodes[i]);
+        }
+        EdgeImpl[] edges = graphStore.edgeStore.toArray();
+        for (int i = 0; i < edges.length; i += 5) {
+            graphStore.removeEdge(edges[i]);
+        }
+        return graphStore;
+    }
+
+    @Test
+    public void testParallelAndSequentialNodeEdgeEncodingProduceIdenticalBytes() throws Exception {
+        GraphStore graphStore = buildMultiBlockGraphWithGarbage();
+        Serialization ser = new Serialization();
+
+        List<Spliterator<Node>> nodeChunks = Serialization.splitIntoBlockChunks(graphStore.nodeStore.spliterator());
+        List<Spliterator<Edge>> edgeChunks = Serialization.splitIntoBlockChunks(graphStore.edgeStore.spliterator());
+        Assert.assertTrue(nodeChunks.size() > 1 || edgeChunks
+                .size() > 1, "test graph should span more than one block to be meaningful");
+
+        DataInputOutput sequentialOut = new DataInputOutput();
+        ser.serializeChunksSequentially(sequentialOut, Serialization.splitIntoBlockChunks(graphStore.nodeStore
+                .spliterator()), Serialization.splitIntoBlockChunks(graphStore.edgeStore.spliterator()));
+
+        DataInputOutput parallelOut = new DataInputOutput();
+        ser.serializeChunksInParallel(parallelOut, Serialization.splitIntoBlockChunks(graphStore.nodeStore
+                .spliterator()), Serialization.splitIntoBlockChunks(graphStore.edgeStore.spliterator()));
+
+        Assert.assertEquals(Arrays.copyOf(parallelOut.getBuf(), parallelOut.getPos()), Arrays
+                .copyOf(sequentialOut.getBuf(), sequentialOut.getPos()));
+    }
+
+    @Test
+    public void testSerializeAndDeserializeMultiBlockGraphRoundTrips() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateLargeGraphStore();
+        Assert.assertTrue(Serialization.splitIntoBlockChunks(graphStore.nodeStore.spliterator())
+                .size() > 1, "test graph should span more than one block to exercise the parallel path");
+
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Serialization ser = new Serialization(graphModel);
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphStore(dio, graphStore);
+        byte[] bytes = dio.toByteArray();
+
+        GraphModelImpl graphModel2 = new GraphModelImpl();
+        Serialization ser2 = new Serialization(graphModel2);
+        GraphStore deserialized = ser2.deserializeGraphStore(dio.reset(bytes));
+
+        Assert.assertTrue(graphStore.nodeStore.deepEquals(deserialized.nodeStore));
+        Assert.assertTrue(graphStore.edgeStore.deepEquals(deserialized.edgeStore));
+    }
+
+    @Test(timeOut = 5000)
+    public void testSerializeChunksInParallelPropagatesExceptionAndLeavesNoThreads() throws Exception {
+        Serialization ser = new Serialization();
+        List<Spliterator<Node>> nodeChunks = new ArrayList<>();
+        nodeChunks.add(new ThrowingSpliterator<>());
+        nodeChunks.add(new ThrowingSpliterator<>());
+        List<Spliterator<Edge>> edgeChunks = new ArrayList<>();
+
+        Assert.expectThrows(RuntimeException.class, () -> ser
+                .serializeChunksInParallel(new DataInputOutput(), nodeChunks, edgeChunks));
+
+        long deadline = System.currentTimeMillis() + 2000;
+        long remaining;
+        do {
+            remaining = countGraphstoreSerializeThreads();
+            if (remaining == 0) {
+                break;
+            }
+            Thread.sleep(50);
+        } while (System.currentTimeMillis() < deadline);
+        Assert.assertEquals(remaining, 0, "no graphstore-serialize threads should remain after a failed parallel encode");
+    }
+
+    private static long countGraphstoreSerializeThreads() {
+        return Thread.getAllStackTraces().keySet().stream().filter(t -> "graphstore-serialize".equals(t.getName()))
+                .count();
+    }
+
+    private static final class ThrowingSpliterator<T> implements Spliterator<T> {
+
+        @Override
+        public boolean tryAdvance(Consumer<? super T> action) {
+            throw new RuntimeException("boom");
+        }
+
+        @Override
+        public Spliterator<T> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return 1;
+        }
+
+        @Override
+        public int characteristics() {
+            return 0;
         }
     }
 }
