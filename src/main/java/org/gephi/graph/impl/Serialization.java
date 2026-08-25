@@ -351,53 +351,62 @@ public class Serialization {
     }
 
     public GraphStore deserializeGraphStore(DataInput is) throws IOException, ClassNotFoundException {
-        if (!model.store.nodeStore.isEmpty()) { // TODO test other stores
-            throw new IOException("The store is not empty");
-        }
+        GraphStore store = model.store;
+        // Hold the write lock for the whole method: deserialization mutates the store directly
+        // (nodeStore.add()/edgeStore.add(), bypassing GraphStore's own auto-locked addNode()/
+        // addEdge()), so without this a concurrent reader could observe a partially-populated store.
+        store.autoWriteLock();
+        try {
+            if (!store.nodeStore.isEmpty()) { // TODO test other stores
+                throw new IOException("The store is not empty");
+            }
 
-        idMap.clear();
+            idMap.clear();
 
-        // Store Configuration
-        deserialize(is);
-
-        // Graph Version
-        GraphVersion version = (GraphVersion) deserialize(is);
-        model.store.version.nodeVersion = version.nodeVersion;
-        model.store.version.edgeVersion = version.edgeVersion;
-
-        // Edge types
-        deserialize(is);
-
-        // Columns
-        deserialize(is);
-        deserialize(is);
-
-        // Time store
-        deserialize(is);
-
-        // Factory
-        deserialize(is);
-
-        // Atts
-        GraphAttributesImpl attributes = (GraphAttributesImpl) deserialize(is);
-        model.store.attributes.setGraphAttributes(attributes);
-
-        // TimeFormat
-        deserialize(is);
-
-        // Time zone
-        deserialize(is);
-
-        // Nodes and edges
-        int nodesAndEdges = (Integer) deserialize(is);
-        for (int i = 0; i < nodesAndEdges; i++) {
+            // Store Configuration
             deserialize(is);
+
+            // Graph Version
+            GraphVersion version = (GraphVersion) deserialize(is);
+            store.version.nodeVersion = version.nodeVersion;
+            store.version.edgeVersion = version.edgeVersion;
+
+            // Edge types
+            deserialize(is);
+
+            // Columns
+            deserialize(is);
+            deserialize(is);
+
+            // Time store
+            deserialize(is);
+
+            // Factory
+            deserialize(is);
+
+            // Atts
+            GraphAttributesImpl attributes = (GraphAttributesImpl) deserialize(is);
+            store.attributes.setGraphAttributes(attributes);
+
+            // TimeFormat
+            deserialize(is);
+
+            // Time zone
+            deserialize(is);
+
+            // Nodes and edges
+            int nodesAndEdges = (Integer) deserialize(is);
+            for (int i = 0; i < nodesAndEdges; i++) {
+                deserialize(is);
+            }
+
+            // ViewStore
+            deserialize(is);
+
+            return store;
+        } finally {
+            store.autoWriteUnlock();
         }
-
-        // ViewStore
-        deserialize(is);
-
-        return model.store;
     }
 
     private void serializeNode(DataOutput out, NodeImpl node) throws IOException {
