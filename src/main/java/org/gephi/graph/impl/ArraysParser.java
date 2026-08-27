@@ -17,9 +17,7 @@ package org.gephi.graph.impl;
 
 import static org.gephi.graph.impl.FormattingAndParsingUtils.COMMA;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.EMPTY_VALUE;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_BRACKET;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.LEFT_BOUND_SQUARE_BRACKET;
-import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_BRACKET;
 import static org.gephi.graph.impl.FormattingAndParsingUtils.RIGHT_BOUND_SQUARE_BRACKET;
 
 import java.io.IOException;
@@ -83,8 +81,6 @@ public final class ArraysParser {
                 c = (char) r;
                 switch (c) {
                     case RIGHT_BOUND_SQUARE_BRACKET:
-                    case RIGHT_BOUND_BRACKET:
-                    case LEFT_BOUND_BRACKET:
                     case LEFT_BOUND_SQUARE_BRACKET:
                     case ' ':
                     case '\t':
@@ -101,7 +97,7 @@ public final class ArraysParser {
                     default:
                         reader.skip(-1);// Go backwards 1 position, for reading
                                         // start of value
-                        String value = FormattingAndParsingUtils.parseValue(reader);
+                        String value = FormattingAndParsingUtils.parseValue(reader, false);
                         if (value.equals("null")) {
                             value = null;// Special null value only when not in
                                          // literal parsing mode
