@@ -47,6 +47,15 @@ public class ArraysParserTest {
     }
 
     @Test
+    public void testParseStringWithParenthesis() {
+        String[] a1 = ArraysParser.parseArray(String[].class, "[Foo,Bar(Foo)]");
+        String[] a2 = ArraysParser.parseArray(String[].class, "[(Foo), Bar(Foo), Baz)(]");
+
+        Assert.assertEquals(new String[] { "Foo", "Bar(Foo)" }, a1);
+        Assert.assertEquals(new String[] { "(Foo)", "Bar(Foo)", "Baz)(" }, a2);
+    }
+
+    @Test
     public void testParseCharacter() {
         Character[] a1 = ArraysParser.parseArray(Character[].class, "[a, b, c, 2, 9]");
         char[] a2 = (char[]) ArraysParser.parseArrayAsPrimitiveArray(Character[].class, "[a, b, c, 2, 9]");
