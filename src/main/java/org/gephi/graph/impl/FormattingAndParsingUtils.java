@@ -126,20 +126,40 @@ public final class FormattingAndParsingUtils {
     }
 
     /**
-     * Parses a value until end is detected either by a comma or a bounds closing character.
+     * Parses a value until end is detected either by a comma or a bounds closing character. Both {@code )} and
+     * {@code ]} are treated as a closing bound, since this is used for parsing interval and timestamp bounds which can
+     * be opened/closed with either bracket type.
      *
      * @param reader Input reader
      * @return Parsed value
      * @throws IOException Unexpected read error
      */
     protected static String parseValue(StringReader reader) throws IOException {
+        return parseValue(reader, true);
+    }
+
+    /**
+     * Parses a value until end is detected either by a comma or a bounds closing character.
+     *
+     * @param reader Input reader
+     * @param roundBracketIsClosingBound Whether {@code )} should be treated as a closing bound character in addition to
+     *        {@code ]}. This should be disabled for grammars, such as plain arrays, where {@code (} and {@code )} have
+     *        no structural meaning and can be part of an unquoted value.
+     * @return Parsed value
+     * @throws IOException Unexpected read error
+     */
+    protected static String parseValue(StringReader reader, boolean roundBracketIsClosingBound) throws IOException {
         StringBuilder sb = new StringBuilder();
         int r;
         char c;
         while ((r = reader.read()) != -1) {
             c = (char) r;
+            if (roundBracketIsClosingBound && c == RIGHT_BOUND_BRACKET) {
+                reader.skip(-1);// Go backwards 1 position, for detecting end
+                                // of bounds
+                return sb.toString().trim();
+            }
             switch (c) {
-                case RIGHT_BOUND_BRACKET:
                 case RIGHT_BOUND_SQUARE_BRACKET:
                     reader.skip(-1);// Go backwards 1 position, for detecting
                                     // end of bounds
