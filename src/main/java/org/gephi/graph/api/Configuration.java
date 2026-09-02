@@ -408,7 +408,7 @@ public class Configuration {
          * <p>
          * If disabled, only a single edge of a given type can exist between two nodes.
          * <p>
-         * Default is <code>false</code>.
+         * Default is <code>true</code>.
          *
          * @param enableParallelEdgesSameType enable parallel edges of the same type
          * @return this builder
