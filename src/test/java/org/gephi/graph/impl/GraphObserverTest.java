@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Graph;
@@ -514,17 +515,25 @@ public class GraphObserverTest {
         ExecutorService executor = Executors.newFixedThreadPool(threadCount + 1);
         try {
             // Forces the version overflow path, which iterates the observers while other threads
-            // register and unregister
+            // register and unregister. Both a node and an edge are mutated so handleNodeReset()
+            // and handleEdgeReset() (each bumps a different version) both get exercised.
             Future<?> mutator = executor.submit(() -> {
                 barrier.await();
-                Node node = store.factory.newNode("concurrent-observer-test");
+                Node node1 = store.factory.newNode("concurrent-observer-test-1");
+                Node node2 = store.factory.newNode("concurrent-observer-test-2");
+                Edge edge = store.factory
+                        .newEdge("concurrent-observer-test-edge", node1, node2, EdgeTypeStore.NULL_LABEL, 1.0, true);
                 while (mutating.get()) {
                     store.autoWriteLock();
                     try {
                         store.version.nodeVersion = Integer.MAX_VALUE - 1;
                         store.version.edgeVersion = Integer.MAX_VALUE - 1;
-                        store.addNode(node);
-                        store.removeNode(node);
+                        store.addNode(node1);
+                        store.addNode(node2);
+                        store.addEdge(edge);
+                        store.removeEdge(edge);
+                        store.removeNode(node1);
+                        store.removeNode(node2);
                     } finally {
                         store.autoWriteUnlock();
                     }
@@ -556,7 +565,60 @@ public class GraphObserverTest {
             executor.shutdownNow();
         }
 
-        Assert.assertTrue(store.observers.isEmpty());
+        synchronized (store.observers) {
+            Assert.assertTrue(store.observers.isEmpty());
+        }
+    }
+
+    @Test
+    public void testConcurrentCreateAndDestroyGraphObserverAutoLockingDisabled() throws Exception {
+        final int threadCount = 4;
+        final int iterations = 500;
+
+        // With auto-locking disabled, autoWriteLock()/autoReadLock() are no-ops, so the observers
+        // list's own monitor is the only thing left guarding it against concurrent add/remove/iterate.
+        final GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableAutoLocking(false).build());
+        final GraphStore store = graphModel.getStore();
+        final AtomicBoolean resetting = new AtomicBoolean(true);
+        final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
+
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount + 1);
+        try {
+            Future<?> resetter = executor.submit(() -> {
+                barrier.await();
+                while (resetting.get()) {
+                    store.version.nodeVersion = Integer.MAX_VALUE - 1;
+                    store.version.incrementAndGetNodeVersion();
+                }
+                return null;
+            });
+
+            List<Future<?>> tasks = new ArrayList<>();
+            for (int t = 0; t < threadCount; t++) {
+                tasks.add(executor.submit((Callable<Void>) () -> {
+                    barrier.await();
+                    for (int i = 0; i < iterations; i++) {
+                        GraphObserver observer = graphModel.createGraphObserver(store, false);
+                        observer.destroy();
+                        Assert.assertTrue(observer.isDestroyed());
+                    }
+                    return null;
+                }));
+            }
+
+            for (Future<?> task : tasks) {
+                task.get(60, TimeUnit.SECONDS);
+            }
+            resetting.set(false);
+            resetter.get(60, TimeUnit.SECONDS);
+        } finally {
+            resetting.set(false);
+            executor.shutdownNow();
+        }
+
+        synchronized (store.observers) {
+            Assert.assertTrue(store.observers.isEmpty());
+        }
     }
 
     @Test
