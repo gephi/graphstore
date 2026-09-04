@@ -377,6 +377,9 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public GraphObserver createGraphObserver(Graph graph, boolean withGraphDiff) {
+        // The graph write lock makes the view-existence check and the registration atomic with
+        // respect to view destruction. Registration itself is guarded by the observers monitor,
+        // always acquired inside the graph lock.
         store.autoWriteLock();
         try {
             if (graph.getView().isMainView()) {
@@ -456,6 +459,8 @@ public class GraphModelImpl implements GraphModel {
     public void destroyGraphObserver(GraphObserver observer) {
         checkGraphObserver(observer);
 
+        // See createGraphObserver: the graph lock keeps this atomic with view destruction, which
+        // also destroys the view's observers.
         store.autoWriteLock();
         try {
             if (observer.getGraph().getView().isMainView()) {

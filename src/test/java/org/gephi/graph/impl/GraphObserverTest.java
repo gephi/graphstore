@@ -15,10 +15,21 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphDiff;
+import org.gephi.graph.api.GraphObserver;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.testng.Assert;
@@ -488,5 +499,109 @@ public class GraphObserverTest {
 
         Assert.assertEquals(edgeVersion, Integer.MIN_VALUE + 1);
         Assert.assertEquals(graphObserver.edgeVersion, Integer.MIN_VALUE);
+    }
+
+    @Test
+    public void testConcurrentCreateAndDestroyGraphObserver() throws Exception {
+        final int threadCount = 4;
+        final int iterations = 200;
+
+        final GraphStore store = GraphGenerator.generateSmallGraphStore();
+        final GraphModelImpl graphModel = store.graphModel;
+        final AtomicBoolean mutating = new AtomicBoolean(true);
+        final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
+
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount + 1);
+        try {
+            // Forces the version overflow path, which iterates the observers while other threads
+            // register and unregister
+            Future<?> mutator = executor.submit(() -> {
+                barrier.await();
+                Node node = store.factory.newNode("concurrent-observer-test");
+                while (mutating.get()) {
+                    store.autoWriteLock();
+                    try {
+                        store.version.nodeVersion = Integer.MAX_VALUE - 1;
+                        store.version.edgeVersion = Integer.MAX_VALUE - 1;
+                        store.addNode(node);
+                        store.removeNode(node);
+                    } finally {
+                        store.autoWriteUnlock();
+                    }
+                }
+                return null;
+            });
+
+            List<Future<?>> tasks = new ArrayList<>();
+            for (int t = 0; t < threadCount; t++) {
+                tasks.add(executor.submit((Callable<Void>) () -> {
+                    barrier.await();
+                    for (int i = 0; i < iterations; i++) {
+                        GraphObserver observer = graphModel.createGraphObserver(store, i % 2 == 0);
+                        observer.hasGraphChanged();
+                        observer.destroy();
+                        Assert.assertTrue(observer.isDestroyed());
+                    }
+                    return null;
+                }));
+            }
+
+            for (Future<?> task : tasks) {
+                task.get(60, TimeUnit.SECONDS);
+            }
+            mutating.set(false);
+            mutator.get(60, TimeUnit.SECONDS);
+        } finally {
+            mutating.set(false);
+            executor.shutdownNow();
+        }
+
+        Assert.assertTrue(store.observers.isEmpty());
+    }
+
+    @Test
+    public void testConcurrentCreateGraphObserverAndDestroyView() throws Exception {
+        final int rounds = 200;
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            for (int round = 0; round < rounds; round++) {
+                final GraphStore store = GraphGenerator.generateTinyGraphStore();
+                final GraphModelImpl graphModel = store.graphModel;
+                final GraphViewImpl view = (GraphViewImpl) graphModel.createView();
+                final Graph viewGraph = graphModel.getGraph(view);
+                final CyclicBarrier barrier = new CyclicBarrier(2);
+
+                Future<GraphObserver> creation = executor.submit(() -> {
+                    barrier.await();
+                    try {
+                        return graphModel.createGraphObserver(viewGraph, true);
+                    } catch (IllegalArgumentException e) {
+                        // The view was destroyed first
+                        return null;
+                    }
+                });
+                Future<?> destruction = executor.submit((Callable<Void>) () -> {
+                    barrier.await();
+                    graphModel.destroyView(view);
+                    return null;
+                });
+
+                GraphObserver observer = creation.get(60, TimeUnit.SECONDS);
+                destruction.get(60, TimeUnit.SECONDS);
+
+                Assert.assertTrue(view.isDestroyed());
+                boolean stillRegistered;
+                synchronized (view.observers) {
+                    stillRegistered = !view.observers.isEmpty();
+                }
+                Assert.assertFalse(stillRegistered, "Observer registered on a destroyed view");
+                if (observer != null) {
+                    Assert.assertTrue(observer.isDestroyed(), "Observer of a destroyed view still alive");
+                }
+            }
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

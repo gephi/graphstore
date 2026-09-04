@@ -37,7 +37,7 @@ public class GraphObserverImpl implements GraphObserver {
     // Version
     protected int nodeVersion = Integer.MIN_VALUE;
     protected int edgeVersion = Integer.MIN_VALUE;
-    protected boolean destroyed;
+    protected volatile boolean destroyed;
     protected boolean newObserver = true;
     // Cache
     protected GraphDiffImpl graphDiff;
