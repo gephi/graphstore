@@ -982,8 +982,13 @@ public class GraphViewImpl implements GraphView {
 
     protected GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
         if (observers != null) {
+            // Constructed outside the monitor: the constructor takes the graph read lock and
+            // acquiring it under the monitor would invert the lock order used elsewhere
             GraphObserverImpl observer = new GraphObserverImpl(graphStore, version, graph, withDiff);
-            observers.add(observer);
+            // The list also has its own monitor, so it stays safe even if auto-locking is disabled
+            synchronized (observers) {
+                observers.add(observer);
+            }
 
             return observer;
         }
@@ -992,17 +997,21 @@ public class GraphViewImpl implements GraphView {
 
     protected void destroyGraphObserver(GraphObserverImpl observer) {
         if (observers != null) {
-            observers.remove(observer);
-            observer.destroyObserver();
+            synchronized (observers) {
+                observers.remove(observer);
+                observer.destroyObserver();
+            }
         }
     }
 
     protected void destroyAllObservers() {
         if (observers != null) {
-            for (GraphObserverImpl graphObserverImpl : observers) {
-                graphObserverImpl.destroyObserver();
+            synchronized (observers) {
+                for (GraphObserverImpl graphObserverImpl : observers) {
+                    graphObserverImpl.destroyObserver();
+                }
+                observers.clear();
             }
-            observers.clear();
         }
     }
 

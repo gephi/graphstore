@@ -839,8 +839,13 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         }
 
         if (observers != null) {
+            // Constructed outside the monitor: the constructor takes the graph read lock and
+            // acquiring it under the monitor would invert the lock order used elsewhere
             GraphObserverImpl observer = new GraphObserverImpl(this, version, graph, withDiff);
-            observers.add(observer);
+            // The list also has its own monitor, so it stays safe even if auto-locking is disabled
+            synchronized (observers) {
+                observers.add(observer);
+            }
 
             return observer;
         }
@@ -852,8 +857,10 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
             if (observer.graph.getView() != mainGraphView) {
                 throw new RuntimeException("This graph doesn't belong to this store");
             }
-            observers.remove(observer);
-            observer.destroyObserver();
+            synchronized (observers) {
+                observers.remove(observer);
+                observer.destroyObserver();
+            }
         }
     }
 

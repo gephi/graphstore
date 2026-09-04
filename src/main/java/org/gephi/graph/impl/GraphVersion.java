@@ -58,15 +58,20 @@ public class GraphVersion {
             if (graph.getView().isMainView()) {
                 GraphStore graphStore = (GraphStore) graph;
                 if (graphStore.observers != null) {
-                    for (GraphObserverImpl observer : graphStore.observers) {
-                        observer.resetNodeVersion();
+                    // Same monitor used by create/destroy, so it stays safe even if auto-locking is disabled
+                    synchronized (graphStore.observers) {
+                        for (GraphObserverImpl observer : graphStore.observers) {
+                            observer.resetNodeVersion();
+                        }
                     }
                 }
             } else {
                 GraphViewImpl view = (GraphViewImpl) graph.getView();
                 if (view.observers != null) {
-                    for (GraphObserverImpl observer : view.observers) {
-                        observer.resetNodeVersion();
+                    synchronized (view.observers) {
+                        for (GraphObserverImpl observer : view.observers) {
+                            observer.resetNodeVersion();
+                        }
                     }
                 }
             }
@@ -78,15 +83,20 @@ public class GraphVersion {
             if (graph.getView().isMainView()) {
                 GraphStore graphStore = (GraphStore) graph;
                 if (graphStore.observers != null) {
-                    for (GraphObserverImpl observer : graphStore.observers) {
-                        observer.resetEdgeVersion();
+                    // Same monitor used by create/destroy, so it stays safe even if auto-locking is disabled
+                    synchronized (graphStore.observers) {
+                        for (GraphObserverImpl observer : graphStore.observers) {
+                            observer.resetEdgeVersion();
+                        }
                     }
                 }
             } else {
                 GraphViewImpl view = (GraphViewImpl) graph.getView();
                 if (view.observers != null) {
-                    for (GraphObserverImpl observer : view.observers) {
-                        observer.resetEdgeVersion();
+                    synchronized (view.observers) {
+                        for (GraphObserverImpl observer : view.observers) {
+                            observer.resetEdgeVersion();
+                        }
                     }
                 }
             }
