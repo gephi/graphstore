@@ -28,6 +28,7 @@ import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.TimeIndex;
 import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.testng.Assert;
@@ -712,6 +713,23 @@ public class TimestampIndexStoreTest {
 
         assertWaitsForGraphLockWithoutTableLock(graphStore, store.lock, () -> store.getIndex(graph));
         Assert.assertNotNull(store.viewIndexes.get(graph.getView()));
+    }
+
+    @Test
+    public void testGetExistingViewIndexWithoutGraphLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        TimestampIndexStore<Node> store = (TimestampIndexStore<Node>) graphStore.timeStore.nodeIndexStore;
+        Graph graph = graphStore.viewStore.getGraph(graphStore.viewStore.createView());
+        TimeIndex index = store.getIndex(graph);
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        graphStore.writeLock();
+        try {
+            Assert.assertSame(executor.submit(() -> store.getIndex(graph)).get(10, TimeUnit.SECONDS), index);
+        } finally {
+            graphStore.writeUnlock();
+            executor.shutdownNow();
+        }
     }
 
     @Test

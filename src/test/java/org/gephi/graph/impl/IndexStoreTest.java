@@ -375,6 +375,23 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testGetExistingViewIndexWithoutGraphLock() throws Exception {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        Graph graph = graphStore.viewStore.getGraph(graphStore.viewStore.createView());
+        IndexImpl index = indexStore.getIndex(graph);
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        graphStore.writeLock();
+        try {
+            Assert.assertSame(executor.submit(() -> indexStore.getIndex(graph)).get(10, TimeUnit.SECONDS), index);
+        } finally {
+            graphStore.writeUnlock();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     public void testCreateViewIndexWithElements() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
