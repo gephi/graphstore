@@ -19,6 +19,10 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnObserver;
 import org.gephi.graph.api.Origin;
@@ -519,5 +523,49 @@ public class ColumnStoreTest {
         Assert.assertTrue(itr.hasNext());
         Assert.assertSame(itr.next(), col11);
         itr.remove();
+    }
+
+    @Test
+    public void testAddColumnTakesGraphLockBeforeTableLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        ColumnStore<Node> store = graphStore.nodeTable.store;
+        ColumnImpl col = new ColumnImpl(graphStore.nodeTable, "foo", Integer.class, null, null, Origin.DATA, false,
+                false);
+
+        assertWaitsForGraphLockWithoutTableLock(graphStore, store, () -> store.addColumn(col));
+        Assert.assertTrue(store.hasColumn("foo"));
+    }
+
+    @Test
+    public void testRemoveColumnTakesGraphLockBeforeTableLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        ColumnStore<Node> store = graphStore.nodeTable.store;
+        ColumnImpl col = new ColumnImpl(graphStore.nodeTable, "foo", Integer.class, null, null, Origin.DATA, false,
+                false);
+        store.addColumn(col);
+
+        assertWaitsForGraphLockWithoutTableLock(graphStore, store, () -> store.removeColumn(col));
+        Assert.assertFalse(store.hasColumn("foo"));
+    }
+
+    private static void assertWaitsForGraphLockWithoutTableLock(GraphStore graphStore, ColumnStore<Node> store, Runnable operation) throws Exception {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> future;
+            graphStore.writeLock();
+            try {
+                future = executor.submit(operation);
+                while (!graphStore.lock.readWriteLock.hasQueuedThreads() && !future.isDone()) {
+                    Thread.sleep(1);
+                }
+                Assert.assertFalse(future.isDone());
+                Assert.assertFalse(store.lock.lock.isLocked());
+            } finally {
+                graphStore.writeUnlock();
+            }
+            future.get(10, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }
