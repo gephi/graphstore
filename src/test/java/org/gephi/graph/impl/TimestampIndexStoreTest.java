@@ -19,6 +19,10 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
@@ -701,6 +705,16 @@ public class TimestampIndexStoreTest {
     }
 
     @Test
+    public void testGetIndexWithViewTakesGraphLockBeforeTableLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        TimestampIndexStore<Node> store = (TimestampIndexStore<Node>) graphStore.timeStore.nodeIndexStore;
+        Graph graph = graphStore.viewStore.getGraph(graphStore.viewStore.createView());
+
+        assertWaitsForGraphLockWithoutTableLock(graphStore, store.lock, () -> store.getIndex(graph));
+        Assert.assertNotNull(store.viewIndexes.get(graph.getView()));
+    }
+
+    @Test
     public void testClearInViewElementNotInView() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         NodeImpl n1 = graphStore.getNode("1");
@@ -725,5 +739,26 @@ public class TimestampIndexStoreTest {
             list.add(t);
         }
         return list.toArray();
+    }
+
+    private static void assertWaitsForGraphLockWithoutTableLock(GraphStore graphStore, TableLockImpl tableLock, Runnable operation) throws Exception {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> future;
+            graphStore.writeLock();
+            try {
+                future = executor.submit(operation);
+                while (!graphStore.lock.readWriteLock.hasQueuedThreads() && !future.isDone()) {
+                    Thread.sleep(1);
+                }
+                Assert.assertFalse(future.isDone());
+                Assert.assertFalse(tableLock.lock.isLocked());
+            } finally {
+                graphStore.writeUnlock();
+            }
+            future.get(10, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

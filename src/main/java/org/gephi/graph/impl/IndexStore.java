@@ -67,12 +67,18 @@ public class IndexStore<T extends Element> {
         if (view.isMainView()) {
             return mainIndex;
         }
-        synchronized (viewIndexes) {
-            IndexImpl<T> viewIndex = viewIndexes.get(graph.getView());
-            if (viewIndex == null) {
-                viewIndex = createViewIndex(graph);
+        // The graph lock is taken first, as indexing the view requires it
+        graph.readLock();
+        try {
+            synchronized (viewIndexes) {
+                IndexImpl<T> viewIndex = viewIndexes.get(graph.getView());
+                if (viewIndex == null) {
+                    viewIndex = createViewIndex(graph);
+                }
+                return viewIndex;
             }
-            return viewIndex;
+        } finally {
+            graph.readUnlock();
         }
     }
 

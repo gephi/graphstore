@@ -273,6 +273,8 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         if (viewIndexes == null) {
             return null;
         }
+        // The graph lock is taken first, as indexing the view requires it
+        graph.readLock();
         lock();
         try {
             TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
@@ -283,6 +285,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
             return viewIndex;
         } finally {
             unlock();
+            graph.readUnlock();
         }
     }
 
