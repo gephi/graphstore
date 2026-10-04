@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.gephi.graph.api.Column;
-import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
@@ -33,6 +32,7 @@ public class IndexStore<T extends Element> {
     protected final ColumnStore<T> columnStore;
     protected final TableLockImpl lock;
     protected final IndexImpl<T> mainIndex;
+    // Modified with both the table lock and its monitor held. The monitor is taken last.
     protected final Map<GraphView, IndexImpl<T>> viewIndexes;
 
     public IndexStore(ColumnStore<T> columnStore) {
@@ -75,15 +75,15 @@ public class IndexStore<T extends Element> {
         }
         // The graph lock is taken first, as indexing the view requires it
         graph.readLock();
+        lock();
         try {
-            synchronized (viewIndexes) {
-                IndexImpl<T> viewIndex = viewIndexes.get(view);
-                if (viewIndex == null) {
-                    viewIndex = createViewIndex(graph);
-                }
-                return viewIndex;
+            IndexImpl<T> viewIndex = viewIndexes.get(view);
+            if (viewIndex == null) {
+                viewIndex = createViewIndex(graph);
             }
+            return viewIndex;
         } finally {
+            unlock();
             graph.readUnlock();
         }
     }
@@ -97,7 +97,9 @@ public class IndexStore<T extends Element> {
             IndexImpl viewIndex = new IndexImpl<>(columnStore, graph);
             ColumnImpl[] columns = columnStore.toArray();
             viewIndex.addAllColumns(columns);
-            viewIndexes.put(graph.getView(), viewIndex);
+            synchronized (viewIndexes) {
+                viewIndexes.put(graph.getView(), viewIndex);
+            }
 
             indexView(graph);
 
@@ -113,7 +115,10 @@ public class IndexStore<T extends Element> {
         }
         lock();
         try {
-            IndexImpl<T> index = viewIndexes.remove(graph.getView());
+            IndexImpl<T> index;
+            synchronized (viewIndexes) {
+                index = viewIndexes.remove(graph.getView());
+            }
             if (index != null) {
                 index.destroy();
             }
@@ -129,9 +134,8 @@ public class IndexStore<T extends Element> {
             synchronized (viewIndexes) {
                 for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                     GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                    DirectedSubgraph graph = graphView.getDirectedGraph();
-                    boolean inView = element instanceof Node ? graph.contains((Node) element)
-                            : graph.contains((Edge) element);
+                    boolean inView = element instanceof Node ? graphView.containsNode((Node) element)
+                            : graphView.containsEdge((Edge) element);
                     if (inView) {
                         entry.getValue().set(column, oldValue, value, element);
                     }
@@ -158,9 +162,8 @@ public class IndexStore<T extends Element> {
                         synchronized (viewIndexes) {
                             for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                                 GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                                DirectedSubgraph graph = graphView.getDirectedGraph();
-                                boolean inView = element instanceof Node ? graph.contains((Node) element)
-                                        : graph.contains((Edge) element);
+                                boolean inView = element instanceof Node ? graphView.containsNode((Node) element)
+                                        : graphView.containsEdge((Edge) element);
                                 if (inView) {
                                     entry.getValue().remove(c, value, element);
                                 }

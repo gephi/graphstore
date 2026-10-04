@@ -16,6 +16,9 @@
 
 package org.gephi.graph.impl;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MonitorInfo;
+import java.lang.management.ThreadInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -392,6 +395,51 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testGetIndexWithViewWaitsForTableLockWithoutViewIndexesMonitor() throws Exception {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        Graph graph = graphStore.viewStore.getGraph(graphStore.viewStore.createView());
+        Thread thread = new Thread(() -> indexStore.getIndex(graph));
+
+        indexStore.lock.lock();
+        try {
+            thread.start();
+            while (!indexStore.lock.lock.hasQueuedThread(thread) && thread.isAlive()) {
+                Thread.sleep(1);
+            }
+            Assert.assertTrue(thread.isAlive());
+            Assert.assertFalse(holdsMonitor(thread, indexStore.viewIndexes));
+        } finally {
+            indexStore.lock.unlock();
+        }
+        thread.join(10000);
+        Assert.assertNotNull(indexStore.viewIndexes.get(graph.getView()));
+    }
+
+    @Test
+    public void testSetAttributeInViewWithoutGraphLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeTable.store.addColumn(column);
+        NodeImpl n1 = graphStore.getNode("1");
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+        IndexImpl index = indexStore.getIndex(graphStore.viewStore.getGraph(view));
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        graphStore.writeLock();
+        try {
+            executor.submit(() -> n1.setAttribute(column, "bar")).get(10, TimeUnit.SECONDS);
+        } finally {
+            graphStore.writeUnlock();
+            executor.shutdownNow();
+        }
+        Assert.assertEquals(index.count(column, "bar"), 1);
+    }
+
+    @Test
     public void testCreateViewIndexWithElements() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
@@ -690,5 +738,16 @@ public class IndexStoreTest {
         } finally {
             executor.shutdownNow();
         }
+    }
+
+    private static boolean holdsMonitor(Thread thread, Object monitor) {
+        ThreadInfo info = ManagementFactory.getThreadMXBean()
+                .getThreadInfo(new long[] { thread.getId() }, true, false)[0];
+        for (MonitorInfo monitorInfo : info.getLockedMonitors()) {
+            if (monitorInfo.getIdentityHashCode() == System.identityHashCode(monitor)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
