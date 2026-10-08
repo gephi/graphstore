@@ -84,6 +84,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         checkNonNullColumnObject(column);
         checkIndexStatus(column);
 
+        graphReadLock();
         lock();
         try {
             final ColumnImpl columnImpl = (ColumnImpl) column;
@@ -118,12 +119,14 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
             }
         } finally {
             unlock();
+            graphReadUnlock();
         }
     }
 
     public void removeColumn(final Column column) {
         checkNonNullColumnObject(column);
 
+        graphReadLock();
         lock();
         try {
             final ColumnImpl columnImpl = (ColumnImpl) column;
@@ -149,6 +152,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
             columnImpl.setStoreId(NULL_ID);
         } finally {
             unlock();
+            graphReadUnlock();
         }
     }
 
@@ -314,6 +318,19 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
     void unlock() {
         if (lock != null) {
             lock.unlock();
+        }
+    }
+
+    // The graph lock is taken before the table lock, as when elements are added
+    private void graphReadLock() {
+        if (graphStore != null) {
+            graphStore.autoReadLock();
+        }
+    }
+
+    private void graphReadUnlock() {
+        if (graphStore != null) {
+            graphStore.autoReadUnlock();
         }
     }
 
