@@ -275,7 +275,18 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         }
         lock();
         try {
-            TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
+            TimeIndexImpl viewIndex = viewIndexes.get(view);
+            if (viewIndex != null) {
+                return viewIndex;
+            }
+        } finally {
+            unlock();
+        }
+        // The graph lock is taken first, as indexing the view requires it
+        graph.readLock();
+        lock();
+        try {
+            TimeIndexImpl viewIndex = viewIndexes.get(view);
             if (viewIndex == null) {
                 // TODO Make the auto-creation optional?
                 viewIndex = createViewIndex(graph);
@@ -283,6 +294,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
             return viewIndex;
         } finally {
             unlock();
+            graph.readUnlock();
         }
     }
 

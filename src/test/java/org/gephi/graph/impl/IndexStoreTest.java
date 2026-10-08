@@ -18,6 +18,10 @@ package org.gephi.graph.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -361,6 +365,33 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testGetIndexWithViewTakesGraphLockBeforeTableLock() throws Exception {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        Graph graph = graphStore.viewStore.getGraph(graphStore.viewStore.createView());
+
+        assertWaitsForGraphLockWithoutTableLock(graphStore, indexStore.lock, () -> indexStore.getIndex(graph));
+        Assert.assertNotNull(indexStore.viewIndexes.get(graph.getView()));
+    }
+
+    @Test
+    public void testGetExistingViewIndexWithoutGraphLock() throws Exception {
+        GraphStore graphStore = generateBasicGraphStoreWithColumns();
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        Graph graph = graphStore.viewStore.getGraph(graphStore.viewStore.createView());
+        IndexImpl index = indexStore.getIndex(graph);
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        graphStore.writeLock();
+        try {
+            Assert.assertSame(executor.submit(() -> indexStore.getIndex(graph)).get(10, TimeUnit.SECONDS), index);
+        } finally {
+            graphStore.writeUnlock();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     public void testCreateViewIndexWithElements() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
@@ -638,5 +669,26 @@ public class IndexStoreTest {
             list.add(n);
         }
         return list.toArray(new Node[0]);
+    }
+
+    private static void assertWaitsForGraphLockWithoutTableLock(GraphStore graphStore, TableLockImpl tableLock, Runnable operation) throws Exception {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> future;
+            graphStore.writeLock();
+            try {
+                future = executor.submit(operation);
+                while (!graphStore.lock.readWriteLock.hasQueuedThreads() && !future.isDone()) {
+                    Thread.sleep(1);
+                }
+                Assert.assertFalse(future.isDone());
+                Assert.assertFalse(tableLock.lock.isLocked());
+            } finally {
+                graphStore.writeUnlock();
+            }
+            future.get(10, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }
