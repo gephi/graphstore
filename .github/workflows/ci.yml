@@ -19,6 +19,10 @@ jobs:
           server-password: OSSRH_PASS
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.11
       - name: Publish package
         run: mvn -B -Djava.awt.headless=true -Dmaven.repository.credentialScope=id deploy -P release
         env:
