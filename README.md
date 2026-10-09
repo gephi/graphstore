@@ -40,14 +40,14 @@ Follow [this QuickStart](https://github.com/gephi/graphstore/wiki/Quick-Start) t
 <dependency>
     <groupId>org.gephi</groupId>
     <artifactId>graphstore</artifactId>
-    <version>0.8.8</version>
+    <version>0.8.9</version>
 </dependency>
 ```
 
 ### From a Gradle project
 
 ```
-compile 'org.gephi:graphstore:0.8.8'
+compile 'org.gephi:graphstore:0.8.9'
 ```
 
 ## Dependencies
