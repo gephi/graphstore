@@ -587,16 +587,12 @@ public class NodeStore implements Collection<Node>, NodeIterable {
         return currentBlock.offset + currentBlock.nodeLength;
     }
 
-    // Clears the bits of the free store ids below maxStoreId()
+    // Clears the bits of the free store ids below maxStoreId(), as listed in each block's garbage array
     void clearFreeStoreIds(BitSet bits) {
         for (int i = 0; i < blocksCount; i++) {
             NodeBlock block = blocks[i];
-            if (block.hasGarbage()) {
-                for (int j = 0; j < block.nodeLength; j++) {
-                    if (block.backingArray[j] == null) {
-                        bits.clear(block.offset + j);
-                    }
-                }
+            for (int j = 0; j < block.garbageLength; j++) {
+                bits.clear(block.offset + block.garbageArray[j] - Short.MIN_VALUE);
             }
         }
     }
