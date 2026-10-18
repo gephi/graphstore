@@ -282,6 +282,9 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         graph.readLock();
         lock();
         try {
+            if (((GraphViewImpl) view).isDestroyed()) {
+                throw new IllegalArgumentException("The view doesn't exist");
+            }
             TimeIndexImpl viewIndex = viewIndexes.get(view);
             if (viewIndex == null) {
                 // TODO Make the auto-creation optional?

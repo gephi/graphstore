@@ -75,6 +75,9 @@ public class IndexStore<T extends Element> {
         // The graph lock is taken first, as indexing the view requires it
         graph.readLock();
         try {
+            if (((GraphViewImpl) view).isDestroyed()) {
+                throw new IllegalArgumentException("The view doesn't exist");
+            }
             synchronized (viewIndexes) {
                 IndexImpl<T> viewIndex = viewIndexes.get(view);
                 if (viewIndex == null) {
