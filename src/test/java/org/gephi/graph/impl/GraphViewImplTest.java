@@ -1923,4 +1923,76 @@ public class GraphViewImplTest {
             Assert.assertEquals(directed.getEdgeCount(i), iterate(directed.getEdges(i)));
         }
     }
+
+    @Test
+    public void testFillSkipsFreeEdgeSlots() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge removed = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(removed);
+        graphStore.addEdge(graphStore.factory.newEdge("b", n2, n1, 0, 1.0, true));
+        graphStore.removeEdge(removed);
+
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView(false, true);
+        Subgraph graph = graphModel.getGraph(view);
+        graph.fill();
+        Edge added = graphStore.factory.newEdge("c", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(added);
+
+        Assert.assertFalse(graph.contains(added));
+        Assert.assertEquals(graph.getEdgeCount(), 1);
+        Assert.assertEquals(graph.getEdges().toCollection().size(), 1);
+        graph.intersection(graphModel.getGraph(graphModel.createView(false, true)));
+        Assert.assertEquals(graph.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testNotSkipsFreeEdgeSlots() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge removed = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(removed);
+        graphStore.addEdge(graphStore.factory.newEdge("b", n2, n1, 0, 1.0, true));
+        graphStore.removeEdge(removed);
+
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView(false, true);
+        Subgraph graph = graphModel.getGraph(view);
+        graph.not();
+        Edge added = graphStore.factory.newEdge("c", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(added);
+
+        Assert.assertFalse(graph.contains(added));
+        Assert.assertEquals(graph.getEdgeCount(), 1);
+        Assert.assertEquals(graph.getEdges().toCollection().size(), 1);
+    }
+
+    @Test
+    public void testFillAndNotSkipFreeNodeSlots() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node removed = graphStore.factory.newNode("1");
+        graphStore.addAllNodes(Arrays.asList(removed, graphStore.factory.newNode("2")));
+        graphStore.removeNode(removed);
+
+        GraphViewImpl filled = (GraphViewImpl) graphModel.createView(true, false);
+        Subgraph filledGraph = graphModel.getGraph(filled);
+        filledGraph.fill();
+        GraphViewImpl inverted = (GraphViewImpl) graphModel.createView(true, false);
+        Subgraph invertedGraph = graphModel.getGraph(inverted);
+        invertedGraph.not();
+        Node added = graphStore.factory.newNode("3");
+        graphStore.addNode(added);
+
+        for (Subgraph graph : Arrays.asList(filledGraph, invertedGraph)) {
+            Assert.assertFalse(graph.contains(added));
+            Assert.assertEquals(graph.getNodeCount(), 1);
+            Assert.assertEquals(graph.getNodes().toCollection().size(), 1);
+        }
+    }
 }

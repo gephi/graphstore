@@ -472,9 +472,11 @@ public class GraphViewImpl implements GraphView {
     public void fill() {
         if (nodeView) {
             nodeBitVector.set(0, graphStore.nodeStore.maxStoreId(), true);
+            graphStore.nodeStore.clearFreeStoreIds(nodeBitVector);
             this.nodeCount = graphStore.nodeStore.size();
         }
         edgeBitVector.set(0, graphStore.edgeStore.maxStoreId());
+        graphStore.edgeStore.clearFreeStoreIds(edgeBitVector);
 
         this.edgeCount = graphStore.edgeStore.size();
         int typeLength = graphStore.edgeStore.typeSize.length;
@@ -581,12 +583,14 @@ public class GraphViewImpl implements GraphView {
         // Flip node bits if this is a node view
         if (nodeView) {
             nodeBitVector.flip(0, graphStore.nodeStore.maxStoreId());
+            graphStore.nodeStore.clearFreeStoreIds(nodeBitVector);
             this.nodeCount = graphStore.nodeStore.size() - this.nodeCount;
             incrementNodeVersion();
         }
 
         // Flip edge bits
         edgeBitVector.flip(0, graphStore.edgeStore.maxStoreId());
+        graphStore.edgeStore.clearFreeStoreIds(edgeBitVector);
 
         // Invert the edge and type counts (including types that weren't in the view before) in locals,
         // published once the edges with invalid endpoints are removed
