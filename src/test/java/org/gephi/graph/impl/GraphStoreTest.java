@@ -45,6 +45,7 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TextProperties;
+import org.gephi.graph.impl.utils.DataInputOutput;
 import org.gephi.graph.spi.LayoutData;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -1554,6 +1555,103 @@ public class GraphStoreTest {
             writer.join();
             executor.shutdownNow();
         }
+    }
+
+    @Test
+    public void testSetTypeDirectedOntoUndirectedEdge() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        graphStore.addEdge(graphStore.factory.newEdge("u", n2, n1, 1, 1.0, false));
+
+        for (Edge directed : Arrays.asList(graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true), graphStore.factory
+                .newEdge("b", n2, n1, 0, 1.0, true))) {
+            graphStore.addEdge(directed);
+            try {
+                directed.setType(1);
+                Assert.fail("Expected the undirected edge to conflict");
+            } catch (IllegalArgumentException e) {
+                // expected
+            }
+            Assert.assertEquals(directed.getType(), 0);
+            Assert.assertFalse(((EdgeImpl) directed).isMutual());
+            graphStore.removeEdge(directed);
+        }
+        Assert.assertEquals(graphStore.edgeStore.mutualEdgesSize, 0);
+    }
+
+    @Test
+    public void testSetTypeUndirectedOntoDirectedEdge() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge undirected = graphStore.factory.newEdge("u", n1, n2, 0, 1.0, false);
+        graphStore.addEdge(undirected);
+
+        for (Edge directed : Arrays.asList(graphStore.factory.newEdge("a", n1, n2, 1, 1.0, true), graphStore.factory
+                .newEdge("b", n2, n1, 1, 1.0, true))) {
+            graphStore.addEdge(directed);
+            try {
+                undirected.setType(1);
+                Assert.fail("Expected the directed edge to conflict");
+            } catch (IllegalArgumentException e) {
+                // expected
+            }
+            Assert.assertEquals(undirected.getType(), 0);
+            graphStore.removeEdge(directed);
+        }
+        undirected.setType(1);
+        Assert.assertEquals(undirected.getType(), 1);
+    }
+
+    @Test
+    public void testSetTypeKeepsMutualCountsConsistent() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge directed = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(directed);
+        graphStore.addEdge(graphStore.factory.newEdge("u", n2, n1, 1, 1.0, false));
+        try {
+            directed.setType(1);
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        int iterated = 0;
+        for (Edge ignored : graphStore.undirectedDecorator.getEdges()) {
+            iterated++;
+        }
+        Assert.assertEquals(graphStore.undirectedDecorator.getEdgeCount(), iterated);
+
+        Serialization ser = new Serialization(graphModel);
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, graphModel);
+        GraphModelImpl read = ser.deserializeGraphModel(dio.reset(dio.toByteArray()));
+        Assert.assertEquals(read.getGraph().getEdgeCount(), 2);
+    }
+
+    @Test
+    public void testRemoveUnpairedParallelEdgeKeepsMutualPair() {
+        GraphStore graphStore = new GraphStore(null, Configuration.builder().enableParallelEdgesSameType(true).build());
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge forward = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        Edge reverse = graphStore.factory.newEdge("b", n2, n1, 0, 1.0, true);
+        Edge parallel = graphStore.factory.newEdge("c", n1, n2, 0, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(forward, reverse, parallel));
+        Assert.assertFalse(((EdgeImpl) parallel).isMutual());
+
+        graphStore.removeEdge(parallel);
+        Assert.assertTrue(((EdgeImpl) forward).isMutual());
+        Assert.assertTrue(((EdgeImpl) reverse).isMutual());
+        Assert.assertEquals(graphStore.edgeStore.mutualEdgesSize, 1);
+        Assert.assertEquals(graphStore.undirectedDecorator.getEdgeCount(), 1);
     }
 
     private static void assertGraphType(GraphStore graphStore, boolean directed, boolean undirected, boolean mixed) {
