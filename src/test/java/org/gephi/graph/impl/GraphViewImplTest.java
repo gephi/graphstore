@@ -1533,6 +1533,19 @@ public class GraphViewImplTest {
         assertMutualCounts(graphModel, view);
     }
 
+    @Test
+    public void testCreateViewWithPredicatesMultipleTypes() {
+        GraphModelImpl graphModel = generateMutualPairModel();
+        GraphStore graphStore = graphModel.store;
+        graphStore.addEdge(graphStore.factory
+                .newEdge("d", graphStore.getNode("2"), graphStore.getNode("0"), 2, 1.0, true));
+
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView(n -> true, e -> true);
+        Assert.assertEquals(view.getEdgeCount(), 4);
+        Assert.assertEquals(view.getEdgeCount(2), 1);
+        assertMutualCounts(graphModel, view);
+    }
+
     private static GraphModelImpl generateMutualPairModel() {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore graphStore = graphModel.store;

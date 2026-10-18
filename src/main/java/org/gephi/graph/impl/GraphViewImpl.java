@@ -113,6 +113,7 @@ public class GraphViewImpl implements GraphView {
 
             edgeBitVector.set(edge.getStoreId());
             int type = edge.getType();
+            ensureTypeCountArrayCapacity(type);
             typeCounts[type]++;
             count++;
 
