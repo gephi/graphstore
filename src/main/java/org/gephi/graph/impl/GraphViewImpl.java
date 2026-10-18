@@ -667,6 +667,13 @@ public class GraphViewImpl implements GraphView {
         }
     }
 
+    // Called for every view when the edge is removed from the store, whether or not the view has edges enabled
+    public void removeEdgeFromStore(EdgeImpl edge) {
+        if (edgeBitVector.get(edge.storeId)) {
+            removeEdge(edge);
+        }
+    }
+
     /**
      * Bulk remove nodes from the view. This is more efficient than removing nodes one by one as it batches index
      * updates and increments version only once.

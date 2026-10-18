@@ -540,4 +540,57 @@ public class GraphViewStoreTest {
 
         store.createView((GraphView) null);
     }
+
+    @Test
+    public void testRemoveEdgeWithNodeView() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        Node n3 = graphStore.factory.newNode("3");
+        graphStore.addAllNodes(java.util.Arrays.asList(n1, n2, n3));
+        Edge inView = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        Edge notInView = graphStore.factory.newEdge("b", n2, n3, 0, 1.0, true);
+        graphStore.addEdge(inView);
+        graphStore.addEdge(notInView);
+
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView(true, false);
+        Subgraph graph = graphModel.getGraph(view);
+        graph.addNode(n1);
+        graph.addNode(n2);
+        Assert.assertEquals(graph.getEdgeCount(), 1);
+
+        graphStore.removeEdge(notInView);
+        Assert.assertEquals(graph.getEdgeCount(), 1);
+        graphStore.removeEdge(inView);
+        Assert.assertEquals(graph.getEdgeCount(), 0);
+        Assert.assertEquals(graph.getEdgeCount(0), 0);
+        Assert.assertEquals(graph.getEdges().toArray().length, 0);
+    }
+
+    @Test
+    public void testSetEdgeTypeWithNodeView() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        Node n3 = graphStore.factory.newNode("3");
+        graphStore.addAllNodes(java.util.Arrays.asList(n1, n2, n3));
+        Edge inView = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        Edge notInView = graphStore.factory.newEdge("b", n2, n3, 0, 1.0, true);
+        graphStore.addEdge(inView);
+        graphStore.addEdge(notInView);
+
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView(true, false);
+        Subgraph graph = graphModel.getGraph(view);
+        graph.addNode(n1);
+        graph.addNode(n2);
+
+        notInView.setType(1);
+        Assert.assertEquals(graph.getEdgeCount(0), 1);
+        inView.setType(1);
+        Assert.assertEquals(graph.getEdgeCount(0), 0);
+        Assert.assertEquals(graph.getEdgeCount(1), 1);
+        Assert.assertEquals(graph.getEdgeCount(), 1);
+    }
 }
