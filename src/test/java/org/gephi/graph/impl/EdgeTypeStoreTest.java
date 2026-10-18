@@ -167,6 +167,39 @@ public class EdgeTypeStoreTest {
     }
 
     @Test
+    public void testIsMultiGraph() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        Assert.assertFalse(edgeTypeStore.isMultiGraph());
+
+        edgeTypeStore.addType("foo");
+        Assert.assertTrue(edgeTypeStore.isMultiGraph());
+        edgeTypeStore.removeType("foo");
+        Assert.assertFalse(edgeTypeStore.isMultiGraph());
+
+        edgeTypeStore.addType("bar", 5);
+        Assert.assertTrue(edgeTypeStore.isMultiGraph());
+        edgeTypeStore.removeType(5);
+        Assert.assertFalse(edgeTypeStore.isMultiGraph());
+
+        edgeTypeStore.registerEdgeType(2);
+        Assert.assertTrue(edgeTypeStore.isMultiGraph());
+        edgeTypeStore.clear();
+        Assert.assertFalse(edgeTypeStore.isMultiGraph());
+    }
+
+    @Test
+    public void testIsMultiGraphAfterMaximumLengthException() {
+        EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
+        try {
+            edgeTypeStore.addType("foo", EdgeTypeStore.MAX_SIZE - 1);
+            Assert.fail("Expected the maximum length to be reached");
+        } catch (RuntimeException e) {
+            // expected
+        }
+        Assert.assertEquals(edgeTypeStore.isMultiGraph(), edgeTypeStore.size() > 1);
+    }
+
+    @Test
     public void testClear() {
         EdgeTypeStore edgeTypeStore = new EdgeTypeStore();
         edgeTypeStore.addType("0");

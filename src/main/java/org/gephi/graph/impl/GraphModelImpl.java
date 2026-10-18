@@ -214,12 +214,7 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public boolean isMultiGraph() {
-        store.autoReadLock();
-        try {
-            return store.edgeTypeStore.size() > 1;
-        } finally {
-            store.autoReadUnlock();
-        }
+        return store.edgeTypeStore.isMultiGraph();
     }
 
     @Override
