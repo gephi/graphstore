@@ -186,7 +186,78 @@ public class GraphModelTest {
         graphModel.store.addAllNodes(Arrays.asList(n1, n2));
         graphModel.store.addEdge(graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true));
         graphModel.store.addEdge(graphModel.factory().newEdge("1", n1, n2, 1, 1.0, true));
+        Assert.assertTrue(graphModel.store.edgeTypeStore.contains(1));
         Assert.assertTrue(graphModel.isMultiGraph());
+    }
+
+    @Test
+    public void testIsMultiGraphRemoveEdgesOneByOne() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        Node n3 = graphModel.factory().newNode("3");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2, n3));
+        graphModel.store.addEdge(graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true));
+        Edge e1 = graphModel.factory().newEdge("1", n1, n2, 1, 1.0, true);
+        Edge e2 = graphModel.factory().newEdge("2", n2, n3, 1, 1.0, true);
+        graphModel.store.addAllEdges(Arrays.asList(e1, e2));
+
+        graphModel.store.removeEdge(e1);
+        Assert.assertTrue(graphModel.isMultiGraph());
+        graphModel.store.removeEdge(e2);
+        Assert.assertFalse(graphModel.isMultiGraph());
+    }
+
+    @Test
+    public void testIsMultiGraphRemoveNode() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        Node n3 = graphModel.factory().newNode("3");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2, n3));
+        graphModel.store.addEdge(graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true));
+        graphModel.store.addEdge(graphModel.factory().newEdge("1", n2, n3, 1, 1.0, true));
+        Assert.assertTrue(graphModel.isMultiGraph());
+
+        graphModel.store.removeNode(n3);
+        Assert.assertFalse(graphModel.isMultiGraph());
+    }
+
+    @Test
+    public void testIsMultiGraphSetTypeBeforeAdd() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        graphModel.store.addEdge(graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true));
+        Edge edge = graphModel.factory().newEdge("1", n2, n1, 0, 1.0, true);
+
+        edge.setType(1);
+        Assert.assertFalse(graphModel.isMultiGraph());
+        graphModel.store.addEdge(edge);
+        Assert.assertTrue(graphModel.isMultiGraph());
+    }
+
+    @Test
+    public void testIsMultiGraphAfterSerialization() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        int type = graphModel.addEdgeType("foo");
+        graphModel.addEdgeType("bar");
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        graphModel.store.addEdge(graphModel.factory().newEdge("0", n1, n2, type, 1.0, true));
+        Assert.assertFalse(roundTrip(graphModel).isMultiGraph());
+
+        graphModel.store.addEdge(graphModel.factory().newEdge("1", n2, n1, 0, 1.0, true));
+        Assert.assertTrue(roundTrip(graphModel).isMultiGraph());
+    }
+
+    private static GraphModelImpl roundTrip(GraphModelImpl graphModel) throws Exception {
+        Serialization ser = new Serialization(graphModel);
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, graphModel);
+        return ser.deserializeGraphModel(dio.reset(dio.toByteArray()));
     }
 
     @Test

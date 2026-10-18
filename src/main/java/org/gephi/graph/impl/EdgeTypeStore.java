@@ -159,7 +159,6 @@ public class EdgeTypeStore {
         if (label != null) {
             labelMap.remove(label);
             garbageQueue.add(id);
-
         }
         return label;
     }

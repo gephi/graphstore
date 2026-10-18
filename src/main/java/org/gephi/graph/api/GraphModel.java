@@ -407,7 +407,10 @@ public interface GraphModel {
     public Object getEdgeTypeLabel(int id);
 
     /**
-     * Returns the number of different edge types.
+     * Returns the number of registered edge types.
+     * <p>
+     * The count includes the default type, which is always registered, and types without edges. Use
+     * {@link #getEdgeTypeLabels(boolean)} or {@link #isMultiGraph()} for the types that have edges.
      *
      * @return edge type count
      */
