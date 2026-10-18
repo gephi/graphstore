@@ -71,6 +71,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected int undirectedSize;
     protected int mutualEdgesSize;
     protected int[] mutualEdgesTypeSize;
+    // Graph type derived from undirectedSize and size, published for lock-free reads
+    private volatile GraphType graphType;
 
     public EdgeStore() {
         initStore();
@@ -120,6 +122,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
         this.mutualEdgesTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
         this.typeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        this.undirectedSize = 0;
+        this.mutualEdgesSize = 0;
+        updateGraphType();
     }
 
     private void ensureCapacity(final int capacity) {
@@ -809,6 +814,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             size++;
             typeSize[type]++;
+            updateGraphType();
             return true;
         } else if (isValidIndex(edge.storeId) && get(edge.storeId) == edge) {
             return false;
@@ -874,6 +880,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             if (!directed) {
                 undirectedSize--;
             }
+            updateGraphType();
 
             if (edgeTypeStore != null) {
                 // TODO - if type count is zero, do smthing
@@ -1197,16 +1204,31 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
+    // Called under the write lock once size and undirectedSize are both up to date
+    private void updateGraphType() {
+        GraphType type;
+        if (undirectedSize == 0) {
+            type = GraphType.DIRECTED;
+        } else if (undirectedSize == size) {
+            type = GraphType.UNDIRECTED;
+        } else {
+            type = GraphType.MIXED;
+        }
+        if (graphType != type) {
+            graphType = type;
+        }
+    }
+
     boolean isMixedGraph() {
-        return undirectedSize > 0 && undirectedSize != size;
+        return graphType == GraphType.MIXED;
     }
 
     boolean isUndirectedGraph() {
-        return size > 0 && undirectedSize == size;
+        return graphType == GraphType.UNDIRECTED;
     }
 
     boolean isDirectedGraph() {
-        return undirectedSize == 0;
+        return graphType == GraphType.DIRECTED;
     }
 
     protected boolean isValidIndex(int id) {
@@ -1300,6 +1322,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     int maxStoreId() {
         return currentBlock.offset + currentBlock.nodeLength;
+    }
+
+    private enum GraphType {
+        DIRECTED, UNDIRECTED, MIXED
     }
 
     protected static class EdgeBlock {

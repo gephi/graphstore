@@ -775,32 +775,17 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     @Override
     public boolean isDirected() {
-        autoReadLock();
-        try {
-            return edgeStore.isDirectedGraph();
-        } finally {
-            autoReadUnlock();
-        }
+        return edgeStore.isDirectedGraph();
     }
 
     @Override
     public boolean isUndirected() {
-        autoReadLock();
-        try {
-            return edgeStore.isUndirectedGraph();
-        } finally {
-            autoReadUnlock();
-        }
+        return edgeStore.isUndirectedGraph();
     }
 
     @Override
     public boolean isMixed() {
-        autoReadLock();
-        try {
-            return edgeStore.isMixedGraph();
-        } finally {
-            autoReadUnlock();
-        }
+        return edgeStore.isMixedGraph();
     }
 
     @Override
