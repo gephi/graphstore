@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.impl;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,11 +78,23 @@ public class GraphBridgeImpl implements GraphBridge {
             }
         }
 
-        // Copy edge labels
-        EdgeTypeStore sourceEdgeTypeStore = sourceStore.edgeTypeStore;
-        for (Integer edgeId : edgeTypeIds) {
-            Object label = sourceEdgeTypeStore.getLabel(edgeId);
-            store.edgeTypeStore.addType(label, edgeId);
+        // Copy edge labels, locking the source and destination one after the other
+        Int2ObjectMap<Object> edgeTypeLabels = new Int2ObjectOpenHashMap<>();
+        sourceStore.autoReadLock();
+        try {
+            for (Integer edgeId : edgeTypeIds) {
+                edgeTypeLabels.put(edgeId.intValue(), sourceStore.edgeTypeStore.getLabel(edgeId));
+            }
+        } finally {
+            sourceStore.autoReadUnlock();
+        }
+        store.autoWriteLock();
+        try {
+            for (Int2ObjectMap.Entry<Object> entry : edgeTypeLabels.int2ObjectEntrySet()) {
+                store.edgeTypeStore.addType(entry.getValue(), entry.getIntKey());
+            }
+        } finally {
+            store.autoWriteUnlock();
         }
 
         // Copy node columns
