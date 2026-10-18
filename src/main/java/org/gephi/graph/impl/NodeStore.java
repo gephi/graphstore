@@ -312,6 +312,10 @@ public class NodeStore implements Collection<Node>, NodeIterable {
                 spatialIndex.addNode(node);
             }
 
+            if (viewStore != null) {
+                viewStore.addNode(node);
+            }
+
             size++;
 
             return true;

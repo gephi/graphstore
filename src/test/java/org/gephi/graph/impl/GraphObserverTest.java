@@ -323,6 +323,41 @@ public class GraphObserverTest {
     }
 
     @Test
+    public void testEdgeViewNodeAddedAndRemovedInStore() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphViewImpl view = store.viewStore.createView(false, true);
+        GraphObserverImpl graphObserver = store.viewStore
+                .createGraphObserver(store.viewStore.getDirectedGraph(view), false);
+
+        Node node = store.factory.newNode("3");
+        store.addNode(node);
+        Assert.assertTrue(graphObserver.hasGraphChanged());
+        store.removeNode(node);
+        Assert.assertTrue(graphObserver.hasGraphChanged());
+    }
+
+    @Test
+    public void testDiffEdgeViewNodeAddedAndRemovedInStore() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphViewImpl view = store.viewStore.createView(false, true);
+        GraphObserverImpl graphObserver = store.viewStore
+                .createGraphObserver(store.viewStore.getDirectedGraph(view), true);
+
+        Node node = store.factory.newNode("3");
+        store.addNode(node);
+        Assert.assertTrue(graphObserver.hasGraphChanged());
+        GraphDiff diff = graphObserver.getDiff();
+        Assert.assertEquals(diff.getAddedNodes().toArray(), new Node[] { node });
+        Assert.assertSame(diff.getRemovedNodes(), NodeIterable.EMPTY);
+
+        store.removeNode(node);
+        Assert.assertTrue(graphObserver.hasGraphChanged());
+        diff = graphObserver.getDiff();
+        Assert.assertEquals(diff.getRemovedNodes().toArray(), new Node[] { node });
+        Assert.assertSame(diff.getAddedNodes(), NodeIterable.EMPTY);
+    }
+
+    @Test
     public void testDiffViewEdgeReaddedWithNewStoreId() {
         GraphStore store = GraphGenerator.generateTinyGraphStore();
         GraphViewImpl view = store.viewStore.createView();

@@ -1225,7 +1225,7 @@ public class GraphViewImpl implements GraphView {
         return true;
     }
 
-    private int incrementNodeVersion() {
+    int incrementNodeVersion() {
         if (version != null) {
             return version.incrementAndGetNodeVersion();
         }

@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
@@ -632,6 +633,41 @@ public class GraphViewStoreTest {
         graphModel.getGraph().removeAllNodes(graphModel.getGraph().getNodes().toCollection());
         Assert.assertEquals(graph.getNodeCount(), 0);
         Assert.assertEquals(graph.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testEdgeViewNodeIndexOnStoreAddAndRemove() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphModelImpl graphModel = graphStore.graphModel;
+        Column column = graphModel.getNodeTable().addColumn("age", Integer.class);
+        GraphView view = graphModel.createView(false, true);
+        Assert.assertEquals(graphModel.getNodeIndex(view).count(column, null), 2);
+
+        Node node = graphModel.factory().newNode("3");
+        graphModel.getGraph().addNode(node);
+        Assert.assertEquals(graphModel.getNodeIndex(view).count(column, null), 3);
+
+        graphModel.getGraph().removeNode(node);
+        Assert.assertEquals(graphModel.getNodeIndex(view).count(column, null), 2);
+    }
+
+    @Test
+    public void testNodeViewIndexOnStoreAddWithReusedStoreId() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphModelImpl graphModel = graphStore.graphModel;
+        Column column = graphModel.getNodeTable().addColumn("age", Integer.class);
+        GraphView view = graphModel.createView();
+        graphModel.getGraph(view).fill();
+        Assert.assertEquals(graphModel.getNodeIndex(view).count(column, null), 2);
+
+        Node removed = graphStore.getNode("1");
+        int storeId = removed.getStoreId();
+        graphModel.getGraph().removeNode(removed);
+        Node node = graphModel.factory().newNode("3");
+        graphModel.getGraph().addNode(node);
+        Assert.assertEquals(node.getStoreId(), storeId);
+        Assert.assertFalse(graphModel.getGraph(view).contains(node));
+        Assert.assertEquals(graphModel.getNodeIndex(view).count(column, null), 1);
     }
 
     @Test
