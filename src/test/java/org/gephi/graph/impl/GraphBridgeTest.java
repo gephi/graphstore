@@ -71,7 +71,7 @@ public class GraphBridgeTest {
             executor.shutdownNow();
         }
         Assert.assertEquals(dest.store.edgeTypeStore.getId("foo"), type);
-        Assert.assertTrue(dest.isMultiGraph());
+        Assert.assertEquals(dest.getEdgeTypeCount(), 2);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
