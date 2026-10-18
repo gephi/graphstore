@@ -78,7 +78,8 @@ public class GraphViewStore {
     }
 
     public GraphViewImpl createView(GraphView view) {
-        return createView(view, true, true);
+        checkNonNullViewObject(view);
+        return createView(view, view.isNodeView(), view.isEdgeView());
     }
 
     public GraphViewImpl createView(GraphView view, boolean nodes, boolean edges) {

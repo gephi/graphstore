@@ -593,4 +593,50 @@ public class GraphViewStoreTest {
         Assert.assertEquals(graph.getEdgeCount(1), 1);
         Assert.assertEquals(graph.getEdgeCount(), 1);
     }
+
+    @Test
+    public void testCopyEdgeView() {
+        GraphModelImpl graphModel = GraphGenerator.generateTinyGraphStore().graphModel;
+        GraphView view = graphModel.createView(false, true);
+        Edge edge = graphModel.getGraph().getEdges().toArray()[0];
+        graphModel.getGraph(view).addEdge(edge);
+
+        GraphView copy = graphModel.copyView(view);
+        Assert.assertFalse(copy.isNodeView());
+        Assert.assertTrue(copy.isEdgeView());
+        Assert.assertEquals(graphModel.getGraph(copy).getEdgeCount(), 1);
+        Assert.assertTrue(graphModel.getGraph(copy).contains(edge));
+        Assert.assertEquals(graphModel.getGraph(copy).getNodeCount(), graphModel.getGraph().getNodeCount());
+    }
+
+    @Test
+    public void testCopyEdgeViewWithNodes() {
+        GraphModelImpl graphModel = GraphGenerator.generateTinyGraphStore().graphModel;
+        GraphView view = graphModel.createView(false, true);
+        Edge edge = graphModel.getGraph().getEdges().toArray()[0];
+        graphModel.getGraph(view).addEdge(edge);
+
+        GraphView copy = graphModel.copyView(view, true, true);
+        Subgraph graph = graphModel.getGraph(copy);
+        Assert.assertTrue(copy.isNodeView());
+        Assert.assertEquals(graph.getNodeCount(), graphModel.getGraph().getNodeCount());
+        for (Node node : graphModel.getGraph().getNodes()) {
+            Assert.assertTrue(graph.contains(node));
+        }
+        Assert.assertEquals(graph.getEdgeCount(), 1);
+        Assert.assertTrue(graph.contains(edge));
+    }
+
+    @Test
+    public void testCopyNodeView() {
+        GraphModelImpl graphModel = GraphGenerator.generateTinyGraphStore().graphModel;
+        GraphView view = graphModel.createView(true, false);
+        graphModel.getGraph(view).fill();
+
+        GraphView copy = graphModel.copyView(view);
+        Assert.assertTrue(copy.isNodeView());
+        Assert.assertFalse(copy.isEdgeView());
+        Assert.assertEquals(graphModel.getGraph(copy).getNodeCount(), graphModel.getGraph().getNodeCount());
+        Assert.assertEquals(graphModel.getGraph(copy).getEdgeCount(), graphModel.getGraph().getEdgeCount());
+    }
 }

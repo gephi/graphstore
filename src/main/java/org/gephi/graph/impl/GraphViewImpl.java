@@ -136,9 +136,16 @@ public class GraphViewImpl implements GraphView {
         this.nodeView = nodes;
         this.edgeView = edges;
         this.attributes = new GraphAttributesImpl();
-        if (nodes) {
+        if (nodes && view.nodeView) {
             this.nodeBitVector = (BitSet) view.nodeBitVector.clone();
             this.nodeCount = view.nodeCount;
+        } else if (nodes) {
+            // The copied view doesn't filter nodes, so it contains all of them
+            this.nodeBitVector = new BitSet(graphStore.nodeStore.maxStoreId());
+            for (Node node : graphStore.nodeStore) {
+                nodeBitVector.set(node.getStoreId());
+            }
+            this.nodeCount = graphStore.nodeStore.size();
         } else {
             this.nodeBitVector = null;
         }
