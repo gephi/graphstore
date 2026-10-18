@@ -113,6 +113,7 @@ public class GraphViewImpl implements GraphView {
 
             edgeBitVector.set(edge.getStoreId());
             int type = edge.getType();
+            ensureTypeCountArrayCapacity(type);
             typeCounts[type]++;
             count++;
 
@@ -597,10 +598,6 @@ public class GraphViewImpl implements GraphView {
         for (int i = 0; i < storeTypeLength; i++) {
             this.typeCounts[i] = graphStore.edgeStore.typeSize[i] - this.typeCounts[i];
         }
-        for (int i = 0; i < graphStore.edgeStore.mutualEdgesTypeSize.length; i++) {
-            this.mutualEdgeTypeCounts[i] = graphStore.edgeStore.mutualEdgesTypeSize[i] - this.mutualEdgeTypeCounts[i];
-        }
-        this.mutualEdgesCount = graphStore.edgeStore.mutualEdgesSize - this.mutualEdgesCount;
 
         incrementEdgeVersion();
 
@@ -631,6 +628,9 @@ public class GraphViewImpl implements GraphView {
                 bulkRemoveEdgesForNot(edgesToRemove);
             }
         }
+
+        // A mutual pair can be split between the view and its complement, so count the pairs again
+        recountMutualEdges();
 
         // Rebuild indexes (necessary for NOT operation as the view content has
         // completely changed)
@@ -798,7 +798,9 @@ public class GraphViewImpl implements GraphView {
 
             if (edge.isMutual() && !edge.isSelfLoop()) {
                 EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
-                if (reverseEdge != null && containsEdge(reverseEdge)) {
+                // The bits are already cleared: a pair removed together is counted once
+                if (reverseEdge != null && (containsEdge(reverseEdge) || (edgesToRemove
+                        .get(reverseEdge.storeId) && edge.storeId < reverseEdge.storeId))) {
                     mutualEdgeTypeCounts[type]--;
                     mutualEdgesCount--;
                 }
@@ -849,7 +851,9 @@ public class GraphViewImpl implements GraphView {
 
             if (edge.isMutual() && !edge.isSelfLoop()) {
                 EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
-                if (reverseEdge != null && containsEdge(reverseEdge)) {
+                // The bits are already set: a pair added together is counted once
+                if (reverseEdge != null && containsEdge(reverseEdge) && (!edgesToAdd
+                        .get(reverseEdge.storeId) || edge.storeId < reverseEdge.storeId)) {
                     mutualEdgeTypeCounts[type]++;
                     mutualEdgesCount++;
                 }
@@ -887,7 +891,7 @@ public class GraphViewImpl implements GraphView {
         edgeBitVector.andNot(edgesToRemove);
         edgeCount -= removedCount;
 
-        // Update type counts and mutual edge counts
+        // Update type counts, mutual edges are counted again by not()
         for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
             EdgeImpl edge = getEdge(i);
             if (edge == null) {
@@ -897,17 +901,27 @@ public class GraphViewImpl implements GraphView {
             int type = edge.type;
             ensureTypeCountArrayCapacity(type);
             typeCounts[type]--;
-
-            if (edge.isMutual() && !edge.isSelfLoop()) {
-                EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
-                if (reverseEdge != null && containsEdge(reverseEdge)) {
-                    mutualEdgeTypeCounts[type]--;
-                    mutualEdgesCount--;
-                }
-            }
         }
         // Note: Version increment and index updates are handled by the caller (not()
         // method)
+    }
+
+    // Counts each mutual pair whose two edges are in the view once
+    private void recountMutualEdges() {
+        int[] counts = new int[typeCounts.length];
+        int total = 0;
+        for (int i = edgeBitVector.nextSetBit(0); i >= 0; i = edgeBitVector.nextSetBit(i + 1)) {
+            EdgeImpl edge = getEdge(i);
+            if (edge != null && edge.isMutual() && !edge.isSelfLoop()) {
+                EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
+                if (reverseEdge != null && edge.storeId < reverseEdge.storeId && containsEdge(reverseEdge)) {
+                    counts[edge.type]++;
+                    total++;
+                }
+            }
+        }
+        mutualEdgeTypeCounts = counts;
+        mutualEdgesCount = total;
     }
 
     public int getNodeCount() {

@@ -411,7 +411,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public EdgeIterable getEdges(int type) {
         if (undirected) {
             return new EdgeIterableWrapper(
-                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.iteratorType(type, undirected)),
+                    () -> new UndirectedEdgeViewIterator(graphStore.edgeStore.iteratorType(type, false)),
                     () -> graphStore.edgeStore.newFilteredSizedSpliterator(e -> e.getType() == type && view
                             .containsEdge(e) && !isUndirectedToIgnore(e), view.getUndirectedEdgeCount(type)),
                     graphStore.getAutoLock());
