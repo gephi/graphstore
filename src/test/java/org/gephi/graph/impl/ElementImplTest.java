@@ -1116,6 +1116,64 @@ public class ElementImplTest {
         Assert.assertEquals(node.getAttribute("age", view), 15.0);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetTimestampAttributeInDestroyedView() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimestampColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        GraphView view = store.viewStore.createView();
+        store.viewStore.destroyView(view);
+        node.getAttribute(column, view);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetTimestampAttributeInViewFromOtherStore() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimestampColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        GraphView view = new GraphStore().viewStore.createView();
+        node.getAttribute(column, view);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetTimestampAttributeInUnregisteredView() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimestampColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.getAttribute(column, new GraphViewImpl(store, true, true));
+    }
+
+    @Test
+    public void testGetTimestampAttributeInMainViewFromOtherStore() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimestampColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        Assert.assertNull(node.getAttribute(column, new GraphStore().getView()));
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testGetTimestampAttributeInNullView() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimestampColumn(store);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.getAttribute(column, (GraphView) null);
+    }
+
+    @Test
+    public void testGetTimestampAttributeInViewWithoutStore() {
+        GraphStore store = new GraphStore();
+        Column column = generateTimestampColumn(store);
+
+        NodeImpl node = new NodeImpl("0");
+        GraphView view = store.viewStore.createView();
+        Assert.assertNull(node.getAttribute(column, view));
+    }
+
     @Test
     public void testCheckDynamicType() {
         GraphStore store = new GraphStore();
