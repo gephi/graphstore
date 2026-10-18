@@ -257,7 +257,8 @@ public class GraphViewStore {
 
     protected void removeNode(NodeImpl node) {
         for (GraphViewImpl view : views) {
-            if (view != null) {
+            // Edge-only views include all nodes, and incident edges are removed from them beforehand
+            if (view != null && view.nodeView) {
                 view.removeNode(node);
             }
         }

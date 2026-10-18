@@ -617,6 +617,24 @@ public class GraphViewStoreTest {
     }
 
     @Test
+    public void testRemoveNodeWithEdgeView() {
+        GraphModelImpl graphModel = GraphGenerator.generateTinyGraphStore().graphModel;
+        GraphView view = graphModel.createView(false, true);
+        Edge edge = graphModel.getGraph().getEdges().toArray()[0];
+        Subgraph graph = graphModel.getGraph(view);
+        graph.addEdge(edge);
+
+        graphModel.getGraph().removeNode(edge.getSource());
+        Assert.assertEquals(graph.getEdgeCount(), 0);
+        Assert.assertEquals(graph.getNodeCount(), graphModel.getGraph().getNodeCount());
+        Assert.assertEquals(graph.getNodes().toCollection(), graphModel.getGraph().getNodes().toCollection());
+
+        graphModel.getGraph().removeAllNodes(graphModel.getGraph().getNodes().toCollection());
+        Assert.assertEquals(graph.getNodeCount(), 0);
+        Assert.assertEquals(graph.getEdgeCount(), 0);
+    }
+
+    @Test
     public void testCopyEdgeViewWithNodes() {
         GraphModelImpl graphModel = GraphGenerator.generateTinyGraphStore().graphModel;
         GraphView view = graphModel.createView(false, true);
