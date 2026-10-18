@@ -1134,29 +1134,23 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public boolean retainAll(Collection<?> c) {
         checkCollection(c);
 
-        if (!c.isEmpty()) {
-            ObjectSet<EdgeImpl> set = new ObjectOpenHashSet(c.size());
-            for (Object o : c) {
-                checkNonNullObject(o);
-                checkEdgeExists((EdgeImpl) o);
-                set.add((EdgeImpl) o);
-            }
-
-            boolean changed = false;
-            EdgeStoreIterator itr = iterator();
-            while (itr.hasNext()) {
-                EdgeImpl e = itr.next();
-                if (!set.contains(e)) {
-                    itr.remove();
-                    changed = true;
-                }
-            }
-            return changed;
-        } else if (size > 0) {
-            clear();
-            return true;
+        ObjectSet<EdgeImpl> set = new ObjectOpenHashSet(c.size());
+        for (Object o : c) {
+            checkNonNullObject(o);
+            checkEdgeExists((EdgeImpl) o);
+            set.add((EdgeImpl) o);
         }
-        return false;
+
+        boolean changed = false;
+        EdgeStoreIterator itr = iterator();
+        while (itr.hasNext()) {
+            EdgeImpl e = itr.next();
+            if (!set.contains(e)) {
+                itr.remove();
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     public int deepHashCode() {

@@ -43,6 +43,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.NodeIterable;
+import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.Table;
 import org.gephi.graph.api.TextProperties;
 import org.gephi.graph.impl.utils.DataInputOutput;
@@ -874,6 +875,34 @@ public class GraphStoreTest {
         graphStore.retainNodes(Collections.singletonList(nodes[0]));
         Assert.assertEquals(graphStore.getNodeCount(), 1);
         Assert.assertTrue(graphStore.contains(nodes[0]));
+    }
+
+    @Test
+    public void testRetainNodesEmptyRemovesEdgesAndUpdatesViews() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+        Subgraph subgraph = graphStore.viewStore.getGraph(view);
+
+        Assert.assertTrue(graphStore.retainNodes(Collections.EMPTY_LIST));
+        Assert.assertEquals(graphStore.getNodeCount(), 0);
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+        Assert.assertEquals(subgraph.getNodeCount(), 0);
+        Assert.assertEquals(subgraph.getEdgeCount(), 0);
+    }
+
+    @Test
+    public void testRetainEdgesEmptyUpdatesViews() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        int nodeCount = graphStore.getNodeCount();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+        Subgraph subgraph = graphStore.viewStore.getGraph(view);
+
+        Assert.assertTrue(graphStore.retainEdges(Collections.EMPTY_LIST));
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+        Assert.assertEquals(subgraph.getNodeCount(), nodeCount);
+        Assert.assertEquals(subgraph.getEdgeCount(), 0);
     }
 
     @Test
