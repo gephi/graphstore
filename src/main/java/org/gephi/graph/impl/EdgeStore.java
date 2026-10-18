@@ -320,10 +320,38 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         for (EdgeStoreIterator itr = new EdgeStoreIterator(); itr.hasNext();) {
             EdgeImpl edge = itr.next();
+            clearEndpoints(edge);
             edge.setStoreId(EdgeStore.NULL_ID);
+            edge.nextOutEdge = EdgeStore.NULL_ID;
+            edge.previousOutEdge = EdgeStore.NULL_ID;
+            edge.nextInEdge = EdgeStore.NULL_ID;
+            edge.previousInEdge = EdgeStore.NULL_ID;
+            edge.setMutual(false);
         }
 
         initStore();
+    }
+
+    // Resets the adjacency heads and degrees of the edge's source and target
+    private void clearEndpoints(EdgeImpl edge) {
+        NodeImpl source = edge.source;
+        NodeImpl target = edge.target;
+        if (source.headOut.length > GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT) {
+            source.headOut = new EdgeImpl[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        } else if (edge.type < source.headOut.length) {
+            source.headOut[edge.type] = null;
+        }
+        if (target.headIn.length > GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT) {
+            target.headIn = new EdgeImpl[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        } else if (edge.type < target.headIn.length) {
+            target.headIn[edge.type] = null;
+        }
+        source.outDegree = 0;
+        source.inDegree = 0;
+        source.mutualDegree = 0;
+        target.outDegree = 0;
+        target.inDegree = 0;
+        target.mutualDegree = 0;
     }
 
     @Override

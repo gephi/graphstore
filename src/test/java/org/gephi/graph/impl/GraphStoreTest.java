@@ -975,6 +975,119 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testClearEdgesResetsNodes() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge a = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        Edge b = graphStore.factory.newEdge("b", n2, n1, 0, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(a, b));
+        Assert.assertTrue(a.isMutual());
+
+        graphStore.clearEdges();
+
+        assertNoEdges(graphStore, n1, n2);
+        Assert.assertFalse(a.isMutual());
+        Assert.assertFalse(b.isMutual());
+    }
+
+    @Test
+    public void testClearEdgesReAddAndRemove() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge a = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        Edge b = graphStore.factory.newEdge("b", n2, n1, 0, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(a, b));
+
+        graphStore.clearEdges();
+        graphStore.addAllEdges(Arrays.asList(a, b));
+
+        Assert.assertEquals(graphStore.getDegree(n1), 2);
+        Assert.assertEquals(graphStore.getUndirectedDegree(n1), 1);
+        Assert.assertTrue(graphStore.removeEdge(a));
+        Assert.assertTrue(graphStore.removeEdge(b));
+        assertNoEdges(graphStore, n1, n2);
+    }
+
+    @Test
+    public void testClearEdgesSelfLoopAndUndirected() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge loop = graphStore.factory.newEdge("loop", n1, n1, 0, 1.0, true);
+        Edge undirected = graphStore.factory.newEdge("u", n1, n2, 0, 1.0, false);
+        graphStore.addAllEdges(Arrays.asList(loop, undirected));
+
+        graphStore.clearEdges();
+        assertNoEdges(graphStore, n1, n2);
+
+        graphStore.addAllEdges(Arrays.asList(loop, undirected));
+        Assert.assertEquals(graphStore.getEdgeCount(), 2);
+        Assert.assertTrue(graphStore.removeEdge(loop));
+        Assert.assertTrue(graphStore.removeEdge(undirected));
+        assertNoEdges(graphStore, n1, n2);
+    }
+
+    @Test
+    public void testClearEdgesMultipleTypes() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge e0 = graphStore.factory.newEdge("e0", n1, n2, 0, 1.0, true);
+        Edge e1 = graphStore.factory.newEdge("e1", n1, n2, 1, 1.0, true);
+        Edge e2 = graphStore.factory.newEdge("e2", n2, n1, 2, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(e0, e1, e2));
+
+        graphStore.clearEdges();
+        assertNoEdges(graphStore, n1, n2);
+
+        graphStore.addAllEdges(Arrays.asList(e0, e1, e2));
+        Assert.assertEquals(graphStore.getDegree(n1), 3);
+        Assert.assertTrue(graphStore.removeEdge(e2));
+        Assert.assertTrue(graphStore.removeEdge(e1));
+        Assert.assertTrue(graphStore.removeEdge(e0));
+        assertNoEdges(graphStore, n1, n2);
+    }
+
+    @Test
+    public void testClearResetsNodesAndEdges() {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge a = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        Edge b = graphStore.factory.newEdge("b", n2, n1, 0, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(a, b));
+
+        graphStore.clear();
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        assertNoEdges(graphStore, n1, n2);
+
+        graphStore.addAllEdges(Arrays.asList(a, b));
+        Assert.assertEquals(graphStore.getUndirectedDegree(n1), 1);
+        Assert.assertTrue(graphStore.removeEdge(a));
+        Assert.assertTrue(graphStore.removeEdge(b));
+        assertNoEdges(graphStore, n1, n2);
+    }
+
+    private static void assertNoEdges(GraphStore graphStore, Node... nodes) {
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
+        for (Node n : nodes) {
+            Assert.assertEquals(graphStore.getDegree(n), 0);
+            Assert.assertEquals(graphStore.getInDegree(n), 0);
+            Assert.assertEquals(graphStore.getOutDegree(n), 0);
+            Assert.assertEquals(graphStore.getUndirectedDegree(n), 0);
+            Assert.assertEquals(graphStore.getEdges(n).toArray().length, 0);
+            Assert.assertEquals(graphStore.getNeighbors(n).toArray().length, 0);
+        }
+    }
+
+    @Test
     public void testDeepEquals() {
         GraphStore g1 = GraphGenerator.generateTinyGraphStore();
         GraphStore g2 = GraphGenerator.generateTinyGraphStore();
