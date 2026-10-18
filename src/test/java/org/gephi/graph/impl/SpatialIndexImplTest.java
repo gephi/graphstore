@@ -16,6 +16,12 @@
 package org.gephi.graph.impl;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
@@ -40,6 +46,63 @@ public class SpatialIndexImplTest {
     public void testGetEdgesEmpty() {
         SpatialIndexImpl spatialIndex = new GraphStore(null, getConfig()).spatialIndex;
         Assert.assertTrue(spatialIndex.getEdgesInArea(BOUNDS_RECT).toCollection().isEmpty());
+    }
+
+    @Test
+    public void testGetEdgesInAreaRacingRemoveNode() throws Exception {
+        GraphStore store = GraphGenerator.generateTinyGraphStore(getConfig());
+        NodeImpl n1 = store.getNode("1");
+        CountDownLatch writeLocked = new CountDownLatch(1);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2, SpatialIndexImplTest::daemonThread);
+        try {
+            Future<?> writer = executor.submit(() -> {
+                store.writeLock();
+                try {
+                    writeLocked.countDown();
+                    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+                    while (!store.lock.readWriteLock.hasQueuedThreads() && System.nanoTime() < deadline) {
+                        Thread.sleep(1);
+                    }
+                    store.removeNode(n1);
+                } finally {
+                    store.writeUnlock();
+                }
+                return null;
+            });
+            Future<?> reader = executor.submit(() -> {
+                writeLocked.await();
+                store.spatialIndex.getEdgesInArea(BOUNDS_RECT).toCollection();
+                return null;
+            });
+            writer.get(10, TimeUnit.SECONDS);
+            reader.get(5, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testGetEdgesInAreaDoBreak() throws Exception {
+        GraphStore store = GraphGenerator.generateTinyGraphStore(getConfig());
+        EdgeIterable iterable = store.spatialIndex.getEdgesInArea(BOUNDS_RECT);
+        Iterator<Edge> iterator = iterable.iterator();
+        Assert.assertTrue(iterator.hasNext());
+        iterator.next();
+        iterable.doBreak();
+
+        ExecutorService executor = Executors.newSingleThreadExecutor(SpatialIndexImplTest::daemonThread);
+        try {
+            executor.submit(() -> store.removeNode(store.getNode("1"))).get(5, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    private static Thread daemonThread(Runnable runnable) {
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        return thread;
     }
 
     @Test

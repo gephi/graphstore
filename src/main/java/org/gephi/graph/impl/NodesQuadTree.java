@@ -908,6 +908,7 @@ public class NodesQuadTree {
         @Override
         public void doBreak() {
             readUnlock();
+            graphStore.edgeStore.readUnlock();
         }
 
     }
@@ -925,10 +926,13 @@ public class NodesQuadTree {
 
         public QuadTreeEdgesIterator(QuadTreeNode root, Rect2D searchRect, boolean approximate, Predicate<? super Edge> predicate) {
             this.predicate = predicate;
+            // Graph lock first, as node add and remove take the quad tree lock under the graph write lock
+            graphStore.edgeStore.readLock();
             readLock();
 
             // Create a node iterator for the quad tree
-            final QuadTreeNodesIterator nodeIterator = new QuadTreeNodesIterator(root, searchRect, approximate);
+            final QuadTreeNodesIterator nodeIterator = new QuadTreeNodesIterator(root, searchRect, approximate, null,
+                    false);
 
             // Create the edge iterator using the EdgeStore method
             this.edgeIterator = graphStore.edgeStore.edgeIterator(new Iterator<>() {
@@ -941,7 +945,7 @@ public class NodesQuadTree {
                 public NodeImpl next() {
                     return nodeIterator.next();
                 }
-            }, true);
+            }, false);
         }
 
         @Override
@@ -964,6 +968,7 @@ public class NodesQuadTree {
             }
 
             readUnlock();
+            graphStore.edgeStore.readUnlock();
             finished = true;
             return false;
         }
@@ -985,6 +990,7 @@ public class NodesQuadTree {
         private final Rect2D searchRect;
         private final boolean approximate;
         private final Predicate<? super Node> predicate;
+        private final boolean locking;
         private final Deque<QuadTreeNode> nodesStack = new ArrayDeque<>();
         private final Deque<Boolean> fullyContainedStack = new ArrayDeque<>();
 
@@ -1000,11 +1006,18 @@ public class NodesQuadTree {
         }
 
         public QuadTreeNodesIterator(QuadTreeNode root, Rect2D searchRect, boolean approximate, Predicate<? super Node> predicate) {
+            this(root, searchRect, approximate, predicate, true);
+        }
+
+        public QuadTreeNodesIterator(QuadTreeNode root, Rect2D searchRect, boolean approximate, Predicate<? super Node> predicate, boolean locking) {
             this.searchRect = searchRect;
             this.approximate = approximate;
             this.predicate = predicate;
+            this.locking = locking;
 
-            readLock();
+            if (locking) {
+                readLock();
+            }
 
             // Null rect means get all
             currentFullyContained = searchRect == null;
@@ -1080,7 +1093,9 @@ public class NodesQuadTree {
                 }
             }
 
-            readUnlock();
+            if (locking) {
+                readUnlock();
+            }
             finished = true;
             return false;
         }

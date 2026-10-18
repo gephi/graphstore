@@ -126,6 +126,9 @@ public interface SpatialIndex {
      * context, to avoid the spatial index being modified while being queried.
      * <p>
      * Every call to this method must be matched with a call to {@link #spatialIndexReadUnlock()}.
+     * <p>
+     * To also hold the graph read lock, acquire it before this lock, as adding and removing nodes take this lock while
+     * holding the graph write lock.
      */
     void spatialIndexReadLock();
 
