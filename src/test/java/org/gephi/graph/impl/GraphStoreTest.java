@@ -1486,6 +1486,76 @@ public class GraphStoreTest {
         Assert.assertEquals(inconsistent.get(), 0);
     }
 
+    @Test
+    public void testUndirectedEdgeCountConsistentDuringConcurrentWrites() throws Exception {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        graphStore.addEdge(graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true));
+
+        // Adding and removing the reverse edge leaves one undirected edge either way
+        AtomicBoolean done = new AtomicBoolean();
+        AtomicInteger inconsistent = new AtomicInteger();
+        Thread reader = new Thread(() -> {
+            while (!done.get()) {
+                if (graphStore.undirectedDecorator.getEdgeCount() != 1 || graphStore.undirectedDecorator
+                        .getEdgeCount(0) != 1) {
+                    inconsistent.incrementAndGet();
+                }
+            }
+        });
+        reader.start();
+        try {
+            for (int i = 0; i < 100000; i++) {
+                Edge edge = graphStore.factory.newEdge("b" + i, n2, n1, 0, 1.0, true);
+                graphStore.addEdge(edge);
+                graphStore.removeEdge(edge);
+            }
+        } finally {
+            done.set(true);
+            reader.join();
+        }
+        Assert.assertEquals(inconsistent.get(), 0);
+    }
+
+    @Test
+    public void testEdgeCountByTypeDoesNotBlockOnWriteLock() throws Exception {
+        GraphStore graphStore = new GraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        graphStore.addEdge(graphStore.factory.newEdge("a", n1, n2, 1, 1.0, true));
+        graphStore.addEdge(graphStore.factory.newEdge("b", n2, n1, 1, 1.0, true));
+
+        CountDownLatch locked = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        Thread writer = new Thread(() -> {
+            graphStore.writeLock();
+            try {
+                locked.countDown();
+                release.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                graphStore.writeUnlock();
+            }
+        });
+        writer.start();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Assert.assertTrue(locked.await(5, TimeUnit.SECONDS));
+            Future<int[]> counts = executor
+                    .submit(() -> new int[] { graphStore.getEdgeCount(1), graphStore.undirectedDecorator
+                            .getEdgeCount(1), graphStore.undirectedDecorator.getEdgeCount() });
+            Assert.assertEquals(counts.get(5, TimeUnit.SECONDS), new int[] { 2, 1, 1 });
+        } finally {
+            release.countDown();
+            writer.join();
+            executor.shutdownNow();
+        }
+    }
+
     private static void assertGraphType(GraphStore graphStore, boolean directed, boolean undirected, boolean mixed) {
         Assert.assertEquals(graphStore.isDirected(), directed);
         Assert.assertEquals(graphStore.isUndirected(), undirected);

@@ -219,7 +219,7 @@ public class EdgeTypeStore {
         return id - Short.MIN_VALUE - 1;
     }
 
-    private void checkValidId(final int id) {
+    static void checkValidId(final int id) {
         if (id < 0 || id >= MAX_SIZE) {
             throw new IllegalArgumentException("The type must be included between 0 and 65535");
         }
