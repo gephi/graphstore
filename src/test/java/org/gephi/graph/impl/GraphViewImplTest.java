@@ -1796,6 +1796,83 @@ public class GraphViewImplTest {
     }
 
     @Test
+    public void testEdgeCountRegisteredTypePastViewArray() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge edge = graphStore.factory.newEdge("0", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(edge);
+        graphStore.addEdge(graphStore.factory.newEdge("1", n1, n2, 1, 1.0, true));
+
+        GraphView view = graphModel.createView();
+        Subgraph graph = graphModel.getGraph(view);
+        graph.addAllNodes(Arrays.asList(n1, n2));
+        graph.addEdge(edge);
+        graphModel.setVisibleView(view);
+
+        Assert.assertEquals(graphModel.getGraphVisible().getEdgeCount(1), 0);
+        Assert.assertEquals(graphModel.getUndirectedGraphVisible().getEdgeCount(1), 0);
+        Assert.assertEquals(graphModel.getGraphVisible().getEdgeCount(0), 1);
+    }
+
+    @Test
+    public void testEdgeCountsConsistentDuringBulkViewOperations() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node[] nodes = new Node[4];
+        for (int i = 0; i < nodes.length; i++) {
+            nodes[i] = graphStore.factory.newNode(String.valueOf(i));
+        }
+        graphStore.addAllNodes(Arrays.asList(nodes));
+        for (int i = 1; i < nodes.length; i++) {
+            graphStore.addEdge(graphStore.factory.newEdge("a" + i, nodes[0], nodes[i], 0, 1.0, true));
+            graphStore.addEdge(graphStore.factory.newEdge("b" + i, nodes[i], nodes[0], 0, 1.0, true));
+        }
+        Subgraph full = graphModel.getGraph(graphModel.createView());
+        full.fill();
+        Subgraph empty = graphModel.getGraph(graphModel.createView());
+        GraphView view = graphModel.createView();
+        Subgraph graph = graphModel.getGraph(view);
+        graph.fill();
+        GraphView edgeView = graphModel.createView(false, true);
+        Subgraph edgeGraph = graphModel.getGraph(edgeView);
+        edgeGraph.fill();
+
+        // Each view holds either all 6 edges (3 mutual pairs) or none
+        AtomicBoolean done = new AtomicBoolean();
+        AtomicInteger inconsistent = new AtomicInteger();
+        Thread reader = new Thread(() -> {
+            while (!done.get()) {
+                for (GraphView v : Arrays.asList(view, edgeView)) {
+                    Subgraph directed = graphModel.getGraph(v);
+                    UndirectedSubgraph undirected = graphModel.getUndirectedGraph(v);
+                    int edges = directed.getEdgeCount();
+                    int typeEdges = directed.getEdgeCount(0);
+                    int undirectedEdges = undirected.getEdgeCount();
+                    int undirectedTypeEdges = undirected.getEdgeCount(0);
+                    if ((edges != 0 && edges != 6) || (typeEdges != 0 && typeEdges != 6) || (undirectedEdges != 0 && undirectedEdges != 3) || (undirectedTypeEdges != 0 && undirectedTypeEdges != 3)) {
+                        inconsistent.incrementAndGet();
+                    }
+                }
+            }
+        });
+        reader.start();
+        try {
+            for (int i = 0; i < 20000; i++) {
+                graph.intersection(empty);
+                graph.union(full);
+                edgeGraph.not();
+            }
+        } finally {
+            done.set(true);
+            reader.join();
+        }
+        Assert.assertEquals(inconsistent.get(), 0);
+    }
+
+    @Test
     public void testUndirectedEdgeCountConsistentDuringConcurrentWrites() throws Exception {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore graphStore = graphModel.store;
@@ -1839,6 +1916,11 @@ public class GraphViewImplTest {
             Assert.assertEquals(view.getUndirectedEdgeCount(i), view.typeCounts[i] - view.mutualEdgeTypeCounts[i]);
         }
         UndirectedSubgraph undirected = graphModel.getUndirectedGraph(view);
-        Assert.assertEquals(undirected.getEdgeCount(), undirected.getEdges().toArray().length);
+        Assert.assertEquals(undirected.getEdgeCount(), iterate(undirected.getEdges()));
+        Subgraph directed = graphModel.getGraph(view);
+        for (int i = 0; i < view.typeCounts.length; i++) {
+            Assert.assertEquals(undirected.getEdgeCount(i), iterate(undirected.getEdges(i)));
+            Assert.assertEquals(directed.getEdgeCount(i), iterate(directed.getEdges(i)));
+        }
     }
 }
