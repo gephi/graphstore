@@ -255,11 +255,24 @@ public class GraphViewStore {
         graphViewImpl.destroyGraphObserver(graphObserver);
     }
 
+    protected void addNode(NodeImpl node) {
+        for (GraphViewImpl view : views) {
+            // Edge-only views include all nodes
+            if (view != null && !view.nodeView) {
+                view.incrementNodeVersion();
+            }
+        }
+    }
+
     protected void removeNode(NodeImpl node) {
         for (GraphViewImpl view : views) {
-            // Edge-only views include all nodes, and incident edges are removed from them beforehand
-            if (view != null && view.nodeView) {
-                view.removeNode(node);
+            if (view != null) {
+                if (view.nodeView) {
+                    view.removeNode(node);
+                } else {
+                    // Edge-only views include all nodes, and incident edges are removed from them beforehand
+                    view.incrementNodeVersion();
+                }
             }
         }
     }

@@ -192,6 +192,18 @@ public class IndexStore<T extends Element> {
                     Object value = elementImpl.getAttribute(c);
                     value = mainIndex.put(c, value, element);
                     elementImpl.attributes.setAttribute(c, value);
+                    // Only edge-only views contain a node as it's added to the store. Edges are indexed in node-only
+                    // views when they are added to them.
+                    if (element instanceof Node && !viewIndexes.isEmpty()) {
+                        synchronized (viewIndexes) {
+                            for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
+                                GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                                if (graphView.containsNode((Node) element)) {
+                                    entry.getValue().put(c, value, element);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         } finally {
