@@ -1539,10 +1539,88 @@ public class GraphViewImplTest {
         GraphStore graphStore = graphModel.store;
         graphStore.addEdge(graphStore.factory
                 .newEdge("d", graphStore.getNode("2"), graphStore.getNode("0"), 2, 1.0, true));
+        graphStore.addEdge(graphStore.factory
+                .newEdge("e", graphStore.getNode("0"), graphStore.getNode("2"), 2, 1.0, true));
 
         GraphViewImpl view = (GraphViewImpl) graphModel.createView(n -> true, e -> true);
-        Assert.assertEquals(view.getEdgeCount(), 4);
-        Assert.assertEquals(view.getEdgeCount(2), 1);
+        Assert.assertEquals(view.getEdgeCount(), 5);
+        Assert.assertEquals(view.getEdgeCount(2), 2);
+        Assert.assertEquals(view.mutualEdgeTypeCounts[2], 1);
+        assertMutualCounts(graphModel, view);
+    }
+
+    @Test
+    public void testNotEdgeViewSplitsMutualPair() {
+        GraphModelImpl graphModel = generateMutualPairModel();
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView(false, true);
+        Subgraph graph = graphModel.getGraph(view);
+        graph.addEdge(graphModel.store.getEdge("a"));
+
+        graph.not();
+        assertMutualCounts(graphModel, view);
+        graph.not();
+        assertMutualCounts(graphModel, view);
+    }
+
+    @Test
+    public void testUnionAddsEdgeWithReverseInView() {
+        GraphModelImpl graphModel = generateMutualPairModel();
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView();
+        Subgraph graph = graphModel.getGraph(view);
+        graph.addAllNodes(graphModel.store.getNodes().toCollection());
+        graph.addEdge(graphModel.store.getEdge("b"));
+        GraphViewImpl other = (GraphViewImpl) graphModel.createView();
+        Subgraph otherGraph = graphModel.getGraph(other);
+        otherGraph.addAllNodes(graphModel.store.getNodes().toCollection());
+        otherGraph.addEdge(graphModel.store.getEdge("a"));
+
+        graph.union(otherGraph);
+        Assert.assertEquals(view.mutualEdgesCount, 1);
+        assertMutualCounts(graphModel, view);
+    }
+
+    @Test
+    public void testIntersectionKeepsReverseEdge() {
+        GraphModelImpl graphModel = generateMutualPairModel();
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView();
+        Subgraph graph = graphModel.getGraph(view);
+        graph.fill();
+        GraphViewImpl other = (GraphViewImpl) graphModel.createView();
+        Subgraph otherGraph = graphModel.getGraph(other);
+        otherGraph.addAllNodes(graphModel.store.getNodes().toCollection());
+        otherGraph.addEdge(graphModel.store.getEdge("a"));
+        otherGraph.addEdge(graphModel.store.getEdge("c"));
+
+        graph.intersection(otherGraph);
+        Assert.assertEquals(view.mutualEdgesCount, 0);
+        assertMutualCounts(graphModel, view);
+    }
+
+    @Test
+    public void testRetainEdgesMutualPair() {
+        GraphModelImpl graphModel = generateMutualPairModel();
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView();
+        Subgraph graph = graphModel.getGraph(view);
+        graph.fill();
+
+        graph.retainEdges(Arrays.asList(graphModel.store.getEdge("a"), graphModel.store.getEdge("b")));
+        Assert.assertEquals(view.mutualEdgesCount, 1);
+        assertMutualCounts(graphModel, view);
+        graph.retainEdges(Collections.singletonList(graphModel.store.getEdge("a")));
+        assertMutualCounts(graphModel, view);
+    }
+
+    @Test
+    public void testRetainNodesMutualPair() {
+        GraphModelImpl graphModel = generateMutualPairModel();
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView();
+        Subgraph graph = graphModel.getGraph(view);
+        graph.fill();
+
+        graph.retainNodes(Arrays.asList(graphModel.store.getNode("0"), graphModel.store.getNode("1")));
+        Assert.assertEquals(view.mutualEdgesCount, 1);
+        assertMutualCounts(graphModel, view);
+        graph.retainNodes(Collections.singletonList(graphModel.store.getNode("1")));
         assertMutualCounts(graphModel, view);
     }
 
