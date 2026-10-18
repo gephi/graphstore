@@ -1624,6 +1624,33 @@ public class GraphViewImplTest {
         assertMutualCounts(graphModel, view);
     }
 
+    @Test
+    public void testUndirectedEdgesByTypeWithoutReverseEdge() {
+        GraphModelImpl graphModel = generateMutualPairModel();
+        GraphViewImpl view = (GraphViewImpl) graphModel.createView();
+        Subgraph graph = graphModel.getGraph(view);
+        graph.fill();
+        UndirectedSubgraph undirected = graphModel.getUndirectedGraph(view);
+
+        // Iterates rather than collecting, which goes through the spliterator instead
+        for (String id : new String[] { "a", "b" }) {
+            Edge edge = graphModel.store.getEdge(id);
+            graph.removeEdge(edge);
+            Assert.assertEquals(iterate(undirected.getEdges(0)), 2);
+            Assert.assertEquals(iterate(undirected.getEdges()), 2);
+            graph.addEdge(edge);
+        }
+        Assert.assertEquals(iterate(undirected.getEdges(0)), 2);
+    }
+
+    private static int iterate(Iterable<Edge> edges) {
+        int count = 0;
+        for (Edge ignored : edges) {
+            count++;
+        }
+        return count;
+    }
+
     private static GraphModelImpl generateMutualPairModel() {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore graphStore = graphModel.store;
