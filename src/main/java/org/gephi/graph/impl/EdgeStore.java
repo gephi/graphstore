@@ -690,6 +690,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             if (newDicoValue != null && !configuration.isEnableParallelEdgesSameType()) {
                 return false;
             }
+            checkUndirectedNotExist(edge, type);
 
             edgeTypeStore.registerEdgeType(type);
             boolean wasMutual = edge.isMutual();
@@ -743,7 +744,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             dico.put(longId, newDicoValue);
         }
 
-        if (directed && !edge.isSelfLoop()) {
+        // Only an edge paired with a reverse edge releases one, parallel edges may leave others paired
+        if (directed && !edge.isSelfLoop() && edge.isMutual()) {
             int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
             if (index != null) {
                 for (int i = 0; i < index.length; i++) {
@@ -1223,7 +1225,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     void checkUndirectedNotExist(EdgeImpl edge) {
-        int type = edge.type;
+        checkUndirectedNotExist(edge, edge.type);
+    }
+
+    // Checks that no edge of the other directedness connects the same nodes with the given type
+    void checkUndirectedNotExist(EdgeImpl edge, int type) {
         if (type < longDictionary.length) {
             if (edge.isDirected() && !isDirectedGraph()) {
                 int[] index = longDictionary[type].get(getLongId(edge.source, edge.target, false));
