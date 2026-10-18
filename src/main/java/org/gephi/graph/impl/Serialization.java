@@ -676,7 +676,11 @@ public class Serialization {
         Object[] labels = (Object[]) deserialize(is);
         short[] garbage = (short[]) deserialize(is);
 
+        // Replace any types the store already had
         EdgeTypeStore edgeTypeStore = model.store.edgeTypeStore;
+        edgeTypeStore.labelMap.clear();
+        edgeTypeStore.idMap.clear();
+        edgeTypeStore.garbageQueue.clear();
         edgeTypeStore.length = length;
         for (int i = 0; i < ids.length; i++) {
             short id = ids[i];
