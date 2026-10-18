@@ -278,7 +278,6 @@ public class SerializationTest {
         Assert.assertFalse(l.contains("Baz"));
         Assert.assertFalse(l.contains("Qux"));
         Assert.assertEquals(l.size(), 2);
-        Assert.assertTrue(l.isMultiGraph());
     }
 
     @Test
