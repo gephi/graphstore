@@ -733,6 +733,37 @@ public class TimestampIndexStoreTest {
     }
 
     @Test
+    public void testRemoveTimestampWithViewIndexWithoutGraphLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        NodeImpl n1 = graphStore.getNode("1");
+        NodeImpl n2 = graphStore.getNode("2");
+        n1.addTimestamp(1.0);
+        n2.addTimestamp(1.0);
+        n2.addTimestamp(2.0);
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.addNode(n1);
+        view.addNode(n2);
+        TimestampIndexStore<Node> store = (TimestampIndexStore<Node>) graphStore.timeStore.nodeIndexStore;
+        TimeIndex<Node> index = store.getIndex(graphStore.viewStore.getGraph(view));
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        graphStore.writeLock();
+        try {
+            // n2 keeps 1.0 so the timestamp stays in the store and the view index is what's checked
+            executor.submit(() -> {
+                n1.removeTimestamp(1.0);
+                n2.removeTimestamp(2.0);
+            }).get(10, TimeUnit.SECONDS);
+        } finally {
+            graphStore.writeUnlock();
+            executor.shutdownNow();
+        }
+        Assert.assertEquals(getArrayFromIterable(index.get(1.0)), new Node[] { n2 });
+        Assert.assertEquals(getArrayFromIterable(index.get(2.0)).length, 0);
+    }
+
+    @Test
     public void testClearInViewElementNotInView() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         NodeImpl n1 = graphStore.getNode("1");

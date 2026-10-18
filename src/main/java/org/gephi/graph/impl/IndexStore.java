@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.gephi.graph.api.Column;
-import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
@@ -113,7 +112,11 @@ public class IndexStore<T extends Element> {
         }
         lock();
         try {
-            IndexImpl<T> index = viewIndexes.remove(graph.getView());
+            IndexImpl<T> index;
+            // Same monitor as set(), which iterates the view indexes without the table lock
+            synchronized (viewIndexes) {
+                index = viewIndexes.remove(graph.getView());
+            }
             if (index != null) {
                 index.destroy();
             }
@@ -128,10 +131,10 @@ public class IndexStore<T extends Element> {
         if (!viewIndexes.isEmpty()) {
             synchronized (viewIndexes) {
                 for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
+                    // Reads the view directly, the graph lock can't be taken while holding the monitor
                     GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                    DirectedSubgraph graph = graphView.getDirectedGraph();
-                    boolean inView = element instanceof Node ? graph.contains((Node) element)
-                            : graph.contains((Edge) element);
+                    boolean inView = element instanceof Node ? graphView.containsNode((Node) element)
+                            : graphView.containsEdge((Edge) element);
                     if (inView) {
                         entry.getValue().set(column, oldValue, value, element);
                     }
@@ -158,9 +161,8 @@ public class IndexStore<T extends Element> {
                         synchronized (viewIndexes) {
                             for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                                 GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                                DirectedSubgraph graph = graphView.getDirectedGraph();
-                                boolean inView = element instanceof Node ? graph.contains((Node) element)
-                                        : graph.contains((Edge) element);
+                                boolean inView = element instanceof Node ? graphView.containsNode((Node) element)
+                                        : graphView.containsEdge((Edge) element);
                                 if (inView) {
                                     entry.getValue().remove(c, value, element);
                                 }
