@@ -18,6 +18,11 @@ package org.gephi.graph.impl;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
@@ -150,6 +155,47 @@ public class GraphModelTest {
         Assert.assertFalse(graphModel.isMultiGraph());
         graphModel.addEdgeType("foo");
         Assert.assertTrue(graphModel.isMultiGraph());
+    }
+
+    @Test
+    public void testIsMultiGraphWithAutoRegisteredType() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.getStore().addAllNodes(Arrays.asList(n1, n2));
+        graphModel.getStore().addEdge(graphModel.factory().newEdge("0", n1, n2, 1, 1.0, true));
+        Assert.assertTrue(graphModel.isMultiGraph());
+    }
+
+    @Test
+    public void testIsMultiGraphDoesNotBlockOnWriteLock() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        graphModel.addEdgeType("foo");
+
+        CountDownLatch locked = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        Thread writer = new Thread(() -> {
+            graphModel.store.writeLock();
+            try {
+                locked.countDown();
+                release.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                graphModel.store.writeUnlock();
+            }
+        });
+        writer.start();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Assert.assertTrue(locked.await(5, TimeUnit.SECONDS));
+            Future<Boolean> multiGraph = executor.submit(graphModel::isMultiGraph);
+            Assert.assertTrue(multiGraph.get(5, TimeUnit.SECONDS));
+        } finally {
+            release.countDown();
+            writer.join();
+            executor.shutdownNow();
+        }
     }
 
     @Test

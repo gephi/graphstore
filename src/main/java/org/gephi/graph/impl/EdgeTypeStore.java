@@ -38,6 +38,8 @@ public class EdgeTypeStore {
     protected final Short2ObjectMap idMap;
     protected final ShortSortedSet garbageQueue;
     protected int length;
+    // Whether more than one type is registered, published for lock-free reads
+    private volatile boolean multiGraph;
 
     public EdgeTypeStore() {
         this(new ConfigurationImpl());
@@ -103,6 +105,7 @@ public class EdgeTypeStore {
             }
             labelMap.put(label, id);
             idMap.put(id, label);
+            updateMultiGraph();
         }
         return shortToInt(id);
     }
@@ -120,21 +123,26 @@ public class EdgeTypeStore {
                 throw new RuntimeException("This id '" + id + "' is already assigned to a different label");
             }
         }
-        if (garbageQueue.contains(givenId)) {
-            garbageQueue.remove(givenId);
-            labelMap.put(label, givenId);
-            idMap.put(givenId, label);
-        } else {
-            short insertId = intToShort(length++);
-            while (insertId < givenId) {
-                garbageQueue.add(insertId);
-                insertId = intToShort(length++);
-                if (length >= MAX_SIZE) {
-                    throw new RuntimeException("Maximum number of edge types reached at " + MAX_SIZE);
+        try {
+            if (garbageQueue.contains(givenId)) {
+                garbageQueue.remove(givenId);
+                labelMap.put(label, givenId);
+                idMap.put(givenId, label);
+            } else {
+                short insertId = intToShort(length++);
+                while (insertId < givenId) {
+                    garbageQueue.add(insertId);
+                    insertId = intToShort(length++);
+                    if (length >= MAX_SIZE) {
+                        throw new RuntimeException("Maximum number of edge types reached at " + MAX_SIZE);
+                    }
                 }
+                labelMap.put(label, givenId);
+                idMap.put(givenId, label);
             }
-            labelMap.put(label, givenId);
-            idMap.put(givenId, label);
+        } finally {
+            // The loop above can throw after changing length
+            updateMultiGraph();
         }
         return true;
     }
@@ -146,6 +154,7 @@ public class EdgeTypeStore {
         }
         idMap.remove(id);
         garbageQueue.add(id);
+        updateMultiGraph();
 
         int intId = shortToInt(id);
         return intId;
@@ -159,7 +168,7 @@ public class EdgeTypeStore {
         if (label != null) {
             labelMap.remove(label);
             garbageQueue.add(id);
-
+            updateMultiGraph();
         }
         return label;
     }
@@ -206,10 +215,23 @@ public class EdgeTypeStore {
         length++;
         labelMap.put(null, id);
         idMap.put(id, null);
+        updateMultiGraph();
     }
 
     public int size() {
         return length - garbageQueue.size();
+    }
+
+    public boolean isMultiGraph() {
+        return multiGraph;
+    }
+
+    // Called once length and garbageQueue are both up to date
+    void updateMultiGraph() {
+        boolean multi = size() > 1;
+        if (multiGraph != multi) {
+            multiGraph = multi;
+        }
     }
 
     private short intToShort(final int id) {
