@@ -628,12 +628,22 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public void clear() {
-        view.clear();
+        graphStore.autoWriteLock();
+        try {
+            view.clear();
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
     }
 
     @Override
     public void clearEdges() {
-        view.clearEdges();
+        graphStore.autoWriteLock();
+        try {
+            view.clearEdges();
+        } finally {
+            graphStore.autoWriteUnlock();
+        }
     }
 
     @Override
