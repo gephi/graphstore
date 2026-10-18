@@ -20,6 +20,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -584,6 +585,16 @@ public class NodeStore implements Collection<Node>, NodeIterable {
 
     int maxStoreId() {
         return currentBlock.offset + currentBlock.nodeLength;
+    }
+
+    // Clears the bits of the free store ids below maxStoreId(), as listed in each block's garbage array
+    void clearFreeStoreIds(BitSet bits) {
+        for (int i = 0; i < blocksCount; i++) {
+            NodeBlock block = blocks[i];
+            for (int j = 0; j < block.garbageLength; j++) {
+                bits.clear(block.offset + block.garbageArray[j] - Short.MIN_VALUE);
+            }
+        }
     }
 
     protected static class NodeBlock {

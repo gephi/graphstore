@@ -23,6 +23,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -1396,6 +1397,16 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     int maxStoreId() {
         return currentBlock.offset + currentBlock.nodeLength;
+    }
+
+    // Clears the bits of the free store ids below maxStoreId(), as listed in each block's garbage array
+    void clearFreeStoreIds(BitSet bits) {
+        for (int i = 0; i < blocksCount; i++) {
+            EdgeBlock block = blocks[i];
+            for (int j = 0; j < block.garbageLength; j++) {
+                bits.clear(block.offset + block.garbageArray[j] - Short.MIN_VALUE);
+            }
+        }
     }
 
     private enum GraphType {
