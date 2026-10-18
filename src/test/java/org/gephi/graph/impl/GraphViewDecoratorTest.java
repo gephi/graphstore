@@ -1156,20 +1156,20 @@ public class GraphViewDecoratorTest {
     private static void assertWaitsForReadLock(GraphStore graphStore, Runnable action, BooleanSupplier unchanged) throws Exception {
         ReentrantReadWriteLock lock = graphStore.lock.readWriteLock;
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<?> future;
-        graphStore.readLock();
         try {
-            future = executor.submit(action);
-            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-            while (!lock.hasQueuedThreads() && !future.isDone() && System.nanoTime() < deadline) {
-                Thread.sleep(1);
+            Future<?> future;
+            graphStore.readLock();
+            try {
+                future = executor.submit(action);
+                long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+                while (!lock.hasQueuedThreads() && !future.isDone() && System.nanoTime() < deadline) {
+                    Thread.sleep(1);
+                }
+                Assert.assertTrue(lock.hasQueuedThreads());
+                Assert.assertTrue(unchanged.getAsBoolean());
+            } finally {
+                graphStore.readUnlock();
             }
-            Assert.assertTrue(lock.hasQueuedThreads());
-            Assert.assertTrue(unchanged.getAsBoolean());
-        } finally {
-            graphStore.readUnlock();
-        }
-        try {
             future.get(5, TimeUnit.SECONDS);
         } finally {
             executor.shutdownNow();
