@@ -798,7 +798,9 @@ public class GraphViewImpl implements GraphView {
 
             if (edge.isMutual() && !edge.isSelfLoop()) {
                 EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
-                if (reverseEdge != null && containsEdge(reverseEdge)) {
+                // The bits are already cleared: a pair removed together is counted once
+                if (reverseEdge != null && (containsEdge(reverseEdge) || (edgesToRemove
+                        .get(reverseEdge.storeId) && edge.storeId < reverseEdge.storeId))) {
                     mutualEdgeTypeCounts[type]--;
                     mutualEdgesCount--;
                 }
@@ -849,7 +851,9 @@ public class GraphViewImpl implements GraphView {
 
             if (edge.isMutual() && !edge.isSelfLoop()) {
                 EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
-                if (reverseEdge != null && containsEdge(reverseEdge)) {
+                // The bits are already set: a pair added together is counted once
+                if (reverseEdge != null && containsEdge(reverseEdge) && (!edgesToAdd
+                        .get(reverseEdge.storeId) || edge.storeId < reverseEdge.storeId)) {
                     mutualEdgeTypeCounts[type]++;
                     mutualEdgesCount++;
                 }
@@ -900,7 +904,9 @@ public class GraphViewImpl implements GraphView {
 
             if (edge.isMutual() && !edge.isSelfLoop()) {
                 EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
-                if (reverseEdge != null && containsEdge(reverseEdge)) {
+                // The bits are already cleared: a pair removed together is counted once
+                if (reverseEdge != null && (containsEdge(reverseEdge) || (edgesToRemove
+                        .get(reverseEdge.storeId) && edge.storeId < reverseEdge.storeId))) {
                     mutualEdgeTypeCounts[type]--;
                     mutualEdgesCount--;
                 }
