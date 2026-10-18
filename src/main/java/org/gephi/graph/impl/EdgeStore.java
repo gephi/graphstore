@@ -73,6 +73,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected int[] mutualEdgesTypeSize;
     // Graph type derived from undirectedSize and size, published for lock-free reads
     private volatile GraphType graphType;
+    // Number of types with at least one edge, and whether there is more than one
+    protected int nonEmptyTypeCount;
+    private volatile boolean multiGraph;
 
     public EdgeStore() {
         initStore();
@@ -124,7 +127,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.typeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
         this.undirectedSize = 0;
         this.mutualEdgesSize = 0;
+        this.nonEmptyTypeCount = 0;
         updateGraphType();
+        updateMultiGraph();
     }
 
     private void ensureCapacity(final int capacity) {
@@ -684,7 +689,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             edgeTypeStore.registerEdgeType(type);
             boolean wasMutual = edge.isMutual();
             removeFromDico(edge, edge.storeId);
-            typeSize[oldType]--;
+            decrementTypeSize(oldType);
 
             removeOutEdge(edge);
             removeInEdge(edge);
@@ -693,7 +698,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             insertInEdge(edge);
 
             addToDico(newDico, newDicoValue, edge, longId);
-            typeSize[type]++;
+            incrementTypeSize(type);
+            updateMultiGraph();
 
             if (viewStore != null) {
                 viewStore.setEdgeType(edge, oldType, wasMutual);
@@ -841,8 +847,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             }
 
             size++;
-            typeSize[type]++;
+            incrementTypeSize(type);
             updateGraphType();
+            updateMultiGraph();
             return true;
         } else if (isValidIndex(edge.storeId) && get(edge.storeId) == edge) {
             return false;
@@ -883,7 +890,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             target.inDegree--;
 
             size--;
-            typeSize[edge.type]--;
+            decrementTypeSize(edge.type);
             garbageSize++;
             dictionary.remove(edge.getId());
             trimDictionary();
@@ -909,6 +916,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 undirectedSize--;
             }
             updateGraphType();
+            updateMultiGraph();
 
             if (edgeTypeStore != null) {
                 // TODO - if type count is zero, do smthing
@@ -1245,6 +1253,30 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         if (graphType != type) {
             graphType = type;
         }
+    }
+
+    private void incrementTypeSize(int type) {
+        if (typeSize[type]++ == 0) {
+            nonEmptyTypeCount++;
+        }
+    }
+
+    private void decrementTypeSize(int type) {
+        if (--typeSize[type] == 0) {
+            nonEmptyTypeCount--;
+        }
+    }
+
+    // Called under the write lock once nonEmptyTypeCount is up to date
+    private void updateMultiGraph() {
+        boolean multi = nonEmptyTypeCount > 1;
+        if (multiGraph != multi) {
+            multiGraph = multi;
+        }
+    }
+
+    boolean isMultiGraph() {
+        return multiGraph;
     }
 
     boolean isMixedGraph() {

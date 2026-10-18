@@ -691,7 +691,6 @@ public class Serialization {
         for (int i = 0; i < garbage.length; i++) {
             edgeTypeStore.garbageQueue.add(garbage[i]);
         }
-        edgeTypeStore.updateMultiGraph();
         return edgeTypeStore;
     }
 

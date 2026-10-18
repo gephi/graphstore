@@ -257,7 +257,6 @@ public class SerializationTest {
         ser = new Serialization(graphModel);
         EdgeTypeStore l = (EdgeTypeStore) ser.deserialize(buf);
         Assert.assertTrue(edgeTypeStore.deepEquals(l));
-        Assert.assertTrue(l.isMultiGraph());
     }
 
     @Test
