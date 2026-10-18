@@ -96,10 +96,10 @@ public class GraphViewStore {
             }
         } else {
             checkGraphViewObject(view);
-            checkViewExist((GraphViewImpl) view);
 
             graphStore.autoWriteLock();
             try {
+                checkViewExist((GraphViewImpl) view);
                 GraphViewImpl graphView = new GraphViewImpl((GraphViewImpl) view, nodes, edges);
                 addView(graphView);
                 return graphView;
@@ -115,10 +115,10 @@ public class GraphViewStore {
             throw new IllegalArgumentException("Can't delete the main view");
         }
         checkGraphViewObject(view);
-        checkViewExist((GraphViewImpl) view);
 
         graphStore.autoWriteLock();
         try {
+            checkViewExist((GraphViewImpl) view);
             TimeIndexStore nodeTimeStore = graphStore.timeStore.nodeIndexStore;
             if (nodeTimeStore != null) {
                 nodeTimeStore.deleteViewIndex(((GraphViewImpl) view).getDirectedGraph());
@@ -147,10 +147,14 @@ public class GraphViewStore {
 
     public void setTimeInterval(GraphView view, Interval interval) {
         checkNonNullViewObject(view);
-        checkViewExist((GraphViewImpl) view);
+        if (view.isMainView()) {
+            throw new IllegalArgumentException("Can't set the time interval of the main view");
+        }
+        checkGraphViewObject(view);
 
         graphStore.autoWriteLock();
         try {
+            checkViewExist((GraphViewImpl) view);
             GraphViewImpl graphView = (GraphViewImpl) view;
             graphView.setTimeInterval(interval);
         } finally {
@@ -233,9 +237,13 @@ public class GraphViewStore {
 
     public GraphObserverImpl createGraphObserver(Graph graph, boolean withDiff) {
         GraphViewImpl graphViewImpl = (GraphViewImpl) graph.getView();
-        checkViewExist(graphViewImpl);
-
-        return graphViewImpl.createGraphObserver(graph, withDiff);
+        graphStore.autoReadLock();
+        try {
+            checkViewExist(graphViewImpl);
+            return graphViewImpl.createGraphObserver(graph, withDiff);
+        } finally {
+            graphStore.autoReadUnlock();
+        }
     }
 
     public void destroyGraphObserver(GraphObserverImpl graphObserver) {

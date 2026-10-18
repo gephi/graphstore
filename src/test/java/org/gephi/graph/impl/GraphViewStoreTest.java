@@ -23,6 +23,12 @@ import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
 import org.gephi.graph.api.UndirectedSubgraph;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -638,5 +644,73 @@ public class GraphViewStoreTest {
         Assert.assertFalse(copy.isEdgeView());
         Assert.assertEquals(graphModel.getGraph(copy).getNodeCount(), graphModel.getGraph().getNodeCount());
         Assert.assertEquals(graphModel.getGraph(copy).getEdgeCount(), graphModel.getGraph().getEdgeCount());
+    }
+
+    @Test
+    public void testRacingOperationsOnDestroyedViewThrow() throws Exception {
+        String[] ops = { "createView", "destroyView", "setTimeInterval", "nodeIndex", "edgeIndex", "observer" };
+        for (String op : ops) {
+            GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+            GraphModelImpl model = (GraphModelImpl) graphStore.graphModel;
+            GraphViewImpl view = graphStore.viewStore.createView();
+            Callable<Object> action;
+            switch (op) {
+                case "createView":
+                    action = () -> graphStore.viewStore.createView(view);
+                    break;
+                case "destroyView":
+                    action = () -> {
+                        graphStore.viewStore.destroyView(view);
+                        return null;
+                    };
+                    break;
+                case "setTimeInterval":
+                    action = () -> {
+                        graphStore.viewStore.setTimeInterval(view, new Interval(1, 2));
+                        return null;
+                    };
+                    break;
+                case "edgeIndex":
+                    action = () -> model.getEdgeIndex(view);
+                    break;
+                case "observer":
+                    action = () -> graphStore.viewStore.createGraphObserver(view.getDirectedGraph(), false);
+                    break;
+                default:
+                    action = () -> model.getNodeIndex(view);
+            }
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            try {
+                Future<Object> future;
+                graphStore.writeLock();
+                try {
+                    future = executor.submit(action);
+                    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+                    while (!graphStore.lock.readWriteLock.hasQueuedThreads() && !future.isDone() && System
+                            .nanoTime() < deadline) {
+                        Thread.sleep(1);
+                    }
+                    Assert.assertTrue(graphStore.lock.readWriteLock.hasQueuedThreads(), op);
+                    graphStore.viewStore.destroyView(view);
+                } finally {
+                    graphStore.writeUnlock();
+                }
+                try {
+                    future.get(5, TimeUnit.SECONDS);
+                    Assert.fail(op);
+                } catch (ExecutionException e) {
+                    Assert.assertTrue(e.getCause() instanceof IllegalArgumentException, op);
+                }
+            } finally {
+                executor.shutdownNow();
+            }
+        }
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testSetTimeIntervalMainView() {
+        GraphStore graphStore = new GraphStore();
+        graphStore.viewStore.setTimeInterval(graphStore.mainGraphView, new Interval(1, 2));
     }
 }
