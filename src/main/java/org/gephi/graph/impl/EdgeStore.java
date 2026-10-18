@@ -72,10 +72,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected int mutualEdgesSize;
     protected int[] mutualEdgesTypeSize;
     // Graph type derived from undirectedSize and size, published for lock-free reads
-    private static final byte GRAPH_DIRECTED = 0;
-    private static final byte GRAPH_UNDIRECTED = 1;
-    private static final byte GRAPH_MIXED = 2;
-    private volatile byte graphType;
+    private volatile GraphType graphType;
 
     public EdgeStore() {
         initStore();
@@ -1209,13 +1206,13 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     // Called under the write lock once size and undirectedSize are both up to date
     private void updateGraphType() {
-        byte type;
+        GraphType type;
         if (undirectedSize == 0) {
-            type = GRAPH_DIRECTED;
+            type = GraphType.DIRECTED;
         } else if (undirectedSize == size) {
-            type = GRAPH_UNDIRECTED;
+            type = GraphType.UNDIRECTED;
         } else {
-            type = GRAPH_MIXED;
+            type = GraphType.MIXED;
         }
         if (graphType != type) {
             graphType = type;
@@ -1223,15 +1220,15 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     boolean isMixedGraph() {
-        return graphType == GRAPH_MIXED;
+        return graphType == GraphType.MIXED;
     }
 
     boolean isUndirectedGraph() {
-        return graphType == GRAPH_UNDIRECTED;
+        return graphType == GraphType.UNDIRECTED;
     }
 
     boolean isDirectedGraph() {
-        return graphType == GRAPH_DIRECTED;
+        return graphType == GraphType.DIRECTED;
     }
 
     protected boolean isValidIndex(int id) {
@@ -1325,6 +1322,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     int maxStoreId() {
         return currentBlock.offset + currentBlock.nodeLength;
+    }
+
+    private enum GraphType {
+        DIRECTED, UNDIRECTED, MIXED
     }
 
     protected static class EdgeBlock {
