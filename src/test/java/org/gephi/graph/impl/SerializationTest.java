@@ -261,6 +261,50 @@ public class SerializationTest {
     }
 
     @Test
+    public void testEdgeTypeStoreReplacesExistingTypes() throws IOException, ClassNotFoundException {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        EdgeTypeStore edgeTypeStore = graphModel.store.edgeTypeStore;
+        edgeTypeStore.addType("Bar");
+        byte[] buf = new Serialization(graphModel).serialize(edgeTypeStore);
+
+        GraphModelImpl target = new GraphModelImpl();
+        target.store.edgeTypeStore.addType("Foo");
+        target.store.edgeTypeStore.removeType("Foo");
+        target.store.edgeTypeStore.addType("Baz");
+        target.store.edgeTypeStore.addType("Qux");
+
+        EdgeTypeStore l = (EdgeTypeStore) new Serialization(target).deserialize(buf);
+        Assert.assertTrue(edgeTypeStore.deepEquals(l));
+        Assert.assertFalse(l.contains("Baz"));
+        Assert.assertFalse(l.contains("Qux"));
+        Assert.assertEquals(l.size(), 2);
+        Assert.assertTrue(l.isMultiGraph());
+    }
+
+    @Test
+    public void testReadIntoModelWithEdgeTypes() throws Exception {
+        GraphModelImpl source = new GraphModelImpl();
+        int type = source.addEdgeType("Bar");
+        Node n1 = source.factory().newNode("1");
+        Node n2 = source.factory().newNode("2");
+        source.store.addAllNodes(Arrays.asList(n1, n2));
+        source.store.addEdge(source.factory().newEdge("0", n1, n2, type, 1.0, true));
+        DataInputOutput dio = new DataInputOutput();
+        new Serialization(source).serializeGraphModel(dio, source);
+        byte[] bytes = dio.toByteArray();
+
+        GraphModelImpl target = new GraphModelImpl();
+        target.addEdgeType("Foo");
+        target.addEdgeType("Baz");
+        new Serialization(target).deserializeGraphModel(dio.reset(bytes), target);
+
+        Assert.assertEquals(target.getEdgeTypeCount(), 2);
+        Assert.assertEqualsNoOrder(target.getEdgeTypeLabels(), new Object[] { null, "Bar" });
+        Assert.assertEquals(target.getEdgeType("Foo"), EdgeTypeStore.NULL_TYPE);
+        Assert.assertEquals(target.getEdgeType("Bar"), type);
+    }
+
+    @Test
     public void testTable() throws IOException, ClassNotFoundException {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphStore graphStore = graphModel.store;
