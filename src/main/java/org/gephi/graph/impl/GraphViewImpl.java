@@ -41,7 +41,7 @@ public class GraphViewImpl implements GraphView {
     protected final GraphAttributesImpl attributes;
     protected BitSet nodeBitVector;
     protected BitSet edgeBitVector;
-    protected int storeId;
+    protected volatile int storeId = GraphViewStore.NULL_VIEW;
     // Version
     protected final GraphVersion version;
     protected final List<GraphObserverImpl> observers;

@@ -147,8 +147,8 @@ public abstract class ElementImpl implements Element {
         if (!column.isDynamic()) {
             return getAttribute(column);
         } else {
-            Interval interval = view.getTimeInterval();
             checkViewExist(view);
+            Interval interval = view.getTimeInterval();
             return attributes.getAttribute(column, interval, estimator);
         }
     }
@@ -623,9 +623,19 @@ public abstract class ElementImpl implements Element {
     }
 
     void checkViewExist(final GraphView view) {
-        graphStore.viewStore.checkNonNullViewObject(view);
-        if (!view.isMainView()) {
-            graphStore.viewStore.checkViewExist((GraphViewImpl) view);
+        if (view == null) {
+            throw new NullPointerException();
+        }
+        if (view.isMainView()) {
+            return;
+        }
+        if (!(view instanceof GraphViewImpl)) {
+            throw new IllegalArgumentException("The view is not from this implementation");
+        }
+        // Lock-free: callers may hold the table lock or the element monitor
+        GraphViewImpl viewImpl = (GraphViewImpl) view;
+        if (viewImpl.isDestroyed() || (graphStore != null && viewImpl.graphStore != graphStore)) {
+            throw new IllegalArgumentException("The view doesn't exist");
         }
     }
 

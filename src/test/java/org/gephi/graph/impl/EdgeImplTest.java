@@ -291,6 +291,16 @@ public class EdgeImplTest {
         Assert.assertEquals(e.getWeight(view), 20.0);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetWeightWithDestroyedView() {
+        Configuration config = Configuration.builder().edgeWeightType(TimestampDoubleMap.class).build();
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore(config);
+        Edge e = graphStore.getEdge("0");
+        GraphViewImpl view = graphStore.viewStore.createView();
+        graphStore.viewStore.destroyView(view);
+        e.getWeight(view);
+    }
+
     @Test
     public void testGetWeightWithViewStatic() {
         Configuration config = Configuration.builder().edgeWeightType(Double.class).build();
