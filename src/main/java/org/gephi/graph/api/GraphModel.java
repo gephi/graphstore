@@ -298,6 +298,10 @@ public interface GraphModel {
      * Get the visible graph.
      * <p>
      * The visible graph may be the full graph (default) or a graph view.
+     * <p>
+     * Destroying the visible view makes the main view visible again. To use the visible graph safely while other
+     * threads may destroy views, acquire the graph read lock before calling this method and hold it while using the
+     * result.
      *
      * @return visible graph
      */
@@ -320,6 +324,10 @@ public interface GraphModel {
 
     /**
      * Gets the visible graph with the directed interface.
+     * <p>
+     * Destroying the visible view makes the main view visible again. To use the visible graph safely while other
+     * threads may destroy views, acquire the graph read lock before calling this method and hold it while using the
+     * result.
      *
      * @return visible graph
      */
@@ -334,6 +342,10 @@ public interface GraphModel {
 
     /**
      * Gets the visible graph with the undirected interface.
+     * <p>
+     * Destroying the visible view makes the main view visible again. To use the visible graph safely while other
+     * threads may destroy views, acquire the graph read lock before calling this method and hold it while using the
+     * result.
      *
      * @return visible graph
      */
@@ -357,6 +369,10 @@ public interface GraphModel {
 
     /**
      * Gets the visible view.
+     * <p>
+     * Destroying the visible view makes the main view visible again. To use the visible graph safely while other
+     * threads may destroy views, acquire the graph read lock before calling this method and hold it while using the
+     * result.
      *
      * @return visible view
      */
