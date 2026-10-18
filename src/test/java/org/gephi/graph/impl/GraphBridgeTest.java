@@ -19,6 +19,11 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Edge;
@@ -34,6 +39,40 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class GraphBridgeTest {
+
+    @Test
+    public void testCopyEdgeTypeTakesWriteLock() throws Exception {
+        GraphStore source = new GraphStore();
+        Node n1 = source.factory.newNode("1");
+        Node n2 = source.factory.newNode("2");
+        source.addAllNodes(Arrays.asList(n1, n2));
+        int type = source.edgeTypeStore.addType("foo");
+        source.addEdge(source.factory.newEdge("0", n1, n2, type, 1.0, true));
+
+        GraphModelImpl dest = new GraphModelImpl();
+        ReentrantReadWriteLock destLock = dest.store.lock.readWriteLock;
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<?> copy;
+        dest.store.readLock();
+        try {
+            copy = executor.submit(() -> new GraphBridgeImpl(dest.store).copyNodes(source.getNodes().toArray()));
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (!destLock.hasQueuedThreads() && System.nanoTime() < deadline) {
+                Thread.sleep(1);
+            }
+            Assert.assertTrue(destLock.hasQueuedThreads());
+            Assert.assertFalse(dest.store.edgeTypeStore.contains("foo"));
+        } finally {
+            dest.store.readUnlock();
+        }
+        try {
+            copy.get(5, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
+        Assert.assertEquals(dest.store.edgeTypeStore.getId("foo"), type);
+        Assert.assertEquals(dest.getEdgeTypeCount(), 2);
+    }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testVerifyConfiguration() {
