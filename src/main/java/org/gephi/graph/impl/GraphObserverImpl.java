@@ -121,7 +121,7 @@ public class GraphObserverImpl implements GraphObserver {
 
             for (int i = 0; i < nodeCache.length; i++) {
                 NodeImpl nImpl = nodeCache[i];
-                if (nImpl != null && !graph.contains(nImpl)) {
+                if (nImpl != null && (nImpl.storeId != i || !graph.contains(nImpl))) {
                     graphDiff.removedNodes.add(nImpl);
                     nodeCache[i] = null;
                 }
@@ -148,7 +148,7 @@ public class GraphObserverImpl implements GraphObserver {
 
             for (int i = 0; i < edgeCache.length; i++) {
                 EdgeImpl eImpl = edgeCache[i];
-                if (eImpl != null && !graph.contains(eImpl)) {
+                if (eImpl != null && (eImpl.storeId != i || !graph.contains(eImpl))) {
                     graphDiff.removedEdges.add(eImpl);
                     edgeCache[i] = null;
                 }

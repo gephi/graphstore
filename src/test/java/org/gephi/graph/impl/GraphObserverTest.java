@@ -290,6 +290,60 @@ public class GraphObserverTest {
     }
 
     @Test
+    public void testDiffViewRemovedFromStore() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphViewImpl view = store.viewStore.createView();
+        view.fill();
+        GraphObserverImpl graphObserver = store.viewStore
+                .createGraphObserver(store.viewStore.getDirectedGraph(view), true);
+        Node node = store.getNode("1");
+        Edge edge = store.getEdge("0");
+        store.removeNode(node);
+
+        Assert.assertTrue(graphObserver.hasGraphChanged());
+        GraphDiff diff = graphObserver.getDiff();
+        Assert.assertEquals(diff.getRemovedNodes().toArray(), new Node[] { node });
+        Assert.assertEquals(diff.getRemovedEdges().toArray(), new Edge[] { edge });
+        Assert.assertSame(diff.getAddedNodes(), NodeIterable.EMPTY);
+        Assert.assertSame(diff.getAddedEdges(), EdgeIterable.EMPTY);
+    }
+
+    @Test
+    public void testDiffEdgeViewRemovedFromStore() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphViewImpl view = store.viewStore.createView(false, true);
+        Edge edge = store.getEdge("0");
+        view.addEdge(edge);
+        GraphObserverImpl graphObserver = store.viewStore
+                .createGraphObserver(store.viewStore.getUndirectedGraph(view), true);
+        store.removeNode(edge.getSource());
+
+        Assert.assertTrue(graphObserver.hasGraphChanged());
+        Assert.assertEquals(graphObserver.getDiff().getRemovedEdges().toArray(), new Edge[] { edge });
+    }
+
+    @Test
+    public void testDiffViewEdgeReaddedWithNewStoreId() {
+        GraphStore store = GraphGenerator.generateTinyGraphStore();
+        GraphViewImpl view = store.viewStore.createView();
+        view.fill();
+        GraphObserverImpl graphObserver = store.viewStore
+                .createGraphObserver(store.viewStore.getDirectedGraph(view), true);
+        Edge edge = store.getEdge("0");
+        store.removeEdge(edge);
+        Edge other = store.factory.newEdge("1", edge.getSource(), edge.getTarget(), 0, 1.0, true);
+        store.addEdge(other);
+        store.addEdge(edge);
+        view.addEdge(other);
+        view.addEdge(edge);
+
+        Assert.assertTrue(graphObserver.hasGraphChanged());
+        GraphDiff diff = graphObserver.getDiff();
+        Assert.assertEquals(diff.getRemovedEdges().toArray(), new Edge[] { edge });
+        Assert.assertEquals(diff.getAddedEdges().toArray(), new Edge[] { other, edge });
+    }
+
+    @Test
     public void testDiffAddedNodes() {
         GraphStore store = GraphGenerator.generateSmallGraphStore();
         GraphObserverImpl graphObserver = store.createGraphObserver(store, true);
