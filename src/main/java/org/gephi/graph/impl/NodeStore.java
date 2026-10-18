@@ -452,29 +452,23 @@ public class NodeStore implements Collection<Node>, NodeIterable {
     public boolean retainAll(final Collection<?> c) {
         checkCollection(c);
 
-        if (!c.isEmpty()) {
-            ObjectSet<NodeImpl> set = new ObjectOpenHashSet(c.size());
-            for (Object o : c) {
-                checkNonNullObject(o);
-                checkNodeExists((NodeImpl) o);
-                set.add((NodeImpl) o);
-            }
-
-            boolean changed = false;
-            NodeStoreIterator itr = iterator();
-            while (itr.hasNext()) {
-                NodeImpl e = itr.next();
-                if (!set.contains(e)) {
-                    itr.remove();
-                    changed = true;
-                }
-            }
-            return changed;
-        } else if (size > 0) {
-            clear();
-            return true;
+        ObjectSet<NodeImpl> set = new ObjectOpenHashSet(c.size());
+        for (Object o : c) {
+            checkNonNullObject(o);
+            checkNodeExists((NodeImpl) o);
+            set.add((NodeImpl) o);
         }
-        return false;
+
+        boolean changed = false;
+        NodeStoreIterator itr = iterator();
+        while (itr.hasNext()) {
+            NodeImpl e = itr.next();
+            if (!set.contains(e)) {
+                itr.remove();
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     public int deepHashCode() {
