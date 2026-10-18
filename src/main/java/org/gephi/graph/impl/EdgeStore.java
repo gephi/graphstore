@@ -71,6 +71,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected int undirectedSize;
     protected int mutualEdgesSize;
     protected int[] mutualEdgesTypeSize;
+    // Graph type derived from undirectedSize and size, published for lock-free reads
+    private static final byte GRAPH_DIRECTED = 0;
+    private static final byte GRAPH_UNDIRECTED = 1;
+    private static final byte GRAPH_MIXED = 2;
+    private volatile byte graphType;
 
     public EdgeStore() {
         initStore();
@@ -120,6 +125,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
         this.mutualEdgesTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
         this.typeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        this.undirectedSize = 0;
+        this.mutualEdgesSize = 0;
+        updateGraphType();
     }
 
     private void ensureCapacity(final int capacity) {
@@ -809,6 +817,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             size++;
             typeSize[type]++;
+            updateGraphType();
             return true;
         } else if (isValidIndex(edge.storeId) && get(edge.storeId) == edge) {
             return false;
@@ -874,6 +883,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             if (!directed) {
                 undirectedSize--;
             }
+            updateGraphType();
 
             if (edgeTypeStore != null) {
                 // TODO - if type count is zero, do smthing
@@ -1197,16 +1207,31 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         }
     }
 
+    // Called under the write lock once size and undirectedSize are both up to date
+    private void updateGraphType() {
+        byte type;
+        if (undirectedSize == 0) {
+            type = GRAPH_DIRECTED;
+        } else if (undirectedSize == size) {
+            type = GRAPH_UNDIRECTED;
+        } else {
+            type = GRAPH_MIXED;
+        }
+        if (graphType != type) {
+            graphType = type;
+        }
+    }
+
     boolean isMixedGraph() {
-        return undirectedSize > 0 && undirectedSize != size;
+        return graphType == GRAPH_MIXED;
     }
 
     boolean isUndirectedGraph() {
-        return size > 0 && undirectedSize == size;
+        return graphType == GRAPH_UNDIRECTED;
     }
 
     boolean isDirectedGraph() {
-        return undirectedSize == 0;
+        return graphType == GRAPH_DIRECTED;
     }
 
     protected boolean isValidIndex(int id) {

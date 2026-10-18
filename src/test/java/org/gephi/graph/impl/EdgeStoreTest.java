@@ -186,6 +186,34 @@ public class EdgeStoreTest {
     }
 
     @Test
+    public void testClearResetsGraphType() {
+        EdgeStore edgeStore = new EdgeStore();
+        edgeStore.add(GraphGenerator.generateSingleUndirectedEdge());
+        Assert.assertTrue(edgeStore.isUndirectedGraph());
+
+        edgeStore.clear();
+
+        Assert.assertTrue(edgeStore.isDirectedGraph());
+        Assert.assertFalse(edgeStore.isUndirectedGraph());
+        Assert.assertFalse(edgeStore.isMixedGraph());
+        Assert.assertEquals(edgeStore.undirectedSize(), 0);
+    }
+
+    @Test
+    public void testClearResetsMutualEdges() {
+        EdgeStore edgeStore = new EdgeStore();
+        for (EdgeImpl edge : GraphGenerator.generateMutualEdges(0)) {
+            edgeStore.add(edge);
+        }
+        Assert.assertEquals(edgeStore.undirectedSize(), 1);
+
+        edgeStore.clear();
+
+        Assert.assertEquals(edgeStore.undirectedSize(), 0);
+        Assert.assertEquals(edgeStore.undirectedSize(0), 0);
+    }
+
+    @Test
     public void testRemove() {
         EdgeStore edgeStore = new EdgeStore();
         EdgeImpl edge = GraphGenerator.generateSingleEdge();
