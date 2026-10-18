@@ -67,10 +67,13 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected Object2IntOpenHashMap dictionary;
     protected Long2ObjectOpenCustomHashMap<int[]>[] longDictionary;
     // Stats
-    protected int typeSize[];
+    protected volatile int[] typeSize;
     protected int undirectedSize;
     protected int mutualEdgesSize;
     protected int[] mutualEdgesTypeSize;
+    // Counts seen by the undirected graph (mutual pairs counted once), each written once per mutation
+    protected int undirectedGraphSize;
+    protected volatile int[] undirectedGraphTypeSize;
     // Graph type derived from undirectedSize and size, published for lock-free reads
     private volatile GraphType graphType;
     // Number of types with at least one edge, and whether there is more than one
@@ -125,8 +128,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
         this.mutualEdgesTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
         this.typeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
+        this.undirectedGraphTypeSize = new int[GraphStoreConfiguration.EDGESTORE_DEFAULT_TYPE_COUNT];
         this.undirectedSize = 0;
         this.mutualEdgesSize = 0;
+        this.undirectedGraphSize = 0;
         this.nonEmptyTypeCount = 0;
         updateGraphType();
         updateMultiGraph();
@@ -228,6 +233,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             newSizeArray = new int[type + 1];
             System.arraycopy(typeSize, 0, newSizeArray, 0, length);
             typeSize = newSizeArray;
+            newSizeArray = new int[type + 1];
+            System.arraycopy(undirectedGraphTypeSize, 0, newSizeArray, 0, length);
+            undirectedGraphTypeSize = newSizeArray;
         }
     }
 
@@ -365,21 +373,17 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     public int undirectedSize() {
-        return size - mutualEdgesSize;
+        return undirectedGraphSize;
     }
 
     public int size(int type) {
-        if (type < longDictionary.length) {
-            return typeSize[type];
-        }
-        return 0;
+        int[] sizes = typeSize;
+        return type < sizes.length ? sizes[type] : 0;
     }
 
     public int undirectedSize(int type) {
-        if (type < longDictionary.length) {
-            return typeSize[type] - mutualEdgesTypeSize[type];
-        }
-        return 0;
+        int[] sizes = undirectedGraphTypeSize;
+        return type < sizes.length ? sizes[type] : 0;
     }
 
     @Override
@@ -699,6 +703,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             addToDico(newDico, newDicoValue, edge, longId);
             incrementTypeSize(type);
+            updateUndirectedGraphSize(oldType);
+            updateUndirectedGraphSize(type);
             updateMultiGraph();
 
             if (viewStore != null) {
@@ -848,6 +854,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
             size++;
             incrementTypeSize(type);
+            updateUndirectedGraphSize(type);
             updateGraphType();
             updateMultiGraph();
             return true;
@@ -915,6 +922,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             if (!directed) {
                 undirectedSize--;
             }
+            updateUndirectedGraphSize(edge.type);
             updateGraphType();
             updateMultiGraph();
 
@@ -1265,6 +1273,12 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         if (--typeSize[type] == 0) {
             nonEmptyTypeCount--;
         }
+    }
+
+    // Called under the write lock once size, mutualEdgesSize and the type's counts are up to date
+    private void updateUndirectedGraphSize(int type) {
+        undirectedGraphSize = size - mutualEdgesSize;
+        undirectedGraphTypeSize[type] = typeSize[type] - mutualEdgesTypeSize[type];
     }
 
     // Called under the write lock once nonEmptyTypeCount is up to date

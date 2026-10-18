@@ -482,15 +482,8 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
 
     @Override
     public int getEdgeCount(final int type) {
-        autoReadLock();
-        try {
-            if (edgeTypeStore.contains(type)) {
-                return edgeStore.size(type);
-            }
-            return 0;
-        } finally {
-            autoReadUnlock();
-        }
+        EdgeTypeStore.checkValidId(type);
+        return edgeStore.size(type);
     }
 
     @Override

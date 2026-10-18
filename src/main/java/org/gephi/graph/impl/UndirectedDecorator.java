@@ -223,15 +223,8 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public int getEdgeCount(int type) {
-        store.autoReadLock();
-        try {
-            if (store.edgeTypeStore.contains(type)) {
-                return store.edgeStore.undirectedSize(type);
-            }
-            return 0;
-        } finally {
-            store.autoReadUnlock();
-        }
+        EdgeTypeStore.checkValidId(type);
+        return store.edgeStore.undirectedSize(type);
     }
 
     @Override

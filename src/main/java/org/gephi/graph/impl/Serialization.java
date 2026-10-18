@@ -885,6 +885,7 @@ public class Serialization {
         view.typeCounts = typeCounts;
         view.mutualEdgesCount = mutualEdgesCount;
         view.mutualEdgeTypeCounts = mutualEdgeTypeCounts;
+        view.updateUndirectedEdgeCounts();
 
         view.version.nodeVersion = version.nodeVersion;
         view.version.edgeVersion = version.edgeVersion;

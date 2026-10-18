@@ -51,9 +51,12 @@ public class GraphViewImpl implements GraphView {
     // Stats
     protected int nodeCount;
     protected int edgeCount;
-    protected int[] typeCounts;
+    protected volatile int[] typeCounts;
     protected int[] mutualEdgeTypeCounts;
     protected int mutualEdgesCount;
+    // Counts seen by the undirected graph (mutual pairs counted once), each written once per mutation
+    protected int undirectedEdgeCount;
+    protected volatile int[] undirectedTypeCounts;
     // Dynamic
     protected Interval interval;
 
@@ -70,6 +73,7 @@ public class GraphViewImpl implements GraphView {
         this.edgeBitVector = new BitSet(store.edgeStore.maxStoreId());
         this.typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         this.mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
+        this.undirectedTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
 
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
@@ -124,6 +128,7 @@ public class GraphViewImpl implements GraphView {
             }
         }
         edgeCount = count;
+        updateUndirectedEdgeCounts();
     }
 
     public GraphViewImpl(final GraphViewImpl view, boolean nodes, boolean edges) {
@@ -144,6 +149,7 @@ public class GraphViewImpl implements GraphView {
         this.mutualEdgeTypeCounts = new int[view.mutualEdgeTypeCounts.length];
         System.arraycopy(view.mutualEdgeTypeCounts, 0, mutualEdgeTypeCounts, 0, view.mutualEdgeTypeCounts.length);
         this.mutualEdgesCount = view.mutualEdgesCount;
+        updateUndirectedEdgeCounts();
         this.directedDecorator = new GraphViewDecorator(graphStore, this, false);
         this.undirectedDecorator = new GraphViewDecorator(graphStore, this, true);
         this.version = graphStore.version != null ? new GraphVersion(directedDecorator) : null;
@@ -420,6 +426,7 @@ public class GraphViewImpl implements GraphView {
         typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         mutualEdgesCount = 0;
+        updateUndirectedEdgeCounts();
 
         if (nodeView) {
             IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
@@ -450,6 +457,7 @@ public class GraphViewImpl implements GraphView {
         typeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         mutualEdgeTypeCounts = new int[GraphStoreConfiguration.VIEW_DEFAULT_TYPE_COUNT];
         mutualEdgesCount = 0;
+        updateUndirectedEdgeCounts();
 
         IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
         if (edgeIndexStore != null) {
@@ -475,6 +483,7 @@ public class GraphViewImpl implements GraphView {
         this.mutualEdgeTypeCounts = new int[graphStore.edgeStore.mutualEdgesTypeSize.length];
         System.arraycopy(graphStore.edgeStore.mutualEdgesTypeSize, 0, this.mutualEdgeTypeCounts, 0, this.mutualEdgeTypeCounts.length);
         this.mutualEdgesCount = graphStore.edgeStore.mutualEdgesSize;
+        updateUndirectedEdgeCounts();
 
         if (edgeCount > 0) {
             incrementEdgeVersion();
@@ -579,24 +588,13 @@ public class GraphViewImpl implements GraphView {
         // Flip edge bits
         edgeBitVector.flip(0, graphStore.edgeStore.maxStoreId());
 
-        // Update edge counts by subtracting from totals
-        this.edgeCount = graphStore.edgeStore.size() - this.edgeCount;
-
-        // Ensure type count arrays are sized to match the store
-        int storeTypeLength = graphStore.edgeStore.longDictionary.length;
-        if (typeCounts.length < storeTypeLength) {
-            int[] newTypeCounts = new int[storeTypeLength];
-            System.arraycopy(typeCounts, 0, newTypeCounts, 0, typeCounts.length);
-            typeCounts = newTypeCounts;
-
-            int[] newMutualCounts = new int[storeTypeLength];
-            System.arraycopy(mutualEdgeTypeCounts, 0, newMutualCounts, 0, mutualEdgeTypeCounts.length);
-            mutualEdgeTypeCounts = newMutualCounts;
-        }
-
-        // Invert all type counts (including types that weren't in the view before)
-        for (int i = 0; i < storeTypeLength; i++) {
-            this.typeCounts[i] = graphStore.edgeStore.typeSize[i] - this.typeCounts[i];
+        // Invert the edge and type counts (including types that weren't in the view before) in locals,
+        // published once the edges with invalid endpoints are removed
+        int newEdgeCount = graphStore.edgeStore.size() - this.edgeCount;
+        int[] storeTypeSize = graphStore.edgeStore.typeSize;
+        int[] newTypeCounts = new int[Math.max(typeCounts.length, storeTypeSize.length)];
+        for (int i = 0; i < storeTypeSize.length; i++) {
+            newTypeCounts[i] = storeTypeSize[i] - (i < typeCounts.length ? typeCounts[i] : 0);
         }
 
         incrementEdgeVersion();
@@ -625,12 +623,15 @@ public class GraphViewImpl implements GraphView {
 
             // Bulk remove invalid edges
             if (!edgesToRemove.isEmpty()) {
-                bulkRemoveEdgesForNot(edgesToRemove);
+                newEdgeCount -= bulkRemoveEdgesForNot(edgesToRemove, newTypeCounts);
             }
         }
+        typeCounts = newTypeCounts;
+        edgeCount = newEdgeCount;
 
         // A mutual pair can be split between the view and its complement, so count the pairs again
         recountMutualEdges();
+        updateUndirectedEdgeCounts();
 
         // Rebuild indexes (necessary for NOT operation as the view content has
         // completely changed)
@@ -783,9 +784,9 @@ public class GraphViewImpl implements GraphView {
         // Update edge bit vector
         int removedCount = edgesToRemove.cardinality();
         edgeBitVector.andNot(edgesToRemove);
-        edgeCount -= removedCount;
 
-        // Update type counts and mutual edge counts
+        // Update type counts in a copy, published once, and mutual edge counts
+        int[] counts = typeCounts.clone();
         for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
             EdgeImpl edge = getEdge(i);
             if (edge == null) {
@@ -794,7 +795,10 @@ public class GraphViewImpl implements GraphView {
 
             int type = edge.type;
             ensureTypeCountArrayCapacity(type);
-            typeCounts[type]--;
+            if (counts.length < typeCounts.length) {
+                counts = Arrays.copyOf(counts, typeCounts.length);
+            }
+            counts[type]--;
 
             if (edge.isMutual() && !edge.isSelfLoop()) {
                 EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
@@ -806,6 +810,9 @@ public class GraphViewImpl implements GraphView {
                 }
             }
         }
+        typeCounts = counts;
+        edgeCount -= removedCount;
+        updateUndirectedEdgeCounts();
 
         incrementEdgeVersion();
 
@@ -836,9 +843,9 @@ public class GraphViewImpl implements GraphView {
         // Update edge bit vector
         int addedCount = edgesToAdd.cardinality();
         edgeBitVector.or(edgesToAdd);
-        edgeCount += addedCount;
 
-        // Update type counts and mutual edge counts
+        // Update type counts in a copy, published once, and mutual edge counts
+        int[] counts = typeCounts.clone();
         for (int i = edgesToAdd.nextSetBit(0); i >= 0; i = edgesToAdd.nextSetBit(i + 1)) {
             EdgeImpl edge = getEdge(i);
             if (edge == null) {
@@ -847,7 +854,10 @@ public class GraphViewImpl implements GraphView {
 
             int type = edge.type;
             ensureTypeCountArrayCapacity(type);
-            typeCounts[type]++;
+            if (counts.length < typeCounts.length) {
+                counts = Arrays.copyOf(counts, typeCounts.length);
+            }
+            counts[type]++;
 
             if (edge.isMutual() && !edge.isSelfLoop()) {
                 EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
@@ -859,6 +869,9 @@ public class GraphViewImpl implements GraphView {
                 }
             }
         }
+        typeCounts = counts;
+        edgeCount += addedCount;
+        updateUndirectedEdgeCounts();
 
         incrementEdgeVersion();
 
@@ -882,14 +895,14 @@ public class GraphViewImpl implements GraphView {
     }
 
     /**
-     * Special bulk remove for the not() operation. This updates the bit vector and stats but does NOT increment version
-     * or update indexes (those are handled separately in not()).
+     * Special bulk remove for the not() operation. This updates the bit vector and the given type counts, and returns
+     * the number of removed edges. It does NOT increment version or update indexes (those are handled separately in
+     * not()).
      */
-    private void bulkRemoveEdgesForNot(BitSet edgesToRemove) {
+    private int bulkRemoveEdgesForNot(BitSet edgesToRemove, int[] counts) {
         // Update edge bit vector
         int removedCount = edgesToRemove.cardinality();
         edgeBitVector.andNot(edgesToRemove);
-        edgeCount -= removedCount;
 
         // Update type counts, mutual edges are counted again by not()
         for (int i = edgesToRemove.nextSetBit(0); i >= 0; i = edgesToRemove.nextSetBit(i + 1)) {
@@ -897,13 +910,11 @@ public class GraphViewImpl implements GraphView {
             if (edge == null) {
                 continue; // SAFETY: Skip if edge no longer exists in store
             }
-
-            int type = edge.type;
-            ensureTypeCountArrayCapacity(type);
-            typeCounts[type]--;
+            counts[edge.type]--;
         }
         // Note: Version increment and index updates are handled by the caller (not()
         // method)
+        return removedCount;
     }
 
     // Counts each mutual pair whose two edges are in the view once
@@ -936,21 +947,19 @@ public class GraphViewImpl implements GraphView {
     }
 
     public int getUndirectedEdgeCount() {
-        return edgeCount - mutualEdgesCount;
+        return undirectedEdgeCount;
     }
 
     public int getEdgeCount(int type) {
-        if (type < 0 || type >= typeCounts.length) {
-            throw new IllegalArgumentException("Incorrect type=" + type);
-        }
-        return typeCounts[type];
+        EdgeTypeStore.checkValidId(type);
+        int[] counts = typeCounts;
+        return type < counts.length ? counts[type] : 0;
     }
 
     public int getUndirectedEdgeCount(int type) {
-        if (type < 0 || type >= typeCounts.length) {
-            throw new IllegalArgumentException("Incorrect type=" + type);
-        }
-        return typeCounts[type] - mutualEdgeTypeCounts[type];
+        EdgeTypeStore.checkValidId(type);
+        int[] counts = undirectedTypeCounts;
+        return type < counts.length ? counts[type] : 0;
     }
 
     @Override
@@ -1046,6 +1055,8 @@ public class GraphViewImpl implements GraphView {
                 mutualEdgesCount++;
             }
         }
+        updateUndirectedEdgeCount(oldType);
+        updateUndirectedEdgeCount(edgeImpl.type);
     }
 
     private void addEdge(EdgeImpl edgeImpl) {
@@ -1064,6 +1075,7 @@ public class GraphViewImpl implements GraphView {
             mutualEdgeTypeCounts[type]++;
             mutualEdgesCount++;
         }
+        updateUndirectedEdgeCount(type);
 
         IndexStore<Edge> indexStore = graphStore.edgeTable.store.indexStore;
         if (indexStore != null) {
@@ -1087,6 +1099,7 @@ public class GraphViewImpl implements GraphView {
             mutualEdgeTypeCounts[edgeImpl.type]--;
             mutualEdgesCount--;
         }
+        updateUndirectedEdgeCount(edgeImpl.type);
 
         IndexStore<Edge> indexStore = graphStore.edgeTable.store.indexStore;
         if (indexStore != null) {
@@ -1116,6 +1129,28 @@ public class GraphViewImpl implements GraphView {
             System.arraycopy(mutualEdgeTypeCounts, 0, newMutualArray, 0, mutualEdgeTypeCounts.length);
             mutualEdgeTypeCounts = newMutualArray;
         }
+        if (type >= undirectedTypeCounts.length) {
+            int[] newUndirectedArray = new int[type + 1];
+            System.arraycopy(undirectedTypeCounts, 0, newUndirectedArray, 0, undirectedTypeCounts.length);
+            undirectedTypeCounts = newUndirectedArray;
+        }
+    }
+
+    // Called once edgeCount, mutualEdgesCount and the type's counts are up to date
+    private void updateUndirectedEdgeCount(int type) {
+        undirectedEdgeCount = edgeCount - mutualEdgesCount;
+        undirectedTypeCounts[type] = typeCounts[type] - mutualEdgeTypeCounts[type];
+    }
+
+    // Rebuilds all the undirected counts, after a bulk change
+    protected void updateUndirectedEdgeCounts() {
+        int[] counts = typeCounts;
+        int[] undirected = new int[counts.length];
+        for (int i = 0; i < counts.length; i++) {
+            undirected[i] = counts[i] - (i < mutualEdgeTypeCounts.length ? mutualEdgeTypeCounts[i] : 0);
+        }
+        undirectedTypeCounts = undirected;
+        undirectedEdgeCount = edgeCount - mutualEdgesCount;
     }
 
     public int deepHashCode() {
