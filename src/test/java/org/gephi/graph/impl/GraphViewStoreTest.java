@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphModel;
@@ -648,7 +649,7 @@ public class GraphViewStoreTest {
 
     @Test
     public void testRacingOperationsOnDestroyedViewThrow() throws Exception {
-        String[] ops = { "createView", "destroyView", "setTimeInterval", "nodeIndex", "edgeIndex", "observer" };
+        String[] ops = { "createView", "destroyView", "setTimeInterval", "nodeIndex", "edgeIndex", "nodeTimeIndex", "edgeTimeIndex", "observer" };
         for (String op : ops) {
             GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
             GraphModelImpl model = (GraphModelImpl) graphStore.graphModel;
@@ -672,6 +673,12 @@ public class GraphViewStoreTest {
                     break;
                 case "edgeIndex":
                     action = () -> model.getEdgeIndex(view);
+                    break;
+                case "nodeTimeIndex":
+                    action = () -> model.getNodeTimeIndex(view);
+                    break;
+                case "edgeTimeIndex":
+                    action = () -> model.getEdgeTimeIndex(view);
                     break;
                 case "observer":
                     action = () -> graphStore.viewStore.createGraphObserver(view.getDirectedGraph(), false);
@@ -706,6 +713,29 @@ public class GraphViewStoreTest {
                 executor.shutdownNow();
             }
         }
+    }
+
+    @Test
+    public void testViewOperationsWithoutTimeIndex() {
+        GraphModel model = GraphModel.Factory.newInstance(Configuration.builder().enableIndexTime(false).build());
+        Node n1 = model.factory().newNode("1");
+        Node n2 = model.factory().newNode("2");
+        Edge e = model.factory().newEdge(n1, n2);
+        model.getDirectedGraph().addNode(n1);
+        model.getDirectedGraph().addNode(n2);
+        model.getDirectedGraph().addEdge(e);
+
+        GraphView view = model.createView();
+        Subgraph subgraph = model.getGraph(view);
+        subgraph.fill();
+        subgraph.removeNode(n1);
+        subgraph.addNode(n1);
+        subgraph.addEdge(e);
+        subgraph.removeEdge(e);
+        subgraph.not();
+        subgraph.clear();
+        model.destroyView(view);
+        Assert.assertTrue(view.isDestroyed());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

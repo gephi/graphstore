@@ -39,7 +39,7 @@ public class GraphViewStore {
     protected GraphViewImpl[] views;
     protected int length;
     // Visible view
-    protected GraphView visibleView;
+    protected volatile GraphView visibleView;
 
     public GraphViewStore(GraphStore graphStore) {
         if (graphStore == null) {

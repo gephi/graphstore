@@ -315,6 +315,9 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         if (graph.getView().isMainView()) {
             throw new IllegalArgumentException("Can't delete a view index for the main view");
         }
+        if (viewIndexes == null) {
+            return;
+        }
         lock();
         try {
             TimeIndexImpl index = viewIndexes.remove(graph.getView());
@@ -327,11 +330,14 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     }
 
     public void indexView(Graph graph) {
-        TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
-        if (viewIndex != null) {
-            graph.readLock();
-            lock();
-            try {
+        if (viewIndexes == null) {
+            return;
+        }
+        graph.readLock();
+        lock();
+        try {
+            TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
+            if (viewIndex != null) {
                 Iterator<T> iterator = null;
 
                 if (elementType.equals(Node.class)) {
@@ -356,18 +362,21 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                         }
                     }
                 }
-            } finally {
-                graph.readUnlock();
-                unlock();
             }
+        } finally {
+            unlock();
+            graph.readUnlock();
         }
     }
 
     public void indexInView(T element, GraphView view) {
-        TimeIndexImpl viewIndex = viewIndexes.get(view);
-        if (viewIndex != null) {
-            lock();
-            try {
+        if (viewIndexes == null) {
+            return;
+        }
+        lock();
+        try {
+            TimeIndexImpl viewIndex = viewIndexes.get(view);
+            if (viewIndex != null) {
                 S set = getTimeSet(element);
                 if (set != null) {
                     K[] ts = set.toArray();
@@ -379,17 +388,20 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                         }
                     }
                 }
-            } finally {
-                unlock();
             }
+        } finally {
+            unlock();
         }
     }
 
     public void clearInView(T element, GraphView view) {
-        TimeIndexImpl viewIndex = viewIndexes.get(view);
-        if (viewIndex != null) {
-            lock();
-            try {
+        if (viewIndexes == null) {
+            return;
+        }
+        lock();
+        try {
+            TimeIndexImpl viewIndex = viewIndexes.get(view);
+            if (viewIndex != null) {
                 S set = getTimeSet(element);
                 if (set != null) {
                     K[] ts = set.toArray();
@@ -401,16 +413,24 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                         }
                     }
                 }
-            } finally {
-                unlock();
             }
+        } finally {
+            unlock();
         }
     }
 
     public void clear(GraphView view) {
-        TimeIndexImpl viewIndex = viewIndexes.get(view);
-        if (viewIndex != null) {
-            viewIndex.clear();
+        if (viewIndexes == null) {
+            return;
+        }
+        lock();
+        try {
+            TimeIndexImpl viewIndex = viewIndexes.get(view);
+            if (viewIndex != null) {
+                viewIndex.clear();
+            }
+        } finally {
+            unlock();
         }
     }
 
