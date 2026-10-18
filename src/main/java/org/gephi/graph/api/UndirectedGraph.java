@@ -17,6 +17,10 @@ package org.gephi.graph.api;
 
 /**
  * Undirected graph
+ * <p>
+ * A directed edge and its reverse edge of the same type are seen as a single undirected edge. With parallel edges,
+ * which edges are paired depends on the order of insertion and removal, so edge counts may differ between graphs
+ * holding the same edges.
  */
 public interface UndirectedGraph extends Graph {
 }
