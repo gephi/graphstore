@@ -267,7 +267,7 @@ public class GraphViewStore {
     protected void setEdgeType(EdgeImpl edge, int oldType, boolean wasMutual) {
         for (GraphViewImpl view : views) {
             if (view != null) {
-                if ((view.nodeView && !view.edgeView) || (view.edgeView && view.containsEdge(edge))) {
+                if (view.containsEdge(edge)) {
                     view.setEdgeType(edge, oldType, wasMutual);
                 }
             }
@@ -277,7 +277,7 @@ public class GraphViewStore {
     protected void removeEdge(EdgeImpl edge) {
         for (GraphViewImpl view : views) {
             if (view != null) {
-                view.removeEdge(edge);
+                view.removeEdgeFromStore(edge);
             }
         }
     }
