@@ -18,6 +18,12 @@ package org.gephi.graph.impl;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
@@ -1120,5 +1126,53 @@ public class GraphViewDecoratorTest {
     // Configuration with spatial index enabled
     private Configuration getSpatialConfig() {
         return Configuration.builder().enableSpatialIndex(true).build();
+    }
+
+    @Test
+    public void testClearEdgesTakesWriteLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        DirectedSubgraph graph = graphStore.viewStore.getDirectedGraph(view);
+        graph.fill();
+
+        assertWaitsForReadLock(graphStore, graph::clearEdges, () -> view.getEdgeCount() > 0);
+        Assert.assertEquals(view.getEdgeCount(), 0);
+        Assert.assertTrue(view.getNodeCount() > 0);
+    }
+
+    @Test
+    public void testClearTakesWriteLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        DirectedSubgraph graph = graphStore.viewStore.getDirectedGraph(view);
+        graph.fill();
+
+        assertWaitsForReadLock(graphStore, graph::clear, () -> view.getNodeCount() > 0);
+        Assert.assertEquals(view.getNodeCount(), 0);
+        Assert.assertEquals(view.getEdgeCount(), 0);
+    }
+
+    // Runs the action while this thread holds the read lock, and checks it waits for the lock first
+    private static void assertWaitsForReadLock(GraphStore graphStore, Runnable action, BooleanSupplier unchanged) throws Exception {
+        ReentrantReadWriteLock lock = graphStore.lock.readWriteLock;
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<?> future;
+        graphStore.readLock();
+        try {
+            future = executor.submit(action);
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (!lock.hasQueuedThreads() && !future.isDone() && System.nanoTime() < deadline) {
+                Thread.sleep(1);
+            }
+            Assert.assertTrue(lock.hasQueuedThreads());
+            Assert.assertTrue(unchanged.getAsBoolean());
+        } finally {
+            graphStore.readUnlock();
+        }
+        try {
+            future.get(5, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }
