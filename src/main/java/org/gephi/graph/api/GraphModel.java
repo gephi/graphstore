@@ -465,7 +465,8 @@ public interface GraphModel {
     public boolean isDynamic();
 
     /**
-     * Returns true if the graph is multi-graph (multiple types of edges).
+     * Returns true if the graph is multi-graph, i.e. edges of more than one type currently exist. Registered edge types
+     * without edges are not counted.
      *
      * @return true if multi-graph, false otherwise
      */

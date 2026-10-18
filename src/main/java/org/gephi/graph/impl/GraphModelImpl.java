@@ -214,7 +214,7 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public boolean isMultiGraph() {
-        return store.edgeTypeStore.isMultiGraph();
+        return store.edgeStore.isMultiGraph();
     }
 
     @Override

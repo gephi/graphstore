@@ -153,8 +153,29 @@ public class GraphModelTest {
     public void testIsMultiGraph() {
         GraphModelImpl graphModel = new GraphModelImpl();
         Assert.assertFalse(graphModel.isMultiGraph());
-        graphModel.addEdgeType("foo");
+        int type = graphModel.addEdgeType("foo");
+        Assert.assertFalse(graphModel.isMultiGraph());
+
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        Edge e0 = graphModel.factory().newEdge("0", n1, n2, EdgeTypeStore.NULL_LABEL, 1.0, true);
+        Edge e1 = graphModel.factory().newEdge("1", n1, n2, type, 1.0, true);
+        graphModel.store.addEdge(e0);
+        Assert.assertFalse(graphModel.isMultiGraph());
+        graphModel.store.addEdge(e1);
         Assert.assertTrue(graphModel.isMultiGraph());
+
+        graphModel.store.removeEdge(e1);
+        Assert.assertFalse(graphModel.isMultiGraph());
+
+        e0.setType(type);
+        Assert.assertFalse(graphModel.isMultiGraph());
+        graphModel.store.addEdge(graphModel.factory().newEdge("2", n2, n1, EdgeTypeStore.NULL_LABEL, 1.0, true));
+        Assert.assertTrue(graphModel.isMultiGraph());
+
+        graphModel.store.clearEdges();
+        Assert.assertFalse(graphModel.isMultiGraph());
     }
 
     @Test
@@ -162,15 +183,20 @@ public class GraphModelTest {
         GraphModelImpl graphModel = new GraphModelImpl();
         Node n1 = graphModel.factory().newNode("1");
         Node n2 = graphModel.factory().newNode("2");
-        graphModel.getStore().addAllNodes(Arrays.asList(n1, n2));
-        graphModel.getStore().addEdge(graphModel.factory().newEdge("0", n1, n2, 1, 1.0, true));
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        graphModel.store.addEdge(graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true));
+        graphModel.store.addEdge(graphModel.factory().newEdge("1", n1, n2, 1, 1.0, true));
         Assert.assertTrue(graphModel.isMultiGraph());
     }
 
     @Test
     public void testIsMultiGraphDoesNotBlockOnWriteLock() throws Exception {
         GraphModelImpl graphModel = new GraphModelImpl();
-        graphModel.addEdgeType("foo");
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        graphModel.store.addEdge(graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true));
+        graphModel.store.addEdge(graphModel.factory().newEdge("1", n1, n2, 1, 1.0, true));
 
         CountDownLatch locked = new CountDownLatch(1);
         CountDownLatch release = new CountDownLatch(1);
