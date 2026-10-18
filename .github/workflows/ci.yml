@@ -17,6 +17,8 @@ jobs:
           server-id: central
           server-username: OSSRH_USER
           server-password: OSSRH_PASS
+          mvn-server-repository-origins: |
+            central:https://central.sonatype.com
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
       - name: Set up Maven
@@ -24,7 +26,7 @@ jobs:
         with:
           maven-version: 3.9.11
       - name: Publish package
-        run: mvn -B -Djava.awt.headless=true -Dmaven.repository.credentialScope=id deploy -P release
+        run: mvn -B -Djava.awt.headless=true deploy -P release
         env:
           OSSRH_USER: ${{ secrets.OSSRH_TOKEN_USER }}
           OSSRH_PASS: ${{ secrets.OSSRH_TOKEN_PASSWD }}
