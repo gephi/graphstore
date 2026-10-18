@@ -392,6 +392,37 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testSetAttributeWithViewIndexWithoutGraphLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeTable.store.addColumn(column);
+        NodeImpl n1 = graphStore.getNode("1");
+        NodeImpl n2 = graphStore.getNode("2");
+        n1.setAttribute(column, "bar");
+        n2.setAttribute(column, "bar");
+
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.addNode(n1);
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        IndexImpl index = indexStore.getIndex(graphStore.viewStore.getGraph(view));
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        graphStore.writeLock();
+        try {
+            executor.submit(() -> {
+                n1.setAttribute(column, "baz");
+                n2.setAttribute(column, "baz");
+            }).get(10, TimeUnit.SECONDS);
+        } finally {
+            graphStore.writeUnlock();
+            executor.shutdownNow();
+        }
+        Assert.assertEquals(index.count(column, "baz"), 1);
+        Assert.assertEquals(index.count(column, "bar"), 0);
+        Assert.assertEquals(indexStore.mainIndex.count(column, "baz"), 2);
+    }
+
+    @Test
     public void testCreateViewIndexWithElements() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;

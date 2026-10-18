@@ -21,7 +21,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.Graph;
@@ -158,13 +157,10 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
 
                 if (!viewIndexes.isEmpty()) {
                     for (Entry<GraphView, TimeIndexImpl> entry : viewIndexes.entrySet()) {
+                        // Reads the view directly, the graph lock can't be taken while holding the table lock
                         GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                        DirectedSubgraph graph = graphView.getDirectedGraph();
-                        if (element instanceof Node) {
-                            if (graph.contains((Node) element)) {
-                                entry.getValue().remove(timeIndex, element);
-                            }
-                        } else if (graph.contains((Edge) element)) {
+                        boolean node = element instanceof Node;
+                        if (node ? graphView.containsNode((Node) element) : graphView.containsEdge((Edge) element)) {
                             entry.getValue().remove(timeIndex, element);
                         }
                     }
