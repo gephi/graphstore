@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.impl;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -72,6 +73,35 @@ public class GraphLockImpl implements GraphLock {
     @Override
     public int getWriteHoldCount() {
         return readWriteLock.getWriteHoldCount();
+    }
+
+    @Override
+    public boolean tryReadLock(long timeout, TimeUnit unit) throws InterruptedException {
+        return readLock.tryLock(timeout, unit);
+    }
+
+    @Override
+    public boolean tryWriteLock(long timeout, TimeUnit unit) throws InterruptedException {
+        if (readWriteLock.getReadHoldCount() > 0 && !readWriteLock.isWriteLockedByCurrentThread()) {
+            throw new IllegalMonitorStateException(
+                    "Impossible to acquire a write lock when currently holding a read lock. Use toArray() methods on NodeIterable and EdgeIterable to avoid holding a readLock or wrap your loop with a write lock.");
+        }
+        return writeLock.tryLock(timeout, unit);
+    }
+
+    @Override
+    public int getReadLockCount() {
+        return readWriteLock.getReadLockCount();
+    }
+
+    @Override
+    public boolean isWriteLocked() {
+        return readWriteLock.isWriteLocked();
+    }
+
+    @Override
+    public int getQueueLength() {
+        return readWriteLock.getQueueLength();
     }
 
     public void checkHoldWriteLock() {
