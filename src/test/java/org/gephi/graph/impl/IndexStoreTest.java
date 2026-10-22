@@ -415,6 +415,27 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testGetIndexFailureReleasesGraphLockAndKeepsNoIndex() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        ColumnImpl column = new ColumnImpl("age", Integer.class, "Age", null, Origin.DATA, true, false);
+        graphStore.nodeTable.store.addColumn(column);
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        Graph graph = graphStore.viewStore.getGraph(view);
+        // The attribute of a node holds a value of the wrong type
+        graphStore.getNode("2").setAttribute(column, 1);
+        graphStore.getNode("2").getAttributes()[column.getIndex()] = "invalid";
+
+        Assert.assertThrows(ClassCastException.class, () -> indexStore.getIndex(graph));
+
+        Assert.assertEquals(graphStore.lock.getReadHoldCount(), 0);
+        Assert.assertTrue(graphStore.lock.writeLock.tryLock());
+        graphStore.lock.writeLock.unlock();
+        Assert.assertNull(indexStore.viewIndexes.get(view));
+    }
+
+    @Test
     public void testGetExistingViewIndexWithoutGraphLock() throws Exception {
         GraphStore graphStore = generateBasicGraphStoreWithColumns();
         IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;

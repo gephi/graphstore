@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
@@ -306,7 +307,12 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         // TODO: Check view doesn't exist already
         viewIndexes.put(graph.getView(), viewIndex);
 
-        indexView(graph);
+        try {
+            indexView(graph);
+        } catch (RuntimeException | Error e) {
+            viewIndexes.remove(graph.getView());
+            throw e;
+        }
 
         return viewIndex;
     }
@@ -338,27 +344,37 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         try {
             TimeIndexImpl viewIndex = viewIndexes.get(graph.getView());
             if (viewIndex != null) {
-                Iterator<T> iterator = null;
+                ElementIterable<?> elements = null;
 
                 if (elementType.equals(Node.class)) {
-                    iterator = (Iterator<T>) graph.getNodes().iterator();
+                    elements = graph.getNodes();
                 } else if (elementType.equals(Edge.class)) {
-                    iterator = (Iterator<T>) graph.getEdges().iterator();
+                    elements = graph.getEdges();
                 }
 
-                if (iterator != null) {
-                    while (iterator.hasNext()) {
-                        Element element = iterator.next();
-                        S set = getTimeSet(element);
-                        if (set != null) {
-                            K[] ts = set.toArray();
-                            int tsLength = ts.length;
-                            for (int i = 0; i < tsLength; i++) {
-                                Integer timestamp = timeSortedMap.get(ts[i]);
-                                if (timestamp != null) {
-                                    viewIndex.add(timestamp, element);
+                if (elements != null) {
+                    Iterator<T> iterator = (Iterator<T>) elements.iterator();
+                    // The iterator holds a graph read lock until it is exhausted
+                    boolean exhausted = false;
+                    try {
+                        while (iterator.hasNext()) {
+                            Element element = iterator.next();
+                            S set = getTimeSet(element);
+                            if (set != null) {
+                                K[] ts = set.toArray();
+                                int tsLength = ts.length;
+                                for (int i = 0; i < tsLength; i++) {
+                                    Integer timestamp = timeSortedMap.get(ts[i]);
+                                    if (timestamp != null) {
+                                        viewIndex.add(timestamp, element);
+                                    }
                                 }
                             }
+                        }
+                        exhausted = true;
+                    } finally {
+                        if (!exhausted) {
+                            elements.doBreak();
                         }
                     }
                 }

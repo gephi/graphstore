@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
@@ -106,7 +107,12 @@ public class IndexStore<T extends Element> {
             // set() only takes the monitor, so it has to wait until the index is filled
             synchronized (viewIndexes) {
                 viewIndexes.put(graph.getView(), viewIndex);
-                indexView(graph);
+                try {
+                    indexView(graph);
+                } catch (RuntimeException | Error e) {
+                    viewIndexes.remove(graph.getView());
+                    throw e;
+                }
             }
 
             return viewIndex;
@@ -222,25 +228,35 @@ public class IndexStore<T extends Element> {
         if (viewIndex != null) {
             graph.readLock();
             try {
-                Iterator<T> iterator = null;
+                ElementIterable<?> elements = null;
                 if (columnStore.elementType.equals(Node.class)) {
-                    iterator = (Iterator<T>) graph.getNodes().iterator();
+                    elements = graph.getNodes();
                 } else if (columnStore.elementType.equals(Edge.class)) {
-                    iterator = (Iterator<T>) graph.getEdges().iterator();
+                    elements = graph.getEdges();
                 }
 
-                if (iterator != null) {
-                    while (iterator.hasNext()) {
-                        ElementImpl element = (ElementImpl) iterator.next();
+                if (elements != null) {
+                    Iterator<T> iterator = (Iterator<T>) elements.iterator();
+                    // The iterator holds a graph read lock until it is exhausted
+                    boolean exhausted = false;
+                    try {
+                        while (iterator.hasNext()) {
+                            ElementImpl element = (ElementImpl) iterator.next();
 
-                        final ColumnImpl[] cols = columnStore.columns;
-                        int length = columnStore.length;
-                        for (int i = 0; i < length; i++) {
-                            Column c = cols[i];
-                            if (c != null) {
-                                Object value = element.getAttribute(c);
-                                viewIndex.put(c, value, element);
+                            final ColumnImpl[] cols = columnStore.columns;
+                            int length = columnStore.length;
+                            for (int i = 0; i < length; i++) {
+                                Column c = cols[i];
+                                if (c != null) {
+                                    Object value = element.getAttribute(c);
+                                    viewIndex.put(c, value, element);
+                                }
                             }
+                        }
+                        exhausted = true;
+                    } finally {
+                        if (!exhausted) {
+                            elements.doBreak();
                         }
                     }
                 }
