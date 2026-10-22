@@ -37,6 +37,25 @@ import org.testng.annotations.Test;
 public class TimestampIndexStoreTest {
 
     @Test
+    public void testGetIndexFailureReleasesGraphLockAndKeepsNoIndex() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        graphStore.getNode("1").addTimestamp(1.0);
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+        TimestampIndexStore<?> store = (TimestampIndexStore<?>) graphStore.timeStore.nodeIndexStore;
+        Graph graph = graphStore.viewStore.getGraph(view);
+        // The time set of a node holds something that isn't a time set
+        graphStore.getNode("2").getAttributes()[GraphStoreConfiguration.ELEMENT_TIMESET_INDEX] = "invalid";
+
+        Assert.assertThrows(ClassCastException.class, () -> store.getIndex(graph));
+
+        Assert.assertEquals(graphStore.lock.getReadHoldCount(), 0);
+        Assert.assertTrue(graphStore.lock.writeLock.tryLock());
+        graphStore.lock.writeLock.unlock();
+        Assert.assertNull(store.viewIndexes.get(view));
+    }
+
+    @Test
     public void testEmpty() {
         TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         Assert.assertTrue(store.size() == 0);
