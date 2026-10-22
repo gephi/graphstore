@@ -18,6 +18,7 @@ package org.gephi.graph.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -372,6 +373,45 @@ public class IndexStoreTest {
 
         assertWaitsForGraphLockWithoutTableLock(graphStore, indexStore.lock, () -> indexStore.getIndex(graph));
         Assert.assertNotNull(indexStore.viewIndexes.get(graph.getView()));
+    }
+
+    @Test
+    public void testGetIndexWithViewDoesNotHoldMonitorWhileWaitingForTableLock() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        graphStore.nodeTable.store.addColumn(column);
+        NodeImpl n1 = graphStore.getNode("1");
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        Graph indexedGraph = graphStore.viewStore.getGraph(graphStore.viewStore.createView());
+        indexStore.getIndex(indexedGraph);
+        Graph graph = graphStore.viewStore.getGraph(graphStore.viewStore.createView());
+
+        // Like ColumnStore.addColumn: holds the table lock, then reaches the view index monitor through set()
+        CountDownLatch tableLocked = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Future<?> setter = executor.submit(() -> {
+                indexStore.lock.lock();
+                try {
+                    tableLocked.countDown();
+                    while (!indexStore.lock.lock.hasQueuedThreads()) {
+                        Thread.sleep(1);
+                    }
+                    indexStore.set(column, null, "bar", n1);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    indexStore.lock.unlock();
+                }
+            });
+            Assert.assertTrue(tableLocked.await(10, TimeUnit.SECONDS));
+            Future<IndexImpl> getter = executor.submit(() -> indexStore.getIndex(graph));
+
+            setter.get(10, TimeUnit.SECONDS);
+            Assert.assertNotNull(getter.get(10, TimeUnit.SECONDS));
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     @Test

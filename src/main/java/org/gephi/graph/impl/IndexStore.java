@@ -72,20 +72,24 @@ public class IndexStore<T extends Element> {
                 return viewIndex;
             }
         }
-        // The graph lock is taken first, as indexing the view requires it
+        // The graph lock is taken first, as indexing the view requires it, then the table lock. The view index monitor
+        // is only held for the lookup and the put, as set() takes it while the table lock is held by addColumn.
         graph.readLock();
+        lock();
         try {
             if (((GraphViewImpl) view).isDestroyed()) {
                 throw new IllegalArgumentException("The view doesn't exist");
             }
+            IndexImpl<T> viewIndex;
             synchronized (viewIndexes) {
-                IndexImpl<T> viewIndex = viewIndexes.get(view);
-                if (viewIndex == null) {
-                    viewIndex = createViewIndex(graph);
-                }
-                return viewIndex;
+                viewIndex = viewIndexes.get(view);
             }
+            if (viewIndex == null) {
+                viewIndex = createViewIndex(graph);
+            }
+            return viewIndex;
         } finally {
+            unlock();
             graph.readUnlock();
         }
     }
@@ -99,9 +103,11 @@ public class IndexStore<T extends Element> {
             IndexImpl viewIndex = new IndexImpl<>(columnStore, graph);
             ColumnImpl[] columns = columnStore.toArray();
             viewIndex.addAllColumns(columns);
-            viewIndexes.put(graph.getView(), viewIndex);
-
-            indexView(graph);
+            // set() only takes the monitor, so it has to wait until the index is filled
+            synchronized (viewIndexes) {
+                viewIndexes.put(graph.getView(), viewIndex);
+                indexView(graph);
+            }
 
             return viewIndex;
         } finally {
