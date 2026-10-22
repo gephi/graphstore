@@ -1223,7 +1223,13 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
         @Override
         public void remove() {
-            itr.remove();
+            checkWriteLock();
+            if (pointer.isMutual() && view
+                    .containsEdge(graphStore.edgeStore.get(pointer.target, pointer.source, pointer.type, false))) {
+                throw new UnsupportedOperationException(
+                        "Removing directed edges from undirected iterator is not supported");
+            }
+            removeEdge(pointer);
         }
     }
 
