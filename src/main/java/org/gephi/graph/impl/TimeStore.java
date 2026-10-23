@@ -17,6 +17,7 @@ package org.gephi.graph.impl;
 
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.TimeRepresentation;
 
@@ -49,11 +50,48 @@ public class TimeStore {
     }
 
     public double getMin(Graph graph) {
-        if (!nodeIndexStore.hasIndex() || !edgeIndexStore.hasIndex()) {
+        if (!hasIndex()) {
             return Double.NEGATIVE_INFINITY;
         }
-        double nodeMin = nodeIndexStore.getIndex(graph).getMinTimestamp();
-        double edgeMin = edgeIndexStore.getIndex(graph).getMinTimestamp();
+        return min(nodeIndexStore.getIndex(graph).getMinTimestamp(), edgeIndexStore.getIndex(graph).getMinTimestamp());
+    }
+
+    public double getMax(Graph graph) {
+        if (!hasIndex()) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return max(nodeIndexStore.getIndex(graph).getMaxTimestamp(), edgeIndexStore.getIndex(graph).getMaxTimestamp());
+    }
+
+    /**
+     * Gets the minimum and maximum time of the node and edge indexes of the graph's view. The four values are read in
+     * one table lock hold, so they come from a single state of the time store.
+     * <p>
+     * For a view, the caller holds the graph read lock, as getting the view indexes may create them.
+     *
+     * @param graph graph to get the bounds of
+     * @return time bounds, infinite if empty or if time indexing is disabled
+     */
+    public Interval getBounds(Graph graph) {
+        if (!hasIndex()) {
+            return Interval.INFINITY_INTERVAL;
+        }
+        TimeIndexImpl nodeIndex = (TimeIndexImpl) nodeIndexStore.getIndex(graph);
+        TimeIndexImpl edgeIndex = (TimeIndexImpl) edgeIndexStore.getIndex(graph);
+        lock();
+        try {
+            return new Interval(min(nodeIndex.getMinTimestampUnlocked(), edgeIndex.getMinTimestampUnlocked()),
+                    max(nodeIndex.getMaxTimestampUnlocked(), edgeIndex.getMaxTimestampUnlocked()));
+        } finally {
+            unlock();
+        }
+    }
+
+    public boolean hasIndex() {
+        return nodeIndexStore.hasIndex() && edgeIndexStore.hasIndex();
+    }
+
+    private static double min(double nodeMin, double edgeMin) {
         if (Double.isInfinite(nodeMin)) {
             return edgeMin;
         }
@@ -63,12 +101,7 @@ public class TimeStore {
         return Math.min(nodeMin, edgeMin);
     }
 
-    public double getMax(Graph graph) {
-        if (!nodeIndexStore.hasIndex() || !edgeIndexStore.hasIndex()) {
-            return Double.POSITIVE_INFINITY;
-        }
-        double nodeMax = nodeIndexStore.getIndex(graph).getMaxTimestamp();
-        double edgeMax = edgeIndexStore.getIndex(graph).getMaxTimestamp();
+    private static double max(double nodeMax, double edgeMax) {
         if (Double.isInfinite(nodeMax)) {
             return edgeMax;
         }
@@ -90,8 +123,13 @@ public class TimeStore {
     }
 
     public void clear() {
-        nodeIndexStore.clear();
-        edgeIndexStore.clear();
+        lock();
+        try {
+            nodeIndexStore.clear();
+            edgeIndexStore.clear();
+        } finally {
+            unlock();
+        }
     }
 
     public void clearEdges() {
@@ -118,5 +156,17 @@ public class TimeStore {
             return false;
         }
         return true;
+    }
+
+    private void lock() {
+        if (lock != null) {
+            lock.lock();
+        }
+    }
+
+    private void unlock() {
+        if (lock != null) {
+            lock.unlock();
+        }
     }
 }

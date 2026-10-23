@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
@@ -863,6 +864,229 @@ public class GraphModelTest {
         graphModel.getGraph(view).addNode(n2);
 
         Assert.assertEquals(graphModel.getTimeBounds(view), new Interval(2.0, 3.0));
+    }
+
+    @Test
+    public void testGetTimeBoundsDoesNotBlockOnWriteLock() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        n.addTimestamp(1.0);
+        n.addTimestamp(5.0);
+
+        CountDownLatch locked = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        Thread writer = new Thread(() -> {
+            graphModel.store.writeLock();
+            try {
+                locked.countDown();
+                release.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                graphModel.store.writeUnlock();
+            }
+        });
+        writer.start();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Assert.assertTrue(locked.await(5, TimeUnit.SECONDS));
+            Assert.assertEquals(executor.submit(() -> graphModel.getTimeBounds())
+                    .get(5, TimeUnit.SECONDS), new Interval(1.0, 5.0));
+            Assert.assertEquals(executor.submit(() -> graphModel.getTimeBoundsVisible())
+                    .get(5, TimeUnit.SECONDS), new Interval(1.0, 5.0));
+        } finally {
+            release.countDown();
+            writer.join();
+            executor.shutdownNow();
+        }
+    }
+
+    // Bounds are read from a single state of the time index, so they are never a mix of two states
+    @Test
+    public void testGetTimeBoundsWhenNodesAreAddedAndRemoved() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node anchor = graphModel.factory().newNode("anchor");
+        graphModel.store.addNode(anchor);
+        anchor.addTimestamp(10.0);
+        anchor.addTimestamp(20.0);
+        Node n = graphModel.factory().newNode("1");
+        n.addTimestamp(1.0);
+        n.addTimestamp(30.0);
+
+        int invalid = countInvalidTimeBounds(graphModel, bounds -> bounds.equals(new Interval(10.0, 20.0)) || bounds
+                .equals(new Interval(1.0, 30.0)), () -> {
+                    for (int i = 0; i < 100000; i++) {
+                        graphModel.store.addNode(n);
+                        graphModel.store.removeNode(n);
+                    }
+                });
+        Assert.assertEquals(invalid, 0);
+    }
+
+    @Test
+    public void testGetTimeBoundsWhenTimesChange() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        n.addTimestamp(30.0);
+
+        int invalid = countInvalidTimeBounds(graphModel, bounds -> bounds.equals(new Interval(30.0, 30.0)) || bounds
+                .equals(new Interval(10.0, 30.0)) || bounds.equals(new Interval(10.0, 10.0)), () -> {
+                    for (int i = 0; i < 100000; i++) {
+                        n.addTimestamp(10.0);
+                        n.removeTimestamp(30.0);
+                        n.addTimestamp(30.0);
+                        n.removeTimestamp(10.0);
+                    }
+                });
+        Assert.assertEquals(invalid, 0);
+    }
+
+    // Edges only exist with their nodes, so the bounds never come from the edge times alone
+    @Test
+    public void testGetTimeBoundsWhenGraphIsCleared() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        n1.addTimestamp(30.0);
+        Edge e = graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true);
+        e.addTimestamp(40.0);
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        graphModel.store.addEdge(e);
+
+        int invalid = countInvalidTimeBounds(graphModel, bounds -> !bounds.equals(new Interval(40.0, 40.0)), () -> {
+            for (int i = 0; i < 20000; i++) {
+                graphModel.store.clear();
+                graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+                graphModel.store.addEdge(e);
+            }
+        });
+        Assert.assertEquals(invalid, 0);
+    }
+
+    @Test
+    public void testGetTimeBoundsVisible() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        n1.addTimestamp(1.0);
+        n2.addTimestamp(5.0);
+        Assert.assertEquals(graphModel.getTimeBoundsVisible(), new Interval(1.0, 5.0));
+
+        GraphView view = graphModel.createView();
+        graphModel.getGraph(view).addNode(n2);
+        graphModel.setVisibleView(view);
+        Assert.assertEquals(graphModel.getTimeBoundsVisible(), new Interval(5.0, 5.0));
+
+        graphModel.destroyView(view);
+        Assert.assertEquals(graphModel.getTimeBoundsVisible(), new Interval(1.0, 5.0));
+    }
+
+    @Test
+    public void testGetTimeBoundsVisibleWhenViewIsDestroyedWhileWaiting() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        n1.addTimestamp(1.0);
+        n2.addTimestamp(5.0);
+        GraphView view = graphModel.createView();
+        graphModel.getGraph(view).addNode(n2);
+        graphModel.setVisibleView(view);
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<Interval> bounds;
+            graphModel.store.writeLock();
+            try {
+                bounds = executor.submit(() -> graphModel.getTimeBoundsVisible());
+                long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+                while (!graphModel.store.lock.readWriteLock.hasQueuedThreads() && !bounds.isDone() && System
+                        .nanoTime() < deadline) {
+                    Thread.sleep(1);
+                }
+                graphModel.destroyView(view);
+            } finally {
+                graphModel.store.writeUnlock();
+            }
+            Assert.assertEquals(bounds.get(5, TimeUnit.SECONDS), new Interval(1.0, 5.0));
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testGetTimeBoundsWithIndexConfigDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableIndexTime(false).build());
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        n.addTimestamp(1.0);
+        GraphView view = graphModel.createView();
+
+        Assert.assertEquals(graphModel.getTimeBounds(), Interval.INFINITY_INTERVAL);
+        Assert.assertEquals(graphModel.getTimeBounds(view), Interval.INFINITY_INTERVAL);
+        Assert.assertEquals(graphModel.getTimeBoundsVisible(), Interval.INFINITY_INTERVAL);
+        Assert.assertThrows(IllegalArgumentException.class, () -> graphModel.getTimeBounds(foreignView()));
+    }
+
+    private static GraphView foreignView() {
+        return new GraphView() {
+            @Override
+            public GraphModel getGraphModel() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isMainView() {
+                return false;
+            }
+
+            @Override
+            public boolean isNodeView() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isEdgeView() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Interval getTimeInterval() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isDestroyed() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    private static int countInvalidTimeBounds(GraphModelImpl graphModel, Predicate<Interval> valid, Runnable writer) throws Exception {
+        AtomicBoolean done = new AtomicBoolean();
+        AtomicInteger invalid = new AtomicInteger();
+        Thread reader = new Thread(() -> {
+            while (!done.get()) {
+                try {
+                    if (!valid.test(graphModel.getTimeBounds())) {
+                        invalid.incrementAndGet();
+                    }
+                } catch (RuntimeException e) {
+                    invalid.incrementAndGet();
+                }
+            }
+        });
+        reader.start();
+        try {
+            writer.run();
+        } finally {
+            done.set(true);
+            reader.join();
+        }
+        return invalid.get();
     }
 
     @Test

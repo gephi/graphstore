@@ -401,22 +401,36 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Interval getTimeBounds() {
-        return getTimeBounds(store.getView());
+        return store.timeStore.getBounds(store);
     }
 
     @Override
     public Interval getTimeBoundsVisible() {
-        return getTimeBounds(getGraphVisible().getView());
+        if (store.viewStore.visibleView.isMainView() || !store.timeStore.hasIndex()) {
+            return getTimeBounds();
+        }
+        // The visible view is read again under the lock, which keeps it from being destroyed while it is used
+        store.autoReadLock();
+        try {
+            return getTimeBounds(store.viewStore.visibleView);
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override
     public Interval getTimeBounds(GraphView view) {
-        TimeStore timeStore = store.timeStore;
+        if (view.isMainView()) {
+            return getTimeBounds();
+        }
+        if (!store.timeStore.hasIndex()) {
+            // Nothing is indexed, so there is nothing to read under the lock
+            store.viewStore.checkGraphViewObject(view);
+            return Interval.INFINITY_INTERVAL;
+        }
         store.autoReadLock();
         try {
-            double min = timeStore.getMin(getGraph(view));
-            double max = timeStore.getMax(getGraph(view));
-            return new Interval(min, max);
+            return store.timeStore.getBounds(getGraph(view));
         } finally {
             store.autoReadUnlock();
         }

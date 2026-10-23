@@ -36,71 +36,81 @@ public class TimestampIndexImpl<T extends Element> extends TimeIndexImpl<T, Doub
     public double getMinTimestamp() {
         lock();
         try {
-            Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
-            if (mainIndex) {
-                // Returns the minimum across all tracked timestamps, including those that
-                // belong only to dynamic attribute values (TimeMap columns) and not to
-                // element existence (TimeSet). This intentionally gives the earliest time
-                // at which any graph data exists, which may be earlier than the first time
-                // any element is present. View indexes filter to element-only timestamps.
-                if (!sortedMap.isEmpty()) {
-                    return sortedMap.firstDoubleKey();
-                }
-            } else {
-                if (!sortedMap.isEmpty()) {
-                    ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator();
-                    while (bi.hasNext()) {
-                        Double2IntMap.Entry entry = bi.next();
-                        double timestamp = entry.getDoubleKey();
-                        int index = entry.getIntValue();
-                        if (index < timestamps.length) {
-                            TimeIndexEntry timestampEntry = timestamps[index];
-                            if (timestampEntry != null) {
-                                return timestamp;
-                            }
-                        }
-                    }
-                }
-            }
-            return Double.NEGATIVE_INFINITY;
+            return getMinTimestampUnlocked();
         } finally {
             unlock();
         }
     }
 
     @Override
-    public double getMaxTimestamp() {
-        lock();
-        try {
-            Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
-            if (mainIndex) {
-                // Returns the maximum across all tracked timestamps, including those that
-                // belong only to dynamic attribute values (TimeMap columns) and not to
-                // element existence (TimeSet). See getMinTimestamp() for details.
-                if (!sortedMap.isEmpty()) {
-                    return sortedMap.lastDoubleKey();
-                }
-            } else {
-                if (!sortedMap.isEmpty()) {
-                    ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet()
-                            .iterator(sortedMap.double2IntEntrySet().last());
-                    while (bi.hasPrevious()) {
-                        Double2IntMap.Entry entry = bi.previous();
-                        double timestamp = entry.getDoubleKey();
-                        int index = entry.getIntValue();
-                        if (index < timestamps.length) {
-                            TimeIndexEntry timestampEntry = timestamps[index];
-                            if (timestampEntry != null) {
-                                return timestamp;
-                            }
+    protected double getMinTimestampUnlocked() {
+        Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
+        if (mainIndex) {
+            // Returns the minimum across all tracked timestamps, including those that
+            // belong only to dynamic attribute values (TimeMap columns) and not to
+            // element existence (TimeSet). This intentionally gives the earliest time
+            // at which any graph data exists, which may be earlier than the first time
+            // any element is present. View indexes filter to element-only timestamps.
+            if (!sortedMap.isEmpty()) {
+                return sortedMap.firstDoubleKey();
+            }
+        } else {
+            if (!sortedMap.isEmpty()) {
+                ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet().iterator();
+                while (bi.hasNext()) {
+                    Double2IntMap.Entry entry = bi.next();
+                    double timestamp = entry.getDoubleKey();
+                    int index = entry.getIntValue();
+                    if (index < timestamps.length) {
+                        TimeIndexEntry timestampEntry = timestamps[index];
+                        if (timestampEntry != null) {
+                            return timestamp;
                         }
                     }
                 }
             }
-            return Double.POSITIVE_INFINITY;
+        }
+        return Double.NEGATIVE_INFINITY;
+    }
+
+    @Override
+    public double getMaxTimestamp() {
+        lock();
+        try {
+            return getMaxTimestampUnlocked();
         } finally {
             unlock();
         }
+    }
+
+    @Override
+    protected double getMaxTimestampUnlocked() {
+        Double2IntSortedMap sortedMap = (Double2IntSortedMap) timestampIndexStore.timeSortedMap;
+        if (mainIndex) {
+            // Returns the maximum across all tracked timestamps, including those that
+            // belong only to dynamic attribute values (TimeMap columns) and not to
+            // element existence (TimeSet). See getMinTimestamp() for details.
+            if (!sortedMap.isEmpty()) {
+                return sortedMap.lastDoubleKey();
+            }
+        } else {
+            if (!sortedMap.isEmpty()) {
+                ObjectBidirectionalIterator<Double2IntMap.Entry> bi = sortedMap.double2IntEntrySet()
+                        .iterator(sortedMap.double2IntEntrySet().last());
+                while (bi.hasPrevious()) {
+                    Double2IntMap.Entry entry = bi.previous();
+                    double timestamp = entry.getDoubleKey();
+                    int index = entry.getIntValue();
+                    if (index < timestamps.length) {
+                        TimeIndexEntry timestampEntry = timestamps[index];
+                        if (timestampEntry != null) {
+                            return timestamp;
+                        }
+                    }
+                }
+            }
+        }
+        return Double.POSITIVE_INFINITY;
     }
 
     @Override

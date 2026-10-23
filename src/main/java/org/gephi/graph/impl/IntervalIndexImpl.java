@@ -34,73 +34,83 @@ public class IntervalIndexImpl<T extends Element> extends TimeIndexImpl<T, Inter
     public double getMinTimestamp() {
         lock();
         try {
-            Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
-            if (mainIndex) {
-                // Returns the minimum across all tracked intervals, including those that
-                // belong only to dynamic attribute values (IntervalMap columns) and not to
-                // element existence (IntervalSet). This intentionally gives the earliest time
-                // at which any graph data exists, which may be earlier than the first time
-                // any element is present. View indexes filter to element-only intervals.
-                if (!sortedMap.isEmpty()) {
-                    return sortedMap.getLow();
-                }
-            } else {
-                if (!sortedMap.isEmpty()) {
-                    for (Map.Entry<Interval, Integer> entry : sortedMap.entrySet()) {
-                        int index = entry.getValue();
-                        if (index < timestamps.length) {
-                            TimeIndexEntry intervalEntry = timestamps[index];
-                            if (intervalEntry != null) {
-                                return entry.getKey().getLow();
-                            }
-                        }
-                    }
-                }
-            }
-            return Double.NEGATIVE_INFINITY;
+            return getMinTimestampUnlocked();
         } finally {
             unlock();
         }
     }
 
     @Override
+    protected double getMinTimestampUnlocked() {
+        Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
+        if (mainIndex) {
+            // Returns the minimum across all tracked intervals, including those that
+            // belong only to dynamic attribute values (IntervalMap columns) and not to
+            // element existence (IntervalSet). This intentionally gives the earliest time
+            // at which any graph data exists, which may be earlier than the first time
+            // any element is present. View indexes filter to element-only intervals.
+            if (!sortedMap.isEmpty()) {
+                return sortedMap.getLow();
+            }
+        } else {
+            if (!sortedMap.isEmpty()) {
+                for (Map.Entry<Interval, Integer> entry : sortedMap.entrySet()) {
+                    int index = entry.getValue();
+                    if (index < timestamps.length) {
+                        TimeIndexEntry intervalEntry = timestamps[index];
+                        if (intervalEntry != null) {
+                            return entry.getKey().getLow();
+                        }
+                    }
+                }
+            }
+        }
+        return Double.NEGATIVE_INFINITY;
+    }
+
+    @Override
     public double getMaxTimestamp() {
         lock();
         try {
-            if (mainIndex) {
-                // Returns the maximum across all tracked intervals, including those that
-                // belong only to dynamic attribute values (IntervalMap columns) and not to
-                // element existence (IntervalSet). See getMinTimestamp() for details.
-                Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
-                if (!sortedMap.isEmpty()) {
-                    return sortedMap.getHigh();
-                }
-            } else {
-                // TODO Better algorithm to find max
-                Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
-                if (!sortedMap.isEmpty()) {
-                    double max = Double.NEGATIVE_INFINITY;
-                    boolean found = false;
-                    for (Map.Entry<Interval, Integer> entry : sortedMap.entrySet()) {
-                        int index = entry.getValue();
-                        if (index < timestamps.length) {
-                            TimeIndexEntry intervalEntry = timestamps[index];
-                            if (intervalEntry != null) {
-                                found = true;
-                                max = Math.max(max, entry.getKey().getHigh());
-                            }
-                        }
-                    }
-                    if (found) {
-                        return max;
-                    }
-                }
-
-            }
-            return Double.POSITIVE_INFINITY;
+            return getMaxTimestampUnlocked();
         } finally {
             unlock();
         }
+    }
+
+    @Override
+    protected double getMaxTimestampUnlocked() {
+        if (mainIndex) {
+            // Returns the maximum across all tracked intervals, including those that
+            // belong only to dynamic attribute values (IntervalMap columns) and not to
+            // element existence (IntervalSet). See getMinTimestamp() for details.
+            Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
+            if (!sortedMap.isEmpty()) {
+                return sortedMap.getHigh();
+            }
+        } else {
+            // TODO Better algorithm to find max
+            Interval2IntTreeMap sortedMap = (Interval2IntTreeMap) timestampIndexStore.timeSortedMap;
+            if (!sortedMap.isEmpty()) {
+                double max = Double.NEGATIVE_INFINITY;
+                boolean found = false;
+                for (Map.Entry<Interval, Integer> entry : sortedMap.entrySet()) {
+                    int index = entry.getValue();
+                    if (index < timestamps.length) {
+                        TimeIndexEntry intervalEntry = timestamps[index];
+                        if (intervalEntry != null) {
+                            found = true;
+                            max = Math.max(max, entry.getKey().getHigh());
+                        }
+                    }
+                }
+                if (found) {
+                    return max;
+                }
+            }
+
+        }
+        return Double.POSITIVE_INFINITY;
     }
 
     @Override
