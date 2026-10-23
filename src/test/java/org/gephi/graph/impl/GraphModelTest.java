@@ -23,6 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
@@ -82,6 +84,44 @@ public class GraphModelTest {
         graphModel.setVisibleView(view);
         graphModel.setVisibleView(graphModel.store.getView());
         Assert.assertSame(graphModel.getGraphVisible(), graphModel.getGraph());
+    }
+
+    @Test
+    public void testGetGraphOfViewWhileGraphTypeChanges() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        Node n3 = graphStore.factory.newNode("3");
+        graphStore.addAllNodes(Arrays.asList(n1, n2, n3));
+        graphStore.addEdge(graphStore.factory.newEdge("u", n1, n2, 0, 1.0, false));
+        GraphView view = graphModel.createView();
+        graphModel.getGraph(view).fill();
+
+        AtomicBoolean done = new AtomicBoolean();
+        AtomicInteger errors = new AtomicInteger();
+        Thread reader = new Thread(() -> {
+            while (!done.get()) {
+                try {
+                    graphModel.getGraph(view);
+                } catch (RuntimeException e) {
+                    errors.incrementAndGet();
+                }
+            }
+        });
+        reader.start();
+        try {
+            // The graph alternates between undirected and mixed
+            for (int i = 0; i < 100000; i++) {
+                Edge edge = graphStore.factory.newEdge("d" + i, n2, n3, 0, 1.0, true);
+                graphStore.addEdge(edge);
+                graphStore.removeEdge(edge);
+            }
+        } finally {
+            done.set(true);
+            reader.join();
+        }
+        Assert.assertEquals(errors.get(), 0);
     }
 
     @Test

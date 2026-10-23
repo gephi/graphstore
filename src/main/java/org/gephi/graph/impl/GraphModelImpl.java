@@ -82,10 +82,7 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public Subgraph getGraph(GraphView view) {
-        if (store.isUndirected()) {
-            return store.viewStore.getUndirectedGraph(view);
-        }
-        return store.viewStore.getDirectedGraph(view);
+        return store.viewStore.getGraph(view);
     }
 
     @Override
