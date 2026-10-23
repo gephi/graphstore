@@ -917,6 +917,72 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testIsDynamicAfterRemovingDynamicColumn() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Column column = graphModel.getNodeTable().addColumn("foo", TimestampDoubleMap.class);
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        n.setAttribute(column, 1.0, 5.0);
+        Assert.assertTrue(graphModel.isDynamic());
+
+        graphModel.getNodeTable().removeColumn(column);
+
+        Assert.assertFalse(graphModel.isDynamic());
+        Assert.assertEquals(graphModel.getTimeBounds(), Interval.INFINITY_INTERVAL);
+    }
+
+    @Test
+    public void testTimeBoundsAfterRemovingDynamicColumn() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Column column = graphModel.getNodeTable().addColumn("foo", TimestampDoubleMap.class);
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        n1.setAttribute(column, 1.0, 1.0);
+        n1.setAttribute(column, 1.0, 9.0);
+        n2.setAttribute(column, 1.0, 5.0);
+        n2.addTimestamp(5.0);
+
+        graphModel.getNodeTable().removeColumn(column);
+
+        Assert.assertEquals(graphModel.getTimeBounds(), new Interval(5.0, 5.0));
+    }
+
+    @Test
+    public void testTimesOfOtherColumnsAfterRemovingDynamicColumn() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Column removed = graphModel.getNodeTable().addColumn("foo", TimestampDoubleMap.class);
+        Column kept = graphModel.getNodeTable().addColumn("bar", TimestampDoubleMap.class);
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        n.setAttribute(removed, 1.0, 5.0);
+        n.setAttribute(kept, 2.0, 5.0);
+        n.setAttribute(kept, 2.0, 7.0);
+
+        graphModel.getNodeTable().removeColumn(removed);
+
+        Assert.assertEquals(graphModel.getTimeBounds(), new Interval(5.0, 7.0));
+        Assert.assertTrue(graphModel.isDynamic());
+    }
+
+    @Test
+    public void testTimesOfOtherNodesAfterRemovingTimeSetColumn() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Column column = graphModel.getNodeTable().addColumn("foo", TimestampSet.class);
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        // The value is set before the node joins the graph, so its times are not in the time index
+        n1.setAttribute(column, new TimestampSet(new double[] { 5.0 }));
+        n2.addTimestamp(5.0);
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+
+        graphModel.getNodeTable().removeColumn(column);
+
+        Assert.assertTrue(graphModel.isDynamic());
+        Assert.assertEquals(graphModel.getTimeBounds(), new Interval(5.0, 5.0));
+    }
+
+    @Test
     public void testGetTimeBoundsInView() {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphView view = graphModel.createView();
