@@ -28,6 +28,8 @@ public class TimeStore {
     // Store
     protected final TimeIndexStore nodeIndexStore;
     protected final TimeIndexStore edgeIndexStore;
+    // True if any node or edge time key is indexed. Written under the lock, read without it.
+    private volatile boolean dynamic;
 
     public TimeStore(GraphStore store, boolean indexed) {
         this.graphStore = store;
@@ -38,11 +40,11 @@ public class TimeStore {
             timeRepresentation = store.configuration.getTimeRepresentation();
         }
         if (timeRepresentation.equals(TimeRepresentation.INTERVAL)) {
-            nodeIndexStore = new IntervalIndexStore<>(Node.class, lock, indexed);
-            edgeIndexStore = new IntervalIndexStore<>(Edge.class, lock, indexed);
+            nodeIndexStore = new IntervalIndexStore<>(Node.class, lock, indexed, this::updateDynamic);
+            edgeIndexStore = new IntervalIndexStore<>(Edge.class, lock, indexed, this::updateDynamic);
         } else {
-            nodeIndexStore = new TimestampIndexStore<>(Node.class, lock, indexed);
-            edgeIndexStore = new TimestampIndexStore<>(Edge.class, lock, indexed);
+            nodeIndexStore = new TimestampIndexStore<>(Node.class, lock, indexed, this::updateDynamic);
+            edgeIndexStore = new TimestampIndexStore<>(Edge.class, lock, indexed, this::updateDynamic);
         }
     }
 
@@ -77,7 +79,14 @@ public class TimeStore {
     }
 
     public boolean isEmpty() {
-        return nodeIndexStore.size() == 0 && edgeIndexStore.size() == 0;
+        return !dynamic;
+    }
+
+    private void updateDynamic() {
+        boolean value = nodeIndexStore.size() > 0 || edgeIndexStore.size() > 0;
+        if (dynamic != value) {
+            dynamic = value;
+        }
     }
 
     public void clear() {

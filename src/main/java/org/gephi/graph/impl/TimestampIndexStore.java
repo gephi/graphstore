@@ -23,7 +23,11 @@ import org.gephi.graph.api.types.TimestampSet;
 public class TimestampIndexStore<T extends Element> extends TimeIndexStore<T, Double, TimestampSet, TimestampMap<?>> {
 
     public TimestampIndexStore(Class<T> type, TableLockImpl lock, boolean indexed) {
-        super(type, lock, indexed, new Double2IntRBTreeMap());
+        this(type, lock, indexed, null);
+    }
+
+    public TimestampIndexStore(Class<T> type, TableLockImpl lock, boolean indexed, Runnable sizeListener) {
+        super(type, lock, indexed, new Double2IntRBTreeMap(), sizeListener);
         mainIndex = indexed ? new TimestampIndexImpl(this, true) : null;
     }
 

@@ -739,6 +739,112 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testIsDynamicFollowsTimesOfNodesAndEdges() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        Edge e = graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true);
+        graphModel.store.addEdge(e);
+        Assert.assertFalse(graphModel.isDynamic());
+
+        n1.addTimestamp(1.0);
+        e.addTimestamp(2.0);
+        Assert.assertTrue(graphModel.isDynamic());
+
+        n1.removeTimestamp(1.0);
+        Assert.assertTrue(graphModel.isDynamic());
+
+        graphModel.store.removeEdge(e);
+        Assert.assertFalse(graphModel.isDynamic());
+
+        n2.addTimestamp(3.0);
+        Assert.assertTrue(graphModel.isDynamic());
+        graphModel.store.clear();
+        Assert.assertFalse(graphModel.isDynamic());
+    }
+
+    @Test
+    public void testIsDynamicWithIntervals() {
+        GraphModelImpl graphModel = new GraphModelImpl(
+                Configuration.builder().timeRepresentation(TimeRepresentation.INTERVAL).build());
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        Assert.assertFalse(graphModel.isDynamic());
+
+        n.addInterval(new Interval(1.0, 2.0));
+        Assert.assertTrue(graphModel.isDynamic());
+        n.removeInterval(new Interval(1.0, 2.0));
+        Assert.assertFalse(graphModel.isDynamic());
+    }
+
+    @Test
+    public void testIsDynamicAfterSerialization() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        Assert.assertFalse(roundTrip(graphModel).isDynamic());
+
+        n.addTimestamp(1.0);
+        Assert.assertTrue(roundTrip(graphModel).isDynamic());
+    }
+
+    @Test
+    public void testIsDynamicDoesNotBlockOnWriteLock() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        n.addTimestamp(1.0);
+
+        CountDownLatch locked = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        Thread writer = new Thread(() -> {
+            graphModel.store.writeLock();
+            try {
+                locked.countDown();
+                release.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                graphModel.store.writeUnlock();
+            }
+        });
+        writer.start();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Assert.assertTrue(locked.await(5, TimeUnit.SECONDS));
+            Future<Boolean> dynamic = executor.submit(graphModel::isDynamic);
+            Assert.assertTrue(dynamic.get(5, TimeUnit.SECONDS));
+        } finally {
+            release.countDown();
+            writer.join();
+            executor.shutdownNow();
+        }
+    }
+
+    // A reader that polls isDynamic() must never see false while the graph keeps a time
+    @Test
+    public void testIsDynamicWhenTimeMovesBetweenNodeAndEdge() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+        Edge e = graphModel.factory().newEdge("0", n1, n2, 0, 1.0, true);
+        graphModel.store.addEdge(e);
+        n1.addTimestamp(5.0);
+
+        int notDynamic = countNotDynamicAnswers(graphModel, () -> {
+            for (int i = 0; i < 100000; i++) {
+                e.addTimestamp(5.0);
+                n1.removeTimestamp(5.0);
+                n1.addTimestamp(5.0);
+                e.removeTimestamp(5.0);
+            }
+        });
+        Assert.assertEquals(notDynamic, 0);
+    }
+
+    @Test
     public void testGetTimeBoundsInView() {
         GraphModelImpl graphModel = new GraphModelImpl();
         GraphView view = graphModel.createView();

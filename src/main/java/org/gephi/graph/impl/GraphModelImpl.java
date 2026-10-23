@@ -216,12 +216,7 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public boolean isDynamic() {
-        store.autoReadLock();
-        try {
-            return !store.timeStore.isEmpty();
-        } finally {
-            store.autoReadUnlock();
-        }
+        return !store.timeStore.isEmpty();
     }
 
     @Override

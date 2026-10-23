@@ -477,7 +477,10 @@ public interface GraphModel {
     public boolean isMixed();
 
     /**
-     * Returns true if the graph is dynamic.
+     * Returns true if the graph is dynamic, i.e. at least one node or edge holds a time, as a timestamp, an interval or
+     * the time of a dynamic attribute value.
+     * <p>
+     * This method doesn't take the graph lock, so a write in progress can be visible.
      *
      * @return true if dynamic, false otherwise
      */
