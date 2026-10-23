@@ -427,6 +427,8 @@ public interface GraphModel {
      * <p>
      * The count includes the default type, which is always registered, and types without edges. Use
      * {@link #getEdgeTypeLabels(boolean)} or {@link #isMultiGraph()} for the types that have edges.
+     * <p>
+     * This method doesn't take the graph lock, so a write in progress can be visible.
      *
      * @return edge type count
      */

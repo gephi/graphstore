@@ -375,6 +375,77 @@ public class GraphModelTest {
         Assert.assertTrue(roundTrip(graphModel).isMultiGraph());
     }
 
+    @Test
+    public void testGetEdgeTypeCountAfterSerialization() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        graphModel.addEdgeType("foo");
+        graphModel.addEdgeType("bar");
+
+        Assert.assertEquals(roundTrip(graphModel).getEdgeTypeCount(), 3);
+    }
+
+    @Test
+    public void testGetEdgeTypeCountDoesNotBlockOnWriteLock() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        graphModel.addEdgeType("foo");
+
+        CountDownLatch locked = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        Thread writer = new Thread(() -> {
+            graphModel.store.writeLock();
+            try {
+                locked.countDown();
+                release.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                graphModel.store.writeUnlock();
+            }
+        });
+        writer.start();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Assert.assertTrue(locked.await(5, TimeUnit.SECONDS));
+            Future<Integer> count = executor.submit(graphModel::getEdgeTypeCount);
+            Assert.assertEquals(count.get(5, TimeUnit.SECONDS).intValue(), 2);
+        } finally {
+            release.countDown();
+            writer.join();
+            executor.shutdownNow();
+        }
+    }
+
+    // The default type is always registered, so the count is never below one while edges and their types are cleared
+    @Test
+    public void testGetEdgeTypeCountWhenEdgesAreCleared() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+
+        AtomicBoolean done = new AtomicBoolean();
+        AtomicInteger invalid = new AtomicInteger();
+        Thread reader = new Thread(() -> {
+            while (!done.get()) {
+                int count = graphModel.getEdgeTypeCount();
+                if (count < 1 || count > 2) {
+                    invalid.incrementAndGet();
+                }
+            }
+        });
+        reader.start();
+        try {
+            for (int i = 0; i < 20000; i++) {
+                graphModel.store.addEdge(graphModel.factory().newEdge("e", n1, n2, 1, 1.0, true));
+                graphModel.store.clearEdges();
+            }
+        } finally {
+            done.set(true);
+            reader.join();
+        }
+        Assert.assertEquals(invalid.get(), 0);
+    }
+
     private static GraphModelImpl roundTrip(GraphModelImpl graphModel) throws Exception {
         Serialization ser = new Serialization(graphModel);
         DataInputOutput dio = new DataInputOutput();
