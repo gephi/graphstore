@@ -121,8 +121,7 @@ public final class TimestampSet implements TimeSet<Double> {
 
     @Override
     public boolean contains(Double timestamp) {
-        int index = Arrays.binarySearch(array, timestamp);
-        return index >= 0 && index < size;
+        return Arrays.binarySearch(array, 0, size, timestamp) >= 0;
     }
 
     @Override

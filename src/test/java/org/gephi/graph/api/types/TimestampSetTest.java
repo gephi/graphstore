@@ -392,4 +392,20 @@ public class TimestampSetTest {
             Assert.assertEquals(a[i], b[i]);
         }
     }
+
+    @Test
+    public void testContainsAfterRemove() {
+        TimestampSet set = new TimestampSet();
+        for (double t = 1.0; t <= 5.0; t++) {
+            set.add(t);
+        }
+        set.remove(1.0);
+        set.remove(2.0);
+        set.remove(3.0);
+
+        Assert.assertTrue(set.contains(4.0));
+        Assert.assertTrue(set.contains(5.0));
+        Assert.assertFalse(set.contains(1.0));
+        Assert.assertEquals(set.size(), 2);
+    }
 }

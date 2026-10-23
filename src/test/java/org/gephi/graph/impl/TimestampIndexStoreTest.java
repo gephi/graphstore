@@ -29,7 +29,9 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.TimeIndex;
+import org.gephi.graph.api.types.TimestampDoubleMap;
 import org.gephi.graph.api.types.TimestampIntegerMap;
+import org.gephi.graph.api.types.TimestampSet;
 import org.gephi.graph.api.types.TimestampStringMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -288,6 +290,47 @@ public class TimestampIndexStoreTest {
         Assert.assertEquals(store1.deepHashCode(), store2.deepHashCode());
         Assert.assertNotEquals(store1.deepHashCode(), store3.deepHashCode());
         Assert.assertNotEquals(store3.deepHashCode(), store4.deepHashCode());
+    }
+
+    @Test
+    public void testReplaceTimeMap() {
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
+        TimestampDoubleMap oldMap = new TimestampDoubleMap();
+        oldMap.put(1.0, 1.0);
+        oldMap.put(2.0, 1.0);
+        TimestampDoubleMap newMap = new TimestampDoubleMap();
+        newMap.put(2.0, 2.0);
+        newMap.put(3.0, 2.0);
+        store.add(oldMap);
+        store.add(2.0);
+
+        store.replace(oldMap, newMap);
+
+        Assert.assertEquals(store.size(), 2);
+        Assert.assertFalse(store.contains(1.0));
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(2.0)], 2);
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(3.0)], 1);
+    }
+
+    @Test
+    public void testReplaceTimeSet() {
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, true);
+        NodeImpl nodeImpl = new NodeImpl(0);
+        TimestampSet oldSet = new TimestampSet();
+        oldSet.add(1.0);
+        oldSet.add(2.0);
+        TimestampSet newSet = new TimestampSet();
+        newSet.add(2.0);
+        newSet.add(3.0);
+        store.add(oldSet, nodeImpl);
+
+        store.replace(oldSet, newSet, nodeImpl);
+
+        Assert.assertEquals(store.size(), 2);
+        Assert.assertEquals(getArrayFromIterable(store.mainIndex.get(1.0)).length, 0);
+        Assert.assertEquals(getArrayFromIterable(store.mainIndex.get(2.0))[0], nodeImpl);
+        Assert.assertEquals(getArrayFromIterable(store.mainIndex.get(3.0))[0], nodeImpl);
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(2.0)], 1);
     }
 
     @Test

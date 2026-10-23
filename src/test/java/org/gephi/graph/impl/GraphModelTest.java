@@ -23,6 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.Index;
@@ -82,6 +84,125 @@ public class GraphModelTest {
         graphModel.setVisibleView(view);
         graphModel.setVisibleView(graphModel.store.getView());
         Assert.assertSame(graphModel.getGraphVisible(), graphModel.getGraph());
+    }
+
+    // A reader that polls isDynamic() must never see false while the graph keeps a time
+    @Test
+    public void testIsDynamicWhenReplacingTimeMap() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Column column = graphModel.getNodeTable().addColumn("foo", TimestampDoubleMap.class);
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        TimestampDoubleMap first = new TimestampDoubleMap();
+        first.put(5.0, 1.0);
+        TimestampDoubleMap second = new TimestampDoubleMap();
+        second.put(5.0, 2.0);
+        n.setAttribute(column, first);
+
+        // The only time stays in the graph while the value is replaced
+        int notDynamic = countNotDynamicAnswers(graphModel, () -> {
+            for (int i = 0; i < 100000; i++) {
+                n.setAttribute(column, (i & 1) == 0 ? second : first);
+            }
+        });
+        Assert.assertEquals(notDynamic, 0);
+    }
+
+    // A reader that polls isDynamic() must never see false while the graph keeps a time
+    @Test
+    public void testIsDynamicWhenReplacingTimeSet() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        n.addTimestamp(5.0);
+        TimestampSet first = new TimestampSet();
+        first.add(5.0);
+        TimestampSet second = new TimestampSet();
+        second.add(5.0);
+        second.add(6.0);
+        Column timeset = graphModel.defaultColumns().nodeTimeSet();
+
+        int notDynamic = countNotDynamicAnswers(graphModel, () -> {
+            for (int i = 0; i < 100000; i++) {
+                n.setAttribute(timeset, (i & 1) == 0 ? second : first);
+            }
+        });
+        Assert.assertEquals(notDynamic, 0);
+        Assert.assertTrue(n.hasTimestamp(5.0));
+    }
+
+    // A value changed in place and set again indexes its new times
+    @Test
+    public void testSetTimeMapChangedInPlace() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Column column = graphModel.getNodeTable().addColumn("foo", TimestampDoubleMap.class);
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        TimestampDoubleMap map = new TimestampDoubleMap();
+        map.put(5.0, 1.0);
+        n.setAttribute(column, map);
+
+        map.put(7.0, 1.0);
+        n.setAttribute(column, map);
+
+        Assert.assertEquals(graphModel.getTimeBounds(), new Interval(5.0, 7.0));
+    }
+
+    // A value changed in place and set again indexes its new times
+    @Test
+    public void testSetTimeSetChangedInPlace() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        n.addTimestamp(5.0);
+        Column timeset = graphModel.defaultColumns().nodeTimeSet();
+
+        TimestampSet set = (TimestampSet) n.getAttribute(timeset);
+        set.add(7.0);
+        n.setAttribute(timeset, set);
+
+        Assert.assertEquals(graphModel.getTimeBounds(), new Interval(5.0, 7.0));
+    }
+
+    @Test
+    public void testReplaceTimeSetAfterRemovingTimestamps() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        Node n = graphModel.factory().newNode("1");
+        graphModel.store.addNode(n);
+        for (double t = 1.0; t <= 5.0; t++) {
+            n.addTimestamp(t);
+        }
+        n.removeTimestamp(1.0);
+        n.removeTimestamp(2.0);
+        n.removeTimestamp(3.0);
+        Column timeset = graphModel.defaultColumns().nodeTimeSet();
+
+        // Replacing the time set after removals must index exactly the timestamps of the new set
+        n.setAttribute(timeset, new TimestampSet(new double[] { 4.0, 5.0 }));
+        Assert.assertEquals(graphModel.getTimeBounds(), new Interval(4.0, 5.0));
+
+        n.setAttribute(timeset, new TimestampSet());
+        Assert.assertFalse(graphModel.isDynamic());
+    }
+
+    private static int countNotDynamicAnswers(GraphModelImpl graphModel, Runnable writer) throws Exception {
+        AtomicBoolean done = new AtomicBoolean();
+        AtomicInteger notDynamic = new AtomicInteger();
+        Thread reader = new Thread(() -> {
+            while (!done.get()) {
+                if (!graphModel.isDynamic()) {
+                    notDynamic.incrementAndGet();
+                }
+            }
+        });
+        reader.start();
+        try {
+            writer.run();
+        } finally {
+            done.set(true);
+            reader.join();
+        }
+        return notDynamic.get();
     }
 
     @Test
