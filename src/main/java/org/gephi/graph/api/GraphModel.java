@@ -669,6 +669,8 @@ public interface GraphModel {
      * Gets the time bounds.
      * <p>
      * The time bounds is an interval made of the minimum and maximum time observed in the entire graph.
+     * <p>
+     * This method doesn't take the graph lock, so a write in progress can be visible.
      *
      * @return time bounds
      */
@@ -678,6 +680,9 @@ public interface GraphModel {
      * Gets the time bounds for the visible graph.
      * <p>
      * The time bounds is an interval made of the minimum and maximum time observed in the entire graph.
+     * <p>
+     * If the visible view is the main view, this method doesn't take the graph lock. If the visible view is destroyed
+     * concurrently, the time bounds of the main view are returned.
      *
      * @return time bounds
      */
@@ -687,6 +692,8 @@ public interface GraphModel {
      * Gets the time bounds for the given graph view.
      * <p>
      * The time bounds is an interval made of the minimum and maximum time observed in the entire graph.
+     * <p>
+     * If the view is the main view, this method doesn't take the graph lock.
      *
      * @param view the graph view
      * @return time bounds

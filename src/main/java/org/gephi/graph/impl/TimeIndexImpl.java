@@ -42,6 +42,16 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
         lock = store.lock;
     }
 
+    /**
+     * Gets the minimum time without taking the lock. The caller holds the table lock.
+     */
+    protected abstract double getMinTimestampUnlocked();
+
+    /**
+     * Gets the maximum time without taking the lock. The caller holds the table lock.
+     */
+    protected abstract double getMaxTimestampUnlocked();
+
     public boolean hasElements() {
         return elementCount > 0;
     }
