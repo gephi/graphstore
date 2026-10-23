@@ -325,6 +325,16 @@ public abstract class ElementImpl implements Element {
         }
     }
 
+    // Called when a dynamic column is removed, its times no longer count in the time index
+    void removeFromTimeIndex(Object oldValue) {
+        if (oldValue instanceof TimeMap && isValid()) {
+            TimeIndexStore timeIndexStore = getTimeIndexStore();
+            if (timeIndexStore != null) {
+                timeIndexStore.remove((TimeMap) oldValue);
+            }
+        }
+    }
+
     @Override
     public boolean addTimestamp(double timestamp) {
         checkDouble(timestamp);

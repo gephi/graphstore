@@ -133,8 +133,13 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
 
             // Clean attributes
             if (graphStore != null && columnImpl.table != null) {
+                boolean timeMapColumn = columnImpl.isDynamicAttribute();
                 for (Element e : graphStore.getElements(columnImpl.table)) {
-                    ((ElementImpl) e).attributes.setAttribute(column, null);
+                    ElementImpl element = (ElementImpl) e;
+                    Object oldValue = element.attributes.setAttribute(column, null);
+                    if (timeMapColumn) {
+                        element.removeFromTimeIndex(oldValue);
+                    }
                 }
             }
 
