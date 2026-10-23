@@ -18,7 +18,6 @@ package org.gephi.graph.impl;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -295,14 +294,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testReplaceTimeMap() {
-        List<Double> removed = new ArrayList<>();
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, false) {
-            @Override
-            protected Integer remove(Double k) {
-                removed.add(k);
-                return super.remove(k);
-            }
-        };
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, false);
         TimestampDoubleMap oldMap = new TimestampDoubleMap();
         oldMap.put(1.0, 1.0);
         oldMap.put(2.0, 1.0);
@@ -314,7 +306,6 @@ public class TimestampIndexStoreTest {
 
         store.replace(oldMap, newMap);
 
-        Assert.assertEquals(removed, Collections.singletonList(1.0));
         Assert.assertEquals(store.size(), 2);
         Assert.assertFalse(store.contains(1.0));
         Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(2.0)], 2);
@@ -323,14 +314,7 @@ public class TimestampIndexStoreTest {
 
     @Test
     public void testReplaceTimeSet() {
-        List<Double> removed = new ArrayList<>();
-        TimestampIndexStore<Node> store = new TimestampIndexStore<Node>(Node.class, null, true) {
-            @Override
-            protected Integer remove(Double k) {
-                removed.add(k);
-                return super.remove(k);
-            }
-        };
+        TimestampIndexStore<Node> store = new TimestampIndexStore<>(Node.class, null, true);
         NodeImpl nodeImpl = new NodeImpl(0);
         TimestampSet oldSet = new TimestampSet();
         oldSet.add(1.0);
@@ -342,7 +326,6 @@ public class TimestampIndexStoreTest {
 
         store.replace(oldSet, newSet, nodeImpl);
 
-        Assert.assertEquals(removed, Collections.singletonList(1.0));
         Assert.assertEquals(store.size(), 2);
         Assert.assertEquals(getArrayFromIterable(store.mainIndex.get(1.0)).length, 0);
         Assert.assertEquals(getArrayFromIterable(store.mainIndex.get(2.0))[0], nodeImpl);

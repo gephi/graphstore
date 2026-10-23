@@ -86,6 +86,7 @@ public class GraphModelTest {
         Assert.assertSame(graphModel.getGraphVisible(), graphModel.getGraph());
     }
 
+    // A reader that polls isDynamic() must never see false while the graph keeps a time
     @Test
     public void testIsDynamicWhenReplacingTimeMap() throws Exception {
         GraphModelImpl graphModel = new GraphModelImpl();
@@ -107,6 +108,7 @@ public class GraphModelTest {
         Assert.assertEquals(notDynamic, 0);
     }
 
+    // A reader that polls isDynamic() must never see false while the graph keeps a time
     @Test
     public void testIsDynamicWhenReplacingTimeSet() throws Exception {
         GraphModelImpl graphModel = new GraphModelImpl();
@@ -129,6 +131,7 @@ public class GraphModelTest {
         Assert.assertTrue(n.hasTimestamp(5.0));
     }
 
+    // A value changed in place and set again indexes its new times
     @Test
     public void testSetTimeMapChangedInPlace() {
         GraphModelImpl graphModel = new GraphModelImpl();
@@ -145,6 +148,7 @@ public class GraphModelTest {
         Assert.assertEquals(graphModel.getTimeBounds(), new Interval(5.0, 7.0));
     }
 
+    // A value changed in place and set again indexes its new times
     @Test
     public void testSetTimeSetChangedInPlace() {
         GraphModelImpl graphModel = new GraphModelImpl();
@@ -173,6 +177,7 @@ public class GraphModelTest {
         n.removeTimestamp(3.0);
         Column timeset = graphModel.defaultColumns().nodeTimeSet();
 
+        // Replacing the time set after removals must index exactly the timestamps of the new set
         n.setAttribute(timeset, new TimestampSet(new double[] { 4.0, 5.0 }));
         Assert.assertEquals(graphModel.getTimeBounds(), new Interval(4.0, 5.0));
 
