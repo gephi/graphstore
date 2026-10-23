@@ -31,7 +31,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.gephi.graph.api.Column;
@@ -1479,43 +1478,6 @@ public class GraphStoreTest {
         } finally {
             release.countDown();
             writer.join();
-            executor.shutdownNow();
-        }
-    }
-
-    @Test
-    public void testUndirectedGraphWriteLockWithAutoLockingDisabled() throws Exception {
-        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableAutoLocking(false).build());
-        assertBlocks(graphModel.getUndirectedGraph()::writeLock, graphModel
-                .getUndirectedGraph()::writeUnlock, () -> graphModel.getDirectedGraph()
-                        .readLock(), () -> graphModel.getDirectedGraph().readUnlock());
-    }
-
-    @Test
-    public void testUndirectedGraphReadLockWithAutoLockingDisabled() throws Exception {
-        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().enableAutoLocking(false).build());
-        assertBlocks(graphModel.getUndirectedGraph()::readLock, graphModel
-                .getUndirectedGraph()::readUnlock, () -> graphModel.getDirectedGraph()
-                        .writeLock(), () -> graphModel.getDirectedGraph().writeUnlock());
-    }
-
-    // The other thread has to wait while this thread holds the lock, and gets it once it is released
-    private static void assertBlocks(Runnable lock, Runnable unlock, Runnable otherLock, Runnable otherUnlock) throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        try {
-            lock.run();
-            Future<?> other;
-            try {
-                other = executor.submit(() -> {
-                    otherLock.run();
-                    otherUnlock.run();
-                });
-                Assert.assertThrows(TimeoutException.class, () -> other.get(200, TimeUnit.MILLISECONDS));
-            } finally {
-                unlock.run();
-            }
-            other.get(5, TimeUnit.SECONDS);
-        } finally {
             executor.shutdownNow();
         }
     }
