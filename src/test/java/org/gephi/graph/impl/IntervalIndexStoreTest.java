@@ -27,7 +27,9 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.TimeRepresentation;
+import org.gephi.graph.api.types.IntervalDoubleMap;
 import org.gephi.graph.api.types.IntervalIntegerMap;
+import org.gephi.graph.api.types.IntervalSet;
 import org.gephi.graph.api.types.IntervalStringMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -38,6 +40,46 @@ public class IntervalIndexStoreTest {
     public void testEmpty() {
         IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
         Assert.assertTrue(store.size() == 0);
+    }
+
+    @Test
+    public void testReplaceTimeMap() {
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
+        IntervalDoubleMap oldMap = new IntervalDoubleMap();
+        oldMap.put(new Interval(1.0, 2.0), 1.0);
+        oldMap.put(new Interval(3.0, 4.0), 1.0);
+        IntervalDoubleMap newMap = new IntervalDoubleMap();
+        newMap.put(new Interval(1.0, 3.0), 2.0);
+        newMap.put(new Interval(3.0, 4.0), 2.0);
+        store.add(oldMap);
+
+        store.replace(oldMap, newMap);
+
+        Assert.assertEquals(store.size(), 2);
+        Assert.assertFalse(store.contains(new Interval(1.0, 2.0)));
+        Assert.assertTrue(store.contains(new Interval(1.0, 3.0)));
+        Assert.assertTrue(store.contains(new Interval(3.0, 4.0)));
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(new Interval(3.0, 4.0))], 1);
+    }
+
+    @Test
+    public void testReplaceTimeSet() {
+        IntervalIndexStore<Node> store = new IntervalIndexStore<>(Node.class, null, false);
+        NodeImpl nodeImpl = new NodeImpl(0);
+        IntervalSet oldSet = new IntervalSet();
+        oldSet.add(new Interval(1.0, 2.0));
+        oldSet.add(new Interval(3.0, 4.0));
+        IntervalSet newSet = new IntervalSet();
+        newSet.add(new Interval(1.0, 3.0));
+        newSet.add(new Interval(3.0, 4.0));
+        store.add(oldSet, nodeImpl);
+
+        store.replace(oldSet, newSet, nodeImpl);
+
+        Assert.assertEquals(store.size(), 2);
+        Assert.assertFalse(store.contains(new Interval(1.0, 2.0)));
+        Assert.assertTrue(store.contains(new Interval(1.0, 3.0)));
+        Assert.assertEquals(store.countMap[(Integer) store.timeSortedMap.get(new Interval(3.0, 4.0))], 1);
     }
 
     @Test

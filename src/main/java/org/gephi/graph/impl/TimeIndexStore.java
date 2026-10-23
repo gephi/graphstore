@@ -185,6 +185,44 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         }
     }
 
+    // Adds the times only the new value holds, then removes the times only the old value held, so a time in both stays
+    // in the index
+    public void replace(TimeMap<K, ?> oldTimeMap, TimeMap<K, ?> newTimeMap) {
+        lock();
+        try {
+            for (K timeKey : newTimeMap.toKeysArray()) {
+                if (!oldTimeMap.contains(timeKey)) {
+                    add(timeKey);
+                }
+            }
+            for (K timeKey : oldTimeMap.toKeysArray()) {
+                if (!newTimeMap.contains(timeKey)) {
+                    remove(timeKey);
+                }
+            }
+        } finally {
+            unlock();
+        }
+    }
+
+    public void replace(TimeSet<K> oldTimeSet, TimeSet<K> newTimeSet, Element element) {
+        lock();
+        try {
+            for (K timeKey : newTimeSet.toArray()) {
+                if (!oldTimeSet.contains(timeKey)) {
+                    add(timeKey, element);
+                }
+            }
+            for (K timeKey : oldTimeSet.toArray()) {
+                if (!newTimeSet.contains(timeKey)) {
+                    remove(timeKey, element);
+                }
+            }
+        } finally {
+            unlock();
+        }
+    }
+
     public boolean contains(K k) {
         checkK(k);
 

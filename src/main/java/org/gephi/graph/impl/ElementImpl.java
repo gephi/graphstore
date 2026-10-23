@@ -286,26 +286,34 @@ public abstract class ElementImpl implements Element {
                 TimeIndexStore timeIndexStore = getTimeIndexStore();
                 if (timeIndexStore != null) {
                     if (TimeMap.class.isAssignableFrom(columnImpl.getTypeClass())) {
-                        if (oldValue instanceof TimeMap) {
-                            timeIndexStore.remove((TimeMap) oldValue);
-                        } else if (oldValue != null) {
-                            timeIndexStore.remove(oldValue);
-                        }
-                        if (newValue instanceof TimeMap) {
-                            timeIndexStore.add((TimeMap) newValue);
-                        } else if (newValue != null) {
-                            timeIndexStore.add(newValue);
+                        if (oldValue instanceof TimeMap && newValue instanceof TimeMap && oldValue != newValue) {
+                            timeIndexStore.replace((TimeMap) oldValue, (TimeMap) newValue);
+                        } else {
+                            if (oldValue instanceof TimeMap) {
+                                timeIndexStore.remove((TimeMap) oldValue);
+                            } else if (oldValue != null) {
+                                timeIndexStore.remove(oldValue);
+                            }
+                            if (newValue instanceof TimeMap) {
+                                timeIndexStore.add((TimeMap) newValue);
+                            } else if (newValue != null) {
+                                timeIndexStore.add(newValue);
+                            }
                         }
                     } else if (TimeSet.class.isAssignableFrom(columnImpl.getTypeClass())) {
-                        if (oldValue instanceof TimeSet) {
-                            timeIndexStore.remove((TimeSet) oldValue, this);
-                        } else if (oldValue != null) {
-                            timeIndexStore.remove(oldValue, this);
-                        }
-                        if (newValue instanceof TimeSet) {
-                            timeIndexStore.add((TimeSet) newValue, this);
-                        } else if (newValue != null) {
-                            timeIndexStore.add(newValue, this);
+                        if (oldValue instanceof TimeSet && newValue instanceof TimeSet && oldValue != newValue) {
+                            timeIndexStore.replace((TimeSet) oldValue, (TimeSet) newValue, this);
+                        } else {
+                            if (oldValue instanceof TimeSet) {
+                                timeIndexStore.remove((TimeSet) oldValue, this);
+                            } else if (oldValue != null) {
+                                timeIndexStore.remove(oldValue, this);
+                            }
+                            if (newValue instanceof TimeSet) {
+                                timeIndexStore.add((TimeSet) newValue, this);
+                            } else if (newValue != null) {
+                                timeIndexStore.add(newValue, this);
+                            }
                         }
                     }
                 }
