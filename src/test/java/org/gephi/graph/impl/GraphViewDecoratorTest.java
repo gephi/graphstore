@@ -17,12 +17,14 @@ package org.gephi.graph.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import org.gephi.graph.api.Configuration;
@@ -1174,5 +1176,100 @@ public class GraphViewDecoratorTest {
         } finally {
             executor.shutdownNow();
         }
+    }
+
+    @Test
+    public void testUndirectedIteratorRemoveKeepsEdgeInStore() {
+        assertUndirectedIteratorRemoveKeepsEdgesInStore((graph, node) -> graph.getEdges());
+        assertUndirectedIteratorRemoveKeepsEdgesInStore((graph, node) -> graph.getEdges(0));
+        assertUndirectedIteratorRemoveKeepsEdgesInStore((graph, node) -> graph.getEdges(node));
+        assertUndirectedIteratorRemoveKeepsEdgesInStore((graph, node) -> graph.getEdges(node, 0));
+    }
+
+    @Test
+    public void testUndirectedIteratorRemoveMutualEdge() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        UndirectedSubgraph graph = graphStore.viewStore.getUndirectedGraph(view);
+        graph.addAllNodes(graphStore.getNodes().toCollection());
+        graph.addAllEdges(graphStore.getEdges().toCollection());
+
+        graph.writeLock();
+        try {
+            Iterator<Edge> itr = graph.getEdges().iterator();
+            Assert.assertTrue(itr.hasNext());
+            itr.next();
+            Assert.assertThrows(UnsupportedOperationException.class, itr::remove);
+            graphStore.readUnlock();
+        } finally {
+            graph.writeUnlock();
+        }
+        Assert.assertEquals(graphStore.getEdgeCount(), 2);
+        Assert.assertEquals(view.getEdgeCount(), 2);
+    }
+
+    @Test
+    public void testUndirectedIteratorRemoveMutualEdgeWithOneDirectionInView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStoreWithMutualEdge();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        UndirectedSubgraph graph = graphStore.viewStore.getUndirectedGraph(view);
+        graph.addAllNodes(graphStore.getNodes().toCollection());
+        graph.addEdge(graphStore.getEdge("0"));
+
+        graph.writeLock();
+        try {
+            for (Iterator<Edge> itr = graph.getEdges().iterator(); itr.hasNext();) {
+                itr.next();
+                itr.remove();
+            }
+        } finally {
+            graph.writeUnlock();
+        }
+        Assert.assertEquals(view.getEdgeCount(), 0);
+        Assert.assertEquals(graph.getEdgeCount(), 0);
+        Assert.assertEquals(graphStore.getEdgeCount(), 2);
+    }
+
+    @Test
+    public void testUndirectedIteratorRemoveWithoutWriteLock() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        UndirectedSubgraph graph = graphStore.viewStore.getUndirectedGraph(view);
+        graph.addAllNodes(graphStore.getNodes().toCollection());
+        graph.addAllEdges(graphStore.getEdges().toCollection());
+
+        Iterator<Edge> itr = graph.getEdges().iterator();
+        Assert.assertTrue(itr.hasNext());
+        itr.next();
+        Assert.assertThrows(IllegalMonitorStateException.class, itr::remove);
+        graphStore.readUnlock();
+        Assert.assertEquals(view.getEdgeCount(), graphStore.getEdgeCount());
+    }
+
+    private void assertUndirectedIteratorRemoveKeepsEdgesInStore(BiFunction<UndirectedSubgraph, Node, EdgeIterable> edges) {
+        GraphStore graphStore = new GraphStore();
+        Node a = graphStore.factory.newNode("a");
+        Node b = graphStore.factory.newNode("b");
+        Node c = graphStore.factory.newNode("c");
+        graphStore.addAllNodes(Arrays.asList(a, b, c));
+        graphStore.addEdge(graphStore.factory.newEdge("ab", a, b, 0, 1.0, true));
+        graphStore.addEdge(graphStore.factory.newEdge("bc", b, c, 0, 1.0, true));
+        GraphViewImpl view = graphStore.viewStore.createView();
+        UndirectedSubgraph graph = graphStore.viewStore.getUndirectedGraph(view);
+        graph.addAllNodes(graphStore.getNodes().toCollection());
+        graph.addAllEdges(graphStore.getEdges().toCollection());
+
+        graph.writeLock();
+        try {
+            for (Iterator<Edge> itr = edges.apply(graph, b).iterator(); itr.hasNext();) {
+                itr.next();
+                itr.remove();
+            }
+        } finally {
+            graph.writeUnlock();
+        }
+
+        Assert.assertEquals(view.getEdgeCount(), 0);
+        Assert.assertEquals(graphStore.getEdgeCount(), 2);
     }
 }
