@@ -23,7 +23,11 @@ import org.gephi.graph.api.types.IntervalSet;
 public class IntervalIndexStore<T extends Element> extends TimeIndexStore<T, Interval, IntervalSet, IntervalMap<?>> {
 
     public IntervalIndexStore(Class<T> type, TableLockImpl lock, boolean indexed) {
-        super(type, lock, indexed, new Interval2IntTreeMap());
+        this(type, lock, indexed, null);
+    }
+
+    public IntervalIndexStore(Class<T> type, TableLockImpl lock, boolean indexed, Runnable sizeListener) {
+        super(type, lock, indexed, new Interval2IntTreeMap(), sizeListener);
         mainIndex = indexed ? new IntervalIndexImpl(this, true) : null;
     }
 

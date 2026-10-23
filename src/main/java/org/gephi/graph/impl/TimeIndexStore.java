@@ -36,6 +36,8 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
 
     // Lock
     protected final TableLockImpl lock;
+    // Called after the number of time keys changed, while the lock is held (optional)
+    private final Runnable sizeListener;
     // Element
     protected final Class<T> elementType;
     // Timestamp index management
@@ -47,9 +49,10 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
     protected TimeIndexImpl mainIndex;
     protected final Map<GraphView, TimeIndexImpl> viewIndexes;
 
-    protected TimeIndexStore(Class<T> type, TableLockImpl lock, boolean indexed, Map<K, Integer> sortedMap) {
+    protected TimeIndexStore(Class<T> type, TableLockImpl lock, boolean indexed, Map<K, Integer> sortedMap, Runnable sizeListener) {
         this.elementType = type;
         this.lock = lock;
+        this.sizeListener = sizeListener;
 
         garbageQueue = new IntRBTreeSet();
         // Subclass
@@ -57,6 +60,12 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
         countMap = new int[0];
 
         viewIndexes = indexed ? new Object2ObjectOpenHashMap<>() : null;
+    }
+
+    private void sizeChanged() {
+        if (sizeListener != null) {
+            sizeListener.run();
+        }
     }
 
     protected abstract void checkK(K k);
@@ -81,6 +90,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                 timeSortedMap.put(k, id);
                 ensureArraySize(id);
                 countMap[id] = 1;
+                sizeChanged();
             } else {
                 countMap[id]++;
             }
@@ -137,6 +147,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
                 if (--countMap[id] == 0) {
                     garbageQueue.add(id);
                     timeSortedMap.remove(k);
+                    sizeChanged();
                 }
             }
             return id;
@@ -281,6 +292,7 @@ public abstract class TimeIndexStore<T extends Element, K, S extends TimeSet<K>,
             garbageQueue.clear();
             countMap = new int[0];
             length = 0;
+            sizeChanged();
 
             if (mainIndex != null) {
                 mainIndex.clear();
