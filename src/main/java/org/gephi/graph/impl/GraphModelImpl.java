@@ -167,12 +167,7 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public int getEdgeTypeCount() {
-        store.autoReadLock();
-        try {
-            return store.edgeTypeStore.size();
-        } finally {
-            store.autoReadUnlock();
-        }
+        return store.edgeTypeStore.size();
     }
 
     @Override
