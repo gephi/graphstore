@@ -138,11 +138,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public Edge getEdge(Node node1, Node node2) {
-        readLock();
+        store.autoReadLock();
         try {
             return store.edgeStore.get(node1, node2, true);
         } finally {
-            readUnlock();
+            store.autoReadUnlock();
         }
     }
 
@@ -154,11 +154,11 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public Edge getEdge(Node node1, Node node2, int type) {
-        readLock();
+        store.autoReadLock();
         try {
             return store.edgeStore.get(node1, node2, type, true);
         } finally {
-            readUnlock();
+            store.autoReadUnlock();
         }
     }
 
@@ -344,27 +344,27 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public void readLock() {
-        store.autoReadLock();
+        store.readLock();
     }
 
     @Override
     public void readUnlock() {
-        store.autoReadUnlock();
+        store.readUnlock();
     }
 
     @Override
     public void readUnlockAll() {
-        store.autoReadUnlockAll();
+        store.readUnlockAll();
     }
 
     @Override
     public void writeLock() {
-        store.autoWriteLock();
+        store.writeLock();
     }
 
     @Override
     public void writeUnlock() {
-        store.autoWriteUnlock();
+        store.writeUnlock();
     }
 
     @Override
