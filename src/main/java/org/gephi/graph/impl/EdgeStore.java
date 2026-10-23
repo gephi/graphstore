@@ -1549,6 +1549,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         @Override
         public void remove() {
+            checkWriteLock();
             if (pointer.isMutual()) {
                 throw new UnsupportedOperationException(
                         "Removing directed edges from undirected iterator is not supported");
@@ -1584,6 +1585,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         @Override
         public void remove() {
+            checkWriteLock();
             EdgeStore.this.remove(pointer);
         }
     }
@@ -2190,6 +2192,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         @Override
         public void remove() {
+            checkWriteLock();
             if (pointer.isMutual()) {
                 throw new UnsupportedOperationException(
                         "Removing directed edges from undirected iterator is not supported");

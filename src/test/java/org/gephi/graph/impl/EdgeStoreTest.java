@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Spliterator;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.gephi.graph.api.Configuration;
@@ -2379,6 +2380,50 @@ public class EdgeStoreTest {
             edgeMap.put(e.getId(), e);
         }
         return edgeMap;
+    }
+
+    @Test
+    public void testTypeIteratorRemoveWithoutWriteLock() {
+        assertIteratorRemoveRequiresWriteLock((graphStore, source) -> graphStore.getEdges(0).iterator());
+    }
+
+    @Test
+    public void testUndirectedIteratorRemoveWithoutWriteLock() {
+        assertIteratorRemoveRequiresWriteLock((graphStore, source) -> graphStore.undirectedDecorator.getEdges()
+                .iterator());
+    }
+
+    @Test
+    public void testInOutUndirectedIteratorRemoveWithoutWriteLock() {
+        assertIteratorRemoveRequiresWriteLock((graphStore, source) -> graphStore.undirectedDecorator.getEdges(source)
+                .iterator());
+    }
+
+    private void assertIteratorRemoveRequiresWriteLock(BiFunction<GraphStore, Node, Iterator<Edge>> iteratorFactory) {
+        GraphStore graphStore = new GraphStore();
+        Node source = graphStore.factory.newNode("a");
+        Node target = graphStore.factory.newNode("b");
+        graphStore.addAllNodes(Arrays.asList(source, target));
+        graphStore.addEdge(graphStore.factory.newEdge("e", source, target, 0, 1.0, true));
+
+        Iterator<Edge> itr = iteratorFactory.apply(graphStore, source);
+        Assert.assertTrue(itr.hasNext());
+        itr.next();
+        Assert.assertThrows(IllegalMonitorStateException.class, itr::remove);
+        graphStore.readUnlock();
+
+        Assert.assertEquals(graphStore.getEdgeCount(), 1);
+        graphStore.writeLock();
+        try {
+            Iterator<Edge> writeItr = iteratorFactory.apply(graphStore, source);
+            Assert.assertTrue(writeItr.hasNext());
+            writeItr.next();
+            writeItr.remove();
+            graphStore.readUnlock();
+        } finally {
+            graphStore.writeUnlock();
+        }
+        Assert.assertEquals(graphStore.getEdgeCount(), 0);
     }
 
     private NodeImpl[] getNodes(EdgeImpl[] edges) {
