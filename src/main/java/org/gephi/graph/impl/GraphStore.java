@@ -93,7 +93,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
         graphModel = model;
         lock = new GraphLockImpl();
 
-        edgeTypeStore = new EdgeTypeStore();
+        edgeTypeStore = new EdgeTypeStore(configuration);
         mainGraphView = new MainGraphView();
         viewStore = new GraphViewStore(this);
         version = configuration.isEnableObservers() ? new GraphVersion(this) : null;

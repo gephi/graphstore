@@ -376,6 +376,32 @@ public class GraphModelTest {
     }
 
     @Test
+    public void testAddEdgeTypeWithConfiguredLabelType() {
+        GraphModelImpl graphModel = new GraphModelImpl(Configuration.builder().edgeLabelType(Integer.class).build());
+
+        int type = graphModel.addEdgeType(42);
+
+        Assert.assertEquals(graphModel.getEdgeTypeLabel(type), 42);
+        Assert.assertThrows(IllegalArgumentException.class, () -> graphModel.addEdgeType("foo"));
+    }
+
+    @Test
+    public void testAddEdgeWithConfiguredAutoRegistrationDisabled() {
+        GraphModelImpl graphModel = new GraphModelImpl(
+                Configuration.builder().enableAutoEdgeTypeRegistration(false).build());
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        graphModel.store.addAllNodes(Arrays.asList(n1, n2));
+
+        Assert.assertThrows(UnsupportedOperationException.class, () -> graphModel.store
+                .addEdge(graphModel.factory().newEdge("0", n1, n2, 5, 1.0, true)));
+        Assert.assertEquals(graphModel.store.getEdgeCount(), 0);
+
+        int type = graphModel.addEdgeType("foo");
+        Assert.assertTrue(graphModel.store.addEdge(graphModel.factory().newEdge("1", n1, n2, type, 1.0, true)));
+    }
+
+    @Test
     public void testGetEdgeTypeCountAfterSerialization() throws Exception {
         GraphModelImpl graphModel = new GraphModelImpl();
         graphModel.addEdgeType("foo");
