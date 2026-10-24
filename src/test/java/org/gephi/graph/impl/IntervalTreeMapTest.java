@@ -182,6 +182,36 @@ public class IntervalTreeMapTest {
         Assert.assertEquals(m.getHigh(), Double.POSITIVE_INFINITY);
     }
 
+    // The highest end and the interval holding it follow the content of the map through puts and removes
+    @Test
+    public void testHighAfterPutsAndRemoves() {
+        Random random = new Random(42);
+        for (int sequence = 0; sequence < 500; sequence++) {
+            Interval2IntTreeMap map = new Interval2IntTreeMap();
+            Set<Interval> model = new HashSet<>();
+            for (int op = 0; op < 60; op++) {
+                if (model.isEmpty() || random.nextInt(3) > 0) {
+                    double low = random.nextInt(50);
+                    Interval interval = new Interval(low, low + random.nextInt(20));
+                    map.put(interval, 42);
+                    model.add(interval);
+                } else {
+                    Interval interval = model.iterator().next();
+                    map.remove(interval);
+                    model.remove(interval);
+                }
+                double expectedHigh = Double.NEGATIVE_INFINITY;
+                for (Interval interval : model) {
+                    expectedHigh = Math.max(expectedHigh, interval.getHigh());
+                }
+                if (!model.isEmpty()) {
+                    Assert.assertEquals(map.getHigh(), expectedHigh);
+                    Assert.assertEquals(map.maximum().getHigh(), expectedHigh);
+                }
+            }
+        }
+    }
+
     public void testMinMax() {
         Interval i1 = new Interval(1.0, 8.0);
         Interval i2 = new Interval(-1.0, 3.0);
