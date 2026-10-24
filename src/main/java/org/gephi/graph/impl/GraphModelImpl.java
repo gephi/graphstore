@@ -122,12 +122,7 @@ public class GraphModelImpl implements GraphModel {
 
     @Override
     public void setVisibleView(GraphView view) {
-        store.autoWriteLock();
-        try {
-            store.viewStore.setVisibleView(view);
-        } finally {
-            store.autoWriteUnlock();
-        }
+        store.viewStore.setVisibleView(view);
     }
 
     @Override

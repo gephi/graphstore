@@ -382,6 +382,9 @@ public interface GraphModel {
      * Sets the visible view.
      * <p>
      * If <em>view</em> is null, it restores the main view.
+     * <p>
+     * Restoring the main view doesn't acquire the graph lock. Setting another view acquires the graph read lock, so it
+     * can be called while holding the read lock.
      *
      * @param view view
      */

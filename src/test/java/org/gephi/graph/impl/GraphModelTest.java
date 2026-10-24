@@ -87,6 +87,46 @@ public class GraphModelTest {
         Assert.assertSame(graphModel.getGraphVisible(), graphModel.getGraph());
     }
 
+    @Test
+    public void testSetVisibleViewWithoutWriteLock() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphView view = graphModel.createView();
+        graphModel.setVisibleView(view);
+
+        CountDownLatch locked = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        Thread writer = new Thread(() -> {
+            graphModel.store.writeLock();
+            try {
+                locked.countDown();
+                release.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                graphModel.store.writeUnlock();
+            }
+        });
+        writer.start();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Assert.assertTrue(locked.await(5, TimeUnit.SECONDS));
+            executor.submit(() -> graphModel.setVisibleView(null)).get(5, TimeUnit.SECONDS);
+            Assert.assertTrue(graphModel.getVisibleView().isMainView());
+        } finally {
+            release.countDown();
+            writer.join();
+            executor.shutdownNow();
+        }
+
+        graphModel.store.readLock();
+        try {
+            graphModel.setVisibleView(view);
+        } finally {
+            graphModel.store.readUnlock();
+        }
+        Assert.assertSame(graphModel.getVisibleView(), view);
+    }
+
     // A reader that polls isDynamic() must never see false while the graph keeps a time
     @Test
     public void testIsDynamicWhenReplacingTimeMap() throws Exception {
