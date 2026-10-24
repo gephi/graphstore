@@ -682,6 +682,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         int oldType = e.getType();
         EdgeImpl edge = (EdgeImpl) e;
         if (edge.storeId != EdgeStore.NULL_ID) {
+            EdgeTypeStore.checkValidId(type);
             ensureLongDictionaryCapacity(type);
             Long2ObjectOpenCustomHashMap<int[]> newDico = longDictionary[type];
 
@@ -800,11 +801,12 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
         EdgeImpl edge = (EdgeImpl) e;
         if (edge.storeId == EdgeStore.NULL_ID) {
+            int type = edge.type;
+            EdgeTypeStore.checkValidId(type);
             checkIdDoesntExist(e.getId());
             checkSourceTargets(edge);
             checkUndirectedNotExist(edge);
 
-            int type = edge.type;
             boolean directed = edge.isDirected();
             NodeImpl source = edge.source;
             NodeImpl target = edge.target;
