@@ -568,4 +568,19 @@ public class ColumnStoreTest {
             executor.shutdownNow();
         }
     }
+
+    @Test
+    public void testRemoveColumnTwiceKeepsColumnWithSameKey() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Column removed = graphStore.nodeTable.addColumn("foo", Integer.class);
+        graphStore.nodeTable.removeColumn(removed);
+        Column added = graphStore.nodeTable.addColumn("foo", String.class);
+        Node node = graphStore.getNode("1");
+        node.setAttribute(added, "bar");
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> graphStore.nodeTable.removeColumn(removed));
+
+        Assert.assertTrue(graphStore.nodeTable.hasColumn("foo"));
+        Assert.assertEquals(node.getAttribute(added), "bar");
+    }
 }

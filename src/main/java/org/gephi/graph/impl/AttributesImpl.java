@@ -101,12 +101,13 @@ public class AttributesImpl {
         return null;
     }
 
-    protected Object removeTimeAttribute(Column column, Object timeObject) {
+    protected Object removeTimeAttribute(ColumnStore columnStore, Column column, Object timeObject) {
         int index = column.getIndex();
         Object oldValue = null;
         boolean res = false;
         synchronized (this) {
-            TimeMap dynamicValue = (TimeMap) attributes[index];
+            checkColumnInStore(columnStore, column, index);
+            TimeMap dynamicValue = index < attributes.length ? (TimeMap) attributes[index] : null;
             if (dynamicValue != null) {
                 oldValue = dynamicValue.get(timeObject, null);
 
@@ -119,6 +120,23 @@ public class AttributesImpl {
     protected Object setAttribute(Column column, Object value) {
         int index = column.getIndex();
         return setAttribute(index, value);
+    }
+
+    // Sets the value only while the column is in the store, removeColumn clears the values after removing it
+    protected Object setAttribute(ColumnStore columnStore, Column column, Object value) {
+        int index = column.getIndex();
+        synchronized (this) {
+            checkColumnInStore(columnStore, column, index);
+            Object oldValue = ensureSize(index);
+            attributes[index] = value;
+            return oldValue;
+        }
+    }
+
+    private void checkColumnInStore(ColumnStore columnStore, Column column, int index) {
+        if (index == ColumnStore.NULL_ID || (columnStore != null && columnStore.columns[index] != column)) {
+            throw new IllegalArgumentException("The column does not exist");
+        }
     }
 
     public Object setAttribute(int index, Object value) {
@@ -161,10 +179,11 @@ public class AttributesImpl {
      *
      * @return true if the time was not already in the map
      */
-    protected boolean setAttribute(Column column, Object value, Object timeObject) {
+    protected boolean setAttribute(ColumnStore columnStore, Column column, Object value, Object timeObject) {
         int index = column.getIndex();
         Object oldValue = null;
         synchronized (this) {
+            checkColumnInStore(columnStore, column, index);
             oldValue = ensureSize(index);
             TimeMap dynamicValue;
             if (oldValue == null) {

@@ -135,6 +135,15 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
         try {
             final ColumnImpl columnImpl = (ColumnImpl) column;
 
+            short id = idMap.getShort(column.getId());
+            if (id == NULL_SHORT || columns[shortToInt(id)] != columnImpl) {
+                throw new IllegalArgumentException("The column doesnt exist");
+            }
+            // Removed before clearing the values, setters only write while the column is in the store
+            idMap.removeShort(column.getId());
+            int intId = shortToInt(id);
+            columns[intId] = null;
+
             // Clean attributes
             if (graphStore != null && columnImpl.table != null) {
                 boolean timeMapColumn = columnImpl.isDynamicAttribute();
@@ -147,14 +156,7 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 }
             }
 
-            short id = idMap.removeShort(column.getId());
-            if (id == NULL_SHORT) {
-                throw new IllegalArgumentException("The column doesnt exist");
-            }
             garbageQueue.add(id);
-
-            int intId = shortToInt(id);
-            columns[intId] = null;
             if (indexStore != null) {
                 indexStore.removeColumn((ColumnImpl) column);
             }
