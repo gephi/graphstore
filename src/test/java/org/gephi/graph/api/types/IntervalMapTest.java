@@ -514,6 +514,21 @@ public class IntervalMapTest {
     }
 
     @Test
+    public void testCopyConstructorAfterRemove() {
+        IntervalStringMap map1 = new IntervalStringMap();
+        map1.put(new Interval(1.0, 2.0), "foo");
+        map1.put(new Interval(4.0, 5.0), "bar");
+        map1.put(new Interval(7.0, 8.0), "baz");
+        map1.remove(new Interval(1.0, 2.0));
+
+        IntervalStringMap map2 = new IntervalStringMap(map1);
+        Assert.assertEquals(map2.size(), 2);
+        Assert.assertEquals(map2, map1);
+        map1.clear();
+        Assert.assertEquals(map2.size(), 2);
+    }
+
+    @Test
     public void testToStringDouble() {
         IntervalStringMap map1 = new IntervalStringMap();
         Assert.assertEquals(map1.toString(), "<empty>");

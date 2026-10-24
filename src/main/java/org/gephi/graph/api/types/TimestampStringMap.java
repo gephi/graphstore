@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.api.types;
 
+import java.util.Arrays;
 import org.gephi.graph.api.Estimator;
 
 /**
@@ -67,7 +68,7 @@ public final class TimestampStringMap extends TimestampMap<String> {
      * @param source the map to copy
      */
     public TimestampStringMap(TimestampStringMap source) {
-        this(source.array, source.values);
+        this(Arrays.copyOf(source.array, source.size), Arrays.copyOf(source.values, source.size));
     }
 
     @Override

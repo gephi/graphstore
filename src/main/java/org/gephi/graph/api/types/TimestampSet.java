@@ -70,7 +70,7 @@ public final class TimestampSet implements TimeSet<Double> {
      * @param source the set to copy
      */
     public TimestampSet(TimestampSet source) {
-        this(source.array);
+        this(Arrays.copyOf(source.array, source.size));
     }
 
     @Override

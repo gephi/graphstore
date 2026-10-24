@@ -69,7 +69,7 @@ public final class TimestampCharMap extends TimestampMap<Character> {
      * @param source the map to copy
      */
     public TimestampCharMap(TimestampCharMap source) {
-        this(source.array, source.values);
+        this(Arrays.copyOf(source.array, source.size), Arrays.copyOf(source.values, source.size));
     }
 
     /**

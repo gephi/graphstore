@@ -296,6 +296,21 @@ public class TimestampSetTest {
     }
 
     @Test
+    public void testCopyConstructorAfterRemove() {
+        TimestampSet set1 = new TimestampSet();
+        set1.add(1.0);
+        set1.add(2.0);
+        set1.add(3.0);
+        set1.remove(1.0);
+
+        TimestampSet set2 = new TimestampSet(set1);
+        Assert.assertEquals(set2.size(), 2);
+        Assert.assertEquals(set2, set1);
+        set1.clear();
+        Assert.assertEquals(set2.size(), 2);
+    }
+
+    @Test
     public void testToStringDouble() {
         TimestampSet set1 = new TimestampSet();
         Assert.assertEquals(set1.toString(), "<empty>");

@@ -361,6 +361,21 @@ public class IntervalSetTest {
     }
 
     @Test
+    public void testCopyConstructorAfterRemove() {
+        IntervalSet set1 = new IntervalSet();
+        set1.add(new Interval(1.0, 2.0));
+        set1.add(new Interval(4.0, 5.0));
+        set1.add(new Interval(7.0, 8.0));
+        set1.remove(new Interval(1.0, 2.0));
+
+        IntervalSet set2 = new IntervalSet(set1);
+        Assert.assertEquals(set2.size(), 2);
+        Assert.assertEquals(set2, set1);
+        set1.clear();
+        Assert.assertEquals(set2.size(), 2);
+    }
+
+    @Test
     public void testToStringDouble() {
         IntervalSet set1 = new IntervalSet();
         Assert.assertEquals(set1.toString(), "<empty>");
