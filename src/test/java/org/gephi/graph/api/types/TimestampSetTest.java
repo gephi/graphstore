@@ -200,6 +200,16 @@ public class TimestampSetTest {
     }
 
     @Test
+    public void testMaxAfterRemove() {
+        TimestampSet set = new TimestampSet();
+        set.add(1.0);
+        set.add(3.0);
+        set.remove(3.0);
+        Assert.assertEquals(set.getMax(), 1.0);
+        Assert.assertEquals(set.getMaxDouble(), 1.0);
+    }
+
+    @Test
     public void testClear() {
         TimestampSet set = new TimestampSet();
 

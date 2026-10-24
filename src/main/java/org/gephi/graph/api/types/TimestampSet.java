@@ -96,7 +96,7 @@ public final class TimestampSet implements TimeSet<Double> {
     @Override
     public Double getMax() {
         if (size > 0) {
-            return array[array.length - 1];
+            return array[size - 1];
         }
         return null;
     }

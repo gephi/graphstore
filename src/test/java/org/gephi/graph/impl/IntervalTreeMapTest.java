@@ -212,25 +212,30 @@ public class IntervalTreeMapTest {
         }
     }
 
+    @Test
     public void testMinMax() {
         Interval i1 = new Interval(1.0, 8.0);
         Interval i2 = new Interval(-1.0, 3.0);
         Interval i3 = new Interval(4.0, 9.0);
+        Interval i4 = new Interval(5.0, 6.0);
 
         Interval2IntTreeMap m = new Interval2IntTreeMap();
         m.put(i1, 42);
-        Assert.assertSame(m.minimum(), i1);
-        Assert.assertSame(m.maximum(), i1);
+        Assert.assertEquals(m.minimum(), i1);
+        Assert.assertEquals(m.maximum(), i1);
         m.put(i2, 42);
-        Assert.assertSame(m.minimum(), i2);
-        Assert.assertSame(m.maximum(), i1);
+        Assert.assertEquals(m.minimum(), i2);
+        Assert.assertEquals(m.maximum(), i1);
         m.put(i3, 42);
-        Assert.assertSame(m.minimum(), i2);
-        Assert.assertSame(m.maximum(), i3);
+        Assert.assertEquals(m.minimum(), i2);
+        Assert.assertEquals(m.maximum(), i3);
+        // The maximum is the interval with the highest end, not the one with the highest start
+        m.put(i4, 42);
+        Assert.assertEquals(m.maximum(), i3);
         m.remove(i3);
         m.remove(i2);
-        Assert.assertSame(m.minimum(), i1);
-        Assert.assertSame(m.maximum(), i1);
+        Assert.assertEquals(m.minimum(), i1);
+        Assert.assertEquals(m.maximum(), i1);
     }
 
     @Test
