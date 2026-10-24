@@ -1271,6 +1271,23 @@ public class ElementImplTest {
     }
 
     @Test
+    public void testClearAttributesAfterRemoveColumn() {
+        GraphStore store = new GraphStore();
+        Column removed = store.nodeTable.addColumn("removed", Integer.class);
+        Column kept = store.nodeTable.addColumn("kept", Integer.class);
+
+        NodeImpl node = new NodeImpl("0", store);
+        node.setAttribute(removed, 1);
+        node.setAttribute(kept, 2);
+        store.addNode(node);
+
+        store.nodeTable.removeColumn(removed);
+        node.clearAttributes();
+
+        Assert.assertNull(node.getAttribute(kept));
+    }
+
+    @Test
     public void testRemoveColumnDefaultValue() {
         GraphStore store = new GraphStore();
         Column column = new ColumnImpl(store.nodeTable, "age", Integer.class, "Age", 25, Origin.DATA, true, false);
