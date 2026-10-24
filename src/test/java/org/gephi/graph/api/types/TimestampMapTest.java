@@ -629,6 +629,32 @@ public class TimestampMapTest {
     }
 
     @Test
+    public void testEqualsAfterRemove() {
+        TimestampIntegerMap map1 = new TimestampIntegerMap();
+        map1.put(1.0, 1);
+        map1.put(2.0, 2);
+        map1.remove(2.0);
+        TimestampIntegerMap map2 = new TimestampIntegerMap();
+        map2.put(1.0, 1);
+        map2.put(3.0, 3);
+        map2.remove(3.0);
+
+        Assert.assertEquals(map1, map2);
+        Assert.assertEquals(map1.hashCode(), map2.hashCode());
+    }
+
+    @Test
+    public void testToArrayAfterRemove() {
+        TimestampIntegerMap map = new TimestampIntegerMap();
+        map.put(1.0, 1);
+        map.put(2.0, 2);
+        map.remove(2.0);
+
+        Assert.assertEquals(map.toIntegerArray(), new int[] { 1 });
+        Assert.assertEquals(map.getTimestamps(), new double[] { 1.0 });
+    }
+
+    @Test
     public void testToStringDouble() {
         TimestampStringMap map1 = new TimestampStringMap();
         Assert.assertEquals(map1.toString(), "<empty>");

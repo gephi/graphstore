@@ -171,7 +171,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
     protected Object toNativeArray() {
         Object values = getValuesArray();
         int length = Array.getLength(values);
-        if (size < length - 1) {
+        if (size < length) {
             Object res = Array.newInstance(values.getClass().getComponentType(), size);
             System.arraycopy(values, 0, res, 0, size);
             return res;

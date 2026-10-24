@@ -167,7 +167,7 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
     protected Object toPrimitiveArray() {
         Object values = getValuesArray();
         int length = Array.getLength(values);
-        if (size < length - 1) {
+        if (size < length) {
             Object res = Array.newInstance(values.getClass().getComponentType(), size);
             System.arraycopy(values, 0, res, 0, size);
             return res;
@@ -322,7 +322,7 @@ public abstract class TimestampMap<T> implements TimeMap<Double, T> {
         if (this.size != other.size) {
             return false;
         }
-        for (int i = 0; i < this.array.length && i < other.array.length; i++) {
+        for (int i = 0; i < size; i++) {
             double i1 = this.array[i];
             double i2 = other.array[i];
             if (i1 != i2) {
