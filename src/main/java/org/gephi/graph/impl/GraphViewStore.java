@@ -230,8 +230,15 @@ public class GraphViewStore {
             visibleView = graphStore.mainGraphView;
         } else {
             checkGraphViewObject(view);
-            checkViewExist((GraphViewImpl) view);
-            visibleView = view;
+
+            // The read lock keeps the view from being destroyed between the check and the write
+            graphStore.autoReadLock();
+            try {
+                checkViewExist((GraphViewImpl) view);
+                visibleView = view;
+            } finally {
+                graphStore.autoReadUnlock();
+            }
         }
     }
 
