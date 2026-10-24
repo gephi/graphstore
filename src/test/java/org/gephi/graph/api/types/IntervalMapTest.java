@@ -451,6 +451,23 @@ public class IntervalMapTest {
     }
 
     @Test
+    public void testAverageWithZeroWeight() {
+        IntervalIntegerMap map = new IntervalIntegerMap();
+        map.put(new Interval(0, 10), 5);
+        map.put(new Interval(10, 12), 8);
+        IntervalByteMap byteMap = new IntervalByteMap();
+        byteMap.put(new Interval(0, 10), (byte) 5);
+        byteMap.put(new Interval(10, 12), (byte) 8);
+
+        // Plain mean of the overlapping intervals when they all have zero weight
+        for (IntervalMap m : new IntervalMap[] { map, byteMap }) {
+            Assert.assertEquals((double) m.get(new Interval(3, 3), Estimator.AVERAGE), 5.0, 1e-9);
+            Assert.assertEquals((double) m.get(new Interval(10, 10), Estimator.AVERAGE), 6.5, 1e-9);
+            Assert.assertEquals((double) m.get(new Interval(12, 16), Estimator.AVERAGE), 8.0, 1e-9);
+        }
+    }
+
+    @Test
     public void testLongEstimators() {
         IntervalLongMap set = new IntervalLongMap();
         set.put(new Interval(0, 2), 2l);

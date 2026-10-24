@@ -592,6 +592,13 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
             w = w.multiply(new BigDecimal(((Number) getValue(intervals[i])).doubleValue()));
             result = result.add(w);
         }
+        if (period.signum() == 0) {
+            // Plain mean when all the overlapping intervals have zero weight, e.g. for a point query
+            for (int i = 0; i < intervals.length; i++) {
+                result = result.add(new BigDecimal(((Number) getValue(intervals[i])).doubleValue()));
+            }
+            period = new BigDecimal(intervals.length);
+        }
         return result.divide(period, 10, RoundingMode.HALF_EVEN);
     }
 
@@ -614,6 +621,13 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
             period += w;
             w *= ((Number) getValue(intervals[i])).doubleValue();
             result += w;
+        }
+        if (period == 0.0) {
+            // Plain mean when all the overlapping intervals have zero weight, e.g. for a point query
+            for (int i = 0; i < intervals.length; i++) {
+                result += ((Number) getValue(intervals[i])).doubleValue();
+            }
+            period = intervals.length;
         }
         return result / period;
     }
