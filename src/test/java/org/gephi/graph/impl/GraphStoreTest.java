@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Spliterator;
@@ -33,6 +34,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIterable;
 import org.gephi.graph.api.Configuration;
@@ -1480,6 +1482,29 @@ public class GraphStoreTest {
             writer.join();
             executor.shutdownNow();
         }
+    }
+
+    @Test
+    public void testNodeEdgesOfInvalidType() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node node = graphStore.getNode("1");
+        List<Supplier<Iterable<?>>> getters = Arrays
+                .asList(() -> graphStore.getEdges(node, -1), () -> graphStore.getInEdges(node, -1), () -> graphStore
+                        .getOutEdges(node, -1), () -> graphStore
+                                .getNeighbors(node, -1), () -> graphStore.getPredecessors(node, -1), () -> graphStore
+                                        .getSuccessors(node, -1), () -> graphStore.undirectedDecorator
+                                                .getEdges(node, -1), () -> graphStore.undirectedDecorator
+                                                        .getNeighbors(node, -1));
+
+        for (Supplier<Iterable<?>> getter : getters) {
+            Assert.assertThrows(IllegalArgumentException.class, () -> getter.get().iterator());
+        }
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> graphStore.clearEdges(node, -1));
+
+        // A read lock left by one of them would make the write lock fail
+        graphStore.writeLock();
+        graphStore.writeUnlock();
     }
 
     @Test
