@@ -136,6 +136,15 @@ public class AttributesImpl {
         return oldValue;
     }
 
+    // Replaces the value only if it's still the expected one
+    protected void replaceAttribute(int index, Object expectedValue, Object value) {
+        synchronized (this) {
+            if (getAttribute(index) == expectedValue) {
+                setAttribute(index, value);
+            }
+        }
+    }
+
     private Object ensureSize(int index) {
         if (index >= attributes.length) {
             Object[] newArray = new Object[index + 1];

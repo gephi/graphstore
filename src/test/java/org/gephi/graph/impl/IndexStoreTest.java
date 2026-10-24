@@ -17,12 +17,14 @@
 package org.gephi.graph.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -455,7 +457,8 @@ public class IndexStoreTest {
     @Test
     public void testSetAttributeWithViewIndexWithoutGraphLock() throws Exception {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
-        ColumnImpl column = new ColumnImpl("foo", String.class, "Foo", null, Origin.DATA, true, false);
+        ColumnImpl column = new ColumnImpl(graphStore.nodeTable, "foo", String.class, "Foo", null, Origin.DATA, true,
+                false);
         graphStore.nodeTable.store.addColumn(column);
         NodeImpl n1 = graphStore.getNode("1");
         NodeImpl n2 = graphStore.getNode("2");
@@ -481,6 +484,132 @@ public class IndexStoreTest {
         Assert.assertEquals(index.count(column, "baz"), 1);
         Assert.assertEquals(index.count(column, "bar"), 0);
         Assert.assertEquals(indexStore.mainIndex.count(column, "baz"), 2);
+    }
+
+    @Test
+    public void testSetAttributeWhileRemovingAndAddingNode() throws Exception {
+        GraphStore graphStore = new GraphStore();
+        Column column = graphStore.nodeTable.addColumn("foo", Integer.class);
+        NodeImpl node = new NodeImpl("0", graphStore);
+        graphStore.addNode(node);
+
+        AtomicBoolean done = new AtomicBoolean();
+        CountDownLatch started = new CountDownLatch(1);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> setter = executor.submit(() -> {
+                for (int i = 0; !done.get(); i++) {
+                    node.setAttribute(column, i % 4);
+                    started.countDown();
+                }
+            });
+            Assert.assertTrue(started.await(10, TimeUnit.SECONDS));
+            try {
+                for (int i = 0; i < 10000; i++) {
+                    graphStore.removeNode(node);
+                    graphStore.addNode(node);
+                }
+            } finally {
+                done.set(true);
+            }
+            setter.get(10, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
+        IndexImpl<Node> index = graphStore.nodeTable.store.indexStore.mainIndex;
+        Assert.assertEquals(index.countElements(column), 1);
+        Assert.assertEquals(index.count(column, node.getAttribute(column)), 1);
+    }
+
+    @Test
+    public void testSetAttributeConcurrentlyOnSameNode() throws Exception {
+        GraphStore graphStore = new GraphStore();
+        Column column = graphStore.nodeTable.addColumn("foo", Integer.class);
+        NodeImpl node = new NodeImpl("0", graphStore);
+        graphStore.addNode(node);
+
+        CountDownLatch start = new CountDownLatch(2);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            List<Future<?>> setters = new ArrayList<>();
+            for (int t = 0; t < 2; t++) {
+                final int offset = t;
+                setters.add(executor.submit(() -> {
+                    start.countDown();
+                    start.await();
+                    for (int i = 0; i < 10000; i++) {
+                        node.setAttribute(column, offset + 2 * (i % 2));
+                    }
+                    return null;
+                }));
+            }
+            for (Future<?> setter : setters) {
+                setter.get(10, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+        IndexImpl<Node> index = graphStore.nodeTable.store.indexStore.mainIndex;
+        Assert.assertEquals(index.countElements(column), 1);
+        Assert.assertEquals(index.count(column, node.getAttribute(column)), 1);
+    }
+
+    @Test
+    public void testSetAttributeOutsideViewWhileIteratingViewIndex() throws Exception {
+        GraphStore graphStore = new GraphStore();
+        Column a = graphStore.nodeTable.addColumn("a", Integer.class);
+        Column b = graphStore.nodeTable.addColumn("b", Integer.class);
+        NodeImpl inView = new NodeImpl("0", graphStore);
+        NodeImpl outside = new NodeImpl("1", graphStore);
+        inView.setAttribute(a, 0);
+        outside.setAttribute(a, 0);
+        graphStore.addNode(inView);
+        graphStore.addNode(outside);
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.addNode(inView);
+        IndexImpl<Node> viewIndex = graphStore.nodeTable.store.indexStore.getIndex(graphStore.viewStore.getGraph(view));
+
+        Thread setter = new Thread(() -> outside.setAttribute(a, 5));
+        CountDownLatch iterating = new CountDownLatch(1);
+        Thread iterator = new Thread(() -> {
+            // The iterator holds the lock of the view index until it is exhausted
+            Iterator<Node> nodes = viewIndex.get(a, 0).iterator();
+            iterating.countDown();
+            Thread.State state;
+            while ((state = setter.getState()) != Thread.State.TERMINATED && state != Thread.State.WAITING) {
+                Thread.onSpinWait();
+            }
+            while (nodes.hasNext()) {
+                nodes.next().setAttribute(b, 1);
+            }
+        });
+        setter.setDaemon(true);
+        iterator.setDaemon(true);
+        iterator.start();
+        Assert.assertTrue(iterating.await(10, TimeUnit.SECONDS));
+        setter.start();
+        iterator.join(5000);
+        setter.join(5000);
+
+        Assert.assertFalse(iterator.isAlive());
+        Assert.assertFalse(setter.isAlive());
+        Assert.assertEquals(viewIndex.count(b, 1), 1);
+    }
+
+    @Test
+    public void testAddColumnWithDefaultValueAfterViewIndex() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.addNode(graphStore.getNode("1"));
+        IndexStore<Node> indexStore = graphStore.nodeTable.store.indexStore;
+        IndexImpl<Node> index = indexStore.getIndex(graphStore.viewStore.getGraph(view));
+
+        Column column = graphStore.nodeTable.addColumn("foo", "Foo", Integer.class, Origin.DATA, 42, true);
+
+        Assert.assertEquals(index.countElements(column), 1);
+        Assert.assertEquals(index.count(column, 42), 1);
+        Assert.assertEquals(indexStore.mainIndex.countElements(column), 2);
+        Assert.assertEquals(indexStore.mainIndex.count(column, 42), 2);
     }
 
     @Test

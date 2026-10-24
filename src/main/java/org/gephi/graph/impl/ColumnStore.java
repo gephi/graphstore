@@ -112,6 +112,10 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
                 if (graphStore != null && columnImpl.table != null) {
                     for (Element e : graphStore.getElements(columnImpl.table)) {
                         e.setAttribute(column, column.getDefaultValue());
+                        if (indexStore != null) {
+                            // Setting the value only updates the indexes the element is in
+                            indexStore.index(columnImpl, (T) e);
+                        }
                     }
                 }
             } else {

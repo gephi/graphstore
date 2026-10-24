@@ -180,6 +180,7 @@ public abstract class ElementImpl implements Element {
 
         Object oldValue = attributes.setAttribute(column, column.getDefaultValue());
         updateIndex(column, oldValue, column.getDefaultValue());
+        updateIndexToCurrentValue(column, column.getDefaultValue());
 
         return oldValue;
     }
@@ -240,6 +241,23 @@ public abstract class ElementImpl implements Element {
 
         Object oldValue = attributes.setAttribute(column, value);
         updateIndex(column, oldValue, value);
+        updateIndexToCurrentValue(column, value);
+    }
+
+    // Another thread can set the attribute between the write and the index update, so the index follows the value
+    // read again
+    private void updateIndexToCurrentValue(Column column, Object indexedValue) {
+        int index = column.getIndex();
+        Object value;
+        while (index != ColumnStore.NULL_ID && (value = attributes.getAttribute(index)) != indexedValue && isValid()) {
+            ColumnStore columnStore = getColumnStore();
+            // Stops when the column is removed meanwhile
+            if (columnStore == null || columnStore.columns[index] != column) {
+                return;
+            }
+            columnStore.indexStore.set(column, indexedValue, value, this);
+            indexedValue = value;
+        }
     }
 
     @Override

@@ -147,10 +147,7 @@ public class IndexStore<T extends Element> {
             synchronized (viewIndexes) {
                 for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                     // Reads the view directly, the graph lock can't be taken while holding the monitor
-                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
-                    boolean inView = element instanceof Node ? graphView.containsNode((Node) element)
-                            : graphView.containsEdge((Edge) element);
-                    if (inView) {
+                    if (inView((GraphViewImpl) entry.getKey(), element)) {
                         entry.getValue().set(column, oldValue, value, element);
                     }
                 }
@@ -158,6 +155,16 @@ public class IndexStore<T extends Element> {
         }
 
         return value;
+    }
+
+    // Like containsNode and containsEdge, but reads the store id once as the element can be removed meanwhile
+    private static boolean inView(GraphViewImpl view, Element element) {
+        if (element instanceof Node) {
+            int storeId = ((NodeImpl) element).getStoreId();
+            return storeId != NodeStore.NULL_ID && (!view.nodeView || view.nodeBitVector.get(storeId));
+        }
+        int storeId = ((EdgeImpl) element).getStoreId();
+        return storeId != EdgeStore.NULL_ID && view.edgeBitVector.get(storeId);
     }
 
     public void clear(T element) {
@@ -202,8 +209,9 @@ public class IndexStore<T extends Element> {
                 Column c = cols[i];
                 if (c != null) {
                     Object value = elementImpl.getAttribute(c);
-                    value = mainIndex.put(c, value, element);
-                    elementImpl.attributes.setAttribute(c, value);
+                    Object indexedValue = mainIndex.put(c, value, element);
+                    elementImpl.attributes.replaceAttribute(c.getIndex(), value, indexedValue);
+                    indexCurrentValue(mainIndex, c, indexedValue, elementImpl);
                     // Only edge-only views contain a node as it's added to the store. Edges are indexed in node-only
                     // views when they are added to them.
                     if (element instanceof Node && !viewIndexes.isEmpty()) {
@@ -211,7 +219,8 @@ public class IndexStore<T extends Element> {
                             for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
                                 GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
                                 if (graphView.containsNode((Node) element)) {
-                                    entry.getValue().put(c, value, element);
+                                    entry.getValue().put(c, indexedValue, element);
+                                    indexCurrentValue(entry.getValue(), c, indexedValue, elementImpl);
                                 }
                             }
                         }
@@ -220,6 +229,27 @@ public class IndexStore<T extends Element> {
             }
         } finally {
             unlock();
+        }
+    }
+
+    // Table locked
+    protected void index(ColumnImpl column, T element) {
+        ElementImpl elementImpl = (ElementImpl) element;
+        Object value = elementImpl.getAttribute(column);
+        mainIndex.put(column, value, element);
+        indexCurrentValue(mainIndex, column, value, elementImpl);
+        if (!viewIndexes.isEmpty()) {
+            synchronized (viewIndexes) {
+                for (Entry<GraphView, IndexImpl<T>> entry : viewIndexes.entrySet()) {
+                    GraphViewImpl graphView = (GraphViewImpl) entry.getKey();
+                    boolean inView = element instanceof Node ? graphView.containsNode((Node) element)
+                            : graphView.containsEdge((Edge) element);
+                    if (inView) {
+                        entry.getValue().put(column, value, element);
+                        indexCurrentValue(entry.getValue(), column, value, elementImpl);
+                    }
+                }
+            }
         }
     }
 
@@ -250,6 +280,7 @@ public class IndexStore<T extends Element> {
                                 if (c != null) {
                                     Object value = element.getAttribute(c);
                                     viewIndex.put(c, value, element);
+                                    indexCurrentValue(viewIndex, c, value, element);
                                 }
                             }
                         }
@@ -279,11 +310,21 @@ public class IndexStore<T extends Element> {
                     if (c != null) {
                         Object value = elementImpl.getAttribute(c);
                         index.put(c, value, element);
+                        indexCurrentValue(index, c, value, elementImpl);
                     }
                 }
             }
         } finally {
             unlock();
+        }
+    }
+
+    // A set between reading the value and putting it finds no element to move, so it's moved to the current value
+    private static void indexCurrentValue(IndexImpl index, Column column, Object indexedValue, ElementImpl element) {
+        Object value;
+        while ((value = element.attributes.getAttribute(column)) != indexedValue) {
+            index.set(column, indexedValue, value, element);
+            indexedValue = value;
         }
     }
 
