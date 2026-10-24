@@ -197,6 +197,26 @@ public class IntervalSetTest {
         set.add(new Interval(2.0, 4.0));
     }
 
+    @Test(timeOut = 10000)
+    public void testEndOverlappingNext() {
+        IntervalSet set = new IntervalSet();
+        Assert.assertTrue(set.add(new Interval(2, 100)));
+        Assert.assertTrue(set.add(new Interval(-3, 1)));
+        Assert.assertTrue(set.add(new Interval(-50, -50)));
+        Assert.assertThrows(IllegalArgumentException.class, () -> set.add(new Interval(1, 7)));
+        Assert.assertThrows(IllegalArgumentException.class, () -> set.add(new Interval(7, 10)));
+        Assert.assertEquals(set.getIntervals(), new double[] { -50, -50, -3, 1, 2, 100 });
+    }
+
+    @Test
+    public void testContinuousBeforePoint() {
+        IntervalSet set = new IntervalSet();
+        Assert.assertTrue(set.add(new Interval(3.0, 3.0)));
+        Assert.assertTrue(set.add(new Interval(1.0, 2.0)));
+        Assert.assertTrue(set.add(new Interval(2.0, 3.0)));
+        Assert.assertEquals(set.getIntervals(), new double[] { 1.0, 2.0, 2.0, 3.0, 3.0, 3.0 });
+    }
+
     @Test
     public void testRemoveEmpty() {
         IntervalSet set = new IntervalSet();

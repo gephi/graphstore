@@ -246,7 +246,7 @@ public final class IntervalSet implements TimeSet<Interval> {
                 double startValue = array[insertIndex];
                 double endValue = array[insertIndex + 1];
                 if (startValue > intervalStart) {
-                    if (intervalEnd >= endValue) {
+                    if (intervalEnd > startValue) {
                         overlappingIntervallException();
                     }
                     break;
