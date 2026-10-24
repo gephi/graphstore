@@ -350,7 +350,7 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         if (index >= 0) {
             int startIndex = index % 2 == 0 ? index : index - 1;
             for (; startIndex - 2 >= 0;) {
-                if (array[startIndex - 2] == intervalStart) {
+                if (array[startIndex - 1] >= intervalStart) {
                     startIndex -= 2;
                 } else {
                     break;
@@ -574,6 +574,10 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         BigDecimal result = new BigDecimal(0.0);
         BigDecimal period = new BigDecimal(0.0);
         for (int i = 0; i < intervals.length; i++) {
+            if (weights[i] == 0.0) {
+                // Intervals touching the query don't count
+                continue;
+            }
             BigDecimal w = new BigDecimal(weights[i]);
             period = period.add(w);
             w = w.multiply(new BigDecimal(((Number) getValue(intervals[i])).doubleValue()));
@@ -594,6 +598,10 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         double result = 0.0, period = 0.0;
         for (int i = 0; i < intervals.length; i++) {
             double w = weights[i];
+            if (w == 0.0) {
+                // Intervals touching the query don't count
+                continue;
+            }
             period += w;
             w *= ((Number) getValue(intervals[i])).doubleValue();
             result += w;
