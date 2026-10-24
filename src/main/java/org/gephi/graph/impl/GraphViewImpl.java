@@ -533,10 +533,12 @@ public class GraphViewImpl implements GraphView {
     }
 
     public void intersection(final GraphViewImpl otherView) {
-        BitSet nodeOtherBitVector = otherView.nodeBitVector;
         BitSet edgeOtherBitVector = otherView.edgeBitVector;
 
-        if (nodeView) {
+        // An edge-only view contains all the nodes, so only the nodes of a node view can be removed
+        if (nodeView && otherView.nodeView) {
+            BitSet nodeOtherBitVector = otherView.nodeBitVector;
+
             // Find nodes to remove: nodes in this view but NOT in other view
             BitSet nodesToRemove = (BitSet) nodeBitVector.clone();
             nodesToRemove.andNot(nodeOtherBitVector);
@@ -560,10 +562,11 @@ public class GraphViewImpl implements GraphView {
     }
 
     public void union(final GraphViewImpl otherView) {
-        BitSet nodeOtherBitVector = otherView.nodeBitVector;
         BitSet edgeOtherBitVector = otherView.edgeBitVector;
 
         if (nodeView) {
+            BitSet nodeOtherBitVector = otherView.nodeView ? otherView.nodeBitVector : allNodeBitVector();
+
             // Find nodes to add: nodes in other view but NOT in this view
             BitSet nodesToAdd = (BitSet) nodeOtherBitVector.clone();
             nodesToAdd.andNot(nodeBitVector);
@@ -584,6 +587,14 @@ public class GraphViewImpl implements GraphView {
                 bulkAddEdges(edgesToAdd);
             }
         }
+    }
+
+    // An edge-only view contains all the nodes
+    private BitSet allNodeBitVector() {
+        BitSet bitVector = new BitSet();
+        bitVector.set(0, graphStore.nodeStore.maxStoreId());
+        graphStore.nodeStore.clearFreeStoreIds(bitVector);
+        return bitVector;
     }
 
     public void not() {

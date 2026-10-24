@@ -896,6 +896,38 @@ public class GraphViewDecoratorTest {
         Assert.assertTrue(graph1.contains(n2));
     }
 
+    // An edge-only view contains all the nodes
+    @Test
+    public void testUnionWithEdgeOnlyView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        DirectedSubgraph nodeGraph = store.getDirectedGraph(store.createView(true, true));
+        DirectedSubgraph edgeOnlyGraph = store.getDirectedGraph(store.createView(false, true));
+        nodeGraph.addNode(graphStore.getNode("1"));
+        Edge edge = graphStore.getEdges().toArray()[0];
+        edgeOnlyGraph.addEdge(edge);
+
+        nodeGraph.union(edgeOnlyGraph);
+
+        Assert.assertEquals(nodeGraph.getNodeCount(), graphStore.getNodeCount());
+        Assert.assertTrue(nodeGraph.contains(edge));
+        Assert.assertEquals(nodeGraph.getEdgeCount(), 1);
+    }
+
+    @Test
+    public void testIntersectionWithEdgeOnlyView() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        DirectedSubgraph nodeGraph = store.getDirectedGraph(store.createView(true, true));
+        DirectedSubgraph edgeOnlyGraph = store.getDirectedGraph(store.createView(false, true));
+        nodeGraph.addNode(graphStore.getNode("1"));
+
+        nodeGraph.intersection(edgeOnlyGraph);
+
+        Assert.assertEquals(nodeGraph.getNodeCount(), 1);
+        Assert.assertTrue(nodeGraph.contains(graphStore.getNode("1")));
+    }
+
     @Test
     public void testGetBoundariesEmptyView() {
         GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
