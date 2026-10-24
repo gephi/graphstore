@@ -583,6 +583,17 @@ public class IntervalMapTest {
     }
 
     @Test
+    public void testToArrayAfterRemove() {
+        IntervalIntegerMap map = new IntervalIntegerMap();
+        map.put(new Interval(1.0, 2.0), 1);
+        map.put(new Interval(3.0, 4.0), 2);
+        map.remove(new Interval(3.0, 4.0));
+
+        Assert.assertEquals(map.toIntegerArray(), new int[] { 1 });
+        Assert.assertEquals(map.getIntervals(), new double[] { 1.0, 2.0 });
+    }
+
+    @Test
     public void testToStringDouble() {
         IntervalStringMap map1 = new IntervalStringMap();
         Assert.assertEquals(map1.toString(), "<empty>");
