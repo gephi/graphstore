@@ -2260,6 +2260,29 @@ public class EdgeStoreTest {
     }
 
     @Test
+    public void testAddInvalidType() {
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null, null);
+        Assert.assertThrows(IllegalArgumentException.class, () -> edgeStore.add(GraphGenerator.generateSingleEdge(-1)));
+        Assert.assertThrows(IllegalArgumentException.class, () -> edgeStore
+                .add(GraphGenerator.generateSingleEdge(EdgeTypeStore.MAX_SIZE)));
+        EdgeImpl undirectedEdge = GraphGenerator.generateEdgeList(1, -1, false, false, false)[0];
+        Assert.assertThrows(IllegalArgumentException.class, () -> edgeStore.add(undirectedEdge));
+        Assert.assertEquals(edgeStore.size(), 0);
+    }
+
+    @Test
+    public void testSetInvalidType() {
+        EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null, null);
+        EdgeImpl edge = GraphGenerator.generateSingleEdge();
+        edgeStore.add(edge);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> edgeStore.setEdgeType(edge, -1));
+        Assert.assertThrows(IllegalArgumentException.class, () -> edgeStore.setEdgeType(edge, EdgeTypeStore.MAX_SIZE));
+        Assert.assertEquals(edge.getType(), 0);
+        Assert.assertEquals(edgeStore.size(), 1);
+    }
+
+    @Test
     public void testSetTypeWithMutualEdge() {
         EdgeStore edgeStore = new EdgeStore(new EdgeTypeStore(), null, null, null, null, null);
         EdgeImpl[] edges = GraphGenerator.generateMutualEdges(4);
