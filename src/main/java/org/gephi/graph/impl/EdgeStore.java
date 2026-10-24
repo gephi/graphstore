@@ -1880,6 +1880,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected boolean out = true;
 
         public EdgeTypeInOutIterator(NodeImpl node, int type) {
+            EdgeTypeStore.checkValidId(type);
             this.type = type;
             readLock();
             EdgeImpl[] outArray = node.headOut;
@@ -1961,6 +1962,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected EdgeImpl pointer;
 
         public EdgeTypeOutIterator(NodeImpl node, int type) {
+            EdgeTypeStore.checkValidId(type);
             this.type = type;
             readLock();
             EdgeImpl[] outArray = node.headOut;
@@ -2074,6 +2076,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected EdgeImpl pointer;
 
         public EdgeTypeInIterator(NodeImpl node, int type) {
+            EdgeTypeStore.checkValidId(type);
             this.type = type;
             readLock();
             EdgeImpl[] inArray = node.headIn;
