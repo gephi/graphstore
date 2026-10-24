@@ -388,8 +388,8 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
     protected double[] getIntervalsWeight(double intervalStart, double intervalEnd, int[] intervals) {
         double[] res = new double[intervals.length];
         for (int i = 0; i < intervals.length; i++) {
-            double start = array[i * 2];
-            double end = array[i * 2 + 1];
+            double start = array[intervals[i] * 2];
+            double end = array[intervals[i] * 2 + 1];
             if (start != end) {
                 start = Math.max(intervalStart, start);
                 end = Math.min(intervalEnd, end);
