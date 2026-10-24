@@ -109,7 +109,8 @@ public abstract class TimeIndexImpl<T extends Element, K, S extends TimeSet<K>, 
 
     private void ensureArraySize(int index) {
         if (index >= timestamps.length) {
-            TimeIndexEntry[] newArray = new TimeIndexEntry[index + 1];
+            int newSize = Math.max(index + 1, (int) (index * GraphStoreConfiguration.TIMESTAMP_STORE_GROWING_FACTOR));
+            TimeIndexEntry[] newArray = new TimeIndexEntry[newSize];
             System.arraycopy(timestamps, 0, newArray, 0, timestamps.length);
             timestamps = newArray;
         }
