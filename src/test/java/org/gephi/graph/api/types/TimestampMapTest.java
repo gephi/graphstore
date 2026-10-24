@@ -614,6 +614,21 @@ public class TimestampMapTest {
     }
 
     @Test
+    public void testCopyConstructorAfterRemove() {
+        TimestampStringMap map1 = new TimestampStringMap();
+        map1.put(1.0, "foo");
+        map1.put(2.0, "bar");
+        map1.put(3.0, "baz");
+        map1.remove(1.0);
+
+        TimestampStringMap map2 = new TimestampStringMap(map1);
+        Assert.assertEquals(map2.size(), 2);
+        Assert.assertEquals(map2, map1);
+        map1.clear();
+        Assert.assertEquals(map2.size(), 2);
+    }
+
+    @Test
     public void testToStringDouble() {
         TimestampStringMap map1 = new TimestampStringMap();
         Assert.assertEquals(map1.toString(), "<empty>");

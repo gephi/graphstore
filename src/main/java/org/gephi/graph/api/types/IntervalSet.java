@@ -71,7 +71,7 @@ public final class IntervalSet implements TimeSet<Interval> {
      * @param source set to copy
      */
     public IntervalSet(IntervalSet source) {
-        this(source.array);
+        this(Arrays.copyOf(source.array, source.size * 2));
     }
 
     @Override

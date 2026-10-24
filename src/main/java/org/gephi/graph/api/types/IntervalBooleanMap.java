@@ -15,6 +15,7 @@
  */
 package org.gephi.graph.api.types;
 
+import java.util.Arrays;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Interval;
 
@@ -68,7 +69,7 @@ public final class IntervalBooleanMap extends IntervalMap<Boolean> {
      * @param source the map to copy
      */
     public IntervalBooleanMap(IntervalBooleanMap source) {
-        this(source.array, source.values);
+        this(Arrays.copyOf(source.array, source.size * 2), Arrays.copyOf(source.values, source.size));
     }
 
     /**

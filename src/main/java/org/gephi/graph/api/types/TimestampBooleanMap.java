@@ -69,7 +69,7 @@ public final class TimestampBooleanMap extends TimestampMap<Boolean> {
      * @param source the map to copy
      */
     public TimestampBooleanMap(TimestampBooleanMap source) {
-        this(source.array, source.values);
+        this(Arrays.copyOf(source.array, source.size), Arrays.copyOf(source.values, source.size));
     }
 
     /**
