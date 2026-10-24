@@ -97,7 +97,7 @@ public final class IntervalSet implements TimeSet<Interval> {
     @Override
     public Interval getMax() {
         if (size > 0) {
-            return new Interval(array[array.length - 2], array[array.length - 1]);
+            return new Interval(array[size * 2 - 2], array[size * 2 - 1]);
         }
         return null;
     }
@@ -113,7 +113,7 @@ public final class IntervalSet implements TimeSet<Interval> {
     @Override
     public Double getMaxDouble() {
         if (size > 0) {
-            return array[array.length - 1];
+            return array[size * 2 - 1];
         }
         return null;
     }

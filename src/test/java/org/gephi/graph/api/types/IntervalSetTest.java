@@ -136,6 +136,16 @@ public class IntervalSetTest {
         Assert.assertEquals(set.getMaxDouble(), 5.0);
     }
 
+    @Test
+    public void testMaxAfterRemove() {
+        IntervalSet set = new IntervalSet();
+        set.add(new Interval(1.0, 2.0));
+        set.add(new Interval(3.0, 4.0));
+        set.remove(new Interval(3.0, 4.0));
+        Assert.assertEquals(set.getMax(), new Interval(1.0, 2.0));
+        Assert.assertEquals(set.getMaxDouble(), 2.0);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testStartOverlappingAbove() {
         IntervalSet set = new IntervalSet();
