@@ -144,6 +144,9 @@ public final class IntervalSet implements TimeSet<Interval> {
         int index = Arrays.binarySearch(array, 0, realSize, interval.getLow());
         if (index >= 0) {
             int foundIndex = index % 2 == 0 ? index : index - 1;
+            while (foundIndex - 2 >= 0 && array[foundIndex - 2] == interval.getLow()) {
+                foundIndex -= 2;
+            }
             int shift;
             for (; foundIndex < realSize && foundIndex >= 0; foundIndex += shift) {
                 double startValue = array[foundIndex];
@@ -241,6 +244,9 @@ public final class IntervalSet implements TimeSet<Interval> {
             return insertIndex;
         } else {
             int insertIndex = index % 2 == 0 ? index : index - 1;
+            while (insertIndex - 2 >= 0 && array[insertIndex - 2] == intervalStart) {
+                insertIndex -= 2;
+            }
             int shift;
             for (; insertIndex < realSize && insertIndex >= 0; insertIndex += shift) {
                 double startValue = array[insertIndex];
@@ -292,6 +298,9 @@ public final class IntervalSet implements TimeSet<Interval> {
         int index = Arrays.binarySearch(array, 0, realSize, intervalStart);
         if (index >= 0) {
             int removeIndex = index % 2 == 0 ? index : index - 1;
+            while (removeIndex - 2 >= 0 && array[removeIndex - 2] == intervalStart) {
+                removeIndex -= 2;
+            }
             int shift;
             for (; removeIndex < realSize && removeIndex >= 0; removeIndex += shift) {
                 double startValue = array[removeIndex];

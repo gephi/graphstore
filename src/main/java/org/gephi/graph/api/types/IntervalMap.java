@@ -221,6 +221,9 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
             return -(insertIndex / 2) - 1;
         } else {
             int insertIndex = index % 2 == 0 ? index : index - 1;
+            while (insertIndex - 2 >= 0 && array[insertIndex - 2] == intervalStart) {
+                insertIndex -= 2;
+            }
             int shift;
             for (; insertIndex < realSize && insertIndex >= 0; insertIndex += shift) {
                 double startValue = array[insertIndex];
@@ -272,6 +275,9 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         int index = Arrays.binarySearch(array, 0, realSize, intervalStart);
         if (index >= 0) {
             int removeIndex = index % 2 == 0 ? index : index - 1;
+            while (removeIndex - 2 >= 0 && array[removeIndex - 2] == intervalStart) {
+                removeIndex -= 2;
+            }
             int shift;
             for (; removeIndex < realSize && removeIndex >= 0; removeIndex += shift) {
                 double startValue = array[removeIndex];
@@ -325,6 +331,9 @@ public abstract class IntervalMap<T> implements TimeMap<Interval, T> {
         int index = Arrays.binarySearch(array, 0, realSize, intervalStart);
         if (index >= 0) {
             int foundIndex = index % 2 == 0 ? index : index - 1;
+            while (foundIndex - 2 >= 0 && array[foundIndex - 2] == intervalStart) {
+                foundIndex -= 2;
+            }
             int shift;
             for (; foundIndex < realSize && foundIndex >= 0; foundIndex += shift) {
                 double startValue = array[foundIndex];
