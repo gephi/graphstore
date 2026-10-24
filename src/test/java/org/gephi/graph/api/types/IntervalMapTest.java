@@ -397,6 +397,18 @@ public class IntervalMapTest {
     }
 
     @Test
+    public void testAverageWeightsOverlappingIntervals() {
+        IntervalIntegerMap map = new IntervalIntegerMap();
+        map.put(new Interval(0, 1), 0);
+        map.put(new Interval(10, 20), 10);
+        map.put(new Interval(20, 30), 20);
+
+        // Each value is weighted by the part of its interval inside the query
+        double expected = (5.0 * 10 + 10.0 * 20) / 15.0;
+        Assert.assertEquals((double) map.get(new Interval(15, 30), Estimator.AVERAGE), expected, 1e-9);
+    }
+
+    @Test
     public void testLongEstimators() {
         IntervalLongMap set = new IntervalLongMap();
         set.put(new Interval(0, 2), 2l);
