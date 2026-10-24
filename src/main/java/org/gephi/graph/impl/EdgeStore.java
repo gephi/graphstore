@@ -1617,7 +1617,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
      */
     protected abstract class AbstractEdgeInOutIterator implements Iterator<Edge> {
 
-        protected boolean locking;
+        protected final boolean locking;
         protected int outTypeLength;
         protected int inTypeLength;
         protected EdgeImpl[] outArray;
@@ -1682,7 +1682,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 if (pointer == null) {
                     // No more edges for current node, try next node
                     if (!moveToNextNode()) {
-                        release();
+                        if (locking) {
+                            readUnlock();
+                        }
                         return false;
                     }
                 }
@@ -1716,14 +1718,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 }
             }
             return lastEdge;
-        }
-
-        // Releases the read lock taken by the constructor, once
-        public void release() {
-            if (locking) {
-                locking = false;
-                readUnlock();
-            }
         }
 
         @Override
@@ -1784,7 +1778,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected final class EdgeOutIterator implements Iterator<Edge> {
 
         protected final int typeLength;
-        protected boolean locking = true;
         protected EdgeImpl[] outArray;
         protected int typeIndex = 0;
         protected EdgeImpl pointer;
@@ -1796,14 +1789,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             typeLength = outArray.length;
         }
 
-        // Releases the read lock taken by the constructor, once
-        public void release() {
-            if (locking) {
-                locking = false;
-                readUnlock();
-            }
-        }
-
         @Override
         public boolean hasNext() {
             if (pointer == null) {
@@ -1811,7 +1796,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                     pointer = outArray[typeIndex++];
                 }
                 if (pointer == null) {
-                    release();
+                    readUnlock();
                     return false;
                 }
             }
@@ -1840,7 +1825,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected final class EdgeInIterator implements Iterator<Edge> {
 
         protected final int typeLength;
-        protected boolean locking = true;
         protected EdgeImpl[] inArray;
         protected int typeIndex = 0;
         protected EdgeImpl pointer;
@@ -1852,14 +1836,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             typeLength = inArray.length;
         }
 
-        // Releases the read lock taken by the constructor, once
-        public void release() {
-            if (locking) {
-                locking = false;
-                readUnlock();
-            }
-        }
-
         @Override
         public boolean hasNext() {
             if (pointer == null) {
@@ -1867,7 +1843,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                     pointer = inArray[typeIndex++];
                 }
                 if (pointer == null) {
-                    release();
+                    readUnlock();
                     return false;
                 }
             }

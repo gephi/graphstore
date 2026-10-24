@@ -510,6 +510,8 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     @Override
     public int getDegree(Node node) {
         EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, true);
+        // The iterator releases the read lock when it is exhausted
+        boolean exhausted = false;
         try {
             int count = 0;
             while (itr.hasNext()) {
@@ -521,15 +523,20 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
                     }
                 }
             }
+            exhausted = true;
             return count;
         } finally {
-            itr.release();
+            if (!exhausted) {
+                graphStore.autoReadUnlock();
+            }
         }
     }
 
     @Override
     public int getInDegree(Node node) {
         EdgeStore.EdgeInIterator itr = graphStore.edgeStore.edgeInIterator(node);
+        // The iterator releases the read lock when it is exhausted
+        boolean exhausted = false;
         try {
             int count = 0;
             while (itr.hasNext()) {
@@ -537,15 +544,20 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
                     count++;
                 }
             }
+            exhausted = true;
             return count;
         } finally {
-            itr.release();
+            if (!exhausted) {
+                graphStore.autoReadUnlock();
+            }
         }
     }
 
     @Override
     public int getOutDegree(Node node) {
         EdgeStore.EdgeOutIterator itr = graphStore.edgeStore.edgeOutIterator(node);
+        // The iterator releases the read lock when it is exhausted
+        boolean exhausted = false;
         try {
             int count = 0;
             while (itr.hasNext()) {
@@ -553,9 +565,12 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
                     count++;
                 }
             }
+            exhausted = true;
             return count;
         } finally {
-            itr.release();
+            if (!exhausted) {
+                graphStore.autoReadUnlock();
+            }
         }
     }
 
