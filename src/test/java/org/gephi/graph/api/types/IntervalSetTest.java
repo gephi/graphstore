@@ -217,6 +217,21 @@ public class IntervalSetTest {
         Assert.assertEquals(set.getIntervals(), new double[] { 1.0, 2.0, 2.0, 3.0, 3.0, 3.0 });
     }
 
+    @Test(timeOut = 10000)
+    public void testPointAtSharedStart() {
+        IntervalSet set = new IntervalSet();
+        Assert.assertTrue(set.add(new Interval(0, 2)));
+        Assert.assertTrue(set.add(new Interval(0, 0)));
+        Assert.assertTrue(set.add(new Interval(2, 2)));
+
+        // An interval is found whatever interval shares its start
+        Assert.assertTrue(set.contains(new Interval(0, 0)));
+        Assert.assertFalse(set.add(new Interval(0, 0)));
+        Assert.assertTrue(set.remove(new Interval(0, 0)));
+        Assert.assertFalse(set.contains(new Interval(0, 0)));
+        Assert.assertEquals(set.getIntervals(), new double[] { 0, 2, 2, 2 });
+    }
+
     @Test
     public void testRemoveEmpty() {
         IntervalSet set = new IntervalSet();

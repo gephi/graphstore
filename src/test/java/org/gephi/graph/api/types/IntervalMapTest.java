@@ -106,6 +106,23 @@ public class IntervalMapTest {
         Assert.assertEquals(map.getIntervals(), new double[] { -50, -50, -3, 1, 2, 100 });
     }
 
+    @Test(timeOut = 10000)
+    public void testPointAtSharedStart() {
+        IntervalIntegerMap map = new IntervalIntegerMap();
+        Assert.assertTrue(map.put(new Interval(0, 2), 1));
+        Assert.assertTrue(map.put(new Interval(0, 0), 2));
+        Assert.assertTrue(map.put(new Interval(2, 2), 3));
+
+        // An interval is found whatever interval shares its start
+        Assert.assertEquals(map.get(new Interval(0, 0), (Integer) null), Integer.valueOf(2));
+        Assert.assertFalse(map.put(new Interval(0, 0), 4));
+        Assert.assertEquals(map.get(new Interval(0, 0), (Integer) null), Integer.valueOf(4));
+        Assert.assertTrue(map.remove(new Interval(0, 0)));
+        Assert.assertFalse(map.contains(new Interval(0, 0)));
+        Assert.assertEquals(map.getIntervals(), new double[] { 0, 2, 2, 2 });
+        Assert.assertEquals(map.toValuesArray(), new Integer[] { 1, 3 });
+    }
+
     @Test
     public void testRemove() {
         for (IntervalMap set : getAllInstances()) {
