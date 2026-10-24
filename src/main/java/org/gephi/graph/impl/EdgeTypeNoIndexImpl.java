@@ -1,8 +1,11 @@
 package org.gephi.graph.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
@@ -25,7 +28,11 @@ public class EdgeTypeNoIndexImpl implements ColumnIndexImpl<Object, Edge> {
 
     @Override
     public Iterable<Edge> get(Object label) {
-        return graph.getEdges(labelToType(label));
+        List<Edge> edges = new ArrayList<>();
+        for (Edge edge : graph.getEdges(labelToType(label))) {
+            edges.add(edge);
+        }
+        return Collections.unmodifiableList(edges);
     }
 
     @Override

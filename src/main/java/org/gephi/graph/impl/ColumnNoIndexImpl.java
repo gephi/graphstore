@@ -17,8 +17,11 @@
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,7 +87,23 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
 
     @Override
     public Iterable<T> get(K value) {
-        return new ElementWithValueIterable(getElementIterator(), value);
+        lock();
+        try {
+            Iterator<T> elementIterator = getElementIterator();
+            List<T> elements = new ArrayList<>();
+            if (elementIterator != null) {
+                while (elementIterator.hasNext()) {
+                    T element = elementIterator.next();
+                    K val = (K) element.getAttribute(column, graph.getView());
+                    if ((value == null && val == null) || (val != null && val.equals(value))) {
+                        elements.add(element);
+                    }
+                }
+            }
+            return Collections.unmodifiableList(elements);
+        } finally {
+            unlock();
+        }
     }
 
     @Override
@@ -227,63 +246,6 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
     public void removeValue(T element, K value) {
         // Nothing to remove
         version.incrementAndGet();
-    }
-
-    private class ElementWithValueIterable implements Iterable<T> {
-
-        private final Iterator<T> ite;
-        private final K value;
-
-        public ElementWithValueIterable(Iterator<T> ite, K value) {
-            this.ite = ite;
-            this.value = value;
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return new ElementWithValueIterator(ite, value);
-        }
-    }
-
-    private class ElementWithValueIterator implements Iterator<T> {
-
-        private final Iterator<T> itr;
-        private final K value;
-        private T pointer;
-
-        public ElementWithValueIterator(Iterator<T> itr, K value) {
-            this.itr = itr;
-            this.value = value;
-            lock();
-        }
-
-        @Override
-        public boolean hasNext() {
-            while (pointer == null && itr.hasNext()) {
-                T element = itr.next();
-                K val = (K) element.getAttribute(column, graph.getView());
-                if ((value == null && val == null) || (val != null && val.equals(value))) {
-                    pointer = element;
-                }
-            }
-            if (pointer != null) {
-                return true;
-            }
-            unlock();
-            return false;
-        }
-
-        @Override
-        public T next() {
-            T res = pointer;
-            pointer = null;
-            return res;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
     }
 
     private void lock() {

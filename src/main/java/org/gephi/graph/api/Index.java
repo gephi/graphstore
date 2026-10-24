@@ -37,15 +37,19 @@ public interface Index<T extends Element> {
 
     /**
      * Gets an Iterable of all elements in the index with <em>value</em> in the given <em>column</em>.
+     * <p>
+     * The result is a snapshot taken when this method is called, later changes to the index don't affect it.
      *
      * @param column the column to get values
      * @param value the value
-     * @return an iterable with element with <em>value</em> in <em>column</em>, or null if value not found
+     * @return an iterable with element with <em>value</em> in <em>column</em>, or an empty iterable if value not found
      */
     public Iterable<T> get(Column column, Object value);
 
     /**
      * Returns all unique values in the given column.
+     * <p>
+     * The result is a snapshot taken when this method is called, later changes to the index don't affect it.
      *
      * @param column the column to get values from
      * @return a collection of all unique values

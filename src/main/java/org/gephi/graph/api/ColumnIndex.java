@@ -22,6 +22,9 @@ import java.util.Set;
 /**
  * A column index is associated with a column and keeps track of each unique value and can also return the minimum and
  * maximum values in case of a sortable value type.
+ * <p>
+ * Its iterator returns each value with its elements as a snapshot taken when the iterator is created, later changes to
+ * the index don't affect it.
  *
  * @param <K> value type
  * @param <T> Element class
@@ -38,6 +41,8 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
 
     /**
      * Gets an Iterable of all elements in the column index with <em>value</em>.
+     * <p>
+     * The result is a snapshot taken when this method is called, later changes to the index don't affect it.
      *
      * @param value the value
      * @return an iterable with element with <em>value</em>
@@ -46,6 +51,8 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
 
     /**
      * Returns all unique values.
+     * <p>
+     * The result is a snapshot taken when this method is called, later changes to the index don't affect it.
      *
      * @return a collection of all unique values
      */

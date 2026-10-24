@@ -1,8 +1,11 @@
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
@@ -46,7 +49,13 @@ public class DegreeNoIndexImpl implements ColumnIndexImpl<Integer, Node> {
     @Override
     public Iterable<Node> get(Integer degree) {
         checkNull(degree);
-        return new NodeWithDegreeIterable(degree);
+        List<Node> nodes = new ArrayList<>();
+        for (Node node : graph.getNodes()) {
+            if (degree == getDegree(node)) {
+                nodes.add(node);
+            }
+        }
+        return Collections.unmodifiableList(nodes);
     }
 
     @Override
@@ -172,56 +181,6 @@ public class DegreeNoIndexImpl implements ColumnIndexImpl<Integer, Node> {
     private void checkNull(Integer value) {
         if (value == null) {
             throw new NullPointerException();
-        }
-    }
-
-    private class NodeWithDegreeIterable implements Iterable<Node> {
-
-        private final Integer value;
-
-        public NodeWithDegreeIterable(Integer degree) {
-            this.value = degree;
-        }
-
-        @Override
-        public Iterator<Node> iterator() {
-            return new NodeWithDegreeIterator(value);
-        }
-    }
-
-    private class NodeWithDegreeIterator implements Iterator<Node> {
-
-        private final Iterator<Node> itr;
-        private final Integer value;
-        private Node pointer;
-
-        public NodeWithDegreeIterator(Integer value) {
-            this.itr = graph.getNodes().iterator();
-            this.value = value;
-        }
-
-        @Override
-        public boolean hasNext() {
-            while (pointer == null && itr.hasNext()) {
-                Node node = itr.next();
-                int degree = getDegree(node);
-                if (value == degree) {
-                    pointer = node;
-                }
-            }
-            return pointer != null;
-        }
-
-        @Override
-        public Node next() {
-            Node res = pointer;
-            pointer = null;
-            return res;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
         }
     }
 }

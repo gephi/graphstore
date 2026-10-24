@@ -17,18 +17,25 @@
 package org.gephi.graph.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
+import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Index;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Subgraph;
@@ -572,7 +579,6 @@ public class IndexStoreTest {
         Thread setter = new Thread(() -> outside.setAttribute(a, 5));
         CountDownLatch iterating = new CountDownLatch(1);
         Thread iterator = new Thread(() -> {
-            // The iterator holds the lock of the view index until it is exhausted
             Iterator<Node> nodes = viewIndex.get(a, 0).iterator();
             iterating.countDown();
             Thread.State state;
@@ -594,6 +600,120 @@ public class IndexStoreTest {
         Assert.assertFalse(iterator.isAlive());
         Assert.assertFalse(setter.isAlive());
         Assert.assertEquals(viewIndex.count(b, 1), 1);
+    }
+
+    @Test
+    public void testSetAttributeInsideViewWhileIteratingViewIndex() throws Exception {
+        GraphModel graphModel = GraphModel.Factory.newInstance();
+        Column a = graphModel.getNodeTable().addColumn("a", Integer.class);
+        Column b = graphModel.getNodeTable().addColumn("b", Integer.class);
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        n1.setAttribute(a, 0);
+        n2.setAttribute(a, 0);
+        graphModel.getGraph().addNode(n1);
+        graphModel.getGraph().addNode(n2);
+        GraphView view = graphModel.createView();
+        graphModel.getGraph(view).addNode(n1);
+        graphModel.getGraph(view).addNode(n2);
+        Index<Node> viewIndex = graphModel.getNodeIndex(view);
+
+        Thread setter = new Thread(() -> n2.setAttribute(a, 5));
+        setter.setDaemon(true);
+        FutureTask<Void> iteration = new FutureTask<>(() -> {
+            Iterator<Node> nodes = viewIndex.get(a, 0).iterator();
+            setter.start();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            Thread.State state;
+            while ((state = setter.getState()) != Thread.State.TERMINATED && state != Thread.State.WAITING && System
+                    .nanoTime() < deadline) {
+                Thread.sleep(1);
+            }
+            while (nodes.hasNext()) {
+                nodes.next().setAttribute(b, 1);
+            }
+            return null;
+        });
+        Thread iterator = new Thread(iteration);
+        iterator.setDaemon(true);
+        iterator.start();
+
+        iteration.get(10, TimeUnit.SECONDS);
+        setter.join(5000);
+        Assert.assertFalse(setter.isAlive());
+        Assert.assertEquals(viewIndex.count(a, 5), 1);
+        Assert.assertEquals(viewIndex.count(b, 1), 2);
+    }
+
+    @Test
+    public void testSetAttributeAndAddNodeAfterIncompleteGet() throws Exception {
+        GraphModel graphModel = GraphModel.Factory.newInstance();
+        Column indexed = graphModel.getNodeTable().addColumn("a", Integer.class);
+        Column notIndexed = graphModel.getNodeTable().addColumn("b", "b", Integer.class, Origin.DATA, null, false);
+        Graph graph = graphModel.getGraph();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        for (Node n : new Node[] { n1, n2 }) {
+            n.setAttribute(indexed, 0);
+            n.setAttribute(notIndexed, 0);
+            graph.addNode(n);
+        }
+        Index<Node> index = graphModel.getNodeIndex();
+        for (Column column : new Column[] { indexed, notIndexed }) {
+            // Never iterated, then stopped after the first element
+            index.get(column, 0);
+            for (Node node : index.get(column, 0)) {
+                Assert.assertNotNull(node);
+                break;
+            }
+        }
+
+        FutureTask<Void> writer = new FutureTask<>(() -> {
+            n1.setAttribute(indexed, 1);
+            Node n3 = graphModel.factory().newNode("3");
+            n3.setAttribute(indexed, 0);
+            graph.addNode(n3);
+            return null;
+        });
+        Thread thread = new Thread(writer);
+        thread.setDaemon(true);
+        thread.start();
+
+        writer.get(10, TimeUnit.SECONDS);
+        Assert.assertEquals(index.count(indexed, 0), 2);
+        Assert.assertEquals(index.count(indexed, 1), 1);
+    }
+
+    @Test
+    public void testGetIsSnapshot() {
+        GraphModel graphModel = GraphModel.Factory.newInstance();
+        Column column = graphModel.getNodeTable().addColumn("a", Integer.class);
+        Graph graph = graphModel.getGraph();
+        Node n1 = graphModel.factory().newNode("1");
+        Node n2 = graphModel.factory().newNode("2");
+        n1.setAttribute(column, 0);
+        n2.setAttribute(column, 0);
+        graph.addNode(n1);
+        graph.addNode(n2);
+        Index<Node> index = graphModel.getNodeIndex();
+
+        Iterable<Node> nodes = index.get(column, 0);
+        Iterator<Map.Entry<Object, ? extends Set<Node>>> entries = index.getColumnIndex(column).iterator();
+        n2.setAttribute(column, 1);
+        Node n3 = graphModel.factory().newNode("3");
+        n3.setAttribute(column, 0);
+        graph.addNode(n3);
+
+        Set<Node> expected = new HashSet<>(Arrays.asList(n1, n2));
+        for (int i = 0; i < 2; i++) {
+            Set<Node> actual = new HashSet<>();
+            nodes.forEach(actual::add);
+            Assert.assertEquals(actual, expected);
+        }
+        Map.Entry<Object, ? extends Set<Node>> entry = entries.next();
+        Assert.assertEquals(entry.getKey(), 0);
+        Assert.assertEquals(entry.getValue(), expected);
+        Assert.assertFalse(entries.hasNext());
     }
 
     @Test
