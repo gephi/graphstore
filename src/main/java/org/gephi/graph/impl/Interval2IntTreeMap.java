@@ -216,6 +216,10 @@ public final class Interval2IntTreeMap implements Map<Interval, Integer> {
             y.p.right = x;
         }
         if (y != z) {
+            // Recompute max from the successor's old parent up to z
+            for (Node i = x.p; i != z; i = i.p) {
+                computeMax(i);
+            }
             if (y.color == BLACK) {
                 deleteFixup(x);
             }
