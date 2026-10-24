@@ -504,6 +504,7 @@ public class GraphViewImpl implements GraphView {
         if (nodeView) {
             IndexStore<Node> nodeIndexStore = graphStore.nodeTable.store.indexStore;
             if (nodeIndexStore != null) {
+                nodeIndexStore.clear(directedDecorator.view);
                 nodeIndexStore.indexView(directedDecorator);
             }
             TimeIndexStore nodeTimeIndexStore = graphStore.timeStore.nodeIndexStore;
@@ -513,6 +514,7 @@ public class GraphViewImpl implements GraphView {
         }
         IndexStore<Edge> edgeIndexStore = graphStore.edgeTable.store.indexStore;
         if (edgeIndexStore != null) {
+            edgeIndexStore.clear(directedDecorator.view);
             edgeIndexStore.indexView(directedDecorator);
         }
         TimeIndexStore edgeTimeIndexStore = graphStore.timeStore.edgeIndexStore;

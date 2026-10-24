@@ -73,25 +73,29 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     public K putValue(T element, K value) {
         lock();
         try {
-            if (value == null) {
-                if (nullSet.add(element)) {
-                    elements++;
-                    version.incrementAndGet();
-                }
-            } else {
-                ValueSet<K, T> set = getValueSet(value);
-                if (set == null) {
-                    set = addValue(value);
-                }
-                value = set.value;
-
-                if (set.add(element)) {
-                    elements++;
-                    version.incrementAndGet();
-                }
-            }
+            return put(element, value);
         } finally {
             unlock();
+        }
+    }
+
+    private K put(T element, K value) {
+        if (value == null) {
+            if (nullSet.add(element)) {
+                elements++;
+                version.incrementAndGet();
+            }
+        } else {
+            ValueSet<K, T> set = getValueSet(value);
+            if (set == null) {
+                set = addValue(value);
+            }
+            value = set.value;
+
+            if (set.add(element)) {
+                elements++;
+                version.incrementAndGet();
+            }
         }
         return value;
     }
@@ -100,19 +104,13 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     public void removeValue(T element, K value) {
         lock();
         try {
-            if (value == null) {
-                if (nullSet.remove(element)) {
-                    elements--;
-                    version.incrementAndGet();
-                }
-            } else {
-                ValueSet<K, T> set = getValueSet(value);
-                if (set.remove(element)) {
-                    elements--;
-                    version.incrementAndGet();
-                }
-                if (set.isEmpty()) {
-                    removeValue(value);
+            // A concurrent set can have written a new value without moving the element to it yet
+            if (!remove(element, value) && !remove(element, null)) {
+                for (ValueSet<K, T> set : map.values()) {
+                    if (set.contains(element)) {
+                        remove(element, set.value);
+                        break;
+                    }
                 }
             }
         } finally {
@@ -122,8 +120,30 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
     @Override
     public K replaceValue(T element, K oldValue, K newValue) {
-        removeValue(element, oldValue);
-        return putValue(element, newValue);
+        lock();
+        try {
+            // An element not indexed under its old value is left out, it's indexed with its current value when added.
+            // The index of a column removed meanwhile is destroyed.
+            if (map != null && remove(element, oldValue)) {
+                return put(element, newValue);
+            }
+            return newValue;
+        } finally {
+            unlock();
+        }
+    }
+
+    private boolean remove(T element, K value) {
+        ValueSet<K, T> set = getValueSet(value);
+        if (set == null || !set.remove(element)) {
+            return false;
+        }
+        elements--;
+        version.incrementAndGet();
+        if (value != null && set.isEmpty()) {
+            removeValue(value);
+        }
+        return true;
     }
 
     protected int getCount(K value) {
