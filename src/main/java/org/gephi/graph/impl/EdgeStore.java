@@ -221,22 +221,24 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         if (type >= length) {
             Long2ObjectOpenCustomHashMap[] newArray = new Long2ObjectOpenCustomHashMap[type + 1];
             System.arraycopy(longDictionary, 0, newArray, 0, length);
-            longDictionary = newArray;
             for (int i = length; i <= type; i++) {
                 Long2ObjectOpenCustomHashMap newMap = new Long2ObjectOpenCustomHashMap(
                         GraphStoreConfiguration.EDGESTORE_DEFAULT_DICTIONARY_SIZE,
                         GraphStoreConfiguration.EDGESTORE_DICTIONARY_LOAD_FACTOR, new DictionaryHashStrategy());
-                longDictionary[i] = newMap;
+                newArray[i] = newMap;
             }
-            int[] newSizeArray = new int[type + 1];
-            System.arraycopy(mutualEdgesTypeSize, 0, newSizeArray, 0, length);
-            mutualEdgesTypeSize = newSizeArray;
-            newSizeArray = new int[type + 1];
-            System.arraycopy(typeSize, 0, newSizeArray, 0, length);
-            typeSize = newSizeArray;
-            newSizeArray = new int[type + 1];
-            System.arraycopy(undirectedGraphTypeSize, 0, newSizeArray, 0, length);
-            undirectedGraphTypeSize = newSizeArray;
+            int[] newMutualEdgesTypeSize = new int[type + 1];
+            System.arraycopy(mutualEdgesTypeSize, 0, newMutualEdgesTypeSize, 0, length);
+            int[] newTypeSize = new int[type + 1];
+            System.arraycopy(typeSize, 0, newTypeSize, 0, length);
+            int[] newUndirectedGraphTypeSize = new int[type + 1];
+            System.arraycopy(undirectedGraphTypeSize, 0, newUndirectedGraphTypeSize, 0, length);
+
+            // Assigned only once all arrays are allocated, so a failed allocation leaves the store unchanged
+            longDictionary = newArray;
+            mutualEdgesTypeSize = newMutualEdgesTypeSize;
+            typeSize = newTypeSize;
+            undirectedGraphTypeSize = newUndirectedGraphTypeSize;
         }
     }
 
