@@ -509,57 +509,69 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public int getDegree(Node node) {
-        if (undirected) {
+        EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, true);
+        // The iterator releases the read lock when it is exhausted
+        boolean exhausted = false;
+        try {
             int count = 0;
-            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, true);
             while (itr.hasNext()) {
                 EdgeImpl edge = itr.next();
-                if (view.containsEdge(edge) && !isUndirectedToIgnore(edge)) {
+                if (view.containsEdge(edge) && !(undirected && isUndirectedToIgnore(edge))) {
                     count++;
                     if (edge.isSelfLoop()) {
                         count++;
                     }
                 }
             }
+            exhausted = true;
             return count;
-        } else {
-            int count = 0;
-            EdgeStore.EdgeInOutIterator itr = graphStore.edgeStore.edgeIterator(node, true);
-            while (itr.hasNext()) {
-                EdgeImpl edge = itr.next();
-                if (view.containsEdge(edge)) {
-                    count++;
-                    if (edge.isSelfLoop()) {
-                        count++;
-                    }
-                }
+        } finally {
+            if (!exhausted) {
+                graphStore.autoReadUnlock();
             }
-            return count;
         }
     }
 
     @Override
     public int getInDegree(Node node) {
-        int count = 0;
         EdgeStore.EdgeInIterator itr = graphStore.edgeStore.edgeInIterator(node);
-        while (itr.hasNext()) {
-            if (view.containsEdge(itr.next())) {
-                count++;
+        // The iterator releases the read lock when it is exhausted
+        boolean exhausted = false;
+        try {
+            int count = 0;
+            while (itr.hasNext()) {
+                if (view.containsEdge(itr.next())) {
+                    count++;
+                }
+            }
+            exhausted = true;
+            return count;
+        } finally {
+            if (!exhausted) {
+                graphStore.autoReadUnlock();
             }
         }
-        return count;
     }
 
     @Override
     public int getOutDegree(Node node) {
-        int count = 0;
         EdgeStore.EdgeOutIterator itr = graphStore.edgeStore.edgeOutIterator(node);
-        while (itr.hasNext()) {
-            if (view.containsEdge(itr.next())) {
-                count++;
+        // The iterator releases the read lock when it is exhausted
+        boolean exhausted = false;
+        try {
+            int count = 0;
+            while (itr.hasNext()) {
+                if (view.containsEdge(itr.next())) {
+                    count++;
+                }
+            }
+            exhausted = true;
+            return count;
+        } finally {
+            if (!exhausted) {
+                graphStore.autoReadUnlock();
             }
         }
-        return count;
     }
 
     @Override
