@@ -95,6 +95,17 @@ public class IntervalMapTest {
         }
     }
 
+    @Test(timeOut = 10000)
+    public void testPutOverlappingNext() {
+        IntervalIntegerMap map = new IntervalIntegerMap();
+        Assert.assertTrue(map.put(new Interval(2, 100), 1));
+        Assert.assertTrue(map.put(new Interval(-3, 1), 2));
+        Assert.assertTrue(map.put(new Interval(-50, -50), 3));
+        Assert.assertThrows(IllegalArgumentException.class, () -> map.put(new Interval(1, 7), 4));
+        Assert.assertThrows(IllegalArgumentException.class, () -> map.put(new Interval(7, 10), 5));
+        Assert.assertEquals(map.getIntervals(), new double[] { -50, -50, -3, 1, 2, 100 });
+    }
+
     @Test
     public void testRemove() {
         for (IntervalMap set : getAllInstances()) {
