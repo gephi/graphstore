@@ -464,7 +464,7 @@ public abstract class ElementImpl implements Element {
                 final ColumnImpl[] cols = columnStore.columns;
                 for (int i = 0; i < length; i++) {
                     Column c = cols[i];
-                    if (!c.isProperty() && !c.isReadOnly()) {
+                    if (c != null && !c.isProperty() && !c.isReadOnly()) {
                         removeAttribute(c);
                     }
                 }
