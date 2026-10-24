@@ -929,6 +929,31 @@ public class GraphViewDecoratorTest {
     }
 
     @Test
+    public void testIsAdjacentWithEdgeOfAnyType() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        int type = graphStore.edgeTypeStore.addType("foo");
+        graphStore.addEdge(graphStore.factory.newEdge("e", n1, n2, type, 1.0, true));
+
+        GraphViewImpl view = store.createView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        UndirectedSubgraph undirectedGraph = store.getUndirectedGraph(view);
+        graph.addAllNodes(graphStore.getNodes().toCollection());
+        Assert.assertFalse(graph.isAdjacent(n1, n2));
+        Assert.assertFalse(undirectedGraph.isAdjacent(n1, n2));
+
+        graph.addAllEdges(graphStore.getEdges().toCollection());
+        Assert.assertTrue(graph.isAdjacent(n1, n2));
+        Assert.assertTrue(graph.isAdjacent(n1, n2, type));
+        Assert.assertFalse(graph.isAdjacent(n2, n1));
+        Assert.assertTrue(undirectedGraph.isAdjacent(n1, n2));
+        Assert.assertTrue(undirectedGraph.isAdjacent(n2, n1));
+    }
+
+    @Test
     public void testGetBoundariesEmptyView() {
         GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
         GraphViewStore store = graphStore.viewStore;
