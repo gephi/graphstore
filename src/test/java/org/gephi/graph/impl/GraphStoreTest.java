@@ -41,6 +41,7 @@ import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.EdgeIterable;
+import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
@@ -1501,6 +1502,38 @@ public class GraphStoreTest {
         }
 
         Assert.assertThrows(IllegalArgumentException.class, () -> graphStore.clearEdges(node, -1));
+
+        // A read lock left by one of them would make the write lock fail
+        graphStore.writeLock();
+        graphStore.writeUnlock();
+    }
+
+    @Test
+    public void testEdgesBetweenNodesOfInvalidType() {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        Node n2 = graphStore.getNode("2");
+        GraphViewImpl view = graphStore.viewStore.createView();
+        view.fill();
+        List<Graph> graphs = Arrays.asList(graphStore, graphStore.undirectedDecorator, graphStore.viewStore
+                .getGraph(view), graphStore.viewStore.getUndirectedGraph(view));
+
+        for (Graph graph : graphs) {
+            for (int type : new int[] { -1, EdgeTypeStore.MAX_SIZE }) {
+                Assert.assertThrows(IllegalArgumentException.class, () -> graph.getEdge(n1, n2, type));
+                Assert.assertThrows(IllegalArgumentException.class, () -> graph.getEdges(n1, n2, type).iterator());
+                Assert.assertThrows(IllegalArgumentException.class, () -> graph.isAdjacent(n1, n2, type));
+                Assert.assertThrows(IllegalArgumentException.class, () -> graph.getEdges(type).iterator());
+                Assert.assertThrows(IllegalArgumentException.class, () -> graph.getEdges(type).toArray());
+            }
+
+            int unregisteredType = EdgeTypeStore.MAX_SIZE - 1;
+            Assert.assertNull(graph.getEdge(n1, n2, unregisteredType));
+            Assert.assertFalse(graph.getEdges(n1, n2, unregisteredType).iterator().hasNext());
+            Assert.assertFalse(graph.isAdjacent(n1, n2, unregisteredType));
+            Assert.assertFalse(graph.getEdges(unregisteredType).iterator().hasNext());
+            Assert.assertEquals(graph.getEdges(unregisteredType).toArray().length, 0);
+        }
 
         // A read lock left by one of them would make the write lock fail
         graphStore.writeLock();
