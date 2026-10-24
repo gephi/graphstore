@@ -245,7 +245,7 @@ public class IntervalMapTest {
         Assert.assertEquals(j.getOverlappingIntervals(2003, 2003), new int[] { 2 });
         Assert.assertEquals(j.getOverlappingIntervals(2003, 2007), new int[] { 2, 3 });
         Assert.assertEquals(j.getOverlappingIntervals(2009, 2010), new int[] {});
-        Assert.assertEquals(j.getOverlappingIntervals(2002, 2004.9), new int[] { 1, 2 });
+        Assert.assertEquals(j.getOverlappingIntervals(2002, 2004.9), new int[] { 0, 1, 2 });
     }
 
     @Test
@@ -423,6 +423,31 @@ public class IntervalMapTest {
         // Each value is weighted by the part of its interval inside the query
         double expected = (5.0 * 10 + 10.0 * 20) / 15.0;
         Assert.assertEquals((double) map.get(new Interval(15, 30), Estimator.AVERAGE), expected, 1e-9);
+    }
+
+    @Test
+    public void testEstimatorsIncludeTouchingIntervals() {
+        IntervalIntegerMap map = new IntervalIntegerMap();
+        map.put(new Interval(0, 2), 1);
+        map.put(new Interval(2, 4), 2);
+        map.put(new Interval(4, 6), 3);
+
+        // An interval sharing an endpoint with the query overlaps it
+        Assert.assertEquals(map.get(new Interval(2, 3), Estimator.FIRST), 1);
+        Assert.assertEquals(map.get(new Interval(4, 5), Estimator.FIRST), 2);
+        Assert.assertEquals(map.get(new Interval(6, 7), Estimator.FIRST), 3);
+        Assert.assertEquals(map.get(new Interval(1, 2), Estimator.LAST), 2);
+    }
+
+    @Test
+    public void testAverageIgnoresTouchingIntervals() {
+        IntervalDoubleMap map = new IntervalDoubleMap();
+        map.put(new Interval(0, 2), Double.NaN);
+        map.put(new Interval(2, 4), 1.0);
+        map.put(new Interval(4, 6), 3.0);
+
+        Assert.assertEquals((double) map.get(new Interval(2, 3), Estimator.AVERAGE), 1.0, 1e-9);
+        Assert.assertEquals((double) map.get(new Interval(3, 4), Estimator.AVERAGE), 1.0, 1e-9);
     }
 
     @Test
