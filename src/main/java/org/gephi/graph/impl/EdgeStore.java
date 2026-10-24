@@ -378,11 +378,13 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     public int size(int type) {
+        EdgeTypeStore.checkValidId(type);
         int[] sizes = typeSize;
         return type < sizes.length ? sizes[type] : 0;
     }
 
     public int undirectedSize(int type) {
+        EdgeTypeStore.checkValidId(type);
         int[] sizes = undirectedGraphTypeSize;
         return type < sizes.length ? sizes[type] : 0;
     }
@@ -449,6 +451,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     public EdgeTypeIterator iteratorType(final int type, final boolean undirected) {
+        EdgeTypeStore.checkValidId(type);
         return new EdgeTypeIterator(type, undirected);
     }
 
@@ -573,6 +576,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public EdgeImpl get(final Node source, final Node target, final int type, boolean undirectedDecorator) {
         checkNonNullObject(source);
         checkNonNullObject(target);
+        EdgeTypeStore.checkValidId(type);
         NodeImpl sourceImpl = (NodeImpl) source;
         NodeImpl targetImpl = (NodeImpl) target;
 
@@ -618,6 +622,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public Iterator<Edge> getAll(final Node source, final Node target, final int type, boolean undirectedDecorator) {
         checkNonNullObject(source);
         checkNonNullObject(target);
+        EdgeTypeStore.checkValidId(type);
         NodeImpl sourceImpl = (NodeImpl) source;
         NodeImpl targetImpl = (NodeImpl) target;
 
@@ -971,6 +976,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     public boolean contains(NodeImpl source, NodeImpl target, int type) {
         checkNonNullObject(source);
         checkNonNullObject(target);
+        EdgeTypeStore.checkValidId(type);
 
         if (type < longDictionary.length) {
             if (isUndirectedGraph()) {
