@@ -36,14 +36,20 @@ import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrays;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 
 public abstract class ColumnStandardIndexImpl<K, T extends Element> implements ColumnIndexImpl<K, T> {
 
@@ -149,6 +155,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     protected int getCount(K value) {
         lock();
         try {
+            checkNotDestroyed();
             if (value == null) {
                 return nullSet.size();
             }
@@ -172,6 +179,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     public Collection<K> values() {
         lock();
         try {
+            checkNotDestroyed();
             return new ArrayList<>(new WithNullDecorator());
         } finally {
             unlock();
@@ -180,6 +188,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
     @Override
     public int countValues() {
+        checkNotDestroyed();
         return (nullSet.isEmpty() ? 0 : 1) + map.size();
     }
 
@@ -254,18 +263,20 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
     @Override
     public Iterator<Map.Entry<K, ? extends Set<T>>> iterator() {
+        checkNotDestroyed();
         return new EntryIterator();
     }
 
     @Override
-    public Iterable<T> get(K value) {
-        lock();
-        ValueSet<K, T> valueSet = getValueSet(value);
-        if (valueSet == null) {
-            unlock();
-            return ValueSet.EMPTY;
+    public ElementIterable<T> get(K value) {
+        return new ValueIterable(value);
+    }
+
+    // The index of a removed column is destroyed
+    private void checkNotDestroyed() {
+        if (map == null) {
+            throw new IllegalArgumentException("The column does not exist");
         }
-        return new LockableIterable<>(valueSet.set);
     }
 
     protected ValueSet<K, T> getValueSet(K value) {
@@ -485,7 +496,6 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
     protected static final class ValueSet<K, T> implements Set<T> {
 
-        protected static ValueSet EMPTY = new ValueSet(null);
         protected final K value;
         private final Set<T> set;
 
@@ -758,45 +768,145 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         }
     }
 
-    private class LockableIterable<E> implements Iterable<E> {
+    private final class ValueIterable implements ElementIterable<T> {
 
-        private final Iterable<E> ite;
+        private final K value;
+        // Most recently opened iterator that still holds the lock
+        private ValueIterator last;
 
-        public LockableIterable(Iterable<E> ite) {
-            this.ite = ite;
+        public ValueIterable(K value) {
+            this.value = value;
         }
 
         @Override
-        public Iterator<E> iterator() {
-            return new LockableIterator<>(ite.iterator());
-        }
-    }
-
-    private class LockableIterator<E> implements Iterator<E> {
-
-        private final Iterator<E> itr;
-
-        public LockableIterator(Iterator<E> itr) {
-            this.itr = itr;
+        public Iterator<T> iterator() {
+            return new ValueIterator();
         }
 
         @Override
-        public boolean hasNext() {
-            boolean n = itr.hasNext();
-            if (!n && lock != null) {
-                lock.unlock();
+        public Stream<T> parallelStream() {
+            throw new UnsupportedOperationException("Parallel stream not supported for this operation.");
+        }
+
+        @Override
+        public T[] toArray() {
+            lock();
+            try {
+                checkNotDestroyed();
+                ValueSet<K, T> valueSet = getValueSet(value);
+                T[] array = (T[]) Array.newInstance(column.table != null ? column.table.getElementClass()
+                        : Element.class, valueSet != null ? valueSet.size() : 0);
+                return valueSet != null ? valueSet.toArray(array) : array;
+            } finally {
+                unlock();
             }
-            return n;
         }
 
         @Override
-        public E next() {
-            return itr.next();
+        public Collection<T> toCollection() {
+            lock();
+            try {
+                checkNotDestroyed();
+                ValueSet<K, T> valueSet = getValueSet(value);
+                return valueSet != null ? new ArrayList<>(valueSet) : new ArrayList<>();
+            } finally {
+                unlock();
+            }
         }
 
         @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
+        public Set<T> toSet() {
+            lock();
+            try {
+                checkNotDestroyed();
+                ValueSet<K, T> valueSet = getValueSet(value);
+                return valueSet != null ? new ObjectOpenHashSet<>(valueSet) : new ObjectOpenHashSet<>();
+            } finally {
+                unlock();
+            }
+        }
+
+        @Override
+        public Spliterator<T> spliterator() {
+            return toCollection().spliterator();
+        }
+
+        @Override
+        public void doBreak() {
+            ValueIterator iterator = last;
+            while (iterator != null) {
+                ValueIterator prev = iterator.prev;
+                iterator.release();
+                iterator = prev;
+            }
+        }
+
+        // Holds the index lock until it is exhausted or released
+        private final class ValueIterator implements Iterator<T> {
+
+            private final Iterator<T> itr;
+            private boolean locked;
+            private ValueIterator prev;
+            private ValueIterator next;
+
+            public ValueIterator() {
+                lock();
+                locked = true;
+                prev = last;
+                if (prev != null) {
+                    prev.next = this;
+                }
+                last = this;
+                ValueSet<K, T> valueSet = null;
+                try {
+                    checkNotDestroyed();
+                    valueSet = getValueSet(value);
+                } finally {
+                    if (valueSet == null) {
+                        release();
+                    }
+                }
+                itr = valueSet != null ? valueSet.iterator() : Collections.emptyIterator();
+            }
+
+            @Override
+            public boolean hasNext() {
+                if (locked && itr.hasNext()) {
+                    return true;
+                }
+                release();
+                return false;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return itr.next();
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not supported.");
+            }
+
+            private void release() {
+                if (locked) {
+                    unlock();
+                    locked = false;
+                    if (prev != null) {
+                        prev.next = next;
+                    }
+                    if (next != null) {
+                        next.prev = prev;
+                    } else {
+                        last = prev;
+                    }
+                    prev = null;
+                    next = null;
+                }
+            }
         }
     }
 }

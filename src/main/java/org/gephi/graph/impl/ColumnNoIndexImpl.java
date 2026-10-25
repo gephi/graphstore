@@ -26,6 +26,7 @@ import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphLock;
@@ -50,22 +51,25 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         this.graphLock = graph != null ? graph.getLock() : null;
     }
 
-    private Iterator<T> getElementIterator() {
+    // The iterator of the elements holds a graph read lock until it is exhausted
+    private ElementIterable<T> getElements() {
         if (elementClass.equals(Node.class)) {
-            return (Iterator<T>) graph.getNodes().iterator();
+            return (ElementIterable<T>) graph.getNodes();
         } else if (elementClass.equals(Edge.class)) {
-            return (Iterator<T>) graph.getEdges().iterator();
+            return (ElementIterable<T>) graph.getEdges();
         }
-        return null;
+        return ElementIterable.EMPTY;
     }
 
     @Override
     public int count(K value) {
         lock();
         try {
-            Iterator<T> elementIterator = getElementIterator();
+            ElementIterable<T> elements = getElements();
+            Iterator<T> elementIterator = elements.iterator();
             int count = 0;
-            if (elementIterator != null) {
+            boolean exhausted = false;
+            try {
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
                     K obj = (K) element.getAttribute(column, graph.getView());
@@ -75,6 +79,11 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
                         count++;
                     }
                 }
+                exhausted = true;
+            } finally {
+                if (!exhausted) {
+                    elements.doBreak();
+                }
             }
             return count;
         } finally {
@@ -83,21 +92,31 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
     }
 
     @Override
-    public Iterable<T> get(K value) {
-        return new ElementWithValueIterable(getElementIterator(), value);
+    public ElementIterable<T> get(K value) {
+        return new FilteredElementIterable<>(getElements(), element -> {
+            Object val = element.getAttribute(column, graph.getView());
+            return val == null ? value == null : val.equals(value);
+        }, elementClass);
     }
 
     @Override
     public Collection<K> values() {
         lock();
         try {
-            Iterator<T> elementIterator = getElementIterator();
+            ElementIterable<T> elements = getElements();
+            Iterator<T> elementIterator = elements.iterator();
             Set<K> set = new ObjectOpenHashSet<>();
-            if (elementIterator != null) {
+            boolean exhausted = false;
+            try {
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
                     K obj = (K) element.getAttribute(column, graph.getView());
                     set.add(obj);
+                }
+                exhausted = true;
+            } finally {
+                if (!exhausted) {
+                    elements.doBreak();
                 }
             }
             return set;
@@ -134,8 +153,10 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         lock();
         try {
             Number min = null;
-            Iterator<T> elementIterator = getElementIterator();
-            if (elementIterator != null) {
+            ElementIterable<T> elements = getElements();
+            Iterator<T> elementIterator = elements.iterator();
+            boolean exhausted = false;
+            try {
                 double minN = Double.POSITIVE_INFINITY;
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
@@ -146,6 +167,11 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
                         }
                         min = num;
                     }
+                }
+                exhausted = true;
+            } finally {
+                if (!exhausted) {
+                    elements.doBreak();
                 }
             }
             return min;
@@ -162,10 +188,11 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
         lock();
         try {
             Number max = null;
-            Iterator<T> elementIterator = getElementIterator();
-            if (elementIterator != null) {
+            ElementIterable<T> elements = getElements();
+            Iterator<T> elementIterator = elements.iterator();
+            boolean exhausted = false;
+            try {
                 double maxN = Double.NEGATIVE_INFINITY;
-
                 while (elementIterator.hasNext()) {
                     ElementImpl element = (ElementImpl) elementIterator.next();
                     Number num = (Number) element.getAttribute(column, graph.getView(), Estimator.MAX);
@@ -175,6 +202,11 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
                         }
                         max = num;
                     }
+                }
+                exhausted = true;
+            } finally {
+                if (!exhausted) {
+                    elements.doBreak();
                 }
             }
             return max;
@@ -227,63 +259,6 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
     public void removeValue(T element, K value) {
         // Nothing to remove
         version.incrementAndGet();
-    }
-
-    private class ElementWithValueIterable implements Iterable<T> {
-
-        private final Iterator<T> ite;
-        private final K value;
-
-        public ElementWithValueIterable(Iterator<T> ite, K value) {
-            this.ite = ite;
-            this.value = value;
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return new ElementWithValueIterator(ite, value);
-        }
-    }
-
-    private class ElementWithValueIterator implements Iterator<T> {
-
-        private final Iterator<T> itr;
-        private final K value;
-        private T pointer;
-
-        public ElementWithValueIterator(Iterator<T> itr, K value) {
-            this.itr = itr;
-            this.value = value;
-            lock();
-        }
-
-        @Override
-        public boolean hasNext() {
-            while (pointer == null && itr.hasNext()) {
-                T element = itr.next();
-                K val = (K) element.getAttribute(column, graph.getView());
-                if ((value == null && val == null) || (val != null && val.equals(value))) {
-                    pointer = element;
-                }
-            }
-            if (pointer != null) {
-                return true;
-            }
-            unlock();
-            return false;
-        }
-
-        @Override
-        public T next() {
-            T res = pointer;
-            pointer = null;
-            return res;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
     }
 
     private void lock() {

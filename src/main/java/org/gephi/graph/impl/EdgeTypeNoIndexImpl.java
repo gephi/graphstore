@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
 
 public class EdgeTypeNoIndexImpl implements ColumnIndexImpl<Object, Edge> {
@@ -24,8 +25,8 @@ public class EdgeTypeNoIndexImpl implements ColumnIndexImpl<Object, Edge> {
     }
 
     @Override
-    public Iterable<Edge> get(Object label) {
-        return graph.getEdges(labelToType(label));
+    public ElementIterable<Edge> get(Object label) {
+        return new FilteredElementIterable<>(graph.getEdges(labelToType(label)), edge -> true, Edge.class);
     }
 
     @Override

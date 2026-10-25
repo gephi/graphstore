@@ -38,11 +38,28 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
 
     /**
      * Gets an Iterable of all elements in the column index with <em>value</em>.
+     * <p>
+     * The index lock, or the graph read lock if the column isn't indexed, is held from {@code iterator()} until the
+     * iterator is exhausted or {@link ElementIterable#doBreak()} is called. To stop early, or when the loop body
+     * throws, call <code>doBreak()</code>, which also releases the nested iterations over the same result. A result is
+     * iterated and broken from a single thread and isn't shared between threads. {@code stream()} iterates a copy and
+     * holds no lock, parallel streams aren't supported.
+     * <p>
+     * While the lock is held, other threads wait for it: for an indexed column, the threads that set its value or add
+     * or remove elements of its table, otherwise the threads that write to the graph. A loop body that calls the graph,
+     * model or index APIs (reading or writing the graph, setting attributes, getting a view index) can deadlock with
+     * them. In that case, copy the result with {@link ElementIterable#toArray()}, which releases the lock before
+     * returning, and iterate the array. The loop body must not set the values of the column or add or remove elements.
+     * <p>
+     * A value of the wrong type for an indexed column may throw a <code>ClassCastException</code> when iterating, not
+     * in this method.
      *
      * @param value the value
-     * @return an iterable with element with <em>value</em>
+     * @return an iterable with element with <em>value</em>, empty if value not found
+     * @throws IllegalArgumentException if this is the edge type column index and <em>value</em> isn't an edge type
+     *         label
      */
-    Iterable<T> get(K value);
+    ElementIterable<T> get(K value);
 
     /**
      * Returns all unique values.

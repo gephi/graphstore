@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
 
@@ -44,9 +45,9 @@ public class DegreeNoIndexImpl implements ColumnIndexImpl<Integer, Node> {
     }
 
     @Override
-    public Iterable<Node> get(Integer degree) {
+    public ElementIterable<Node> get(Integer degree) {
         checkNull(degree);
-        return new NodeWithDegreeIterable(degree);
+        return new FilteredElementIterable<>(graph.getNodes(), node -> getDegree(node) == degree, Node.class);
     }
 
     @Override
@@ -172,56 +173,6 @@ public class DegreeNoIndexImpl implements ColumnIndexImpl<Integer, Node> {
     private void checkNull(Integer value) {
         if (value == null) {
             throw new NullPointerException();
-        }
-    }
-
-    private class NodeWithDegreeIterable implements Iterable<Node> {
-
-        private final Integer value;
-
-        public NodeWithDegreeIterable(Integer degree) {
-            this.value = degree;
-        }
-
-        @Override
-        public Iterator<Node> iterator() {
-            return new NodeWithDegreeIterator(value);
-        }
-    }
-
-    private class NodeWithDegreeIterator implements Iterator<Node> {
-
-        private final Iterator<Node> itr;
-        private final Integer value;
-        private Node pointer;
-
-        public NodeWithDegreeIterator(Integer value) {
-            this.itr = graph.getNodes().iterator();
-            this.value = value;
-        }
-
-        @Override
-        public boolean hasNext() {
-            while (pointer == null && itr.hasNext()) {
-                Node node = itr.next();
-                int degree = getDegree(node);
-                if (value == degree) {
-                    pointer = node;
-                }
-            }
-            return pointer != null;
-        }
-
-        @Override
-        public Node next() {
-            Node res = pointer;
-            pointer = null;
-            return res;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
         }
     }
 }
