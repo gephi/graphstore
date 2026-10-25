@@ -195,7 +195,12 @@ public class IndexImpl<T extends Element> implements Index<T> {
     public Object set(Column column, Object oldValue, Object value, T element) {
         checkNonNullColumnObject(column);
 
-        return getIndex(column).replaceValue(element, oldValue, value);
+        // No index while the column is added or after it's removed concurrently
+        ColumnIndexImpl index = getIndex(column);
+        if (index == null) {
+            return value;
+        }
+        return index.replaceValue(element, oldValue, value);
     }
 
     public void clear() {

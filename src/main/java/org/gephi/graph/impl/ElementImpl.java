@@ -178,7 +178,7 @@ public abstract class ElementImpl implements Element {
         checkColumn(column);
         checkReadOnlyColumn(column);
 
-        Object oldValue = attributes.setAttribute(column, column.getDefaultValue());
+        Object oldValue = attributes.setAttribute(getColumnStore(), column, column.getDefaultValue());
         updateIndex(column, oldValue, column.getDefaultValue());
         updateIndexToCurrentValue(column, column.getDefaultValue());
 
@@ -213,7 +213,7 @@ public abstract class ElementImpl implements Element {
         checkColumnDynamic(column);
         checkReadOnlyColumn(column);
 
-        Object oldValue = attributes.removeTimeAttribute(column, timeObject);
+        Object oldValue = attributes.removeTimeAttribute(getColumnStore(), column, timeObject);
 
         // TODO
         if (oldValue != null && isValid()) {
@@ -239,7 +239,7 @@ public abstract class ElementImpl implements Element {
         value = AttributeUtils.standardizeValue(value);
         checkType(column, value);
 
-        Object oldValue = attributes.setAttribute(column, value);
+        Object oldValue = attributes.setAttribute(getColumnStore(), column, value);
         updateIndex(column, oldValue, value);
         updateIndexToCurrentValue(column, value);
     }
@@ -291,7 +291,7 @@ public abstract class ElementImpl implements Element {
 
         // Only a time the map did not already hold is a new reference for the time index. Passing the whole map would
         // re-count every time in it, as removeTimeAttribute decrements one at a time.
-        boolean isNewTime = attributes.setAttribute(column, value, timeObject);
+        boolean isNewTime = attributes.setAttribute(getColumnStore(), column, value, timeObject);
         updateIndex(column, null, isNewTime ? timeObject : null);
     }
 

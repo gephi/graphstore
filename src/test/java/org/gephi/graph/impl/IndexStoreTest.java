@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
@@ -32,6 +33,7 @@ import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Origin;
 import org.gephi.graph.api.Subgraph;
+import org.gephi.graph.api.types.TimestampIntegerMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -552,6 +554,115 @@ public class IndexStoreTest {
         IndexImpl<Node> index = graphStore.nodeTable.store.indexStore.mainIndex;
         Assert.assertEquals(index.countElements(column), 1);
         Assert.assertEquals(index.count(column, node.getAttribute(column)), 1);
+    }
+
+    @Test
+    public void testSetAttributeWhileRemovingColumn() throws Exception {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl node = new NodeImpl("0", graphStore);
+        graphStore.addNode(node);
+        AtomicReference<Column> column = new AtomicReference<>(graphStore.nodeTable.addColumn("foo", Integer.class));
+
+        AtomicBoolean done = new AtomicBoolean();
+        CountDownLatch started = new CountDownLatch(1);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> setter = executor.submit(() -> {
+                for (int i = 0; !done.get(); i++) {
+                    Column c = column.get();
+                    try {
+                        node.setAttribute(c, c.getTypeClass() == Integer.class ? (Object) (i % 4)
+                                : String.valueOf(i % 4));
+                    } catch (IllegalArgumentException e) {
+                        // The column was removed
+                    }
+                    started.countDown();
+                }
+            });
+            Assert.assertTrue(started.await(10, TimeUnit.SECONDS));
+            try {
+                for (int i = 0; i < 20000; i++) {
+                    graphStore.nodeTable.removeColumn(column.get());
+                    // Reuses the slot with the other type
+                    column.set(graphStore.nodeTable.addColumn("foo", i % 2 == 0 ? String.class : Integer.class));
+                }
+            } finally {
+                done.set(true);
+                setter.get(10, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+        IndexImpl<Node> index = graphStore.nodeTable.store.indexStore.mainIndex;
+        Column last = column.get();
+        Object value = node.getAttribute(last);
+        Assert.assertTrue(value == null || last.getTypeClass().isInstance(value));
+        Assert.assertEquals(index.countElements(last), 1);
+        Assert.assertEquals(index.count(last, value), 1);
+
+        int slot = last.getIndex();
+        graphStore.nodeTable.removeColumn(last);
+        Column added = graphStore.nodeTable.addColumn("bar", Double.class);
+        Assert.assertEquals(added.getIndex(), slot);
+        Assert.assertNull(node.getAttribute(added));
+        Assert.assertEquals(index.count(added, null), 1);
+    }
+
+    @Test
+    public void testRemoveTimeAttributeOfColumnAddedAfterNodeCreated() {
+        GraphStore graphStore = new GraphStore();
+        // Not in the store, so adding a column does not extend its attributes
+        NodeImpl node = new NodeImpl("0", graphStore);
+        Column column = graphStore.nodeTable.addColumn("foo", TimestampIntegerMap.class);
+
+        Assert.assertNull(node.removeAttribute(column, 1.0));
+        Assert.assertNull(node.getAttribute(column));
+    }
+
+    @Test
+    public void testSetTimeAttributeWhileRemovingColumn() throws Exception {
+        GraphStore graphStore = new GraphStore();
+        NodeImpl node = new NodeImpl("0", graphStore);
+        graphStore.addNode(node);
+        AtomicReference<Column> column = new AtomicReference<>(
+                graphStore.nodeTable.addColumn("foo", TimestampIntegerMap.class));
+
+        AtomicBoolean done = new AtomicBoolean();
+        CountDownLatch started = new CountDownLatch(1);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> setter = executor.submit(() -> {
+                for (int i = 0; !done.get(); i++) {
+                    Column c = column.get();
+                    try {
+                        if (c.isDynamic()) {
+                            node.setAttribute(c, i % 4, (double) (i % 7));
+                            node.removeAttribute(c, (double) ((i + 3) % 7));
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // The column was removed
+                    }
+                    started.countDown();
+                }
+            });
+            Assert.assertTrue(started.await(10, TimeUnit.SECONDS));
+            try {
+                for (int i = 0; i < 20000; i++) {
+                    graphStore.nodeTable.removeColumn(column.get());
+                    // Reuses the slot with a column that is not dynamic
+                    column.set(graphStore.nodeTable
+                            .addColumn("foo", i % 2 == 0 ? Integer.class : TimestampIntegerMap.class));
+                }
+            } finally {
+                done.set(true);
+                setter.get(10, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+        Column last = column.get();
+        Object value = node.getAttribute(last);
+        Assert.assertTrue(value == null || last.getTypeClass().isInstance(value));
     }
 
     @Test
