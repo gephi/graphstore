@@ -562,7 +562,9 @@ public interface GraphModel {
      * Destroys the given view.
      * <p>
      * A graph of one of the most recently destroyed views that is still held keeps following the changes of the graph,
-     * like the graph of a live view. The graph of an older destroyed view is emptied.
+     * like the graph of a live view. The graph of an older destroyed view loses its edges, and its nodes too unless it
+     * is a view of edges only. This is a best effort to keep the graphs fetched just before the destroy usable, the
+     * read lock of a graph should be taken before it is fetched, see {@link #getGraphVisible()}.
      *
      * @param view view to destroy
      */
