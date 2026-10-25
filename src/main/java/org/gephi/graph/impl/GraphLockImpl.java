@@ -81,15 +81,6 @@ public class GraphLockImpl implements GraphLock {
     }
 
     @Override
-    public boolean tryWriteLock(long timeout, TimeUnit unit) throws InterruptedException {
-        if (readWriteLock.getReadHoldCount() > 0 && !readWriteLock.isWriteLockedByCurrentThread()) {
-            throw new IllegalMonitorStateException(
-                    "Impossible to acquire a write lock when currently holding a read lock. Use toArray() methods on NodeIterable and EdgeIterable to avoid holding a readLock or wrap your loop with a write lock.");
-        }
-        return writeLock.tryLock(timeout, unit);
-    }
-
-    @Override
     public int getReadLockCount() {
         return readWriteLock.getReadLockCount();
     }

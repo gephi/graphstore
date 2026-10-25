@@ -78,36 +78,6 @@ public class GraphLockImplTest {
     // --- Timed acquisition ---
 
     @Test
-    public void testTryWriteLockAcquiresWhenFree() throws InterruptedException {
-        GraphLockImpl lock = new GraphLockImpl();
-        Assert.assertTrue(lock.tryWriteLock(1, TimeUnit.SECONDS));
-        Assert.assertEquals(lock.getWriteHoldCount(), 1);
-        lock.writeUnlock();
-    }
-
-    @Test
-    public void testTryWriteLockTimesOutWhileAnotherThreadHoldsRead() throws InterruptedException {
-        GraphLockImpl lock = new GraphLockImpl();
-        CountDownLatch acquired = new CountDownLatch(1);
-        CountDownLatch release = new CountDownLatch(1);
-        Thread reader = holdLockOnThread(lock, false, acquired, release);
-        acquired.await();
-        Assert.assertFalse(lock.tryWriteLock(100, TimeUnit.MILLISECONDS));
-        Assert.assertEquals(lock.getWriteHoldCount(), 0);
-        release.countDown();
-        reader.join();
-        Assert.assertTrue(lock.tryWriteLock(1, TimeUnit.SECONDS));
-        lock.writeUnlock();
-    }
-
-    @Test(expectedExceptions = IllegalMonitorStateException.class)
-    public void testTryWriteLockWhileHoldingReadLock() throws InterruptedException {
-        GraphLockImpl lock = new GraphLockImpl();
-        lock.readLock();
-        lock.tryWriteLock(1, TimeUnit.SECONDS);
-    }
-
-    @Test
     public void testTryReadLockAcquiresWhenFree() throws InterruptedException {
         GraphLockImpl lock = new GraphLockImpl();
         Assert.assertTrue(lock.tryReadLock(1, TimeUnit.SECONDS));
@@ -131,31 +101,109 @@ public class GraphLockImplTest {
     }
 
     @Test
-    public void testTryWriteLockPropagatesInterrupt() throws InterruptedException {
+    public void testTryReadLockPropagatesInterrupt() throws InterruptedException {
+        GraphLockImpl lock = new GraphLockImpl();
+        CountDownLatch acquired = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        Thread writer = holdLockOnThread(lock, true, acquired, release);
+        acquired.await();
+        AtomicBoolean interrupted = new AtomicBoolean(false);
+        Thread reader = new Thread(() -> {
+            try {
+                lock.tryReadLock(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                interrupted.set(true);
+            }
+        });
+        reader.setDaemon(true);
+        try {
+            reader.start();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (reader.getState() != Thread.State.TIMED_WAITING && System.nanoTime() < deadline) {
+                Thread.sleep(5);
+            }
+            reader.interrupt();
+            reader.join(5000);
+            Assert.assertFalse(reader.isAlive());
+            Assert.assertTrue(interrupted.get());
+            Assert.assertEquals(lock.getQueueLength(), 0);
+        } finally {
+            release.countDown();
+            writer.join();
+        }
+        Assert.assertTrue(lock.tryReadLock(1, TimeUnit.SECONDS));
+        lock.readUnlock();
+    }
+
+    @Test
+    public void testQueuedWriterBlocksNewTryReadLock() throws InterruptedException {
         GraphLockImpl lock = new GraphLockImpl();
         CountDownLatch acquired = new CountDownLatch(1);
         CountDownLatch release = new CountDownLatch(1);
         Thread reader = holdLockOnThread(lock, false, acquired, release);
         acquired.await();
-        AtomicBoolean interrupted = new AtomicBoolean(false);
-        CountDownLatch waiting = new CountDownLatch(1);
+        AtomicBoolean writerAcquired = new AtomicBoolean(false);
         Thread writer = new Thread(() -> {
-            try {
-                waiting.countDown();
-                lock.tryWriteLock(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                interrupted.set(true);
-            }
+            lock.writeLock();
+            writerAcquired.set(true);
+            lock.writeUnlock();
         });
-        writer.start();
-        waiting.await();
-        writer.interrupt();
+        writer.setDaemon(true);
+        try {
+            writer.start();
+            // A parked writer is fully linked in the queue, which is when new readers start to wait behind it
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (writer.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+                Thread.sleep(5);
+            }
+            Assert.assertEquals(writer.getState(), Thread.State.WAITING);
+            Assert.assertEquals(lock.getQueueLength(), 1);
+
+            // The reader still holds the lock, yet a new reader can't get in behind the queued writer
+            Assert.assertFalse(lock.tryReadLock(0, TimeUnit.MILLISECONDS));
+            Assert.assertFalse(lock.tryReadLock(100, TimeUnit.MILLISECONDS));
+            Assert.assertEquals(lock.getReadHoldCount(), 0);
+        } finally {
+            release.countDown();
+            reader.join();
+        }
         writer.join(5000);
         Assert.assertFalse(writer.isAlive());
-        Assert.assertTrue(interrupted.get());
-        Assert.assertEquals(lock.getWriteHoldCount(), 0);
-        release.countDown();
-        reader.join();
+        Assert.assertTrue(writerAcquired.get());
+        Assert.assertTrue(lock.tryReadLock(1, TimeUnit.SECONDS));
+        lock.readUnlock();
+    }
+
+    @Test
+    public void testTryReadLockWithZeroTimeoutIsReentrantBehindQueuedWriter() throws InterruptedException {
+        GraphLockImpl lock = new GraphLockImpl();
+        lock.readLock();
+        Thread writer = new Thread(() -> {
+            lock.writeLock();
+            lock.writeUnlock();
+        });
+        writer.setDaemon(true);
+        try {
+            writer.start();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (writer.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+                Thread.sleep(5);
+            }
+            Assert.assertEquals(lock.getQueueLength(), 1);
+            Assert.assertTrue(lock.tryReadLock(0, TimeUnit.MILLISECONDS));
+            lock.readUnlock();
+        } finally {
+            lock.readUnlockAll();
+            writer.join(5000);
+        }
+        Assert.assertFalse(writer.isAlive());
+    }
+
+    @Test
+    public void testTryReadLockWithZeroTimeoutAcquiresWhenFree() throws InterruptedException {
+        GraphLockImpl lock = new GraphLockImpl();
+        Assert.assertTrue(lock.tryReadLock(0, TimeUnit.MILLISECONDS));
+        lock.readUnlock();
     }
 
     // --- Diagnostics ---
@@ -169,13 +217,17 @@ public class GraphLockImplTest {
             lock.writeLock();
             lock.writeUnlock();
         });
-        writer.start();
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-        while (lock.getQueueLength() == 0 && System.nanoTime() < deadline) {
-            Thread.sleep(5);
+        writer.setDaemon(true);
+        try {
+            writer.start();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (lock.getQueueLength() == 0 && System.nanoTime() < deadline) {
+                Thread.sleep(5);
+            }
+            Assert.assertEquals(lock.getQueueLength(), 1);
+        } finally {
+            lock.readUnlock();
         }
-        Assert.assertEquals(lock.getQueueLength(), 1);
-        lock.readUnlock();
         writer.join();
         Assert.assertEquals(lock.getQueueLength(), 0);
     }

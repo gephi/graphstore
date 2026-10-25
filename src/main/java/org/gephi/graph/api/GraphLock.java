@@ -52,7 +52,6 @@ public interface GraphLock {
      * and returns immediately, setting the write lock hold count to one.
      *
      * @throws IllegalMonitorStateException if the current thread holds a read lock already
-     * @see #tryWriteLock(long, TimeUnit)
      */
     void writeLock();
 
@@ -84,38 +83,22 @@ public interface GraphLock {
     int getWriteHoldCount();
 
     /**
-     * Acquires the read lock if the write lock is not held by another thread within the given waiting time.
+     * Acquires the read lock if it becomes available within the given waiting time, which it does when no other thread
+     * holds the write lock, and no writer is waiting ahead of the caller.
      * <p>
      * Unlike {@link #readLock()}, the wait is bounded and interruptible. A caller that receives {@code false} has not
-     * acquired the lock and must not call {@link #readUnlock()}.
+     * acquired the lock and must not call {@link #readUnlock()}, nor read the graph as if it had. A timeout of zero
+     * returns immediately, so a caller that doesn't hold the lock can skip its work instead of waiting for a writer. A
+     * thread that already holds the read or the write lock always acquires it again, so it can't use this to detect a
+     * waiting writer, see {@link #getQueueLength()}.
      *
      * @param timeout the time to wait for the read lock
      * @param unit the time unit of the timeout argument
      * @return true if the read lock was acquired
-     * @throws InterruptedException if the current thread is interrupted while waiting
-     * @throws UnsupportedOperationException if the implementation does not support timed acquisition
+     * @throws InterruptedException if the current thread is interrupted on entry or while waiting, which clears its
+     *         interrupt status, so a caller that doesn't propagate the exception should restore the status
      */
-    default boolean tryReadLock(long timeout, TimeUnit unit) throws InterruptedException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Acquires the write lock if neither the read nor write lock are held by another thread within the given waiting
-     * time.
-     * <p>
-     * Unlike {@link #writeLock()}, the wait is bounded and interruptible. A caller that receives {@code false} has not
-     * acquired the lock and must not call {@link #writeUnlock()}.
-     *
-     * @param timeout the time to wait for the write lock
-     * @param unit the time unit of the timeout argument
-     * @return true if the write lock was acquired
-     * @throws IllegalMonitorStateException if the current thread holds a read lock already
-     * @throws InterruptedException if the current thread is interrupted while waiting
-     * @throws UnsupportedOperationException if the implementation does not support timed acquisition
-     */
-    default boolean tryWriteLock(long timeout, TimeUnit unit) throws InterruptedException {
-        throw new UnsupportedOperationException();
-    }
+    boolean tryReadLock(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
      * Queries the number of read holds on this lock across all threads. This differs from {@link #getReadHoldCount()},
@@ -123,21 +106,17 @@ public interface GraphLock {
      * hold that was never released.
      *
      * @return the total number of read holds, or zero if the read lock is not held
-     * @throws UnsupportedOperationException if the implementation does not expose this
      */
-    default int getReadLockCount() {
-        throw new UnsupportedOperationException();
-    }
+    int getReadLockCount();
 
     /**
-     * Queries whether the write lock is held by any thread.
+     * Queries whether the write lock is held by any thread. The value may change at any time, it is designed for
+     * monitoring, not for synchronization control, and a {@code false} doesn't mean the read lock is available, as
+     * readers also wait behind a queued writer.
      *
      * @return true if any thread holds the write lock
-     * @throws UnsupportedOperationException if the implementation does not expose this
      */
-    default boolean isWriteLocked() {
-        throw new UnsupportedOperationException();
-    }
+    boolean isWriteLocked();
 
     /**
      * Returns an estimate of the number of threads waiting to acquire either the read or the write lock. The value is
@@ -145,9 +124,6 @@ public interface GraphLock {
      * designed for monitoring, not for synchronization control.
      *
      * @return the estimated number of waiting threads
-     * @throws UnsupportedOperationException if the implementation does not expose this
      */
-    default int getQueueLength() {
-        throw new UnsupportedOperationException();
-    }
+    int getQueueLength();
 }
