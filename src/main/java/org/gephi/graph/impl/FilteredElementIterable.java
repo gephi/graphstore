@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 
@@ -36,7 +37,8 @@ class FilteredElementIterable<T extends Element> implements ElementIterable<T> {
     private final ElementIterable<T> source;
     private final Predicate<T> filter;
     private final Class<T> elementClass;
-    private FilteredIterator current;
+    // Most recently opened iterator whose source still holds the lock
+    private FilteredIterator last;
 
     FilteredElementIterable(ElementIterable<T> source, Predicate<T> filter, Class<T> elementClass) {
         this.source = source;
@@ -46,8 +48,12 @@ class FilteredElementIterable<T extends Element> implements ElementIterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        current = new FilteredIterator(source.iterator());
-        return current;
+        return new FilteredIterator(source.iterator());
+    }
+
+    @Override
+    public Stream<T> parallelStream() {
+        throw new UnsupportedOperationException("Parallel stream not supported for this operation.");
     }
 
     @Override
@@ -72,9 +78,8 @@ class FilteredElementIterable<T extends Element> implements ElementIterable<T> {
 
     @Override
     public void doBreak() {
-        if (current != null) {
-            current.release();
-            current = null;
+        while (last != null) {
+            last.release();
         }
     }
 
@@ -83,23 +88,35 @@ class FilteredElementIterable<T extends Element> implements ElementIterable<T> {
         private final Iterator<T> itr;
         private boolean open = true;
         private T pointer;
+        private FilteredIterator prev;
+        private FilteredIterator next;
 
         public FilteredIterator(Iterator<T> itr) {
             this.itr = itr;
+            prev = last;
+            if (prev != null) {
+                prev.next = this;
+            }
+            last = this;
         }
 
         @Override
         public boolean hasNext() {
-            while (pointer == null && open) {
-                if (itr.hasNext()) {
-                    T element = itr.next();
-                    if (filter.test(element)) {
-                        pointer = element;
+            try {
+                while (pointer == null && open) {
+                    if (itr.hasNext()) {
+                        T element = itr.next();
+                        if (filter.test(element)) {
+                            pointer = element;
+                        }
+                    } else {
+                        // The source iterator released the lock
+                        unlink();
                     }
-                } else {
-                    // The source iterator released the lock
-                    open = false;
                 }
+            } catch (RuntimeException | Error e) {
+                release();
+                throw e;
             }
             return pointer != null;
         }
@@ -122,9 +139,23 @@ class FilteredElementIterable<T extends Element> implements ElementIterable<T> {
         private void release() {
             if (open) {
                 source.doBreak();
-                open = false;
-                pointer = null;
+                unlink();
             }
+        }
+
+        private void unlink() {
+            open = false;
+            pointer = null;
+            if (prev != null) {
+                prev.next = next;
+            }
+            if (next != null) {
+                next.prev = prev;
+            } else {
+                last = prev;
+            }
+            prev = null;
+            next = null;
         }
     }
 }

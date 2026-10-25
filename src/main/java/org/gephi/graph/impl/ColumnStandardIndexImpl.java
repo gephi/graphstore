@@ -46,6 +46,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 
@@ -758,7 +759,8 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     private final class ValueIterable implements ElementIterable<T> {
 
         private final K value;
-        private ValueIterator current;
+        // Most recently opened iterator that still holds the lock
+        private ValueIterator last;
 
         public ValueIterable(K value) {
             this.value = value;
@@ -766,8 +768,12 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
         @Override
         public Iterator<T> iterator() {
-            current = new ValueIterator(value);
-            return current;
+            return new ValueIterator();
+        }
+
+        @Override
+        public Stream<T> parallelStream() {
+            throw new UnsupportedOperationException("Parallel stream not supported for this operation.");
         }
 
         @Override
@@ -807,59 +813,75 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
         @Override
         public void doBreak() {
-            if (current != null) {
-                current.release();
-                current = null;
+            while (last != null) {
+                last.release();
             }
         }
-    }
 
-    // Holds the index lock until it is exhausted or released
-    private final class ValueIterator implements Iterator<T> {
+        // Holds the index lock until it is exhausted or released
+        private final class ValueIterator implements Iterator<T> {
 
-        private final Iterator<T> itr;
-        private boolean locked;
+            private final Iterator<T> itr;
+            private boolean locked;
+            private ValueIterator prev;
+            private ValueIterator next;
 
-        public ValueIterator(K value) {
-            lock();
-            locked = true;
-            ValueSet<K, T> valueSet = null;
-            try {
-                valueSet = getValueSet(value);
-            } finally {
-                if (valueSet == null) {
-                    release();
+            public ValueIterator() {
+                lock();
+                locked = true;
+                prev = last;
+                if (prev != null) {
+                    prev.next = this;
                 }
+                last = this;
+                ValueSet<K, T> valueSet = null;
+                try {
+                    valueSet = getValueSet(value);
+                } finally {
+                    if (valueSet == null) {
+                        release();
+                    }
+                }
+                itr = valueSet != null ? valueSet.iterator() : Collections.emptyIterator();
             }
-            itr = valueSet != null ? valueSet.iterator() : Collections.emptyIterator();
-        }
 
-        @Override
-        public boolean hasNext() {
-            if (locked && itr.hasNext()) {
-                return true;
+            @Override
+            public boolean hasNext() {
+                if (locked && itr.hasNext()) {
+                    return true;
+                }
+                release();
+                return false;
             }
-            release();
-            return false;
-        }
 
-        @Override
-        public T next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException();
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return itr.next();
             }
-            return itr.next();
-        }
 
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported.");
-        }
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not supported.");
+            }
 
-        private void release() {
-            if (locked) {
-                unlock();
-                locked = false;
+            private void release() {
+                if (locked) {
+                    unlock();
+                    locked = false;
+                    if (prev != null) {
+                        prev.next = next;
+                    }
+                    if (next != null) {
+                        next.prev = prev;
+                    } else {
+                        last = prev;
+                    }
+                    prev = null;
+                    next = null;
+                }
             }
         }
     }

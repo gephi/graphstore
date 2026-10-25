@@ -29,6 +29,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.gephi.graph.api.Column;
+import org.gephi.graph.api.ColumnIndex;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
@@ -673,6 +674,64 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testGetParallelStream() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Index<Node> index = graphModel.getNodeIndex();
+
+        for (String id : new String[] { "indexed", "notIndexed" }) {
+            ElementIterable<Node> nodes = index.get(graphModel.getNodeTable().getColumn(id), 0);
+            Assert.assertThrows(UnsupportedOperationException.class, nodes::parallelStream);
+        }
+        assertWritesFromAnotherThread(graphModel);
+    }
+
+    @Test
+    public void testGetNestedIterationsDoBreak() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Index<Node> index = graphModel.getNodeIndex();
+
+        for (String id : new String[] { "indexed", "notIndexed" }) {
+            ElementIterable<Node> nodes = index.get(graphModel.getNodeTable().getColumn(id), 0);
+            Iterator<Node> outer = nodes.iterator();
+            Assert.assertNotNull(outer.next());
+            Iterator<Node> inner = nodes.iterator();
+            Assert.assertNotNull(inner.next());
+            Iterator<Node> exhausted = nodes.iterator();
+            exhausted.forEachRemaining(Assert::assertNotNull);
+            nodes.doBreak();
+            assertWritesFromAnotherThread(graphModel);
+        }
+    }
+
+    @Test
+    public void testGetAfterRemovingNotIndexedColumn() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Index<Node> index = graphModel.getNodeIndex();
+        Column column = graphModel.getNodeTable().getColumn("notIndexed");
+        ElementIterable<Node> nodes = index.get(column, 0);
+        graphModel.getNodeTable().removeColumn(column);
+
+        Assert.assertThrows(IllegalArgumentException.class, nodes::toCollection);
+        Assert.assertThrows(IllegalArgumentException.class, nodes::toArray);
+        Assert.assertThrows(IllegalArgumentException.class, () -> nodes.iterator().hasNext());
+        assertWritesFromAnotherThread(graphModel);
+    }
+
+    @Test
+    public void testNotIndexedColumnIndexAfterRemovingColumn() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Column column = graphModel.getNodeTable().getColumn("notIndexed");
+        ColumnIndex<Integer, Node> columnIndex = graphModel.getNodeIndex().getColumnIndex(column);
+        graphModel.getNodeTable().removeColumn(column);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> columnIndex.count(0));
+        Assert.assertThrows(IllegalArgumentException.class, columnIndex::values);
+        Assert.assertThrows(IllegalArgumentException.class, columnIndex::getMinValue);
+        Assert.assertThrows(IllegalArgumentException.class, columnIndex::getMaxValue);
+        assertWritesFromAnotherThread(graphModel);
+    }
+
+    @Test
     public void testAddColumnWithDefaultValueAfterViewIndex() {
         GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
         GraphViewImpl view = graphStore.viewStore.createView();
@@ -1013,7 +1072,9 @@ public class IndexStoreTest {
         FutureTask<Void> writes = new FutureTask<>(() -> {
             Node node = graphModel.getGraph().getNode("1");
             node.setAttribute(indexed, 1);
-            node.setAttribute(notIndexed, 1);
+            if (notIndexed != null) {
+                node.setAttribute(notIndexed, 1);
+            }
             Node added = graphModel.factory().newNode();
             added.setAttribute(indexed, 0);
             graphModel.getGraph().addNode(added);

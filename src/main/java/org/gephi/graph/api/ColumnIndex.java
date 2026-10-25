@@ -39,11 +39,15 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
     /**
      * Gets an Iterable of all elements in the column index with <em>value</em>.
      * <p>
-     * The index lock, or the graph read lock if the column isn't indexed, is taken when {@code iterator()} is called
-     * and released when the iterator is exhausted or when {@link ElementIterable#doBreak()} is called. Iterate the
-     * result fully or call <code>doBreak()</code>, from the iterating thread, to stop early. Don't modify the index
-     * (set the column's value, add or remove elements) while iterating, like writing to the graph while iterating its
-     * elements.
+     * The index lock, or the graph read lock if the column isn't indexed, is held from {@code iterator()} until the
+     * iterator is exhausted or {@link ElementIterable#doBreak()} is called from the iterating thread. To stop early,
+     * call <code>doBreak()</code>, which also releases the nested iterations over the same result. Parallel streams
+     * aren't supported. The edge type column returns {@link Graph#getEdges(int)} instead.
+     * <p>
+     * While the lock is held, other threads that update the index or write to the graph wait for it, so a loop body
+     * that sets attributes or reads the graph can deadlock with them. In that case, copy the result with
+     * {@link ElementIterable#toArray()}, which releases the lock before returning, and iterate the array. The loop body
+     * must not set the values of the column or add or remove elements.
      * <p>
      * The return type is {@link ElementIterable} since 0.8.11, code compiled against an earlier version must be
      * recompiled.
