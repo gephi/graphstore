@@ -15,6 +15,8 @@
  */
 package org.gephi.graph.api;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Wrapper around <code>ReentrantReadWriteLock</code> that controls multi-thread access to the graph structure.
  */
@@ -23,6 +25,12 @@ public interface GraphLock {
     /**
      * Acquires the read lock. Acquires the read lock if the write lock is not held by another thread and returns
      * immediately.
+     * <p>
+     * This call waits without bound. A read hold blocks every writer, and once a writer is waiting, new readers wait
+     * behind it as well, so a read hold that is never released stalls all graph operations. Do not hold the read lock
+     * across a wait on another thread, and do not abandon an auto-locking iterator (see {@link NodeIterable} and
+     * {@link EdgeIterable}) before it is exhausted or {@code doBreak()} has been called. Use
+     * {@link #tryReadLock(long, TimeUnit)} when the caller cannot afford to wait indefinitely.
      */
     void readLock();
 
@@ -73,4 +81,49 @@ public interface GraphLock {
      *         current thread
      */
     int getWriteHoldCount();
+
+    /**
+     * Acquires the read lock if it becomes available within the given waiting time, which it does when no other thread
+     * holds the write lock, and no writer is waiting ahead of the caller.
+     * <p>
+     * Unlike {@link #readLock()}, the wait is bounded and interruptible. A caller that receives {@code false} has not
+     * acquired the lock and must not call {@link #readUnlock()}, nor read the graph as if it had. A timeout of zero
+     * returns immediately, so a caller that doesn't hold the lock can skip its work instead of waiting for a writer. A
+     * thread that already holds the read or the write lock always acquires it again, so it can't use this to detect a
+     * waiting writer, see {@link #getQueueLength()}.
+     *
+     * @param timeout the time to wait for the read lock
+     * @param unit the time unit of the timeout argument
+     * @return true if the read lock was acquired
+     * @throws InterruptedException if the current thread is interrupted on entry or while waiting, which clears its
+     *         interrupt status, so a caller that doesn't propagate the exception should restore the status
+     */
+    boolean tryReadLock(long timeout, TimeUnit unit) throws InterruptedException;
+
+    /**
+     * Queries the number of read holds on this lock across all threads. This differs from {@link #getReadHoldCount()},
+     * which counts only the current thread. A non-zero value while no thread is expected to be reading points at a read
+     * hold that was never released.
+     *
+     * @return the total number of read holds, or zero if the read lock is not held
+     */
+    int getReadLockCount();
+
+    /**
+     * Queries whether the write lock is held by any thread. The value may change at any time, it is designed for
+     * monitoring, not for synchronization control, and a {@code false} doesn't mean the read lock is available, as
+     * readers also wait behind a queued writer.
+     *
+     * @return true if any thread holds the write lock
+     */
+    boolean isWriteLocked();
+
+    /**
+     * Returns an estimate of the number of threads waiting to acquire either the read or the write lock. The value is
+     * an estimate because the number of threads may change while this method traverses internal data structures. It is
+     * designed for monitoring, not for synchronization control.
+     *
+     * @return the estimated number of waiting threads
+     */
+    int getQueueLength();
 }
