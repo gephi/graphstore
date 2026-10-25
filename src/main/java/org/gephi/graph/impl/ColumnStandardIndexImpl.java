@@ -32,22 +32,22 @@ import it.unimi.dsi.fastutil.longs.LongArrays;
 import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrays;
-import java.util.AbstractMap;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 
 public abstract class ColumnStandardIndexImpl<K, T extends Element> implements ColumnIndexImpl<K, T> {
 
@@ -258,33 +258,12 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
     @Override
     public Iterator<Map.Entry<K, ? extends Set<T>>> iterator() {
-        lock();
-        try {
-            List<Map.Entry<K, ? extends Set<T>>> entries = new ArrayList<>(map.size() + 1);
-            if (!nullSet.isEmpty()) {
-                entries.add(new AbstractMap.SimpleImmutableEntry<>(null, nullSet.copy()));
-            }
-            for (ValueSet<K, T> valueSet : map.values()) {
-                entries.add(new AbstractMap.SimpleImmutableEntry<>(valueSet.value, valueSet.copy()));
-            }
-            return Collections.unmodifiableList(entries).iterator();
-        } finally {
-            unlock();
-        }
+        return new EntryIterator();
     }
 
     @Override
-    public Iterable<T> get(K value) {
-        lock();
-        try {
-            ValueSet<K, T> valueSet = getValueSet(value);
-            if (valueSet == null) {
-                return Collections.emptyList();
-            }
-            return Collections.unmodifiableList(new ObjectArrayList<>(valueSet.set));
-        } finally {
-            unlock();
-        }
+    public ElementIterable<T> get(K value) {
+        return new ValueIterable(value);
     }
 
     protected ValueSet<K, T> getValueSet(K value) {
@@ -505,15 +484,11 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     protected static final class ValueSet<K, T> implements Set<T> {
 
         protected final K value;
-        private final ObjectOpenHashSet<T> set;
+        private final Set<T> set;
 
         public ValueSet(K value) {
             this.value = value;
             this.set = new ObjectOpenHashSet<>();
-        }
-
-        Set<T> copy() {
-            return Collections.unmodifiableSet(set.clone());
         }
 
         @Override
@@ -722,6 +697,169 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
             @Override
             public void remove() {
                 throw new UnsupportedOperationException("Not supported operation.");
+            }
+        }
+    }
+
+    private final class EntryIterator implements Iterator<Map.Entry<K, ? extends Set<T>>> {
+
+        private final Iterator<Map.Entry<K, ValueSet<K, T>>> mapIterator;
+        private NullEntry nullEntry;
+
+        public EntryIterator() {
+            if (!nullSet.isEmpty()) {
+                nullEntry = new NullEntry();
+            }
+            mapIterator = map.entrySet().iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (nullEntry != null) {
+                return true;
+            }
+            return mapIterator.hasNext();
+        }
+
+        @Override
+        public Map.Entry<K, ? extends Set<T>> next() {
+            if (nullEntry != null) {
+                NullEntry ne = nullEntry;
+                nullEntry = null;
+                return ne;
+            }
+            return mapIterator.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported operation.");
+        }
+    }
+
+    private class NullEntry implements Map.Entry<K, Set<T>> {
+
+        @Override
+        public K getKey() {
+            return null;
+        }
+
+        @Override
+        public Set<T> getValue() {
+            return nullSet;
+        }
+
+        @Override
+        public Set<T> setValue(Set<T> v) {
+            throw new UnsupportedOperationException("Not supported operation.");
+        }
+    }
+
+    private final class ValueIterable implements ElementIterable<T> {
+
+        private final K value;
+        private ValueIterator current;
+
+        public ValueIterable(K value) {
+            this.value = value;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            current = new ValueIterator(value);
+            return current;
+        }
+
+        @Override
+        public T[] toArray() {
+            lock();
+            try {
+                ValueSet<K, T> valueSet = getValueSet(value);
+                T[] array = (T[]) Array.newInstance(column.table != null ? column.table.getElementClass()
+                        : Element.class, valueSet != null ? valueSet.size() : 0);
+                return valueSet != null ? valueSet.toArray(array) : array;
+            } finally {
+                unlock();
+            }
+        }
+
+        @Override
+        public Collection<T> toCollection() {
+            lock();
+            try {
+                ValueSet<K, T> valueSet = getValueSet(value);
+                return valueSet != null ? new ArrayList<>(valueSet) : new ArrayList<>();
+            } finally {
+                unlock();
+            }
+        }
+
+        @Override
+        public Set<T> toSet() {
+            lock();
+            try {
+                ValueSet<K, T> valueSet = getValueSet(value);
+                return valueSet != null ? new ObjectOpenHashSet<>(valueSet) : new ObjectOpenHashSet<>();
+            } finally {
+                unlock();
+            }
+        }
+
+        @Override
+        public void doBreak() {
+            if (current != null) {
+                current.release();
+                current = null;
+            }
+        }
+    }
+
+    // Holds the index lock until it is exhausted or released
+    private final class ValueIterator implements Iterator<T> {
+
+        private final Iterator<T> itr;
+        private boolean locked;
+
+        public ValueIterator(K value) {
+            lock();
+            locked = true;
+            ValueSet<K, T> valueSet = null;
+            try {
+                valueSet = getValueSet(value);
+            } finally {
+                if (valueSet == null) {
+                    release();
+                }
+            }
+            itr = valueSet != null ? valueSet.iterator() : Collections.emptyIterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (locked && itr.hasNext()) {
+                return true;
+            }
+            release();
+            return false;
+        }
+
+        @Override
+        public T next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return itr.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Not supported.");
+        }
+
+        private void release() {
+            if (locked) {
+                unlock();
+                locked = false;
             }
         }
     }

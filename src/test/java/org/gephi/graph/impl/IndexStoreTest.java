@@ -17,11 +17,9 @@
 package org.gephi.graph.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
@@ -579,6 +578,7 @@ public class IndexStoreTest {
         Thread setter = new Thread(() -> outside.setAttribute(a, 5));
         CountDownLatch iterating = new CountDownLatch(1);
         Thread iterator = new Thread(() -> {
+            // The iterator holds the lock of the view index until it is exhausted
             Iterator<Node> nodes = viewIndex.get(a, 0).iterator();
             iterating.countDown();
             Thread.State state;
@@ -603,117 +603,73 @@ public class IndexStoreTest {
     }
 
     @Test
-    public void testSetAttributeInsideViewWhileIteratingViewIndex() throws Exception {
-        GraphModel graphModel = GraphModel.Factory.newInstance();
-        Column a = graphModel.getNodeTable().addColumn("a", Integer.class);
-        Column b = graphModel.getNodeTable().addColumn("b", Integer.class);
-        Node n1 = graphModel.factory().newNode("1");
-        Node n2 = graphModel.factory().newNode("2");
-        n1.setAttribute(a, 0);
-        n2.setAttribute(a, 0);
-        graphModel.getGraph().addNode(n1);
-        graphModel.getGraph().addNode(n2);
-        GraphView view = graphModel.createView();
-        graphModel.getGraph(view).addNode(n1);
-        graphModel.getGraph(view).addNode(n2);
-        Index<Node> viewIndex = graphModel.getNodeIndex(view);
+    public void testGetWithoutIterating() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Index<Node> index = graphModel.getNodeIndex();
 
-        Thread setter = new Thread(() -> n2.setAttribute(a, 5));
-        setter.setDaemon(true);
-        FutureTask<Void> iteration = new FutureTask<>(() -> {
-            Iterator<Node> nodes = viewIndex.get(a, 0).iterator();
-            setter.start();
-            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-            Thread.State state;
-            while ((state = setter.getState()) != Thread.State.TERMINATED && state != Thread.State.WAITING && System
-                    .nanoTime() < deadline) {
-                Thread.sleep(1);
-            }
-            while (nodes.hasNext()) {
-                nodes.next().setAttribute(b, 1);
-            }
-            return null;
-        });
-        Thread iterator = new Thread(iteration);
-        iterator.setDaemon(true);
-        iterator.start();
-
-        iteration.get(10, TimeUnit.SECONDS);
-        setter.join(5000);
-        Assert.assertFalse(setter.isAlive());
-        Assert.assertEquals(viewIndex.count(a, 5), 1);
-        Assert.assertEquals(viewIndex.count(b, 1), 2);
+        index.get(graphModel.getNodeTable().getColumn("indexed"), 0);
+        index.get(graphModel.getNodeTable().getColumn("notIndexed"), 0);
+        assertWritesFromAnotherThread(graphModel);
     }
 
     @Test
-    public void testSetAttributeAndAddNodeAfterIncompleteGet() throws Exception {
-        GraphModel graphModel = GraphModel.Factory.newInstance();
-        Column indexed = graphModel.getNodeTable().addColumn("a", Integer.class);
-        Column notIndexed = graphModel.getNodeTable().addColumn("b", "b", Integer.class, Origin.DATA, null, false);
-        Graph graph = graphModel.getGraph();
-        Node n1 = graphModel.factory().newNode("1");
-        Node n2 = graphModel.factory().newNode("2");
-        for (Node n : new Node[] { n1, n2 }) {
-            n.setAttribute(indexed, 0);
-            n.setAttribute(notIndexed, 0);
-            graph.addNode(n);
-        }
+    public void testGetDoBreak() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
         Index<Node> index = graphModel.getNodeIndex();
-        for (Column column : new Column[] { indexed, notIndexed }) {
-            // Never iterated, then stopped after the first element
-            index.get(column, 0);
-            for (Node node : index.get(column, 0)) {
+
+        for (String id : new String[] { "indexed", "notIndexed" }) {
+            ElementIterable<Node> nodes = index.get(graphModel.getNodeTable().getColumn(id), 0);
+            for (Node node : nodes) {
                 Assert.assertNotNull(node);
                 break;
             }
+            nodes.doBreak();
+            assertWritesFromAnotherThread(graphModel);
         }
-
-        FutureTask<Void> writer = new FutureTask<>(() -> {
-            n1.setAttribute(indexed, 1);
-            Node n3 = graphModel.factory().newNode("3");
-            n3.setAttribute(indexed, 0);
-            graph.addNode(n3);
-            return null;
-        });
-        Thread thread = new Thread(writer);
-        thread.setDaemon(true);
-        thread.start();
-
-        writer.get(10, TimeUnit.SECONDS);
-        Assert.assertEquals(index.count(indexed, 0), 2);
-        Assert.assertEquals(index.count(indexed, 1), 1);
     }
 
     @Test
-    public void testGetIsSnapshot() {
-        GraphModel graphModel = GraphModel.Factory.newInstance();
-        Column column = graphModel.getNodeTable().addColumn("a", Integer.class);
-        Graph graph = graphModel.getGraph();
-        Node n1 = graphModel.factory().newNode("1");
-        Node n2 = graphModel.factory().newNode("2");
-        n1.setAttribute(column, 0);
-        n2.setAttribute(column, 0);
-        graph.addNode(n1);
-        graph.addNode(n2);
+    public void testGetIterateTwice() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
         Index<Node> index = graphModel.getNodeIndex();
 
-        Iterable<Node> nodes = index.get(column, 0);
-        Iterator<Map.Entry<Object, ? extends Set<Node>>> entries = index.getColumnIndex(column).iterator();
-        n2.setAttribute(column, 1);
-        Node n3 = graphModel.factory().newNode("3");
-        n3.setAttribute(column, 0);
-        graph.addNode(n3);
-
-        Set<Node> expected = new HashSet<>(Arrays.asList(n1, n2));
-        for (int i = 0; i < 2; i++) {
-            Set<Node> actual = new HashSet<>();
-            nodes.forEach(actual::add);
-            Assert.assertEquals(actual, expected);
+        for (String id : new String[] { "indexed", "notIndexed" }) {
+            ElementIterable<Node> nodes = index.get(graphModel.getNodeTable().getColumn(id), 0);
+            Set<Node> first = new HashSet<>();
+            nodes.forEach(first::add);
+            Set<Node> second = new HashSet<>();
+            nodes.forEach(second::add);
+            Assert.assertEquals(first.size(), 2);
+            Assert.assertEquals(second, first);
         }
-        Map.Entry<Object, ? extends Set<Node>> entry = entries.next();
-        Assert.assertEquals(entry.getKey(), 0);
-        Assert.assertEquals(entry.getValue(), expected);
-        Assert.assertFalse(entries.hasNext());
+        assertWritesFromAnotherThread(graphModel);
+    }
+
+    @Test
+    public void testGetDoBreakAfterExhaustionAndTwice() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Index<Node> index = graphModel.getNodeIndex();
+
+        for (String id : new String[] { "indexed", "notIndexed" }) {
+            Column column = graphModel.getNodeTable().getColumn(id);
+            Iterator<Node> held = index.get(column, 0).iterator();
+            ElementIterable<Node> exhausted = index.get(column, 0);
+            exhausted.forEach(Assert::assertNotNull);
+            exhausted.doBreak();
+            exhausted.doBreak();
+            ElementIterable<Node> broken = index.get(column, 0);
+            Assert.assertNotNull(broken.iterator().next());
+            broken.doBreak();
+            broken.doBreak();
+            // The first iterator still holds its lock and releases it when exhausted
+            int count = 0;
+            while (held.hasNext()) {
+                held.next();
+                count++;
+            }
+            Assert.assertEquals(count, 2);
+        }
+        assertWritesFromAnotherThread(graphModel);
     }
 
     @Test
@@ -1034,6 +990,39 @@ public class IndexStoreTest {
             list.add(n);
         }
         return list.toArray(new Node[0]);
+    }
+
+    private static GraphModel generateModelWithIndexedAndNotIndexedColumns() {
+        GraphModel graphModel = GraphModel.Factory.newInstance();
+        Column indexed = graphModel.getNodeTable().addColumn("indexed", Integer.class);
+        Column notIndexed = graphModel.getNodeTable()
+                .addColumn("notIndexed", "notIndexed", Integer.class, Origin.DATA, null, false);
+        for (String id : new String[] { "1", "2" }) {
+            Node node = graphModel.factory().newNode(id);
+            node.setAttribute(indexed, 0);
+            node.setAttribute(notIndexed, 0);
+            graphModel.getGraph().addNode(node);
+        }
+        return graphModel;
+    }
+
+    // Sets both columns of a node and adds a node, which wait for the index lock and the graph write lock
+    private static void assertWritesFromAnotherThread(GraphModel graphModel) throws Exception {
+        Column indexed = graphModel.getNodeTable().getColumn("indexed");
+        Column notIndexed = graphModel.getNodeTable().getColumn("notIndexed");
+        FutureTask<Void> writes = new FutureTask<>(() -> {
+            Node node = graphModel.getGraph().getNode("1");
+            node.setAttribute(indexed, 1);
+            node.setAttribute(notIndexed, 1);
+            Node added = graphModel.factory().newNode();
+            added.setAttribute(indexed, 0);
+            graphModel.getGraph().addNode(added);
+            return null;
+        });
+        Thread thread = new Thread(writes);
+        thread.setDaemon(true);
+        thread.start();
+        writes.get(10, TimeUnit.SECONDS);
     }
 
     private static void assertWaitsForGraphLockWithoutTableLock(GraphStore graphStore, TableLockImpl tableLock, Runnable operation) throws Exception {

@@ -38,18 +38,25 @@ public interface Index<T extends Element> {
     /**
      * Gets an Iterable of all elements in the index with <em>value</em> in the given <em>column</em>.
      * <p>
-     * The result is a snapshot taken when this method is called, later changes to the index don't affect it.
+     * The index lock, or the graph read lock if the column isn't indexed, is taken when {@code iterator()} is called
+     * and released when the iterator is exhausted or when {@link ElementIterable#doBreak()} is called. Iterate the
+     * result fully or call <code>doBreak()</code>, from the iterating thread, to stop early. Don't modify the index
+     * (set the column's value, add or remove elements) while iterating, like writing to the graph while iterating its
+     * elements.
+     * <p>
+     * The return type is {@link ElementIterable} since 0.8.11, code compiled against an earlier version must be
+     * recompiled.
      *
      * @param column the column to get values
      * @param value the value
-     * @return an iterable with element with <em>value</em> in <em>column</em>, or an empty iterable if value not found
+     * @return an iterable with element with <em>value</em> in <em>column</em>, empty if value not found
+     * @throws IllegalArgumentException if <em>column</em> is the edge type column and <em>value</em> isn't an edge type
+     *         label
      */
-    public Iterable<T> get(Column column, Object value);
+    public ElementIterable<T> get(Column column, Object value);
 
     /**
      * Returns all unique values in the given column.
-     * <p>
-     * The result is a snapshot taken when this method is called, later changes to the index don't affect it.
      *
      * @param column the column to get values from
      * @return a collection of all unique values

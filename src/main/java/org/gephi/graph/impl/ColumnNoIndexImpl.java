@@ -17,11 +17,8 @@
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,6 +26,7 @@ import org.gephi.graph.api.AttributeUtils;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Estimator;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphLock;
@@ -86,24 +84,19 @@ public class ColumnNoIndexImpl<K, T extends Element> implements ColumnIndexImpl<
     }
 
     @Override
-    public Iterable<T> get(K value) {
-        lock();
-        try {
-            Iterator<T> elementIterator = getElementIterator();
-            List<T> elements = new ArrayList<>();
-            if (elementIterator != null) {
-                while (elementIterator.hasNext()) {
-                    T element = elementIterator.next();
-                    K val = (K) element.getAttribute(column, graph.getView());
-                    if ((value == null && val == null) || (val != null && val.equals(value))) {
-                        elements.add(element);
-                    }
-                }
-            }
-            return Collections.unmodifiableList(elements);
-        } finally {
-            unlock();
+    public ElementIterable<T> get(K value) {
+        ElementIterable<T> elements;
+        if (elementClass.equals(Node.class)) {
+            elements = (ElementIterable<T>) graph.getNodes();
+        } else if (elementClass.equals(Edge.class)) {
+            elements = (ElementIterable<T>) graph.getEdges();
+        } else {
+            return ElementIterable.EMPTY;
         }
+        return new FilteredElementIterable<>(elements, element -> {
+            Object val = element.getAttribute(column, graph.getView());
+            return val == null ? value == null : val.equals(value);
+        }, elementClass);
     }
 
     @Override

@@ -1,15 +1,13 @@
 package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Node;
 
@@ -47,15 +45,9 @@ public class DegreeNoIndexImpl implements ColumnIndexImpl<Integer, Node> {
     }
 
     @Override
-    public Iterable<Node> get(Integer degree) {
+    public ElementIterable<Node> get(Integer degree) {
         checkNull(degree);
-        List<Node> nodes = new ArrayList<>();
-        for (Node node : graph.getNodes()) {
-            if (degree == getDegree(node)) {
-                nodes.add(node);
-            }
-        }
-        return Collections.unmodifiableList(nodes);
+        return new FilteredElementIterable<>(graph.getNodes(), node -> getDegree(node) == degree, Node.class);
     }
 
     @Override

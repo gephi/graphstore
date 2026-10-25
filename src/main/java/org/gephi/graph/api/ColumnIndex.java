@@ -22,9 +22,6 @@ import java.util.Set;
 /**
  * A column index is associated with a column and keeps track of each unique value and can also return the minimum and
  * maximum values in case of a sortable value type.
- * <p>
- * Its iterator returns each value with its elements as a snapshot taken when the iterator is created, later changes to
- * the index don't affect it.
  *
  * @param <K> value type
  * @param <T> Element class
@@ -42,17 +39,24 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
     /**
      * Gets an Iterable of all elements in the column index with <em>value</em>.
      * <p>
-     * The result is a snapshot taken when this method is called, later changes to the index don't affect it.
+     * The index lock, or the graph read lock if the column isn't indexed, is taken when {@code iterator()} is called
+     * and released when the iterator is exhausted or when {@link ElementIterable#doBreak()} is called. Iterate the
+     * result fully or call <code>doBreak()</code>, from the iterating thread, to stop early. Don't modify the index
+     * (set the column's value, add or remove elements) while iterating, like writing to the graph while iterating its
+     * elements.
+     * <p>
+     * The return type is {@link ElementIterable} since 0.8.11, code compiled against an earlier version must be
+     * recompiled.
      *
      * @param value the value
-     * @return an iterable with element with <em>value</em>
+     * @return an iterable with element with <em>value</em>, empty if value not found
+     * @throws IllegalArgumentException if this is the edge type column index and <em>value</em> isn't an edge type
+     *         label
      */
-    Iterable<T> get(K value);
+    ElementIterable<T> get(K value);
 
     /**
      * Returns all unique values.
-     * <p>
-     * The result is a snapshot taken when this method is called, later changes to the index don't affect it.
      *
      * @return a collection of all unique values
      */

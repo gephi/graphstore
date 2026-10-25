@@ -23,6 +23,7 @@ import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIndex;
 import org.gephi.graph.api.Element;
+import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Index;
 
@@ -76,17 +77,17 @@ public class IndexImpl<T extends Element> implements Index<T> {
     }
 
     @Override
-    public Iterable<T> get(Column column, Object value) {
+    public ElementIterable<T> get(Column column, Object value) {
         checkNonNullColumnObject(column);
 
         ColumnIndexImpl index = getIndex(column);
         if (index != null) {
             return index.get(value);
         }
-        return Collections.EMPTY_LIST;
+        return ElementIterable.EMPTY;
     }
 
-    public Iterable<T> get(String key, Object value) {
+    public ElementIterable<T> get(String key, Object value) {
         checkNonNullObject(key);
 
         return get(columnStore.getColumn(key), value);
