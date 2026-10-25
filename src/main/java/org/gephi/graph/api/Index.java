@@ -39,14 +39,19 @@ public interface Index<T extends Element> {
      * Gets an Iterable of all elements in the index with <em>value</em> in the given <em>column</em>.
      * <p>
      * The index lock, or the graph read lock if the column isn't indexed, is held from {@code iterator()} until the
-     * iterator is exhausted or {@link ElementIterable#doBreak()} is called from the iterating thread. To stop early,
-     * call <code>doBreak()</code>, which also releases the nested iterations over the same result. Parallel streams
-     * aren't supported. The edge type column returns {@link Graph#getEdges(int)} instead.
+     * iterator is exhausted or {@link ElementIterable#doBreak()} is called. To stop early, or when the loop body
+     * throws, call <code>doBreak()</code>, which also releases the nested iterations over the same result. A result is
+     * iterated and broken from a single thread and isn't shared between threads. {@code stream()} iterates a copy and
+     * holds no lock, parallel streams aren't supported.
      * <p>
      * While the lock is held, other threads that update the index or write to the graph wait for it, so a loop body
-     * that sets attributes or reads the graph can deadlock with them. In that case, copy the result with
-     * {@link ElementIterable#toArray()}, which releases the lock before returning, and iterate the array. The loop body
-     * must not set the values of the column or add or remove elements.
+     * that calls the graph, model or index APIs (reading or writing the graph, setting attributes, getting a view
+     * index) can deadlock with them. In that case, copy the result with {@link ElementIterable#toArray()}, which
+     * releases the lock before returning, and iterate the array. The loop body must not set the values of the column or
+     * add or remove elements.
+     * <p>
+     * A value of the wrong type for an indexed column may throw a <code>ClassCastException</code> when iterating, not
+     * in this method.
      * <p>
      * The return type is {@link ElementIterable} since 0.8.11, code compiled against an earlier version must be
      * recompiled.

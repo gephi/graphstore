@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.gephi.graph.api.Element;
@@ -812,9 +813,17 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         }
 
         @Override
+        public Spliterator<T> spliterator() {
+            return toCollection().spliterator();
+        }
+
+        @Override
         public void doBreak() {
-            while (last != null) {
-                last.release();
+            ValueIterator iterator = last;
+            while (iterator != null) {
+                ValueIterator prev = iterator.prev;
+                iterator.release();
+                iterator = prev;
             }
         }
 

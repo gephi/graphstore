@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.gephi.graph.api.Element;
@@ -77,9 +78,17 @@ class FilteredElementIterable<T extends Element> implements ElementIterable<T> {
     }
 
     @Override
+    public Spliterator<T> spliterator() {
+        return toCollection().spliterator();
+    }
+
+    @Override
     public void doBreak() {
-        while (last != null) {
-            last.release();
+        FilteredIterator iterator = last;
+        while (iterator != null) {
+            FilteredIterator prev = iterator.prev;
+            iterator.release();
+            iterator = prev;
         }
     }
 

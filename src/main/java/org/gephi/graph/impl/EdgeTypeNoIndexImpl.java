@@ -26,7 +26,7 @@ public class EdgeTypeNoIndexImpl implements ColumnIndexImpl<Object, Edge> {
 
     @Override
     public ElementIterable<Edge> get(Object label) {
-        return graph.getEdges(labelToType(label));
+        return new FilteredElementIterable<>(graph.getEdges(labelToType(label)), edge -> true, Edge.class);
     }
 
     @Override

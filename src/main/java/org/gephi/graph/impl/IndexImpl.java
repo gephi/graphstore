@@ -22,10 +22,13 @@ import java.util.Map;
 import java.util.Set;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.ColumnIndex;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.EdgeIterable;
 import org.gephi.graph.api.Element;
 import org.gephi.graph.api.ElementIterable;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.Index;
+import org.gephi.graph.api.NodeIterable;
 
 public class IndexImpl<T extends Element> implements Index<T> {
 
@@ -84,7 +87,8 @@ public class IndexImpl<T extends Element> implements Index<T> {
         if (index != null) {
             return index.get(value);
         }
-        return ElementIterable.EMPTY;
+        return (ElementIterable<T>) (Edge.class.equals(columnStore.elementType) ? EdgeIterable.EMPTY
+                : NodeIterable.EMPTY);
     }
 
     public ElementIterable<T> get(String key, Object value) {

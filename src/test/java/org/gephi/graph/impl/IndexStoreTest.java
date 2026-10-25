@@ -704,6 +704,55 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testGetStream() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Index<Node> index = graphModel.getNodeIndex();
+
+        for (String id : new String[] { "indexed", "notIndexed" }) {
+            Column column = graphModel.getNodeTable().getColumn(id);
+            Assert.assertTrue(index.get(column, 0).stream().findFirst().isPresent());
+            Assert.assertTrue(index.get(column, 0).stream().anyMatch(node -> true));
+            Assert.assertEquals(index.get(column, 0).stream().count(), 2);
+            index.get(column, 0).stream();
+        }
+        assertWritesFromAnotherThread(graphModel);
+    }
+
+    @Test
+    public void testGetEdgeTypeDoBreak() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Graph graph = graphModel.getGraph();
+        int type = graphModel.addEdgeType("t");
+        graph.addEdge(graphModel.factory().newEdge(graph.getNode("1"), graph.getNode("2"), type, 1.0, true));
+        graph.addEdge(graphModel.factory().newEdge(graph.getNode("2"), graph.getNode("1"), type, 1.0, true));
+        Column column = graphModel.defaultColumns().edgeType();
+        Index<Edge> index = graphModel.getEdgeIndex();
+
+        ElementIterable<Edge> exhausted = index.get(column, "t");
+        exhausted.forEach(Assert::assertNotNull);
+        graph.readLock();
+        exhausted.doBreak();
+        exhausted.doBreak();
+        graph.readUnlock();
+
+        ElementIterable<Edge> edges = index.get(column, "t");
+        Assert.assertNotNull(edges.iterator().next());
+        Assert.assertNotNull(edges.iterator().next());
+        edges.doBreak();
+        assertWritesFromAnotherThread(graphModel);
+    }
+
+    @Test
+    public void testGetRemovedEdgeColumnToArray() {
+        GraphModel graphModel = GraphModel.Factory.newInstance();
+        Column column = graphModel.getEdgeTable().addColumn("foo", Integer.class);
+        graphModel.getEdgeTable().removeColumn(column);
+
+        Edge[] edges = graphModel.getEdgeIndex().get(column, 0).toArray();
+        Assert.assertEquals(edges.length, 0);
+    }
+
+    @Test
     public void testGetAfterRemovingNotIndexedColumn() throws Exception {
         GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
         Index<Node> index = graphModel.getNodeIndex();
