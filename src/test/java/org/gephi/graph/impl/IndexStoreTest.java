@@ -767,6 +767,20 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testGetAfterRemovingIndexedColumn() throws Exception {
+        GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
+        Index<Node> index = graphModel.getNodeIndex();
+        Column column = graphModel.getNodeTable().getColumn("indexed");
+        ElementIterable<Node> nodes = index.get(column, 0);
+        graphModel.getNodeTable().removeColumn(column);
+
+        Assert.assertThrows(IllegalArgumentException.class, nodes::toCollection);
+        Assert.assertThrows(IllegalArgumentException.class, nodes::toArray);
+        Assert.assertThrows(IllegalArgumentException.class, () -> nodes.iterator().hasNext());
+        assertWritesFromAnotherThread(graphModel);
+    }
+
+    @Test
     public void testNotIndexedColumnIndexAfterRemovingColumn() throws Exception {
         GraphModel graphModel = generateModelWithIndexedAndNotIndexedColumns();
         Column column = graphModel.getNodeTable().getColumn("notIndexed");
@@ -1120,12 +1134,15 @@ public class IndexStoreTest {
         Column notIndexed = graphModel.getNodeTable().getColumn("notIndexed");
         FutureTask<Void> writes = new FutureTask<>(() -> {
             Node node = graphModel.getGraph().getNode("1");
-            node.setAttribute(indexed, 1);
+            Node added = graphModel.factory().newNode();
+            // Skips the columns removed by the test
+            if (indexed != null) {
+                node.setAttribute(indexed, 1);
+                added.setAttribute(indexed, 0);
+            }
             if (notIndexed != null) {
                 node.setAttribute(notIndexed, 1);
             }
-            Node added = graphModel.factory().newNode();
-            added.setAttribute(indexed, 0);
             graphModel.getGraph().addNode(added);
             return null;
         });

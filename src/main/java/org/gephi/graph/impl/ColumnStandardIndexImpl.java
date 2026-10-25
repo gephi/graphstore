@@ -155,6 +155,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     protected int getCount(K value) {
         lock();
         try {
+            checkNotDestroyed();
             if (value == null) {
                 return nullSet.size();
             }
@@ -178,6 +179,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
     public Collection<K> values() {
         lock();
         try {
+            checkNotDestroyed();
             return new ArrayList<>(new WithNullDecorator());
         } finally {
             unlock();
@@ -186,6 +188,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
     @Override
     public int countValues() {
+        checkNotDestroyed();
         return (nullSet.isEmpty() ? 0 : 1) + map.size();
     }
 
@@ -260,12 +263,20 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
 
     @Override
     public Iterator<Map.Entry<K, ? extends Set<T>>> iterator() {
+        checkNotDestroyed();
         return new EntryIterator();
     }
 
     @Override
     public ElementIterable<T> get(K value) {
         return new ValueIterable(value);
+    }
+
+    // The index of a removed column is destroyed
+    private void checkNotDestroyed() {
+        if (map == null) {
+            throw new IllegalArgumentException("The column does not exist");
+        }
     }
 
     protected ValueSet<K, T> getValueSet(K value) {
@@ -781,6 +792,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         public T[] toArray() {
             lock();
             try {
+                checkNotDestroyed();
                 ValueSet<K, T> valueSet = getValueSet(value);
                 T[] array = (T[]) Array.newInstance(column.table != null ? column.table.getElementClass()
                         : Element.class, valueSet != null ? valueSet.size() : 0);
@@ -794,6 +806,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         public Collection<T> toCollection() {
             lock();
             try {
+                checkNotDestroyed();
                 ValueSet<K, T> valueSet = getValueSet(value);
                 return valueSet != null ? new ArrayList<>(valueSet) : new ArrayList<>();
             } finally {
@@ -805,6 +818,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
         public Set<T> toSet() {
             lock();
             try {
+                checkNotDestroyed();
                 ValueSet<K, T> valueSet = getValueSet(value);
                 return valueSet != null ? new ObjectOpenHashSet<>(valueSet) : new ObjectOpenHashSet<>();
             } finally {
@@ -845,6 +859,7 @@ public abstract class ColumnStandardIndexImpl<K, T extends Element> implements C
                 last = this;
                 ValueSet<K, T> valueSet = null;
                 try {
+                    checkNotDestroyed();
                     valueSet = getValueSet(value);
                 } finally {
                     if (valueSet == null) {
