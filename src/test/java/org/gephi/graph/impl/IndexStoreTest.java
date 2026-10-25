@@ -609,6 +609,17 @@ public class IndexStoreTest {
     }
 
     @Test
+    public void testRemoveTimeAttributeOfColumnAddedAfterNodeCreated() {
+        GraphStore graphStore = new GraphStore();
+        // Not in the store, so adding a column does not extend its attributes
+        NodeImpl node = new NodeImpl("0", graphStore);
+        Column column = graphStore.nodeTable.addColumn("foo", TimestampIntegerMap.class);
+
+        Assert.assertNull(node.removeAttribute(column, 1.0));
+        Assert.assertNull(node.getAttribute(column));
+    }
+
+    @Test
     public void testSetTimeAttributeWhileRemovingColumn() throws Exception {
         GraphStore graphStore = new GraphStore();
         NodeImpl node = new NodeImpl("0", graphStore);

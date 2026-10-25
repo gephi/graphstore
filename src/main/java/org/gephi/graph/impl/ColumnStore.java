@@ -169,11 +169,19 @@ public class ColumnStore<T extends Element> implements ColumnIterable {
 
     public void removeColumn(final String key) {
         checkNonNullObject(key);
-        ColumnImpl col = getColumn(key);
-        if (col == null) {
-            throw new IllegalArgumentException("The column doesnt exist");
+
+        graphReadLock();
+        lock();
+        try {
+            ColumnImpl col = getColumn(key);
+            if (col == null) {
+                throw new IllegalArgumentException("The column doesnt exist");
+            }
+            removeColumn(col);
+        } finally {
+            unlock();
+            graphReadUnlock();
         }
-        removeColumn(col);
     }
 
     public int getColumnIndex(final String key) {
