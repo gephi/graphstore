@@ -52,9 +52,6 @@ public interface Index<T extends Element> {
      * <p>
      * A value of the wrong type for an indexed column may throw a <code>ClassCastException</code> when iterating, not
      * in this method.
-     * <p>
-     * The return type is {@link ElementIterable} since 0.8.11, code compiled against an earlier version must be
-     * recompiled.
      *
      * @param column the column to get values
      * @param value the value

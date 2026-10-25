@@ -53,9 +53,6 @@ public interface ColumnIndex<K, T extends Element> extends Iterable<Map.Entry<K,
      * <p>
      * A value of the wrong type for an indexed column may throw a <code>ClassCastException</code> when iterating, not
      * in this method.
-     * <p>
-     * The return type is {@link ElementIterable} since 0.8.11, code compiled against an earlier version must be
-     * recompiled.
      *
      * @param value the value
      * @return an iterable with element with <em>value</em>, empty if value not found
