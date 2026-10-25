@@ -560,6 +560,9 @@ public interface GraphModel {
 
     /**
      * Destroys the given view.
+     * <p>
+     * A graph of one of the most recently destroyed views that is still held keeps following the changes of the graph,
+     * like the graph of a live view. The graph of an older destroyed view is emptied.
      *
      * @param view view to destroy
      */

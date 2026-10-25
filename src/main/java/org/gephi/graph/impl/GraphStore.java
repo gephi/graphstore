@@ -604,11 +604,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public void clear() {
         autoWriteLock();
         try {
-            for (GraphViewImpl view : viewStore.views) {
-                if (view != null) {
-                    view.clear();
-                }
-            }
+            viewStore.clear();
             edgeStore.clear();
             nodeStore.clear();
             edgeTypeStore.clear();
@@ -624,11 +620,7 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     public void clearEdges() {
         autoWriteLock();
         try {
-            for (GraphViewImpl view : viewStore.views) {
-                if (view != null) {
-                    view.clearEdges();
-                }
-            }
+            viewStore.clearEdges();
             edgeStore.clear();
             edgeTypeStore.clear();
             edgeTable.store.indexStore.clear();

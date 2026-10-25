@@ -19,12 +19,21 @@ import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Configuration;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Element;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Interval;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
+import org.gephi.graph.api.TimeRepresentation;
 import org.gephi.graph.api.UndirectedSubgraph;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -32,9 +41,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 public class GraphViewStoreTest {
+
+    // Node and edge, node-only and edge-only views
+    private static final boolean[][] VIEW_KINDS = { { true, true }, { true, false }, { false, true } };
 
     @Test
     public void testEmptyStore() {
@@ -124,6 +137,371 @@ public class GraphViewStoreTest {
         Assert.assertFalse(store.contains(view));
         Assert.assertEquals(store.size(), 0);
         Assert.assertSame(store.getVisibleView(), graphStore.mainGraphView);
+    }
+
+    @Test
+    public void testDestroyedViewKeepsContent() {
+        for (boolean[] kind : VIEW_KINDS) {
+            GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+            GraphViewImpl view = createPartialView(graphStore, kind[0], kind[1]);
+            GraphViewImpl control = createPartialView(graphStore, kind[0], kind[1]);
+            Subgraph graph = graphStore.viewStore.getDirectedGraph(view);
+            Set<Node> nodes = toSet(graph.getNodes().toArray());
+            Set<Edge> edges = toSet(graph.getEdges().toArray());
+            Assert.assertTrue(edges.size() > 0 && edges.size() < graphStore.getEdgeCount());
+
+            // Replaced by another view without changing the store, as when a filter is swapped
+            graphStore.viewStore.setVisibleView(view);
+            graphStore.viewStore.setVisibleView(graphStore.viewStore.createView(graphStore.mainGraphView));
+            graphStore.viewStore.destroyView(view);
+
+            Assert.assertEquals(toSet(graph.getNodes().toArray()), nodes);
+            Assert.assertEquals(toSet(graph.getEdges().toArray()), edges);
+            assertSameContent(graphStore, view, control);
+        }
+    }
+
+    @Test
+    public void testDestroyedViewFollowsStoreRemovals() {
+        for (boolean[] kind : VIEW_KINDS) {
+            GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+            GraphViewImpl view = createPartialView(graphStore, kind[0], kind[1]);
+            GraphViewImpl control = createPartialView(graphStore, kind[0], kind[1]);
+            Subgraph graph = graphStore.viewStore.getDirectedGraph(view);
+            Set<Node> nodes = toSet(graph.getNodes().toArray());
+            Set<Edge> edges = toSet(graph.getEdges().toArray());
+            graphStore.viewStore.destroyView(view);
+
+            List<Edge> removedEdges = Arrays.asList(graphStore.getEdges().toArray()).subList(0, 20);
+            graphStore.removeAllEdges(removedEdges);
+            edges.removeAll(removedEdges);
+            List<Node> removedNodes = Arrays.asList(graphStore.getNodes().toArray()).subList(0, 5);
+            for (Node node : removedNodes) {
+                edges.removeAll(graphStore.getEdges(node).toCollection());
+            }
+            graphStore.removeAllNodes(removedNodes);
+            nodes.removeAll(removedNodes);
+
+            Assert.assertEquals(toSet(graph.getNodes().toArray()), nodes);
+            Assert.assertEquals(toSet(graph.getEdges().toArray()), edges);
+            Assert.assertEquals(graph.getNodeCount(), nodes.size());
+            Assert.assertEquals(graph.getEdgeCount(), edges.size());
+            assertSameContent(graphStore, view, control);
+        }
+    }
+
+    @Test
+    public void testDestroyedViewIgnoresReusedStoreIds() {
+        for (boolean[] kind : VIEW_KINDS) {
+            GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+            GraphViewImpl view = createPartialView(graphStore, kind[0], kind[1]);
+            GraphViewImpl control = createPartialView(graphStore, kind[0], kind[1]);
+            Subgraph graph = graphStore.viewStore.getDirectedGraph(view);
+            graphStore.viewStore.destroyView(view);
+
+            List<Node> removedNodes = Arrays.asList(graphStore.getNodes().toArray()).subList(0, 5);
+            Set<Integer> removedNodeIds = new HashSet<>();
+            removedNodes.forEach(n -> removedNodeIds.add(n.getStoreId()));
+            graphStore.removeAllEdges(Arrays.asList(graphStore.getEdges().toArray()).subList(0, 20));
+            graphStore.removeAllNodes(removedNodes);
+
+            List<Node> addedNodes = new ArrayList<>();
+            for (int i = 0; i < removedNodes.size(); i++) {
+                addedNodes.add(graphStore.factory.newNode("added" + i));
+            }
+            graphStore.addAllNodes(addedNodes);
+            Set<Integer> addedNodeIds = new HashSet<>();
+            addedNodes.forEach(n -> addedNodeIds.add(n.getStoreId()));
+            Assert.assertEquals(addedNodeIds, removedNodeIds);
+
+            // Between all the nodes with a new type, so the added edges reuse the free store ids and then some
+            Node[] allNodes = graphStore.getNodes().toArray();
+            List<Edge> addedEdges = new ArrayList<>();
+            for (int i = 0; i < allNodes.length; i++) {
+                for (int j = i + 1; j < allNodes.length; j++) {
+                    addedEdges.add(graphStore.factory
+                            .newEdge("added" + i + "_" + j, allNodes[i], allNodes[j], 3, 1.0, true));
+                }
+            }
+            graphStore.addAllEdges(addedEdges);
+
+            Subgraph controlGraph = graphStore.viewStore.getDirectedGraph(control);
+            for (Node node : addedNodes) {
+                Assert.assertEquals(graph.contains(node), !kind[0]);
+            }
+            int addedInView = 0;
+            for (Edge edge : addedEdges) {
+                Assert.assertEquals(graph.contains(edge), controlGraph.contains(edge));
+                addedInView += graph.contains(edge) ? 1 : 0;
+            }
+            // Only a node-only view takes the edges added between its nodes
+            Assert.assertEquals(addedInView > 0, kind[0] && !kind[1]);
+            assertSameContent(graphStore, view, control);
+        }
+    }
+
+    @Test
+    public void testDestroyedViewFollowsEdgeTypeChanges() {
+        for (boolean[] kind : VIEW_KINDS) {
+            GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+            GraphViewImpl view = createPartialView(graphStore, kind[0], kind[1]);
+            GraphViewImpl control = createPartialView(graphStore, kind[0], kind[1]);
+            graphStore.viewStore.destroyView(view);
+
+            for (Edge edge : graphStore.getEdges().toArray()) {
+                if (edge.getStoreId() % 3 == 0) {
+                    edge.setType((edge.getType() + 1) % 4);
+                }
+            }
+            assertSameContent(graphStore, view, control);
+        }
+    }
+
+    @Test
+    public void testDestroyedViewFollowsStoreClear() {
+        for (boolean[] kind : VIEW_KINDS) {
+            GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+            GraphViewImpl view = createPartialView(graphStore, kind[0], kind[1]);
+            GraphViewImpl control = createPartialView(graphStore, kind[0], kind[1]);
+            graphStore.viewStore.destroyView(view);
+
+            graphStore.clear();
+            Assert.assertEquals(view.getNodeCount(), 0);
+            Assert.assertEquals(view.getEdgeCount(), 0);
+            assertSameContent(graphStore, view, control);
+
+            // The store ids start over
+            Node n1 = graphStore.factory.newNode("1");
+            Node n2 = graphStore.factory.newNode("2");
+            graphStore.addAllNodes(Arrays.asList(n1, n2));
+            graphStore.addEdge(graphStore.factory.newEdge(n1, n2, 0, true));
+            assertSameContent(graphStore, view, control);
+        }
+    }
+
+    @Test
+    public void testDestroyedViewFollowsStoreClearEdges() {
+        for (boolean[] kind : VIEW_KINDS) {
+            GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+            GraphViewImpl view = createPartialView(graphStore, kind[0], kind[1]);
+            GraphViewImpl control = createPartialView(graphStore, kind[0], kind[1]);
+            Set<Node> nodes = toSet(graphStore.viewStore.getDirectedGraph(view).getNodes().toArray());
+            graphStore.viewStore.destroyView(view);
+
+            graphStore.clearEdges();
+            Assert.assertEquals(view.getEdgeCount(), 0);
+            Assert.assertEquals(toSet(graphStore.viewStore.getDirectedGraph(view).getNodes().toArray()), nodes);
+            assertSameContent(graphStore, view, control);
+
+            Node[] allNodes = graphStore.getNodes().toArray();
+            for (int i = 1; i < allNodes.length; i++) {
+                graphStore.addEdge(graphStore.factory.newEdge(allNodes[i - 1], allNodes[i], 0, true));
+            }
+            assertSameContent(graphStore, view, control);
+        }
+    }
+
+    @Test
+    public void testDestroyedViewWithIndexes() {
+        for (TimeRepresentation timeRepresentation : TimeRepresentation.values()) {
+            GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(timeRepresentation);
+            GraphModelImpl graphModel = graphStore.graphModel;
+            Column nodeColumn = graphModel.getNodeTable().addColumn("age", Integer.class);
+            Column edgeColumn = graphModel.getEdgeTable().addColumn("kind", String.class);
+            List<Node> nodes = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                Node node = graphStore.factory.newNode(String.valueOf(i));
+                node.setAttribute(nodeColumn, i % 3);
+                addTime(node, timeRepresentation, i);
+                nodes.add(node);
+            }
+            graphStore.addAllNodes(nodes);
+            for (int i = 1; i < nodes.size(); i++) {
+                Edge edge = graphStore.factory.newEdge(nodes.get(i - 1), nodes.get(i), 0, true);
+                edge.setAttribute(edgeColumn, "e" + (i % 2));
+                addTime(edge, timeRepresentation, i);
+                graphStore.addEdge(edge);
+            }
+
+            GraphViewImpl view = createPartialView(graphStore, true, true);
+            GraphViewImpl control = createPartialView(graphStore, true, true);
+            for (GraphView v : Arrays.asList(view, control)) {
+                graphModel.getNodeIndex(v);
+                graphModel.getEdgeIndex(v);
+                graphModel.getNodeTimeIndex(v);
+                graphModel.getEdgeTimeIndex(v);
+            }
+            graphStore.viewStore.destroyView(view);
+
+            Node added = graphStore.factory.newNode("added");
+            added.setAttribute(nodeColumn, 1);
+            addTime(added, timeRepresentation, 20);
+            graphStore.addNode(added);
+            Edge addedEdge = graphStore.factory.newEdge(nodes.get(1), nodes.get(5), 0, true);
+            addTime(addedEdge, timeRepresentation, 20);
+            graphStore.addEdge(addedEdge);
+            for (Node node : graphStore.getNodes().toArray()) {
+                node.setAttribute(nodeColumn, 5);
+                addTime(node, timeRepresentation, 30);
+            }
+            for (Edge edge : graphStore.getEdges().toArray()) {
+                edge.setAttribute(edgeColumn, "changed");
+                addTime(edge, timeRepresentation, 30);
+            }
+            graphStore.getEdges().toArray()[0].setType(1);
+            graphStore.removeEdge(graphStore.getEdges().toArray()[0]);
+            graphStore.removeNode(nodes.get(2));
+            assertSameContent(graphStore, view, control);
+
+            // Only the live view has indexes
+            Set<GraphView> indexed = Collections.singleton(control);
+            Assert.assertEquals(graphStore.nodeTable.store.indexStore.viewIndexes.keySet(), indexed);
+            Assert.assertEquals(graphStore.edgeTable.store.indexStore.viewIndexes.keySet(), indexed);
+            Assert.assertEquals(graphStore.timeStore.nodeIndexStore.viewIndexes.keySet(), indexed);
+            Assert.assertEquals(graphStore.timeStore.edgeIndexStore.viewIndexes.keySet(), indexed);
+            Assert.assertThrows(IllegalArgumentException.class, () -> graphModel.getNodeIndex(view));
+            Assert.assertThrows(IllegalArgumentException.class, () -> graphModel.getEdgeTimeIndex(view));
+            Assert.assertEquals(graphModel.getNodeIndex(control).count(nodeColumn, 5), graphModel.getGraph(control)
+                    .getNodeCount());
+        }
+    }
+
+    @Test
+    public void testDestroyedViewsAreReleased() throws InterruptedException {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        List<WeakReference<GraphView>> released = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            GraphViewImpl view = store.createView(graphStore.mainGraphView);
+            store.destroyView(view);
+            released.add(new WeakReference<>(view));
+        }
+        // The store's references to the views are cleared at the same time as these ones
+        WeakReference<Object> garbage = new WeakReference<>(new Object());
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while ((garbage.get() != null || released.stream().anyMatch(ref -> ref.get() != null)) && System
+                .nanoTime() < deadline) {
+            System.gc();
+            Thread.sleep(10);
+        }
+        if (garbage.get() != null) {
+            throw new SkipException("No garbage collection happened");
+        }
+        for (WeakReference<GraphView> ref : released) {
+            Assert.assertNull(ref.get());
+        }
+
+        GraphViewImpl held = store.createView(graphStore.mainGraphView);
+        store.destroyView(held);
+        Assert.assertEquals(store.destroyedViews.size(), 1);
+        Assert.assertSame(store.destroyedViews.get(0).get(), held);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> store.destroyView(held));
+        Assert.assertThrows(IllegalArgumentException.class, () -> store.createView(held));
+        Assert.assertThrows(IllegalArgumentException.class, () -> store.setVisibleView(held));
+        Assert.assertEquals(store.destroyedViews.size(), 1);
+
+        graphStore.removeNode(graphStore.getNodes().toArray()[0]);
+        Assert.assertEquals(store.getGraph(held).getNodes().toArray().length, graphStore.getNodeCount());
+        Assert.assertEquals(store.getGraph(held).getEdges().toArray().length, graphStore.getEdgeCount());
+    }
+
+    @Test
+    public void testOlderDestroyedViewsAreEmptied() {
+        GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
+        int count = GraphViewStore.MAX_DESTROYED_VIEWS + 3;
+        GraphViewImpl[] views = new GraphViewImpl[count];
+        GraphViewImpl[] controls = new GraphViewImpl[count];
+        for (int i = 0; i < count; i++) {
+            boolean[] kind = VIEW_KINDS[i % VIEW_KINDS.length];
+            views[i] = createPartialView(graphStore, kind[0], kind[1]);
+            controls[i] = createPartialView(graphStore, kind[0], kind[1]);
+        }
+        for (GraphViewImpl view : views) {
+            graphStore.viewStore.destroyView(view);
+        }
+
+        for (int round = 0; round < 2; round++) {
+            graphStore.removeAllEdges(Arrays.asList(graphStore.getEdges().toArray()).subList(0, 10));
+            graphStore.removeNode(graphStore.getNodes().toArray()[0]);
+            Node node = graphStore.factory.newNode("added" + round);
+            graphStore.addNode(node);
+            graphStore.addEdge(graphStore.factory
+                    .newEdge("added" + round, node, graphStore.getNodes().toArray()[0], 0, 1.0, true));
+
+            for (int i = 0; i < count; i++) {
+                if (i >= count - GraphViewStore.MAX_DESTROYED_VIEWS) {
+                    assertSameContent(graphStore, views[i], controls[i]);
+                    continue;
+                }
+                // Emptied once it was no longer one of the most recently destroyed views
+                Subgraph directed = graphStore.viewStore.getDirectedGraph(views[i]);
+                Subgraph undirected = graphStore.viewStore.getUndirectedGraph(views[i]);
+                for (Subgraph graph : Arrays.asList(directed, undirected)) {
+                    Assert.assertEquals(graph.getEdgeCount(), 0);
+                    Assert.assertEquals(graph.getEdges().toArray().length, 0);
+                    Assert.assertEquals(graph.getNodeCount(), views[i].nodeView ? 0 : graphStore.getNodeCount());
+                    Assert.assertEquals(graph.getNodes().toArray().length, graph.getNodeCount());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testDestroyedViewsTrackingIsCapped() {
+        GraphStore graphStore = GraphGenerator.generateSmallGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        List<GraphView> held = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            GraphViewImpl view = store.createView(graphStore.mainGraphView);
+            store.destroyView(view);
+            held.add(view);
+            Assert.assertEquals(store.destroyedViews.size(), Math.min(i + 1, GraphViewStore.MAX_DESTROYED_VIEWS));
+        }
+        // The most recently destroyed, oldest first
+        int first = held.size() - GraphViewStore.MAX_DESTROYED_VIEWS;
+        for (int i = 0; i < GraphViewStore.MAX_DESTROYED_VIEWS; i++) {
+            Assert.assertSame(store.destroyedViews.get(i).get(), held.get(first + i));
+        }
+    }
+
+    // Keeps part of the nodes and/or edges, the same ones on each call
+    private static GraphViewImpl createPartialView(GraphStore graphStore, boolean nodes, boolean edges) {
+        return graphStore.viewStore
+                .createView(nodes ? n -> n.getStoreId() % 3 != 0 : null, edges ? e -> e.getStoreId() % 2 == 0 : null);
+    }
+
+    private static void addTime(Element element, TimeRepresentation timeRepresentation, double time) {
+        if (timeRepresentation == TimeRepresentation.TIMESTAMP) {
+            element.addTimestamp(time);
+        } else {
+            element.addInterval(new Interval(time, time + 1));
+        }
+    }
+
+    private static <T> Set<T> toSet(T[] elements) {
+        return new HashSet<>(Arrays.asList(elements));
+    }
+
+    // A destroyed view is expected to change with the store like a live view created the same way
+    private static void assertSameContent(GraphStore graphStore, GraphViewImpl view, GraphViewImpl control) {
+        Assert.assertTrue(view.isDestroyed());
+        Assert.assertFalse(control.isDestroyed());
+        Assert.assertTrue(view.deepEquals(control));
+        assertSameContent(graphStore.viewStore.getDirectedGraph(view), graphStore.viewStore.getDirectedGraph(control));
+        assertSameContent(graphStore.viewStore.getUndirectedGraph(view), graphStore.viewStore
+                .getUndirectedGraph(control));
+    }
+
+    private static void assertSameContent(Subgraph graph, Subgraph control) {
+        Assert.assertEquals(graph.getNodeCount(), control.getNodeCount());
+        Assert.assertEquals(graph.getEdgeCount(), control.getEdgeCount());
+        Assert.assertEquals(toSet(graph.getNodes().toArray()), toSet(control.getNodes().toArray()));
+        Assert.assertEquals(toSet(graph.getEdges().toArray()), toSet(control.getEdges().toArray()));
+        for (int type = 0; type < 4; type++) {
+            Assert.assertEquals(graph.getEdgeCount(type), control.getEdgeCount(type));
+            Assert.assertEquals(toSet(graph.getEdges(type).toArray()), toSet(control.getEdges(type).toArray()));
+        }
     }
 
     @Test

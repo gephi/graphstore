@@ -17,6 +17,9 @@ package org.gephi.graph.impl;
 
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import org.gephi.graph.api.DirectedSubgraph;
 import org.gephi.graph.api.Edge;
@@ -33,11 +36,15 @@ public class GraphViewStore {
     protected static final int NULL_VIEW = -1;
     // Config
     protected static final int DEFAULT_VIEWS = 0;
+    // Destroyed views kept following the store, each costs like a view on every change of the store
+    protected static final int MAX_DESTROYED_VIEWS = 8;
     // Data
     protected final IntSortedSet garbageQueue;
     protected final GraphStore graphStore;
     protected GraphViewImpl[] views;
     protected int length;
+    // Most recently destroyed views, oldest first, updated like the views for as long as they're held elsewhere
+    protected final List<WeakReference<GraphViewImpl>> destroyedViews;
     // Visible view
     protected volatile GraphView visibleView;
 
@@ -48,6 +55,7 @@ public class GraphViewStore {
         this.graphStore = graphStore;
         this.views = new GraphViewImpl[DEFAULT_VIEWS];
         this.garbageQueue = new IntRBTreeSet();
+        this.destroyedViews = new ArrayList<>();
         this.visibleView = graphStore.mainGraphView;
     }
 
@@ -140,6 +148,17 @@ public class GraphViewStore {
             }
 
             removeView((GraphViewImpl) view);
+
+            // Its graph may still be held, so the view keeps following the store, where store ids get reused
+            destroyedViews.removeIf(ref -> ref.get() == null);
+            destroyedViews.add(new WeakReference<>((GraphViewImpl) view));
+            while (destroyedViews.size() > MAX_DESTROYED_VIEWS) {
+                // Emptied instead, so that it stays consistent once it no longer follows the store
+                GraphViewImpl oldest = destroyedViews.remove(0).get();
+                if (oldest != null) {
+                    oldest.clear();
+                }
+            }
         } finally {
             graphStore.autoWriteUnlock();
         }
@@ -269,6 +288,13 @@ public class GraphViewStore {
                 view.incrementNodeVersion();
             }
         }
+        // Iterated by index, so that the hooks don't allocate
+        for (int i = 0; i < destroyedViews.size(); i++) {
+            GraphViewImpl view = destroyedViews.get(i).get();
+            if (view != null && !view.nodeView) {
+                view.incrementNodeVersion();
+            }
+        }
     }
 
     protected void removeNode(NodeImpl node) {
@@ -278,6 +304,16 @@ public class GraphViewStore {
                     view.removeNode(node);
                 } else {
                     // Edge-only views include all nodes, and incident edges are removed from them beforehand
+                    view.incrementNodeVersion();
+                }
+            }
+        }
+        for (int i = 0; i < destroyedViews.size(); i++) {
+            GraphViewImpl view = destroyedViews.get(i).get();
+            if (view != null) {
+                if (view.nodeView) {
+                    view.removeNode(node);
+                } else {
                     view.incrementNodeVersion();
                 }
             }
@@ -292,6 +328,12 @@ public class GraphViewStore {
                 }
             }
         }
+        for (int i = 0; i < destroyedViews.size(); i++) {
+            GraphViewImpl view = destroyedViews.get(i).get();
+            if (view != null && view.nodeView && !view.edgeView) {
+                view.addEdgeInNodeView(edge);
+            }
+        }
     }
 
     protected void setEdgeType(EdgeImpl edge, int oldType, boolean wasMutual) {
@@ -302,12 +344,53 @@ public class GraphViewStore {
                 }
             }
         }
+        for (int i = 0; i < destroyedViews.size(); i++) {
+            GraphViewImpl view = destroyedViews.get(i).get();
+            if (view != null && view.containsEdge(edge)) {
+                view.setEdgeType(edge, oldType, wasMutual);
+            }
+        }
     }
 
     protected void removeEdge(EdgeImpl edge) {
         for (GraphViewImpl view : views) {
             if (view != null) {
                 view.removeEdgeFromStore(edge);
+            }
+        }
+        for (int i = 0; i < destroyedViews.size(); i++) {
+            GraphViewImpl view = destroyedViews.get(i).get();
+            if (view != null) {
+                view.removeEdgeFromStore(edge);
+            }
+        }
+    }
+
+    // Called when the store is cleared, the views are kept but emptied
+    protected void clear() {
+        for (GraphViewImpl view : views) {
+            if (view != null) {
+                view.clear();
+            }
+        }
+        for (int i = 0; i < destroyedViews.size(); i++) {
+            GraphViewImpl view = destroyedViews.get(i).get();
+            if (view != null) {
+                view.clear();
+            }
+        }
+    }
+
+    protected void clearEdges() {
+        for (GraphViewImpl view : views) {
+            if (view != null) {
+                view.clearEdges();
+            }
+        }
+        for (int i = 0; i < destroyedViews.size(); i++) {
+            GraphViewImpl view = destroyedViews.get(i).get();
+            if (view != null) {
+                view.clearEdges();
             }
         }
     }
