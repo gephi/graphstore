@@ -404,9 +404,11 @@ public class Configuration {
         }
 
         /**
-         * Sets whether to enable multiple edges of the same type between two nodes.
+         * Sets whether to enable parallel edges of the same type, i.e. edges with the same type, endpoints and
+         * direction.
          * <p>
-         * If disabled, only a single edge of a given type can exist between two nodes.
+         * If disabled, {@link Graph#addEdge(Edge)} returns false for such an edge. A directed edge and its reverse
+         * edge, and edges of different types, are always allowed.
          * <p>
          * Default is <code>true</code>.
          *

@@ -20,8 +20,10 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -750,14 +752,14 @@ public class GraphStoreTest {
     }
 
     @Test
-    public void testGetNodeEdgesUnusedEdgeType() {
+    public void testGetNodeEdgesNonDefaultEdgeType() {
         GraphStore graphStore = new GraphStore();
         NodeStore nodeStore = GraphGenerator.generateNodeStore(5);
         EdgeImpl[] edges = GraphGenerator.generateEdgeList(nodeStore, 4, 1, true, true, false);
         graphStore.addAllEdges(Arrays.asList(edges));
 
         for (EdgeImpl e : edges) {
-            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target), new EdgeImpl[] {});
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
             testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
         }
     }
@@ -773,12 +775,100 @@ public class GraphStoreTest {
     }
 
     @Test
-    public void testGetNodeEdgesMixedUnusedEdgeType() {
+    public void testGetNodeEdgesMixedNonDefaultEdgeType() {
         GraphStore graphStore = GraphGenerator.generateSmallMixedGraphStore(2);
 
         for (EdgeImpl e : graphStore.edgeStore.toArray()) {
-            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target), new EdgeImpl[] {});
+            testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target), new EdgeImpl[] { e });
             testEdgeIterableWithoutParallel(graphStore.getEdges(e.source, e.target, e.type), new EdgeImpl[] { e });
+        }
+    }
+
+    @Test
+    public void testGetEdgesAllTypes() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        int type = graphStore.edgeTypeStore.addType("foo");
+        Edge e1 = graphStore.factory.newEdge("e1", n1, n2, type, 1.0, true);
+        Edge e0 = graphStore.factory.newEdge("e0", n1, n2, 0, 1.0, true);
+        Edge e2 = graphStore.factory.newEdge("e2", n1, n2, type, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(e1, e0, e2));
+
+        Assert.assertSame(graphStore.getEdge(n1, n2), e0);
+        List<Edge> edges = new ArrayList<>(graphStore.getEdges(n1, n2).toCollection());
+        Assert.assertEquals(edges.size(), 3);
+        Assert.assertSame(edges.get(0), e0);
+        Assert.assertEquals(new HashSet<>(edges), new HashSet<>(Arrays.asList(e0, e1, e2)));
+        Assert.assertNull(graphStore.getEdge(n2, n1));
+        Assert.assertFalse(graphStore.getEdges(n2, n1).iterator().hasNext());
+        Assert.assertEquals(graphStore.lock.getReadHoldCount(), 0);
+
+        graphStore.removeEdge(e0);
+        Assert.assertSame(graphStore.getEdge(n1, n2), graphStore.getEdge(n1, n2, type));
+    }
+
+    @Test
+    public void testGetEdgesAllTypesMixed() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore();
+        Node s = graphStore.factory.newNode("s");
+        Node t = graphStore.factory.newNode("t");
+        graphStore.addAllNodes(Arrays.asList(s, t));
+        int undirectedType = graphStore.edgeTypeStore.addType("undirected");
+        int directedType = graphStore.edgeTypeStore.addType("directed");
+        Edge reverse = graphStore.factory.newEdge("r", t, s, 0, 1.0, true);
+        Edge undirected = graphStore.factory.newEdge("u", s, t, undirectedType, 1.0, false);
+        Edge directed = graphStore.factory.newEdge("d", s, t, directedType, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(directed, undirected, reverse));
+
+        Assert.assertEquals(graphStore.getEdges(s, t).toCollection(), Arrays.asList(undirected, directed));
+        Assert.assertEquals(graphStore.getEdges(t, s).toCollection(), Arrays.asList(reverse, undirected));
+        Assert.assertSame(graphStore.getEdge(s, t), undirected);
+        Assert.assertSame(graphStore.getEdge(t, s), reverse);
+        Assert.assertEquals(graphStore.undirectedDecorator.getEdges(s, t).toCollection(), Arrays
+                .asList(reverse, undirected, directed));
+        Assert.assertSame(graphStore.undirectedDecorator.getEdge(s, t), reverse);
+    }
+
+    @Test
+    public void testGetEdgesAllTypesUndirected() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore();
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        int type = graphStore.edgeTypeStore.addType("foo");
+        Edge e1 = graphStore.factory.newEdge("e1", n2, n1, type, 1.0, false);
+        Edge e0 = graphStore.factory.newEdge("e0", n1, n2, 0, 1.0, false);
+        graphStore.addAllEdges(Arrays.asList(e1, e0));
+
+        Assert.assertSame(graphStore.getEdge(n1, n2), e0);
+        Assert.assertSame(graphStore.getEdge(n2, n1), e0);
+        Assert.assertEquals(graphStore.getEdges(n1, n2).toCollection(), Arrays.asList(e0, e1));
+        Assert.assertEquals(graphStore.getEdges(n2, n1).toCollection(), Arrays.asList(e0, e1));
+    }
+
+    @Test
+    public void testGetEdgesWaitsForWriter() throws Exception {
+        GraphStore graphStore = GraphGenerator.generateTinyGraphStore();
+        Node n1 = graphStore.getNode("1");
+        Node n2 = graphStore.getNode("2");
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<Edge[]> edges;
+            graphStore.writeLock();
+            try {
+                edges = executor.submit(() -> graphStore.getEdges(n1, n2).toArray());
+                while (!graphStore.lock.readWriteLock.hasQueuedThreads() && !edges.isDone()) {
+                    Thread.sleep(1);
+                }
+                graphStore.removeEdge(graphStore.getEdge("0"));
+            } finally {
+                graphStore.writeUnlock();
+            }
+            Assert.assertEquals(edges.get(10, TimeUnit.SECONDS).length, 0);
+        } finally {
+            executor.shutdownNow();
         }
     }
 

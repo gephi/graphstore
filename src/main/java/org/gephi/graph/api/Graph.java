@@ -170,9 +170,9 @@ public interface Graph {
     public boolean hasEdge(Object id);
 
     /**
-     * Gets the edge adjacent to node1 and node2.
+     * Gets an edge between node1 and node2, of any type.
      * <p>
-     * If multiple parallel edges exist it returns the first edge.
+     * If several edges connect the nodes, returns the first edge of the lowest type.
      *
      * @param node1 first node
      * @param node2 second node
@@ -181,9 +181,9 @@ public interface Graph {
     public Edge getEdge(Node node1, Node node2);
 
     /**
-     * Get the edges adjacent to node1 and node2.
+     * Gets the edges between node1 and node2, of all types.
      * <p>
-     * If there aren't any parallel edges only one edge will be returned.
+     * The edges are grouped by type, in ascending type order.
      *
      * @param node1 first node
      * @param node2 second node
