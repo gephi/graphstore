@@ -60,8 +60,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public EdgeIterable getEdges(Node node1, Node node2) {
-        return new EdgeIterableWrapper(
-                () -> new EdgeViewIterator(graphStore.edgeStore.getAll(node1, node2, undirected)),
+        return new EdgeIterableWrapper(() -> pairIterator(graphStore.edgeStore.getAll(node1, node2, undirected)),
                 graphStore.getAutoLock());
     }
 
@@ -69,11 +68,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public Edge getEdge(Node node1, Node node2, int type) {
         graphStore.autoReadLock();
         try {
-            EdgeImpl edge = graphStore.edgeStore.get(node1, node2, type, undirected);
-            if (edge != null && view.containsEdge(edge)) {
-                return edge;
-            }
-            return null;
+            return graphStore.edgeStore.get(node1, node2, type, undirected, view);
         } finally {
             graphStore.autoReadUnlock();
         }
@@ -81,9 +76,12 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
 
     @Override
     public EdgeIterable getEdges(Node node1, Node node2, int type) {
-        return new EdgeIterableWrapper(
-                () -> new EdgeViewIterator(graphStore.edgeStore.getAll(node1, node2, type, undirected)),
+        return new EdgeIterableWrapper(() -> pairIterator(graphStore.edgeStore.getAll(node1, node2, type, undirected)),
                 graphStore.getAutoLock());
+    }
+
+    private Iterator<Edge> pairIterator(Iterator<Edge> iterator) {
+        return undirected ? new UndirectedEdgeViewIterator(iterator) : new EdgeViewIterator(iterator);
     }
 
     @Override
@@ -167,12 +165,10 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         graphStore.autoReadLock();
         try {
             EdgeStore edgeStore = graphStore.edgeStore;
-            int typeLength = edgeStore.longDictionary.length;
-            for (int type = 0; type < typeLength; type++) {
-                EdgeImpl edge = edgeStore.get(source, target, type, undirected);
-                if (edge != null && view.containsEdge(edge)) {
-                    return true;
-                }
+            if (edgeStore.get(source, target, false, view) != null) {
+                return true;
+            } else if (undirected && !edgeStore.isUndirectedGraph()) {
+                return edgeStore.get(target, source, false, view) != null;
             }
             return false;
         } finally {
@@ -186,8 +182,13 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         checkValidInViewNodeObject(target);
         graphStore.autoReadLock();
         try {
-            EdgeImpl edge = graphStore.edgeStore.get(source, target, type, undirected);
-            return edge != null && view.containsEdge(edge);
+            EdgeStore edgeStore = graphStore.edgeStore;
+            if (edgeStore.get(source, target, type, false, view) != null) {
+                return true;
+            } else if (undirected && !edgeStore.isUndirectedGraph()) {
+                return edgeStore.get(target, source, type, false, view) != null;
+            }
+            return false;
         } finally {
             graphStore.autoReadUnlock();
         }
@@ -887,12 +888,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     boolean isUndirectedToIgnore(final EdgeImpl edge) {
-        if (edge.isMutual() && edge.source.storeId < edge.target.storeId) {
-            if (view.containsEdge(graphStore.edgeStore.get(edge.target, edge.source, edge.type, false))) {
-                return true;
-            }
-        }
-        return false;
+        return graphStore.edgeStore.isUndirectedToIgnore(edge, view);
     }
 
     @Override
