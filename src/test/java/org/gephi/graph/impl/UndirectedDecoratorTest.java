@@ -163,10 +163,21 @@ public class UndirectedDecoratorTest {
         Edge e1 = store.factory.newEdge("1", n2, n1, 2, 1.0, false);
 
         store.addAllEdges(Arrays.asList(new Edge[] { e0, e1 }));
-        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2), new Edge[] {});
+        testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2), new Edge[] { e0, e1 });
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 0), new Edge[] {});
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 1), new Edge[] { e0 });
         testEdgeIterable(store.undirectedDecorator.getEdges(n1, n2, 2), new Edge[] { e1 });
+    }
+
+    @Test
+    public void testGetEdgesSelfLoopOnce() {
+        GraphStore store = new GraphStore();
+        Node n1 = store.factory.newNode("1");
+        store.addNode(n1);
+        Edge loop = store.factory.newEdge("0", n1, n1, 0, 1.0, true);
+        store.addEdge(loop);
+
+        Assert.assertEquals(store.undirectedDecorator.getEdges(n1, n1).toCollection(), Arrays.asList(loop));
     }
 
     @Test

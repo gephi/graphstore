@@ -24,7 +24,9 @@ package org.gephi.graph.api;
 public interface DirectedGraph extends Graph {
 
     /**
-     * Gets the edge adjacent to source and target.
+     * Gets an edge from source to target, or an undirected edge between them, of any type.
+     * <p>
+     * If several edges match, returns the first edge of the lowest type.
      *
      * @param source the source node
      * @param target the target node
@@ -32,6 +34,18 @@ public interface DirectedGraph extends Graph {
      */
     @Override
     public Edge getEdge(Node source, Node target);
+
+    /**
+     * Gets the edges from source to target, and the undirected edges between them, of all types.
+     * <p>
+     * The edges are grouped by type, in ascending type order.
+     *
+     * @param source the source node
+     * @param target the target node
+     * @return the adjacent edges
+     */
+    @Override
+    public EdgeIterable getEdges(Node source, Node target);
 
     /**
      * Gets the edge adjacent to source and target with an edge of the given type.

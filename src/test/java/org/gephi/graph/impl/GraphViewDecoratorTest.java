@@ -954,6 +954,30 @@ public class GraphViewDecoratorTest {
     }
 
     @Test
+    public void testGetEdgeOfAnyTypeInView() {
+        GraphStore graphStore = GraphGenerator.generateEmptyGraphStore();
+        GraphViewStore store = graphStore.viewStore;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        int type = graphStore.edgeTypeStore.addType("foo");
+        Edge e0 = graphStore.factory.newEdge("e0", n1, n2, 0, 1.0, true);
+        Edge e1 = graphStore.factory.newEdge("e1", n1, n2, type, 1.0, true);
+        Edge e2 = graphStore.factory.newEdge("e2", n1, n2, type, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(e0, e1, e2));
+
+        GraphViewImpl view = store.createView();
+        DirectedSubgraph graph = store.getDirectedGraph(view);
+        graph.addAllNodes(graphStore.getNodes().toCollection());
+        graph.addEdge(e2);
+        Assert.assertSame(graph.getEdge(n1, n2), e2);
+        Assert.assertEquals(graph.getEdges(n1, n2).toCollection(), Collections.singletonList(e2));
+        UndirectedSubgraph undirectedGraph = store.getUndirectedGraph(view);
+        Assert.assertSame(undirectedGraph.getEdge(n2, n1), e2);
+        Assert.assertEquals(undirectedGraph.getEdges(n2, n1).toCollection(), Collections.singletonList(e2));
+    }
+
+    @Test
     public void testGetBoundariesEmptyView() {
         GraphStore graphStore = GraphGenerator.generateEmptyGraphStore(getSpatialConfig());
         GraphViewStore store = graphStore.viewStore;

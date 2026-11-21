@@ -568,55 +568,58 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     public EdgeImpl get(final Node source, final Node target, boolean undirectedDecorator) {
-        return get(source, target, EdgeTypeStore.NULL_LABEL, undirectedDecorator);
+        return get(source, target, undirectedDecorator, null);
+    }
+
+    // First edge between source and target, all types, in ascending type order, that the view contains if not null;
+    // the caller holds the read lock
+    EdgeImpl get(final Node source, final Node target, boolean undirectedDecorator, GraphViewImpl view) {
+        checkNonNullObject(source);
+        checkNonNullObject(target);
+        NodeImpl sourceImpl = (NodeImpl) source;
+        NodeImpl targetImpl = (NodeImpl) target;
+
+        int[] typeSizes = typeSize;
+        for (int type = 0; type < typeSizes.length; type++) {
+            if (typeSizes[type] > 0) {
+                EdgeImpl edge = getInType(sourceImpl, targetImpl, type, undirectedDecorator, view);
+                if (edge != null) {
+                    return edge;
+                }
+            }
+        }
+        return null;
     }
 
     public Iterator<Edge> getAll(final Node source, final Node target, boolean undirectedDecorator) {
-        return getAll(source, target, EdgeTypeStore.NULL_LABEL, undirectedDecorator);
+        checkNonNullObject(source);
+        checkNonNullObject(target);
+        NodeImpl sourceImpl = (NodeImpl) source;
+        NodeImpl targetImpl = (NodeImpl) target;
+
+        readLock();
+        int[] ids = null;
+        try {
+            int[] typeSizes = typeSize;
+            for (int type = 0; type < typeSizes.length; type++) {
+                if (typeSizes[type] > 0) {
+                    ids = concat(ids, getAllIdsInType(sourceImpl, targetImpl, type, undirectedDecorator));
+                }
+            }
+        } catch (Throwable t) {
+            readUnlock();
+            throw t;
+        }
+        return edgesIterator(ids);
     }
 
     public EdgeImpl get(final Node source, final Node target, final int type, boolean undirectedDecorator) {
         checkNonNullObject(source);
         checkNonNullObject(target);
         EdgeTypeStore.checkValidId(type);
-        NodeImpl sourceImpl = (NodeImpl) source;
-        NodeImpl targetImpl = (NodeImpl) target;
 
         if (type < longDictionary.length) {
-            if (isUndirectedGraph()) {
-                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
-                if (index != null) {
-                    return get(index[0]);
-                }
-            } else if (isMixedGraph()) {
-                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
-                if (index != null) {
-                    return get(index[0]);
-                } else if (targetImpl.storeId > sourceImpl.storeId) {
-                    index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
-                    if (index != null) {
-                        EdgeImpl e = get(index[0]);
-                        if (!e.isDirected() || undirectedDecorator) {
-                            return e;
-                        }
-                    }
-                } else if (undirectedDecorator) {
-                    index = longDictionary[type].get(getLongId(targetImpl, sourceImpl, true));
-                    if (index != null) {
-                        return get(index[0]);
-                    }
-                }
-            } else {
-                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
-                if (index != null) {
-                    return get(index[0]);
-                } else if (undirectedDecorator) {
-                    index = longDictionary[type].get(getLongId(targetImpl, sourceImpl, true));
-                    if (index != null) {
-                        return get(index[0]);
-                    }
-                }
-            }
+            return getInType((NodeImpl) source, (NodeImpl) target, type, undirectedDecorator, null);
         }
         return null;
     }
@@ -625,45 +628,95 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         checkNonNullObject(source);
         checkNonNullObject(target);
         EdgeTypeStore.checkValidId(type);
-        NodeImpl sourceImpl = (NodeImpl) source;
-        NodeImpl targetImpl = (NodeImpl) target;
 
-        if (type < longDictionary.length) {
-            if (isUndirectedGraph()) {
-                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
-                if (index != null) {
-                    return new EdgesIterator(index);
-                }
-            } else if (isMixedGraph() && !undirectedDecorator) {
-                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
-                if (index != null) {
-                    return new EdgesIterator(index);
-                } else if (targetImpl.storeId > sourceImpl.storeId) {
-                    index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, false));
-                    if (index != null) {
-                        return new EdgesIteratorOnlyUndirected(index);
-                    }
-                }
-            } else {
-                int[] index = longDictionary[type].get(getLongId(sourceImpl, targetImpl, true));
-                if (undirectedDecorator) {
-                    int[] reverseIndex = longDictionary[type].get(getLongId(targetImpl, sourceImpl, true));
-                    if (reverseIndex != null) {
-                        if (index != null) {
-                            index = Arrays.copyOf(index, index.length + reverseIndex.length);
-                            System.arraycopy(reverseIndex, 0, index, index.length - reverseIndex.length, reverseIndex.length);
-                        } else {
-                            index = reverseIndex;
-                        }
-                    }
-                }
-                if (index != null) {
-                    return new EdgesIterator(index);
+        readLock();
+        int[] ids = null;
+        try {
+            if (type < longDictionary.length) {
+                ids = getAllIdsInType((NodeImpl) source, (NodeImpl) target, type, undirectedDecorator);
+            }
+        } catch (Throwable t) {
+            readUnlock();
+            throw t;
+        }
+        return edgesIterator(ids);
+    }
+
+    private EdgeImpl getInType(NodeImpl source, NodeImpl target, int type, boolean undirectedDecorator, GraphViewImpl view) {
+        EdgeImpl edge = first(getIdsInType(source, target, type, undirectedDecorator), view);
+        if (edge == null) {
+            edge = first(getReverseIdsInType(source, target, type, undirectedDecorator), view);
+        }
+        return edge;
+    }
+
+    private EdgeImpl first(int[] ids, GraphViewImpl view) {
+        if (ids != null) {
+            if (view == null) {
+                return get(ids[0]);
+            }
+            for (int id : ids) {
+                EdgeImpl edge = get(id);
+                if (view.containsEdge(edge)) {
+                    return edge;
                 }
             }
         }
+        return null;
+    }
 
-        return EMPTY_EDGE_ITERATOR;
+    private int[] getAllIdsInType(NodeImpl source, NodeImpl target, int type, boolean undirectedDecorator) {
+        return concat(getIdsInType(source, target, type, undirectedDecorator), getReverseIdsInType(source, target, type, undirectedDecorator));
+    }
+
+    // Store ids of the given type under the key from source to target, or under the undirected key on undirected
+    // graphs and, for undirected edges, on mixed graphs without the undirected decorator
+    private int[] getIdsInType(NodeImpl source, NodeImpl target, int type, boolean undirectedDecorator) {
+        Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
+        if (isUndirectedGraph()) {
+            return dico.get(getLongId(source, target, false));
+        } else if (isMixedGraph() && !undirectedDecorator) {
+            int[] index = dico.get(getLongId(source, target, true));
+            if (index == null && target.storeId > source.storeId) {
+                // The undirected key is also the key of the directed edges from target to source
+                index = dico.get(getLongId(source, target, false));
+                if (index != null && get(index[0]).isDirected()) {
+                    return null;
+                }
+            }
+            return index;
+        }
+        return dico.get(getLongId(source, target, true));
+    }
+
+    // Store ids of the given type under the key from target to source, which the undirected decorator also reads on
+    // directed and mixed graphs, where the undirected key is one of the two directed keys
+    private int[] getReverseIdsInType(NodeImpl source, NodeImpl target, int type, boolean undirectedDecorator) {
+        // A self-loop's reverse key is its own key
+        if (undirectedDecorator && source != target && !isUndirectedGraph()) {
+            return longDictionary[type].get(getLongId(target, source, true));
+        }
+        return null;
+    }
+
+    private static int[] concat(int[] ids, int[] otherIds) {
+        if (ids == null) {
+            return otherIds;
+        } else if (otherIds == null) {
+            return ids;
+        }
+        int[] result = Arrays.copyOf(ids, ids.length + otherIds.length);
+        System.arraycopy(otherIds, 0, result, ids.length, otherIds.length);
+        return result;
+    }
+
+    // Iterates the given store ids and releases the read lock, taken by the caller, once exhausted
+    private Iterator<Edge> edgesIterator(int[] ids) {
+        if (ids == null) {
+            readUnlock();
+            return EMPTY_EDGE_ITERATOR;
+        }
+        return new EdgesIterator(ids);
     }
 
     public EdgeImpl getMutualEdge(final Edge e) {
@@ -2015,9 +2068,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         protected final int[] indices;
         protected int index;
 
+        // The read lock is taken by the caller
         public EdgesIterator(int[] indices) {
             this.indices = indices;
-            readLock();
         }
 
         @Override
@@ -2038,42 +2091,6 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         public void remove() {
             checkWriteLock();
             EdgeStore.this.remove(get(indices[index - 1]));
-        }
-    }
-
-    protected final class EdgesIteratorOnlyUndirected extends EdgesIterator {
-
-        protected EdgeImpl pointer;
-
-        public EdgesIteratorOnlyUndirected(int[] indices) {
-            super(indices);
-        }
-
-        @Override
-        public boolean hasNext() {
-            pointer = null;
-            while (index < indices.length && pointer == null) {
-                pointer = EdgeStore.this.get(indices[index++]);
-                if (pointer.isDirected()) {
-                    pointer = null;
-                }
-            }
-            if (pointer == null) {
-                readUnlock();
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public Edge next() {
-            return pointer;
-        }
-
-        @Override
-        public void remove() {
-            checkWriteLock();
-            EdgeStore.this.remove(pointer);
         }
     }
 
