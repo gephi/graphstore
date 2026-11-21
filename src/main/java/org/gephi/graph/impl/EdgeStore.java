@@ -571,8 +571,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return get(source, target, undirectedDecorator, null);
     }
 
-    // First edge between source and target, all types, in ascending type order, that the view contains if not null;
-    // the caller holds the read lock
+    // First edge between source and target, all types, in ascending type order, that the view contains if not null.
+    // With the undirected decorator, skips the edges hidden by their mutual edge. The caller holds the read lock.
     EdgeImpl get(final Node source, final Node target, boolean undirectedDecorator, GraphViewImpl view) {
         checkNonNullObject(source);
         checkNonNullObject(target);
@@ -614,12 +614,17 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     public EdgeImpl get(final Node source, final Node target, final int type, boolean undirectedDecorator) {
+        return get(source, target, type, undirectedDecorator, null);
+    }
+
+    // Same as get(source, target, undirectedDecorator, view), for the given type
+    EdgeImpl get(final Node source, final Node target, final int type, boolean undirectedDecorator, GraphViewImpl view) {
         checkNonNullObject(source);
         checkNonNullObject(target);
         EdgeTypeStore.checkValidId(type);
 
         if (type < longDictionary.length) {
-            return getInType((NodeImpl) source, (NodeImpl) target, type, undirectedDecorator, null);
+            return getInType((NodeImpl) source, (NodeImpl) target, type, undirectedDecorator, view);
         }
         return null;
     }
@@ -643,21 +648,21 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     private EdgeImpl getInType(NodeImpl source, NodeImpl target, int type, boolean undirectedDecorator, GraphViewImpl view) {
-        EdgeImpl edge = first(getIdsInType(source, target, type, undirectedDecorator), view);
+        // Only mutual edges can be hidden
+        boolean skipHidden = undirectedDecorator && mutualEdgesTypeSize[type] > 0;
+        EdgeImpl edge = first(getIdsInType(source, target, type, undirectedDecorator), skipHidden, view);
         if (edge == null) {
-            edge = first(getReverseIdsInType(source, target, type, undirectedDecorator), view);
+            edge = first(getReverseIdsInType(source, target, type, undirectedDecorator), skipHidden, view);
         }
         return edge;
     }
 
-    private EdgeImpl first(int[] ids, GraphViewImpl view) {
+    private EdgeImpl first(int[] ids, boolean skipHidden, GraphViewImpl view) {
         if (ids != null) {
-            if (view == null) {
-                return get(ids[0]);
-            }
             for (int id : ids) {
                 EdgeImpl edge = get(id);
-                if (view.containsEdge(edge)) {
+                boolean inView = view == null || view.containsEdge(edge);
+                if (inView && !(skipHidden && isUndirectedToIgnore(edge, view))) {
                     return edge;
                 }
             }
@@ -1456,6 +1461,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     boolean isUndirectedToIgnore(EdgeImpl edge) {
         return edge.isMutual() && edge.source.storeId < edge.target.storeId;
+    }
+
+    // In a view, only if the view also contains the mutual edge
+    boolean isUndirectedToIgnore(EdgeImpl edge, GraphViewImpl view) {
+        return isUndirectedToIgnore(edge) && (view == null || view.containsEdge(getMutual(edge)));
     }
 
     int maxStoreId() {

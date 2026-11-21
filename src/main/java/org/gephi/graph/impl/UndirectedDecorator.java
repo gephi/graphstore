@@ -249,12 +249,30 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
 
     @Override
     public boolean isAdjacent(Node node1, Node node2) {
-        return store.isAdjacent(node1, node2);
+        store.autoReadLock();
+        try {
+            EdgeStore edgeStore = store.edgeStore;
+            if (edgeStore.isAdjacent(node1, node2)) {
+                return true;
+            }
+            return !edgeStore.isUndirectedGraph() && edgeStore.isAdjacent(node2, node1);
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override
     public boolean isAdjacent(Node node1, Node node2, int type) {
-        return store.isAdjacent(node1, node2, type);
+        store.autoReadLock();
+        try {
+            EdgeStore edgeStore = store.edgeStore;
+            if (edgeStore.isAdjacent(node1, node2, type)) {
+                return true;
+            }
+            return !edgeStore.isUndirectedGraph() && edgeStore.isAdjacent(node2, node1, type);
+        } finally {
+            store.autoReadUnlock();
+        }
     }
 
     @Override

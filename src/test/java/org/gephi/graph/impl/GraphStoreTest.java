@@ -873,6 +873,55 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testPairLookupsMatchGetEdges() {
+        for (boolean mixed : new boolean[] { false, true }) {
+            GraphStore graphStore = GraphGenerator.generateEmptyGraphStore();
+            Node a = graphStore.factory.newNode("a");
+            Node b = graphStore.factory.newNode("b");
+            Node c = graphStore.factory.newNode("c");
+            Node d = graphStore.factory.newNode("d");
+            graphStore.addAllNodes(Arrays.asList(a, b, c, d));
+            int t1 = graphStore.edgeTypeStore.addType("t1");
+            int t2 = graphStore.edgeTypeStore.addType("t2");
+            // Parallel edges, mutual pairs in two types, reverse edges of another type, self-loops and an edge without
+            // a reverse edge
+            Edge p1 = graphStore.factory.newEdge("p1", a, b, 0, 1.0, true);
+            Edge p2 = graphStore.factory.newEdge("p2", a, b, 0, 1.0, true);
+            Edge r = graphStore.factory.newEdge("r", b, a, 0, 1.0, true);
+            Edge q1 = graphStore.factory.newEdge("q1", b, c, t1, 1.0, true);
+            Edge q2 = graphStore.factory.newEdge("q2", c, b, t1, 1.0, true);
+            Edge x0 = graphStore.factory.newEdge("x0", a, c, 0, 1.0, true);
+            Edge x1 = graphStore.factory.newEdge("x1", c, a, t1, 1.0, true);
+            Edge y = graphStore.factory.newEdge("y", b, d, 0, 1.0, true);
+            Edge s0 = graphStore.factory.newEdge("s0", a, a, 0, 1.0, true);
+            Edge s1 = graphStore.factory.newEdge("s1", d, d, t1, 1.0, true);
+            List<Edge> edges = new ArrayList<>(Arrays.asList(p1, p2, r, q1, q2, x0, x1, y, s0, s1));
+            // Leaves out x0, s1, the first parallel edge p1 and the mutual edge q2 of q1
+            List<Edge> partialEdges = new ArrayList<>(Arrays.asList(p2, r, q1, x1, y, s0));
+            if (mixed) {
+                Edge u = graphStore.factory.newEdge("u", d, a, t2, 1.0, false);
+                edges.add(u);
+                partialEdges.add(u);
+            }
+            graphStore.addAllEdges(edges);
+
+            GraphViewImpl fullView = graphStore.viewStore.createView();
+            fullView.fill();
+            GraphViewImpl partialView = graphStore.viewStore.createView();
+            DirectedSubgraph partialGraph = graphStore.viewStore.getDirectedGraph(partialView);
+            partialGraph.addAllNodes(graphStore.getNodes().toCollection());
+            partialGraph.addAllEdges(partialEdges);
+
+            assertPairLookupsMatchGetEdges(graphStore, false);
+            assertPairLookupsMatchGetEdges(graphStore.undirectedDecorator, true);
+            for (GraphViewImpl view : Arrays.asList(fullView, partialView)) {
+                assertPairLookupsMatchGetEdges(graphStore.viewStore.getDirectedGraph(view), false);
+                assertPairLookupsMatchGetEdges(graphStore.viewStore.getUndirectedGraph(view), true);
+            }
+        }
+    }
+
+    @Test
     public void testRemoveNode() {
         GraphStore graphStore = GraphGenerator.generateSmallMultiTypeGraphStore();
         Node[] nodes = graphStore.getNodes().toArray();
@@ -1358,6 +1407,45 @@ public class GraphStoreTest {
     }
 
     // UTILITY
+    private void assertPairLookupsMatchGetEdges(Graph graph, boolean undirected) {
+        Edge[] edges = graph.getEdges().toArray();
+        Node[] nodes = graph.getNodes().toArray();
+        int[] types = graph.getModel().getEdgeTypes();
+        for (Node n1 : nodes) {
+            for (Node n2 : nodes) {
+                String lookup = n1.getId() + "-" + n2.getId();
+                assertPairLookups(lookup, edgesBetween(edges, n1, n2, undirected, -1), graph.getEdges(n1, n2), graph
+                        .getEdge(n1, n2), graph.isAdjacent(n1, n2));
+                for (int type : types) {
+                    assertPairLookups(lookup + " type " + type, edgesBetween(edges, n1, n2, undirected, type), graph
+                            .getEdges(n1, n2, type), graph.getEdge(n1, n2, type), graph.isAdjacent(n1, n2, type));
+                }
+            }
+        }
+        Assert.assertEquals(graph.getLock().getReadHoldCount(), 0);
+    }
+
+    // Edges between the nodes as the graph sees them, of the given type or of any type if negative
+    private Set<Edge> edgesBetween(Edge[] edges, Node n1, Node n2, boolean undirected, int type) {
+        Set<Edge> result = new HashSet<>();
+        for (Edge edge : edges) {
+            boolean between = edge.getSource() == n1 && edge.getTarget() == n2 || edge.getSource() == n2 && edge
+                    .getTarget() == n1 && (undirected || !edge.isDirected());
+            if (between && (type < 0 || edge.getType() == type)) {
+                result.add(edge);
+            }
+        }
+        return result;
+    }
+
+    private void assertPairLookups(String lookup, Set<Edge> expected, EdgeIterable edges, Edge edge, boolean adjacent) {
+        List<Edge> actual = new ArrayList<>(edges.toCollection());
+        Assert.assertEquals(actual.size(), expected.size(), lookup);
+        Assert.assertEquals(new HashSet<>(actual), expected, lookup);
+        Assert.assertSame(edge, actual.isEmpty() ? null : actual.get(0), lookup);
+        Assert.assertEquals(adjacent, !actual.isEmpty(), lookup);
+    }
+
     private void testNodeIterable(NodeIterable iterable, NodeImpl[] nodes) {
         Assert.assertEquals(iterable.toArray(), nodes);
         Assert.assertEquals(iterable.stream().toArray(Node[]::new), nodes);
