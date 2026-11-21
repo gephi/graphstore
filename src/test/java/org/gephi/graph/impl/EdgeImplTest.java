@@ -412,10 +412,6 @@ public class EdgeImplTest {
         Assert.assertFalse(edge.isMutual());
         Assert.assertFalse(edge.isValid());
 
-        edge.setMutual(true);
-
-        Assert.assertTrue(edge.isMutual());
-
         edge = new EdgeImpl("0", source, source, 0, weight, true);
 
         Assert.assertTrue(edge.isSelfLoop());
@@ -423,10 +419,6 @@ public class EdgeImplTest {
         edge = new EdgeImpl("0", source, target, 0, weight, false);
 
         Assert.assertFalse(edge.isDirected());
-
-        edge.setMutual(true);
-
-        Assert.assertFalse(edge.isMutual());
     }
 
     @Test

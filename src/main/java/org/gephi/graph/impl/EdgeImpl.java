@@ -30,7 +30,6 @@ public class EdgeImpl extends ElementImpl implements Edge {
 
     // Const
     protected static final byte DIRECTED_BYTE = 1;
-    protected static final byte MUTUAL_BYTE = 1 << 1;
     // Final Data
     protected final NodeImpl source;
     protected final NodeImpl target;
@@ -42,6 +41,8 @@ public class EdgeImpl extends ElementImpl implements Edge {
     protected int nextInEdge = EdgeStore.NULL_ID;
     protected int previousOutEdge = EdgeStore.NULL_ID;
     protected int previousInEdge = EdgeStore.NULL_ID;
+    // Store id of the edge in the other direction, of the same type, this edge is paired with
+    protected int mutualId = EdgeStore.NULL_ID;
     // Flags
     protected byte flags;
     // Props
@@ -205,19 +206,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
         return (flags & DIRECTED_BYTE) == 1;
     }
 
-    protected void setMutual(boolean mutual) {
-        if (isDirected()) {
-            if (mutual) {
-                flags |= MUTUAL_BYTE;
-            } else {
-                flags &= ~MUTUAL_BYTE;
-            }
-        }
-    }
-
     @Override
     public boolean isMutual() {
-        return (flags & MUTUAL_BYTE) == MUTUAL_BYTE;
+        return mutualId != EdgeStore.NULL_ID;
     }
 
     @Override

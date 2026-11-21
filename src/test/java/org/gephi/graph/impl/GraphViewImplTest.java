@@ -19,8 +19,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,6 +34,7 @@ import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.Subgraph;
+import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.graph.api.UndirectedSubgraph;
 import org.gephi.graph.impl.utils.DataInputOutput;
 import org.testng.Assert;
@@ -1672,9 +1676,9 @@ public class GraphViewImplTest {
         int expected = 0;
         for (Edge e : graphModel.getGraph(view).getEdges().toArray()) {
             EdgeImpl edge = (EdgeImpl) e;
-            if (edge.isMutual() && !edge.isSelfLoop()) {
-                EdgeImpl reverse = graphModel.store.edgeStore.get(edge.target, edge.source, edge.type, false);
-                if (reverse != null && view.containsEdge(reverse) && edge.storeId < reverse.storeId) {
+            if (edge.isMutual()) {
+                EdgeImpl reverse = (EdgeImpl) graphModel.store.getMutualEdge(edge);
+                if (view.containsEdge(reverse) && edge.storeId < reverse.storeId) {
                     expectedTypeCounts[edge.type]++;
                     expected++;
                 }
@@ -1775,6 +1779,174 @@ public class GraphViewImplTest {
                 Assert.assertEquals(read.getUndirectedGraph(view).getEdgeCount(1), 1);
             }
         }
+    }
+
+    @Test
+    public void testUndirectedEdgeCountsWithParallelMutualEdges() {
+        Random random = new Random(42);
+        for (int run = 0; run < 100; run++) {
+            GraphModelImpl graphModel = new GraphModelImpl();
+            GraphStore graphStore = graphModel.store;
+            List<Node> nodes = new ArrayList<>();
+            for (int i = 0; i < 3; i++) {
+                nodes.add(graphStore.factory.newNode(String.valueOf(i)));
+            }
+            graphStore.addAllNodes(nodes);
+            // A node view with all the nodes, destroyed but still held
+            GraphViewImpl destroyed = (GraphViewImpl) graphModel.createView(true, false);
+            graphModel.getGraph(destroyed).addAllNodes(nodes);
+            graphModel.destroyView(destroyed);
+            // A node and edge view, an edge view, a node view and the destroyed view
+            GraphViewImpl[] views = { (GraphViewImpl) graphModel.createView(), (GraphViewImpl) graphModel
+                    .createView(false, true), (GraphViewImpl) graphModel.createView(true, false), destroyed };
+            graphModel.getGraph(views[0]).addAllNodes(nodes);
+            List<Edge> edges = new ArrayList<>();
+            for (int step = 0; step < 100; step++) {
+                // Adds are twice as likely, so that parallel edges pile up
+                int operation = edges.isEmpty() ? 0 : Math.max(0, random.nextInt(7) - 1);
+                if (operation == 0) {
+                    Edge edge = graphStore.factory.newEdge(nodes.get(random.nextInt(3)), nodes
+                            .get(random.nextInt(3)), random.nextInt(2), true);
+                    graphStore.addEdge(edge);
+                    edges.add(edge);
+                    // The node and edge view and the edge view hold about half the edges
+                    for (int i = 0; i < 2; i++) {
+                        if (random.nextBoolean()) {
+                            graphModel.getGraph(views[i]).addEdge(edge);
+                        }
+                    }
+                } else if (operation == 1) {
+                    graphStore.removeEdge(edges.remove(random.nextInt(edges.size())));
+                } else if (operation == 2) {
+                    edges.get(random.nextInt(edges.size())).setType(random.nextInt(2));
+                } else if (operation == 3) {
+                    Subgraph graph = graphModel.getGraph(views[random.nextInt(2)]);
+                    Edge edge = edges.get(random.nextInt(edges.size()));
+                    if (!graph.removeEdge(edge)) {
+                        graph.addEdge(edge);
+                    }
+                } else if (operation == 4) {
+                    Subgraph graph = graphModel.getGraph(views[2]);
+                    Node node = nodes.get(random.nextInt(3));
+                    if (!graph.removeNode(node)) {
+                        graph.addNode(node);
+                    }
+                } else {
+                    int i = random.nextInt(2);
+                    Subgraph graph = graphModel.getGraph(views[i]);
+                    Subgraph other = graphModel.getGraph(views[1 - i]);
+                    if (random.nextBoolean()) {
+                        graph.union(other);
+                    } else {
+                        graph.intersection(other);
+                    }
+                }
+
+                UndirectedGraph undirected = graphModel.getUndirectedGraph();
+                Assert.assertEquals(undirected.getEdgeCount(), expectedUndirectedEdgeCount(edges));
+                Assert.assertEquals(iterate(undirected.getEdges()), undirected.getEdgeCount());
+                for (GraphViewImpl view : views) {
+                    assertUndirectedEdgeCounts(graphModel, view);
+                }
+                for (Edge edge : edges) {
+                    if (edge.isMutual()) {
+                        Assert.assertSame(graphStore.getMutualEdge(graphStore.getMutualEdge(edge)), edge);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testUndirectedEdgeCountsAfterSerializationWithParallelMutualEdges() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        Node n3 = graphStore.factory.newNode("3");
+        graphStore.addAllNodes(Arrays.asList(n1, n2, n3));
+        Edge removed = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        graphStore.addEdge(removed);
+        List<Edge> edges = Arrays.asList(graphStore.factory.newEdge("b", n1, n2, 0, 1.0, true), graphStore.factory
+                .newEdge("c", n2, n1, 0, 1.0, true), graphStore.factory
+                        .newEdge("d", n2, n1, 0, 1.0, true), graphStore.factory.newEdge("e", n1, n2, 0, 1.0, true));
+        graphStore.addAllEdges(edges);
+        // Loading pairs the edges as they are added, which can differ from the pairs left by this removal
+        graphStore.removeEdge(removed);
+        // Takes the free store id, so that loading keeps the store ids
+        graphStore.addEdge(graphStore.factory.newEdge("f", n1, n3, 0, 1.0, true));
+        // A view for each subset of the edges between n1 and n2
+        for (int subset = 0; subset < 1 << edges.size(); subset++) {
+            Subgraph graph = graphModel.getGraph(graphModel.createView());
+            graph.addAllNodes(Arrays.asList(n1, n2, n3));
+            for (int i = 0; i < edges.size(); i++) {
+                if ((subset & 1 << i) != 0) {
+                    graph.addEdge(edges.get(i));
+                }
+            }
+        }
+
+        Serialization ser = new Serialization(graphModel);
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, graphModel);
+        GraphModelImpl read = ser.deserializeGraphModel(dio.reset(dio.toByteArray()));
+
+        Assert.assertEquals(read.getUndirectedGraph().getEdgeCount(), graphModel.getUndirectedGraph().getEdgeCount());
+        for (GraphViewImpl view : read.store.viewStore.views) {
+            if (view != null) {
+                assertUndirectedEdgeCounts(read, view);
+            }
+        }
+    }
+
+    @Test
+    public void testLoadViewSavedWithFreeEdgeIds() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge r1 = graphStore.factory.newEdge("r1", n1, n2, 0, 1.0, true);
+        Edge r2 = graphStore.factory.newEdge("r2", n1, n2, 0, 1.0, true);
+        Edge b = graphStore.factory.newEdge("b", n1, n2, 0, 1.0, true);
+        Edge c = graphStore.factory.newEdge("c", n2, n1, 0, 1.0, true);
+        Edge x = graphStore.factory.newEdge("x", n1, n2, 1, 1.0, true);
+        Edge y = graphStore.factory.newEdge("y", n2, n1, 1, 1.0, true);
+        Edge z = graphStore.factory.newEdge("z", n1, n2, 0, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(r1, r2, b, c, x, y, z));
+        graphStore.removeEdge(r1);
+        graphStore.removeEdge(r2);
+        // The view is saved while the store has free edge ids
+        Subgraph graph = graphModel.getGraph(graphModel.createView());
+        graph.addAllNodes(Arrays.asList(n1, n2));
+        graph.addAllEdges(Arrays.asList(b, c, z));
+
+        Serialization ser = new Serialization(graphModel);
+        DataInputOutput dio = new DataInputOutput();
+        ser.serializeGraphModel(dio, graphModel);
+        GraphModelImpl read = ser.deserializeGraphModel(dio.reset(dio.toByteArray()));
+
+        Assert.assertEquals(read.getUndirectedGraph().getEdgeCount(), graphModel.getUndirectedGraph().getEdgeCount());
+    }
+
+    // A directed edge and a reverse edge of the same type count once, with as many such pairs as possible
+    private static int expectedUndirectedEdgeCount(List<Edge> edges) {
+        Map<List<Object>, Integer> counts = new HashMap<>();
+        for (Edge edge : edges) {
+            counts.merge(Arrays.asList(edge.getSource(), edge.getTarget(), edge.getType()), 1, Integer::sum);
+        }
+        int count = 0;
+        for (Map.Entry<List<Object>, Integer> entry : counts.entrySet()) {
+            Node source = (Node) entry.getKey().get(0);
+            Node target = (Node) entry.getKey().get(1);
+            Integer reverse = counts.get(Arrays.asList(target, source, entry.getKey().get(2)));
+            if (reverse == null || source == target) {
+                count += entry.getValue();
+            } else if (source.getStoreId() < target.getStoreId()) {
+                count += Math.max(entry.getValue(), reverse);
+            }
+        }
+        return count;
     }
 
     @Test
@@ -1902,6 +2074,46 @@ public class GraphViewImplTest {
             for (int i = 0; i < 100000; i++) {
                 graph.removeEdge(b);
                 graph.addEdge(b);
+            }
+        } finally {
+            done.set(true);
+            reader.join();
+        }
+        Assert.assertEquals(inconsistent.get(), 0);
+    }
+
+    @Test
+    public void testUndirectedEdgeCountConsistentDuringConcurrentTypeChanges() throws Exception {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge a = graphStore.factory.newEdge("a", n1, n2, 0, 1.0, true);
+        Edge b = graphStore.factory.newEdge("b", n1, n2, 0, 1.0, true);
+        Edge c = graphStore.factory.newEdge("c", n2, n1, 0, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(a, b, c));
+        GraphView view = graphModel.createView();
+        graphModel.getGraph(view).fill();
+        UndirectedSubgraph undirected = graphModel.getUndirectedGraph(view);
+
+        // Moving the edge paired with c to another type pairs c with the other edge, so the view keeps two undirected
+        // edges
+        AtomicBoolean done = new AtomicBoolean();
+        AtomicInteger inconsistent = new AtomicInteger();
+        Thread reader = new Thread(() -> {
+            while (!done.get()) {
+                if (undirected.getEdgeCount() != 2) {
+                    inconsistent.incrementAndGet();
+                }
+            }
+        });
+        reader.start();
+        try {
+            for (int i = 0; i < 100000; i++) {
+                Edge paired = a.isMutual() ? a : b;
+                paired.setType(1);
+                paired.setType(0);
             }
         } finally {
             done.set(true);
