@@ -669,7 +669,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return concat(getIdsInType(source, target, type, undirectedDecorator), getReverseIdsInType(source, target, type, undirectedDecorator));
     }
 
-    // Store ids of the edges of the given type from source to target, or between them if undirected
+    // Store ids of the given type under the key from source to target, or under the undirected key on undirected
+    // graphs and, for undirected edges, on mixed graphs without the undirected decorator
     private int[] getIdsInType(NodeImpl source, NodeImpl target, int type, boolean undirectedDecorator) {
         Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
         if (isUndirectedGraph()) {
@@ -688,8 +689,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return dico.get(getLongId(source, target, true));
     }
 
-    // Store ids of the edges of the given type from target to source, which the undirected decorator also returns on
-    // directed and mixed graphs
+    // Store ids of the given type under the key from target to source, which the undirected decorator also reads on
+    // directed and mixed graphs, where the undirected key is one of the two directed keys
     private int[] getReverseIdsInType(NodeImpl source, NodeImpl target, int type, boolean undirectedDecorator) {
         // A self-loop's reverse key is its own key
         if (undirectedDecorator && source != target && !isUndirectedGraph()) {
