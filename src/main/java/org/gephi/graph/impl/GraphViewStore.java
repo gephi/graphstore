@@ -336,18 +336,39 @@ public class GraphViewStore {
         }
     }
 
-    protected void setEdgeType(EdgeImpl edge, int oldType, boolean wasMutual) {
+    // The edge's old mutual edge is paired again with repaired, if not null
+    protected void setEdgeType(EdgeImpl edge, int oldType, EdgeImpl oldMutual, EdgeImpl repaired) {
         for (GraphViewImpl view : views) {
             if (view != null) {
                 if (view.containsEdge(edge)) {
-                    view.setEdgeType(edge, oldType, wasMutual);
+                    view.setEdgeType(edge, oldType, oldMutual);
+                } else if (repaired != null) {
+                    view.addMutualPair(repaired, oldMutual);
                 }
             }
         }
         for (int i = 0; i < destroyedViews.size(); i++) {
             GraphViewImpl view = destroyedViews.get(i).get();
-            if (view != null && view.containsEdge(edge)) {
-                view.setEdgeType(edge, oldType, wasMutual);
+            if (view != null) {
+                if (view.containsEdge(edge)) {
+                    view.setEdgeType(edge, oldType, oldMutual);
+                } else if (repaired != null) {
+                    view.addMutualPair(repaired, oldMutual);
+                }
+            }
+        }
+    }
+
+    protected void addMutualPair(EdgeImpl edge, EdgeImpl mutual) {
+        for (GraphViewImpl view : views) {
+            if (view != null) {
+                view.addMutualPair(edge, mutual);
+            }
+        }
+        for (int i = 0; i < destroyedViews.size(); i++) {
+            GraphViewImpl view = destroyedViews.get(i).get();
+            if (view != null) {
+                view.addMutualPair(edge, mutual);
             }
         }
     }

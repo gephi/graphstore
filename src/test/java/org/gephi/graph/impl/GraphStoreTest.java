@@ -696,6 +696,46 @@ public class GraphStoreTest {
     }
 
     @Test
+    public void testGetMutualEdgeWithParallelEdges() {
+        GraphModelImpl graphModel = new GraphModelImpl();
+        GraphStore graphStore = graphModel.store;
+        Node n1 = graphStore.factory.newNode("1");
+        Node n2 = graphStore.factory.newNode("2");
+        graphStore.addAllNodes(Arrays.asList(n1, n2));
+        Edge e1 = graphStore.factory.newEdge("1", n1, n2, 0, 1.0, true);
+        Edge e2 = graphStore.factory.newEdge("2", n1, n2, 0, 1.0, true);
+        Edge e3 = graphStore.factory.newEdge("3", n2, n1, 0, 1.0, true);
+        Edge e4 = graphStore.factory.newEdge("4", n2, n1, 0, 1.0, true);
+        graphStore.addAllEdges(Arrays.asList(e1, e2, e3, e4));
+
+        // The edge each edge is paired with
+        for (Edge edge : Arrays.asList(e1, e2, e3, e4)) {
+            Assert.assertTrue(edge.isMutual());
+            Assert.assertSame(graphStore.getMutualEdge(graphStore.getMutualEdge(edge)), edge);
+        }
+        Edge mutual = graphStore.getMutualEdge(e2);
+        DirectedSubgraph graph = graphModel.getDirectedGraph(graphModel.createView());
+        graph.addAllNodes(Arrays.asList(n1, n2));
+        graph.addEdge(e2);
+        Assert.assertNull(graph.getMutualEdge(e2));
+        graph.addEdge(mutual);
+        Assert.assertSame(graph.getMutualEdge(e2), mutual);
+
+        // A view without the mutual edge gets another reverse edge it contains
+        Edge other = mutual == e3 ? e4 : e3;
+        graph.removeEdge(mutual);
+        graph.addEdge(other);
+        Assert.assertSame(graph.getMutualEdge(e2), other);
+        Assert.assertSame(graph.getMutualEdge(other), e2);
+
+        // An edge left without a pair gets the first reverse edge
+        graphStore.removeEdge(e3);
+        Edge unpaired = e1.isMutual() ? e2 : e1;
+        Assert.assertFalse(unpaired.isMutual());
+        Assert.assertSame(graphStore.getMutualEdge(unpaired), e4);
+    }
+
+    @Test
     public void testGetNodes() {
         GraphStore graphStore = new GraphStore();
         NodeImpl[] nodes = GraphGenerator.generateNodeList(2);

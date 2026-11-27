@@ -88,11 +88,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     public Edge getMutualEdge(Edge e) {
         graphStore.autoReadLock();
         try {
-            EdgeImpl edge = graphStore.edgeStore.getMutualEdge(e);
-            if (edge != null && view.containsEdge(edge)) {
-                return edge;
-            }
-            return null;
+            return graphStore.edgeStore.getMutualEdge(e, view);
         } finally {
             graphStore.autoReadUnlock();
         }
@@ -1235,8 +1231,7 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
         @Override
         public void remove() {
             checkWriteLock();
-            if (pointer.isMutual() && view
-                    .containsEdge(graphStore.edgeStore.get(pointer.target, pointer.source, pointer.type, false))) {
+            if (view.containsMutual(pointer)) {
                 throw new UnsupportedOperationException(
                         "Removing directed edges from undirected iterator is not supported");
             }

@@ -18,9 +18,10 @@ package org.gephi.graph.api;
 /**
  * Undirected graph
  * <p>
- * A directed edge and its reverse edge of the same type are seen as a single undirected edge. With parallel edges,
- * which edges are paired depends on the order of insertion and removal, so edge counts may differ between graphs
- * holding the same edges.
+ * A directed edge and its reverse edge of the same type are seen as a single undirected edge. Edges are paired one to
+ * one, as many as possible, so the whole graph's edge count only depends on the edges it holds. With several edges of
+ * the same type between two nodes, which edges are paired depends on the order of insertion and removal. A subgraph
+ * sees a directed edge and its reverse edge as a single edge only if they are paired and it contains both.
  */
 public interface UndirectedGraph extends Graph {
 }

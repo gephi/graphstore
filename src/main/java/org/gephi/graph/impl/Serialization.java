@@ -571,6 +571,14 @@ public class Serialization {
             // ViewStore
             deserialize(is);
 
+            // Edges were paired again as they were added, possibly with other edges
+            for (GraphViewImpl view : store.viewStore.views) {
+                if (view != null) {
+                    view.recountMutualEdges();
+                    view.updateUndirectedEdgeCounts();
+                }
+            }
+
             return store;
         } finally {
             store.autoWriteUnlock();

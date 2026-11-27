@@ -156,12 +156,11 @@ public interface DirectedGraph extends Graph {
     public EdgeIterable getOutEdges(Node node, int type);
 
     /**
-     * Gets the edge in the other direction of the given edge.
-     * <p>
-     * This takes in account the edge type so only edges of the same type can be mutual.
+     * Gets an edge of the same type in the opposite direction of the given edge: the edge it is paired with (see
+     * {@link Edge#isMutual()}) if this graph contains it, otherwise the first such edge in this graph.
      *
      * @param edge the edge to get the mutual edge
-     * @return the mutual edge, or null
+     * @return the edge in the opposite direction, or null if not found
      */
     public Edge getMutualEdge(Edge edge);
 

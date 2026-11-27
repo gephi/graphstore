@@ -121,8 +121,8 @@ public class GraphViewImpl implements GraphView {
             typeCounts[type]++;
             count++;
 
-            if (((EdgeImpl) edge).isMutual() && !edge.isSelfLoop() && containsEdge(graphStore.edgeStore
-                    .get(edge.getTarget(), edge.getSource(), type, false))) {
+            // The bits are set in store order: a pair is counted once, with its second edge
+            if (containsMutual((EdgeImpl) edge)) {
                 mutualEdgeTypeCounts[type]++;
                 mutualEdgesCount++;
             }
@@ -831,11 +831,10 @@ public class GraphViewImpl implements GraphView {
             }
             counts[type]--;
 
-            if (edge.isMutual() && !edge.isSelfLoop()) {
-                EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
+            if (edge.isMutual()) {
+                int mutualId = edge.mutualId;
                 // The bits are already cleared: a pair removed together is counted once
-                if (reverseEdge != null && (containsEdge(reverseEdge) || (edgesToRemove
-                        .get(reverseEdge.storeId) && edge.storeId < reverseEdge.storeId))) {
+                if (edgeBitVector.get(mutualId) || (edgesToRemove.get(mutualId) && edge.storeId < mutualId)) {
                     mutualEdgeTypeCounts[type]--;
                     mutualEdgesCount--;
                 }
@@ -890,11 +889,10 @@ public class GraphViewImpl implements GraphView {
             }
             counts[type]++;
 
-            if (edge.isMutual() && !edge.isSelfLoop()) {
-                EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
+            if (edge.isMutual()) {
+                int mutualId = edge.mutualId;
                 // The bits are already set: a pair added together is counted once
-                if (reverseEdge != null && containsEdge(reverseEdge) && (!edgesToAdd
-                        .get(reverseEdge.storeId) || edge.storeId < reverseEdge.storeId)) {
+                if (edgeBitVector.get(mutualId) && (!edgesToAdd.get(mutualId) || edge.storeId < mutualId)) {
                     mutualEdgeTypeCounts[type]++;
                     mutualEdgesCount++;
                 }
@@ -949,17 +947,16 @@ public class GraphViewImpl implements GraphView {
     }
 
     // Counts each mutual pair whose two edges are in the view once
-    private void recountMutualEdges() {
+    void recountMutualEdges() {
         int[] counts = new int[typeCounts.length];
         int total = 0;
-        for (int i = edgeBitVector.nextSetBit(0); i >= 0; i = edgeBitVector.nextSetBit(i + 1)) {
+        // A loaded view can have stale bits when the saved store had free ids
+        int maxStoreId = graphStore.edgeStore.maxStoreId();
+        for (int i = edgeBitVector.nextSetBit(0); i >= 0 && i < maxStoreId; i = edgeBitVector.nextSetBit(i + 1)) {
             EdgeImpl edge = getEdge(i);
-            if (edge != null && edge.isMutual() && !edge.isSelfLoop()) {
-                EdgeImpl reverseEdge = graphStore.edgeStore.get(edge.target, edge.source, edge.type, false);
-                if (reverseEdge != null && edge.storeId < reverseEdge.storeId && containsEdge(reverseEdge)) {
-                    counts[edge.type]++;
-                    total++;
-                }
+            if (edge != null && edge.type < counts.length && edge.storeId < edge.mutualId && containsMutual(edge)) {
+                counts[edge.type]++;
+                total++;
             }
         }
         mutualEdgeTypeCounts = counts;
@@ -1069,25 +1066,41 @@ public class GraphViewImpl implements GraphView {
         }
     }
 
-    protected void setEdgeType(EdgeImpl edgeImpl, int oldType, boolean wasMutual) {
+    protected void setEdgeType(EdgeImpl edgeImpl, int oldType, EdgeImpl oldMutual) {
         ensureTypeCountArrayCapacity(edgeImpl.type);
         typeCounts[oldType]--;
         typeCounts[edgeImpl.type]++;
 
-        if (!edgeImpl.isSelfLoop()) {
-            if (wasMutual && containsEdge(graphStore.edgeStore.get(edgeImpl.target, edgeImpl.source, oldType, false))) {
+        if (oldMutual != null && containsEdge(oldMutual)) {
+            // The old mutual edge may be paired again with another edge of the view, which replaces the old pair
+            if (containsMutual(oldMutual)) {
+                incrementEdgeVersion();
+            } else {
                 mutualEdgeTypeCounts[oldType]--;
                 mutualEdgesCount--;
             }
-
-            if (edgeImpl.isMutual() && containsEdge(graphStore.edgeStore
-                    .get(edgeImpl.target, edgeImpl.source, edgeImpl.type, false))) {
-                mutualEdgeTypeCounts[edgeImpl.type]++;
-                mutualEdgesCount++;
-            }
+        }
+        if (containsMutual(edgeImpl)) {
+            mutualEdgeTypeCounts[edgeImpl.type]++;
+            mutualEdgesCount++;
         }
         updateUndirectedEdgeCount(oldType);
         updateUndirectedEdgeCount(edgeImpl.type);
+    }
+
+    // Called when the store pairs two existing edges
+    protected void addMutualPair(EdgeImpl edgeImpl, EdgeImpl mutual) {
+        if (containsEdge(edgeImpl) && containsEdge(mutual)) {
+            incrementEdgeVersion();
+            mutualEdgeTypeCounts[edgeImpl.type]++;
+            mutualEdgesCount++;
+            updateUndirectedEdgeCount(edgeImpl.type);
+        }
+    }
+
+    // Whether the view contains the edge paired with the given edge
+    boolean containsMutual(EdgeImpl edgeImpl) {
+        return edgeImpl.mutualId != EdgeStore.NULL_ID && edgeBitVector.get(edgeImpl.mutualId);
     }
 
     private void addEdge(EdgeImpl edgeImpl) {
@@ -1101,8 +1114,7 @@ public class GraphViewImpl implements GraphView {
 
         typeCounts[type]++;
 
-        if (edgeImpl.isMutual() && !edgeImpl.isSelfLoop() && containsEdge(graphStore.edgeStore
-                .get(edgeImpl.target, edgeImpl.source, edgeImpl.type, false))) {
+        if (containsMutual(edgeImpl)) {
             mutualEdgeTypeCounts[type]++;
             mutualEdgesCount++;
         }
@@ -1125,8 +1137,7 @@ public class GraphViewImpl implements GraphView {
         edgeCount--;
         typeCounts[edgeImpl.type]--;
 
-        if (edgeImpl.isMutual() && !edgeImpl.isSelfLoop() && containsEdge(graphStore.edgeStore
-                .get(edgeImpl.target, edgeImpl.source, edgeImpl.type, false))) {
+        if (containsMutual(edgeImpl)) {
             mutualEdgeTypeCounts[edgeImpl.type]--;
             mutualEdgesCount--;
         }

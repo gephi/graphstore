@@ -342,7 +342,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             edge.previousOutEdge = EdgeStore.NULL_ID;
             edge.nextInEdge = EdgeStore.NULL_ID;
             edge.previousInEdge = EdgeStore.NULL_ID;
-            edge.setMutual(false);
+            edge.mutualId = EdgeStore.NULL_ID;
         }
 
         initStore();
@@ -725,16 +725,45 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     }
 
     public EdgeImpl getMutualEdge(final Edge e) {
+        return getMutualEdge(e, null);
+    }
+
+    // The edge paired with the given edge, otherwise the first reverse edge of the same type, among the edges the view
+    // contains if not null
+    EdgeImpl getMutualEdge(final Edge e, GraphViewImpl view) {
         checkNonNullEdgeObject(e);
 
         EdgeImpl edge = (EdgeImpl) e;
         checkEdgeExists(edge);
 
-        return getMutual(edge);
+        EdgeImpl mutual = getMutual(edge);
+        if (mutual != null && (view == null || view.containsEdge(mutual))) {
+            return mutual;
+        }
+        return get(edge.target, edge.source, edge.type, false, view);
     }
 
+    // The edge paired with the given edge, or null
     private EdgeImpl getMutual(final EdgeImpl edge) {
-        return get(edge.target, edge.source, edge.type, false);
+        return edge.mutualId == NULL_ID ? null : get(edge.mutualId);
+    }
+
+    private void pair(EdgeImpl edge, EdgeImpl mutual) {
+        edge.mutualId = mutual.storeId;
+        mutual.mutualId = edge.storeId;
+        edge.source.mutualDegree++;
+        edge.target.mutualDegree++;
+        mutualEdgesSize++;
+        mutualEdgesTypeSize[edge.type]++;
+    }
+
+    private void unpair(EdgeImpl edge, EdgeImpl mutual) {
+        edge.mutualId = NULL_ID;
+        mutual.mutualId = NULL_ID;
+        edge.source.mutualDegree--;
+        edge.target.mutualDegree--;
+        mutualEdgesSize--;
+        mutualEdgesTypeSize[edge.type]--;
     }
 
     public boolean setEdgeType(final Edge e, int type) {
@@ -759,8 +788,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             checkUndirectedNotExist(edge, type);
 
             edgeTypeStore.registerEdgeType(type);
-            boolean wasMutual = edge.isMutual();
-            removeFromDico(edge, edge.storeId);
+            EdgeImpl oldMutual = getMutual(edge);
+            EdgeImpl repaired = removeFromDico(edge, edge.storeId);
             decrementTypeSize(oldType);
 
             removeOutEdge(edge);
@@ -776,7 +805,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             updateMultiGraph();
 
             if (viewStore != null) {
-                viewStore.setEdgeType(edge, oldType, wasMutual);
+                viewStore.setEdgeType(edge, oldType, oldMutual, repaired);
             }
 
             incrementVersion();
@@ -787,7 +816,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return true;
     }
 
-    private void removeFromDico(EdgeImpl edge, int id) {
+    // Returns the edge the mutual edge of the removed edge is paired with again, or null
+    private EdgeImpl removeFromDico(EdgeImpl edge, int id) {
         int type = edge.type;
         NodeImpl source = edge.source;
         NodeImpl target = edge.target;
@@ -796,10 +826,11 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
         long longId = getLongId(source, target, directed);
         int[] dicoValue = dico.get(longId);
+        int[] newDicoValue = null;
         if (dicoValue.length == 1) {
             dico.remove(longId);
         } else {
-            int[] newDicoValue = new int[dicoValue.length - 1];
+            newDicoValue = new int[dicoValue.length - 1];
             int j = 0;
             for (int i = 0; i < dicoValue.length; i++) {
                 int v = dicoValue[i];
@@ -810,25 +841,24 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             dico.put(longId, newDicoValue);
         }
 
-        // Only an edge paired with a reverse edge releases one, parallel edges may leave others paired
-        if (directed && !edge.isSelfLoop() && edge.isMutual()) {
-            int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
-            if (index != null) {
-                for (int i = 0; i < index.length; i++) {
-                    EdgeImpl mutual = get(index[i]);
-                    if (mutual.isMutual()) {
-                        edge.setMutual(false);
-
-                        mutual.setMutual(false);
-                        source.mutualDegree--;
-                        target.mutualDegree--;
-                        mutualEdgesSize--;
-                        mutualEdgesTypeSize[type]--;
-                        break;
+        EdgeImpl mutual = getMutual(edge);
+        if (mutual != null) {
+            unpair(edge, mutual);
+            // Pairs stay maximal: an edge from source to target is left unpaired only if they outnumbered the reverse
+            // edges, and it takes the released edge
+            int[] reverseIds = longDictionary[type].get(getLongId(target, source, true));
+            if (newDicoValue != null && newDicoValue.length >= reverseIds.length) {
+                // Edges pair in insertion order, so the unpaired ones are usually last
+                for (int i = newDicoValue.length - 1; i >= 0; i--) {
+                    EdgeImpl other = get(newDicoValue[i]);
+                    if (!other.isMutual()) {
+                        pair(other, mutual);
+                        return other;
                     }
                 }
             }
         }
+        return null;
     }
 
     private void addToDico(Long2ObjectOpenCustomHashMap<int[]> dico, int[] dicoValue, EdgeImpl edge, long longId) {
@@ -841,18 +871,13 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         dico.put(longId, dicoValue);
 
         if (edge.isDirected() && !edge.isSelfLoop()) {
-            int type = edge.type;
-            int[] index = longDictionary[type].get(getLongId(edge.target, edge.source, true));
-            if (index != null) {
-                for (int i = 0; i < index.length; i++) {
-                    EdgeImpl mutual = get(index[i]);
+            int[] index = longDictionary[edge.type].get(getLongId(edge.target, edge.source, true));
+            // Pairs are maximal, so a reverse edge is left unpaired only if they outnumbered the other edges
+            if (index != null && index.length >= dicoValue.length) {
+                for (int id : index) {
+                    EdgeImpl mutual = get(id);
                     if (!mutual.isMutual()) {
-                        mutual.setMutual(true);
-                        edge.setMutual(true);
-                        edge.source.mutualDegree++;
-                        edge.target.mutualDegree++;
-                        mutualEdgesSize++;
-                        mutualEdgesTypeSize[type]++;
+                        pair(edge, mutual);
                         break;
                     }
                 }
@@ -987,7 +1012,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 }
             }
 
-            removeFromDico(edge, id);
+            EdgeImpl repaired = removeFromDico(edge, id);
+            if (repaired != null && viewStore != null) {
+                viewStore.addMutualPair(repaired, getMutual(repaired));
+            }
 
             if (!directed) {
                 undirectedSize--;
@@ -1465,7 +1493,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
 
     // In a view, only if the view also contains the mutual edge
     boolean isUndirectedToIgnore(EdgeImpl edge, GraphViewImpl view) {
-        return isUndirectedToIgnore(edge) && (view == null || view.containsEdge(getMutual(edge)));
+        return isUndirectedToIgnore(edge) && (view == null || view.containsMutual(edge));
     }
 
     int maxStoreId() {

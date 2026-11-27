@@ -142,7 +142,10 @@ public interface Edge extends Element, EdgeProperties {
     public boolean isDirected();
 
     /**
-     * Returns true if this edge is directed and another edge exists in the opposite direction.
+     * Returns true if this edge is directed and paired with an edge of the same type in the opposite direction.
+     * <p>
+     * Edges are paired one to one, so with several edges of the same type between two nodes, an edge can have a reverse
+     * edge without being mutual.
      *
      * @return true if mutual, false otherwise
      */
