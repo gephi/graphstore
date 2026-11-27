@@ -192,9 +192,9 @@ public interface Graph {
     public EdgeIterable getEdges(Node node1, Node node2);
 
     /**
-     * Gets the edge adjacent to node1 and node2 and from the given type.
+     * Gets an edge between node1 and node2, of the given type.
      * <p>
-     * If multiple parallel edges exist it returns the first edge.
+     * If several edges of this type connect the nodes, returns the first one.
      *
      * @param node1 the first node
      * @param node2 the second node
@@ -204,14 +204,12 @@ public interface Graph {
     public Edge getEdge(Node node1, Node node2, int type);
 
     /**
-     * Gets the edges adjacent to node1 and node 2 and from the given type.
-     * <p>
-     * If there aren't any parallel edges only one edge will be returned.
+     * Gets the edges between node1 and node2, of the given type.
      *
      * @param node1 the first node
      * @param node2 the second node
      * @param type the edge type
-     * @return the adjacent edges, or an empty iterator if not found
+     * @return the adjacent edges
      */
     public EdgeIterable getEdges(Node node1, Node node2, int type);
 
@@ -318,6 +316,37 @@ public interface Graph {
     public int getDegree(Node node);
 
     /**
+     * Gets the number of edges {@link #getEdges(Node, Node)} returns for the edge's source and target, the edge
+     * included.
+     * <p>
+     * They can be of any type. In a directed graph, they go from the source to the target or are undirected. In a mixed
+     * graph, an undirected edge is also returned for its target and source, but its count and index refer to its source
+     * and target. In an undirected graph, they go in either direction, and a directed edge and its reverse edge seen as
+     * a single undirected edge get the same count and index.
+     * <p>
+     * Returns 1 if this graph doesn't contain the edge.
+     *
+     * @param edge the edge
+     * @return the number of parallel edges, the edge included
+     */
+    public int getParallelEdgeCount(Edge edge);
+
+    /**
+     * Gets the position of the edge among the edges counted by {@link #getParallelEdgeCount(Edge)}, from 0 to that
+     * count minus 1.
+     * <p>
+     * The edges are in ascending type order, then in the order they were added to their type. In an undirected graph,
+     * the directed edges of a type that start at the endpoint with the lower store id come first. Positions only change
+     * when this graph changes.
+     * <p>
+     * Returns 0 if this graph doesn't contain the edge.
+     *
+     * @param edge the edge
+     * @return the position of the edge among its parallel edges
+     */
+    public int getParallelEdgeIndex(Edge edge);
+
+    /**
      * Returns true if the given edge is a self-loop.
      *
      * @param edge the edge to test
@@ -348,7 +377,7 @@ public interface Graph {
      * @param node1 the first node
      * @param node2 the second node
      * @param type the edge type
-     * @return true if node1 and node2 are adjacent with an edge og the given type, false otherwise
+     * @return true if node1 and node2 are adjacent with an edge of the given type, false otherwise
      */
     public boolean isAdjacent(Node node1, Node node2, int type);
 

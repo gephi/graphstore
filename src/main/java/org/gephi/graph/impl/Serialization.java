@@ -571,9 +571,16 @@ public class Serialization {
             // ViewStore
             deserialize(is);
 
-            // Edges were paired again as they were added, possibly with other edges
+            int maxEdgeStoreId = store.edgeStore.maxStoreId();
             for (GraphViewImpl view : store.viewStore.views) {
                 if (view != null) {
+                    // Edges get compacted store ids, so bits beyond the last one would put edges added later in the
+                    // view
+                    int length = view.edgeBitVector.length();
+                    if (length > maxEdgeStoreId) {
+                        view.edgeBitVector.clear(maxEdgeStoreId, length);
+                    }
+                    // Edges were paired again as they were added, possibly with other edges
                     view.recountMutualEdges();
                     view.updateUndirectedEdgeCounts();
                 }

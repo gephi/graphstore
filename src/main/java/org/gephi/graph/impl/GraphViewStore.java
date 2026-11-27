@@ -439,6 +439,8 @@ public class GraphViewStore {
         views[id] = null;
         garbageQueue.add(id);
         view.storeId = NULL_VIEW;
+        // Built again if read
+        view.parallelEdges = null;
 
         view.destroyAllObservers();
 

@@ -43,6 +43,9 @@ public class EdgeImpl extends ElementImpl implements Edge {
     protected int previousInEdge = EdgeStore.NULL_ID;
     // Store id of the edge in the other direction, of the same type, this edge is paired with
     protected int mutualId = EdgeStore.NULL_ID;
+    // Parallel edges: count and index among the edges getEdges(source, target) returns on the main graph
+    protected int parallelCount = 1;
+    protected int parallelIndex;
     // Flags
     protected byte flags;
     // Props

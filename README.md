@@ -13,7 +13,7 @@ GraphStore is an in-memory graph structure implementation written in Java. It's 
 * Comprehensive APIs to read and modify the graph structure
 * Low memory footprint - reduced usage of Java objects and collections optimized for caching
 * Supports directed, undirected and mixed graphs
-* Supports parallel edges (i.e. edges can have a label)
+* Supports parallel edges, of the same type or of different types
 * Any number of attributes can be associated with nodes or edges
 * Thread-safe - Implements read-write locking mechanism to allow multiple reading threads
 * Supports dynamic graphs (graphs over time)

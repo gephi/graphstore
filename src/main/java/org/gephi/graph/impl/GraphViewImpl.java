@@ -59,6 +59,10 @@ public class GraphViewImpl implements GraphView {
     protected volatile int[] undirectedTypeCounts;
     // Dynamic
     protected Interval interval;
+    // Parallel edges, built on read for the edge stamp, which moves when the view's edges change or are reordered
+    protected int edgeStamp;
+    protected volatile ParallelEdges parallelEdges;
+    private final Object parallelEdgesMonitor = new Object();
 
     public GraphViewImpl(final GraphStore store, boolean nodes, boolean edges) {
         this.graphStore = store;
@@ -421,6 +425,8 @@ public class GraphViewImpl implements GraphView {
         if (nodeCount > 0) {
             incrementNodeVersion();
         }
+        // The bits can disagree with edgeCount after a load
+        edgeStamp++;
         if (edgeCount > 0) {
             incrementEdgeVersion();
         }
@@ -456,6 +462,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     public void clearEdges() {
+        // The bits can disagree with edgeCount after a load
+        edgeStamp++;
         if (edgeCount > 0) {
             incrementEdgeVersion();
         }
@@ -1067,6 +1075,8 @@ public class GraphViewImpl implements GraphView {
     }
 
     protected void setEdgeType(EdgeImpl edgeImpl, int oldType, EdgeImpl oldMutual) {
+        // The edge moves among its parallel edges
+        edgeStamp++;
         ensureTypeCountArrayCapacity(edgeImpl.type);
         typeCounts[oldType]--;
         typeCounts[edgeImpl.type]++;
@@ -1101,6 +1111,41 @@ public class GraphViewImpl implements GraphView {
     // Whether the view contains the edge paired with the given edge
     boolean containsMutual(EdgeImpl edgeImpl) {
         return edgeImpl.mutualId != EdgeStore.NULL_ID && edgeBitVector.get(edgeImpl.mutualId);
+    }
+
+    // Count and index of the edge among the view's edges in its group, as count << 32 | index
+    long getParallelEdge(EdgeImpl edgeImpl) {
+        // An edge alone in the main graph is alone in the view
+        if (edgeImpl.parallelCount > 1) {
+            ParallelEdges snapshot = parallelEdges;
+            if (snapshot == null || snapshot.stamp != edgeStamp) {
+                snapshot = buildParallelEdges();
+            }
+            int[] values = snapshot.values;
+            int i = 2 * edgeImpl.storeId;
+            if (i >= 0 && i < values.length && values[i] != 0) {
+                return (long) values[i] << 32 | values[i + 1];
+            }
+        }
+        return 1L << 32;
+    }
+
+    // The caller may hold the read lock on another thread, so it's taken ahead of queued writers
+    private ParallelEdges buildParallelEdges() {
+        graphStore.autoReadLockBarging();
+        try {
+            synchronized (parallelEdgesMonitor) {
+                ParallelEdges snapshot = parallelEdges;
+                int stamp = edgeStamp;
+                if (snapshot == null || snapshot.stamp != stamp) {
+                    snapshot = new ParallelEdges(stamp, graphStore.edgeStore.buildParallelEdges(this));
+                    parallelEdges = snapshot;
+                }
+                return snapshot;
+            }
+        } finally {
+            graphStore.autoReadUnlock();
+        }
     }
 
     private void addEdge(EdgeImpl edgeImpl) {
@@ -1257,6 +1302,7 @@ public class GraphViewImpl implements GraphView {
     }
 
     private int incrementEdgeVersion() {
+        edgeStamp++;
         if (version != null) {
             return version.incrementAndGetEdgeVersion();
         }
@@ -1304,6 +1350,18 @@ public class GraphViewImpl implements GraphView {
         }
         if (n.getStoreId() == NodeStore.NULL_ID) {
             throw new IllegalArgumentException("Node should belong to a store");
+        }
+    }
+
+    // Values from EdgeStore.buildParallelEdges, for the given edge stamp
+    static final class ParallelEdges {
+
+        private final int stamp;
+        private final int[] values;
+
+        private ParallelEdges(int stamp, int[] values) {
+            this.stamp = stamp;
+            this.values = values;
         }
     }
 }

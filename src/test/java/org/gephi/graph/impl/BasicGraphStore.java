@@ -509,6 +509,16 @@ public class BasicGraphStore implements DirectedGraph {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public int getParallelEdgeCount(Edge edge) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int getParallelEdgeIndex(Edge edge) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public static class BasicElement implements Element {
 
         protected final Map<String, Object> properties = new HashMap<>();
