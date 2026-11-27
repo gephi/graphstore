@@ -238,6 +238,25 @@ public class UndirectedDecorator implements UndirectedGraph, UndirectedSubgraph 
     }
 
     @Override
+    public int getParallelEdgeCount(Edge edge) {
+        // Undirected stores have no mutual edges, so their groups are the main graph's
+        if (store.edgeStore.isUndirectedGraph()) {
+            return store.getParallelEdgeCount(edge);
+        }
+        store.edgeStore.checkNonNullEdgeObject(edge);
+        return (int) (store.getUndirectedParallelEdge((EdgeImpl) edge, null) >>> 32);
+    }
+
+    @Override
+    public int getParallelEdgeIndex(Edge edge) {
+        if (store.edgeStore.isUndirectedGraph()) {
+            return store.getParallelEdgeIndex(edge);
+        }
+        store.edgeStore.checkNonNullEdgeObject(edge);
+        return (int) store.getUndirectedParallelEdge((EdgeImpl) edge, null);
+    }
+
+    @Override
     public boolean isSelfLoop(Edge edge) {
         return store.isSelfLoop(edge);
     }

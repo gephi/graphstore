@@ -16,6 +16,9 @@
 
 package org.gephi.graph.impl;
 
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.longs.LongHash;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -46,6 +49,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     protected final static int NULL_ID = -1;
     protected final static int NODE_BITS = 31;
     protected static final Iterator<Edge> EMPTY_EDGE_ITERATOR = Collections.emptyIterator();
+    // Tags the undirected keys in pairCounts, so they differ from the directed key from the higher to the lower node
+    private static final long UNDIRECTED_PAIR_KEY = 1L << 62;
+    private static final long NULL_KEY = -1;
     // Locking (optional)
     protected final GraphLockImpl lock;
     // Version
@@ -80,6 +86,9 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
     // Number of types with at least one edge, and whether there is more than one
     protected int nonEmptyTypeCount;
     private volatile boolean multiGraph;
+    // Number of edges of all types with each directed key, or undirected key tagged with UNDIRECTED_PAIR_KEY, built
+    // once two types have edges
+    private Long2IntOpenHashMap pairCounts;
 
     public EdgeStore() {
         initStore();
@@ -134,6 +143,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         this.mutualEdgesSize = 0;
         this.undirectedGraphSize = 0;
         this.nonEmptyTypeCount = 0;
+        this.pairCounts = null;
         updateGraphType();
         updateMultiGraph();
     }
@@ -343,6 +353,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             edge.nextInEdge = EdgeStore.NULL_ID;
             edge.previousInEdge = EdgeStore.NULL_ID;
             edge.mutualId = EdgeStore.NULL_ID;
+            edge.parallelCount = 1;
+            edge.parallelIndex = 0;
         }
 
         initStore();
@@ -798,11 +810,12 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             insertOutEdge(edge);
             insertInEdge(edge);
 
-            addToDico(newDico, newDicoValue, edge, longId);
+            int[] ids = addToDico(newDico, newDicoValue, edge, longId);
             incrementTypeSize(type);
             updateUndirectedGraphSize(oldType);
             updateUndirectedGraphSize(type);
             updateMultiGraph();
+            addParallel(edge, ids);
 
             if (viewStore != null) {
                 viewStore.setEdgeType(edge, oldType, oldMutual, repaired);
@@ -816,7 +829,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return true;
     }
 
-    // Returns the edge the mutual edge of the removed edge is paired with again, or null
+    // Returns the edge the mutual edge of the removed edge is paired with again, or null. The store's size and the
+    // type's size both count the edge, or both don't
     private EdgeImpl removeFromDico(EdgeImpl edge, int id) {
         int type = edge.type;
         NodeImpl source = edge.source;
@@ -826,6 +840,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         Long2ObjectOpenCustomHashMap<int[]> dico = longDictionary[type];
         long longId = getLongId(source, target, directed);
         int[] dicoValue = dico.get(longId);
+        removeParallel(edge, id, dicoValue);
         int[] newDicoValue = null;
         if (dicoValue.length == 1) {
             dico.remove(longId);
@@ -861,7 +876,8 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
         return null;
     }
 
-    private void addToDico(Long2ObjectOpenCustomHashMap<int[]> dico, int[] dicoValue, EdgeImpl edge, long longId) {
+    // Returns the new list, with the edge last
+    private int[] addToDico(Long2ObjectOpenCustomHashMap<int[]> dico, int[] dicoValue, EdgeImpl edge, long longId) {
         if (dicoValue == null) {
             dicoValue = new int[] { edge.storeId };
         } else {
@@ -883,6 +899,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 }
             }
         }
+        return dicoValue;
     }
 
     @Override
@@ -936,7 +953,7 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             source.outDegree++;
             target.inDegree++;
 
-            addToDico(dico, dicoValue, edge, longId);
+            int[] ids = addToDico(dico, dicoValue, edge, longId);
 
             if (viewStore != null) {
                 viewStore.addEdge(edge);
@@ -952,6 +969,10 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             updateUndirectedGraphSize(type);
             updateGraphType();
             updateMultiGraph();
+            if (pairCounts != null) {
+                pairCounts.addTo(pairKey(edge), 1);
+            }
+            addParallel(edge, ids);
             return true;
         } else if (isValidIndex(edge.storeId) && get(edge.storeId) == edge) {
             return false;
@@ -1016,6 +1037,14 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
             if (repaired != null && viewStore != null) {
                 viewStore.addMutualPair(repaired, getMutual(repaired));
             }
+            if (pairCounts != null) {
+                long pairKey = pairKey(edge);
+                if (pairCounts.addTo(pairKey, -1) == 1) {
+                    pairCounts.remove(pairKey);
+                }
+            }
+            edge.parallelCount = 1;
+            edge.parallelIndex = 0;
 
             if (!directed) {
                 undirectedSize--;
@@ -1508,6 +1537,281 @@ public class EdgeStore implements Collection<Edge>, EdgeIterable {
                 bits.clear(block.offset + block.garbageArray[j] - Short.MIN_VALUE);
             }
         }
+    }
+
+    // Parallel edges: the group of an edge from s to t is what getEdges(s, t) returns on the main graph, the directed
+    // edges from s to t and the undirected edges between s and t, of all types. Its count is the group's size, and its
+    // index its position in the group, by type and then in dictionary order. On mixed graphs, an undirected edge is
+    // also in the groups of the directed edges from t to s
+
+    // Once the edge is last in ids, its dictionary list, and counted in the store's sizes, graph type and pair counts,
+    // sets its count and index and updates the other edges
+    private void addParallel(EdgeImpl edge, int[] ids) {
+        if (pairCounts == null && nonEmptyTypeCount > 1) {
+            buildPairCounts();
+        }
+        if (nonEmptyTypeCount == 1) {
+            // A type never holds both directed and undirected edges between two nodes, so the list is the whole group
+            for (int i = 0; i < ids.length - 1; i++) {
+                get(ids[i]).parallelCount++;
+            }
+            edge.parallelCount = ids.length;
+            edge.parallelIndex = ids.length - 1;
+        } else {
+            int others = relatedEdgeCount(edge) - 1;
+            long parallel = others > 0 ? walkParallel(edge, edge.storeId, ids, 1, others) : 1L << 32;
+            edge.parallelCount = (int) (parallel >>> 32);
+            edge.parallelIndex = (int) parallel;
+        }
+    }
+
+    // While the edge is in ids, its dictionary list, and counted in the store's graph type, updates the other edges.
+    // The store's size and the type's size both count the edge, or both don't
+    private void removeParallel(EdgeImpl edge, int edgeId, int[] ids) {
+        if (typeSize[edge.type] == size) {
+            // All the other edges are of the edge's type, so the list holds every edge it relates to
+            boolean after = false;
+            for (int id : ids) {
+                if (id == edgeId) {
+                    after = true;
+                } else {
+                    EdgeImpl other = get(id);
+                    other.parallelCount--;
+                    if (after) {
+                        other.parallelIndex--;
+                    }
+                }
+            }
+        } else {
+            int related = edge.parallelCount;
+            if (!edge.isDirected() && isMixedGraph() && !edge.isSelfLoop()) {
+                related += pairCounts.get(getLongId(edge.target, edge.source, true));
+            }
+            if (related > 1) {
+                walkParallel(edge, edgeId, ids, -1, related - 1);
+            }
+        }
+    }
+
+    // Visits the edges the edge relates to, until finding the given number of them: those in its group, and those
+    // whose group it's in. Adds delta to the count of the latter, and to their index if the edge comes first. The
+    // edge is in ownIds, its dictionary list, with the given store id. Returns its count and index, as
+    // count << 32 | index, if it's last in its list
+    private long walkParallel(EdgeImpl edge, int edgeId, int[] ownIds, int delta, int others) {
+        NodeImpl source = edge.source;
+        NodeImpl target = edge.target;
+        boolean directed = edge.isDirected();
+        long ownKey = getLongId(source, target, directed);
+        // On mixed graphs, the other directed key holds the undirected edges if it's the undirected key, and the edges
+        // in the other direction, which only relate to undirected edges
+        long otherKey = NULL_KEY;
+        if (isMixedGraph() && source != target) {
+            long sourceTarget = getLongId(source, target, true);
+            otherKey = ownKey == sourceTarget ? getLongId(target, source, true) : sourceTarget;
+            if (directed && otherKey != getLongId(source, target, false)) {
+                otherKey = NULL_KEY;
+            }
+        }
+        int keyCount = otherKey == NULL_KEY ? 1 : 2;
+        int count = 1;
+        int index = 0;
+        int[] typeSizes = typeSize;
+        for (int type = 0; type < typeSizes.length && others > 0; type++) {
+            if (typeSizes[type] == 0) {
+                continue;
+            }
+            for (int k = 0; k < keyCount && others > 0; k++) {
+                int[] ids;
+                if (type == edge.type) {
+                    // The other edges of its type it relates to are in its list
+                    ids = k == 0 ? ownIds : null;
+                } else {
+                    ids = longDictionary[type].get(k == 0 ? ownKey : otherKey);
+                }
+                // Under the other key, a directed edge only relates to undirected edges
+                if (ids == null || (directed && k == 1 && get(ids[0]).isDirected())) {
+                    continue;
+                }
+                boolean after = false;
+                for (int id : ids) {
+                    if (id == edgeId) {
+                        after = true;
+                        continue;
+                    }
+                    EdgeImpl other = get(id);
+                    boolean otherFirst = type < edge.type || (type == edge.type && !after);
+                    boolean inGroup = !other.isDirected() || other.source == source;
+                    boolean hasEdge = !directed || other.source == source;
+                    if (inGroup) {
+                        count++;
+                        if (otherFirst) {
+                            index++;
+                        }
+                    }
+                    if (hasEdge) {
+                        other.parallelCount += delta;
+                        if (!otherFirst) {
+                            other.parallelIndex += delta;
+                        }
+                    }
+                    if ((inGroup || hasEdge) && --others == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return (long) count << 32 | index;
+    }
+
+    // Number of edges the edge relates to, itself included, from the pair counts: its group, and on mixed graphs the
+    // edges in the other direction if it's undirected
+    private int relatedEdgeCount(EdgeImpl edge) {
+        NodeImpl source = edge.source;
+        NodeImpl target = edge.target;
+        long undirectedKey = getLongId(source, target, false) | UNDIRECTED_PAIR_KEY;
+        if (isUndirectedGraph()) {
+            return pairCounts.get(undirectedKey);
+        }
+        int count = pairCounts.get(getLongId(source, target, true));
+        if (isMixedGraph()) {
+            count += pairCounts.get(undirectedKey);
+            if (!edge.isDirected() && source != target) {
+                count += pairCounts.get(getLongId(target, source, true));
+            }
+        }
+        return count;
+    }
+
+    private void buildPairCounts() {
+        pairCounts = new Long2IntOpenHashMap(size);
+        for (Long2ObjectOpenCustomHashMap<int[]> dico : longDictionary) {
+            for (Long2ObjectMap.Entry<int[]> entry : Long2ObjectMaps.fastIterable(dico)) {
+                int[] ids = entry.getValue();
+                long key = entry.getLongKey();
+                pairCounts.addTo(get(ids[0]).isDirected() ? key : key | UNDIRECTED_PAIR_KEY, ids.length);
+            }
+        }
+    }
+
+    private static long pairKey(EdgeImpl edge) {
+        boolean directed = edge.isDirected();
+        long key = getLongId(edge.source, edge.target, directed);
+        return directed ? key : key | UNDIRECTED_PAIR_KEY;
+    }
+
+    // Count and index of each view edge whose main count is above 1, among the view's edges in its group, at
+    // 2 * storeId and 2 * storeId + 1. Slots left at 0 stand for count 1 and index 0. The caller holds the read lock
+    int[] buildParallelEdges(GraphViewImpl view) {
+        BitSet bits = view.edgeBitVector;
+        int length = Math.min(bits.length(), maxStoreId());
+        int[] values = new int[2 * length];
+        List<EdgeImpl> group = new ArrayList<>();
+        boolean mixed = isMixedGraph();
+        int[] typeSizes = typeSize;
+        for (int id = bits.nextSetBit(0); id >= 0 && id < length; id = bits.nextSetBit(id + 1)) {
+            EdgeImpl edge = get(id);
+            if (edge == null || edge.parallelCount == 1 || values[2 * id] != 0) {
+                continue;
+            }
+            NodeImpl source = edge.source;
+            NodeImpl target = edge.target;
+            // On mixed graphs, collects both directions, whose groups share the undirected edges
+            boolean bothDirections = mixed && source != target;
+            long key = bothDirections ? getLongId(source, target, true) : getLongId(source, target, edge.isDirected());
+            long reverseKey = getLongId(target, source, true);
+            // Number of edges under the keys, if known
+            int remaining = edge.parallelCount;
+            if (bothDirections) {
+                remaining = pairCounts != null ? pairCounts.get(key) + pairCounts.get(reverseKey) + pairCounts
+                        .get(getLongId(source, target, false) | UNDIRECTED_PAIR_KEY) : Integer.MAX_VALUE;
+            }
+
+            group.clear();
+            for (int type = 0; type < typeSizes.length && remaining > 0; type++) {
+                if (typeSizes[type] > 0) {
+                    remaining -= collectInView(longDictionary[type].get(key), bits, group);
+                    if (bothDirections && remaining > 0) {
+                        remaining -= collectInView(longDictionary[type].get(reverseKey), bits, group);
+                    }
+                }
+            }
+
+            // Positions in the groups from source to target and from target to source
+            int forward = 0;
+            int backward = 0;
+            for (EdgeImpl other : group) {
+                values[2 * other.storeId + 1] = other.source == source ? forward : backward;
+                if (!other.isDirected() || other.source == source) {
+                    forward++;
+                }
+                if (!other.isDirected() || other.source == target) {
+                    backward++;
+                }
+            }
+            for (EdgeImpl other : group) {
+                values[2 * other.storeId] = other.source == source ? forward : backward;
+            }
+        }
+        return values;
+    }
+
+    // Adds the edges the view contains to the group, and returns the number of ids
+    private int collectInView(int[] ids, BitSet bits, List<EdgeImpl> group) {
+        if (ids == null) {
+            return 0;
+        }
+        for (int id : ids) {
+            if (bits.get(id)) {
+                group.add(get(id));
+            }
+        }
+        return ids.length;
+    }
+
+    // Count and index of the edge among the edges the undirected graph shows between its endpoints, in the view if
+    // not null, as count << 32 | index. They are in the order of getEdges(low, high), low being the endpoint with the
+    // lower store id. A hidden half gets the values of its mutual edge. The caller holds the read lock
+    long getUndirectedParallelEdge(EdgeImpl edge, GraphViewImpl view) {
+        int id = edge.storeId;
+        if (!isValidIndex(id) || get(id) != edge || (view != null && !view.containsEdge(edge))) {
+            return 1L << 32;
+        }
+        if (isUndirectedToIgnore(edge, view)) {
+            edge = getMutual(edge);
+        }
+        NodeImpl low = edge.source;
+        NodeImpl high = edge.target;
+        if (low.storeId > high.storeId) {
+            low = edge.target;
+            high = edge.source;
+        }
+        long lowHigh = getLongId(low, high, true);
+        long highLow = getLongId(high, low, true);
+        // A self-loop's reverse key is its own key
+        int keyCount = low == high ? 1 : 2;
+        int count = 0;
+        int index = 0;
+        int[] typeSizes = typeSize;
+        for (int type = 0; type < typeSizes.length; type++) {
+            if (typeSizes[type] == 0) {
+                continue;
+            }
+            for (int k = 0; k < keyCount; k++) {
+                int[] ids = longDictionary[type].get(k == 0 ? lowHigh : highLow);
+                if (ids != null) {
+                    for (int otherId : ids) {
+                        EdgeImpl other = get(otherId);
+                        if ((view == null || view.containsEdge(other)) && !isUndirectedToIgnore(other, view)) {
+                            if (other == edge) {
+                                index = count;
+                            }
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+        return (long) count << 32 | index;
     }
 
     private enum GraphType {

@@ -533,6 +533,26 @@ public class GraphViewDecorator implements DirectedSubgraph, UndirectedSubgraph,
     }
 
     @Override
+    public int getParallelEdgeCount(Edge edge) {
+        return (int) (getParallelEdge(edge) >>> 32);
+    }
+
+    @Override
+    public int getParallelEdgeIndex(Edge edge) {
+        return (int) getParallelEdge(edge);
+    }
+
+    // Count and index of the edge, as count << 32 | index
+    private long getParallelEdge(Edge edge) {
+        graphStore.edgeStore.checkNonNullEdgeObject(edge);
+        if (undirected && !graphStore.edgeStore.isUndirectedGraph()) {
+            // Mutual pairs come from the whole graph, so the groups aren't the main graph's groups in the view
+            return graphStore.getUndirectedParallelEdge((EdgeImpl) edge, view);
+        }
+        return view.getParallelEdge((EdgeImpl) edge);
+    }
+
+    @Override
     public int getInDegree(Node node) {
         EdgeStore.EdgeInIterator itr = graphStore.edgeStore.edgeInIterator(node);
         // The iterator releases the read lock when it is exhausted

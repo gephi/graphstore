@@ -38,6 +38,13 @@ public class GraphLockImpl implements GraphLock {
         readLock.lock();
     }
 
+    // Takes the read lock ahead of queued writers, unless another thread holds the write lock
+    void readLockBarging() {
+        if (!readLock.tryLock()) {
+            readLock.lock();
+        }
+    }
+
     @Override
     public void readUnlock() {
         readLock.unlock();

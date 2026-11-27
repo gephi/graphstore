@@ -48,7 +48,9 @@ public interface DirectedGraph extends Graph {
     public EdgeIterable getEdges(Node source, Node target);
 
     /**
-     * Gets the edge adjacent to source and target with an edge of the given type.
+     * Gets an edge from source to target, or an undirected edge between them, of the given type.
+     * <p>
+     * If several edges match, returns the first one.
      *
      * @param source the source node
      * @param target the target node
@@ -59,17 +61,29 @@ public interface DirectedGraph extends Graph {
     public Edge getEdge(Node source, Node target, int type);
 
     /**
-     * Returns true if source and target are adjacent.
+     * Gets the edges from source to target, and the undirected edges between them, of the given type.
      *
      * @param source the source node
      * @param target the target node
-     * @return true of adjacent, false otherwise
+     * @param type the edge type
+     * @return the adjacent edges
+     */
+    @Override
+    public EdgeIterable getEdges(Node source, Node target, int type);
+
+    /**
+     * Returns true if an edge goes from source to target, or an undirected edge connects them, of any type.
+     *
+     * @param source the source node
+     * @param target the target node
+     * @return true if adjacent, false otherwise
      */
     @Override
     public boolean isAdjacent(Node source, Node target);
 
     /**
-     * Returns true if source and target are adjacent with an edge of the given type.
+     * Returns true if an edge of the given type goes from source to target, or an undirected edge of this type connects
+     * them.
      *
      * @param source the source node
      * @param target the target node

@@ -505,6 +505,29 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     }
 
     @Override
+    public int getParallelEdgeCount(final Edge edge) {
+        edgeStore.checkNonNullEdgeObject(edge);
+        return ((EdgeImpl) edge).parallelCount;
+    }
+
+    @Override
+    public int getParallelEdgeIndex(final Edge edge) {
+        edgeStore.checkNonNullEdgeObject(edge);
+        return ((EdgeImpl) edge).parallelIndex;
+    }
+
+    // Count and index of the edge in the undirected graph of the store, or of the view if not null, as
+    // count << 32 | index
+    long getUndirectedParallelEdge(final EdgeImpl edge, final GraphViewImpl view) {
+        autoReadLockBarging();
+        try {
+            return edgeStore.getUndirectedParallelEdge(edge, view);
+        } finally {
+            autoReadUnlock();
+        }
+    }
+
+    @Override
     public int getInDegree(final Node node) {
         nodeStore.checkNonNullNodeObject(node);
         return ((NodeImpl) node).getInDegree();
@@ -726,6 +749,13 @@ public class GraphStore implements DirectedGraph, DirectedSubgraph {
     protected void autoReadLock() {
         if (configuration.isEnableAutoLocking()) {
             readLock();
+        }
+    }
+
+    // For reads on behalf of a thread that may hold the read lock while a writer is queued
+    protected void autoReadLockBarging() {
+        if (configuration.isEnableAutoLocking()) {
+            lock.readLockBarging();
         }
     }
 
